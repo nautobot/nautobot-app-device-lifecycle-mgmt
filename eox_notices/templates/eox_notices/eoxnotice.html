@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load buttons %}
+{% load custom_links %}
+{% load helpers %}
+
+{% block title %}{{ object }}{% endblock %}
+
+{% block header %}
+    <div class="row noprint">
+        <div class="col-sm-8 col-md-9">
+            <ol class="breadcrumb">
+                <li><a href="{% url 'plugins:eox_notices:eoxnotice_list' %}">Eox Notice</a></li>
+                <li><a>{{ object }}</a></li>
+            </ol>
+        </div>
+        <div class="col-sm-4 col-md-3">
+            <form action="{% url 'circuits:circuit_list' %}" method="get">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" />
+                    <span class="input-group-btn">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="mdi mdi-magnify" aria-hidden="true"></span> Search
+                        </button>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="pull-right noprint">
+        {% if perms.eox_notices.edit_notice %}
+            <a href="{% url 'plugins:eox_notices:eoxnotice_edit' pk=object.id %}" class="btn btn-warning">
+                <span class="mdi mdi-pencil" aria-hidden="true"></span> Edit
+            </a>
+        {% endif %}
+        {% if perms.eox_notices.delete_notice %}
+            <a href="{% url 'plugins:eox_notices:eoxnotice_delete' pk=object.id %}" class="btn btn-danger">
+                <span class="mdi mdi-trash-can-outline" aria-hidden="true"></span> Delete
+            </a>
+        {% endif %}
+    </div>
+    <h2>EoX Notice: {{ object }}</h2>
+        {% include 'inc/created_updated.html' with obj=object %}
+    <div class="pull-right noprint">
+        {% custom_links object %}
+    </div>
+    <ul class="nav nav-tabs">
+        <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
+            <a href="{{ object.get_absolute_url }}">EoX Notice</a>
+        </li>
+        <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
+            <a href="{% url 'plugins:eox_notices:eoxnotice_changelog' pk=object.id %}">Change Log</a>
+        </li>
+    </ul>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>EoX Notice</strong>
+            </div>
+            <table class="table table-hover panel-body attr-table">
+                <tr>
+                    <td>Devices</td>
+                    <td>
+                        {% if object.devices.exists %}
+                            {% for device in object.devices.all %}
+                                <a href="{% url 'dcim:device' pk=device.pk %}">{{ device }}</a>{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            &mdash;
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Device Type</td>
+                    <td>
+                        {% if object.device_type %}
+                            <a href="{% url 'dcim:devicetype' pk=object.device_type.pk %}">{{ object.device_type }}</a>
+                        {% else %}
+                            &mdash;
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>End of Sale</td>
+                    <td>{{ object.end_of_sale }}</td>
+                </tr>
+                <tr>
+                    <td>End of Support</td>
+                    <td>{{ object.end_of_support }}</td>
+                </tr>
+                <tr>
+                    <td>End of Software Releases</td>
+                    <td>{{ object.end_of_sw_releases }}</td>
+                </tr>
+                <tr>
+                    <td>End of Security Patches</td>
+                    <td>{{ object.end_of_security_patches }}</td>
+                </tr>
+                <tr>
+                    <td>Notice URL</td>
+                    <td>
+                        {{ object.notice_url|placeholder }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

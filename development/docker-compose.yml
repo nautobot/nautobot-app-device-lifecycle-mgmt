@@ -1,0 +1,50 @@
+---
+version: "3"
+services:
+  nautobot:
+    build:
+      context: "../"
+      dockerfile: "development/Dockerfile"
+    image: "nautobot-eox-notices/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
+    command: >
+      sh -c "nautobot-server migrate &&
+             nautobot-server runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - "postgres"
+      - "redis"
+    env_file:
+      - "./dev.env"
+    volumes:
+      - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
+      - "../eox_notices:/source/eox_notices"
+    tty: true
+  worker:
+    build:
+      context: "../"
+      dockerfile: "development/Dockerfile"
+    image: "nautobot-eox-notices/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
+    command: "sh -c 'nautobot-server rqworker'"
+    depends_on:
+      - "nautobot"
+    env_file:
+      - "./dev.env"
+    volumes:
+      - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
+      - "../eox_notices:/source/eox_notices"
+    tty: true
+  postgres:
+    image: "postgres:10"
+    env_file: "dev.env"
+    volumes:
+      - "pgdata_eox_notices:/var/lib/postgresql/data"
+  redis:
+    image: "redis:5-alpine"
+    command:
+      - "sh"
+      - "-c"  # this is to evaluate the $REDIS_PASSWORD from the env
+      - "redis-server --appendonly yes --requirepass $$REDIS_PASSWORD"  ## $$ because of docker-compose
+    env_file: "./dev.env"
+volumes:
+  pgdata_eox_notices:  # yamllint disable-line rule:empty-values

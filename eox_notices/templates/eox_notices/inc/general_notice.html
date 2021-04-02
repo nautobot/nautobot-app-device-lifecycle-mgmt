@@ -1,0 +1,47 @@
+{% load helpers %}
+{% if perms.eox_notices.view_notice and notice %}
+<div class="row">
+    <div class="col-md-12">
+        {% if expired %}
+        <div class="panel panel-danger">
+        {% else %}
+        <div class="panel panel-default">
+        {% endif %}
+            <div class="panel-heading">
+                <strong>EoX Notice</strong>
+            </div>
+            <table class="table table-hover panel-body attr-table">
+                <tr>
+                    <td>Name</td>
+                    <td>
+                        <a href="{% url 'plugins:eox_notices:eoxnotice' pk=notice.id %}">{{ notice }}</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>End of Sale</td>
+                    <td>{{ notice.end_of_sale }}</td>
+                </tr>
+                <tr>
+                    <td>End of Support</td>
+                    <td>{{ notice.end_of_support }}</td>
+                </tr>
+                <tr>
+                    <td>End of Software Releases</td>
+                    <td>{{ notice.end_of_sw_releases }}</td>
+                </tr>
+                <tr>
+                    <td>End of Security Patches</td>
+                    <td>{{ notice.end_of_security_patches }}</td>
+                </tr>
+                <tr>
+                    <td>Notice URL</td>
+                    <td>
+                        {{ notice.notice_url|placeholder }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endif %}
