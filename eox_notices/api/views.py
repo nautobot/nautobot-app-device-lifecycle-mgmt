@@ -16,6 +16,7 @@ class EoxNoticeView(
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
+    """CRUD operations set for EoxNotice view."""
 
     queryset = EoxNotice.objects.all()
     filterset_class = EoxNoticeFilter

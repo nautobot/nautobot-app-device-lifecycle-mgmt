@@ -8,6 +8,7 @@ from eox_notices.models import EoxNotice
 
 
 class EoxNoticeSerializer(serializers.ModelSerializer):
+    """API serializer."""
 
     device_type = NestedDeviceTypeSerializer(
         many=False, read_only=False, required=True, help_text="Device Type to attach EoX Notice to"
@@ -15,6 +16,8 @@ class EoxNoticeSerializer(serializers.ModelSerializer):
     devices = NestedDeviceSerializer(many=True, read_only=True, required=False, help_text="Devices tied to Device Type")
 
     class Meta:
+        """Meta attributes."""
+
         model = EoxNotice
         fields = [
             "id",

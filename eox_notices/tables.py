@@ -7,11 +7,15 @@ from .models import EoxNotice
 
 
 class EoxNoticesTable(BaseTable):
+    """Table for list view."""
+
     name = tables.LinkColumn("plugins:eox_notices:eoxnotice", text=lambda record: record, args=[A("pk")])
     devices = tables.TemplateColumn("{{ record.devices.count }}")
     device_type = tables.LinkColumn()
 
     class Meta(BaseTable.Meta):
+        """Meta attributes."""
+
         model = EoxNotice
         fields = (
             "name",

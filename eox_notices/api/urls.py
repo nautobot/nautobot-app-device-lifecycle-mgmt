@@ -7,4 +7,6 @@ router = routers.DefaultRouter()
 
 router.register(r"", EoxNoticeView)
 
+app_name = "eox_notices-api"
+
 urlpatterns = router.urls

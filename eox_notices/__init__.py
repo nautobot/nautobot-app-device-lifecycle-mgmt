@@ -16,9 +16,14 @@ class EoxNoticesConfig(PluginConfig):
     base_url = "eox-notices"
     required_settings = []
     min_version = "1.0.0b1"
-    max_version = "1.0.0b2"
+    max_version = "1.0.0b3"
     default_settings = {}
     caching_config = {}
+
+    def ready(self):
+        """Register custom signals."""
+        super().ready()
+        import eox_notices.signals  # noqa: F401
 
 
 config = EoxNoticesConfig  # pylint:disable=invalid-name

@@ -9,21 +9,26 @@ from .filters import EoxNoticeFilter
 
 
 class EoxNoticesListView(PermissionRequiredMixin, ObjectListView):
+    """List view."""
+
     queryset = EoxNotice.objects.all()
     filterset = EoxNoticeFilter
     filterset_form = EoxNoticeFilterForm
     table = EoxNoticesTable
-    template_name = "eox_notices/eoxnotice_list.html"
     permission_required = "eox_notices.view_eoxnotice"
     action_buttons = ("add",)
 
 
 class EoxNoticeView(PermissionRequiredMixin, ObjectView):
+    """Detail view."""
+
     queryset = EoxNotice.objects.all()
     permission_required = "eox_notices.view_eoxnotice"
 
 
 class EoxNoticeCreateView(PermissionRequiredMixin, ObjectEditView):
+    """Create view."""
+
     model = EoxNotice
     queryset = EoxNotice.objects.all()
     model_form = EoxNoticeForm
@@ -32,6 +37,7 @@ class EoxNoticeCreateView(PermissionRequiredMixin, ObjectEditView):
 
 
 class EoxNoticeDeleteView(PermissionRequiredMixin, ObjectDeleteView):
+    """Delete view."""
 
     model = EoxNotice
     queryset = EoxNotice.objects.all()
@@ -40,6 +46,7 @@ class EoxNoticeDeleteView(PermissionRequiredMixin, ObjectDeleteView):
 
 
 class EoxNoticeEditView(PermissionRequiredMixin, ObjectEditView):
+    """Edit view."""
 
     model = EoxNotice
     queryset = EoxNotice.objects.all()

@@ -8,6 +8,7 @@ from .models import EoxNotice
 
 
 class EoxNoticeFilter(django_filters.FilterSet):
+    """Filter for EoxNotice."""
 
     q = django_filters.CharFilter(method="search", label="Search")
 
@@ -28,6 +29,8 @@ class EoxNoticeFilter(django_filters.FilterSet):
     )
 
     class Meta:
+        """Meta attributes for filter."""
+
         model = EoxNotice
 
         fields = ["end_of_sale", "end_of_support", "end_of_sw_releases", "end_of_security_patches", "notice_url"]
