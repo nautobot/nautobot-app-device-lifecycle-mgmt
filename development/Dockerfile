@@ -2,7 +2,6 @@
 ARG python_ver=3.7
 FROM python:${python_ver}-slim
 
-ARG nautobot_ver=v1.0.0b2
 ARG nautobot_root=/opt/nautobot
 ENV PYTHONUNBUFFERED 1
 ENV NAUTOBOT_ROOT ${nautobot_root}
@@ -23,12 +22,7 @@ RUN pip install --upgrade pip\
     && poetry config virtualenvs.create false
 
 # -------------------------------------------------------------------------------------
-# Install Nautobot
-# -------------------------------------------------------------------------------------
-RUN pip install nautobot==${nautobot_ver} django-debug-toolbar
-
-# -------------------------------------------------------------------------------------
-# Install Netbox Plugin
+# Install Nautobot & Nautobot Plugin
 # -------------------------------------------------------------------------------------
 WORKDIR /source
 

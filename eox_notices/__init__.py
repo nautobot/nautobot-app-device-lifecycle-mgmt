@@ -11,12 +11,12 @@ class EoxNoticesConfig(PluginConfig):
     name = "eox_notices"
     verbose_name = "Nautobot EoX Tracker"
     version = __version__
-    author = "Network to Code, LLC"
-    description = "Tracks EoX Notices for Nautobot objects.."
+    author = "Mikhail Yohman"
+    description = "Tracks EoX Notices for Nautobot objects."
     base_url = "eox-notices"
     required_settings = []
     min_version = "1.0.0b1"
-    max_version = "1.0.0b3"
+    max_version = "1.9999"
     default_settings = {}
     caching_config = {}
 

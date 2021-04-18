@@ -2,7 +2,7 @@
 name = "aniso8601"
 version = "7.0.0"
 description = "A library for parsing ISO 8601 strings."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -18,7 +18,7 @@ python-versions = "*"
 name = "asgiref"
 version = "3.3.4"
 description = "ASGI specs, helper code, and adapters"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -53,7 +53,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "attrs"
 version = "20.3.0"
 description = "Classes Without Boilerplate"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -102,7 +102,7 @@ d = ["aiohttp (>=3.3.2)", "aiohttp-cors"]
 name = "certifi"
 version = "2020.12.5"
 description = "Python package for providing Mozilla's CA Bundle."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -110,7 +110,7 @@ python-versions = "*"
 name = "cffi"
 version = "1.14.5"
 description = "Foreign Function Interface for Python calling C code."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -121,7 +121,7 @@ pycparser = "*"
 name = "chardet"
 version = "4.0.0"
 description = "Universal encoding detector for Python 2 and 3"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -129,7 +129,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "click"
 version = "7.1.2"
 description = "Composable command line interface toolkit"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -145,7 +145,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "coreapi"
 version = "2.3.3"
 description = "Python client library for Core API."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -159,7 +159,7 @@ uritemplate = "*"
 name = "coreschema"
 version = "0.0.4"
 description = "Core Schema."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -170,7 +170,7 @@ jinja2 = "*"
 name = "cryptography"
 version = "3.4.7"
 description = "cryptography is a package which provides cryptographic recipes and primitives to Python developers."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -189,7 +189,7 @@ test = ["pytest (>=6.0)", "pytest-cov", "pytest-subtests", "pytest-xdist", "pret
 name = "defusedxml"
 version = "0.7.1"
 description = "XML bomb protection for Python stdlib modules"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -197,7 +197,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "django"
 version = "3.1.8"
 description = "A high-level Python Web framework that encourages rapid development and clean, pragmatic design."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -214,7 +214,7 @@ bcrypt = ["bcrypt"]
 name = "django-appconf"
 version = "1.0.4"
 description = "A helper class for handling configuration defaults of packaged apps gracefully."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -225,7 +225,7 @@ django = "*"
 name = "django-cacheops"
 version = "5.1"
 description = "A slick ORM cache with automatic granular event-driven invalidation for Django."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -239,7 +239,7 @@ six = ">=1.4.0"
 name = "django-cors-headers"
 version = "3.7.0"
 description = "django-cors-headers is a Django application for handling the server headers required for Cross-Origin Resource Sharing (CORS)."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -250,7 +250,7 @@ Django = ">=2.2"
 name = "django-cryptography"
 version = "1.0"
 description = "Easily encrypt data in Django"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -259,10 +259,22 @@ cryptography = "*"
 django-appconf = "*"
 
 [[package]]
+name = "django-debug-toolbar"
+version = "3.2.1"
+description = "A configurable set of panels that display various debug information about the current request/response."
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+Django = ">=2.2"
+sqlparse = ">=0.2.0"
+
+[[package]]
 name = "django-filter"
 version = "2.4.0"
 description = "Django-filter is a reusable Django application for allowing users to filter querysets dynamically."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -273,7 +285,7 @@ Django = ">=2.2"
 name = "django-js-asset"
 version = "1.2.2"
 description = "script tag with additional attributes for django.forms.Media"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -281,7 +293,7 @@ python-versions = "*"
 name = "django-mptt"
 version = "0.11.0"
 description = "Utilities for implementing Modified Preorder Tree Traversal with your Django Models and working with trees of Model instances."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -290,21 +302,10 @@ Django = ">=1.11"
 django-js-asset = "*"
 
 [[package]]
-name = "django-pglocks"
-version = "1.0.4"
-description = "django_pglocks provides useful context managers for advisory locks for PostgreSQL."
-category = "dev"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-six = ">=1.0.0"
-
-[[package]]
 name = "django-prometheus"
 version = "2.1.0"
 description = "Django middlewares to monitor your application with Prometheus.io."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -312,10 +313,22 @@ python-versions = "*"
 prometheus-client = ">=0.7"
 
 [[package]]
+name = "django-redis"
+version = "4.12.1"
+description = "Full featured redis cache backend for Django."
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[package.dependencies]
+Django = ">=2.2"
+redis = ">=3.0.0"
+
+[[package]]
 name = "django-rq"
 version = "2.4.1"
 description = "An app that provides django integration for RQ (Redis Queue)"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -332,7 +345,7 @@ testing = ["mock (>=2.0.0)"]
 name = "django-tables2"
 version = "2.3.4"
 description = "Table/data-grid framework for Django"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -346,7 +359,7 @@ tablib = ["tablib"]
 name = "django-taggit"
 version = "1.3.0"
 description = "django-taggit is a reusable Django application for simple tagging."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -357,7 +370,7 @@ Django = ">=1.11"
 name = "django-timezone-field"
 version = "4.1.2"
 description = "A Django app providing database and form fields for pytz timezone objects."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -372,7 +385,7 @@ rest_framework = ["djangorestframework (>=3.0.0)"]
 name = "django-webserver"
 version = "1.2.0"
 description = "Django management commands for production webservers"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -390,7 +403,7 @@ waitress = ["waitress"]
 name = "djangorestframework"
 version = "3.12.4"
 description = "Web APIs for Django, made easy."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -401,7 +414,7 @@ django = ">=2.2"
 name = "drf-yasg"
 version = "1.20.0"
 description = "Automated generation of real Swagger/OpenAPI 2.0 schemas from Django Rest Framework code."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -437,7 +450,7 @@ pyflakes = ">=2.3.0,<2.4.0"
 name = "funcy"
 version = "1.15"
 description = "A fancy and practical functional tools"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -445,7 +458,7 @@ python-versions = "*"
 name = "gitdb"
 version = "4.0.7"
 description = "Git Object Database"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.4"
 
@@ -456,7 +469,7 @@ smmap = ">=3.0.1,<5"
 name = "gitpython"
 version = "3.1.14"
 description = "Python Git Library"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.4"
 
@@ -467,7 +480,7 @@ gitdb = ">=4.0.1,<5"
 name = "graphene"
 version = "2.1.8"
 description = "GraphQL Framework for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -486,7 +499,7 @@ test = ["pytest", "pytest-benchmark", "pytest-cov", "pytest-mock", "snapshottest
 name = "graphene-django"
 version = "2.15.0"
 description = "Graphene Django integration"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -508,7 +521,7 @@ test = ["pytest (>=3.6.3)", "pytest-cov", "coveralls", "mock", "pytz", "pytest-d
 name = "graphql-core"
 version = "2.3.2"
 description = "GraphQL implementation for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -525,7 +538,7 @@ test = ["six (==1.14.0)", "pyannotate (==1.2.0)", "pytest (==4.6.10)", "pytest-d
 name = "graphql-relay"
 version = "2.0.1"
 description = "Relay implementation for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -538,7 +551,7 @@ six = ">=1.12"
 name = "idna"
 version = "2.10"
 description = "Internationalized Domain Names in Applications (IDNA)"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -546,7 +559,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "importlib-metadata"
 version = "3.4.0"
 description = "Read metadata from Python packages"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -562,7 +575,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 name = "importlib-resources"
 version = "5.1.2"
 description = "Read resources from Python packages"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -577,7 +590,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 name = "inflection"
 version = "0.5.1"
 description = "A port of Ruby on Rails inflector to Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -614,7 +627,7 @@ colors = ["colorama (>=0.4.3,<0.5.0)"]
 name = "itypes"
 version = "1.2.0"
 description = "Simple immutable types for python."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -622,7 +635,7 @@ python-versions = "*"
 name = "jinja2"
 version = "2.11.3"
 description = "A very fast and expressive template engine."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -636,7 +649,7 @@ i18n = ["Babel (>=0.8)"]
 name = "jsonschema"
 version = "3.2.0"
 description = "An implementation of JSON Schema validation for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -662,7 +675,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 name = "markdown"
 version = "3.3.4"
 description = "Python implementation of Markdown."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -676,7 +689,7 @@ testing = ["coverage", "pyyaml"]
 name = "markupsafe"
 version = "1.1.1"
 description = "Safely add untrusted strings to HTML/XML markup."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 
@@ -690,47 +703,54 @@ python-versions = "*"
 
 [[package]]
 name = "nautobot"
-version = "1.0.0b3"
+version = "1.0.0-beta.4"
 description = "Source of truth and network automation platform."
-category = "dev"
+category = "main"
 optional = false
-python-versions = ">=3.6,<4.0"
+python-versions = "^3.6"
+develop = false
 
 [package.dependencies]
-Django = ">=3.1.7,<3.2.0"
-django-cacheops = ">=5.1,<5.2"
-django-cors-headers = ">=3.7.0,<3.8.0"
-django-cryptography = ">=1.0,<1.1"
-django-filter = ">=2.4.0,<2.5.0"
-django-mptt = ">=0.11.0,<0.12.0"
-django-pglocks = ">=1.0.4,<1.1.0"
-django-prometheus = ">=2.1.0,<2.2.0"
-django-rq = ">=2.4.0,<3.0.0"
-django-tables2 = ">=2.3.4,<2.4.0"
-django-taggit = ">=1.3.0,<1.4.0"
-django-timezone-field = ">=4.1.1,<4.2.0"
-django-webserver = ">=1.2.0,<1.3.0"
-djangorestframework = ">=3.12.2,<3.13.0"
-drf-yasg = {version = ">=1.20.0,<1.21.0", extras = ["validation"]}
-GitPython = ">=3.1.13,<3.2.0"
-graphene-django = ">=2.15.0,<2.16.0"
-importlib-metadata = {version = ">=3.4.0,<3.5.0", markers = "python_version < \"3.8\""}
-Jinja2 = ">=2.11.3,<2.12.0"
-Markdown = ">=3.3.3,<3.4.0"
-netaddr = ">=0.8.0,<0.9.0"
-Pillow = ">=8.1.0,<8.2.0"
-psycopg2-binary = ">=2.8.6,<2.9.0"
-pycryptodome = ">=3.10.1,<3.11.0"
-pyuwsgi = ">=2.0.19,<3.0.0"
-PyYAML = ">=5.4.1,<5.5.0"
-social-auth-app-django = ">=4.0.0,<5.0.0"
-svgwrite = ">=1.4.1,<1.5.0"
+Django = "~3.1.7"
+django-cacheops = "~5.1"
+django-cors-headers = "~3.7.0"
+django-cryptography = "~1.0"
+django-filter = "~2.4.0"
+django-mptt = "~0.11.0"
+django-prometheus = "~2.1.0"
+django-redis = "^4.12.1"
+django-rq = "^2.4.0"
+django-tables2 = "~2.3.4"
+django-taggit = "~1.3.0"
+django-timezone-field = "~4.1.1"
+django-webserver = "~1.2.0"
+djangorestframework = "~3.12.2"
+drf-yasg = {version = "~1.20.0", extras = ["validation"]}
+GitPython = "~3.1.13"
+graphene-django = "~2.15.0"
+importlib-metadata = {version = "~3.4.0", markers = "python_version < \"3.8\""}
+Jinja2 = "~2.11.3"
+Markdown = "~3.3.3"
+netaddr = "~0.8.0"
+Pillow = "~8.1.0"
+psycopg2-binary = "~2.8.6"
+pycryptodome = "~3.10.1"
+pyuwsgi = "^2.0.19"
+PyYAML = "~5.4.1"
+social-auth-app-django = "^4.0.0"
+svgwrite = "~1.4.1"
+
+[package.source]
+type = "git"
+url = "https://github.com/nautobot/nautobot"
+reference = "develop"
+resolved_reference = "ac1768ab78448955c42425144ddfa91509a13aa1"
 
 [[package]]
 name = "netaddr"
 version = "0.8.0"
 description = "A network address manipulation library for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -741,7 +761,7 @@ importlib-resources = {version = "*", markers = "python_version < \"3.7\""}
 name = "oauthlib"
 version = "3.1.0"
 description = "A generic, spec-compliant, thorough implementation of the OAuth request-signing logic"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -754,7 +774,7 @@ signedtoken = ["cryptography", "pyjwt (>=1.0.0)"]
 name = "packaging"
 version = "20.9"
 description = "Core utilities for Python packages"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -781,7 +801,7 @@ python-versions = ">=2.6"
 name = "pillow"
 version = "8.1.2"
 description = "Python Imaging Library (Fork)"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -803,7 +823,7 @@ dev = ["pre-commit", "tox"]
 name = "prometheus-client"
 version = "0.10.1"
 description = "Python client for the Prometheus monitoring system."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -814,7 +834,7 @@ twisted = ["twisted"]
 name = "promise"
 version = "2.3"
 description = "Promises/A+ implementation for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -828,7 +848,7 @@ test = ["pytest (>=2.7.3)", "pytest-cov", "coveralls", "futures", "pytest-benchm
 name = "psycopg2-binary"
 version = "2.8.6"
 description = "psycopg2 - Python-PostgreSQL Database Adapter"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 
@@ -852,7 +872,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "pycparser"
 version = "2.20"
 description = "C parser in Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -860,7 +880,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "pycryptodome"
 version = "3.10.1"
 description = "Cryptographic library for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -887,7 +907,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "pyjwt"
 version = "2.0.1"
 description = "JSON Web Token implementation in Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -946,7 +966,7 @@ pylint = ">=1.7"
 name = "pyparsing"
 version = "2.4.7"
 description = "Python parsing module"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -954,7 +974,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "pyrsistent"
 version = "0.17.3"
 description = "Persistent/Functional/Immutable data structures"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -999,7 +1019,7 @@ testing = ["django", "django-configurations (>=2.0)"]
 name = "python3-openid"
 version = "3.2.0"
 description = "OpenID support for modern servers and consumers."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1014,7 +1034,7 @@ postgresql = ["psycopg2"]
 name = "pytz"
 version = "2021.1"
 description = "World timezone definitions, modern and historical"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1022,7 +1042,7 @@ python-versions = "*"
 name = "pyuwsgi"
 version = "2.0.19.1.post0"
 description = "The uWSGI server"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1030,7 +1050,7 @@ python-versions = "*"
 name = "pyyaml"
 version = "5.4.1"
 description = "YAML parser and emitter for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 
@@ -1038,7 +1058,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 name = "redis"
 version = "3.5.3"
 description = "Python client for Redis key-value store"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -1057,7 +1077,7 @@ python-versions = "*"
 name = "requests"
 version = "2.25.1"
 description = "Python HTTP for Humans."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -1075,7 +1095,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
 name = "requests-oauthlib"
 version = "1.3.0"
 description = "OAuthlib authentication support for Requests."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -1090,7 +1110,7 @@ rsa = ["oauthlib[signedtoken] (>=3.0.0)"]
 name = "rq"
 version = "1.8.0"
 description = "RQ is a simple, lightweight, library for creating background jobs, and processing them."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -1102,7 +1122,7 @@ redis = ">=3.5.0"
 name = "ruamel.yaml"
 version = "0.17.4"
 description = "ruamel.yaml is a YAML parser/emitter that supports roundtrip preservation of comments, seq/map flow style, and map key order"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3"
 
@@ -1117,7 +1137,7 @@ jinja2 = ["ruamel.yaml.jinja2 (>=0.2)"]
 name = "ruamel.yaml.clib"
 version = "0.2.2"
 description = "C version of reader, parser and emitter for ruamel.yaml derived from libyaml"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1125,7 +1145,7 @@ python-versions = "*"
 name = "rx"
 version = "1.6.1"
 description = "Reactive Extensions (Rx) for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1161,7 +1181,7 @@ tornado = ["tornado (>=5)"]
 name = "singledispatch"
 version = "3.6.1"
 description = "Backport functools.singledispatch from Python 3.4 to Python 2.6-3.3."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.6"
 
@@ -1176,7 +1196,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 name = "six"
 version = "1.15.0"
 description = "Python 2 and 3 compatibility utilities"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -1184,7 +1204,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "smmap"
 version = "4.0.0"
 description = "A pure Python implementation of a sliding window memory map manager"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -1200,7 +1220,7 @@ python-versions = "*"
 name = "social-auth-app-django"
 version = "4.0.0"
 description = "Python Social Authentication, Django integration."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1212,7 +1232,7 @@ social-auth-core = ">=3.3.0"
 name = "social-auth-core"
 version = "4.1.0"
 description = "Python social authentication made simple."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -1236,7 +1256,7 @@ saml = ["python3-saml (>=1.2.1)"]
 name = "sqlparse"
 version = "0.4.1"
 description = "A non-validating SQL parser."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -1256,7 +1276,7 @@ pbr = ">=2.0.0,<2.1.0 || >2.1.0"
 name = "svgwrite"
 version = "1.4.1"
 description = "A Python library to create SVG drawings."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -1264,7 +1284,7 @@ python-versions = ">=3.6"
 name = "swagger-spec-validator"
 version = "2.7.3"
 description = "Validation of Swagger specifications"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1277,7 +1297,7 @@ six = "*"
 name = "text-unidecode"
 version = "1.3"
 description = "The most basic Text::Unidecode port"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1301,7 +1321,7 @@ python-versions = "*"
 name = "typing-extensions"
 version = "3.7.4.3"
 description = "Backported and Experimental Type Hints for Python 3.5+"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1309,7 +1329,7 @@ python-versions = "*"
 name = "uritemplate"
 version = "3.0.1"
 description = "URI templates"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -1317,7 +1337,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "urllib3"
 version = "1.26.4"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
 
@@ -1338,7 +1358,7 @@ python-versions = "*"
 name = "zipp"
 version = "3.4.1"
 description = "Backport of pathlib-compatible object wrapper for zip files"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -1349,7 +1369,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "8d4af9c17756db854d2f6fabdf51f0edbb4eec560d641132073049969246b321"
+content-hash = "c630d350b36665b207f337c7e60de753c4bbff535663f555c03410e0755d880f"
 
 [metadata.files]
 aniso8601 = [
@@ -1485,6 +1505,10 @@ django-cryptography = [
     {file = "django-cryptography-1.0.tar.gz", hash = "sha256:13de5cf8f1250744c104b9e24774d03aa6d8488959dd40cdc016934043652445"},
     {file = "django_cryptography-1.0-py3-none-any.whl", hash = "sha256:0a99980b1cee7cc5e52f9b20b322620fea7cc124d770273e7bd285b20fd9d222"},
 ]
+django-debug-toolbar = [
+    {file = "django-debug-toolbar-3.2.1.tar.gz", hash = "sha256:a5ff2a54f24bf88286f9872836081078f4baa843dc3735ee88524e89f8821e33"},
+    {file = "django_debug_toolbar-3.2.1-py3-none-any.whl", hash = "sha256:e759e63e3fe2d3110e0e519639c166816368701eab4a47fed75d7de7018467b9"},
+]
 django-filter = [
     {file = "django-filter-2.4.0.tar.gz", hash = "sha256:84e9d5bb93f237e451db814ed422a3a625751cbc9968b484ecc74964a8696b06"},
     {file = "django_filter-2.4.0-py3-none-any.whl", hash = "sha256:e00d32cebdb3d54273c48f4f878f898dced8d5dfaad009438fe61ebdf535ace1"},
@@ -1497,12 +1521,13 @@ django-mptt = [
     {file = "django-mptt-0.11.0.tar.gz", hash = "sha256:dfdb3af75ad27cdd4458b0544ec8574174f2b90f99bc2cafab6a15b4bc1895a8"},
     {file = "django_mptt-0.11.0-py2.py3-none-any.whl", hash = "sha256:90eb236eb4f1a92124bd7c37852bbe09c0d21158477cc237556d59842a91c509"},
 ]
-django-pglocks = [
-    {file = "django-pglocks-1.0.4.tar.gz", hash = "sha256:3c47c66fbfbd268ef46269673a0516a039539b0972b8ed2ec9cfee44c4b65523"},
-]
 django-prometheus = [
     {file = "django-prometheus-2.1.0.tar.gz", hash = "sha256:dd3f8da1399140fbef5c00d1526a23d1ade286b144281c325f8e409a781643f2"},
     {file = "django_prometheus-2.1.0-py2.py3-none-any.whl", hash = "sha256:c338d6efde1ca336e90c540b5e87afe9287d7bcc82d651a778f302b0be17a933"},
+]
+django-redis = [
+    {file = "django-redis-4.12.1.tar.gz", hash = "sha256:306589c7021e6468b2656edc89f62b8ba67e8d5a1c8877e2688042263daa7a63"},
+    {file = "django_redis-4.12.1-py3-none-any.whl", hash = "sha256:1133b26b75baa3664164c3f44b9d5d133d1b8de45d94d79f38d1adc5b1d502e5"},
 ]
 django-rq = [
     {file = "django-rq-2.4.1.tar.gz", hash = "sha256:f09059ab37403a47c7933bca396fabb7f3058732d132462eade5333bc4bcac5f"},
@@ -1691,10 +1716,7 @@ mccabe = [
     {file = "mccabe-0.6.1-py2.py3-none-any.whl", hash = "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42"},
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
 ]
-nautobot = [
-    {file = "nautobot-1.0.0b3-py3-none-any.whl", hash = "sha256:9b83a84300dee5f687bbe83e17cca749082854f0def48f2dff48049a5f654760"},
-    {file = "nautobot-1.0.0b3.tar.gz", hash = "sha256:158434d841cac87d9a57b685a0005aa1d0264df9fbc057d14589a00bb2653481"},
-]
+nautobot = []
 netaddr = [
     {file = "netaddr-0.8.0-py2.py3-none-any.whl", hash = "sha256:9666d0232c32d2656e5e5f8d735f58fd6c7457ce52fc21c98d45f2af78f990ac"},
     {file = "netaddr-0.8.0.tar.gz", hash = "sha256:d6cc57c7a07b1d9d2e917aa8b36ae8ce61c35ba3fcd1b83ca31c5a0ee2b5a243"},
