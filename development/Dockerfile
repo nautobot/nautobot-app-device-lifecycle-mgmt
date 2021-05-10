@@ -2,7 +2,6 @@
 ARG python_ver=3.7
 FROM python:${python_ver}-slim
 
-ARG nautobot_ver=v1.0.0b2
 ARG nautobot_root=/opt/nautobot
 ENV PYTHONUNBUFFERED 1
 ENV NAUTOBOT_ROOT ${nautobot_root}
@@ -11,7 +10,7 @@ WORKDIR ${NAUTOBOT_ROOT}
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install --no-install-recommends -y git mime-support && \
+    apt-get install --no-install-recommends -y git && \
     apt-get autoremove -y && \
     apt-get clean all && \
     rm -rf /var/lib/apt/lists/* && \
@@ -21,11 +20,6 @@ RUN apt-get update && \
 RUN pip install --upgrade pip\
     && pip install poetry \
     && poetry config virtualenvs.create false
-
-# -------------------------------------------------------------------------------------
-# Install Nautobot
-# -------------------------------------------------------------------------------------
-RUN pip install nautobot==${nautobot_ver} django-debug-toolbar
 
 # -------------------------------------------------------------------------------------
 # Install Netbox Plugin

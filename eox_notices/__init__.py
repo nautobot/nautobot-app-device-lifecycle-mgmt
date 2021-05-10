@@ -15,8 +15,8 @@ class EoxNoticesConfig(PluginConfig):
     description = "Tracks EoX Notices for Nautobot objects.."
     base_url = "eox-notices"
     required_settings = []
-    min_version = "1.0.0b1"
-    max_version = "1.0.0b3"
+    min_version = "1.0.0"
+    max_version = "1.9999"
     default_settings = {}
     caching_config = {}
 

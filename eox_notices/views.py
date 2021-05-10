@@ -32,7 +32,7 @@ class EoxNoticeCreateView(PermissionRequiredMixin, ObjectEditView):
     model = EoxNotice
     queryset = EoxNotice.objects.all()
     model_form = EoxNoticeForm
-    permission_required = "eox_notices.add_notice"
+    permission_required = "eox_notices.add_eoxnotice"
     default_return_url = "plugins:eox_notices:eoxnotice_list"
 
 
@@ -41,7 +41,7 @@ class EoxNoticeDeleteView(PermissionRequiredMixin, ObjectDeleteView):
 
     model = EoxNotice
     queryset = EoxNotice.objects.all()
-    permission_required = "eox_notices.delete_notice"
+    permission_required = "eox_notices.delete_eoxnotice"
     default_return_url = "plugins:eox_notices:eoxnotice_list"
 
 
@@ -51,5 +51,5 @@ class EoxNoticeEditView(PermissionRequiredMixin, ObjectEditView):
     model = EoxNotice
     queryset = EoxNotice.objects.all()
     model_form = EoxNoticeForm
-    permission_required = "eox_notices.change_notice"
+    permission_required = "eox_notices.change_eoxnotice"
     default_return_url = "plugins:eox_notices:eoxnotice"

@@ -4,7 +4,7 @@ import os
 from invoke import task
 
 PYTHON_VER = os.getenv("PYTHON_VER", "3.8")
-NAUTOBOT_VER = os.getenv("NAUTOBOT_VER", "v1.0.0b3")
+NAUTOBOT_VER = os.getenv("NAUTOBOT_VER", "v1.0.1")
 
 # Name of the docker image/container
 NAME = os.getenv("IMAGE_NAME", "nautobot-eox-notices")

@@ -5,17 +5,13 @@ from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from nautobot.utilities.querysets import RestrictedQuerySet
-from nautobot.extras.models import ChangeLoggedModel
+from nautobot.extras.models.change_logging import ChangeLoggedModel
 from nautobot.core.models import BaseModel
 from nautobot.dcim.models import Device
 
 
-class EoxNotice(ChangeLoggedModel, BaseModel):
+class EoxNotice(BaseModel, ChangeLoggedModel):
     """EoxNotice model for plugin."""
-
-    # Assign permissions to model
-    objects = RestrictedQuerySet.as_manager()
 
     # Set model columns
     devices = models.ManyToManyField(Device)

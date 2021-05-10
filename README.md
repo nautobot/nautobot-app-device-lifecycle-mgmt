@@ -33,13 +33,13 @@ PLUGINS = ["eox_notices"]
 
 The plugin behavior can be controlled with the following list of settings
 
-- TODO
+No current behavior can be controlled via `PLUGINS_CONFIG`, but that will most likely change to manage colors for notifications within specific date ranges, etc.
 
 ## Usage
 
 ### API
 
-TODO
+![](docs/images/eox_notice_api_view.png)
 
 ## Contributing
 
@@ -92,4 +92,28 @@ Each command can be executed with `invoke <command>`. All commands support the a
 
 ## Screenshots
 
-TODO
+### EoX List View
+
+You can view the list of EoX notices as well as filter the table.
+
+![](docs/images/eox_notice_list_view.png)
+
+> The device count is provided in the list view.
+
+### EoX Detail View
+
+You can also click an EoX Notice and see the detail view. This view provides links to the devices that are part affected by this EoX notice due to their device type.
+
+![](docs/images/eox_notice_detail_view.png)
+
+### Device View
+
+You can also view the associated EoX notice from the device. If the device is end of life or end of supoort the notice will be red.
+
+![](docs/images/eox_notice_device_view.png)
+
+### Device Type View
+
+This provides the same UI element as the device view, but within the specific device type's view.
+
+![](docs/images/eox_notice_device_type_view.png)
