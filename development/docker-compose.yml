@@ -1,14 +1,14 @@
----
 version: "3"
 services:
   nautobot:
     build:
       context: "../"
       dockerfile: "development/Dockerfile"
+      args:
+        python_ver: ${PYTHON_VER}
+        nautobot_ver: ${NAUTOBOT_VER}
     image: "nautobot-eox-notices/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
-    command: >
-      sh -c "nautobot-server migrate &&
-             nautobot-server runserver 0.0.0.0:8000"
+    command: "nautobot-server runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
     depends_on:
@@ -24,8 +24,11 @@ services:
     build:
       context: "../"
       dockerfile: "development/Dockerfile"
+      args:
+        nautobot_ver: ${NAUTOBOT_VER}
+        python_ver: ${PYTHON_VER}
     image: "nautobot-eox-notices/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
-    command: "sh -c 'nautobot-server rqworker'"
+    entrypoint: "nautobot-server rqworker"
     depends_on:
       - "nautobot"
     env_file:
@@ -35,12 +38,12 @@ services:
       - "../eox_notices:/source/eox_notices"
     tty: true
   postgres:
-    image: "postgres:10"
+    image: "postgres:13"
     env_file: "dev.env"
     volumes:
       - "pgdata_eox_notices:/var/lib/postgresql/data"
   redis:
-    image: "redis:5-alpine"
+    image: "redis:6-alpine"
     command:
       - "sh"
       - "-c"  # this is to evaluate the $REDIS_PASSWORD from the env

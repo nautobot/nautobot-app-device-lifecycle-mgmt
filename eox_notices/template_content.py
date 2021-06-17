@@ -7,18 +7,21 @@ from .models import EoxNotice
 
 
 def past_due(end_of):
+    """Determine if EoxNotice is past due to change HTML to danger."""
     today = date.today()
     if end_of is None:
         return False
-    if today > end_of:
+    if today >= end_of:
         return True
 
 
 class DeviceEoxNotice(PluginTemplateExtension):
+    """Class to add table for EoxNotice related to device."""
 
     model = "dcim.device"
 
     def right_page(self):
+        """Display table on right side of page."""
         expired = False
         dev_obj = self.context["object"]
         try:
@@ -45,10 +48,12 @@ class DeviceEoxNotice(PluginTemplateExtension):
 
 
 class DeviceTypeEoxNotice(PluginTemplateExtension):
+    """Class to add table for EoxNotice related to device type."""
 
     model = "dcim.devicetype"
 
     def right_page(self):
+        """Display table on right side of page."""
         expired = False
         devtype_obj = self.context["object"]
         try:

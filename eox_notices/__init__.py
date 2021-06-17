@@ -1,6 +1,6 @@
 """Plugin declaration for eox_notices."""
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 from nautobot.extras.plugins import PluginConfig
 
@@ -15,10 +15,15 @@ class EoxNoticesConfig(PluginConfig):
     description = "Tracks EoX Notices for Nautobot objects.."
     base_url = "eox-notices"
     required_settings = []
-    min_version = "1.0.0b1"
-    max_version = "1.0.0b2"
+    min_version = "1.0.0"
+    max_version = "1.9999"
     default_settings = {}
     caching_config = {}
+
+    def ready(self):
+        """Register custom signals."""
+        super().ready()
+        import eox_notices.signals  # noqa: F401
 
 
 config = EoxNoticesConfig  # pylint:disable=invalid-name

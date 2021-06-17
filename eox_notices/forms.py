@@ -9,7 +9,11 @@ from .models import EoxNotice
 
 
 class EoxNoticeForm(BootstrapMixin, forms.ModelForm):
+    """EoxNotice creation/edit form."""
+
     class Meta:
+        """Meta attributes."""
+
         model = EoxNotice
         fields = [
             "device_type",
@@ -29,6 +33,7 @@ class EoxNoticeForm(BootstrapMixin, forms.ModelForm):
 
 
 class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
+    """Filter form to filter searches."""
 
     q = forms.CharField(
         required=False,
@@ -41,6 +46,8 @@ class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
     devices = forms.ModelMultipleChoiceField(required=False, queryset=Device.objects.all(), to_field_name="name")
 
     class Meta:
+        """Meta attributes."""
+
         model = EoxNotice
         # Define the fields above for ordering and widget purposes
         fields = [
