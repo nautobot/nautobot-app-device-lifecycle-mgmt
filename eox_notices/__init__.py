@@ -1,6 +1,6 @@
 """Plugin declaration for eox_notices."""
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 from nautobot.extras.plugins import PluginConfig
 
