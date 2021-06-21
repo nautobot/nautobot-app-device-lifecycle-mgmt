@@ -2,7 +2,6 @@
 
 import os
 
-from ntc_utils.invoke.collections import base
 from invoke import task
 
 

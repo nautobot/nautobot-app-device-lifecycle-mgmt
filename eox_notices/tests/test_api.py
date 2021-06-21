@@ -1,9 +1,8 @@
 """Unit tests for eox_notices."""
 import datetime
 from django.contrib.auth import get_user_model
-from django.urls import reverse
 
-from nautobot.utilities.testing import APITestCase, APIViewTestCases
+from nautobot.utilities.testing import APIViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer
 
 from eox_notices.models import EoxNotice
