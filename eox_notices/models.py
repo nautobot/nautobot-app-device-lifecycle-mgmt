@@ -11,7 +11,7 @@ from nautobot.core.models import BaseModel
 from nautobot.dcim.models import Device
 
 
-class EoxNotice(ChangeLoggedModel, BaseModel):
+class EoxNotice(BaseModel, ChangeLoggedModel):
     """EoxNotice model for plugin."""
 
     # Assign permissions to model

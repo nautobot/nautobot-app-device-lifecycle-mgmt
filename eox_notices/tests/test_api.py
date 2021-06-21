@@ -1,60 +1,65 @@
 """Unit tests for eox_notices."""
-from django.urls import reverse
-from django.test import TestCase
+import datetime
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 
-# Import rest_framework related helpers
-from rest_framework import status
-from rest_framework.test import APIClient
-
-# from nautobot.utilities.testing import APIViewTestCases
+from nautobot.utilities.testing import APITestCase, APIViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer
-from nautobot.users.models import Token
 
 from eox_notices.models import EoxNotice
 
 User = get_user_model()
 
 
-class EoxNoticeAPITest(TestCase):
+class EoxNoticeAPITest(APIViewTestCases.APIViewTestCase):
     """Test the EoxNotices API."""
 
-    def setUp(self):
+    model = EoxNotice
+    bulk_update_data = {"notice_url": "https://cisco.com/eox"}
+    brief_fields = [
+        "device_type",
+        "devices",
+        "display",
+        "end_of_sale",
+        "end_of_security_patches",
+        "end_of_support",
+        "end_of_sw_releases",
+        "id",
+        "notice_url",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
         """Create a superuser and token for API calls."""
-        # Setup user and APIClient
-        self.user = User.objects.create(username="testuser", is_superuser=True)
-        self.token = Token.objects.create(user=self.user)
-        self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token.key}")
-
-        self.base_url_lookup = "plugins-api:eox_notices-api:eoxnotice"
-
-        # Create test objects
-        self.manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
-        self.device_types = (
-            DeviceType.objects.create(model="c9300-24", slug="c9300-24", manufacturer=self.manufacturer),
-            DeviceType.objects.create(model="c9300-48", slug="c9300-48", manufacturer=self.manufacturer),
-            DeviceType.objects.create(model="c9500-24", slug="c9500-24", manufacturer=self.manufacturer),
+        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        device_types = (
+            DeviceType.objects.create(model="c9300-24", slug="c9300-24", manufacturer=manufacturer),
+            DeviceType.objects.create(model="c9300-48", slug="c9300-48", manufacturer=manufacturer),
+            DeviceType.objects.create(model="c9500-24", slug="c9500-24", manufacturer=manufacturer),
+            DeviceType.objects.create(model="c9500-48", slug="c9500-48", manufacturer=manufacturer),
+            DeviceType.objects.create(model="c9407", slug="c9407", manufacturer=manufacturer),
+            DeviceType.objects.create(model="c9410", slug="c9410", manufacturer=manufacturer),
         )
 
-        self.notices = (
-            EoxNotice.objects.create(device_type=self.device_types[0], end_of_sale="2021-04-01"),
-            EoxNotice.objects.create(device_type=self.device_types[1], end_of_sale="2021-04-01"),
-            EoxNotice.objects.create(device_type=self.device_types[2], end_of_sale="2021-04-01"),
-        )
+        EoxNotice.objects.create(device_type=device_types[3], end_of_sale=datetime.date(2021, 4, 1))
+        EoxNotice.objects.create(device_type=device_types[4], end_of_sale=datetime.date(2021, 4, 1))
+        EoxNotice.objects.create(device_type=device_types[5], end_of_sale=datetime.date(2021, 4, 1))
 
-    def test_list_eox_notices_ok(self):
-        """Verify notices are listed."""
-        url = reverse(f"{self.base_url_lookup}-list")
+        cls.create_data = [
+            # Setting end_of_sale as datetime.date for proper comparison
+            {"device_type": device_types[0].id, "end_of_sale": datetime.date(2021, 4, 1)},
+            {"device_type": device_types[1].id, "end_of_sale": datetime.date(2021, 4, 1)},
+            {"device_type": device_types[2].id, "end_of_sale": datetime.date(2021, 4, 1)},
+        ]
 
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["count"], 3)
+    def test_bulk_create_objects(self):
+        """Currently don't support bulk operations."""
+        pass
 
-    def test_detail_eox_notice_ok(self):
-        """Verify notices are listed."""
-        url = reverse(f"{self.base_url_lookup}-detail", kwargs={"pk": self.notices[0].pk})
+    def test_bulk_delete_objects(self):
+        """Currently don't support bulk operations."""
+        pass
 
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["end_of_sale"], "2021-04-01")
+    def test_bulk_update_objects(self):
+        """Currently don't support bulk operations."""
+        pass

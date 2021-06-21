@@ -1,10 +1,13 @@
 """Tasks for use with Invoke."""
 
 import os
+
+from ntc_utils.invoke.collections import base
 from invoke import task
 
+
 PYTHON_VER = os.getenv("PYTHON_VER", "3.8")
-NAUTOBOT_VER = os.getenv("NAUTOBOT_VER", "v1.0.0b3")
+NAUTOBOT_VER = os.getenv("NAUTOBOT_VER", "v1.0.2")
 
 # Name of the docker image/container
 NAME = os.getenv("IMAGE_NAME", "nautobot-eox-notices")
@@ -18,6 +21,24 @@ COMPOSE_COMMAND = f'docker-compose --project-directory "{COMPOSE_DIR}" -f "{COMP
 
 if os.path.isfile(COMPOSE_OVERRIDE_FILE):
     COMPOSE_COMMAND += f' -f "{COMPOSE_OVERRIDE_FILE}"'
+
+# ns_config = {
+#     "ntc": {
+#         "project_name": BUILD_NAME,
+#         "nautobot_version": NAUTOBOT_VER,
+#         "python_version": PYTHON_VER,
+#         "compose_dir": COMPOSE_DIR,
+#         "local": False,
+#         "compose_dir": os.path.join(os.path.dirname(__file__), "development"),
+#         "compose_files": [
+#             "docker-compose.override.yml",
+#             "docker-compose.yml",
+#         ],
+#     }
+# }
+# Use provided base collection from ntc_utils
+# ns = base
+# ns.configure(ns_config)
 
 
 def docker_compose(context, command, **kwargs):

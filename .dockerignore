@@ -1,5 +1,4 @@
 # Docker related
-development/Dockerfile
 development/docker-compose*.yml
 development/*.env
 

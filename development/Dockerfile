@@ -22,7 +22,7 @@ RUN pip install --upgrade pip\
     && poetry config virtualenvs.create false
 
 # -------------------------------------------------------------------------------------
-# Install Nautobot & Nautobot Plugin
+# Install Nautobot Plugin
 # -------------------------------------------------------------------------------------
 WORKDIR /source
 
