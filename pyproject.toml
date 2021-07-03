@@ -22,7 +22,10 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.6"
-nautobot = {git = "https://github.com/nautobot/nautobot", rev = "develop"}
+nautobot = { version = "*", optional = true }
+
+[tool.poetry.extras]
+nautobot = ["nautobot"]
 
 [tool.poetry.dev-dependencies]
 invoke = "^1.4.1"
@@ -36,6 +39,7 @@ pytest-django = "^4.1.0"
 toml = "^0.10.2"
 sentry-sdk = "^1.0.0"
 django-debug-toolbar = "^3.2.1"
+coverage = "^5.5"
 
 [tool.black]
 line-length = 120

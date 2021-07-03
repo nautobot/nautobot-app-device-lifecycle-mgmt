@@ -5,8 +5,8 @@ import os
 from invoke import task
 
 
-PYTHON_VER = os.getenv("PYTHON_VER", "3.8")
-NAUTOBOT_VER = os.getenv("NAUTOBOT_VER", "v1.0.2")
+PYTHON_VER = os.getenv("PYTHON_VER", "3.9")
+NAUTOBOT_VER = os.getenv("NAUTOBOT_VER", "1.0.3")
 
 # Name of the docker image/container
 NAME = os.getenv("IMAGE_NAME", "nautobot-eox-notices")
@@ -66,7 +66,7 @@ def docker_compose(context, command, **kwargs):
 @task
 def build(context, nocache=False, forcerm=False):
     """Build all docker images."""
-    command = f"build --build-arg nautobot_ver={NAUTOBOT_VER} --build-arg python_ver={PYTHON_VER}"
+    command = f"build --build-arg NAUTOBOT_VER={NAUTOBOT_VER} --build-arg PYTHON_VER={PYTHON_VER}"
 
     if nocache:
         command += " --no-cache"
@@ -185,7 +185,7 @@ def makemigrations(context, name=""):
 @task
 def unittest(context, keepdb=False, verbosity=1):
     """Run Django unit tests for the plugin."""
-    entrypoint = f"nautobot-server test eox_notices --verbosity={verbosity}"
+    entrypoint = f"coverage run --module nautobot.core.cli test eox_notices"
     if keepdb:
         entrypoint += " --keepdb"
     command = f"run --entrypoint '{entrypoint}' nautobot"
