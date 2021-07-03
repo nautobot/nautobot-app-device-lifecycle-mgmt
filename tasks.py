@@ -81,7 +81,9 @@ def generate_packages(context):
     """Generate all Python packages inside docker and copy the file locally under dist/."""
     container_name = f"{BUILD_NAME}_nautobot_package"
     context.run(
-        f"docker rm {container_name} || true", env={"NAUTOBOT_VER": NAUTOBOT_VER, "PYTHON_VER": PYTHON_VER}, pty=True,
+        f"docker rm {container_name} || true",
+        env={"NAUTOBOT_VER": NAUTOBOT_VER, "PYTHON_VER": PYTHON_VER},
+        pty=True,
     )
     context.run(
         f"docker-compose  -f {COMPOSE_FILE} -p {BUILD_NAME} run --name {container_name} -w /source nautobot poetry build",
@@ -142,7 +144,9 @@ def destroy(context):
 def nbshell(context):
     """Launch a nbshell session."""
     docker_compose(
-        context, "run --entrypoint 'nautobot-server nbshell' nautobot", pty=True,
+        context,
+        "run --entrypoint 'nautobot-server nbshell' nautobot",
+        pty=True,
     )
 
 
@@ -150,7 +154,9 @@ def nbshell(context):
 def cli(context):
     """Launch a bash shell inside the running Nautobot container."""
     docker_compose(
-        context, "run --entrypoint bash nautobot", pty=True,
+        context,
+        "run --entrypoint bash nautobot",
+        pty=True,
     )
 
 
@@ -159,7 +165,9 @@ def create_user(context, user="admin"):
     """Create a new user in django (default: admin), will prompt for password."""
     print(f"Starting user creation for user {user}")
     docker_compose(
-        context, f"run --entrypoint 'nautobot-server createsuperuser --username {user}' nautobot", pty=True,
+        context,
+        f"run --entrypoint 'nautobot-server createsuperuser --username {user}' nautobot",
+        pty=True,
     )
 
 
@@ -200,7 +208,9 @@ def pylint(context):
     )
     command = f"run --entrypoint '{entrypoint}' nautobot"
     docker_compose(
-        context, command, pty=True,
+        context,
+        command,
+        pty=True,
     )
 
 
