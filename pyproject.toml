@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-eox-notices"
-version = "0.1.0"
+version = "0.1.1"
 description = "Tracks EoX Notices for Nautobot objects."
 authors = ["Mikhail Yohman <mikhail.yohman@gmail.com>"]
 
@@ -39,7 +39,10 @@ pytest-django = "^4.1.0"
 toml = "^0.10.2"
 sentry-sdk = "^1.0.0"
 django-debug-toolbar = "^3.2.1"
+<<<<<<< HEAD
 coverage = "^5.5"
+=======
+>>>>>>> develop
 
 [tool.black]
 line-length = 120

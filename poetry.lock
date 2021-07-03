@@ -326,7 +326,8 @@ optional = true
 python-versions = "*"
 
 [package.dependencies]
-prometheus-client = ">=0.7"
+Django = ">=2.2"
+redis = ">=3.0.0"
 
 [[package]]
 name = "django-redis"
