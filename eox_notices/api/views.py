@@ -1,6 +1,6 @@
 """API Views for eox_notices."""
 
-from rest_framework import mixins, viewsets
+from nautobot.core.api.views import ModelViewSet
 
 from eox_notices.models import EoxNotice
 from eox_notices.filters import EoxNoticeFilter
@@ -8,14 +8,7 @@ from eox_notices.filters import EoxNoticeFilter
 from .serializers import EoxNoticeSerializer
 
 
-class EoxNoticeView(
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-):
+class EoxNoticeView(ModelViewSet):
     """CRUD operations set for EoxNotice view."""
 
     queryset = EoxNotice.objects.all()

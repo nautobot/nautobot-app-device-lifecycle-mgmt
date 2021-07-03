@@ -12,6 +12,9 @@ urlpatterns = [
     path("<uuid:pk>/delete/", views.EoxNoticeDeleteView.as_view(), name="eoxnotice_delete"),
     path("<uuid:pk>/edit/", views.EoxNoticeEditView.as_view(), name="eoxnotice_edit"),
     path(
-        "<uuid:pk>/changelog/", ObjectChangeLogView.as_view(), name="eoxnotice_changelog", kwargs={"model": EoxNotice},
+        "<uuid:pk>/changelog/",
+        ObjectChangeLogView.as_view(),
+        name="eoxnotice_changelog",
+        kwargs={"model": EoxNotice},
     ),
 ]

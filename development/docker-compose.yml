@@ -6,7 +6,6 @@ services:
       dockerfile: "development/Dockerfile"
       args:
         python_ver: ${PYTHON_VER}
-        nautobot_ver: ${NAUTOBOT_VER}
     image: "nautobot-eox-notices/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
     command: "nautobot-server runserver 0.0.0.0:8000"
     ports:

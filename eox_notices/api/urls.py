@@ -5,6 +5,8 @@ from .views import EoxNoticeView
 
 router = routers.DefaultRouter()
 
-router.register("", EoxNoticeView)
+router.register(r"", EoxNoticeView)
+
+app_name = "eox_notices"
 
 urlpatterns = router.urls
