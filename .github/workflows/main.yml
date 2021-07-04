@@ -1,4 +1,4 @@
-name: "All CI related tasks"
+name: "Main tests"
 
 on:
   push:

@@ -1,9 +1,10 @@
 ---
 name: Deploy to PyPi
 on:
-  create:
-    tags:
-      - "v*"
+  release:
+    types: [created]
+  workflow_run:
+    workflows: ["Main tests"]
 
 jobs:
   publish:
