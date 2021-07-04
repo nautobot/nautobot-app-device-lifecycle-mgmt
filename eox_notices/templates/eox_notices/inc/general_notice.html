@@ -35,11 +35,13 @@
                 </tr>
                 <tr>
                     <td>Notice URL</td>
-                    {% if object.notice_url %}
-                        <a href="{{ object.notice_url }}">{{ object.notice_url }}</a>
+                    <td>
+                    {% if notice.notice_url %}
+                        <a href="{{ notice.notice_url }}">{{ notice.notice_url }}</a>
                     {% else %}
                         &mdash;
                     {% endif %}
+                    </td>
                 </tr>
             </table>
         </div>
