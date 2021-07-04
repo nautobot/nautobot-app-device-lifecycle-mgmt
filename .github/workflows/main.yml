@@ -2,9 +2,9 @@ name: "All CI related tasks"
 
 on:
   push:
-    branches: ["develop"]
+    branches: ["develop", "main"]
   pull_request:
-    branches: ["develop"]
+    branches: ["develop", "main"]
 
 jobs:
   linting_unit_testing:
