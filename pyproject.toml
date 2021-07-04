@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-eox-notices"
-version = "0.1.1"
+version = "0.2.0"
 description = "Tracks EoX Notices for Nautobot objects."
 authors = ["Mikhail Yohman <mikhail.yohman@gmail.com>"]
 license = "Apache-2.0"
