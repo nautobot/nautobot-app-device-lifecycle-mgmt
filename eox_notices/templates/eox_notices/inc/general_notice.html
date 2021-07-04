@@ -1,5 +1,5 @@
 {% load helpers %}
-{% if perms.eox_notices.view_notice and notice %}
+{% if perms.eox_notices.view_eoxnotice and notice %}
 <div class="row">
     <div class="col-md-12">
         {% if expired %}
@@ -35,9 +35,11 @@
                 </tr>
                 <tr>
                     <td>Notice URL</td>
-                    <td>
-                        {{ notice.notice_url|placeholder }}
-                    </td>
+                    {% if object.notice_url %}
+                        <a href="{{ object.notice_url }}">{{ object.notice_url }}</a>
+                    {% else %}
+                        &mdash;
+                    {% endif %}
                 </tr>
             </table>
         </div>

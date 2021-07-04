@@ -4,6 +4,7 @@ from django import forms
 
 from nautobot.utilities.forms import BootstrapMixin, DatePicker
 from nautobot.dcim.models import Device, DeviceType
+from nautobot.utilities.forms.forms import BulkEditForm
 
 from .models import EoxNotice
 
@@ -30,6 +31,28 @@ class EoxNoticeForm(BootstrapMixin, forms.ModelForm):
             "end_of_sw_releases": DatePicker(),
             "end_of_security_patches": DatePicker(),
         }
+
+
+class EoxNoticeBulkEditForm(BootstrapMixin, BulkEditForm):
+    """EoxNotice bulk edit form."""
+
+    pk = forms.ModelMultipleChoiceField(queryset=EoxNotice.objects.all(), widget=forms.MultipleHiddenInput)
+    end_of_sale = forms.DateField(widget=DatePicker(), required=False)
+    end_of_support = forms.DateField(widget=DatePicker(), required=False)
+    end_of_sw_releases = forms.DateField(widget=DatePicker(), required=False)
+    end_of_security_patches = forms.DateField(widget=DatePicker(), required=False)
+    notice_url = forms.URLField(required=False)
+
+    class Meta:
+        """Meta attributes."""
+
+        nullable_fields = [
+            "end_of_sale",
+            "end_of_support",
+            "end_of_sw_releases",
+            "end_of_security_patches",
+            "notice_url",
+        ]
 
 
 class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
