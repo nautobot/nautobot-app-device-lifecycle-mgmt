@@ -4,6 +4,8 @@ from django import forms
 
 from nautobot.utilities.forms import BootstrapMixin, DatePicker
 from nautobot.dcim.models import Device, DeviceType
+from nautobot.extras.forms import CustomFieldModelCSVForm
+from nautobot.utilities.forms import BulkEditForm
 
 from .models import EoxNotice
 
@@ -30,6 +32,28 @@ class EoxNoticeForm(BootstrapMixin, forms.ModelForm):
             "end_of_sw_releases": DatePicker(),
             "end_of_security_patches": DatePicker(),
         }
+
+
+class EoxNoticeBulkEditForm(BootstrapMixin, BulkEditForm):
+    """EoxNotice bulk edit form."""
+
+    pk = forms.ModelMultipleChoiceField(queryset=EoxNotice.objects.all(), widget=forms.MultipleHiddenInput)
+    end_of_sale = forms.DateField(widget=DatePicker(), required=False)
+    end_of_support = forms.DateField(widget=DatePicker(), required=False)
+    end_of_sw_releases = forms.DateField(widget=DatePicker(), required=False)
+    end_of_security_patches = forms.DateField(widget=DatePicker(), required=False)
+    notice_url = forms.URLField(required=False)
+
+    class Meta:
+        """Meta attributes."""
+
+        nullable_fields = [
+            "end_of_sale",
+            "end_of_support",
+            "end_of_sw_releases",
+            "end_of_security_patches",
+            "notice_url",
+        ]
 
 
 class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
@@ -67,3 +91,15 @@ class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
             "end_of_sw_releases": DatePicker(),
             "end_of_security_patches": DatePicker(),
         }
+
+
+class EoxNoticeCSVForm(CustomFieldModelCSVForm):
+    """Form for creating bulk eox notices."""
+
+    device_type = forms.ModelChoiceField(
+        required=True, queryset=DeviceType.objects.all(), to_field_name="slug", label="Device type"
+    )
+
+    class Meta:  # noqa: D106 "Missing docstring in public nested class"
+        model = EoxNotice
+        fields = EoxNotice.csv_headers

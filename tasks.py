@@ -1,10 +1,12 @@
 """Tasks for use with Invoke."""
 
 import os
+
 from invoke import task
 
-PYTHON_VER = os.getenv("PYTHON_VER", "3.8")
-NAUTOBOT_VER = os.getenv("NAUTOBOT_VER", "v1.0.1")
+
+PYTHON_VER = os.getenv("PYTHON_VER", "3.9")
+NAUTOBOT_VER = os.getenv("NAUTOBOT_VER", "1.0.3")
 
 # Name of the docker image/container
 NAME = os.getenv("IMAGE_NAME", "nautobot-eox-notices")
@@ -18,6 +20,24 @@ COMPOSE_COMMAND = f'docker-compose --project-directory "{COMPOSE_DIR}" -f "{COMP
 
 if os.path.isfile(COMPOSE_OVERRIDE_FILE):
     COMPOSE_COMMAND += f' -f "{COMPOSE_OVERRIDE_FILE}"'
+
+# ns_config = {
+#     "ntc": {
+#         "project_name": BUILD_NAME,
+#         "nautobot_version": NAUTOBOT_VER,
+#         "python_version": PYTHON_VER,
+#         "compose_dir": COMPOSE_DIR,
+#         "local": False,
+#         "compose_dir": os.path.join(os.path.dirname(__file__), "development"),
+#         "compose_files": [
+#             "docker-compose.override.yml",
+#             "docker-compose.yml",
+#         ],
+#     }
+# }
+# Use provided base collection from ntc_utils
+# ns = base
+# ns.configure(ns_config)
 
 
 def docker_compose(context, command, **kwargs):
@@ -46,7 +66,7 @@ def docker_compose(context, command, **kwargs):
 @task
 def build(context, nocache=False, forcerm=False):
     """Build all docker images."""
-    command = f"build --build-arg nautobot_ver={NAUTOBOT_VER} --build-arg python_ver={PYTHON_VER}"
+    command = f"build --build-arg NAUTOBOT_VER={NAUTOBOT_VER} --build-arg PYTHON_VER={PYTHON_VER}"
 
     if nocache:
         command += " --no-cache"
@@ -61,7 +81,9 @@ def generate_packages(context):
     """Generate all Python packages inside docker and copy the file locally under dist/."""
     container_name = f"{BUILD_NAME}_nautobot_package"
     context.run(
-        f"docker rm {container_name} || true", env={"NAUTOBOT_VER": NAUTOBOT_VER, "PYTHON_VER": PYTHON_VER}, pty=True,
+        f"docker rm {container_name} || true",
+        env={"NAUTOBOT_VER": NAUTOBOT_VER, "PYTHON_VER": PYTHON_VER},
+        pty=True,
     )
     context.run(
         f"docker-compose  -f {COMPOSE_FILE} -p {BUILD_NAME} run --name {container_name} -w /source nautobot poetry build",
@@ -122,7 +144,9 @@ def destroy(context):
 def nbshell(context):
     """Launch a nbshell session."""
     docker_compose(
-        context, "run --entrypoint 'nautobot-server nbshell' nautobot", pty=True,
+        context,
+        "run --entrypoint 'nautobot-server nbshell' nautobot",
+        pty=True,
     )
 
 
@@ -130,7 +154,9 @@ def nbshell(context):
 def cli(context):
     """Launch a bash shell inside the running Nautobot container."""
     docker_compose(
-        context, "run --entrypoint bash nautobot", pty=True,
+        context,
+        "run --entrypoint bash nautobot",
+        pty=True,
     )
 
 
@@ -139,7 +165,9 @@ def create_user(context, user="admin"):
     """Create a new user in django (default: admin), will prompt for password."""
     print(f"Starting user creation for user {user}")
     docker_compose(
-        context, f"run --entrypoint 'nautobot-server createsuperuser --username {user}' nautobot", pty=True,
+        context,
+        f"run --entrypoint 'nautobot-server createsuperuser --username {user}' nautobot",
+        pty=True,
     )
 
 
@@ -165,7 +193,7 @@ def makemigrations(context, name=""):
 @task
 def unittest(context, keepdb=False, verbosity=1):
     """Run Django unit tests for the plugin."""
-    entrypoint = f"nautobot-server test eox_notices --verbosity={verbosity}"
+    entrypoint = f"coverage run --module nautobot.core.cli test eox_notices"
     if keepdb:
         entrypoint += " --keepdb"
     command = f"run --entrypoint '{entrypoint}' nautobot"
@@ -180,7 +208,9 @@ def pylint(context):
     )
     command = f"run --entrypoint '{entrypoint}' nautobot"
     docker_compose(
-        context, command, pty=True,
+        context,
+        command,
+        pty=True,
     )
 
 

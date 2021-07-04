@@ -22,7 +22,10 @@ class EoxNoticeFilter(django_filters.FilterSet):
         field_name="device_type", queryset=DeviceType.objects.all(), label="Device Type"
     )
     devices = django_filters.ModelMultipleChoiceFilter(
-        field_name="devices__name", queryset=Device.objects.all(), to_field_name="name", label="Device",
+        field_name="devices__name",
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        label="Device",
     )
     device_id = django_filters.ModelMultipleChoiceFilter(
         field_name="devices", queryset=Device.objects.all(), label="Device"

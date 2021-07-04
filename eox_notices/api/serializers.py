@@ -1,13 +1,13 @@
 """API serializers for eox_notices."""
 
-from rest_framework import serializers
+from nautobot.core.api.serializers import ValidatedModelSerializer
 
 from nautobot.dcim.api.nested_serializers import NestedDeviceSerializer, NestedDeviceTypeSerializer
 
 from eox_notices.models import EoxNotice
 
 
-class EoxNoticeSerializer(serializers.ModelSerializer):
+class EoxNoticeSerializer(ValidatedModelSerializer):
     """API serializer."""
 
     device_type = NestedDeviceTypeSerializer(
@@ -21,6 +21,7 @@ class EoxNoticeSerializer(serializers.ModelSerializer):
         model = EoxNotice
         fields = [
             "id",
+            "expired",
             "devices",
             "device_type",
             "end_of_sale",

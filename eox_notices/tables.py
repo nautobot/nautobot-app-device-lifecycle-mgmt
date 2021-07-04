@@ -2,13 +2,14 @@
 
 import django_tables2 as tables
 from django_tables2.utils import A
-from nautobot.utilities.tables import BaseTable, ButtonsColumn
+from nautobot.utilities.tables import BaseTable, ButtonsColumn, ToggleColumn
 from .models import EoxNotice
 
 
 class EoxNoticesTable(BaseTable):
     """Table for list view."""
 
+    pk = ToggleColumn()
     name = tables.LinkColumn("plugins:eox_notices:eoxnotice", text=lambda record: record, args=[A("pk")])
     devices = tables.TemplateColumn("{{ record.devices.count }}")
     device_type = tables.LinkColumn()
@@ -19,6 +20,7 @@ class EoxNoticesTable(BaseTable):
 
         model = EoxNotice
         fields = (
+            "pk",
             "name",
             "devices",
             "device_type",

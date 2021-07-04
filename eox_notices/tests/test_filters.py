@@ -24,10 +24,16 @@ class EoxNoticeTestCase(TestCase):
         self.site = Site.objects.create(name="Test 1", slug="test-1")
         self.devices = (
             Device.objects.create(
-                name="r1", device_type=self.device_types[0], device_role=self.device_role, site=self.site,
+                name="r1",
+                device_type=self.device_types[0],
+                device_role=self.device_role,
+                site=self.site,
             ),
             Device.objects.create(
-                name="r2", device_type=self.device_types[1], device_role=self.device_role, site=self.site,
+                name="r2",
+                device_type=self.device_types[1],
+                device_role=self.device_role,
+                site=self.site,
             ),
         )
         self.notices = (
