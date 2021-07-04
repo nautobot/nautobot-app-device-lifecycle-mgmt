@@ -26,14 +26,16 @@ PLUGINS = ["eox_notices"]
 
 # PLUGINS_CONFIG = {
 #   "eox_notices": {
-#     ADD YOUR SETTINGS HERE
+#     "expired_field": "end_of_support",
 #   }
 # }
 ```
 
-The plugin behavior can be controlled with the following list of settings
+The plugin behavior can be controlled with the following list of settings.
 
-No current behavior can be controlled via `PLUGINS_CONFIG`, but that will most likely change to manage colors for notifications within specific date ranges, etc.
+| Setting       | Default        | Description                                                                                                                                                                                                                           |
+| ------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| expired_field | end_of_support | The field that will be used to determine if an EoxNotice object is expired. If the field does not exist on the object, it will determine which of the required fields is set and use that. (Either `end_of_support` or `end_of_sale`) |
 
 ## Usage
 

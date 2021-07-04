@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
+from django.conf import settings
 
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site
 
@@ -83,3 +84,37 @@ class TestModelBasic(TestCase):
         self.assertEqual(str(eox_obj.end_of_support), "2022-04-01")
         self.assertEqual(str(eox_obj), "c9300-24 - End of support: 2022-04-01")
         self.assertEqual(eox_obj.devices.count(), 4)
+
+    def test_expired_property_end_of_support_expired(self):
+        """Test expired property is expired with end_of_support."""
+        eox_obj = EoxNotice.objects.create(device_type=self.device_type, end_of_support="2021-04-01")
+        self.assertTrue(eox_obj.expired)
+
+    def test_expired_property_end_of_support_not_expired(self):
+        """Test expired property is NOT expired with end_of_support."""
+        eox_obj = EoxNotice.objects.create(device_type=self.device_type, end_of_support="2999-04-01")
+        self.assertFalse(eox_obj.expired)
+
+    def test_expired_property_end_of_sale_expired(self):
+        """Test expired property is expired with end_of_sale."""
+        eox_obj = EoxNotice.objects.create(device_type=self.device_type, end_of_sale="2021-04-01")
+        self.assertTrue(eox_obj.expired)
+
+    def test_expired_property_end_of_sale_not_expired(self):
+        """Test expired property is NOT expired with end_of_sale."""
+        eox_obj = EoxNotice.objects.create(device_type=self.device_type, end_of_sale="2999-04-01")
+        self.assertFalse(eox_obj.expired)
+
+    def test_expired_field_setting_end_of_sale_expired(self):
+        """Test expired property is expired with end_of_sale when set within plugin settings."""
+        settings.PLUGINS_CONFIG["eox_notices"]["expired_field"] = "end_of_sale"
+        eox_obj = EoxNotice.objects.create(
+            device_type=self.device_type, end_of_sale="2021-04-01", end_of_support="2999-04-01"
+        )
+        self.assertTrue(eox_obj.expired)
+
+    def test_expired_field_setting_end_of_sale_not_expired(self):
+        """Test expired property is NOT expired with end_of_sale not existing but plugin setting set to end_of_sale."""
+        settings.PLUGINS_CONFIG["eox_notices"]["expired_field"] = "end_of_sale"
+        eox_obj = EoxNotice.objects.create(device_type=self.device_type, end_of_support="2999-04-01")
+        self.assertFalse(eox_obj.expired)

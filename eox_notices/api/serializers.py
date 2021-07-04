@@ -21,6 +21,7 @@ class EoxNoticeSerializer(ValidatedModelSerializer):
         model = EoxNotice
         fields = [
             "id",
+            "expired",
             "devices",
             "device_type",
             "end_of_sale",

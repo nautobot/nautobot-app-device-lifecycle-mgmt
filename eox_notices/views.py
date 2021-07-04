@@ -14,7 +14,6 @@ class EoxNoticesListView(generic.ObjectListView):
     filterset = EoxNoticeFilter
     filterset_form = EoxNoticeFilterForm
     table = EoxNoticesTable
-    # action_buttons = ("add",)
 
     def get_required_permission(self):
         """Return required view permission."""

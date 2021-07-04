@@ -1,9 +1,12 @@
 """Django models for eox_notices plugin."""
 
+from datetime import datetime
+
 from django.db import models
 from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
 from nautobot.extras.models.change_logging import ChangeLoggedModel
 from nautobot.core.models import BaseModel
@@ -48,6 +51,20 @@ class EoxNotice(BaseModel, ChangeLoggedModel):
     def get_absolute_url(self):
         """Returns the Detail view for EoxNotice models."""
         return reverse("plugins:eox_notices:eoxnotice", kwargs={"pk": self.pk})
+
+    @property
+    def expired(self):
+        """Return True or False if chosen field is expired."""
+        expired_field = settings.PLUGINS_CONFIG["eox_notices"].get("expired_field", "end_of_support")
+
+        # If the chosen or default field does not exist, default to one of the required fields that are present
+        if not getattr(self, expired_field) and not getattr(self, "end_of_support"):
+            expired_field = "end_of_sale"
+        elif not getattr(self, expired_field) and not getattr(self, "end_of_sale"):
+            expired_field = "end_of_support"
+
+        today = datetime.today().date()
+        return today >= getattr(self, expired_field)
 
     def save(self, *args, **kwargs):
         """Override save to add devices to EoxNotice found that match the device-type.

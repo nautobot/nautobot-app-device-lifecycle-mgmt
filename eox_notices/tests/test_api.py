@@ -23,6 +23,7 @@ class EoxNoticeAPITest(APIViewTestCases.APIViewTestCase):
         "end_of_security_patches",
         "end_of_support",
         "end_of_sw_releases",
+        "expired",
         "id",
         "notice_url",
     ]

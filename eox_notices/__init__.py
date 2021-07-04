@@ -17,7 +17,7 @@ class EoxNoticesConfig(PluginConfig):
     required_settings = []
     min_version = "1.0.0"
     max_version = "1.9999"
-    default_settings = {}
+    default_settings = {"expired_field": "end_of_support"}
     caching_config = {}
 
     def ready(self):
