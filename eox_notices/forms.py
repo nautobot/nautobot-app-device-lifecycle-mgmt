@@ -4,7 +4,8 @@ from django import forms
 
 from nautobot.utilities.forms import BootstrapMixin, DatePicker
 from nautobot.dcim.models import Device, DeviceType
-from nautobot.utilities.forms.forms import BulkEditForm
+from nautobot.extras.forms import CustomFieldModelCSVForm
+from nautobot.utilities.forms import BulkEditForm
 
 from .models import EoxNotice
 
@@ -90,3 +91,15 @@ class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
             "end_of_sw_releases": DatePicker(),
             "end_of_security_patches": DatePicker(),
         }
+
+
+class EoxNoticeCSVForm(CustomFieldModelCSVForm):
+    """Form for creating bulk eox notices."""
+
+    device_type = forms.ModelChoiceField(
+        required=True, queryset=DeviceType.objects.all(), to_field_name="slug", label="Device type"
+    )
+
+    class Meta:  # noqa: D106 "Missing docstring in public nested class"
+        model = EoxNotice
+        fields = EoxNotice.csv_headers

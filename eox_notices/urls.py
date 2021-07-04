@@ -19,4 +19,5 @@ urlpatterns = [
         name="eoxnotice_changelog",
         kwargs={"model": EoxNotice},
     ),
+    path("import/", views.EoxNoticeBulkImportView.as_view(), name="eoxnotice_import"),
 ]

@@ -27,6 +27,8 @@ class EoxNoticeViewTest(ViewTestCases.PrimaryObjectViewTestCase):
             DeviceType.objects.create(model="c9300-24", slug="c9300-24", manufacturer=manufacturer),
             DeviceType.objects.create(model="c9300-48", slug="c9300-48", manufacturer=manufacturer),
             DeviceType.objects.create(model="c9500-24", slug="c9500-24", manufacturer=manufacturer),
+            DeviceType.objects.create(model="c9200-24", slug="c9200-24", manufacturer=manufacturer),
+            DeviceType.objects.create(model="c9200-48", slug="c9200-48", manufacturer=manufacturer),
         )
 
         EoxNotice.objects.create(device_type=device_types[0], end_of_sale=datetime.date(2021, 4, 1))
@@ -37,16 +39,22 @@ class EoxNoticeViewTest(ViewTestCases.PrimaryObjectViewTestCase):
             "end_of_sale": datetime.date(2021, 4, 1),
             "end_of_support": datetime.date(2024, 4, 1),
         }
+        cls.csv_data = (
+            "device_type,end_of_sale,end_of_support,end_of_sw_releases,end_of_security_patches,notice_url",
+            "c9500-24, 2021-10-06, 2022-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
+            "c9200-24, 2022-10-06, 2023-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
+            "c9200-48, 2023-10-06, 2024-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
+        )
 
     # The following tests are being passed due to import not being implemented at this time
-    def test_bulk_import_object_with_constrained_permission(self):
-        pass
+    # def test_bulk_import_object_with_constrained_permission(self):
+    #     pass
 
-    def test_bulk_import_objects_with_permission(self):
-        pass
+    # def test_bulk_import_objects_with_permission(self):
+    #     pass
 
-    def test_bulk_import_objects_without_permission(self):
-        pass
+    # def test_bulk_import_objects_without_permission(self):
+    #     pass
 
-    def test_bulk_import_objects_with_constrained_permission(self):
-        pass
+    # def test_bulk_import_objects_with_constrained_permission(self):
+    #     pass

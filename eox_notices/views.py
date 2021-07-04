@@ -1,34 +1,27 @@
 """Views for eox_notices."""
 
-from nautobot.core.views.generic import (
-    BulkDeleteView,
-    BulkEditView,
-    ObjectDeleteView,
-    ObjectEditView,
-    ObjectListView,
-    ObjectView,
-)
+from nautobot.core.views import generic
 from .models import EoxNotice
 from .tables import EoxNoticesTable
-from .forms import EoxNoticeForm, EoxNoticeBulkEditForm, EoxNoticeFilterForm
+from .forms import EoxNoticeForm, EoxNoticeBulkEditForm, EoxNoticeFilterForm, EoxNoticeCSVForm
 from .filters import EoxNoticeFilter
 
 
-class EoxNoticesListView(ObjectListView):
+class EoxNoticesListView(generic.ObjectListView):
     """List view."""
 
     queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
     filterset = EoxNoticeFilter
     filterset_form = EoxNoticeFilterForm
     table = EoxNoticesTable
-    action_buttons = ("add",)
+    # action_buttons = ("add",)
 
     def get_required_permission(self):
         """Return required view permission."""
         return "eox_notices.view_eoxnotice"
 
 
-class EoxNoticeView(ObjectView):
+class EoxNoticeView(generic.ObjectView):
     """Detail view."""
 
     queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
@@ -38,7 +31,7 @@ class EoxNoticeView(ObjectView):
         return "eox_notices.view_eoxnotice"
 
 
-class EoxNoticeCreateView(ObjectEditView):
+class EoxNoticeCreateView(generic.ObjectEditView):
     """Create view."""
 
     model = EoxNotice
@@ -51,7 +44,7 @@ class EoxNoticeCreateView(ObjectEditView):
         return "eox_notices.add_eoxnotice"
 
 
-class EoxNoticeDeleteView(ObjectDeleteView):
+class EoxNoticeDeleteView(generic.ObjectDeleteView):
     """Delete view."""
 
     model = EoxNotice
@@ -63,7 +56,7 @@ class EoxNoticeDeleteView(ObjectDeleteView):
         return "eox_notices.delete_eoxnotice"
 
 
-class EoxNoticeEditView(ObjectEditView):
+class EoxNoticeEditView(generic.ObjectEditView):
     """Edit view."""
 
     model = EoxNotice
@@ -72,11 +65,20 @@ class EoxNoticeEditView(ObjectEditView):
     default_return_url = "plugins:eox_notices:eoxnotice"
 
     def get_required_permission(self):
-        """Return required delete permission."""
+        """Return required change permission."""
         return "eox_notices.change_eoxnotice"
 
 
-class EoxNoticeBulkDeleteView(BulkDeleteView):
+class EoxNoticeBulkImportView(generic.BulkImportView):
+    """View for bulk import of eox notices."""
+
+    queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
+    model_form = EoxNoticeCSVForm
+    table = EoxNoticesTable
+    default_return_url = "plugins:eox_notices:eoxnotice_list"
+
+
+class EoxNoticeBulkDeleteView(generic.BulkDeleteView):
     """View for deleting one or more EoxNotice records."""
 
     queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
@@ -89,7 +91,7 @@ class EoxNoticeBulkDeleteView(BulkDeleteView):
         return "eox_notices.delete_eoxnotice"
 
 
-class EoxNoticeBulkEditView(BulkEditView):
+class EoxNoticeBulkEditView(generic.BulkEditView):
     """View for editing one or more EoxNotice records."""
 
     queryset = EoxNotice.objects.prefetch_related("devices", "device_type")

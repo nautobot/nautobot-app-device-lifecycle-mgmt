@@ -22,6 +22,15 @@ class EoxNotice(BaseModel, ChangeLoggedModel):
     end_of_security_patches = models.DateField(null=True, blank=True, verbose_name="End of Security Patches")
     notice_url = models.URLField(blank=True, verbose_name="Notice URL")
 
+    csv_headers = [
+        "device_type",
+        "end_of_sale",
+        "end_of_support",
+        "end_of_sw_releases",
+        "end_of_security_patches",
+        "notice_url",
+    ]
+
     class Meta:
         """Meta attributes for EoxNotice."""
 
@@ -64,3 +73,15 @@ class EoxNotice(BaseModel, ChangeLoggedModel):
 
         if not self.end_of_sale and not self.end_of_support:
             raise ValidationError(_("End of Sale or End of Support must be specified."))
+
+    def to_csv(self):
+        """Return fields for bulk view."""
+        return (
+            self.devices,
+            self.device_type,
+            self.end_of_sale,
+            self.end_of_support,
+            self.end_of_sw_releases,
+            self.end_of_security_patches,
+            self.notice_url,
+        )

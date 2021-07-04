@@ -15,6 +15,13 @@ menu_items = (
                 color=ButtonColorChoices.GREEN,
                 permissions=["eox_notices.add_notice"],
             ),
+            PluginMenuButton(
+                link="plugins:eox_notices:eoxnotice_import",
+                title="Import",
+                icon_class="mdi mdi-database-import-outline",
+                color=ButtonColorChoices.BLUE,
+                permissions=["eox_notices.add_notice"],
+            ),
         ),
     ),
 )
