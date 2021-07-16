@@ -5,7 +5,7 @@ from django.db.models.signals import pre_save, post_save
 
 from nautobot.dcim.models import Device
 
-from .models import EoxNotice
+from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
 
 
 @receiver(post_save, sender=Device)

@@ -17,7 +17,9 @@ class DeviceEoxNotice(PluginTemplateExtension):
         except EoxNotice.DoesNotExist:
             notice = None
 
-        return self.render("nautobot_plugin_device_lifecycle_mgmt/inc/general_notice.html", extra_context={"notice": notice})
+        return self.render(
+            "nautobot_plugin_device_lifecycle_mgmt/inc/general_notice.html", extra_context={"notice": notice}
+        )
 
 
 class DeviceTypeEoxNotice(PluginTemplateExtension):
@@ -33,7 +35,9 @@ class DeviceTypeEoxNotice(PluginTemplateExtension):
         except EoxNotice.DoesNotExist:
             notice = None
 
-        return self.render("nautobot_plugin_device_lifecycle_mgmt/inc/general_notice.html", extra_context={"notice": notice})
+        return self.render(
+            "nautobot_plugin_device_lifecycle_mgmt/inc/general_notice.html", extra_context={"notice": notice}
+        )
 
 
 template_extensions = [DeviceEoxNotice, DeviceTypeEoxNotice]

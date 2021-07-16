@@ -50,7 +50,7 @@ class EoxNotice(BaseModel, ChangeLoggedModel):
 
     def get_absolute_url(self):
         """Returns the Detail view for DeviceLifeCycleEoX models."""
-        return reverse("plugins:nautobot_plugin_device_lifecycle_mgmt:devicelifecycle", kwargs={"pk": self.pk})
+        return reverse("plugins:nautobot_plugin_device_lifecycle_mgmt:eoxnotice", kwargs={"pk": self.pk})
 
     @property
     def expired(self):

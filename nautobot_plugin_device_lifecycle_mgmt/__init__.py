@@ -13,7 +13,7 @@ class DeviceLifeCycleConfig(PluginConfig):
     version = __version__
     author = "Mikhail Yohman"
     description = "Manages device lifecycle of Nautobot Devices and Components."
-    base_url = "device-lifecycle-mgmt"
+    base_url = "device-lifecycle"
     required_settings = []
     min_version = "1.0.0"
     max_version = "1.9999"

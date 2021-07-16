@@ -4,7 +4,7 @@ import django_filters
 from django.db.models import Q
 
 from nautobot.dcim.models import Device, DeviceType
-from .models import EoxNotice
+from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
 
 
 class EoxNoticeFilter(django_filters.FilterSet):

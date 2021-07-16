@@ -7,7 +7,7 @@ from nautobot.dcim.models import Device, DeviceType
 from nautobot.extras.forms import CustomFieldModelCSVForm
 from nautobot.utilities.forms import BulkEditForm
 
-from .models import EoxNotice
+from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
 
 
 class EoxNoticeForm(BootstrapMixin, forms.ModelForm):
