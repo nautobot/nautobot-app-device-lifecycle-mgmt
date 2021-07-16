@@ -1,10 +1,10 @@
-"""API serializers for eox_notices."""
+"""API serializers for nautobot_plugin_device_lifecycle_mgmt."""
 
 from nautobot.core.api.serializers import ValidatedModelSerializer
 
 from nautobot.dcim.api.nested_serializers import NestedDeviceSerializer, NestedDeviceTypeSerializer
 
-from eox_notices.models import EoxNotice
+from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
 
 
 class EoxNoticeSerializer(ValidatedModelSerializer):

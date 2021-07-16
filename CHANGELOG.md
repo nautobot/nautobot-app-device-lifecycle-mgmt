@@ -6,7 +6,7 @@
 
 - Bulk edit/delete in list view
 - Import/export CSV functionality
-- `EoxNotice.expired` property that is defaulted to `end_of_support` or `end_of_sale`. Can be managed via `PLUGINS_CONFIG['eox_notices']`.
+- `NautobotPluginDeviceLifecycleMgmt.expired` property that is defaulted to `end_of_support` or `end_of_sale`. Can be managed via `PLUGINS_CONFIG['nautobot_plugin_device_lifecycle_mgmt']`.
 
 ### Fixed
 

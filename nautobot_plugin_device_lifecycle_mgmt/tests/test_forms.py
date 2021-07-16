@@ -3,7 +3,7 @@ from django.test import TestCase
 
 from nautobot.dcim.models import DeviceType, Manufacturer
 
-from eox_notices.forms import EoxNoticeForm
+from nautobot_plugin_device_lifecycle_mgmt.forms import EoxNoticeForm
 
 
 class EoxFormTest(TestCase):

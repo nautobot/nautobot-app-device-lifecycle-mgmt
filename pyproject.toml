@@ -1,24 +1,24 @@
 [tool.poetry]
-name = "nautobot-eox-notices"
+name = "nautobot-plugin-device-lifecycle-mgmt"
 version = "0.2.0"
-description = "Tracks EoX Notices for Nautobot objects."
+description = "Manages device lifecycles for platforms and software."
 authors = ["Mikhail Yohman <mikhail.yohman@gmail.com>"]
 license = "Apache-2.0"
 readme = "README.md"
-homepage = "https://github.com/fragmentedpacket/nautobot-eox-notices"
-repository = "https://github.com/fragmentedpacket/nautobot-eox-notices"
+homepage = "https://github.com/networktocode-llc/nautobot-plugin-device-lifecycle-mgmt"
+repository = "https://github.com/networktocode-llc/nautobot-plugin-device-lifecycle-mgmt"
 keywords = ["nautobot", "nautobot-plugin"]
 include = [
     "LICENSE",
     "README.md",
 ]
 packages = [
-    { include = "eox_notices" },
+    { include = "nautobot_plugin_device_lifecycle_mgmt" },
 ]
 
 [tool.poetry.dependencies]
 python = "^3.6.2"
-nautobot = { version = "*", optional = true }
+nautobot = "v1.1.0b2"
 
 [tool.poetry.extras]
 nautobot = ["nautobot"]

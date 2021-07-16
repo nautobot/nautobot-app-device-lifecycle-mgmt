@@ -1,4 +1,4 @@
-"""Tables for eox_notices."""
+"""Tables for nautobot_plugin_device_lifecycle_mgmt."""
 
 import django_tables2 as tables
 from django_tables2.utils import A
@@ -10,7 +10,9 @@ class EoxNoticesTable(BaseTable):
     """Table for list view."""
 
     pk = ToggleColumn()
-    name = tables.LinkColumn("plugins:eox_notices:eoxnotice", text=lambda record: record, args=[A("pk")])
+    name = tables.LinkColumn(
+        "plugins:nautobot_plugin_device_lifecycle_mgmt:devicelifecycle", text=lambda record: record, args=[A("pk")]
+    )
     devices = tables.TemplateColumn("{{ record.devices.count }}")
     device_type = tables.LinkColumn()
     actions = ButtonsColumn(EoxNotice, buttons=("edit", "delete"))

@@ -1,12 +1,12 @@
 ---
 name: 🐛 Bug Report
-about: Report a reproducible bug in the current release of nautobot-eox-notices
+about: Report a reproducible bug in the current release of nautobot-plugin-device-lifecycle-mgmt
 ---
 
 ### Environment
 * Python version:  <!-- Example: 3.7.7 -->
 * Nautobot version:  <!-- Example: 2.8.4 -->
-* nautobot-eox-notices version:  <!-- Example: 1.0.0 -->
+* nautobot-plugin-device-lifecycle-mgmt version:  <!-- Example: 1.0.0 -->
 
 <!-- What did you expect to happen? -->
 ### Expected Behavior

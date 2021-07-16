@@ -1,4 +1,4 @@
-"""Django models for eox_notices plugin."""
+"""Django models for nautobot_plugin_device_lifecycle_mgmt plugin."""
 
 from datetime import datetime
 
@@ -35,13 +35,13 @@ class EoxNotice(BaseModel, ChangeLoggedModel):
     ]
 
     class Meta:
-        """Meta attributes for EoxNotice."""
+        """Meta attributes for DeviceLifeCycleEoX."""
 
         ordering = ("end_of_support", "end_of_sale")
         constraints = [models.UniqueConstraint(fields=["device_type"], name="unique_device_type")]
 
     def __str__(self):
-        """String representation of EoxNotices."""
+        """String representation of DeviceLifeCycleEoXs."""
         if self.end_of_support:
             msg = f"{self.device_type} - End of support: {self.end_of_support}"
         else:
@@ -49,13 +49,15 @@ class EoxNotice(BaseModel, ChangeLoggedModel):
         return msg
 
     def get_absolute_url(self):
-        """Returns the Detail view for EoxNotice models."""
-        return reverse("plugins:eox_notices:eoxnotice", kwargs={"pk": self.pk})
+        """Returns the Detail view for DeviceLifeCycleEoX models."""
+        return reverse("plugins:nautobot_plugin_device_lifecycle_mgmt:devicelifecycle", kwargs={"pk": self.pk})
 
     @property
     def expired(self):
         """Return True or False if chosen field is expired."""
-        expired_field = settings.PLUGINS_CONFIG["eox_notices"].get("expired_field", "end_of_support")
+        expired_field = settings.PLUGINS_CONFIG["nautobot_plugin_device_lifecycle_mgmt"].get(
+            "expired_field", "end_of_support"
+        )
 
         # If the chosen or default field does not exist, default to one of the required fields that are present
         if not getattr(self, expired_field) and not getattr(self, "end_of_support"):
@@ -67,7 +69,7 @@ class EoxNotice(BaseModel, ChangeLoggedModel):
         return today >= getattr(self, expired_field)
 
     def save(self, *args, **kwargs):
-        """Override save to add devices to EoxNotice found that match the device-type.
+        """Override save to add devices to DeviceLifeCycleEoX found that match the device-type.
 
         Args:
             signal (bool): Whether the save is being called from a signal.

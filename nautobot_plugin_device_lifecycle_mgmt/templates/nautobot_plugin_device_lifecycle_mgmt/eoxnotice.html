@@ -9,7 +9,7 @@
     <div class="row noprint">
         <div class="col-sm-8 col-md-9">
             <ol class="breadcrumb">
-                <li><a href="{% url 'plugins:eox_notices:eoxnotice_list' %}">Eox Notice</a></li>
+                <li><a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:devicelifecycle_list' %}">Eox Notice</a></li>
                 <li><a>{{ object }}</a></li>
             </ol>
         </div>
@@ -27,13 +27,13 @@
         </div>
     </div>
     <div class="pull-right noprint">
-        {% if perms.eox_notices.edit_notice %}
-            <a href="{% url 'plugins:eox_notices:eoxnotice_edit' pk=object.id %}" class="btn btn-warning">
+        {% if perms.nautobot_plugin_device_lifecycle_mgmt.edit_notice %}
+            <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:devicelifecycle_edit' pk=object.id %}" class="btn btn-warning">
                 <span class="mdi mdi-pencil" aria-hidden="true"></span> Edit
             </a>
         {% endif %}
-        {% if perms.eox_notices.delete_notice %}
-            <a href="{% url 'plugins:eox_notices:eoxnotice_delete' pk=object.id %}" class="btn btn-danger">
+        {% if perms.nautobot_plugin_device_lifecycle_mgmt.delete_notice %}
+            <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:devicelifecycle_delete' pk=object.id %}" class="btn btn-danger">
                 <span class="mdi mdi-trash-can-outline" aria-hidden="true"></span> Delete
             </a>
         {% endif %}
@@ -48,7 +48,7 @@
             <a href="{{ object.get_absolute_url }}">EoX Notice</a>
         </li>
         <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
-            <a href="{% url 'plugins:eox_notices:eoxnotice_changelog' pk=object.id %}">Change Log</a>
+            <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:devicelifecycle_changelog' pk=object.id %}">Change Log</a>
         </li>
     </ul>
 {% endblock %}

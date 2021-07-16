@@ -4,8 +4,8 @@ from django.test import TestCase
 
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site
 
-from eox_notices.models import EoxNotice
-from eox_notices.filters import EoxNoticeFilter
+from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
+from nautobot_plugin_device_lifecycle_mgmt.filters import EoxNoticeFilter
 
 
 class EoxNoticeTestCase(TestCase):

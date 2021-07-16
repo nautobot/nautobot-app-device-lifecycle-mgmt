@@ -1,4 +1,4 @@
-"""Views for eox_notices."""
+"""Views for nautobot_plugin_device_lifecycle_mgmt."""
 
 from nautobot.core.views import generic
 from .models import EoxNotice
@@ -17,7 +17,7 @@ class EoxNoticesListView(generic.ObjectListView):
 
     def get_required_permission(self):
         """Return required view permission."""
-        return "eox_notices.view_eoxnotice"
+        return "nautobot_plugin_device_lifecycle_mgmt.view_devicelifecycle"
 
 
 class EoxNoticeView(generic.ObjectView):
@@ -27,7 +27,7 @@ class EoxNoticeView(generic.ObjectView):
 
     def get_required_permission(self):
         """Return required view permission."""
-        return "eox_notices.view_eoxnotice"
+        return "nautobot_plugin_device_lifecycle_mgmt.view_devicelifecycle"
 
 
 class EoxNoticeCreateView(generic.ObjectEditView):
@@ -36,11 +36,11 @@ class EoxNoticeCreateView(generic.ObjectEditView):
     model = EoxNotice
     queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
     model_form = EoxNoticeForm
-    default_return_url = "plugins:eox_notices:eoxnotice_list"
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:devicelifecycle_list"
 
     def get_required_permission(self):
         """Return required add permission."""
-        return "eox_notices.add_eoxnotice"
+        return "nautobot_plugin_device_lifecycle_mgmt.add_devicelifecycle"
 
 
 class EoxNoticeDeleteView(generic.ObjectDeleteView):
@@ -48,11 +48,11 @@ class EoxNoticeDeleteView(generic.ObjectDeleteView):
 
     model = EoxNotice
     queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
-    default_return_url = "plugins:eox_notices:eoxnotice_list"
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:devicelifecycle_list"
 
     def get_required_permission(self):
         """Return required delete permission."""
-        return "eox_notices.delete_eoxnotice"
+        return "nautobot_plugin_device_lifecycle_mgmt.delete_devicelifecycle"
 
 
 class EoxNoticeEditView(generic.ObjectEditView):
@@ -61,11 +61,11 @@ class EoxNoticeEditView(generic.ObjectEditView):
     model = EoxNotice
     queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
     model_form = EoxNoticeForm
-    default_return_url = "plugins:eox_notices:eoxnotice"
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:devicelifecycle"
 
     def get_required_permission(self):
         """Return required change permission."""
-        return "eox_notices.change_eoxnotice"
+        return "nautobot_plugin_device_lifecycle_mgmt.change_devicelifecycle"
 
 
 class EoxNoticeBulkImportView(generic.BulkImportView):
@@ -74,7 +74,7 @@ class EoxNoticeBulkImportView(generic.BulkImportView):
     queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
     model_form = EoxNoticeCSVForm
     table = EoxNoticesTable
-    default_return_url = "plugins:eox_notices:eoxnotice_list"
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:devicelifecycle_list"
 
 
 class EoxNoticeBulkDeleteView(generic.BulkDeleteView):
@@ -82,12 +82,12 @@ class EoxNoticeBulkDeleteView(generic.BulkDeleteView):
 
     queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
     table = EoxNoticesTable
-    bulk_delete_url = "plugins:eox_notices.eoxnotice_bulk_delete"
-    default_return_url = "plugins:eox_notices:eoxnotice_list"
+    bulk_delete_url = "plugins:nautobot_plugin_device_lifecycle_mgmt.devicelifecycle_bulk_delete"
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:devicelifecycle_list"
 
     def get_required_permission(self):
         """Return required delete permission."""
-        return "eox_notices.delete_eoxnotice"
+        return "nautobot_plugin_device_lifecycle_mgmt.delete_devicelifecycle"
 
 
 class EoxNoticeBulkEditView(generic.BulkEditView):
@@ -97,8 +97,8 @@ class EoxNoticeBulkEditView(generic.BulkEditView):
     filterset = EoxNoticeFilter
     table = EoxNoticesTable
     form = EoxNoticeBulkEditForm
-    bulk_edit_url = "plugins:eox_notices.eoxnotice_bulk_edit"
+    bulk_edit_url = "plugins:nautobot_plugin_device_lifecycle_mgmt.devicelifecycle_bulk_edit"
 
     def get_required_permission(self):
         """Return required change permission."""
-        return "eox_notices.change_eoxnotice"
+        return "nautobot_plugin_device_lifecycle_mgmt.change_devicelifecycle"

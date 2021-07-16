@@ -6,7 +6,7 @@ services:
       dockerfile: "development/Dockerfile"
       args:
         python_ver: ${PYTHON_VER}
-    image: "nautobot-eox-notices/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
+    image: "nautobot-plugin-device-lifecycle-mgmt/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
     command: "nautobot-server runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
@@ -17,7 +17,7 @@ services:
       - "./dev.env"
     volumes:
       - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
-      - "../eox_notices:/source/eox_notices"
+      - "../nautobot_plugin_device_lifecycle_mgmt:/source/nautobot_plugin_device_lifecycle_mgmt"
     tty: true
   worker:
     build:
@@ -26,7 +26,7 @@ services:
       args:
         nautobot_ver: ${NAUTOBOT_VER}
         python_ver: ${PYTHON_VER}
-    image: "nautobot-eox-notices/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
+    image: "nautobot-plugin-device-lifecycle-mgmt/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
     entrypoint: "nautobot-server rqworker"
     depends_on:
       - "nautobot"
@@ -34,13 +34,13 @@ services:
       - "./dev.env"
     volumes:
       - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
-      - "../eox_notices:/source/eox_notices"
+      - "../nautobot_plugin_device_lifecycle_mgmt:/source/nautobot_plugin_device_lifecycle_mgmt"
     tty: true
   postgres:
     image: "postgres:13"
     env_file: "dev.env"
     volumes:
-      - "pgdata_eox_notices:/var/lib/postgresql/data"
+      - "pgdata_nautobot_plugin_device_lifecycle_mgmt:/var/lib/postgresql/data"
   redis:
     image: "redis:6-alpine"
     command:
@@ -49,4 +49,4 @@ services:
       - "redis-server --appendonly yes --requirepass $$REDIS_PASSWORD"  ## $$ because of docker-compose
     env_file: "./dev.env"
 volumes:
-  pgdata_eox_notices:  # yamllint disable-line rule:empty-values
+  pgdata_nautobot_plugin_device_lifecycle_mgmt:  # yamllint disable-line rule:empty-values

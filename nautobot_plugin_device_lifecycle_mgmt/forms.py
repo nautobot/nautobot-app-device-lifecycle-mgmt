@@ -1,4 +1,4 @@
-"""Forms for eox_notices."""
+"""Forms for nautobot_plugin_device_lifecycle_mgmt."""
 
 from django import forms
 

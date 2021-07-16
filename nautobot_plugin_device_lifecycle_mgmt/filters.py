@@ -1,4 +1,4 @@
-"""Filtering for eox_notices UI."""
+"""Filtering for nautobot_plugin_device_lifecycle_mgmt UI."""
 
 import django_filters
 from django.db.models import Q

@@ -4,7 +4,7 @@ from django.conf import settings
 
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site
 
-from eox_notices.models import EoxNotice
+from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
 
 
 class TestModelBasic(TestCase):
@@ -107,7 +107,7 @@ class TestModelBasic(TestCase):
 
     def test_expired_field_setting_end_of_sale_expired(self):
         """Test expired property is expired with end_of_sale when set within plugin settings."""
-        settings.PLUGINS_CONFIG["eox_notices"]["expired_field"] = "end_of_sale"
+        settings.PLUGINS_CONFIG["nautobot_plugin_device_lifecycle_mgmt"]["expired_field"] = "end_of_sale"
         eox_obj = EoxNotice.objects.create(
             device_type=self.device_type, end_of_sale="2021-04-01", end_of_support="2999-04-01"
         )
@@ -115,6 +115,6 @@ class TestModelBasic(TestCase):
 
     def test_expired_field_setting_end_of_sale_not_expired(self):
         """Test expired property is NOT expired with end_of_sale not existing but plugin setting set to end_of_sale."""
-        settings.PLUGINS_CONFIG["eox_notices"]["expired_field"] = "end_of_sale"
+        settings.PLUGINS_CONFIG["nautobot_plugin_device_lifecycle_mgmt"]["expired_field"] = "end_of_sale"
         eox_obj = EoxNotice.objects.create(device_type=self.device_type, end_of_support="2999-04-01")
         self.assertFalse(eox_obj.expired)

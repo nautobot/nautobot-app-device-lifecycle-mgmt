@@ -8,7 +8,22 @@ import os
 import sys
 
 from distutils.util import strtobool
+from django.core.exceptions import ImproperlyConfigured
 from nautobot.core import settings
+
+# Enforce required configuration parameters
+for key in [
+    "ALLOWED_HOSTS",
+    "POSTGRES_DB",
+    "POSTGRES_USER",
+    "POSTGRES_HOST",
+    "POSTGRES_PASSWORD",
+    "REDIS_HOST",
+    "REDIS_PASSWORD",
+    "SECRET_KEY",
+]:
+    if not os.environ.get(key):
+        raise ImproperlyConfigured(f"Required environment variable {key} is missing.")
 
 
 def is_truthy(arg):
@@ -48,62 +63,39 @@ DATABASES = {
     }
 }
 
-# Nautobot uses RQ for task scheduling. These are the following defaults.
-# For detailed configuration see: https://github.com/rq/django-rq#installation
-RQ_QUEUES = {
-    "default": {
-        "HOST": os.getenv("REDIS_HOST", "localhost"),
-        "PORT": os.getenv("REDIS_PORT", 6379),
-        "DB": 0,
-        "PASSWORD": os.getenv("REDIS_PASSWORD", ""),
-        "SSL": os.getenv("REDIS_SSL", False),
-        "DEFAULT_TIMEOUT": 300,
-    },
-    "webhooks": {
-        "HOST": os.getenv("REDIS_HOST", "localhost"),
-        "PORT": os.getenv("REDIS_PORT", 6379),
-        "DB": 0,
-        "PASSWORD": os.getenv("REDIS_PASSWORD", ""),
-        "SSL": os.getenv("REDIS_SSL", False),
-        "DEFAULT_TIMEOUT": 300,
-    },
-    "custom_fields": {
-        "HOST": os.getenv("REDIS_HOST", "localhost"),
-        "PORT": os.getenv("REDIS_PORT", 6379),
-        "DB": 0,
-        "PASSWORD": os.getenv("REDIS_PASSWORD", ""),
-        "SSL": os.getenv("REDIS_SSL", False),
-        "DEFAULT_TIMEOUT": 300,
-    },
-    # "with-sentinel": {
-    #     "SENTINELS": [
-    #         ("mysentinel.redis.example.com", 6379)
-    #         ("othersentinel.redis.example.com", 6379)
-    #     ],
-    #     "MASTER_NAME": 'nautobot",
-    #     "DB": 0,
-    #     "PASSWORD": "",
-    #     "SOCKET_TIMEOUT": None,
-    #     'CONNECTION_KWARGS': {
-    #         'socket_connect_timeout': 10,
-    #     },
-    # },
-    "check_releases": {
-        "HOST": os.getenv("REDIS_HOST", "localhost"),
-        "PORT": os.getenv("REDIS_PORT", 6379),
-        "DB": 0,
-        "PASSWORD": os.getenv("REDIS_PASSWORD", ""),
-        "SSL": os.getenv("REDIS_SSL", False),
-        "DEFAULT_TIMEOUT": 300,
-    },
-}
-
-# Nautobot uses Cacheops for database query caching. These are the following defaults.
-# For detailed configuration see: https://github.com/Suor/django-cacheops#setup
+# Redis variables
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = os.getenv("REDIS_PORT", 6379)
-REDIS_PASS = os.getenv("REDIS_PASSWORD", "")
-CACHEOPS_REDIS = f"redis://:{REDIS_PASS}@{REDIS_HOST}:{REDIS_PORT}/1"
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
+
+# Check for Redis SSL
+REDIS_SCHEME = "redis"
+REDIS_SSL = is_truthy(os.environ.get("REDIS_SSL", False))
+if REDIS_SSL:
+    REDIS_SCHEME = "rediss"
+
+# The django-redis cache is used to establish concurrent locks using Redis. The
+# django-rq settings will use the same instance/database by default.
+#
+# This "default" server is now used by RQ_QUEUES.
+# >> See: nautobot.core.settings.RQ_QUEUES
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"{REDIS_SCHEME}://{REDIS_HOST}:{REDIS_PORT}/0",
+        "TIMEOUT": 300,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD": REDIS_PASSWORD,
+        },
+    }
+}
+
+# RQ_QUEUES is not set here because it just uses the default that gets imported
+# up top via `from nautobot.core.settings import *`.
+
+# REDIS CACHEOPS
+CACHEOPS_REDIS = f"{REDIS_SCHEME}://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/1"
 
 # This key is used for secure generation of random numbers and strings. It must never be exposed outside of this file.
 # For optimal security, SECRET_KEY should be at least 50 characters in length and contain a mix of letters, numbers, and
@@ -149,10 +141,6 @@ BANNER_BOTTOM = os.environ.get("BANNER_BOTTOM", "")
 
 # Text to include on the login page above the login form. HTML is allowed.
 BANNER_LOGIN = os.environ.get("BANNER_LOGIN", "")
-
-# Base URL path if accessing Nautobot within a directory. For example, if installed at https://example.com/nautobot/, set:
-# BASE_PATH = 'nautobot/'
-BASE_PATH = os.environ.get("BASE_PATH", "")
 
 # Cache timeout in seconds. Cannot be 0. Defaults to 900 (15 minutes). To disable caching, set CACHEOPS_ENABLED to False
 CACHEOPS_DEFAULTS = {"timeout": 900}
@@ -256,16 +244,19 @@ NAPALM_ARGS = {}
 PAGINATE_COUNT = int(os.environ.get("PAGINATE_COUNT", 50))
 
 # Enable installed plugins. Add the name of each plugin to the list.
-PLUGINS = ["eox_notices"]
+PLUGINS = [
+    "nautobot_plugin_device_lifecycle_mgmt",
+]
 
 # Plugins configuration settings. These settings are used by various plugins that the user may have installed.
 # Each key in the dictionary is the name of an installed plugin and its value is a dictionary of settings.
-# PLUGINS_CONFIG = {
-#     'my_plugin': {
-#         'foo': 'bar',
-#         'buzz': 'bazz'
-#     }
-# }
+PLUGINS_CONFIG = {
+    "nautobot_plugin_device_lifecycle_mgmt": {
+        "nso_url": os.environ.get("NAUTOBOT_NSO_URL"),
+        "nso_username": os.environ.get("NAUTOBOT_NSO_USERNAME"),
+        "nso_password": os.environ.get("NAUTOBOT_NSO_PASSWORD"),
+    },
+}
 
 # When determining the primary IP address for a device, IPv6 is preferred over IPv4 by default. Set this to True to
 # prefer IPv4 instead.
@@ -330,22 +321,3 @@ if "debug_toolbar" not in EXTRA_INSTALLED_APPS:
     EXTRA_INSTALLED_APPS.append("debug_toolbar")
 if "debug_toolbar.middleware.DebugToolbarMiddleware" not in settings.MIDDLEWARE:
     settings.MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
-
-# SENTRY SETTINGS
-sentry_dsn = os.environ.get("SENTRY_DSN")
-if sentry_dsn:
-    import sentry_sdk
-    from sentry_sdk.integrations.django import DjangoIntegration
-
-    sentry_sdk.init(
-        dsn=sentry_dsn,
-        integrations=[DjangoIntegration()],
-        # Set traces_sample_rate to 1.0 to capture 100%
-        # of transactions for performance monitoring.
-        # We recommend adjusting this value in production.
-        traces_sample_rate=1.0,
-        # If you wish to associate users to errors (assuming you are using
-        # django.contrib.auth) you may enable sending PII data.
-        # send_default_pii=True,
-        debug=True,
-    )

@@ -1,4 +1,4 @@
-# nautobot-eox-notices
+# Nautobot Plugin - Device Lifecycle Management
 
 A plugin for [Nautobot](https://github.com/nautobot/nautobot).
 
@@ -7,25 +7,25 @@ A plugin for [Nautobot](https://github.com/nautobot/nautobot).
 The plugin is available as a Python package in pypi and can be installed with pip
 
 ```shell
-pip install nautobot-eox-notices
+pip install nautobot-plugin-device-lifecycle-mgmt
 ```
 
 > The plugin is compatible with Nautobot 1.0.0b1 and higher
 
-To ensure Nautobot EoX Tracker is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-eox-notices` package:
+To ensure Nautobot EoX Tracker is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-plugin-device-lifecycle-mgmt` package:
 
 ```no-highlight
-# echo nautobot-eox-notices >> local_requirements.txt
+# echo nautobot-plugin-device-lifecycle-mgmt >> local_requirements.txt
 ```
 
 Once installed, the plugin needs to be enabled in your `configuration.py`
 
 ```python
 # In your configuration.py
-PLUGINS = ["eox_notices"]
+PLUGINS = ["nautobot_plugin_device_lifecycle_mgmt"]
 
 # PLUGINS_CONFIG = {
-#   "eox_notices": {
+#   "nautobot_plugin_device_lifecycle_mgmt": {
 #     "expired_field": "end_of_support",
 #   }
 # }
@@ -35,7 +35,7 @@ The plugin behavior can be controlled with the following list of settings.
 
 | Setting       | Default        | Description                                                                                                                                                                                                                           |
 | ------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| expired_field | end_of_support | The field that will be used to determine if an EoxNotice object is expired. If the field does not exist on the object, it will determine which of the required fields is set and use that. (Either `end_of_support` or `end_of_sale`) |
+| expired_field | end_of_support | The field that will be used to determine if an DeviceLifeCycleEoX object is expired. If the field does not exist on the object, it will determine which of the required fields is set and use that. (Either `end_of_support` or `end_of_sale`) |
 
 ## Usage
 

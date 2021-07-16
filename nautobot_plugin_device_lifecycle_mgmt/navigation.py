@@ -5,22 +5,22 @@ from nautobot.utilities.choices import ButtonColorChoices
 
 menu_items = (
     PluginMenuItem(
-        link="plugins:eox_notices:eoxnotice_list",
+        link="plugins:nautobot_plugin_device_lifecycle_mgmt:devicelifecycle_list",
         link_text="EoX Notices",
         buttons=(
             PluginMenuButton(
-                link="plugins:eox_notices:eoxnotice_add",
+                link="plugins:nautobot_plugin_device_lifecycle_mgmt:devicelifecycle_add",
                 title="Add",
                 icon_class="mdi mdi-plus-thick",
                 color=ButtonColorChoices.GREEN,
-                permissions=["eox_notices.add_notice"],
+                permissions=["nautobot_plugin_device_lifecycle_mgmt.add_notice"],
             ),
             PluginMenuButton(
-                link="plugins:eox_notices:eoxnotice_import",
+                link="plugins:nautobot_plugin_device_lifecycle_mgmt:devicelifecycle_import",
                 title="Import",
                 icon_class="mdi mdi-database-import-outline",
                 color=ButtonColorChoices.BLUE,
-                permissions=["eox_notices.add_notice"],
+                permissions=["nautobot_plugin_device_lifecycle_mgmt.add_notice"],
             ),
         ),
     ),

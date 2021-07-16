@@ -1,9 +1,9 @@
-"""API Views for eox_notices."""
+"""API Views for nautobot_plugin_device_lifecycle_mgmt."""
 
 from nautobot.core.api.views import ModelViewSet
 
-from eox_notices.models import EoxNotice
-from eox_notices.filters import EoxNoticeFilter
+from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
+from nautobot_plugin_device_lifecycle_mgmt.filters import EoxNoticeFilter
 
 from .serializers import EoxNoticeSerializer
 

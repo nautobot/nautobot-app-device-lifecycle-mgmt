@@ -1,4 +1,4 @@
-"""Custom signals for eox_notices."""
+"""Custom signals for nautobot_plugin_device_lifecycle_mgmt."""
 
 from django.dispatch import receiver
 from django.db.models.signals import pre_save, post_save
@@ -10,7 +10,7 @@ from .models import EoxNotice
 
 @receiver(post_save, sender=Device)
 def add_new_device_to_notice(sender, instance, **kwargs):
-    """Add/Remove Devices from EoXNotices when device is either updated or created."""
+    """Add/Remove Devices from EoxNotices when device is either updated or created."""
     # Attempt to obtain EoxNotice for the device's device type
     try:
         dt_notice = EoxNotice.objects.get(device_type=instance.device_type)

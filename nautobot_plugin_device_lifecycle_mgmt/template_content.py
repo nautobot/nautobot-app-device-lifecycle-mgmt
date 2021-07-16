@@ -1,4 +1,4 @@
-"""Extended core templates for eox_notices."""
+"""Extended core templates for nautobot_plugin_device_lifecycle_mgmt."""
 
 from nautobot.extras.plugins import PluginTemplateExtension
 from .models import EoxNotice
@@ -17,7 +17,7 @@ class DeviceEoxNotice(PluginTemplateExtension):
         except EoxNotice.DoesNotExist:
             notice = None
 
-        return self.render("eox_notices/inc/general_notice.html", extra_context={"notice": notice})
+        return self.render("nautobot_plugin_device_lifecycle_mgmt/inc/general_notice.html", extra_context={"notice": notice})
 
 
 class DeviceTypeEoxNotice(PluginTemplateExtension):
@@ -33,7 +33,7 @@ class DeviceTypeEoxNotice(PluginTemplateExtension):
         except EoxNotice.DoesNotExist:
             notice = None
 
-        return self.render("eox_notices/inc/general_notice.html", extra_context={"notice": notice})
+        return self.render("nautobot_plugin_device_lifecycle_mgmt/inc/general_notice.html", extra_context={"notice": notice})
 
 
 template_extensions = [DeviceEoxNotice, DeviceTypeEoxNotice]
