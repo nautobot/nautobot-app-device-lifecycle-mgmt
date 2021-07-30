@@ -1,5 +1,5 @@
 """Filtering for nautobot_plugin_device_lifecycle_mgmt UI."""
-
+import datetime
 import django_filters
 from django.db.models import Q
 
@@ -31,16 +31,34 @@ class EoxNoticeFilter(django_filters.FilterSet):
         field_name="devices", queryset=Device.objects.all(), label="Device"
     )
 
+    expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
+
     class Meta:
         """Meta attributes for filter."""
 
         model = EoxNotice
 
-        fields = ["end_of_sale", "end_of_support", "end_of_sw_releases", "end_of_security_patches", "notice_url"]
+        fields = [
+            "end_of_sale",
+            "end_of_support",
+            "end_of_sw_releases",
+            "end_of_security_patches",
+            "notice_url",
+            "expired",
+        ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""
         if not value.strip():
             return queryset
+
         qs_filter = Q(end_of_sale__icontains=value) | Q(end_of_support__icontains=value)
+        return queryset.filter(qs_filter)
+
+    def expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the filtered search."""
+        today = datetime.datetime.today().date()
+        lookup = "gte" if not value else "lt"
+
+        qs_filter = Q(**{f"end_of_sale__{lookup}": today}) | Q(**{f"end_of_support__{lookup}": today})
         return queryset.filter(qs_filter)

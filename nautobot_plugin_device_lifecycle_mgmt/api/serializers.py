@@ -23,4 +23,10 @@ class EoxNoticeSerializer(ValidatedModelSerializer):
             "id",
             "expired",
             "devices",
-        ] + EoxNotice.csv_headers
+            "device_type",
+            "end_of_sale",
+            "end_of_support",
+            "end_of_sw_releases",
+            "end_of_security_patches",
+            "notice_url",
+        ]

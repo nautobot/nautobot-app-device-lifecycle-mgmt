@@ -21,4 +21,15 @@ class EoxNoticesTable(BaseTable):
         """Meta attributes."""
 
         model = EoxNotice
-        fields = tuple(["pk", "name", "devices"] + EoxNotice.csv_headers + ["actions"])
+        fields = (
+            "pk",
+            "name",
+            "devices",
+            "device_type",
+            "end_of_sale",
+            "end_of_support",
+            "end_of_sw_releases",
+            "end_of_security_patches",
+            "notice_url",
+            "actions",
+        )
