@@ -28,7 +28,6 @@ script:
   # If you want to test different versions, it may require updating the poetry definition for Nautobot
   # as that is where the version is controlled
   # - "poetry add nautobot=$NAUTOBOT_VER"
-  - echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin || travis_terminate 1 # yamllint disable-line rule:quoted-strings
   - "INVOKE_NAUTOBOT_PLUGIN_DEVICE_LIFECYCLE_MGMT_PYTHON_VER=$TRAVIS_PYTHON_VERSION invoke build --no-cache"
   - "INVOKE_NAUTOBOT_PLUGIN_DEVICE_LIFECYCLE_MGMT_PYTHON_VER=$TRAVIS_PYTHON_VERSION invoke tests --failfast"
 # --------------------------------------------------------------------------
