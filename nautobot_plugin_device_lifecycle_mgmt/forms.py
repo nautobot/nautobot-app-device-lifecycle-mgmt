@@ -97,7 +97,7 @@ class EoxNoticeCSVForm(CustomFieldModelCSVForm):
     """Form for creating bulk eox notices."""
 
     device_type = forms.ModelChoiceField(
-        required=True, queryset=DeviceType.objects.all(), to_field_name="slug", label="Device type"
+        required=True, queryset=DeviceType.objects.all(), to_field_name="model", label="Device type"
     )
 
     class Meta:  # noqa: D106 "Missing docstring in public nested class"
