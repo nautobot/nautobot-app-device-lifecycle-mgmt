@@ -22,7 +22,7 @@ before_script:
   - "curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py > /tmp/get-poetry.py"
   - "python /tmp/get-poetry.py -y --version 1.1.6"
   - "source $HOME/.poetry/env"
-  - "cp development/creds.env.example development/creds.env"
+  - "cp development/creds.example.env development/creds.env"
 
 script:
   # If you want to test different versions, it may require updating the poetry definition for Nautobot
