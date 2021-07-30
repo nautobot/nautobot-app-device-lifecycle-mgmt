@@ -1,3 +1,4 @@
+"""nautobot_plugin_device_lifecycle_mgmt test class for models."""
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.conf import settings
@@ -8,6 +9,8 @@ from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
 
 
 class TestModelBasic(TestCase):
+    """Tests for the EoX models."""
+
     def setUp(self):
         """Set up base objects."""
         self.manufacturer = Manufacturer.objects.create(name="Cisco")
@@ -52,13 +55,13 @@ class TestModelBasic(TestCase):
         """Successfully create basic notice."""
         with self.assertRaises(ValidationError) as failure_exception:
             EoxNotice.objects.create(device_type=self.device_type)
-        self.assertEquals(failure_exception.exception.messages[0], "End of Sale or End of Support must be specified.")
+        self.assertEqual(failure_exception.exception.messages[0], "End of Sale or End of Support must be specified.")
 
     def test_create_eox_notice_failed_validation_notice_url(self):
         """Successfully create basic notice."""
         with self.assertRaises(ValidationError) as failure_exception:
             EoxNotice.objects.create(device_type=self.device_type, end_of_support="2023-04-01", notice_url="test.com")
-        self.assertEquals(failure_exception.exception.messages[0], "Enter a valid URL.")
+        self.assertEqual(failure_exception.exception.messages[0], "Enter a valid URL.")
 
     def test_create_eox_notice_failed_validation_date(self):
         """Successfully create basic notice."""
@@ -69,14 +72,12 @@ class TestModelBasic(TestCase):
     def test_create_eox_notice_check_devices(self):
         """Successfully create notice and assert correct amount of devices attached."""
         # Create Device dependencies
-        self.site = Site.objects.create(name="Test Site")
-        self.device_role = DeviceRole.objects.create(name="Core Switch")
+        site = Site.objects.create(name="Test Site")
+        device_role = DeviceRole.objects.create(name="Core Switch")
 
         # Create 4 devices to assert they get attached to EoxNotice
         for i in range(0, 4):
-            Device.objects.create(
-                name=f"r{i}", site=self.site, device_role=self.device_role, device_type=self.device_type
-            )
+            Device.objects.create(name=f"r{i}", site=site, device_role=device_role, device_type=self.device_type)
 
         # Create Notice now
         eox_obj = EoxNotice.objects.create(device_type=self.device_type, end_of_support="2022-04-01")

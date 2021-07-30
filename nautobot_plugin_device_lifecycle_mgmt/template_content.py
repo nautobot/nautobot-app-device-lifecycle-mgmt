@@ -4,7 +4,7 @@ from nautobot.extras.plugins import PluginTemplateExtension
 from .models import EoxNotice
 
 
-class DeviceEoxNotice(PluginTemplateExtension):
+class DeviceEoxNotice(PluginTemplateExtension):  # pylint: disable=abstract-method
     """Class to add table for EoxNotice related to device."""
 
     model = "dcim.device"
@@ -22,7 +22,7 @@ class DeviceEoxNotice(PluginTemplateExtension):
         )
 
 
-class DeviceTypeEoxNotice(PluginTemplateExtension):
+class DeviceTypeEoxNotice(PluginTemplateExtension):  # pylint: disable=abstract-method
     """Class to add table for EoxNotice related to device type."""
 
     model = "dcim.devicetype"

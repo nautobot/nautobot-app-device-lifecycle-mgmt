@@ -17,19 +17,8 @@ class EoxNoticesTable(BaseTable):
     device_type = tables.LinkColumn()
     actions = ButtonsColumn(EoxNotice, buttons=("edit", "delete"))
 
-    class Meta(BaseTable.Meta):
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
         """Meta attributes."""
 
         model = EoxNotice
-        fields = (
-            "pk",
-            "name",
-            "devices",
-            "device_type",
-            "end_of_sale",
-            "end_of_support",
-            "end_of_sw_releases",
-            "end_of_security_patches",
-            "notice_url",
-            "actions",
-        )
+        fields = tuple(["pk", "name", "devices"] + EoxNotice.csv_headers + ["actions"])

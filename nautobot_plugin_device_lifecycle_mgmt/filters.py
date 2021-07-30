@@ -38,7 +38,7 @@ class EoxNoticeFilter(django_filters.FilterSet):
 
         fields = ["end_of_sale", "end_of_support", "end_of_sw_releases", "end_of_security_patches", "notice_url"]
 
-    def search(self, queryset, name, value):
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""
         if not value.strip():
             return queryset

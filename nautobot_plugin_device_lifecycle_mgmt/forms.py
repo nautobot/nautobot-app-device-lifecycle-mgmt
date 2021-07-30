@@ -17,14 +17,7 @@ class EoxNoticeForm(BootstrapMixin, forms.ModelForm):
         """Meta attributes."""
 
         model = EoxNotice
-        fields = [
-            "device_type",
-            "end_of_sale",
-            "end_of_support",
-            "end_of_sw_releases",
-            "end_of_security_patches",
-            "notice_url",
-        ]
+        fields = EoxNotice.csv_headers
 
         widgets = {
             "end_of_sale": DatePicker(),
@@ -47,13 +40,7 @@ class EoxNoticeBulkEditForm(BootstrapMixin, BulkEditForm):
     class Meta:
         """Meta attributes."""
 
-        nullable_fields = [
-            "end_of_sale",
-            "end_of_support",
-            "end_of_sw_releases",
-            "end_of_security_patches",
-            "notice_url",
-        ]
+        nullable_fields = EoxNotice.csv_headers[1:]
 
 
 class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
@@ -74,16 +61,7 @@ class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
 
         model = EoxNotice
         # Define the fields above for ordering and widget purposes
-        fields = [
-            "q",
-            "devices",
-            "device_type",
-            "end_of_sale",
-            "end_of_support",
-            "end_of_sw_releases",
-            "end_of_security_patches",
-            "notice_url",
-        ]
+        fields = ["q"] + EoxNotice.csv_headers
 
         widgets = {
             "end_of_sale": DatePicker(),

@@ -23,7 +23,7 @@ class DeviceLifeCycleConfig(PluginConfig):
     def ready(self):
         """Register custom signals."""
         super().ready()
-        import nautobot_plugin_device_lifecycle_mgmt.signals  # noqa: F401
+        import nautobot_plugin_device_lifecycle_mgmt.signals  # pylint: disable=C0415,W0611 # noqa: F401
 
 
 config = DeviceLifeCycleConfig  # pylint:disable=invalid-name

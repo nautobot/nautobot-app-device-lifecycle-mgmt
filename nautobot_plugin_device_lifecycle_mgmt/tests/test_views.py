@@ -10,7 +10,7 @@ from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
 User = get_user_model()
 
 
-class EoxNoticeViewTest(ViewTestCases.PrimaryObjectViewTestCase):
+class EoxNoticeViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
     """Test the EoxNotices views."""
 
     model = EoxNotice
@@ -23,12 +23,9 @@ class EoxNoticeViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     def setUpTestData(cls):
         """Create a superuser and token for API calls."""
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
-        device_types = (
-            DeviceType.objects.create(model="c9300-24", slug="c9300-24", manufacturer=manufacturer),
-            DeviceType.objects.create(model="c9300-48", slug="c9300-48", manufacturer=manufacturer),
-            DeviceType.objects.create(model="c9500-24", slug="c9500-24", manufacturer=manufacturer),
-            DeviceType.objects.create(model="c9200-24", slug="c9200-24", manufacturer=manufacturer),
-            DeviceType.objects.create(model="c9200-48", slug="c9200-48", manufacturer=manufacturer),
+        device_types = tuple(
+            DeviceType.objects.create(model=model, slug=model, manufacturer=manufacturer)
+            for model in ["c9300-24", "c9300-48", "c9500-24", "c9200-24", "c9200-48"]
         )
 
         EoxNotice.objects.create(device_type=device_types[0], end_of_sale=datetime.date(2021, 4, 1))

@@ -7,6 +7,8 @@ from nautobot_plugin_device_lifecycle_mgmt.forms import EoxNoticeForm
 
 
 class EoxFormTest(TestCase):
+    """Test class for Device Lifecycle forms."""
+
     def setUp(self):
         """Create necessary objects."""
         self.manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")

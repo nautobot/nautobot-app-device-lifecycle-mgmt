@@ -8,7 +8,7 @@ from nautobot_plugin_device_lifecycle_mgmt.filters import EoxNoticeFilter
 from .serializers import EoxNoticeSerializer
 
 
-class EoxNoticeView(ModelViewSet):
+class EoxNoticeView(ModelViewSet):  # pylint: disable=too-many-ancestors
     """CRUD operations set for EoxNotice view."""
 
     queryset = EoxNotice.objects.all()

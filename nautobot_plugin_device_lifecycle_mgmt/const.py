@@ -1,10 +1,10 @@
 """Device Lifecycle Objects."""
 
 
-class Permissions:
+class Permissions:  # pylint: disable=too-few-public-methods
     """Constant permissions tied to functions throughout the device lifecycle."""
 
-    class EoX:
+    class EoX:  # pylint: disable=too-few-public-methods
         """Permissions associated with the EoX portion of device lifecycle."""
 
         Create = "nautobot_plugin_device_lifecycle_mgmt.add_eoxnotice"
@@ -13,10 +13,10 @@ class Permissions:
         Delete = "nautobot_plugin_device_lifecycle_mgmt.delete_eoxnotice"
 
 
-class URL:
+class URL:  # pylint: disable=too-few-public-methods
     """Constant URLs tied to functions throughout the device lifecycle."""
 
-    class EoX:
+    class EoX:  # pylint: disable=too-few-public-methods
         """URLs associated with the EoX portion of device lifecycle."""
 
         List = "plugins:nautobot_plugin_device_lifecycle_mgmt:eoxnotice_list"

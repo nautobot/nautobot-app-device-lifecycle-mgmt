@@ -10,7 +10,7 @@ from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
 User = get_user_model()
 
 
-class EoxNoticeAPITest(APIViewTestCases.APIViewTestCase):
+class EoxNoticeAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
     """Test the EoxNotices API."""
 
     model = EoxNotice
@@ -54,12 +54,9 @@ class EoxNoticeAPITest(APIViewTestCases.APIViewTestCase):
 
     def test_bulk_create_objects(self):
         """Currently don't support bulk operations."""
-        pass
 
     def test_bulk_delete_objects(self):
         """Currently don't support bulk operations."""
-        pass
 
     def test_bulk_update_objects(self):
         """Currently don't support bulk operations."""
-        pass

@@ -9,7 +9,7 @@ from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
 
 
 @receiver(post_save, sender=Device)
-def add_new_device_to_notice(sender, instance, **kwargs):
+def add_new_device_to_notice(sender, instance, **kwargs):  # pylint: disable=unused-argument
     """Add/Remove Devices from EoxNotices when device is either updated or created."""
     # Attempt to obtain EoxNotice for the device's device type
     try:
@@ -24,7 +24,7 @@ def add_new_device_to_notice(sender, instance, **kwargs):
 
 
 @receiver(pre_save, sender=Device)
-def update_existing_device_to_notice(sender, instance, **kwargs):
+def update_existing_device_to_notice(sender, instance, **kwargs):  # pylint: disable=unused-argument
     """Check to see if device_type has changed on device and update EoxNotice as necessary."""
     # If device does not exist yet, skip logic to update
     if instance.id is None:
