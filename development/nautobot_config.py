@@ -291,6 +291,9 @@ SESSION_COOKIE_AGE = 1209600  # 2 weeks, in seconds
 # database access.) Note that the user as which Nautobot runs must have read and write permissions to this path.
 SESSION_FILE_PATH = None
 
+# Always use IPython for shell_plus
+SHELL_PLUS = "ipython"
+
 # Configure SSO, for more information see docs/configuration/authentication/sso.md
 SOCIAL_AUTH_ENABLED = False
 
@@ -306,7 +309,8 @@ SHORT_TIME_FORMAT = os.environ.get("SHORT_TIME_FORMAT", "H:i:s")
 DATETIME_FORMAT = os.environ.get("DATETIME_FORMAT", "N j, Y g:i a")
 SHORT_DATETIME_FORMAT = os.environ.get("SHORT_DATETIME_FORMAT", "Y-m-d H:i")
 
-# A list of strings designating all applications that are enabled in this Django installation. Each string should be a dotted Python path to an application configuration class (preferred), or a package containing an application.
+# A list of strings designating all applications that are enabled in this Django installation. Each string should be
+# a dotted Python path to an application configuration class (preferred), or a package containing an application.
 # https://nautobot.readthedocs.io/en/latest/configuration/optional-settings/#extra-applications
 EXTRA_INSTALLED_APPS = os.environ["EXTRA_INSTALLED_APPS"].split(",") if os.environ.get("EXTRA_INSTALLED_APPS") else []
 
@@ -315,5 +319,7 @@ DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda _request: DEBUG and not 
 
 if "debug_toolbar" not in EXTRA_INSTALLED_APPS:
     EXTRA_INSTALLED_APPS.append("debug_toolbar")
+if "django_extensions" not in EXTRA_INSTALLED_APPS:
+    EXTRA_INSTALLED_APPS.append("django_extensions")
 if "debug_toolbar.middleware.DebugToolbarMiddleware" not in settings.MIDDLEWARE:
     settings.MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")

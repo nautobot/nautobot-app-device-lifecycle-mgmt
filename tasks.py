@@ -41,7 +41,7 @@ namespace.configure(
         "nautobot_plugin_device_lifecycle_mgmt": {
             "nautobot_ver": "1.1.0-beta.2",
             "project_name": "nautobot_plugin_device_lifecycle_mgmt",
-            "python_ver": "3.6",
+            "python_ver": "3.7",
             "local": False,
             "compose_dir": os.path.join(os.path.dirname(__file__), "development"),
             "compose_files": ["docker-compose.requirements.yml", "docker-compose.base.yml", "docker-compose.dev.yml"],
@@ -191,6 +191,13 @@ def vscode(context):
 def nbshell(context):
     """Launch an interactive nbshell session."""
     command = "nautobot-server nbshell"
+    run_command(context, command)
+
+
+@task
+def shell_plus(context):
+    """Launch an interactive nbshell session."""
+    command = "nautobot-server shell_plus"
     run_command(context, command)
 
 
