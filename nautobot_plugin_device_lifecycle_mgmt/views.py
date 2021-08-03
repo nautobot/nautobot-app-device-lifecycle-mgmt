@@ -1,7 +1,7 @@
 """Views for nautobot_plugin_device_lifecycle_mgmt."""
 
 from nautobot.core.views import generic
-from nautobot.dcim.models import Device
+from nautobot.dcim.models import Device, InventoryItem
 from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 from nautobot_plugin_device_lifecycle_mgmt.tables import HardwareLCMNoticesTable
 from nautobot_plugin_device_lifecycle_mgmt.forms import (
@@ -33,10 +33,14 @@ class HardwareLCMNoticeView(generic.ObjectView):
     queryset = HardwareLCM.objects.prefetch_related("device_type")
 
     def get_extra_context(self, request, instance):
-        devices = Device.objects.restrict(request.user, Permissions.HardwareLCM.Read).filter(
-            device_type=instance.device_type
-        )
-        return {"devices": devices}
+        if instance.device_type:
+            return {
+                "devices": Device.objects.restrict(request.user, Permissions.HardwareLCM.Read).filter(
+                    device_type=instance.device_type
+                )
+            }
+        if instance.inventory_item:
+            return {"devices": [instance.inventory_item.device]}
 
     def get_required_permission(self):
         """Return required view permission."""

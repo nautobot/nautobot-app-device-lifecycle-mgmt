@@ -1,7 +1,6 @@
 """Django models for nautobot_plugin_device_lifecycle_mgmt plugin."""
 
 from datetime import datetime
-
 from django.db import models
 from django.urls import reverse
 from django.core.exceptions import ValidationError
@@ -16,7 +15,20 @@ class HardwareLCM(BaseModel, ChangeLoggedModel):
     """HardwareLCMNotice model for plugin."""
 
     # Set model columns
-    device_type = models.ForeignKey(to="dcim.DeviceType", on_delete=models.CASCADE, verbose_name="Device Type")
+    device_type = models.ForeignKey(
+        to="dcim.DeviceType",
+        on_delete=models.CASCADE,
+        verbose_name="Device Type",
+        blank=True,
+        null=True,
+    )
+    inventory_item = models.ForeignKey(
+        to="dcim.InventoryItem",
+        on_delete=models.CASCADE,
+        verbose_name="Inventory Item",
+        blank=True,
+        null=True,
+    )
     release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
     end_of_sale = models.DateField(null=True, blank=True, verbose_name="End of Sale")
     end_of_support = models.DateField(null=True, blank=True, verbose_name="End of Support")
@@ -27,6 +39,7 @@ class HardwareLCM(BaseModel, ChangeLoggedModel):
 
     csv_headers = [
         "device_type",
+        "inventory_item",
         "release_date",
         "end_of_sale",
         "end_of_support",
@@ -44,10 +57,11 @@ class HardwareLCM(BaseModel, ChangeLoggedModel):
 
     def __str__(self):
         """String representation of HardwareLCMs."""
+        name = self.device_type if self.device_type else self.inventory_item
         if self.end_of_support:
-            msg = f"{self.device_type} - End of support: {self.end_of_support}"
+            msg = f"{name} - End of support: {self.end_of_support}"
         else:
-            msg = f"{self.device_type} - End of sale: {self.end_of_sale}"
+            msg = f"{name} - End of sale: {self.end_of_sale}"
         return msg
 
     def get_absolute_url(self):
@@ -74,6 +88,12 @@ class HardwareLCM(BaseModel, ChangeLoggedModel):
         """Override clean to do custom validation."""
         super().clean()
 
+        if not any([self.inventory_item, self.device_type]):
+            raise ValidationError(_("Inventory Item or Device Type must be specified."))
+
+        if all([self.inventory_item, self.device_type]):
+            raise ValidationError(_("Only one of Inventory Item or Device Type allowed."))
+
         if not self.end_of_sale and not self.end_of_support:
             raise ValidationError(_("End of Sale or End of Support must be specified."))
 
@@ -81,6 +101,7 @@ class HardwareLCM(BaseModel, ChangeLoggedModel):
         """Return fields for bulk view."""
         return (
             self.device_type,
+            self.inventory_item,
             self.release_date,
             self.end_of_sale,
             self.end_of_support,

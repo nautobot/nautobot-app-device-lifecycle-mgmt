@@ -52,24 +52,19 @@
                 <tr>
                     <td>Devices</td>
                     <td>
-                        {% if devices.exists %}
-                            {% for device in devices.all %}
+                        {% for device in devices %}
                                 <a href="{% url 'dcim:device' pk=device.pk %}">{{ device }}</a>{% if not forloop.last %}, {% endif %}
-                            {% endfor %}
-                        {% else %}
-                            &mdash;
-                        {% endif %}
+                        {% endfor %}
                     </td>
                 </tr>
                 <tr>
+                    {% if object.device_type %}
                     <td>Device Type</td>
-                    <td>
-                        {% if object.device_type %}
-                            <a href="{% url 'dcim:devicetype' pk=object.device_type.pk %}">{{ object.device_type }}</a>
-                        {% else %}
-                            &mdash;
-                        {% endif %}
-                    </td>
+                    <td><a href="{% url 'dcim:devicetype' pk=object.device_type.pk %}">{{ object.device_type }}</a></td>
+                    {% elif object.inventory_item %}
+                    <td>Inventory Item</td>
+                    <td><a href="{% url 'dcim:inventoryitem' pk=object.inventory_item.pk %}">{{ object.inventory_item }}</a></td>
+                    {% endif %}
                 </tr>
                 <tr>
                     <td>End of Sale</td>
