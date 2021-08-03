@@ -35,7 +35,7 @@ class HardwareLCM(BaseModel, ChangeLoggedModel):
     end_of_sw_releases = models.DateField(null=True, blank=True, verbose_name="End of Software Releases")
     end_of_security_patches = models.DateField(null=True, blank=True, verbose_name="End of Security Patches")
     documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
-    comments = models.TextField(blank=True)
+    comments = models.TextField(null=True, blank=True, verbose_name="Comments")
 
     csv_headers = [
         "device_type",
@@ -83,6 +83,13 @@ class HardwareLCM(BaseModel, ChangeLoggedModel):
 
         today = datetime.today().date()
         return today >= getattr(self, expired_field)
+
+    def save(self, *args, **kwargs):
+        """Override save to assert a full clean."""
+
+        # Full clean to assert custom validation in clean() for ORM, etc.
+        super().full_clean()
+        super().save(*args, **kwargs)
 
     def clean(self):
         """Override clean to do custom validation."""

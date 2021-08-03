@@ -1,4 +1,5 @@
 """Menu items."""
+# pylint: disable=C0412
 from packaging.version import Version
 from nautobot import __version__
 from nautobot.utilities.choices import ButtonColorChoices

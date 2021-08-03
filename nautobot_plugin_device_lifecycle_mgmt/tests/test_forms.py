@@ -38,7 +38,7 @@ class HardwareLCMFormTest(TestCase):
         self.assertTrue(form.is_valid())
         self.assertTrue(form.save())
 
-    def test_required_field_device_type_missing(self):
+    def test_required_fields_missing(self):
         form = HardwareLCMNoticeForm(
             data={
                 "end_of_sale": "2021-04-01",
@@ -49,8 +49,7 @@ class HardwareLCMFormTest(TestCase):
             }
         )
         self.assertFalse(form.is_valid())
-        self.assertIn("device_type", form.errors)
-        self.assertIn("This field is required", form.errors["device_type"][0])
+        self.assertDictEqual({"__all__": ["Inventory Item or Device Type must be specified."]}, form.errors)
 
     def test_eo_sale_support_fields_missing(self):
         form = HardwareLCMNoticeForm(data={"device_type": self.device_type})

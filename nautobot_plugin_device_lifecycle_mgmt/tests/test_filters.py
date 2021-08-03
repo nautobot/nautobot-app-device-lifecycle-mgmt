@@ -1,5 +1,5 @@
 """Test filters for lifecycle management."""
-
+from datetime import date
 from django.test import TestCase
 
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site
@@ -115,20 +115,10 @@ class HardwareLCMNoticeTestCase(TestCase):
         params = {"device_type_id": [self.device_types[0].id, self.device_types[1].id]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
-    def test_devices_name_single(self):
-        """Test devices filter."""
-        params = {"devices": ["r1"]}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-
     def test_devices_name_all(self):
         """Test devices filter."""
         params = {"devices": ["r1", "r2"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-
-    def test_device_id_single(self):
-        """Test device_id filter."""
-        params = {"device_id": [self.devices[0].id]}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_device_id_all(self):
         """Test device_id filter."""

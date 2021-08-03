@@ -7,10 +7,10 @@ class Permissions:  # pylint: disable=too-few-public-methods
     class HardwareLCM:  # pylint: disable=too-few-public-methods
         """Permissions associated with the HardwareLCM portion of device lifecycle."""
 
-        Create = "nautobot_plugin_device_lifecycle_mgmt.hardwarelcm_add"
-        Read = "nautobot_plugin_device_lifecycle_mgmt.hardwarelcm_view"
-        Update = "nautobot_plugin_device_lifecycle_mgmt.hardwarelcm_edit"
-        Delete = "nautobot_plugin_device_lifecycle_mgmt.hardwarelcm_delete"
+        Create = "nautobot_plugin_device_lifecycle_mgmt.add_hardwarelcm"
+        Read = "nautobot_plugin_device_lifecycle_mgmt.view_hardwarelcm"
+        Update = "nautobot_plugin_device_lifecycle_mgmt.change_hardwarelcm"
+        Delete = "nautobot_plugin_device_lifecycle_mgmt.delete_hardwarelcm"
 
 
 class URL:  # pylint: disable=too-few-public-methods

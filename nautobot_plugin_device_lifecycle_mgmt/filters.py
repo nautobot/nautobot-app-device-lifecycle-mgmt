@@ -3,7 +3,7 @@ import datetime
 import django_filters
 from django.db.models import Q
 
-from nautobot.dcim.models import Device, DeviceType
+from nautobot.dcim.models import DeviceType
 from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 
 

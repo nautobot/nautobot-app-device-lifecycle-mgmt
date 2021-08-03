@@ -17,15 +17,15 @@ class HardwareLCMNoticeAPITest(APIViewTestCases.APIViewTestCase):  # pylint: dis
     bulk_update_data = {"documentation_url": "https://cisco.com/eox"}
     brief_fields = [
         "device_type",
-        "devices",
         "display",
+        "documentation_url",
         "end_of_sale",
         "end_of_security_patches",
         "end_of_support",
         "end_of_sw_releases",
         "expired",
         "id",
-        "documentation_url",
+        "release_date",
     ]
 
     @classmethod

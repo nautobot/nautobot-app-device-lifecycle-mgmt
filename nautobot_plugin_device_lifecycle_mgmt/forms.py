@@ -3,7 +3,7 @@
 from django import forms
 
 from nautobot.utilities.forms import BootstrapMixin, DatePicker
-from nautobot.dcim.models import Device, DeviceType
+from nautobot.dcim.models import DeviceType
 from nautobot.extras.forms import CustomFieldModelCSVForm
 from nautobot.utilities.forms import BulkEditForm
 
@@ -38,7 +38,7 @@ class HardwareLCMNoticeBulkEditForm(BootstrapMixin, BulkEditForm):
     end_of_sw_releases = forms.DateField(widget=DatePicker(), required=False)
     end_of_security_patches = forms.DateField(widget=DatePicker(), required=False)
     documentation_url = forms.URLField(required=False)
-    comments = forms.CharField()
+    comments = forms.CharField(required=False)
 
     class Meta:
         """Meta attributes."""

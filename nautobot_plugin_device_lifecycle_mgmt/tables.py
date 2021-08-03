@@ -2,7 +2,6 @@
 
 import django_tables2 as tables
 from django_tables2.utils import A
-from nautobot.dcim.models import DeviceType, InventoryItem
 from nautobot.utilities.tables import BaseTable, ButtonsColumn, ToggleColumn
 from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 
