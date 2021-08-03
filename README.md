@@ -12,7 +12,7 @@ pip install nautobot-plugin-device-lifecycle-mgmt
 
 > The plugin is compatible with Nautobot 1.0.0b1 and higher
 
-To ensure Nautobot EoX Tracker is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-plugin-device-lifecycle-mgmt` package:
+To ensure Nautobot HardwareLCM Tracker is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-plugin-device-lifecycle-mgmt` package:
 
 ```no-highlight
 # echo nautobot-plugin-device-lifecycle-mgmt >> local_requirements.txt
@@ -35,7 +35,7 @@ The plugin behavior can be controlled with the following list of settings.
 
 | Setting       | Default        | Description                                                                                                                                                                                                                           |
 | ------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| expired_field | end_of_support | The field that will be used to determine if an DeviceLifeCycleEoX object is expired. If the field does not exist on the object, it will determine which of the required fields is set and use that. (Either `end_of_support` or `end_of_sale`) |
+| expired_field | end_of_support | The field that will be used to determine if an HardwareLCM object is expired. If the field does not exist on the object, it will determine which of the required fields is set and use that. (Either `end_of_support` or `end_of_sale`) |
 
 ## Usage
 
@@ -94,23 +94,23 @@ Each command can be executed with `invoke <command>`. All commands support the a
 
 ## Screenshots
 
-### EoX List View
+### HardwareLCM List View
 
-You can view the list of EoX notices as well as filter the table.
+You can view the list of Hardware/Software notices as well as filter the table.
 
 ![](docs/images/eox_notice_list_view.png)
 
 > The device count is provided in the list view.
 
-### EoX Detail View
+### Hardware Notice Detail View
 
-You can also click an EoX Notice and see the detail view. This view provides links to the devices that are part affected by this EoX notice due to their device type.
+You can also click a Hardware/Software Notice and see the detail view. This view provides links to the devices that are part affected by this EoX notice due to their device type.
 
 ![](docs/images/eox_notice_detail_view.png)
 
 ### Device View
 
-You can also view the associated EoX notice from the device. If the device is end of life or end of supoort the notice will be red.
+You can also view the associated Hardware notice from the device. If the device is end of life or end of supoort the notice will be red.
 
 ![](docs/images/eox_notice_device_view.png)
 

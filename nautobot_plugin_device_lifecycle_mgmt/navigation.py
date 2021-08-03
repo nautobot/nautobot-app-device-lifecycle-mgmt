@@ -2,6 +2,7 @@
 from packaging.version import Version
 from nautobot import __version__
 from nautobot.utilities.choices import ButtonColorChoices
+from nautobot_plugin_device_lifecycle_mgmt.const import Permissions
 
 if Version(__version__) >= Version("1.1.0a"):
     from nautobot.core.apps import NavMenuTab, NavMenuGroup, NavMenuItem, NavMenuButton
@@ -12,32 +13,32 @@ if Version(__version__) >= Version("1.1.0a"):
             weight=600,
             groups=(
                 NavMenuGroup(
-                    name="EoX Notices",
+                    name="Hardware Notices",
                     weight=100,
                     items=(
                         NavMenuItem(
-                            link="plugins:nautobot_plugin_device_lifecycle_mgmt:eoxnotice_list",
-                            name="EoX Notices",
+                            link="plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list",
+                            name="Hardware Notices",
                             permissions=[
-                                "nautobot_plugin_chatops_nso.command_filter",
+                                Permissions.HardwareLCM.Read,
                             ],
                             buttons=(
                                 NavMenuButton(
-                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:eoxnotice_add",
+                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_add",
                                     title="Add",
                                     icon_class="mdi mdi-plus-thick",
                                     button_class=ButtonColorChoices.GREEN,
                                     permissions=[
-                                        "nautobot_plugin_chatops_nso.command_filter_create",
+                                        Permissions.HardwareLCM.Create,
                                     ],
                                 ),
                                 NavMenuButton(
-                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:eoxnotice_import",
+                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_import",
                                     title="Import",
                                     icon_class="mdi mdi-database-import-outline",
                                     button_class=ButtonColorChoices.BLUE,
                                     permissions=[
-                                        "nautobot_plugin_chatops_nso.command_filter_create",
+                                        Permissions.HardwareLCM.Create,
                                     ],
                                 ),
                             ),
@@ -52,22 +53,22 @@ else:
 
     menu_items = (
         PluginMenuItem(
-            link="plugins:nautobot_plugin_device_lifecycle_mgmt:eoxnotice_list",
-            link_text="EoX Notices",
+            link="plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list",
+            link_text="Hardware Notices",
             buttons=(
                 PluginMenuButton(
-                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:eoxnotice_add",
+                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_add",
                     title="Add",
                     icon_class="mdi mdi-plus-thick",
                     color=ButtonColorChoices.GREEN,
-                    permissions=["nautobot_plugin_device_lifecycle_mgmt.add_notice"],
+                    permissions=[Permissions.HardwareLCM.Create],
                 ),
                 PluginMenuButton(
-                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:eoxnotice_import",
+                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_import",
                     title="Import",
                     icon_class="mdi mdi-database-import-outline",
                     color=ButtonColorChoices.BLUE,
-                    permissions=["nautobot_plugin_device_lifecycle_mgmt.add_notice"],
+                    permissions=[Permissions.HardwareLCM.Create],
                 ),
             ),
         ),

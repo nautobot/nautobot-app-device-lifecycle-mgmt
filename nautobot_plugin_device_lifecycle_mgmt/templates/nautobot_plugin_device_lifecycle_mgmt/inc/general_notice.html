@@ -1,5 +1,5 @@
 {% load helpers %}
-{% if perms.nautobot_plugin_device_lifecycle_mgmt.view_eoxnotice and notice %}
+{% if perms.nautobot_plugin_device_lifecycle_mgmt.view_hardwarelcm and notice %}
 <div class="row">
     <div class="col-md-12">
         {% if notice.expired %}
@@ -8,13 +8,13 @@
         <div class="panel panel-default">
         {% endif %}
             <div class="panel-heading">
-                <strong>EoX Notice</strong>
+                <strong>Hardware Notice</strong>
             </div>
             <table class="table table-hover panel-body attr-table">
                 <tr>
                     <td>Name</td>
                     <td>
-                        <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:eoxnotice' pk=notice.id %}">{{ notice }}</a>
+                        <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm' pk=notice.id %}">{{ notice }}</a>
                     </td>
                 </tr>
                 <tr>
@@ -34,13 +34,23 @@
                     <td>{{ notice.end_of_security_patches }}</td>
                 </tr>
                 <tr>
-                    <td>Notice URL</td>
+                    <td>Documentation URL</td>
                     <td>
-                    {% if notice.notice_url %}
-                        <a href="{{ notice.notice_url }}">{{ notice.notice_url }}</a>
+                    {% if notice.documentation_url %}
+                        <a href="{{ notice.documentation_url }}">{{ notice.documentation_url }}</a>
                     {% else %}
                         &mdash;
                     {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Comments</td>
+                    <td>
+                        {% if notice.comments %}
+                        {{ notice.comments }}
+                        {% else %}
+                        &mdash;
+                        {% endif %}
                     </td>
                 </tr>
             </table>

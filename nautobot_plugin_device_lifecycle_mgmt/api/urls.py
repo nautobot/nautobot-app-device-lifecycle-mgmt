@@ -1,11 +1,11 @@
 """API URLs for nautobot_plugin_device_lifecycle_mgmt."""
 
 from rest_framework import routers
-from nautobot_plugin_device_lifecycle_mgmt.api.views import EoxNoticeView
+from nautobot_plugin_device_lifecycle_mgmt.api.views import HardwareLCMNoticeView
 
 router = routers.DefaultRouter()
 
-router.register(r"", EoxNoticeView)
+router.register(r"", HardwareLCMNoticeView)
 
 app_name = "nautobot_plugin_device_lifecycle_mgmt"
 

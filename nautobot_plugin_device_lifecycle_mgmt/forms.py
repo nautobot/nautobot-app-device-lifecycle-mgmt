@@ -7,19 +7,20 @@ from nautobot.dcim.models import Device, DeviceType
 from nautobot.extras.forms import CustomFieldModelCSVForm
 from nautobot.utilities.forms import BulkEditForm
 
-from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
+from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 
 
-class EoxNoticeForm(BootstrapMixin, forms.ModelForm):
-    """EoxNotice creation/edit form."""
+class HardwareLCMNoticeForm(BootstrapMixin, forms.ModelForm):
+    """HardwareLCM creation/edit form."""
 
     class Meta:
         """Meta attributes."""
 
-        model = EoxNotice
-        fields = EoxNotice.csv_headers
+        model = HardwareLCM
+        fields = HardwareLCM.csv_headers
 
         widgets = {
+            "release_date": DatePicker(),
             "end_of_sale": DatePicker(),
             "end_of_support": DatePicker(),
             "end_of_sw_releases": DatePicker(),
@@ -27,29 +28,33 @@ class EoxNoticeForm(BootstrapMixin, forms.ModelForm):
         }
 
 
-class EoxNoticeBulkEditForm(BootstrapMixin, BulkEditForm):
-    """EoxNotice bulk edit form."""
+class HardwareLCMNoticeBulkEditForm(BootstrapMixin, BulkEditForm):
+    """HardwareLCMNotice bulk edit form."""
 
-    pk = forms.ModelMultipleChoiceField(queryset=EoxNotice.objects.all(), widget=forms.MultipleHiddenInput)
+    pk = forms.ModelMultipleChoiceField(queryset=HardwareLCM.objects.all(), widget=forms.MultipleHiddenInput)
+    release_date = forms.DateField(widget=DatePicker(), required=False)
     end_of_sale = forms.DateField(widget=DatePicker(), required=False)
     end_of_support = forms.DateField(widget=DatePicker(), required=False)
     end_of_sw_releases = forms.DateField(widget=DatePicker(), required=False)
     end_of_security_patches = forms.DateField(widget=DatePicker(), required=False)
-    notice_url = forms.URLField(required=False)
+    documentation_url = forms.URLField(required=False)
+    comments = forms.CharField()
 
     class Meta:
         """Meta attributes."""
 
         nullable_fields = [
+            "release_date",
             "end_of_sale",
             "end_of_support",
             "end_of_sw_releases",
             "end_of_security_patches",
-            "notice_url",
+            "documentation_url",
+            "comments",
         ]
 
 
-class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
+class HardwareLCMNoticeFilterForm(BootstrapMixin, forms.ModelForm):
     """Filter form to filter searches."""
 
     q = forms.CharField(
@@ -60,12 +65,11 @@ class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
     device_type = forms.ModelMultipleChoiceField(
         required=False, queryset=DeviceType.objects.all(), to_field_name="slug"
     )
-    devices = forms.ModelMultipleChoiceField(required=False, queryset=Device.objects.all(), to_field_name="name")
 
     class Meta:
         """Meta attributes."""
 
-        model = EoxNotice
+        model = HardwareLCM
         # Define the fields above for ordering and widget purposes
         fields = [
             "q",
@@ -74,7 +78,8 @@ class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
             "end_of_support",
             "end_of_sw_releases",
             "end_of_security_patches",
-            "notice_url",
+            "documentation_url",
+            "comments",
         ]
 
         widgets = {
@@ -85,7 +90,7 @@ class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
         }
 
 
-class EoxNoticeCSVForm(CustomFieldModelCSVForm):
+class HardwareLCMNoticeCSVForm(CustomFieldModelCSVForm):
     """Form for creating bulk eox notices."""
 
     device_type = forms.ModelChoiceField(
@@ -93,5 +98,5 @@ class EoxNoticeCSVForm(CustomFieldModelCSVForm):
     )
 
     class Meta:  # noqa: D106 "Missing docstring in public nested class"
-        model = EoxNotice
-        fields = EoxNotice.csv_headers
+        model = HardwareLCM
+        fields = HardwareLCM.csv_headers

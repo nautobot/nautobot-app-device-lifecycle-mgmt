@@ -4,11 +4,11 @@ import django_filters
 from django.db.models import Q
 
 from nautobot.dcim.models import Device, DeviceType
-from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
+from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 
 
-class EoxNoticeFilter(django_filters.FilterSet):
-    """Filter for EoxNotice."""
+class HardwareLCMNoticeFilter(django_filters.FilterSet):
+    """Filter for HardwareLCMNotice."""
 
     q = django_filters.CharFilter(method="search", label="Search")
 
@@ -21,29 +21,20 @@ class EoxNoticeFilter(django_filters.FilterSet):
     device_type_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device_type", queryset=DeviceType.objects.all(), label="Device Type"
     )
-    devices = django_filters.ModelMultipleChoiceFilter(
-        field_name="devices__name",
-        queryset=Device.objects.all(),
-        to_field_name="name",
-        label="Device",
-    )
-    device_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="devices", queryset=Device.objects.all(), label="Device"
-    )
 
     expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
 
     class Meta:
         """Meta attributes for filter."""
 
-        model = EoxNotice
+        model = HardwareLCM
 
         fields = [
             "end_of_sale",
             "end_of_support",
             "end_of_sw_releases",
             "end_of_security_patches",
-            "notice_url",
+            "documentation_url",
             "expired",
         ]
 

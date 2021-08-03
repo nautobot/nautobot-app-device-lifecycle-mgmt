@@ -1,111 +1,117 @@
 """Views for nautobot_plugin_device_lifecycle_mgmt."""
 
 from nautobot.core.views import generic
-from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
-from nautobot_plugin_device_lifecycle_mgmt.tables import EoxNoticesTable
+from nautobot.dcim.models import Device
+from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_plugin_device_lifecycle_mgmt.tables import HardwareLCMNoticesTable
 from nautobot_plugin_device_lifecycle_mgmt.forms import (
-    EoxNoticeForm,
-    EoxNoticeBulkEditForm,
-    EoxNoticeFilterForm,
-    EoxNoticeCSVForm,
+    HardwareLCMNoticeForm,
+    HardwareLCMNoticeBulkEditForm,
+    HardwareLCMNoticeFilterForm,
+    HardwareLCMNoticeCSVForm,
 )
-from nautobot_plugin_device_lifecycle_mgmt.filters import EoxNoticeFilter
+from nautobot_plugin_device_lifecycle_mgmt.filters import HardwareLCMNoticeFilter
 from nautobot_plugin_device_lifecycle_mgmt.const import Permissions, URL
 
 
-class EoxNoticesListView(generic.ObjectListView):
+class HardwareLCMNoticesListView(generic.ObjectListView):
     """List view."""
 
-    queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
-    filterset = EoxNoticeFilter
-    filterset_form = EoxNoticeFilterForm
-    table = EoxNoticesTable
-    # template_name = "nautobot_plugin_device_lifecycle_mgmt/eoxnotice.html"
+    queryset = HardwareLCM.objects.prefetch_related("device_type")
+    filterset = HardwareLCMNoticeFilter
+    filterset_form = HardwareLCMNoticeFilterForm
+    table = HardwareLCMNoticesTable
 
     def get_required_permission(self):
         """Return required view permission."""
-        return Permissions.EoX.Read
+        return Permissions.HardwareLCM.Read
 
 
-class EoxNoticeView(generic.ObjectView):
+class HardwareLCMNoticeView(generic.ObjectView):
     """Detail view."""
 
-    queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
+    queryset = HardwareLCM.objects.prefetch_related("device_type")
+
+    def get_extra_context(self, request, instance):
+        devices = Device.objects.restrict(request.user, Permissions.HardwareLCM.Read).filter(
+            device_type=instance.device_type
+        )
+        return {"devices": devices}
 
     def get_required_permission(self):
         """Return required view permission."""
-        return Permissions.EoX.Read
+        return Permissions.HardwareLCM.Read
 
 
-class EoxNoticeCreateView(generic.ObjectEditView):
+class HardwareLCMNoticeCreateView(generic.ObjectEditView):
     """Create view."""
 
-    model = EoxNotice
-    queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
-    model_form = EoxNoticeForm
-    default_return_url = URL.EoX.List
+    model = HardwareLCM
+    queryset = HardwareLCM.objects.prefetch_related("device_type")
+    model_form = HardwareLCMNoticeForm
+    default_return_url = URL.HardwareLCM.List
 
     def get_required_permission(self):
         """Return required add permission."""
-        return Permissions.EoX.Create
+        return Permissions.HardwareLCM.Create
 
 
-class EoxNoticeDeleteView(generic.ObjectDeleteView):
+class HardwareLCMNoticeDeleteView(generic.ObjectDeleteView):
     """Delete view."""
 
-    model = EoxNotice
-    queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
-    default_return_url = URL.EoX.List
+    model = HardwareLCM
+    queryset = HardwareLCM.objects.prefetch_related("device_type")
+    default_return_url = URL.HardwareLCM.List
 
     def get_required_permission(self):
         """Return required delete permission."""
-        return Permissions.EoX.Delete
+        return Permissions.HardwareLCM.Delete
 
 
-class EoxNoticeEditView(generic.ObjectEditView):
+class HardwareLCMNoticeEditView(generic.ObjectEditView):
     """Edit view."""
 
-    model = EoxNotice
-    queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
-    model_form = EoxNoticeForm
-    default_return_url = URL.EoX.View
+    model = HardwareLCM
+    queryset = HardwareLCM.objects.prefetch_related("device_type")
+    model_form = HardwareLCMNoticeForm
+    default_return_url = URL.HardwareLCM.View
 
     def get_required_permission(self):
         """Return required change permission."""
-        return Permissions.EoX.Update
+        return Permissions.HardwareLCM.Update
 
 
-class EoxNoticeBulkImportView(generic.BulkImportView):
-    """View for bulk import of eox notices."""
+class HardwareLCMNoticeBulkImportView(generic.BulkImportView):
+    """View for bulk import of hardware lcm."""
 
-    queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
-    model_form = EoxNoticeCSVForm
-    table = EoxNoticesTable
-    default_return_url = URL.EoX.List
+    queryset = HardwareLCM.objects.prefetch_related("device_type")
+    model_form = HardwareLCMNoticeCSVForm
+    table = HardwareLCMNoticesTable
+    default_return_url = URL.HardwareLCM.List
 
 
-class EoxNoticeBulkDeleteView(generic.BulkDeleteView):
-    """View for deleting one or more EoxNotice records."""
+class HardwareLCMNoticeBulkDeleteView(generic.BulkDeleteView):
+    """View for deleting one or more HardwareLCM records."""
 
-    queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
-    table = EoxNoticesTable
-    bulk_delete_url = URL.EoX.BulkDelete
-    default_return_url = URL.EoX.List
+    queryset = HardwareLCM.objects.prefetch_related("device_type")
+    table = HardwareLCMNoticesTable
+    bulk_delete_url = URL.HardwareLCM.BulkDelete
+    default_return_url = URL.HardwareLCM.List
 
     def get_required_permission(self):
         """Return required delete permission."""
-        return Permissions.EoX.Delete
+        return Permissions.HardwareLCM.Delete
 
 
-class EoxNoticeBulkEditView(generic.BulkEditView):
-    """View for editing one or more EoxNotice records."""
+class HardwareLCMNoticeBulkEditView(generic.BulkEditView):
+    """View for editing one or more HardwareLCM records."""
 
-    queryset = EoxNotice.objects.prefetch_related("devices", "device_type")
-    filterset = EoxNoticeFilter
-    table = EoxNoticesTable
-    form = EoxNoticeBulkEditForm
-    bulk_edit_url = URL.EoX.BulkEdit
+    queryset = HardwareLCM.objects.prefetch_related("device_type")
+    filterset = HardwareLCMNoticeFilter
+    table = HardwareLCMNoticesTable
+    form = HardwareLCMNoticeBulkEditForm
+    bulk_edit_url = URL.HardwareLCM.BulkEdit
 
     def get_required_permission(self):
         """Return required change permission."""
-        return Permissions.EoX.Update
+        return Permissions.HardwareLCM.Update

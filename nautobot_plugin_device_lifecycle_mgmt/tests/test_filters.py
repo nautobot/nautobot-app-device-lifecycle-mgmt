@@ -1,18 +1,18 @@
-"""Test filters for eox notices."""
+"""Test filters for lifecycle management."""
 
 from django.test import TestCase
 
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site
 
-from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
-from nautobot_plugin_device_lifecycle_mgmt.filters import EoxNoticeFilter
+from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_plugin_device_lifecycle_mgmt.filters import HardwareLCMNoticeFilter
 
 
-class EoxNoticeTestCase(TestCase):
-    """Tests for EoxNoticeFilter."""
+class HardwareLCMNoticeTestCase(TestCase):
+    """Tests for HardwareLCMNoticeFilter."""
 
-    queryset = EoxNotice.objects.all()
-    filterset = EoxNoticeFilter
+    queryset = HardwareLCM.objects.all()
+    filterset = HardwareLCMNoticeFilter
 
     def setUp(self):
         self.manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
@@ -37,21 +37,21 @@ class EoxNoticeTestCase(TestCase):
             ),
         )
         self.notices = (
-            EoxNotice.objects.create(
+            HardwareLCM.objects.create(
                 device_type=self.device_types[0],
                 end_of_sale="2022-04-01",
                 end_of_support="2023-04-01",
                 end_of_sw_releases="2024-04-01",
                 end_of_security_patches="2025-04-01",
-                notice_url="https://cisco.com/c9300-24",
+                documentation_url="https://cisco.com/c9300-24",
             ),
-            EoxNotice.objects.create(
+            HardwareLCM.objects.create(
                 device_type=self.device_types[1],
                 end_of_sale="2024-04-01",
                 end_of_support="2025-05-01",
                 end_of_sw_releases="2026-05-01",
                 end_of_security_patches="2027-05-01",
-                notice_url="https://cisco.com/c9300-48",
+                documentation_url="https://cisco.com/c9300-48",
             ),
         )
 
@@ -90,9 +90,9 @@ class EoxNoticeTestCase(TestCase):
         params = {"end_of_security_patches": "2027-05-01"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
-    def test_notice_url(self):
+    def test_documentation_url(self):
         """Test notice filter."""
-        params = {"notice_url": "https://cisco.com/c9300-48"}
+        params = {"documentation_url": "https://cisco.com/c9300-48"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_device_type_slug_single(self):

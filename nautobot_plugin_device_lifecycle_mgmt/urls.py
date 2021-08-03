@@ -2,22 +2,22 @@
 from django.urls import path
 from nautobot.extras.views import ObjectChangeLogView
 from nautobot_plugin_device_lifecycle_mgmt import views
-from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
+from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 
 
 urlpatterns = [
-    path("eox-notice/", views.EoxNoticesListView.as_view(), name="eoxnotice_list"),
-    path("eox-notice/<uuid:pk>/", views.EoxNoticeView.as_view(), name="eoxnotice"),
-    path("eox-notice/add/", views.EoxNoticeCreateView.as_view(), name="eoxnotice_add"),
-    path("eox-notice/delete/", views.EoxNoticeBulkDeleteView.as_view(), name="eoxnotice_bulk_delete"),
-    path("eox-notice/edit/", views.EoxNoticeBulkEditView.as_view(), name="eoxnotice_bulk_edit"),
-    path("eox-notice/<uuid:pk>/delete/", views.EoxNoticeDeleteView.as_view(), name="eoxnotice_delete"),
-    path("eox-notice/<uuid:pk>/edit/", views.EoxNoticeEditView.as_view(), name="eoxnotice_edit"),
+    path("hardware-lcm/", views.HardwareLCMNoticesListView.as_view(), name="hardwarelcm_list"),
+    path("hardware-lcm/<uuid:pk>/", views.HardwareLCMNoticeView.as_view(), name="hardwarelcm"),
+    path("hardware-lcm/add/", views.HardwareLCMNoticeCreateView.as_view(), name="hardwarelcm_add"),
+    path("hardware-lcm/delete/", views.HardwareLCMNoticeBulkDeleteView.as_view(), name="hardwarelcm_bulk_delete"),
+    path("hardware-lcm/edit/", views.HardwareLCMNoticeBulkEditView.as_view(), name="hardwarelcm_bulk_edit"),
+    path("hardware-lcm/<uuid:pk>/delete/", views.HardwareLCMNoticeDeleteView.as_view(), name="hardwarelcm_delete"),
+    path("hardware-lcm/<uuid:pk>/edit/", views.HardwareLCMNoticeEditView.as_view(), name="hardwarelcm_edit"),
     path(
-        "eox-notice/<uuid:pk>/changelog/",
+        "hardware-lcm/<uuid:pk>/changelog/",
         ObjectChangeLogView.as_view(),
-        name="eoxnotice_changelog",
-        kwargs={"model": EoxNotice},
+        name="hardwarelcm_changelog",
+        kwargs={"model": HardwareLCM},
     ),
-    path("eox-notice/import/", views.EoxNoticeBulkImportView.as_view(), name="eoxnotice_import"),
+    path("hardware-lcm/import/", views.HardwareLCMNoticeBulkImportView.as_view(), name="hardwarelcm_import"),
 ]

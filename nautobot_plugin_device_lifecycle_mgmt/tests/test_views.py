@@ -5,16 +5,16 @@ from django.contrib.auth import get_user_model
 from nautobot.utilities.testing import ViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer
 
-from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
+from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 
 User = get_user_model()
 
 
-class EoxNoticeViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
-    """Test the EoxNotices views."""
+class HardwareLCMNoticeViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
+    """Test the HardwareLCMNotices views."""
 
-    model = EoxNotice
-    bulk_edit_data = {"notice_url": "https://cisco.com/eox"}
+    model = HardwareLCM
+    bulk_edit_data = {"documentation_url": "https://cisco.com/eox"}
 
     def _get_base_url(self):
         return "plugins:{}:{}_{{}}".format(self.model._meta.app_label, self.model._meta.model_name)
@@ -28,8 +28,8 @@ class EoxNoticeViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: dis
             for model in ["c9300-24", "c9300-48", "c9500-24", "c9200-24", "c9200-48"]
         )
 
-        EoxNotice.objects.create(device_type=device_types[0], end_of_sale=datetime.date(2021, 4, 1))
-        EoxNotice.objects.create(device_type=device_types[1], end_of_sale=datetime.date(2021, 4, 1))
+        HardwareLCM.objects.create(device_type=device_types[0], end_of_sale=datetime.date(2021, 4, 1))
+        HardwareLCM.objects.create(device_type=device_types[1], end_of_sale=datetime.date(2021, 4, 1))
 
         cls.form_data = {
             "device_type": device_types[2].id,
@@ -37,7 +37,7 @@ class EoxNoticeViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: dis
             "end_of_support": datetime.date(2024, 4, 1),
         }
         cls.csv_data = (
-            "device_type,end_of_sale,end_of_support,end_of_sw_releases,end_of_security_patches,notice_url",
+            "device_type,end_of_sale,end_of_support,end_of_sw_releases,end_of_security_patches,documentation_url",
             "c9500-24, 2021-10-06, 2022-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
             "c9200-24, 2022-10-06, 2023-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
             "c9200-48, 2023-10-06, 2024-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",

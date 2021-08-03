@@ -5,16 +5,16 @@ from django.contrib.auth import get_user_model
 from nautobot.utilities.testing import APIViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer
 
-from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice
+from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 
 User = get_user_model()
 
 
-class EoxNoticeAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
-    """Test the EoxNotices API."""
+class HardwareLCMNoticeAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
+    """Test the HardwareLCMNotices API."""
 
-    model = EoxNotice
-    bulk_update_data = {"notice_url": "https://cisco.com/eox"}
+    model = HardwareLCM
+    bulk_update_data = {"documentation_url": "https://cisco.com/eox"}
     brief_fields = [
         "device_type",
         "devices",
@@ -25,7 +25,7 @@ class EoxNoticeAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too
         "end_of_sw_releases",
         "expired",
         "id",
-        "notice_url",
+        "documentation_url",
     ]
 
     @classmethod
@@ -41,9 +41,9 @@ class EoxNoticeAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too
             DeviceType.objects.create(model="c9410", slug="c9410", manufacturer=manufacturer),
         )
 
-        EoxNotice.objects.create(device_type=device_types[3], end_of_sale=datetime.date(2021, 4, 1))
-        EoxNotice.objects.create(device_type=device_types[4], end_of_sale=datetime.date(2021, 4, 1))
-        EoxNotice.objects.create(device_type=device_types[5], end_of_sale=datetime.date(2021, 4, 1))
+        HardwareLCM.objects.create(device_type=device_types[3], end_of_sale=datetime.date(2021, 4, 1))
+        HardwareLCM.objects.create(device_type=device_types[4], end_of_sale=datetime.date(2021, 4, 1))
+        HardwareLCM.objects.create(device_type=device_types[5], end_of_sale=datetime.date(2021, 4, 1))
 
         cls.create_data = [
             # Setting end_of_sale as datetime.date for proper comparison

@@ -10,38 +10,40 @@ from django.conf import settings
 
 from nautobot.extras.models.change_logging import ChangeLoggedModel
 from nautobot.core.models import BaseModel
-from nautobot.dcim.models import Device
 
 
-class EoxNotice(BaseModel, ChangeLoggedModel):
-    """EoxNotice model for plugin."""
+class HardwareLCM(BaseModel, ChangeLoggedModel):
+    """HardwareLCMNotice model for plugin."""
 
     # Set model columns
-    devices = models.ManyToManyField(Device)
     device_type = models.ForeignKey(to="dcim.DeviceType", on_delete=models.CASCADE, verbose_name="Device Type")
+    release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
     end_of_sale = models.DateField(null=True, blank=True, verbose_name="End of Sale")
     end_of_support = models.DateField(null=True, blank=True, verbose_name="End of Support")
     end_of_sw_releases = models.DateField(null=True, blank=True, verbose_name="End of Software Releases")
     end_of_security_patches = models.DateField(null=True, blank=True, verbose_name="End of Security Patches")
-    notice_url = models.URLField(blank=True, verbose_name="Notice URL")
+    documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
+    comments = models.TextField(blank=True)
 
     csv_headers = [
         "device_type",
+        "release_date",
         "end_of_sale",
         "end_of_support",
         "end_of_sw_releases",
         "end_of_security_patches",
-        "notice_url",
+        "documentation_url",
+        "comments",
     ]
 
     class Meta:
-        """Meta attributes for DeviceLifeCycleEoX."""
+        """Meta attributes for HardwareLCM."""
 
         ordering = ("end_of_support", "end_of_sale")
         constraints = [models.UniqueConstraint(fields=["device_type"], name="unique_device_type")]
 
     def __str__(self):
-        """String representation of DeviceLifeCycleEoXs."""
+        """String representation of HardwareLCMs."""
         if self.end_of_support:
             msg = f"{self.device_type} - End of support: {self.end_of_support}"
         else:
@@ -49,8 +51,8 @@ class EoxNotice(BaseModel, ChangeLoggedModel):
         return msg
 
     def get_absolute_url(self):
-        """Returns the Detail view for DeviceLifeCycleEoX models."""
-        return reverse("plugins:nautobot_plugin_device_lifecycle_mgmt:eoxnotice", kwargs={"pk": self.pk})
+        """Returns the Detail view for HardwareLCM models."""
+        return reverse("plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm", kwargs={"pk": self.pk})
 
     @property
     def expired(self):
@@ -68,24 +70,6 @@ class EoxNotice(BaseModel, ChangeLoggedModel):
         today = datetime.today().date()
         return today >= getattr(self, expired_field)
 
-    def save(self, *args, **kwargs):
-        """Override save to add devices to DeviceLifeCycleEoX found that match the device-type.
-
-        Args:
-            signal (bool): Whether the save is being called from a signal.
-        """
-        # Update the model with related devices that are of the specific device type
-        if not kwargs.get("signal"):
-            related_devices = Device.objects.filter(device_type=self.device_type)
-            self.devices.add(*related_devices)
-
-        # Attempt to pop signal if it exists before passing to super().save()
-        kwargs.pop("signal", None)
-
-        # Full clean to assert custom validation in clean() for ORM, etc.
-        super().full_clean()
-        super().save(*args, **kwargs)
-
     def clean(self):
         """Override clean to do custom validation."""
         super().clean()
@@ -96,11 +80,11 @@ class EoxNotice(BaseModel, ChangeLoggedModel):
     def to_csv(self):
         """Return fields for bulk view."""
         return (
-            self.devices,
             self.device_type,
+            self.release_date,
             self.end_of_sale,
             self.end_of_support,
             self.end_of_sw_releases,
             self.end_of_security_patches,
-            self.notice_url,
+            self.documentation_url,
         )

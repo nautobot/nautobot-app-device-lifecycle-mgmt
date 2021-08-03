@@ -10,7 +10,7 @@
 
 ### Fixed
 
-- Fix detail view to show hyperlink of `notice_url`
+- Fix detail view to show hyperlink of `documentation_url`
 
 ## 0.1.1 - 06-17-2021
 
