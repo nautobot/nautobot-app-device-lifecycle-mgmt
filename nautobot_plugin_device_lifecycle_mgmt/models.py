@@ -86,7 +86,6 @@ class HardwareLCM(BaseModel, ChangeLoggedModel):
 
     def save(self, *args, **kwargs):
         """Override save to assert a full clean."""
-
         # Full clean to assert custom validation in clean() for ORM, etc.
         super().full_clean()
         super().save(*args, **kwargs)
