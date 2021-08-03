@@ -1,5 +1,4 @@
 """Test filters for lifecycle management."""
-from datetime import date
 from django.test import TestCase
 
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site

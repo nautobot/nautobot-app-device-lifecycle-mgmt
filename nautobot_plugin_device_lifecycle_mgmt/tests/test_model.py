@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.conf import settings
 
-from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site
+from nautobot.dcim.models import DeviceType, Manufacturer
 
 from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 
