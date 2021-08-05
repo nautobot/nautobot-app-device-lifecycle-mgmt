@@ -11,7 +11,6 @@ from nautobot_plugin_device_lifecycle_mgmt.forms import (
     HardwareLCMNoticeCSVForm,
 )
 from nautobot_plugin_device_lifecycle_mgmt.filters import HardwareLCMNoticeFilter
-from nautobot_plugin_device_lifecycle_mgmt.const import Permissions, URL
 
 
 class HardwareLCMNoticesListView(generic.ObjectListView):
@@ -21,10 +20,6 @@ class HardwareLCMNoticesListView(generic.ObjectListView):
     filterset = HardwareLCMNoticeFilter
     filterset_form = HardwareLCMNoticeFilterForm
     table = HardwareLCMNoticesTable
-
-    def get_required_permission(self):
-        """Return required view permission."""
-        return Permissions.HardwareLCM.Read
 
 
 class HardwareLCMNoticeView(generic.ObjectView):
@@ -41,12 +36,12 @@ class HardwareLCMNoticeView(generic.ObjectView):
         if instance.device_type:
             return {"devices": Device.objects.restrict(request.user, "view").filter(device_type=instance.device_type)}
         if instance.inventory_item:
-            return {"devices": [instance.inventory_item.device]}
+            return {
+                "devices": Device.objects.restrict(request.user, "view").filter(
+                    inventoryitems__part_id=instance.inventory_item
+                )
+            }
         return {"devices": []}
-
-    def get_required_permission(self):
-        """Return required view permission."""
-        return Permissions.HardwareLCM.Read
 
 
 class HardwareLCMNoticeCreateView(generic.ObjectEditView):
@@ -55,11 +50,7 @@ class HardwareLCMNoticeCreateView(generic.ObjectEditView):
     model = HardwareLCM
     queryset = HardwareLCM.objects.prefetch_related("device_type")
     model_form = HardwareLCMNoticeForm
-    default_return_url = URL.HardwareLCM.List
-
-    def get_required_permission(self):
-        """Return required add permission."""
-        return Permissions.HardwareLCM.Create
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list"
 
 
 class HardwareLCMNoticeDeleteView(generic.ObjectDeleteView):
@@ -67,11 +58,7 @@ class HardwareLCMNoticeDeleteView(generic.ObjectDeleteView):
 
     model = HardwareLCM
     queryset = HardwareLCM.objects.prefetch_related("device_type")
-    default_return_url = URL.HardwareLCM.List
-
-    def get_required_permission(self):
-        """Return required delete permission."""
-        return Permissions.HardwareLCM.Delete
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list"
 
 
 class HardwareLCMNoticeEditView(generic.ObjectEditView):
@@ -80,11 +67,7 @@ class HardwareLCMNoticeEditView(generic.ObjectEditView):
     model = HardwareLCM
     queryset = HardwareLCM.objects.prefetch_related("device_type")
     model_form = HardwareLCMNoticeForm
-    default_return_url = URL.HardwareLCM.View
-
-    def get_required_permission(self):
-        """Return required change permission."""
-        return Permissions.HardwareLCM.Update
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm"
 
 
 class HardwareLCMNoticeBulkImportView(generic.BulkImportView):
@@ -93,7 +76,7 @@ class HardwareLCMNoticeBulkImportView(generic.BulkImportView):
     queryset = HardwareLCM.objects.prefetch_related("device_type")
     model_form = HardwareLCMNoticeCSVForm
     table = HardwareLCMNoticesTable
-    default_return_url = URL.HardwareLCM.List
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list"
 
 
 class HardwareLCMNoticeBulkDeleteView(generic.BulkDeleteView):
@@ -101,12 +84,8 @@ class HardwareLCMNoticeBulkDeleteView(generic.BulkDeleteView):
 
     queryset = HardwareLCM.objects.prefetch_related("device_type")
     table = HardwareLCMNoticesTable
-    bulk_delete_url = URL.HardwareLCM.BulkDelete
-    default_return_url = URL.HardwareLCM.List
-
-    def get_required_permission(self):
-        """Return required delete permission."""
-        return Permissions.HardwareLCM.Delete
+    bulk_delete_url = "plugins:nautobot_plugin_device_lifecycle_mgmt.hardwarelcm_bulk_delete"
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list"
 
 
 class HardwareLCMNoticeBulkEditView(generic.BulkEditView):
@@ -116,8 +95,4 @@ class HardwareLCMNoticeBulkEditView(generic.BulkEditView):
     filterset = HardwareLCMNoticeFilter
     table = HardwareLCMNoticesTable
     form = HardwareLCMNoticeBulkEditForm
-    bulk_edit_url = URL.HardwareLCM.BulkEdit
-
-    def get_required_permission(self):
-        """Return required change permission."""
-        return Permissions.HardwareLCM.Update
+    bulk_edit_url = "plugins:nautobot_plugin_device_lifecycle_mgmt.hardwarelcm_bulk_edit"

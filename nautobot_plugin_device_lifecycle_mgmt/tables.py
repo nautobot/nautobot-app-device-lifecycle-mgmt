@@ -17,11 +17,11 @@ class HardwareLCMNoticesTable(BaseTable):
         template_code="""{% if record.device_type %}
                     <a href="{% url 'dcim:devicetype' pk=record.device_type.pk %}">{{ record.device_type }}</a>
                     {% elif record.inventory_item %}
-                    <a href="{% url 'dcim:inventoryitem' pk=record.inventory_item.pk %}">{{ record.inventory_item }}</a>
+                    {{ record.inventory_item }}
                     {% endif %}""",
         verbose_name="Reference",
     )
-    actions = ButtonsColumn(HardwareLCM, buttons=("edit", "delete"))
+    actions = ButtonsColumn(HardwareLCM, buttons=("changelog", "edit", "delete"))
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
         """Meta attributes."""

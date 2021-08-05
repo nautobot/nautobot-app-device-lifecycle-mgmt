@@ -1,9 +1,9 @@
-"""Forms for nautobot_plugin_device_lifecycle_mgmt."""
+"""Forms implementation for the LifeCycle Management plugin."""
 
 from django import forms
 
-from nautobot.utilities.forms import BootstrapMixin, DatePicker
-from nautobot.dcim.models import DeviceType
+from nautobot.utilities.forms import BootstrapMixin, DatePicker, add_blank_choice
+from nautobot.dcim.models import DeviceType, InventoryItem
 from nautobot.extras.forms import CustomFieldModelCSVForm
 from nautobot.utilities.forms import BulkEditForm
 
@@ -13,8 +13,17 @@ from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 class HardwareLCMNoticeForm(BootstrapMixin, forms.ModelForm):
     """HardwareLCM creation/edit form."""
 
+    inventory_item = forms.ChoiceField(
+        choices=add_blank_choice(
+            (i, i)
+            for i in InventoryItem.objects.distinct("part_id").order_by("part_id").values_list("part_id", flat=True)
+        ),
+        label="Inventory Part ID",
+        required=False,
+    )
+
     class Meta:
-        """Meta attributes."""
+        """Meta attributes for the HardwareLCMNoticeForm class."""
 
         model = HardwareLCM
         fields = HardwareLCM.csv_headers
@@ -41,7 +50,7 @@ class HardwareLCMNoticeBulkEditForm(BootstrapMixin, BulkEditForm):
     comments = forms.CharField(required=False)
 
     class Meta:
-        """Meta attributes."""
+        """Meta attributes for the HardwareLCMNoticeBulkEditForm class."""
 
         nullable_fields = [
             "release_date",
@@ -67,7 +76,7 @@ class HardwareLCMNoticeFilterForm(BootstrapMixin, forms.ModelForm):
     )
 
     class Meta:
-        """Meta attributes."""
+        """Meta attributes for the HardwareLCMNoticeFilterForm class."""
 
         model = HardwareLCM
         # Define the fields above for ordering and widget purposes
@@ -79,7 +88,6 @@ class HardwareLCMNoticeFilterForm(BootstrapMixin, forms.ModelForm):
             "end_of_sw_releases",
             "end_of_security_patches",
             "documentation_url",
-            "comments",
         ]
 
         widgets = {
@@ -97,6 +105,8 @@ class HardwareLCMNoticeCSVForm(CustomFieldModelCSVForm):
         required=True, queryset=DeviceType.objects.all(), to_field_name="model", label="Device type"
     )
 
-    class Meta:  # noqa: D106 "Missing docstring in public nested class"
+    class Meta:
+        """Meta attributes for the HardwareLCMNoticeCSVForm class."""
+
         model = HardwareLCM
         fields = HardwareLCM.csv_headers

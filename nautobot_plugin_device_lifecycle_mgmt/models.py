@@ -22,13 +22,7 @@ class HardwareLCM(BaseModel, ChangeLoggedModel):
         blank=True,
         null=True,
     )
-    inventory_item = models.ForeignKey(
-        to="dcim.InventoryItem",
-        on_delete=models.CASCADE,
-        verbose_name="Inventory Item",
-        blank=True,
-        null=True,
-    )
+    inventory_item = models.CharField(verbose_name="Inventory Item Part", max_length=255, blank=True, null=True)
     release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
     end_of_sale = models.DateField(null=True, blank=True, verbose_name="End of Sale")
     end_of_support = models.DateField(null=True, blank=True, verbose_name="End of Support")
@@ -50,14 +44,17 @@ class HardwareLCM(BaseModel, ChangeLoggedModel):
     ]
 
     class Meta:
-        """Meta attributes for HardwareLCM."""
+        """Meta attributes for the HardwareLCM class."""
 
         ordering = ("end_of_support", "end_of_sale")
-        constraints = [models.UniqueConstraint(fields=["device_type"], name="unique_device_type")]
+        constraints = [
+            models.UniqueConstraint(fields=["device_type"], name="unique_device_type"),
+            models.UniqueConstraint(fields=["inventory_item"], name="unique_inventory_item_part"),
+        ]
 
     def __str__(self):
         """String representation of HardwareLCMs."""
-        name = self.device_type if self.device_type else self.inventory_item
+        name = f"Device Type: {self.device_type}" if self.device_type else f"Inventory Part: {self.inventory_item}"
         if self.end_of_support:
             msg = f"{name} - End of support: {self.end_of_support}"
         else:
@@ -114,4 +111,5 @@ class HardwareLCM(BaseModel, ChangeLoggedModel):
             self.end_of_sw_releases,
             self.end_of_security_patches,
             self.documentation_url,
+            self.comments,
         )

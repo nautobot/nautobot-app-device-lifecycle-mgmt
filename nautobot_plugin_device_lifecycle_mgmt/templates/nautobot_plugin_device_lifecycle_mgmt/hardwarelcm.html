@@ -53,7 +53,7 @@
                     <td>Devices</td>
                     <td>
                         {% for device in devices %}
-                                <a href="{% url 'dcim:device' pk=device.pk %}">{{ device }}</a>{% if not forloop.last %}, {% endif %}
+                        <a href="{% url 'dcim:device' pk=device.pk %}">{{ device }}</a>{% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     </td>
                 </tr>
@@ -63,7 +63,7 @@
                     <td><a href="{% url 'dcim:devicetype' pk=object.device_type.pk %}">{{ object.device_type }}</a></td>
                     {% elif object.inventory_item %}
                     <td>Inventory Item</td>
-                    <td><a href="{% url 'dcim:inventoryitem' pk=object.inventory_item.pk %}">{{ object.inventory_item }}</a></td>
+                    <td>{{ object.inventory_item }}</td>
                     {% endif %}
                 </tr>
                 <tr>

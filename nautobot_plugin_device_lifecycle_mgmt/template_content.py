@@ -2,6 +2,7 @@
 from abc import ABCMeta
 from django.db.models import Q
 from nautobot.extras.plugins import PluginTemplateExtension
+from nautobot.dcim.models import Device
 from .models import HardwareLCM
 
 
@@ -33,7 +34,12 @@ class DeviceHWLCMNotice(PluginTemplateExtension, metaclass=ABCMeta):
             "nautobot_plugin_device_lifecycle_mgmt/inc/general_notice.html",
             extra_context={
                 "notices": HardwareLCM.objects.filter(
-                    Q(device_type=dev_obj.device_type) | Q(inventory_item__in=dev_obj.inventoryitems.all())
+                    Q(device_type=dev_obj.device_type)
+                    | Q(
+                        inventory_item__in=Device.objects.filter(pk=dev_obj.pk).values_list(
+                            "inventoryitems__part_id", flat=True
+                        )
+                    )
                 )
             },
         )
@@ -50,7 +56,7 @@ class InventoryItemHWLCMNotice(PluginTemplateExtension, metaclass=ABCMeta):
 
         return self.render(
             "nautobot_plugin_device_lifecycle_mgmt/inc/general_notice.html",
-            extra_context={"notices": HardwareLCM.objects.filter(inventory_item=inv_item_obj)},
+            extra_context={"notices": HardwareLCM.objects.filter(inventory_item=inv_item_obj.part_id)},
         )
 
 
