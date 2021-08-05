@@ -1,7 +1,7 @@
 """Forms implementation for the LifeCycle Management plugin."""
-
+import logging
 from django import forms
-
+from django.db.utils import ProgrammingError
 from nautobot.utilities.forms import BootstrapMixin, DatePicker, add_blank_choice
 from nautobot.dcim.models import DeviceType, InventoryItem
 from nautobot.extras.forms import CustomFieldModelCSVForm
@@ -9,18 +9,28 @@ from nautobot.utilities.forms import BulkEditForm
 
 from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 
+logger = logging.getLogger("nautobot_plugin_device_lifecycle_mgmt")
+
 
 class HardwareLCMNoticeForm(BootstrapMixin, forms.ModelForm):
     """HardwareLCM creation/edit form."""
 
-    inventory_item = forms.ChoiceField(
-        choices=add_blank_choice(
-            (i, i)
-            for i in InventoryItem.objects.distinct("part_id").order_by("part_id").values_list("part_id", flat=True)
-        ),
-        label="Inventory Part ID",
-        required=False,
-    )
+    try:
+        # Generate a list of choices from the distinct inventory item part_ids
+        choices = add_blank_choice(
+            InventoryItem.objects.distinct("part_id").order_by("part_id").values_list("part_id", flat=True)
+        )
+    except ProgrammingError:
+        # The InventoryItem table might not exist yet (if migrations have not been run)
+        # Similar scenario to nautobot/nautobot/extras/apps.py:18
+        choices = ((None, "---------"),)
+        logger.warning(
+            "Fetching the available Nautobot dcim inventory items failed because "
+            "the InventoryItem table was not available or populated. This is normal "
+            "during the execution of the migration command for the first time."
+        )
+
+    inventory_item = forms.ChoiceField(choices=choices, label="Inventory Part ID", required=False)
 
     class Meta:
         """Meta attributes for the HardwareLCMNoticeForm class."""
