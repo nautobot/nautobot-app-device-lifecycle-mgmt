@@ -1,6 +1,6 @@
 {% load helpers %}
-{% if perms.nautobot_plugin_device_lifecycle_mgmt.view_hardwarelcm and notices %}
-{% for notice in notices %}
+{% if perms.view and notices %}
+{% for notice in hw_notices %}
 <div class="row">
     <div class="col-md-12">
         <div class="panel {% if notice.expired %}panel-danger{% else %}panel-warning{% endif %}">
