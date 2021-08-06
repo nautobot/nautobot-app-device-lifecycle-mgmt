@@ -1,4 +1,4 @@
-"""Extended core templates for nautobot_plugin_device_lifecycle_mgmt."""
+"""Extended core templates for the LifeCycle Management plugin."""
 from abc import ABCMeta
 from django.db.models import Q
 from nautobot.extras.plugins import PluginTemplateExtension

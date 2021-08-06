@@ -7,7 +7,7 @@ from taggit.managers import TaggableManager
 from nautobot.extras.graphql.types import TagType
 from nautobot.dcim.models import Device
 from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
-from nautobot_plugin_device_lifecycle_mgmt.filters import HardwareLCMNoticeFilter
+from nautobot_plugin_device_lifecycle_mgmt.filters import HardwareLCMFilter
 
 
 @convert_django_field.register(TaggableManager)
@@ -42,7 +42,7 @@ class HardwareLCMType(DjangoObjectType):
         """Metadata magic method for the HardwareLCMType."""
 
         model = HardwareLCM
-        filterset_class = HardwareLCMNoticeFilter
+        filterset_class = HardwareLCMFilter
 
 
 graphql_types = [

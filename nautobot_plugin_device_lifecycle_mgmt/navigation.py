@@ -1,4 +1,4 @@
-"""Menu items."""
+"""Menu items for the LifeCycle Management plugin."""
 # pylint: disable=C0412
 from packaging.version import Version
 from nautobot import __version__

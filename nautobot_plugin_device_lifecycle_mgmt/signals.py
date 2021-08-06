@@ -1,1 +1,1 @@
-"""Custom signals for nautobot_plugin_device_lifecycle_mgmt."""
+"""Custom signals for the LifeCycle Management plugin."""

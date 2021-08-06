@@ -1,4 +1,4 @@
-"""API serializers for nautobot_plugin_device_lifecycle_mgmt."""
+"""API serializers implementation for the LifeCycle Management plugin."""
 
 from nautobot.core.api.serializers import ValidatedModelSerializer
 
@@ -7,7 +7,7 @@ from nautobot.dcim.api.nested_serializers import NestedDeviceSerializer, NestedD
 from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 
 
-class HardwareLCMNoticeSerializer(ValidatedModelSerializer):
+class HardwareLCMSerializer(ValidatedModelSerializer):
     """API serializer."""
 
     device_type = NestedDeviceTypeSerializer(

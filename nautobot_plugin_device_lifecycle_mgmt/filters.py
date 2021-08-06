@@ -1,4 +1,4 @@
-"""Filtering for nautobot_plugin_device_lifecycle_mgmt UI."""
+"""Filtering implementation for the LifeCycle Management plugin."""
 import datetime
 import django_filters
 from django.db.models import Q
@@ -7,7 +7,7 @@ from nautobot.dcim.models import DeviceType
 from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 
 
-class HardwareLCMNoticeFilter(django_filters.FilterSet):
+class HardwareLCMFilter(django_filters.FilterSet):
     """Filter for HardwareLCMNotice."""
 
     q = django_filters.CharFilter(method="search", label="Search")

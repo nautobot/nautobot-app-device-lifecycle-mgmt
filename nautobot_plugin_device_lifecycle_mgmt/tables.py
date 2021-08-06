@@ -1,4 +1,4 @@
-"""Tables for nautobot_plugin_device_lifecycle_mgmt."""
+"""Tables implementation for the LifeCycle Management plugin."""
 
 import django_tables2 as tables
 from django_tables2.utils import A

@@ -1,8 +1,7 @@
 """Forms implementation for the LifeCycle Management plugin."""
 import logging
 from django import forms
-from django.db.utils import ProgrammingError
-from nautobot.utilities.forms import BootstrapMixin, DatePicker, add_blank_choice
+from nautobot.utilities.forms import BootstrapMixin, DatePicker
 from nautobot.dcim.models import DeviceType, InventoryItem
 from nautobot.extras.forms import CustomFieldModelCSVForm
 from nautobot.utilities.forms import BulkEditForm
@@ -12,25 +11,15 @@ from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 logger = logging.getLogger("nautobot_plugin_device_lifecycle_mgmt")
 
 
-class HardwareLCMNoticeForm(BootstrapMixin, forms.ModelForm):
-    """HardwareLCM creation/edit form."""
+class HardwareLCMForm(BootstrapMixin, forms.ModelForm):
+    """Hardware Device LifeCycle creation/edit form."""
 
-    try:
-        # Generate a list of choices from the distinct inventory item part_ids
-        choices = add_blank_choice(
-            InventoryItem.objects.distinct("part_id").order_by("part_id").values_list("part_id", flat=True)
-        )
-    except ProgrammingError:
-        # The InventoryItem table might not exist yet (if migrations have not been run)
-        # Similar scenario to nautobot/nautobot/extras/apps.py:18
-        choices = ((None, "---------"),)
-        logger.warning(
-            "Fetching the available Nautobot dcim inventory items failed because "
-            "the InventoryItem table was not available or populated. This is normal "
-            "during the execution of the migration command for the first time."
-        )
-
-    inventory_item = forms.ChoiceField(choices=choices, label="Inventory Part ID", required=False)
+    inventory_item = forms.ModelChoiceField(
+        queryset=InventoryItem.objects.distinct("part_id").order_by("part_id").values_list("part_id", flat=True),
+        label="Inventory Part ID",
+        to_field_name="part_id",
+        required=False,
+    )
 
     class Meta:
         """Meta attributes for the HardwareLCMNoticeForm class."""
@@ -47,8 +36,8 @@ class HardwareLCMNoticeForm(BootstrapMixin, forms.ModelForm):
         }
 
 
-class HardwareLCMNoticeBulkEditForm(BootstrapMixin, BulkEditForm):
-    """HardwareLCMNotice bulk edit form."""
+class HardwareLCMBulkEditForm(BootstrapMixin, BulkEditForm):
+    """Hardware Device LifeCycle bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=HardwareLCM.objects.all(), widget=forms.MultipleHiddenInput)
     release_date = forms.DateField(widget=DatePicker(), required=False)
@@ -73,7 +62,7 @@ class HardwareLCMNoticeBulkEditForm(BootstrapMixin, BulkEditForm):
         ]
 
 
-class HardwareLCMNoticeFilterForm(BootstrapMixin, forms.ModelForm):
+class HardwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
     """Filter form to filter searches."""
 
     q = forms.CharField(
@@ -108,8 +97,8 @@ class HardwareLCMNoticeFilterForm(BootstrapMixin, forms.ModelForm):
         }
 
 
-class HardwareLCMNoticeCSVForm(CustomFieldModelCSVForm):
-    """Form for creating bulk eox notices."""
+class HardwareLCMCSVForm(CustomFieldModelCSVForm):
+    """Form for creating bulk Hardware Device Lifecycle notices."""
 
     device_type = forms.ModelChoiceField(
         required=True, queryset=DeviceType.objects.all(), to_field_name="model", label="Device type"

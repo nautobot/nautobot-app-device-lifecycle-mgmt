@@ -1,4 +1,4 @@
-"""Django models for nautobot_plugin_device_lifecycle_mgmt plugin."""
+"""Django models for the LifeCycle Management plugin."""
 
 from datetime import datetime
 from django.db import models
