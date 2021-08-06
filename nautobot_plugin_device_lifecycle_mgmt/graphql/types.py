@@ -10,12 +10,6 @@ from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 from nautobot_plugin_device_lifecycle_mgmt.filters import HardwareLCMFilter
 
 
-@convert_django_field.register(TaggableManager)
-def convert_field_to_list_tags(field, registry=None):
-    """Convert TaggableManager to List of Tags."""
-    return graphene.List(TagType)
-
-
 class LCMDevice(DjangoObjectType):
     """GraphQL representation of a Nautobot Device."""
 
