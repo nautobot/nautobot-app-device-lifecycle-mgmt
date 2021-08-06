@@ -1,10 +1,7 @@
 """GraphQL implementation for the Device LifeCycle Management plugin."""
 import graphene
-from graphene_django import DjangoObjectType
-from graphene_django.converter import convert_django_field
-from taggit.managers import TaggableManager
 
-from nautobot.extras.graphql.types import TagType
+from nautobot.extras.graphql.types import DjangoObjectType
 from nautobot.dcim.models import Device
 from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 from nautobot_plugin_device_lifecycle_mgmt.filters import HardwareLCMFilter

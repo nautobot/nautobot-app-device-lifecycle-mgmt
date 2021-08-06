@@ -35,11 +35,19 @@
 
             <!-- Defines all hardware notice logic within this tab-panel. -->
             <div role="tabpanel" class="tab-pane active" id="hardware">
-                <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                <div class="panel-group" id="hwAccordion" role="tablist" aria-multiselectable="true">
                     {% for notice in hw_notices %}
                     <div class="panel panel-{% if notice.expired %}danger{% else %}warning{% endif %}">
                         <div class="panel-heading" role="tab" id="heading{{ forloop.counter }}">
-                            <span role="button" class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">{{ notice }}</span>
+                            <span role="button"
+                                  class="accordion-toggle collapsed"
+                                  data-toggle="collapse"
+                                  data-parent="#hwAccordion"
+                                  href="#collapse{{ forloop.counter }}"
+                                  aria-expanded="false"
+                                  aria-controls="collapse{{ forloop.counter }}">
+                                {{ notice }}
+                            </span>
                         </div>
                         <div id="collapse{{ forloop.counter }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{ forloop.counter }}">
                             <div class="list-group">
@@ -82,7 +90,9 @@
 
             <!-- Defines all software notice logic within this tab-panel. -->
             <div role="tabpanel" class="tab-pane" id="software">
+                <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
 
+                </div>
             </div>
         </div>
     </div>

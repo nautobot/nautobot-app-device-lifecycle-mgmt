@@ -22,7 +22,7 @@ class HardwareLCMNoticesTable(BaseTable):
         verbose_name="Reference",
     )
     documentation_url = tables.TemplateColumn(
-        template_code="""{% if record.documentation_url %} 
+        template_code="""{% if record.documentation_url %}
                     <a href="{{ record.documentation_url }}" target="_blank" data-toggle="tooltip" data-placement="left" title="{{ record.documentation_url }}">
                         <span class="mdi mdi-open-in-new"></span>
                     </a>
