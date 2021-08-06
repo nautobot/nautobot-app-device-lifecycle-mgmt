@@ -1,15 +1,15 @@
-"""Plugin declaration for nautobot_plugin_device_lifecycle_mgmt."""
+"""Plugin declaration for the Device LifeCycle Management."""
 
-__version__ = "0.2.0"
+__version__ = "1.0.0-beta.0"
 
 from nautobot.extras.plugins import PluginConfig
 
 
 class DeviceLifeCycleConfig(PluginConfig):
-    """Plugin configuration for the nautobot_plugin_device_lifecycle_mgmt plugin."""
+    """Plugin configuration for the Device LifeCycle Management plugin."""
 
     name = "nautobot_plugin_device_lifecycle_mgmt"
-    verbose_name = "Nautobot Device Lifecycle"
+    verbose_name = "Nautobot Device Lifecycle Management"
     version = __version__
     author = "Mikhail Yohman"
     description = "Manages device lifecycle of Nautobot Devices and Components."
