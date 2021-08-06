@@ -7,11 +7,19 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
-from nautobot.extras.models.change_logging import ChangeLoggedModel
-from nautobot.core.models import BaseModel
+from nautobot.extras.utils import extras_features
+from nautobot.core.models.generics import PrimaryModel
 
 
-class HardwareLCM(BaseModel, ChangeLoggedModel):
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "relationships",
+    "webhooks",
+)
+class HardwareLCM(PrimaryModel):
     """HardwareLCMNotice model for plugin."""
 
     # Set model columns
