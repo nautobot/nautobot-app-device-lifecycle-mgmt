@@ -12,8 +12,12 @@ from nautobot_plugin_device_lifecycle_mgmt.forms import (
 )
 from nautobot_plugin_device_lifecycle_mgmt.filters import HardwareLCMFilter
 
+# ---------------------------------------------------------------------------------
+#  Hardware LifeCycle Management Views
+# ---------------------------------------------------------------------------------
 
-class HardwareLCMNoticesListView(generic.ObjectListView):
+
+class HardwareLCMListView(generic.ObjectListView):
     """List view."""
 
     queryset = HardwareLCM.objects.prefetch_related("device_type")
@@ -22,7 +26,7 @@ class HardwareLCMNoticesListView(generic.ObjectListView):
     table = HardwareLCMNoticesTable
 
 
-class HardwareLCMNoticeView(generic.ObjectView):
+class HardwareLCMView(generic.ObjectView):
     """Detail view."""
 
     queryset = HardwareLCM.objects.prefetch_related("device_type")
@@ -44,7 +48,7 @@ class HardwareLCMNoticeView(generic.ObjectView):
         return {"devices": []}
 
 
-class HardwareLCMNoticeCreateView(generic.ObjectEditView):
+class HardwareLCMCreateView(generic.ObjectEditView):
     """Create view."""
 
     model = HardwareLCM
@@ -53,7 +57,7 @@ class HardwareLCMNoticeCreateView(generic.ObjectEditView):
     default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list"
 
 
-class HardwareLCMNoticeDeleteView(generic.ObjectDeleteView):
+class HardwareLCMDeleteView(generic.ObjectDeleteView):
     """Delete view."""
 
     model = HardwareLCM
@@ -61,7 +65,7 @@ class HardwareLCMNoticeDeleteView(generic.ObjectDeleteView):
     default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list"
 
 
-class HardwareLCMNoticeEditView(generic.ObjectEditView):
+class HardwareLCMEditView(generic.ObjectEditView):
     """Edit view."""
 
     model = HardwareLCM
@@ -70,7 +74,7 @@ class HardwareLCMNoticeEditView(generic.ObjectEditView):
     default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm"
 
 
-class HardwareLCMNoticeBulkImportView(generic.BulkImportView):
+class HardwareLCMBulkImportView(generic.BulkImportView):
     """View for bulk import of hardware lcm."""
 
     queryset = HardwareLCM.objects.prefetch_related("device_type")
@@ -79,7 +83,7 @@ class HardwareLCMNoticeBulkImportView(generic.BulkImportView):
     default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list"
 
 
-class HardwareLCMNoticeBulkDeleteView(generic.BulkDeleteView):
+class HardwareLCMBulkDeleteView(generic.BulkDeleteView):
     """View for deleting one or more HardwareLCM records."""
 
     queryset = HardwareLCM.objects.prefetch_related("device_type")
@@ -88,7 +92,7 @@ class HardwareLCMNoticeBulkDeleteView(generic.BulkDeleteView):
     default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list"
 
 
-class HardwareLCMNoticeBulkEditView(generic.BulkEditView):
+class HardwareLCMBulkEditView(generic.BulkEditView):
     """View for editing one or more HardwareLCM records."""
 
     queryset = HardwareLCM.objects.prefetch_related("device_type")
