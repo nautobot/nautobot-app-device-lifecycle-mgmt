@@ -22,6 +22,13 @@ class HardwareLCMFilter(django_filters.FilterSet):
         field_name="device_type", queryset=DeviceType.objects.all(), label="Device Type"
     )
 
+    inventory_item = django_filters.ModelMultipleChoiceFilter(
+        queryset=HardwareLCM.objects.exclude(inventory_item__isnull=True),
+        to_field_name="inventory_item",
+        field_name="inventory_item",
+        label="Inventory Part ID",
+    )
+
     expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
 
     class Meta:
@@ -34,6 +41,7 @@ class HardwareLCMFilter(django_filters.FilterSet):
             "end_of_support",
             "end_of_sw_releases",
             "end_of_security_patches",
+            "inventory_item",
             "documentation_url",
             "expired",
         ]

@@ -15,7 +15,10 @@ class HardwareLCMForm(BootstrapMixin, forms.ModelForm):
     """Hardware Device LifeCycle creation/edit form."""
 
     inventory_item = forms.ModelChoiceField(
-        queryset=InventoryItem.objects.distinct("part_id").order_by("part_id").values_list("part_id", flat=True),
+        queryset=InventoryItem.objects.exclude(part_id__exact="")
+        .distinct("part_id")
+        .order_by("part_id")
+        .values_list("part_id", flat=True),
         label="Inventory Part ID",
         to_field_name="part_id",
         required=False,
@@ -74,6 +77,14 @@ class HardwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
         required=False, queryset=DeviceType.objects.all(), to_field_name="slug"
     )
 
+    inventory_item = forms.ModelMultipleChoiceField(
+        queryset=HardwareLCM.objects.exclude(inventory_item__isnull=True)
+        .exclude(inventory_item__exact="")
+        .values_list("inventory_item", flat=True),
+        label="Inventory Part ID",
+        required=False,
+    )
+
     class Meta:
         """Meta attributes for the HardwareLCMNoticeFilterForm class."""
 
@@ -82,6 +93,7 @@ class HardwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
         fields = [
             "q",
             "device_type",
+            "inventory_item",
             "end_of_sale",
             "end_of_support",
             "end_of_sw_releases",

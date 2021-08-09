@@ -2,7 +2,7 @@
 from abc import ABCMeta
 from django.db.models import Q
 from nautobot.extras.plugins import PluginTemplateExtension
-from nautobot.dcim.models import Device
+from nautobot.dcim.models import InventoryItem
 from .models import HardwareLCM
 
 
@@ -36,9 +36,9 @@ class DeviceHWLCMNotice(PluginTemplateExtension, metaclass=ABCMeta):
                 "hw_notices": HardwareLCM.objects.filter(
                     Q(device_type=dev_obj.device_type)
                     | Q(
-                        inventory_item__in=Device.objects.filter(pk=dev_obj.pk).values_list(
-                            "inventoryitems__part_id", flat=True
-                        )
+                        inventory_item__in=[
+                            i.part_id for i in InventoryItem.objects.filter(device__pk=dev_obj.pk) if i.part_id
+                        ]
                     )
                 )
             },
