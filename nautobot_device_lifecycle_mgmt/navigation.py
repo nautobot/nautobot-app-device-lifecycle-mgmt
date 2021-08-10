@@ -37,6 +37,48 @@ try:
                         ),
                     ),
                 ),
+                NavMenuGroup(
+                    name="Software Lifecycle",
+                    weight=100,
+                    items=(
+                        NavMenuItem(
+                            link="plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm_list",
+                            name="SoftwareLCM",
+                            buttons=(
+                                NavMenuButton(
+                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm_add",
+                                    title="Add",
+                                    icon_class="mdi mdi-plus-thick",
+                                    button_class=ButtonColorChoices.GREEN,
+                                    permissions=[
+                                        "nautobot_plugin_device_lifecycle_mgmt.add_softwarelcm",
+                                    ],
+                                ),
+                            ),
+                            permissions=[
+                                "nautobot_plugin_device_lifecycle_mgmt.view_softwarelcm",
+                            ],
+                        ),
+                        NavMenuItem(
+                            link="plugins:nautobot_plugin_device_lifecycle_mgmt:validatedsoftwarelcm_list",
+                            name="ValidatedSoftwareLCM",
+                            buttons=(
+                                NavMenuButton(
+                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:validatedsoftwarelcm_add",
+                                    title="Add",
+                                    icon_class="mdi mdi-plus-thick",
+                                    button_class=ButtonColorChoices.GREEN,
+                                    permissions=[
+                                        "nautobot_plugin_device_lifecycle_mgmt.add_validatedsoftwarelcm",
+                                    ],
+                                ),
+                            ),
+                            permissions=[
+                                "nautobot_plugin_device_lifecycle_mgmt.view_validatedsoftwarelcm",
+                            ],
+                        ),
+                    ),
+                ),
             ),
         ),
     )
@@ -61,6 +103,32 @@ except ModuleNotFoundError:
                     icon_class="mdi mdi-database-import-outline",
                     color=ButtonColorChoices.BLUE,
                     permissions=["add"],
+                ),
+            ),
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm_list",
+            link_text="Software Lifecycle",
+            buttons=(
+                PluginMenuButton(
+                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm_add",
+                    title="Add",
+                    icon_class="mdi mdi-plus-thick",
+                    color=ButtonColorChoices.GREEN,
+                    permissions=["nautobot_plugin_device_lifecycle_mgmt.add_softwarelcm"],
+                ),
+            ),
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_plugin_device_lifecycle_mgmt:validatedsoftwarelcm_list",
+            link_text="Validated Software Lifecycle",
+            buttons=(
+                PluginMenuButton(
+                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:validatedsoftwarelcm_add",
+                    title="Add",
+                    icon_class="mdi mdi-plus-thick",
+                    color=ButtonColorChoices.GREEN,
+                    permissions=["nautobot_plugin_device_lifecycle_mgmt.add_validatedsoftwarelcm"],
                 ),
             ),
         ),
