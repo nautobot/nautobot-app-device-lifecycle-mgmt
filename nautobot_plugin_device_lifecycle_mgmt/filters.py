@@ -8,7 +8,7 @@ from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
 
 
 class HardwareLCMFilter(django_filters.FilterSet):
-    """Filter for HardwareLCMNotice."""
+    """Filter for HardwareLCM."""
 
     q = django_filters.CharFilter(method="search", label="Search")
 
