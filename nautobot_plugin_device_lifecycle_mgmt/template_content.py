@@ -7,7 +7,7 @@ from .models import HardwareLCM
 
 
 class DeviceTypeHWLCMNotice(PluginTemplateExtension, metaclass=ABCMeta):
-    """Class to add table for HardwareLCMNotice related to device type."""
+    """Class to add table for HardwareLCM related to device type."""
 
     model = "dcim.devicetype"
 
