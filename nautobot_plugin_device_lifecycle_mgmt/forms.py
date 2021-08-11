@@ -52,7 +52,7 @@ class HardwareLCMBulkEditForm(BootstrapMixin, BulkEditForm):
     comments = forms.CharField(required=False)
 
     class Meta:
-        """Meta attributes for the HardwareLCMNoticeBulkEditForm class."""
+        """Meta attributes for the HardwareLCMBulkEditForm class."""
 
         nullable_fields = [
             "release_date",
