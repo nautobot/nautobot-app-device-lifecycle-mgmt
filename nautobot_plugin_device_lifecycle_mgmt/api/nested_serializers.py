@@ -1,4 +1,4 @@
-"""Nested/brief alternate REST API serializers for nautobot_bgp_models models."""
+"""Nested/brief alternate REST API serializers for nautobot_plugin_device_lifecycle_mgmt models."""
 
 from rest_framework import serializers
 
