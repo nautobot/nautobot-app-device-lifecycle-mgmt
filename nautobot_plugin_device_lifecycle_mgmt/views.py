@@ -14,7 +14,11 @@ from nautobot_plugin_device_lifecycle_mgmt.forms import (
     ValidatedSoftwareLCMForm,
     ValidatedSoftwareLCMFilterForm,
 )
-from nautobot_plugin_device_lifecycle_mgmt.filters import EoxNoticeFilter, SoftwareLCMFilter, ValidatedSoftwareLCMFilter
+from nautobot_plugin_device_lifecycle_mgmt.filters import (
+    EoxNoticeFilter,
+    SoftwareLCMFilterSet,
+    ValidatedSoftwareLCMFilterSet,
+)
 from nautobot_plugin_device_lifecycle_mgmt.const import Permissions, URL
 
 
@@ -120,7 +124,7 @@ class SoftwareLCMListView(generic.ObjectListView):
     """SoftwareLCM List view."""
 
     queryset = SoftwareLCM.objects.prefetch_related("device_platform")
-    filterset = SoftwareLCMFilter
+    filterset = SoftwareLCMFilterSet
     filterset_form = SoftwareLCMFilterForm
     table = SoftwareLCMTable
     action_buttons = (
@@ -166,7 +170,7 @@ class ValidatedSoftwareLCMListView(generic.ObjectListView):
     """ValidatedSoftware List view."""
 
     queryset = ValidatedSoftwareLCM.objects.all()
-    filterset = ValidatedSoftwareLCMFilter
+    filterset = ValidatedSoftwareLCMFilterSet
     filterset_form = ValidatedSoftwareLCMFilterForm
     table = ValidatedSoftwareLCMTable
     action_buttons = (

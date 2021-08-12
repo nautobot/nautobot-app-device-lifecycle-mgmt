@@ -64,7 +64,7 @@ class EoxNoticeFilter(django_filters.FilterSet):
         return queryset.filter(qs_filter)
 
 
-class SoftwareLCMFilter(django_filters.FilterSet):
+class SoftwareLCMFilterSet(django_filters.FilterSet):
     """Filter for SoftwareLCM."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -108,7 +108,7 @@ class SoftwareLCMFilter(django_filters.FilterSet):
         return queryset.filter(qs_filter)
 
 
-class ValidatedSoftwareLCMFilter(django_filters.FilterSet):
+class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
     """Filter for ValidatedSoftwareLCM."""
 
     q = django_filters.CharFilter(method="search", label="Search")
