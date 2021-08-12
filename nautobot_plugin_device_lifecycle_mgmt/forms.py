@@ -3,8 +3,9 @@
 from django import forms
 
 
-from nautobot.utilities.forms import BootstrapMixin, DatePicker
+from nautobot.utilities.forms import BootstrapMixin, DatePicker, DynamicModelMultipleChoiceField
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Platform
+from nautobot.extras.models import Tag
 from nautobot.extras.forms import CustomFieldModelCSVForm, CustomFieldModelForm, RelationshipModelForm
 from nautobot.utilities.forms import BulkEditForm, DynamicModelChoiceField, StaticSelect2, BOOLEAN_WITH_BLANK_CHOICES
 
@@ -98,14 +99,19 @@ class EoxNoticeCSVForm(CustomFieldModelCSVForm):
         fields = EoxNotice.csv_headers
 
 
-class SoftwareLCMForm(BootstrapMixin, forms.ModelForm):
+class SoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
     """SoftwareLCM creation/edit form."""
+
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
     class Meta:
         """Meta attributes."""
 
         model = SoftwareLCM
-        fields = SoftwareLCM.csv_headers
+        fields = (
+            *SoftwareLCM.csv_headers,
+            "tags",
+        )
 
         widgets = {
             "end_of_support": DatePicker(),
@@ -175,6 +181,8 @@ class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, Relationshi
         label="Assigned To",
     )
 
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+
     class Meta:
         """Meta attributes."""
 
@@ -187,6 +195,7 @@ class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, Relationshi
             "start",
             "end",
             "primary",
+            "tags",
         )
 
         widgets = {

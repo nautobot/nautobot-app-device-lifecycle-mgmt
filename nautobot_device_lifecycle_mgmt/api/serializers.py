@@ -73,10 +73,14 @@ class SoftwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):
             "image_file_checksum",
             "long_term_support",
             "pre_release",
+            "custom_fields",
+            "tags",
         ]
 
 
-class ValidatedSoftwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=too-many-ancestors
+class ValidatedSoftwareLCMSerializer(
+    CustomFieldModelSerializer, TaggedObjectSerializer
+):  # pylint: disable=too-many-ancestors
     """REST API serializer for ValidatedSoftwareLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
@@ -110,6 +114,8 @@ class ValidatedSoftwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSer
             "start",
             "end",
             "primary",
+            "custom_fields",
+            "tags",
         ]
 
     @swagger_serializer_method(serializer_or_field=serializers.DictField)
