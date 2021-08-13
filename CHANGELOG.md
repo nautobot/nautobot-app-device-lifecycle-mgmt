@@ -11,6 +11,6 @@
 - Adds dynamic menu depending on the version of nautobot running.
 - Handles table not existing prior to migrations.
 - Add GraphQL endpoint for the Device LifeCycle Hardware model.
-- Add `InventoryItem.part_id` custom relationship to the Hardware model.
+- Add `InventoryItem.part_id` field to the Hardware model association options.
 - Add shell_plus and ipython to dev dependencies. 
 
