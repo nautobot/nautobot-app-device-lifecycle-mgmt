@@ -9,19 +9,19 @@
     <div class="row noprint">
         <div class="col-sm-12 col-md-12">
             <ol class="breadcrumb">
-                <li><a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list' %}">Hardware LifeCycle Notice</a></li>
+                <li><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list' %}">Hardware LifeCycle Notice</a></li>
                 <li><a>{{ object }}</a></li>
             </ol>
         </div>
     </div>
     <div class="pull-right noprint">
-        {% if perms.nautobot_plugin_device_lifecycle_mgmt.edit_notice %}
-            <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_edit' pk=object.id %}" class="btn btn-warning">
+        {% if perms.change %}
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_edit' pk=object.id %}" class="btn btn-warning">
                 <span class="mdi mdi-pencil" aria-hidden="true"></span> Edit
             </a>
         {% endif %}
-        {% if perms.nautobot_plugin_device_lifecycle_mgmt.delete_notice %}
-            <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_delete' pk=object.id %}" class="btn btn-danger">
+        {% if perms.delete %}
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_delete' pk=object.id %}" class="btn btn-danger">
                 <span class="mdi mdi-trash-can-outline" aria-hidden="true"></span> Delete
             </a>
         {% endif %}
@@ -36,7 +36,7 @@
             <a href="{{ object.get_absolute_url }}">Hardware Notice</a>
         </li>
         <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
-            <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_changelog' pk=object.id %}">Change Log</a>
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_changelog' pk=object.id %}">Change Log</a>
         </li>
     </ul>
 {% endblock %}

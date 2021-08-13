@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from nautobot.utilities.testing import ViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer
 
-from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM
 
 User = get_user_model()
 

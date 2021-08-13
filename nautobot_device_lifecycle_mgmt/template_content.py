@@ -16,7 +16,7 @@ class DeviceTypeHWLCMNotice(PluginTemplateExtension, metaclass=ABCMeta):
         devtype_obj = self.context["object"]
 
         return self.render(
-            "nautobot_plugin_device_lifecycle_mgmt/inc/general_notice.html",
+            "nautobot_device_lifecycle_mgmt/inc/general_notice.html",
             extra_context={"hw_notices": HardwareLCM.objects.filter(device_type=devtype_obj.pk)},
         )
 
@@ -31,7 +31,7 @@ class DeviceHWLCMNotice(PluginTemplateExtension, metaclass=ABCMeta):
         dev_obj = self.context["object"]
 
         return self.render(
-            "nautobot_plugin_device_lifecycle_mgmt/inc/device_notice.html",
+            "nautobot_device_lifecycle_mgmt/inc/device_notice.html",
             extra_context={
                 "hw_notices": HardwareLCM.objects.filter(
                     Q(device_type=dev_obj.device_type)
@@ -55,7 +55,7 @@ class InventoryItemHWLCMNotice(PluginTemplateExtension, metaclass=ABCMeta):
         inv_item_obj = self.context["object"]
 
         return self.render(
-            "nautobot_plugin_device_lifecycle_mgmt/inc/general_notice.html",
+            "nautobot_device_lifecycle_mgmt/inc/general_notice.html",
             extra_context={"hw_notices": HardwareLCM.objects.filter(inventory_item=inv_item_obj.part_id)},
         )
 

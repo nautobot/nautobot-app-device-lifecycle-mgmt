@@ -1,9 +1,10 @@
 """Django models for the LifeCycle Management plugin."""
 
 from datetime import datetime
-from django.db import models
+from django.db import models, connection
 from django.urls import reverse
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
+from django.db.models import CheckConstraint
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
@@ -58,6 +59,17 @@ class HardwareLCM(PrimaryModel):
         constraints = [
             models.UniqueConstraint(fields=["device_type"], name="unique_device_type"),
             models.UniqueConstraint(fields=["inventory_item"], name="unique_inventory_item_part"),
+            models.CheckConstraint(
+                check=(
+                    models.Q(inventory_item__isnull=True, device_type__isnull=False)
+                    | models.Q(inventory_item__isnull=False, device_type__isnull=True)
+                ),
+                name="At least one of InventoryItem or DeviceType specified.",
+            ),
+            models.CheckConstraint(
+                check=(models.Q(end_of_sale__isnull=False) | models.Q(end_of_support__isnull=False)),
+                name="End of Sale or End of Support must be specified.",
+            ),
         ]
 
     def __str__(self):
@@ -71,14 +83,12 @@ class HardwareLCM(PrimaryModel):
 
     def get_absolute_url(self):
         """Returns the Detail view for HardwareLCM models."""
-        return reverse("plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm", kwargs={"pk": self.pk})
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:hardwarelcm", kwargs={"pk": self.pk})
 
     @property
     def expired(self):
         """Return True or False if chosen field is expired."""
-        expired_field = settings.PLUGINS_CONFIG["nautobot_plugin_device_lifecycle_mgmt"].get(
-            "expired_field", "end_of_support"
-        )
+        expired_field = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"].get("expired_field", "end_of_support")
 
         # If the chosen or default field does not exist, default to one of the required fields that are present
         if not getattr(self, expired_field) and not getattr(self, "end_of_support"):
@@ -100,13 +110,28 @@ class HardwareLCM(PrimaryModel):
         super().clean()
 
         if not any([self.inventory_item, self.device_type]):
-            raise ValidationError(_("Inventory Item or Device Type must be specified."))
+            raise ValidationError(
+                {
+                    "end_of_sale": "End of Sale or End of Support must be specified.",
+                    "end_of_support": "End of Sale or End of Support must be specified.",
+                }
+            )
 
         if all([self.inventory_item, self.device_type]):
-            raise ValidationError(_("Only one of Inventory Item or Device Type allowed."))
+            raise ValidationError(
+                {
+                    "inventory_item": "Only one of Inventory Item OR Device Type allowed.",
+                    "device_type": "Only one of Inventory Item OR Device Type allowed.",
+                }
+            )
 
         if not self.end_of_sale and not self.end_of_support:
-            raise ValidationError(_("End of Sale or End of Support must be specified."))
+            raise ValidationError(
+                {
+                    "end_of_sale": "End of Sale or End of Support must be specified.",
+                    "end_of_support": "End of Sale or End of Support must be specified.",
+                }
+            )
 
     def to_csv(self):
         """Return fields for bulk view."""

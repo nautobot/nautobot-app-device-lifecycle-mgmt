@@ -1,4 +1,4 @@
-"""nautobot_plugin_device_lifecycle_mgmt test class for models."""
+"""nautobot_device_lifecycle_mgmt test class for models."""
 from datetime import date
 from django.test import TestCase
 from django.core.exceptions import ValidationError
@@ -6,7 +6,7 @@ from django.conf import settings
 
 from nautobot.dcim.models import DeviceType, Manufacturer
 
-from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM
 
 
 class TestModelBasic(TestCase):
@@ -103,7 +103,7 @@ class TestModelBasic(TestCase):
 
     def test_expired_field_setting_end_of_sale_expired(self):
         """Test expired property is expired with end_of_sale when set within plugin settings."""
-        settings.PLUGINS_CONFIG["nautobot_plugin_device_lifecycle_mgmt"]["expired_field"] = "end_of_sale"
+        settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]["expired_field"] = "end_of_sale"
         hwlcm_obj = HardwareLCM.objects.create(
             device_type=self.device_type, end_of_sale=date(2021, 4, 1), end_of_support=date(2999, 4, 1)
         )
@@ -111,6 +111,6 @@ class TestModelBasic(TestCase):
 
     def test_expired_field_setting_end_of_sale_not_expired(self):
         """Test expired property is NOT expired with end_of_sale not existing but plugin setting set to end_of_sale."""
-        settings.PLUGINS_CONFIG["nautobot_plugin_device_lifecycle_mgmt"]["expired_field"] = "end_of_sale"
+        settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]["expired_field"] = "end_of_sale"
         hwlcm_obj = HardwareLCM.objects.create(device_type=self.device_type, end_of_support=date(2999, 4, 1))
         self.assertFalse(hwlcm_obj.expired)

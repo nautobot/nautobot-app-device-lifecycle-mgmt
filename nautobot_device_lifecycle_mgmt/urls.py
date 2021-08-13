@@ -1,8 +1,8 @@
 """Django urlpatterns declaration for the LifeCycle Management plugin."""
 from django.urls import path
 from nautobot.extras.views import ObjectChangeLogView
-from nautobot_plugin_device_lifecycle_mgmt import views
-from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_device_lifecycle_mgmt import views
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM
 
 
 urlpatterns = [

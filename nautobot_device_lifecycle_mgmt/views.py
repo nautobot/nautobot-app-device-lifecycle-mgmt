@@ -1,16 +1,15 @@
 """Views implementation for the LifeCycle Management plugin."""
-
 from nautobot.core.views import generic
 from nautobot.dcim.models import Device
-from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
-from nautobot_plugin_device_lifecycle_mgmt.tables import HardwareLCMNoticesTable
-from nautobot_plugin_device_lifecycle_mgmt.forms import (
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_device_lifecycle_mgmt.tables import HardwareLCMNoticesTable
+from nautobot_device_lifecycle_mgmt.forms import (
     HardwareLCMForm,
     HardwareLCMBulkEditForm,
     HardwareLCMFilterForm,
     HardwareLCMCSVForm,
 )
-from nautobot_plugin_device_lifecycle_mgmt.filters import HardwareLCMFilter
+from nautobot_device_lifecycle_mgmt.filters import HardwareLCMFilterSet
 
 # ---------------------------------------------------------------------------------
 #  Hardware LifeCycle Management Views
@@ -21,7 +20,7 @@ class HardwareLCMListView(generic.ObjectListView):
     """List view."""
 
     queryset = HardwareLCM.objects.prefetch_related("device_type")
-    filterset = HardwareLCMFilter
+    filterset = HardwareLCMFilterSet
     filterset_form = HardwareLCMFilterForm
     table = HardwareLCMNoticesTable
 
@@ -54,7 +53,7 @@ class HardwareLCMCreateView(generic.ObjectEditView):
     model = HardwareLCM
     queryset = HardwareLCM.objects.prefetch_related("device_type")
     model_form = HardwareLCMForm
-    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list"
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list"
 
 
 class HardwareLCMDeleteView(generic.ObjectDeleteView):
@@ -62,7 +61,7 @@ class HardwareLCMDeleteView(generic.ObjectDeleteView):
 
     model = HardwareLCM
     queryset = HardwareLCM.objects.prefetch_related("device_type")
-    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list"
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list"
 
 
 class HardwareLCMEditView(generic.ObjectEditView):
@@ -71,7 +70,7 @@ class HardwareLCMEditView(generic.ObjectEditView):
     model = HardwareLCM
     queryset = HardwareLCM.objects.prefetch_related("device_type")
     model_form = HardwareLCMForm
-    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm"
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:hardwarelcm"
 
 
 class HardwareLCMBulkImportView(generic.BulkImportView):
@@ -80,7 +79,7 @@ class HardwareLCMBulkImportView(generic.BulkImportView):
     queryset = HardwareLCM.objects.prefetch_related("device_type")
     model_form = HardwareLCMCSVForm
     table = HardwareLCMNoticesTable
-    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list"
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list"
 
 
 class HardwareLCMBulkDeleteView(generic.BulkDeleteView):
@@ -88,15 +87,15 @@ class HardwareLCMBulkDeleteView(generic.BulkDeleteView):
 
     queryset = HardwareLCM.objects.prefetch_related("device_type")
     table = HardwareLCMNoticesTable
-    bulk_delete_url = "plugins:nautobot_plugin_device_lifecycle_mgmt.hardwarelcm_bulk_delete"
-    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list"
+    bulk_delete_url = "plugins:nautobot_device_lifecycle_mgmt.hardwarelcm_bulk_delete"
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list"
 
 
 class HardwareLCMBulkEditView(generic.BulkEditView):
     """View for editing one or more HardwareLCM records."""
 
     queryset = HardwareLCM.objects.prefetch_related("device_type")
-    filterset = HardwareLCMFilter
+    filterset = HardwareLCMFilterSet
     table = HardwareLCMNoticesTable
     form = HardwareLCMBulkEditForm
-    bulk_edit_url = "plugins:nautobot_plugin_device_lifecycle_mgmt.hardwarelcm_bulk_edit"
+    bulk_edit_url = "plugins:nautobot_device_lifecycle_mgmt.hardwarelcm_bulk_edit"

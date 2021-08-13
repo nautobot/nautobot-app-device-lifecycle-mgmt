@@ -3,7 +3,7 @@
 import django_tables2 as tables
 from django_tables2.utils import A
 from nautobot.utilities.tables import BaseTable, ButtonsColumn, ToggleColumn
-from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM
 
 
 class HardwareLCMNoticesTable(BaseTable):
@@ -11,7 +11,7 @@ class HardwareLCMNoticesTable(BaseTable):
 
     pk = ToggleColumn()
     name = tables.LinkColumn(
-        "plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm", text=lambda record: record, args=[A("pk")]
+        "plugins:nautobot_device_lifecycle_mgmt:hardwarelcm", text=lambda record: record, args=[A("pk")]
     )
     reference_item = tables.TemplateColumn(
         template_code="""{% if record.device_type %}

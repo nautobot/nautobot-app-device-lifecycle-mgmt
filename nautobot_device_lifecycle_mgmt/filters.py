@@ -4,10 +4,10 @@ import django_filters
 from django.db.models import Q
 
 from nautobot.dcim.models import DeviceType
-from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM
 
 
-class HardwareLCMFilter(django_filters.FilterSet):
+class HardwareLCMFilterSet(django_filters.FilterSet):
     """Filter for HardwareLCMNotice."""
 
     q = django_filters.CharFilter(method="search", label="Search")

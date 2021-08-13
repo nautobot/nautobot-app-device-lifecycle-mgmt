@@ -17,19 +17,19 @@ if Version(__version__) >= Version("1.1.0a"):
                     weight=100,
                     items=(
                         NavMenuItem(
-                            link="plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list",
+                            link="plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list",
                             name="Hardware Notices",
                             permissions=["view"],
                             buttons=(
                                 NavMenuButton(
-                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_add",
+                                    link="plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_add",
                                     title="Add",
                                     icon_class="mdi mdi-plus-thick",
                                     button_class=ButtonColorChoices.GREEN,
                                     permissions=["add"],
                                 ),
                                 NavMenuButton(
-                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_import",
+                                    link="plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_import",
                                     title="Import",
                                     icon_class="mdi mdi-database-import-outline",
                                     button_class=ButtonColorChoices.BLUE,
@@ -47,18 +47,18 @@ else:
 
     menu_items = (
         PluginMenuItem(
-            link="plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list",
+            link="plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list",
             link_text="Hardware Notices",
             buttons=(
                 PluginMenuButton(
-                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_add",
+                    link="plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_add",
                     title="Add",
                     icon_class="mdi mdi-plus-thick",
                     color=ButtonColorChoices.GREEN,
                     permissions=["add"],
                 ),
                 PluginMenuButton(
-                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_import",
+                    link="plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_import",
                     title="Import",
                     icon_class="mdi mdi-database-import-outline",
                     color=ButtonColorChoices.BLUE,

@@ -17,7 +17,7 @@ services:
       - "./dev.env"
     volumes:
       - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
-      - "../nautobot_plugin_device_lifecycle_mgmt:/source/nautobot_plugin_device_lifecycle_mgmt"
+      - "../nautobot_device_lifecycle_mgmt:/source/nautobot_device_lifecycle_mgmt"
     tty: true
   worker:
     build:

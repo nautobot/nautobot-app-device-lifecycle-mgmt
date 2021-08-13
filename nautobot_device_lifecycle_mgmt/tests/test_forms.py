@@ -3,7 +3,7 @@ from django.test import TestCase
 
 from nautobot.dcim.models import DeviceType, Manufacturer
 
-from nautobot_plugin_device_lifecycle_mgmt.forms import HardwareLCMForm
+from nautobot_device_lifecycle_mgmt.forms import HardwareLCMForm
 
 
 class HardwareLCMFormTest(TestCase):

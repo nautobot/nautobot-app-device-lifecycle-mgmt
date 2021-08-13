@@ -6,9 +6,9 @@ from nautobot.dcim.models import DeviceType, InventoryItem
 from nautobot.extras.forms import CustomFieldModelCSVForm
 from nautobot.utilities.forms import BulkEditForm
 
-from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM
 
-logger = logging.getLogger("nautobot_plugin_device_lifecycle_mgmt")
+logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 
 
 class HardwareLCMForm(BootstrapMixin, forms.ModelForm):

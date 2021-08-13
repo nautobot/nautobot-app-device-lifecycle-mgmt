@@ -3,8 +3,8 @@ import graphene
 
 from nautobot.extras.graphql.types import DjangoObjectType
 from nautobot.dcim.models import Device
-from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
-from nautobot_plugin_device_lifecycle_mgmt.filters import HardwareLCMFilter
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_device_lifecycle_mgmt.filters import HardwareLCMFilterSet
 
 
 class LCMDevice(DjangoObjectType):
@@ -33,7 +33,7 @@ class HardwareLCMType(DjangoObjectType):
         """Metadata magic method for the HardwareLCMType."""
 
         model = HardwareLCM
-        filterset_class = HardwareLCMFilter
+        filterset_class = HardwareLCMFilterSet
 
 
 graphql_types = [

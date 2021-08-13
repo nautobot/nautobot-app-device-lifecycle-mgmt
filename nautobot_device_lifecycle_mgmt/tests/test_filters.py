@@ -3,15 +3,15 @@ from django.test import TestCase
 
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site
 
-from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
-from nautobot_plugin_device_lifecycle_mgmt.filters import HardwareLCMFilter
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_device_lifecycle_mgmt.filters import HardwareLCMFilterSet
 
 
 class HardwareLCMNoticeTestCase(TestCase):
     """Tests for HardwareLCMNoticeFilter."""
 
     queryset = HardwareLCM.objects.all()
-    filterset = HardwareLCMFilter
+    filterset = HardwareLCMFilterSet
 
     def setUp(self):
         self.manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")

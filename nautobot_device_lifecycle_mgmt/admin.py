@@ -1,7 +1,7 @@
 """Admin interface for eox notices."""
 
 from django.contrib import admin
-from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM
 
 
 @admin.register(HardwareLCM)

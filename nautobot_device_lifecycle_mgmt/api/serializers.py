@@ -4,7 +4,7 @@ from nautobot.core.api.serializers import ValidatedModelSerializer
 
 from nautobot.dcim.api.nested_serializers import NestedDeviceSerializer, NestedDeviceTypeSerializer
 
-from nautobot_plugin_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM
 
 
 class HardwareLCMSerializer(ValidatedModelSerializer):

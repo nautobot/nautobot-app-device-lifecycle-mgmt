@@ -22,7 +22,7 @@ Once installed, the plugin needs to be enabled in your `configuration.py`
 
 ```python
 # In your configuration.py
-PLUGINS = ["nautobot_plugin_device_lifecycle_mgmt"]
+PLUGINS = ["nautobot_device_lifecycle_mgmt"]
 ```
 
 ## Usage
