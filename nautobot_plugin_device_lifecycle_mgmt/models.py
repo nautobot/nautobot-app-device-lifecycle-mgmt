@@ -122,7 +122,7 @@ class EoxNotice(BaseModel, ChangeLoggedModel):
     "webhooks",
 )
 class SoftwareLCM(PrimaryModel):
-    """Software Life-Cycle Management model"""
+    """Software Life-Cycle Management model."""
 
     device_platform = models.ForeignKey(to="dcim.Platform", on_delete=models.CASCADE, verbose_name="Device Platform")
     version = models.CharField(max_length=50)
@@ -192,7 +192,7 @@ class SoftwareLCM(PrimaryModel):
     "webhooks",
 )
 class ValidatedSoftwareLCM(PrimaryModel):
-    """ValidatedSoftwareLCM model"""
+    """ValidatedSoftwareLCM model."""
 
     softwarelcm = models.ForeignKey(to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Related SoftwareLCM")
     assigned_to_content_type = models.ForeignKey(

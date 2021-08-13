@@ -59,6 +59,8 @@ class SoftwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):
     device_platform = NestedPlatformSerializer(required=False, read_only=True)
 
     class Meta:
+        """Meta attributes."""
+
         model = SoftwareLCM
         fields = [
             "id",
@@ -103,6 +105,8 @@ class ValidatedSoftwareLCMSerializer(
     assigned_to = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
+        """Meta attributes."""
+
         model = ValidatedSoftwareLCM
         fields = [
             "id",

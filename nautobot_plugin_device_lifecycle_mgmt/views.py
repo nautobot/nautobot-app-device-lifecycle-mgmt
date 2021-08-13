@@ -1,6 +1,5 @@
 """Views for nautobot_plugin_device_lifecycle_mgmt."""
 
-from django.utils.translation import templatize
 from nautobot.core.views import generic
 from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice, SoftwareLCM, ValidatedSoftwareLCM
 from nautobot_plugin_device_lifecycle_mgmt.tables import EoxNoticesTable, SoftwareLCMTable, ValidatedSoftwareLCMTable
