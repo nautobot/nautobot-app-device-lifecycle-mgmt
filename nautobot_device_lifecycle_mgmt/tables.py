@@ -6,7 +6,7 @@ from nautobot.utilities.tables import BaseTable, ButtonsColumn, ToggleColumn
 from nautobot_device_lifecycle_mgmt.models import HardwareLCM
 
 
-class HardwareLCMNoticesTable(BaseTable):
+class HardwareLCMTable(BaseTable):
     """Table for list view."""
 
     pk = ToggleColumn()

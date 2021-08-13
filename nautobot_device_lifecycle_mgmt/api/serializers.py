@@ -11,7 +11,7 @@ class HardwareLCMSerializer(ValidatedModelSerializer):
     """API serializer."""
 
     device_type = NestedDeviceTypeSerializer(
-        many=False, read_only=False, required=True, help_text="Device Type to attach Hardware LCM Notice to"
+        many=False, read_only=False, required=True, help_text="Device Type to attach the Hardware LCM to"
     )
     devices = NestedDeviceSerializer(many=True, read_only=True, required=False, help_text="Devices tied to Device Type")
 

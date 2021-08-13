@@ -10,8 +10,8 @@ from nautobot_device_lifecycle_mgmt.models import HardwareLCM
 User = get_user_model()
 
 
-class HardwareLCMNoticeViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
-    """Test the HardwareLCMNotices views."""
+class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
+    """Test the HardwareLCM views."""
 
     model = HardwareLCM
     bulk_edit_data = {"documentation_url": "https://cisco.com/eox"}

@@ -1,11 +1,9 @@
 """Django models for the LifeCycle Management plugin."""
 
 from datetime import datetime
-from django.db import models, connection
+from django.db import models
 from django.urls import reverse
-from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
-from django.db.models import CheckConstraint
-from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
 from django.conf import settings
 
 from nautobot.extras.utils import extras_features
@@ -21,7 +19,7 @@ from nautobot.core.models.generics import PrimaryModel
     "webhooks",
 )
 class HardwareLCM(PrimaryModel):
-    """HardwareLCMNotice model for plugin."""
+    """HardwareLCM model for plugin."""
 
     # Set model columns
     device_type = models.ForeignKey(
@@ -109,19 +107,11 @@ class HardwareLCM(PrimaryModel):
         """Override clean to do custom validation."""
         super().clean()
 
-        if not any([self.inventory_item, self.device_type]):
+        if not any([self.inventory_item, self.device_type]) or all([self.inventory_item, self.device_type]):
             raise ValidationError(
                 {
-                    "end_of_sale": "End of Sale or End of Support must be specified.",
-                    "end_of_support": "End of Sale or End of Support must be specified.",
-                }
-            )
-
-        if all([self.inventory_item, self.device_type]):
-            raise ValidationError(
-                {
-                    "inventory_item": "Only one of Inventory Item OR Device Type allowed.",
-                    "device_type": "Only one of Inventory Item OR Device Type allowed.",
+                    "inventory_item": "One and only one of `Inventory Item` OR `Device Type` must be specified.",
+                    "device_type": "One and only one of `Inventory Item` OR `Device Type` must be specified.",
                 }
             )
 

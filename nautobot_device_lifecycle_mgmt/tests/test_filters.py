@@ -7,8 +7,8 @@ from nautobot_device_lifecycle_mgmt.models import HardwareLCM
 from nautobot_device_lifecycle_mgmt.filters import HardwareLCMFilterSet
 
 
-class HardwareLCMNoticeTestCase(TestCase):
-    """Tests for HardwareLCMNoticeFilter."""
+class HardwareLCMTestCase(TestCase):
+    """Tests for HardwareLCMFilter."""
 
     queryset = HardwareLCM.objects.all()
     filterset = HardwareLCMFilterSet

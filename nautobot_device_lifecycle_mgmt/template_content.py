@@ -6,7 +6,7 @@ from nautobot.dcim.models import InventoryItem
 from .models import HardwareLCM
 
 
-class DeviceTypeHWLCMNotice(PluginTemplateExtension, metaclass=ABCMeta):
+class DeviceTypeHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
     """Class to add table for HardwareLCM related to device type."""
 
     model = "dcim.devicetype"
@@ -21,8 +21,8 @@ class DeviceTypeHWLCMNotice(PluginTemplateExtension, metaclass=ABCMeta):
         )
 
 
-class DeviceHWLCMNotice(PluginTemplateExtension, metaclass=ABCMeta):
-    """Class to add table for HardwareLCMNotice related to device type."""
+class DeviceHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
+    """Class to add table for DeviceHWLCM related to device type."""
 
     model = "dcim.device"
 
@@ -45,8 +45,8 @@ class DeviceHWLCMNotice(PluginTemplateExtension, metaclass=ABCMeta):
         )
 
 
-class InventoryItemHWLCMNotice(PluginTemplateExtension, metaclass=ABCMeta):
-    """Class to add table for HardwareLCMNotice related to inventory items."""
+class InventoryItemHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
+    """Class to add table for InventoryItemHWLCM related to inventory items."""
 
     model = "dcim.inventoryitem"
 
@@ -60,4 +60,4 @@ class InventoryItemHWLCMNotice(PluginTemplateExtension, metaclass=ABCMeta):
         )
 
 
-template_extensions = [DeviceTypeHWLCMNotice, DeviceHWLCMNotice, InventoryItemHWLCMNotice]
+template_extensions = [DeviceTypeHWLCM, DeviceHWLCM, InventoryItemHWLCM]

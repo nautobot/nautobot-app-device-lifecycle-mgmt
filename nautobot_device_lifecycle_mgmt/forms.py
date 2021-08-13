@@ -25,7 +25,7 @@ class HardwareLCMForm(BootstrapMixin, forms.ModelForm):
     )
 
     class Meta:
-        """Meta attributes for the HardwareLCMNoticeForm class."""
+        """Meta attributes for the HardwareLCMForm class."""
 
         model = HardwareLCM
         fields = HardwareLCM.csv_headers
@@ -86,7 +86,7 @@ class HardwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
     )
 
     class Meta:
-        """Meta attributes for the HardwareLCMNoticeFilterForm class."""
+        """Meta attributes for the HardwareLCMFilterForm class."""
 
         model = HardwareLCM
         # Define the fields above for ordering and widget purposes
@@ -117,7 +117,7 @@ class HardwareLCMCSVForm(CustomFieldModelCSVForm):
     )
 
     class Meta:
-        """Meta attributes for the HardwareLCMNoticeCSVForm class."""
+        """Meta attributes for the HardwareLCMCSVForm class."""
 
         model = HardwareLCM
         fields = HardwareLCM.csv_headers

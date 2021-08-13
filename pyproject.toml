@@ -13,7 +13,7 @@ include = [
     "README.md",
 ]
 packages = [
-    { include = "nautobot_plugin_device_lifecycle_mgmt" },
+    { include = "nautobot_device_lifecycle_mgmt" },
 ]
 
 [tool.poetry.dependencies]
