@@ -10,7 +10,7 @@
     <div class="row noprint">
         <div class="col-sm-8 col-md-9">
             <ol class="breadcrumb">
-                <li><a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm_list' %}">SoftwareLCM</a></li>
+                <li><a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm_list' %}">Software</a></li>
                 <li><a>{{ object }}</a></li>
             </ol>
         </div>
@@ -43,7 +43,7 @@
     </div>
     <ul class="nav nav-tabs">
         <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
-            <a href="{{ object.get_absolute_url }}">SoftwareLCM</a>
+            <a href="{{ object.get_absolute_url }}">Software</a>
         </li>
         <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
             <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm_changelog' pk=object.id %}">Change Log</a>
@@ -56,7 +56,7 @@
     <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <strong>SoftwareLCM</strong>
+                <strong>Software</strong>
             </div>
             <table class="table table-hover panel-body attr-table">
                 <tr>

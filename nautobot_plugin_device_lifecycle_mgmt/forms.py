@@ -161,7 +161,6 @@ class SoftwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
 class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
     """ValidatedSoftwareLCM creation/edit form."""
 
-    # assigned_to_type =
     assigned_to_device = DynamicModelChoiceField(
         queryset=Device.objects.all(),
         required=False,
@@ -194,7 +193,7 @@ class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, Relationshi
             "assigned_to_inventory_item",
             "start",
             "end",
-            "primary",
+            "preferred",
             "tags",
         )
 
@@ -258,9 +257,10 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
         label="Search",
         help_text="Search for start or end date of validity.",
     )
+    softwarelcm = forms.ModelChoiceField(required=False, queryset=SoftwareLCM.objects.all())
     start = forms.DateField(required=False, widget=DatePicker())
     end = forms.DateField(required=False, widget=DatePicker())
-    primary = forms.BooleanField(required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES))
+    preferred = forms.BooleanField(required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES))
 
     class Meta:
         """Meta attributes."""
@@ -271,5 +271,5 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
             "softwarelcm",
             "start",
             "end",
-            "primary",
+            "preferred",
         ]

@@ -131,10 +131,10 @@ class SoftwareLCM(PrimaryModel):
     end_of_security_patches = models.DateField(null=True, blank=True, verbose_name="End of Security Patches")
     documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
     download_url = models.URLField(blank=True, verbose_name="Download URL")
-    image_file_name = models.CharField(null=True, blank=True, max_length=100, verbose_name="Image File Name")
-    image_file_checksum = models.CharField(null=True, blank=True, max_length=256, verbose_name="Image File Checksum")
-    long_term_support = models.BooleanField(verbose_name="Long Term Support")
-    pre_release = models.BooleanField(verbose_name="Pre-Release")
+    image_file_name = models.CharField(blank=True, max_length=100, verbose_name="Image File Name")
+    image_file_checksum = models.CharField(blank=True, max_length=256, verbose_name="Image File Checksum")
+    long_term_support = models.BooleanField(verbose_name="Long Term Support", default=False)
+    pre_release = models.BooleanField(verbose_name="Pre-Release", default=False)
 
     csv_headers = [
         "device_platform",
@@ -153,8 +153,9 @@ class SoftwareLCM(PrimaryModel):
     class Meta:
         """Meta attributes for SoftwareLCM."""
 
-        verbose_name = "Software LCM"
+        verbose_name = "Software"
         ordering = ("end_of_support", "end_of_security_patches")
+        unique_together = ("device_platform", "version")
 
     def __str__(self):
         """String representation of SoftwareLCM."""
@@ -194,15 +195,15 @@ class SoftwareLCM(PrimaryModel):
 class ValidatedSoftwareLCM(PrimaryModel):
     """ValidatedSoftwareLCM model."""
 
-    softwarelcm = models.ForeignKey(to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Related SoftwareLCM")
+    softwarelcm = models.ForeignKey(to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Software Version")
     assigned_to_content_type = models.ForeignKey(
         to=ContentType,
         limit_choices_to=Q(
             app_label="dcim",
             model__in=(
                 "device",
-                "device_type",
-                "inventory_item",
+                "devicetype",
+                "inventoryitem",
             ),
         ),
         on_delete=models.PROTECT,
@@ -211,8 +212,8 @@ class ValidatedSoftwareLCM(PrimaryModel):
     assigned_to_object_id = models.UUIDField()
     assigned_to = GenericForeignKey(ct_field="assigned_to_content_type", fk_field="assigned_to_object_id")
     start = models.DateField(verbose_name="Valid Since")
-    end = models.DateField(verbose_name="Valid Until")
-    primary = models.BooleanField(verbose_name="Primary Version")
+    end = models.DateField(verbose_name="Valid Until", blank=True, null=True)
+    preferred = models.BooleanField(verbose_name="Preferred Version", default=False)
 
     csv_headers = [
         "softwarelcm",
@@ -220,18 +221,19 @@ class ValidatedSoftwareLCM(PrimaryModel):
         "assigned_to_object_id",
         "start",
         "end",
-        "primary",
+        "preferred",
     ]
 
     class Meta:
         """Meta attributes for ValidatedSoftwareLCM."""
 
-        verbose_name = "Validated SoftwareLCM"
-        ordering = ("softwarelcm", "primary", "start")
+        verbose_name = "Validated Software"
+        ordering = ("softwarelcm", "preferred", "start")
+        unique_together = ("softwarelcm", "assigned_to_content_type", "assigned_to_object_id")
 
     def __str__(self):
         """String representation of ValidatedSoftwareLCM."""
-        msg = f"{self.softwarelcm} - Valid: {self.start} - {self.end}"
+        msg = f"{self.softwarelcm} - Valid since: {self.start}"
         return msg
 
     def get_absolute_url(self):
@@ -246,5 +248,5 @@ class ValidatedSoftwareLCM(PrimaryModel):
             self.assigned_to_object_id,
             self.start,
             self.end,
-            self.primary,
+            self.preferred,
         )

@@ -115,7 +115,7 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
 
     softwarelcm = django_filters.ModelMultipleChoiceFilter(
         queryset=SoftwareLCM.objects.all(),
-        label="SoftwareLCM",
+        label="Software",
     )
 
     # expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
@@ -129,7 +129,7 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
             "softwarelcm",
             "start",
             "end",
-            "primary",
+            "preferred",
         ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use

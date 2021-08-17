@@ -43,7 +43,7 @@ try:
                     items=(
                         NavMenuItem(
                             link="plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm_list",
-                            name="SoftwareLCM",
+                            name="Software",
                             buttons=(
                                 NavMenuButton(
                                     link="plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm_add",
@@ -61,7 +61,7 @@ try:
                         ),
                         NavMenuItem(
                             link="plugins:nautobot_plugin_device_lifecycle_mgmt:validatedsoftwarelcm_list",
-                            name="ValidatedSoftwareLCM",
+                            name="ValidatedSoftware",
                             buttons=(
                                 NavMenuButton(
                                     link="plugins:nautobot_plugin_device_lifecycle_mgmt:validatedsoftwarelcm_add",
