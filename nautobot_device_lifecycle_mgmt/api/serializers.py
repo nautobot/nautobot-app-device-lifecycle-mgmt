@@ -56,7 +56,7 @@ class SoftwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):
     url = serializers.HyperlinkedIdentityField(
         view_name="plugins-api:nautobot_plugin_device_lifecycle_mgmt-api:softwarelcm-detail"
     )
-    device_platform = NestedPlatformSerializer(required=False, read_only=True)
+    device_platform = NestedPlatformSerializer()
 
     class Meta:
         """Meta attributes."""
@@ -96,8 +96,8 @@ class ValidatedSoftwareLCMSerializer(
                 app_label="dcim",
                 model__in=(
                     "device",
-                    "device_type",
-                    "inventory_item",
+                    "devicetype",
+                    "inventoryitem",
                 ),
             )
         ),
@@ -117,7 +117,7 @@ class ValidatedSoftwareLCMSerializer(
             "assigned_to",
             "start",
             "end",
-            "primary",
+            "preferred",
             "custom_fields",
             "tags",
         ]

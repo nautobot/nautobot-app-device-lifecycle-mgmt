@@ -19,3 +19,4 @@ class NestedSoftwareLCMSerializer(WritableNestedSerializer):
 
         model = models.SoftwareLCM
         fields = ["id", "url", "device_platform", "version", "end_of_support"]
+        read_only_fields = ["device_platform"]
