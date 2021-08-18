@@ -113,7 +113,16 @@ class HardwareLCMCSVForm(CustomFieldModelCSVForm):
     """Form for creating bulk Hardware Device Lifecycle notices."""
 
     device_type = forms.ModelChoiceField(
-        required=True, queryset=DeviceType.objects.all(), to_field_name="model", label="Device type"
+        required=False, queryset=DeviceType.objects.all(), to_field_name="model", label="Device type"
+    )
+    inventory_item = forms.ModelChoiceField(
+        required=False,
+        queryset=InventoryItem.objects.exclude(part_id__exact="")
+        .distinct("part_id")
+        .order_by("part_id")
+        .values_list("part_id", flat=True),
+        to_field_name="part_id",
+        label="Inventory Item",
     )
 
     class Meta:

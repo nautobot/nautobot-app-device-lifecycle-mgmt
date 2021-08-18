@@ -12,8 +12,8 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("extras", "0010_change_cf_validation_max_min_field_to_bigint"),
-        ("dcim", "0005_device_local_context_schema"),
+        ("extras", "0005_configcontext_device_types"),
+        ("contenttypes", "0002_remove_content_type_name"),
     ]
 
     operations = [

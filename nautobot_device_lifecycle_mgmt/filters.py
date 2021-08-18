@@ -29,6 +29,22 @@ class HardwareLCMFilterSet(django_filters.FilterSet):
         label="Inventory Part ID",
     )
 
+    end_of_support = django_filters.DateFilter()
+    end_of_support__gte = django_filters.DateFilter(field_name="end_of_support", lookup_expr="gte")
+    end_of_support__lte = django_filters.DateFilter(field_name="end_of_support", lookup_expr="lte")
+
+    end_of_sale = django_filters.DateFilter()
+    end_of_sale__gte = django_filters.DateFilter(field_name="end_of_sale", lookup_expr="gte")
+    end_of_sale__lte = django_filters.DateFilter(field_name="end_of_sale", lookup_expr="lte")
+
+    end_of_security_patches = django_filters.DateFilter()
+    end_of_security_patches__gte = django_filters.DateFilter(field_name="end_of_security_patches", lookup_expr="gte")
+    end_of_security_patches__lte = django_filters.DateFilter(field_name="end_of_security_patches", lookup_expr="lte")
+
+    end_of_sw_releases = django_filters.DateFilter()
+    end_of_sw_releases__gte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="gte")
+    end_of_sw_releases__lte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="lte")
+
     expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
 
     class Meta:

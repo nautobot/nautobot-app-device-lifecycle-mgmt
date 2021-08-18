@@ -25,6 +25,7 @@ class HardwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=t
         "end_of_sw_releases",
         "expired",
         "id",
+        "inventory_item",
         "release_date",
     ]
 

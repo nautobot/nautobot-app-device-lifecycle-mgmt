@@ -24,6 +24,7 @@ class HardwareLCMSerializer(ValidatedModelSerializer):
             "expired",
             "devices",
             "device_type",
+            "inventory_item",
             "release_date",
             "end_of_sale",
             "end_of_support",

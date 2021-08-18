@@ -1,13 +1,13 @@
 # Nautobot Plugin - Device Lifecycle Management
 
-A plugin for [Nautobot](https://github.com/nautobot/nautobot).
+A plugin for [Nautobot](https://github.com/nautobot/nautobot) to manage a devices lifecycle.
 
 ## Installation
 
 The plugin is available as a Python package in pypi and can be installed with pip
 
 ```shell
-pip install nautobot-plugin-device-lifecycle-mgmt
+pip install nautobot-device-lifecycle-mgmt
 ```
 
 > The plugin is compatible with Nautobot 1.0.0b1 and higher
@@ -15,7 +15,7 @@ pip install nautobot-plugin-device-lifecycle-mgmt
 To ensure Nautobot Device Life Cycle Management plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-plugin-device-lifecycle-mgmt` package:
 
 ```no-highlight
-# echo nautobot-plugin-device-lifecycle-mgmt >> local_requirements.txt
+# echo nautobot-device-lifecycle-mgmt >> local_requirements.txt
 ```
 
 Once installed, the plugin needs to be enabled in your `configuration.py`
@@ -28,8 +28,29 @@ PLUGINS = ["nautobot_device_lifecycle_mgmt"]
 ## Usage
 ### Hardware LifeCycle Management
 #### API
-
 ![](docs/images/lcm_hardware_api_view.png)
+
+##### REST API Example 1
+Gather hardware notices that will be end of support by the end of 2021
+```shell script
+curl "http://$NBHOST/api/plugins/device-lifecycle/hardware/?end_of_support__lte=2021-12-31" \
+-X GET \
+-H  "accept: application/json" \
+-H  "Authorization: Token $TOKEN" | json_pp
+````
+
+##### REST API Example 2
+Gather hardware notices that are currently expired. 
+> NOTE: `expired` flag will honor `end_of_support` if the field exist for the record. If the field does not exist, `end_of_sale` will be used as the expired field.
+```shell script
+curl "http://$NBHOST/api/plugins/device-lifecycle/hardware/?expired=true" \  
+-X GET \
+-H  "accept: application/json" \
+-H  "Authorization: Token $TOKEN" | json_pp
+```
+
+#### GraphQL Examples
+![](docs/images/lcm_hardware_graphql.png)
 
 ## Contributing
 
@@ -87,6 +108,7 @@ Each command can be executed with `invoke <command>`. All commands support the a
 You can view the list of Hardware/Software notices as well as filter the table.
 
 ![](docs/images/lcm_hardware_list_view.png)
+
 
 ### Hardware: Device Life Cycle Management Detail View
 
