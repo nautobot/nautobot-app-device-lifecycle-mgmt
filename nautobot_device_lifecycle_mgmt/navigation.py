@@ -1,10 +1,8 @@
 """Menu items for the LifeCycle Management plugin."""
 # pylint: disable=C0412
-from packaging.version import Version
-from nautobot import __version__
 from nautobot.utilities.choices import ButtonColorChoices
 
-if Version(__version__) >= Version("1.1.0a"):
+try:
     from nautobot.core.apps import NavMenuTab, NavMenuGroup, NavMenuItem, NavMenuButton
 
     menu_items = (
@@ -42,7 +40,7 @@ if Version(__version__) >= Version("1.1.0a"):
             ),
         ),
     )
-else:
+except ModuleNotFoundError:
     from nautobot.extras.plugins import PluginMenuItem, PluginMenuButton
 
     menu_items = (
