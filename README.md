@@ -1,6 +1,6 @@
 # Nautobot Plugin - Device Lifecycle Management
 
-A plugin for [Nautobot](https://github.com/nautobot/nautobot) to manage a devices lifecycle.
+A plugin for [Nautobot](https://github.com/nautobot/nautobot) to manage device lifecycles.
 
 ## Installation
 
