@@ -17,7 +17,7 @@ services:
       - "./dev.env"
     volumes:
       - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
-      - "../nautobot_plugin_device_lifecycle_mgmt:/source/nautobot_plugin_device_lifecycle_mgmt"
+      - "../nautobot_device_lifecycle_mgmt:/source/nautobot_device_lifecycle_mgmt"
     tty: true
   worker:
     build:
@@ -34,13 +34,13 @@ services:
       - "./dev.env"
     volumes:
       - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
-      - "../nautobot_plugin_device_lifecycle_mgmt:/source/nautobot_plugin_device_lifecycle_mgmt"
+      - "../nautobot_device_lifecycle_mgmt:/source/nautobot_device_lifecycle_mgmt"
     tty: true
   postgres:
     image: "postgres:13"
     env_file: "dev.env"
     volumes:
-      - "pgdata_nautobot_plugin_device_lifecycle_mgmt:/var/lib/postgresql/data"
+      - "pgdata_nautobot_device_lifecycle_mgmt:/var/lib/postgresql/data"
   redis:
     image: "redis:6-alpine"
     command:
@@ -49,4 +49,4 @@ services:
       - "redis-server --appendonly yes --requirepass $$REDIS_PASSWORD"  ## $$ because of docker-compose
     env_file: "./dev.env"
 volumes:
-  pgdata_nautobot_plugin_device_lifecycle_mgmt:  # yamllint disable-line rule:empty-values
+  pgdata_nautobot_device_lifecycle_mgmt:  # yamllint disable-line rule:empty-values

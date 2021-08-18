@@ -34,14 +34,14 @@ def is_truthy(arg):
 
 # Use pyinvoke configuration for default values, see http://docs.pyinvoke.org/en/stable/concepts/configuration.html
 # Variables may be overwritten in invoke.yml or by the environment variables
-# INVOKE_nautobot_plugin_device_lifecycle_mgmt_xxx
-namespace = Collection("nautobot_plugin_device_lifecycle_mgmt")
+# INVOKE_nautobot_device_lifecycle_mgmt_xxx
+namespace = Collection("nautobot_device_lifecycle_mgmt")
 namespace.configure(
     {
-        "nautobot_plugin_device_lifecycle_mgmt": {
+        "nautobot_device_lifecycle_mgmt": {
             "nautobot_ver": "1.1.0-beta.2",
-            "project_name": "nautobot_plugin_device_lifecycle_mgmt",
-            "python_ver": "3.6",
+            "project_name": "nautobot_device_lifecycle_mgmt",
+            "python_ver": "3.7",
             "local": False,
             "compose_dir": os.path.join(os.path.dirname(__file__), "development"),
             "compose_files": ["docker-compose.requirements.yml", "docker-compose.base.yml", "docker-compose.dev.yml"],
@@ -78,15 +78,15 @@ def docker_compose(context, command, **kwargs):
         **kwargs: Passed through to the context.run() call.
     """
     build_env = {
-        "NAUTOBOT_VER": context.nautobot_plugin_device_lifecycle_mgmt.nautobot_ver,
-        "PYTHON_VER": context.nautobot_plugin_device_lifecycle_mgmt.python_ver,
+        "NAUTOBOT_VER": context.nautobot_device_lifecycle_mgmt.nautobot_ver,
+        "PYTHON_VER": context.nautobot_device_lifecycle_mgmt.python_ver,
     }
     compose_command = (
-        f"docker-compose --project-name {context.nautobot_plugin_device_lifecycle_mgmt.project_name}"
-        f' --project-directory "{context.nautobot_plugin_device_lifecycle_mgmt.compose_dir}"'
+        f"docker-compose --project-name {context.nautobot_device_lifecycle_mgmt.project_name}"
+        f' --project-directory "{context.nautobot_device_lifecycle_mgmt.compose_dir}"'
     )
-    for compose_file in context.nautobot_plugin_device_lifecycle_mgmt.compose_files:
-        compose_file_path = os.path.join(context.nautobot_plugin_device_lifecycle_mgmt.compose_dir, compose_file)
+    for compose_file in context.nautobot_device_lifecycle_mgmt.compose_files:
+        compose_file_path = os.path.join(context.nautobot_device_lifecycle_mgmt.compose_dir, compose_file)
         compose_command += f' -f "{compose_file_path}"'
     compose_command += f" {command}"
     print(f'Running docker-compose command "{command}"')
@@ -95,7 +95,7 @@ def docker_compose(context, command, **kwargs):
 
 def run_command(context, command, **kwargs):
     """Wrapper to run a command locally or inside the nautobot container."""
-    if is_truthy(context.nautobot_plugin_device_lifecycle_mgmt.local):
+    if is_truthy(context.nautobot_device_lifecycle_mgmt.local):
         context.run(command, **kwargs)
     else:
         # Check if netbox is running, no need to start another netbox container to run a command
@@ -127,7 +127,7 @@ def build(context, force_rm=False, cache=True):
     if force_rm:
         command += " --force-rm"
 
-    print(f"Building Nautobot with Python {context.nautobot_plugin_device_lifecycle_mgmt.python_ver}...")
+    print(f"Building Nautobot with Python {context.nautobot_device_lifecycle_mgmt.python_ver}...")
     docker_compose(context, command)
 
 
@@ -195,6 +195,13 @@ def nbshell(context):
 
 
 @task
+def shell_plus(context):
+    """Launch an interactive nbshell session."""
+    command = "nautobot-server shell_plus"
+    run_command(context, command)
+
+
+@task
 def cli(context):
     """Launch a bash shell inside the running Nautobot container."""
     run_command(context, "bash")
@@ -219,7 +226,7 @@ def createsuperuser(context, user="admin"):
 )
 def makemigrations(context, name=""):
     """Perform makemigrations operation in Django."""
-    command = "nautobot-server makemigrations nautobot_plugin_device_lifecycle_mgmt"
+    command = "nautobot-server makemigrations nautobot_device_lifecycle_mgmt"
 
     if name:
         command += f" --name {name}"
@@ -291,7 +298,9 @@ def hadolint(context):
 @task
 def pylint(context):
     """Run pylint code analysis."""
-    command = 'pylint --init-hook "import nautobot; nautobot.setup()" --rcfile pyproject.toml nautobot_plugin_device_lifecycle_mgmt'
+    command = (
+        'pylint --init-hook "import nautobot; nautobot.setup()" --rcfile pyproject.toml nautobot_device_lifecycle_mgmt'
+    )
     run_command(context, command)
 
 
@@ -326,7 +335,7 @@ def check_migrations(context):
         "buffer": "Discard output from passing tests",
     }
 )
-def unittest(context, keepdb=False, label="nautobot_plugin_device_lifecycle_mgmt", failfast=False, buffer=True):
+def unittest(context, keepdb=False, label="nautobot_device_lifecycle_mgmt", failfast=False, buffer=True):
     """Run Nautobot unit tests."""
     command = f"coverage run --module nautobot.core.cli test {label}"
 
@@ -342,7 +351,7 @@ def unittest(context, keepdb=False, label="nautobot_plugin_device_lifecycle_mgmt
 @task
 def unittest_coverage(context):
     """Report on code test coverage as measured by 'invoke unittest'."""
-    command = "coverage report --skip-covered --include 'nautobot_plugin_device_lifecycle_mgmt/*' --omit *migrations*"
+    command = "coverage report --skip-covered --include 'nautobot_device_lifecycle_mgmt/*' --omit *migrations*"
 
     run_command(context, command)
 
@@ -355,7 +364,7 @@ def unittest_coverage(context):
 def tests(context, failfast=False):
     """Run all tests for this plugin."""
     # If we are not running locally, start the docker containers so we don't have to for each test
-    if not is_truthy(context.nautobot_plugin_device_lifecycle_mgmt.local):
+    if not is_truthy(context.nautobot_device_lifecycle_mgmt.local):
         print("Starting Docker Containers...")
         start(context)
     # Sorted loosely from fastest to slowest

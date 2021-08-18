@@ -1,47 +1,56 @@
 # Nautobot Plugin - Device Lifecycle Management
 
-A plugin for [Nautobot](https://github.com/nautobot/nautobot).
+A plugin for [Nautobot](https://github.com/nautobot/nautobot) to manage device lifecycles.
 
 ## Installation
 
 The plugin is available as a Python package in pypi and can be installed with pip
 
 ```shell
-pip install nautobot-plugin-device-lifecycle-mgmt
+pip install nautobot-device-lifecycle-mgmt
 ```
 
 > The plugin is compatible with Nautobot 1.0.0b1 and higher
 
-To ensure Nautobot EoX Tracker is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-plugin-device-lifecycle-mgmt` package:
+To ensure Nautobot Device Life Cycle Management plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-plugin-device-lifecycle-mgmt` package:
 
 ```no-highlight
-# echo nautobot-plugin-device-lifecycle-mgmt >> local_requirements.txt
+# echo nautobot-device-lifecycle-mgmt >> local_requirements.txt
 ```
 
 Once installed, the plugin needs to be enabled in your `configuration.py`
 
 ```python
 # In your configuration.py
-PLUGINS = ["nautobot_plugin_device_lifecycle_mgmt"]
-
-# PLUGINS_CONFIG = {
-#   "nautobot_plugin_device_lifecycle_mgmt": {
-#     "expired_field": "end_of_support",
-#   }
-# }
+PLUGINS = ["nautobot_device_lifecycle_mgmt"]
 ```
 
-The plugin behavior can be controlled with the following list of settings.
-
-| Setting       | Default        | Description                                                                                                                                                                                                                           |
-| ------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| expired_field | end_of_support | The field that will be used to determine if an DeviceLifeCycleEoX object is expired. If the field does not exist on the object, it will determine which of the required fields is set and use that. (Either `end_of_support` or `end_of_sale`) |
-
 ## Usage
+### Hardware LifeCycle Management
+#### API
+![](docs/images/lcm_hardware_api_view.png)
 
-### API
+##### REST API Example 1
+Gather hardware notices that will be end of support by the end of 2021
+```shell script
+curl "http://$NBHOST/api/plugins/device-lifecycle/hardware/?end_of_support__lte=2021-12-31" \
+-X GET \
+-H  "accept: application/json" \
+-H  "Authorization: Token $TOKEN" | json_pp
+````
 
-![](docs/images/eox_notice_api_view.png)
+##### REST API Example 2
+Gather hardware notices that are currently expired. 
+> NOTE: `expired` flag will honor `end_of_support` if the field exist for the record. If the field does not exist, `end_of_sale` will be used as the expired field.
+```shell script
+curl "http://$NBHOST/api/plugins/device-lifecycle/hardware/?expired=true" \  
+-X GET \
+-H  "accept: application/json" \
+-H  "Authorization: Token $TOKEN" | json_pp
+```
+
+#### GraphQL Examples
+![](docs/images/lcm_hardware_graphql.png)
 
 ## Contributing
 
@@ -94,28 +103,27 @@ Each command can be executed with `invoke <command>`. All commands support the a
 
 ## Screenshots
 
-### EoX List View
+### Hardware: Device Life Cycle Management List View
 
-You can view the list of EoX notices as well as filter the table.
+You can view the list of Hardware/Software notices as well as filter the table.
 
-![](docs/images/eox_notice_list_view.png)
+![](docs/images/lcm_hardware_list_view.png)
 
-> The device count is provided in the list view.
 
-### EoX Detail View
+### Hardware: Device Life Cycle Management Detail View
 
-You can also click an EoX Notice and see the detail view. This view provides links to the devices that are part affected by this EoX notice due to their device type.
+You can also click a Hardware/Software Notice and see the detail view. This view provides links to the devices that are part affected by this EoX notice due to their device type.
 
-![](docs/images/eox_notice_detail_view.png)
+![](docs/images/lcm_hardware_detail_view.png)
 
 ### Device View
 
-You can also view the associated EoX notice from the device. If the device is end of life or end of supoort the notice will be red.
+You can also view the associated Hardware notice from the device. If the device is end of life or end of supoort the notice will be red.
 
-![](docs/images/eox_notice_device_view.png)
+![](docs/images/lcm_hardware_device_view.png)
 
 ### Device Type View
 
 This provides the same UI element as the device view, but within the specific device type's view.
 
-![](docs/images/eox_notice_device_type_view.png)
+![](docs/images/lcm_hardware_device_type_view.png)

@@ -1,0 +1,58 @@
+{% load helpers %}
+{% if perms.view and hw_notices %}
+{% for notice in hw_notices %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel {% if notice.expired %}panel-danger{% else %}panel-warning{% endif %}">
+            <div class="panel-heading">
+                <strong>Hardware {% if notice.inventory_item %}Inventory Part {% endif %}Notice</strong>
+            </div>
+            <table class="table table-hover panel-body attr-table">
+                <tr>
+                    <td>Name</td>
+                    <td>
+                        <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:hardwarelcm' pk=notice.id %}">{{ notice }}</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>End of Sale</td>
+                    <td>{{ notice.end_of_sale }}</td>
+                </tr>
+                <tr>
+                    <td>End of Support</td>
+                    <td>{{ notice.end_of_support }}</td>
+                </tr>
+                <tr>
+                    <td>End of Software Releases</td>
+                    <td>{{ notice.end_of_sw_releases }}</td>
+                </tr>
+                <tr>
+                    <td>End of Security Patches</td>
+                    <td>{{ notice.end_of_security_patches }}</td>
+                </tr>
+                <tr>
+                    <td>Documentation URL</td>
+                    <td>
+                    {% if notice.documentation_url %}
+                        <a href="{{ notice.documentation_url }}">{{ notice.documentation_url }}</a>
+                    {% else %}
+                        &mdash;
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Comments</td>
+                    <td>
+                        {% if notice.comments %}
+                        {{ notice.comments }}
+                        {% else %}
+                        &mdash;
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
