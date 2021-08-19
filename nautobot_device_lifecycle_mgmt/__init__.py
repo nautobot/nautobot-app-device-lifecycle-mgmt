@@ -2,6 +2,8 @@
 
 __version__ = "1.0.0-beta.0"
 
+from django.db.models.signals import post_migrate
+
 from nautobot.extras.plugins import PluginConfig
 
 
@@ -24,6 +26,12 @@ class DeviceLifeCycleConfig(PluginConfig):
         """Register custom signals."""
         super().ready()
         import nautobot_device_lifecycle_mgmt.signals  # pylint: disable=C0415,W0611 # noqa: F401
+
+        from .signals import (  # pylint: disable=import-outside-toplevel
+            post_migrate_create_relationships,
+        )
+
+        post_migrate.connect(post_migrate_create_relationships, sender=self)
 
 
 config = DeviceLifeCycleConfig  # pylint:disable=invalid-name
