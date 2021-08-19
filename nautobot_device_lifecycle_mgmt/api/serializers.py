@@ -54,7 +54,7 @@ class SoftwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):
     """REST API serializer for SoftwareLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
-        view_name="plugins-api:nautobot_plugin_device_lifecycle_mgmt-api:softwarelcm-detail"
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwarelcm-detail"
     )
     device_platform = NestedPlatformSerializer()
 
@@ -86,7 +86,7 @@ class ValidatedSoftwareLCMSerializer(
     """REST API serializer for ValidatedSoftwareLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
-        view_name="plugins-api:nautobot_plugin_device_lifecycle_mgmt-api:validatedsoftwarelcm-detail"
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:validatedsoftwarelcm-detail"
     )
     software = NestedSoftwareLCMSerializer()
 

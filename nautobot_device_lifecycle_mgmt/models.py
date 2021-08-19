@@ -1,8 +1,11 @@
-<<<<<<< HEAD
 """Django models for the LifeCycle Management plugin."""
 
 from datetime import datetime
+
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.db.models import Q
 from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.conf import settings
@@ -32,39 +35,10 @@ class HardwareLCM(PrimaryModel):
     )
     inventory_item = models.CharField(verbose_name="Inventory Item Part", max_length=255, blank=True, null=True)
     release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
-=======
-"""Django models for nautobot_plugin_device_lifecycle_mgmt plugin."""
-
-from datetime import datetime
-
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
-from django.db import models
-from django.db.models import Q
-from django.urls import reverse
-from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
-from django.conf import settings
-
-from nautobot.extras.models.change_logging import ChangeLoggedModel
-from nautobot.extras.utils import extras_features
-from nautobot.core.models import BaseModel
-from nautobot.core.models.generics import PrimaryModel
-from nautobot.dcim.models import Device
-
-
-class EoxNotice(BaseModel, ChangeLoggedModel):
-    """EoxNotice model for plugin."""
-
-    # Set model columns
-    devices = models.ManyToManyField(Device)
-    device_type = models.ForeignKey(to="dcim.DeviceType", on_delete=models.CASCADE, verbose_name="Device Type")
->>>>>>> c9c3a9d (Rename plugin)
     end_of_sale = models.DateField(null=True, blank=True, verbose_name="End of Sale")
     end_of_support = models.DateField(null=True, blank=True, verbose_name="End of Support")
     end_of_sw_releases = models.DateField(null=True, blank=True, verbose_name="End of Software Releases")
     end_of_security_patches = models.DateField(null=True, blank=True, verbose_name="End of Security Patches")
-<<<<<<< HEAD
     documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
     comments = models.TextField(null=True, blank=True, verbose_name="Comments")
 
@@ -72,17 +46,10 @@ class EoxNotice(BaseModel, ChangeLoggedModel):
         "device_type",
         "inventory_item",
         "release_date",
-=======
-    notice_url = models.URLField(blank=True, verbose_name="Notice URL")
-
-    csv_headers = [
-        "device_type",
->>>>>>> c9c3a9d (Rename plugin)
         "end_of_sale",
         "end_of_support",
         "end_of_sw_releases",
         "end_of_security_patches",
-<<<<<<< HEAD
         "documentation_url",
         "comments",
     ]
@@ -119,39 +86,11 @@ class EoxNotice(BaseModel, ChangeLoggedModel):
     def get_absolute_url(self):
         """Returns the Detail view for HardwareLCM models."""
         return reverse("plugins:nautobot_device_lifecycle_mgmt:hardwarelcm", kwargs={"pk": self.pk})
-=======
-        "notice_url",
-    ]
-
-    class Meta:
-        """Meta attributes for DeviceLifeCycleEoX."""
-
-        ordering = ("end_of_support", "end_of_sale")
-        constraints = [models.UniqueConstraint(fields=["device_type"], name="unique_device_type")]
-
-    def __str__(self):
-        """String representation of DeviceLifeCycleEoXs."""
-        if self.end_of_support:
-            msg = f"{self.device_type} - End of support: {self.end_of_support}"
-        else:
-            msg = f"{self.device_type} - End of sale: {self.end_of_sale}"
-        return msg
-
-    def get_absolute_url(self):
-        """Returns the Detail view for DeviceLifeCycleEoX models."""
-        return reverse("plugins:nautobot_plugin_device_lifecycle_mgmt:eoxnotice", kwargs={"pk": self.pk})
->>>>>>> c9c3a9d (Rename plugin)
 
     @property
     def expired(self):
         """Return True or False if chosen field is expired."""
-<<<<<<< HEAD
         expired_field = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"].get("expired_field", "end_of_support")
-=======
-        expired_field = settings.PLUGINS_CONFIG["nautobot_plugin_device_lifecycle_mgmt"].get(
-            "expired_field", "end_of_support"
-        )
->>>>>>> c9c3a9d (Rename plugin)
 
         # If the chosen or default field does not exist, default to one of the required fields that are present
         if not getattr(self, expired_field) and not getattr(self, "end_of_support"):
@@ -163,23 +102,7 @@ class EoxNotice(BaseModel, ChangeLoggedModel):
         return today >= getattr(self, expired_field)
 
     def save(self, *args, **kwargs):
-<<<<<<< HEAD
         """Override save to assert a full clean."""
-=======
-        """Override save to add devices to DeviceLifeCycleEoX found that match the device-type.
-
-        Args:
-            signal (bool): Whether the save is being called from a signal.
-        """
-        # Update the model with related devices that are of the specific device type
-        if not kwargs.get("signal"):
-            related_devices = Device.objects.filter(device_type=self.device_type)
-            self.devices.add(*related_devices)
-
-        # Attempt to pop signal if it exists before passing to super().save()
-        kwargs.pop("signal", None)
-
->>>>>>> c9c3a9d (Rename plugin)
         # Full clean to assert custom validation in clean() for ORM, etc.
         super().full_clean()
         super().save(*args, **kwargs)
@@ -188,7 +111,6 @@ class EoxNotice(BaseModel, ChangeLoggedModel):
         """Override clean to do custom validation."""
         super().clean()
 
-<<<<<<< HEAD
         if not any([self.inventory_item, self.device_type]) or all([self.inventory_item, self.device_type]):
             raise ValidationError(
                 {
@@ -204,31 +126,19 @@ class EoxNotice(BaseModel, ChangeLoggedModel):
                     "end_of_support": "End of Sale or End of Support must be specified.",
                 }
             )
-=======
-        if not self.end_of_sale and not self.end_of_support:
-            raise ValidationError(_("End of Sale or End of Support must be specified."))
->>>>>>> c9c3a9d (Rename plugin)
 
     def to_csv(self):
         """Return fields for bulk view."""
         return (
-<<<<<<< HEAD
             self.device_type,
             self.inventory_item,
             self.release_date,
-=======
-            self.devices,
-            self.device_type,
->>>>>>> c9c3a9d (Rename plugin)
             self.end_of_sale,
             self.end_of_support,
             self.end_of_sw_releases,
             self.end_of_security_patches,
-<<<<<<< HEAD
             self.documentation_url,
             self.comments,
-=======
-            self.notice_url,
         )
 
 
@@ -284,7 +194,7 @@ class SoftwareLCM(PrimaryModel):
 
     def get_absolute_url(self):
         """Returns the Detail view for SoftwareLCM models."""
-        return reverse("plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm", kwargs={"pk": self.pk})
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:softwarelcm", kwargs={"pk": self.pk})
 
     def to_csv(self):
         """Return fields for bulk view."""
@@ -359,7 +269,16 @@ class ValidatedSoftwareLCM(PrimaryModel):
 
     def get_absolute_url(self):
         """Returns the Detail view for ValidatedSoftwareLCM models."""
-        return reverse("plugins:nautobot_plugin_device_lifecycle_mgmt:validatedsoftwarelcm", kwargs={"pk": self.pk})
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm", kwargs={"pk": self.pk})
+
+    @property
+    def valid(self):
+        """Return True or False if software is currently valid."""
+        today = datetime.today().date()
+        if self.end:
+            return self.end >= today > self.start
+
+        return True
 
     def to_csv(self):
         """Return fields for bulk view."""
@@ -370,5 +289,4 @@ class ValidatedSoftwareLCM(PrimaryModel):
             self.start,
             self.end,
             self.preferred,
->>>>>>> c9c3a9d (Rename plugin)
         )

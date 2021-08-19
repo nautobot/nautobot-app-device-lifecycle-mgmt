@@ -1,13 +1,13 @@
-<<<<<<< HEAD
 """Forms implementation for the LifeCycle Management plugin."""
 import logging
 from django import forms
-from nautobot.utilities.forms import BootstrapMixin, DatePicker
-from nautobot.dcim.models import DeviceType, InventoryItem
-from nautobot.extras.forms import CustomFieldModelCSVForm
-from nautobot.utilities.forms import BulkEditForm
+from nautobot.utilities.forms import BootstrapMixin, DatePicker, DynamicModelMultipleChoiceField
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, Platform
+from nautobot.extras.forms import CustomFieldModelCSVForm, CustomFieldModelForm, RelationshipModelForm
+from nautobot.extras.models import Tag
+from nautobot.utilities.forms import BulkEditForm, DynamicModelChoiceField, StaticSelect2, BOOLEAN_WITH_BLANK_CHOICES
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 
@@ -33,32 +33,6 @@ class HardwareLCMForm(BootstrapMixin, forms.ModelForm):
 
         widgets = {
             "release_date": DatePicker(),
-=======
-"""Forms for nautobot_plugin_device_lifecycle_mgmt."""
-
-from django import forms
-
-
-from nautobot.utilities.forms import BootstrapMixin, DatePicker, DynamicModelMultipleChoiceField
-from nautobot.dcim.models import Device, DeviceType, InventoryItem, Platform
-from nautobot.extras.models import Tag
-from nautobot.extras.forms import CustomFieldModelCSVForm, CustomFieldModelForm, RelationshipModelForm
-from nautobot.utilities.forms import BulkEditForm, DynamicModelChoiceField, StaticSelect2, BOOLEAN_WITH_BLANK_CHOICES
-
-from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice, SoftwareLCM, ValidatedSoftwareLCM
-
-
-class EoxNoticeForm(BootstrapMixin, forms.ModelForm):
-    """EoxNotice creation/edit form."""
-
-    class Meta:
-        """Meta attributes."""
-
-        model = EoxNotice
-        fields = EoxNotice.csv_headers
-
-        widgets = {
->>>>>>> c9c3a9d (Rename plugin)
             "end_of_sale": DatePicker(),
             "end_of_support": DatePicker(),
             "end_of_sw_releases": DatePicker(),
@@ -66,23 +40,15 @@ class EoxNoticeForm(BootstrapMixin, forms.ModelForm):
         }
 
 
-<<<<<<< HEAD
 class HardwareLCMBulkEditForm(BootstrapMixin, BulkEditForm):
     """Hardware Device LifeCycle bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=HardwareLCM.objects.all(), widget=forms.MultipleHiddenInput)
     release_date = forms.DateField(widget=DatePicker(), required=False)
-=======
-class EoxNoticeBulkEditForm(BootstrapMixin, BulkEditForm):
-    """EoxNotice bulk edit form."""
-
-    pk = forms.ModelMultipleChoiceField(queryset=EoxNotice.objects.all(), widget=forms.MultipleHiddenInput)
->>>>>>> c9c3a9d (Rename plugin)
     end_of_sale = forms.DateField(widget=DatePicker(), required=False)
     end_of_support = forms.DateField(widget=DatePicker(), required=False)
     end_of_sw_releases = forms.DateField(widget=DatePicker(), required=False)
     end_of_security_patches = forms.DateField(widget=DatePicker(), required=False)
-<<<<<<< HEAD
     documentation_url = forms.URLField(required=False)
     comments = forms.CharField(required=False)
 
@@ -91,32 +57,16 @@ class EoxNoticeBulkEditForm(BootstrapMixin, BulkEditForm):
 
         nullable_fields = [
             "release_date",
-=======
-    notice_url = forms.URLField(required=False)
-
-    class Meta:
-        """Meta attributes."""
-
-        nullable_fields = [
->>>>>>> c9c3a9d (Rename plugin)
             "end_of_sale",
             "end_of_support",
             "end_of_sw_releases",
             "end_of_security_patches",
-<<<<<<< HEAD
             "documentation_url",
             "comments",
         ]
 
 
 class HardwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
-=======
-            "notice_url",
-        ]
-
-
-class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
->>>>>>> c9c3a9d (Rename plugin)
     """Filter form to filter searches."""
 
     q = forms.CharField(
@@ -127,7 +77,6 @@ class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
     device_type = forms.ModelMultipleChoiceField(
         required=False, queryset=DeviceType.objects.all(), to_field_name="slug"
     )
-<<<<<<< HEAD
 
     inventory_item = forms.ModelMultipleChoiceField(
         queryset=HardwareLCM.objects.exclude(inventory_item__isnull=True)
@@ -141,31 +90,16 @@ class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
         """Meta attributes for the HardwareLCMFilterForm class."""
 
         model = HardwareLCM
-=======
-    devices = forms.ModelMultipleChoiceField(required=False, queryset=Device.objects.all(), to_field_name="name")
-
-    class Meta:
-        """Meta attributes."""
-
-        model = EoxNotice
->>>>>>> c9c3a9d (Rename plugin)
         # Define the fields above for ordering and widget purposes
         fields = [
             "q",
             "device_type",
-<<<<<<< HEAD
             "inventory_item",
-=======
->>>>>>> c9c3a9d (Rename plugin)
             "end_of_sale",
             "end_of_support",
             "end_of_sw_releases",
             "end_of_security_patches",
-<<<<<<< HEAD
             "documentation_url",
-=======
-            "notice_url",
->>>>>>> c9c3a9d (Rename plugin)
         ]
 
         widgets = {
@@ -176,7 +110,6 @@ class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
         }
 
 
-<<<<<<< HEAD
 class HardwareLCMCSVForm(CustomFieldModelCSVForm):
     """Form for creating bulk Hardware Device Lifecycle notices."""
 
@@ -198,17 +131,6 @@ class HardwareLCMCSVForm(CustomFieldModelCSVForm):
 
         model = HardwareLCM
         fields = HardwareLCM.csv_headers
-=======
-class EoxNoticeCSVForm(CustomFieldModelCSVForm):
-    """Form for creating bulk eox notices."""
-
-    device_type = forms.ModelChoiceField(
-        required=True, queryset=DeviceType.objects.all(), to_field_name="model", label="Device type"
-    )
-
-    class Meta:  # noqa: D106 "Missing docstring in public nested class"
-        model = EoxNotice
-        fields = EoxNotice.csv_headers
 
 
 class SoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
@@ -385,4 +307,3 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
             "end",
             "preferred",
         ]
->>>>>>> c9c3a9d (Rename plugin)

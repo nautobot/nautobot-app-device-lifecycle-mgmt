@@ -1,9 +1,9 @@
 {% load helpers %}
-{% if perms.nautobot_plugin_device_lifecycle_mgmt.view_validatedsoftwarelcm %}
+{% if perms.nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm %}
 <div class="row">
     {% if device_soft %}
     <div class="col-md-12">
-        {% include 'nautobot_plugin_device_lifecycle_mgmt/inc/software_info.html' %}
+        {% include 'nautobot_device_lifecycle_mgmt/inc/software_info.html' %}
     </div>
     {% endif %}
     {% if validsoft_table %}

@@ -10,12 +10,12 @@
     <div class="row noprint">
         <div class="col-sm-8 col-md-9">
             <ol class="breadcrumb">
-                <li><a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm_list' %}">Software</a></li>
+                <li><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwarelcm_list' %}">Software</a></li>
                 <li><a>{{ object }}</a></li>
             </ol>
         </div>
         <div class="col-sm-4 col-md-3">
-            <form action="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm_list' %}" method="get">
+            <form action="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwarelcm_list' %}" method="get">
                 <div class="input-group">
                     <input type="text" name="q" class="form-control" />
                     <span class="input-group-btn">
@@ -29,10 +29,10 @@
     </div>
     <div class="pull-right noprint">
         {% plugin_buttons object %}
-        {% if perms.nautobot_plugin_device_lifecycle_mgmt.change_softwarelcm %}
+        {% if perms.nautobot_device_lifecycle_mgmt.change_softwarelcm %}
             {% edit_button object %}
         {% endif %}
-        {% if perms.nautobot_plugin_device_lifecycle_mgmt.delete_softwarelcm %}
+        {% if perms.nautobot_device_lifecycle_mgmt.delete_softwarelcm %}
             {% delete_button object %}
         {% endif %}
     </div>
@@ -46,7 +46,7 @@
             <a href="{{ object.get_absolute_url }}">Software</a>
         </li>
         <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
-            <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm_changelog' pk=object.id %}">Change Log</a>
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwarelcm_changelog' pk=object.id %}">Change Log</a>
         </li>
     </ul>
 {% endblock %}

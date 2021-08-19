@@ -42,39 +42,39 @@ try:
                     weight=100,
                     items=(
                         NavMenuItem(
-                            link="plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm_list",
+                            link="plugins:nautobot_device_lifecycle_mgmt:softwarelcm_list",
                             name="Software",
                             buttons=(
                                 NavMenuButton(
-                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm_add",
+                                    link="plugins:nautobot_device_lifecycle_mgmt:softwarelcm_add",
                                     title="Add",
                                     icon_class="mdi mdi-plus-thick",
                                     button_class=ButtonColorChoices.GREEN,
                                     permissions=[
-                                        "nautobot_plugin_device_lifecycle_mgmt.add_softwarelcm",
+                                        "nautobot_device_lifecycle_mgmt.add_softwarelcm",
                                     ],
                                 ),
                             ),
                             permissions=[
-                                "nautobot_plugin_device_lifecycle_mgmt.view_softwarelcm",
+                                "nautobot_device_lifecycle_mgmt.view_softwarelcm",
                             ],
                         ),
                         NavMenuItem(
-                            link="plugins:nautobot_plugin_device_lifecycle_mgmt:validatedsoftwarelcm_list",
+                            link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_list",
                             name="Validated Software",
                             buttons=(
                                 NavMenuButton(
-                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:validatedsoftwarelcm_add",
+                                    link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_add",
                                     title="Add",
                                     icon_class="mdi mdi-plus-thick",
                                     button_class=ButtonColorChoices.GREEN,
                                     permissions=[
-                                        "nautobot_plugin_device_lifecycle_mgmt.add_validatedsoftwarelcm",
+                                        "nautobot_device_lifecycle_mgmt.add_validatedsoftwarelcm",
                                     ],
                                 ),
                             ),
                             permissions=[
-                                "nautobot_plugin_device_lifecycle_mgmt.view_validatedsoftwarelcm",
+                                "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
                             ],
                         ),
                     ),
@@ -107,28 +107,28 @@ except ModuleNotFoundError:
             ),
         ),
         PluginMenuItem(
-            link="plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm_list",
-            link_text="Software Lifecycle",
+            link="plugins:nautobot_device_lifecycle_mgmt:softwarelcm_list",
+            link_text="Software",
             buttons=(
                 PluginMenuButton(
-                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm_add",
+                    link="plugins:nautobot_device_lifecycle_mgmt:softwarelcm_add",
                     title="Add",
                     icon_class="mdi mdi-plus-thick",
                     color=ButtonColorChoices.GREEN,
-                    permissions=["nautobot_plugin_device_lifecycle_mgmt.add_softwarelcm"],
+                    permissions=["nautobot_device_lifecycle_mgmt.add_softwarelcm"],
                 ),
             ),
         ),
         PluginMenuItem(
-            link="plugins:nautobot_plugin_device_lifecycle_mgmt:validatedsoftwarelcm_list",
-            link_text="Validated Software Lifecycle",
+            link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_list",
+            link_text="Validated Software",
             buttons=(
                 PluginMenuButton(
-                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:validatedsoftwarelcm_add",
+                    link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_add",
                     title="Add",
                     icon_class="mdi mdi-plus-thick",
                     color=ButtonColorChoices.GREEN,
-                    permissions=["nautobot_plugin_device_lifecycle_mgmt.add_validatedsoftwarelcm"],
+                    permissions=["nautobot_device_lifecycle_mgmt.add_validatedsoftwarelcm"],
                 ),
             ),
         ),
