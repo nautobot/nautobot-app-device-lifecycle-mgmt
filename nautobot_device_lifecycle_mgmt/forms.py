@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 """Forms implementation for the LifeCycle Management plugin."""
 import logging
 from django import forms
@@ -32,6 +33,32 @@ class HardwareLCMForm(BootstrapMixin, forms.ModelForm):
 
         widgets = {
             "release_date": DatePicker(),
+=======
+"""Forms for nautobot_plugin_device_lifecycle_mgmt."""
+
+from django import forms
+
+
+from nautobot.utilities.forms import BootstrapMixin, DatePicker, DynamicModelMultipleChoiceField
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, Platform
+from nautobot.extras.models import Tag
+from nautobot.extras.forms import CustomFieldModelCSVForm, CustomFieldModelForm, RelationshipModelForm
+from nautobot.utilities.forms import BulkEditForm, DynamicModelChoiceField, StaticSelect2, BOOLEAN_WITH_BLANK_CHOICES
+
+from nautobot_plugin_device_lifecycle_mgmt.models import EoxNotice, SoftwareLCM, ValidatedSoftwareLCM
+
+
+class EoxNoticeForm(BootstrapMixin, forms.ModelForm):
+    """EoxNotice creation/edit form."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = EoxNotice
+        fields = EoxNotice.csv_headers
+
+        widgets = {
+>>>>>>> c9c3a9d (Rename plugin)
             "end_of_sale": DatePicker(),
             "end_of_support": DatePicker(),
             "end_of_sw_releases": DatePicker(),
@@ -39,15 +66,23 @@ class HardwareLCMForm(BootstrapMixin, forms.ModelForm):
         }
 
 
+<<<<<<< HEAD
 class HardwareLCMBulkEditForm(BootstrapMixin, BulkEditForm):
     """Hardware Device LifeCycle bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=HardwareLCM.objects.all(), widget=forms.MultipleHiddenInput)
     release_date = forms.DateField(widget=DatePicker(), required=False)
+=======
+class EoxNoticeBulkEditForm(BootstrapMixin, BulkEditForm):
+    """EoxNotice bulk edit form."""
+
+    pk = forms.ModelMultipleChoiceField(queryset=EoxNotice.objects.all(), widget=forms.MultipleHiddenInput)
+>>>>>>> c9c3a9d (Rename plugin)
     end_of_sale = forms.DateField(widget=DatePicker(), required=False)
     end_of_support = forms.DateField(widget=DatePicker(), required=False)
     end_of_sw_releases = forms.DateField(widget=DatePicker(), required=False)
     end_of_security_patches = forms.DateField(widget=DatePicker(), required=False)
+<<<<<<< HEAD
     documentation_url = forms.URLField(required=False)
     comments = forms.CharField(required=False)
 
@@ -56,16 +91,32 @@ class HardwareLCMBulkEditForm(BootstrapMixin, BulkEditForm):
 
         nullable_fields = [
             "release_date",
+=======
+    notice_url = forms.URLField(required=False)
+
+    class Meta:
+        """Meta attributes."""
+
+        nullable_fields = [
+>>>>>>> c9c3a9d (Rename plugin)
             "end_of_sale",
             "end_of_support",
             "end_of_sw_releases",
             "end_of_security_patches",
+<<<<<<< HEAD
             "documentation_url",
             "comments",
         ]
 
 
 class HardwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
+=======
+            "notice_url",
+        ]
+
+
+class EoxNoticeFilterForm(BootstrapMixin, forms.ModelForm):
+>>>>>>> c9c3a9d (Rename plugin)
     """Filter form to filter searches."""
 
     q = forms.CharField(
@@ -76,6 +127,7 @@ class HardwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
     device_type = forms.ModelMultipleChoiceField(
         required=False, queryset=DeviceType.objects.all(), to_field_name="slug"
     )
+<<<<<<< HEAD
 
     inventory_item = forms.ModelMultipleChoiceField(
         queryset=HardwareLCM.objects.exclude(inventory_item__isnull=True)
@@ -89,16 +141,31 @@ class HardwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
         """Meta attributes for the HardwareLCMFilterForm class."""
 
         model = HardwareLCM
+=======
+    devices = forms.ModelMultipleChoiceField(required=False, queryset=Device.objects.all(), to_field_name="name")
+
+    class Meta:
+        """Meta attributes."""
+
+        model = EoxNotice
+>>>>>>> c9c3a9d (Rename plugin)
         # Define the fields above for ordering and widget purposes
         fields = [
             "q",
             "device_type",
+<<<<<<< HEAD
             "inventory_item",
+=======
+>>>>>>> c9c3a9d (Rename plugin)
             "end_of_sale",
             "end_of_support",
             "end_of_sw_releases",
             "end_of_security_patches",
+<<<<<<< HEAD
             "documentation_url",
+=======
+            "notice_url",
+>>>>>>> c9c3a9d (Rename plugin)
         ]
 
         widgets = {
@@ -109,6 +176,7 @@ class HardwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
         }
 
 
+<<<<<<< HEAD
 class HardwareLCMCSVForm(CustomFieldModelCSVForm):
     """Form for creating bulk Hardware Device Lifecycle notices."""
 
@@ -130,3 +198,191 @@ class HardwareLCMCSVForm(CustomFieldModelCSVForm):
 
         model = HardwareLCM
         fields = HardwareLCM.csv_headers
+=======
+class EoxNoticeCSVForm(CustomFieldModelCSVForm):
+    """Form for creating bulk eox notices."""
+
+    device_type = forms.ModelChoiceField(
+        required=True, queryset=DeviceType.objects.all(), to_field_name="model", label="Device type"
+    )
+
+    class Meta:  # noqa: D106 "Missing docstring in public nested class"
+        model = EoxNotice
+        fields = EoxNotice.csv_headers
+
+
+class SoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+    """SoftwareLCM creation/edit form."""
+
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+
+    class Meta:
+        """Meta attributes."""
+
+        model = SoftwareLCM
+        fields = (
+            *SoftwareLCM.csv_headers,
+            "tags",
+        )
+
+        widgets = {
+            "end_of_support": DatePicker(),
+            "end_of_security_patches": DatePicker(),
+        }
+
+
+class SoftwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
+    """Filter form to filter searches for SoftwareLCM."""
+
+    q = forms.CharField(
+        required=False,
+        label="Search",
+        help_text="Search for version, alias, or date for end_of_support or end_of_security_patches.",
+    )
+    version = forms.CharField(required=False)
+    device_platform = forms.ModelMultipleChoiceField(
+        required=False, queryset=Platform.objects.all(), to_field_name="slug"
+    )
+
+    class Meta:
+        """Meta attributes."""
+
+        model = SoftwareLCM
+        fields = [
+            "q",
+            "version",
+            "device_platform",
+            "end_of_support",
+            "end_of_security_patches",
+            "documentation_url",
+            "download_url",
+            "image_file_name",
+            "image_file_checksum",
+            "long_term_support",
+            "pre_release",
+        ]
+
+        widgets = {
+            "end_of_support": DatePicker(),
+            "end_of_security_patches": DatePicker(),
+            "long_term_support": StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+            "pre_release": StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        }
+
+
+class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+    """ValidatedSoftwareLCM creation/edit form."""
+
+    assigned_to_device = DynamicModelChoiceField(
+        queryset=Device.objects.all(),
+        required=False,
+        query_params={"id": "$assigned_to_device"},
+        label="Assigned To",
+    )
+    assigned_to_device_type = DynamicModelChoiceField(
+        queryset=DeviceType.objects.all(),
+        required=False,
+        query_params={"id": "$assigned_to_device_type"},
+        label="Assigned To",
+    )
+    assigned_to_inventory_item = DynamicModelChoiceField(
+        queryset=InventoryItem.objects.all(),
+        required=False,
+        query_params={"id": "$assigned_to_inventory_item"},
+        label="Assigned To",
+    )
+
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+
+    class Meta:
+        """Meta attributes."""
+
+        model = ValidatedSoftwareLCM
+        fields = (
+            "software",
+            "assigned_to_device",
+            "assigned_to_device_type",
+            "assigned_to_inventory_item",
+            "start",
+            "end",
+            "preferred",
+            "tags",
+        )
+
+        widgets = {
+            "start": DatePicker(),
+            "end": DatePicker(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        """Set up initial data for this form."""
+        instance = kwargs.get("instance")
+        initial = kwargs.get("initial", {}).copy()
+
+        if instance:
+            if isinstance(instance.assigned_to, Device):
+                initial["assigned_to_device"] = instance.assigned_to
+            elif isinstance(instance.assigned_to, DeviceType):
+                initial["assigned_to_device_type"] = instance.assigned_to
+            elif isinstance(instance.assigned_to, InventoryItem):
+                initial["assigned_to_inventory_item"] = instance.assigned_to
+
+        kwargs["initial"] = initial
+
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        """Form validation logic."""
+        super().clean()
+
+        if (
+            sum(
+                1
+                for data in (
+                    self.cleaned_data.get("assigned_to_device"),
+                    self.cleaned_data.get("assigned_to_device_type"),
+                    self.cleaned_data.get("assigned_to_inventory_item"),
+                )
+                if data
+            )
+            > 1
+        ):
+            raise forms.ValidationError(
+                "Cannot assign to more than one object. Choose either device, device type or inventory item."
+            )
+
+        if self.cleaned_data.get("assigned_to_device"):
+            self.instance.assigned_to = self.cleaned_data.get("assigned_to_device")
+        elif self.cleaned_data.get("assigned_to_device_type"):
+            self.instance.assigned_to = self.cleaned_data.get("assigned_to_device_type")
+        elif self.cleaned_data.get("assigned_to_inventory_item"):
+            self.instance.assigned_to = self.cleaned_data.get("assigned_to_inventory_item")
+        else:
+            raise forms.ValidationError("A device, device type or inventory item must be selected.")
+
+
+class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+    """Filter form to filter searches for SoftwareLCM."""
+
+    q = forms.CharField(
+        required=False,
+        label="Search",
+        help_text="Search for start or end date of validity.",
+    )
+    software = forms.ModelChoiceField(required=False, queryset=SoftwareLCM.objects.all())
+    start = forms.DateField(required=False, widget=DatePicker())
+    end = forms.DateField(required=False, widget=DatePicker())
+    preferred = forms.BooleanField(required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES))
+
+    class Meta:
+        """Meta attributes."""
+
+        model = ValidatedSoftwareLCM
+        fields = [
+            "q",
+            "software",
+            "start",
+            "end",
+            "preferred",
+        ]
+>>>>>>> c9c3a9d (Rename plugin)

@@ -1,1 +1,1 @@
-"""REST API module for the LifeCycle Management plugin."""
+"""REST API module for nautobot_plugin_device_lifecycle_mgmt plugin."""
