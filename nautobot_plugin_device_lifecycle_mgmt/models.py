@@ -195,7 +195,7 @@ class SoftwareLCM(PrimaryModel):
 class ValidatedSoftwareLCM(PrimaryModel):
     """ValidatedSoftwareLCM model."""
 
-    softwarelcm = models.ForeignKey(to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Software Version")
+    software = models.ForeignKey(to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Software Version")
     assigned_to_content_type = models.ForeignKey(
         to=ContentType,
         limit_choices_to=Q(
@@ -216,7 +216,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
     preferred = models.BooleanField(verbose_name="Preferred Version", default=False)
 
     csv_headers = [
-        "softwarelcm",
+        "software",
         "assigned_to_content_type",
         "assigned_to_object_id",
         "start",
@@ -228,12 +228,12 @@ class ValidatedSoftwareLCM(PrimaryModel):
         """Meta attributes for ValidatedSoftwareLCM."""
 
         verbose_name = "Validated Software"
-        ordering = ("softwarelcm", "preferred", "start")
-        unique_together = ("softwarelcm", "assigned_to_content_type", "assigned_to_object_id")
+        ordering = ("software", "preferred", "start")
+        unique_together = ("software", "assigned_to_content_type", "assigned_to_object_id")
 
     def __str__(self):
         """String representation of ValidatedSoftwareLCM."""
-        msg = f"{self.softwarelcm} - Valid since: {self.start}"
+        msg = f"{self.software} - Valid since: {self.start}"
         return msg
 
     def get_absolute_url(self):
@@ -243,7 +243,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
     def to_csv(self):
         """Return fields for bulk view."""
         return (
-            self.softwarelcm,
+            self.software,
             self.assigned_to_content_type,
             self.assigned_to_object_id,
             self.start,

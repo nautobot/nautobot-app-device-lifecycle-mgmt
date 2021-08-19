@@ -78,7 +78,7 @@ class ValidatedSoftwareLCMTable(BaseTable):
         ],
         orderable=False,
     )
-    softwarelcm = tables.LinkColumn(verbose_name="Software")
+    software = tables.LinkColumn(verbose_name="Software")
     assigned_to = tables.LinkColumn(verbose_name="Assigned To", orderable=False)
     actions = ButtonsColumn(ValidatedSoftwareLCM, buttons=("edit", "delete"))
 
@@ -89,7 +89,7 @@ class ValidatedSoftwareLCMTable(BaseTable):
         fields = (
             "pk",
             "name",
-            "softwarelcm",
+            "software",
             "assigned_to",
             "start",
             "end",

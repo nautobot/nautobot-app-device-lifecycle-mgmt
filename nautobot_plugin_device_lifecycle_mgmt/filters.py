@@ -113,7 +113,7 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
 
     q = django_filters.CharFilter(method="search", label="Search")
 
-    softwarelcm = django_filters.ModelMultipleChoiceFilter(
+    software = django_filters.ModelMultipleChoiceFilter(
         queryset=SoftwareLCM.objects.all(),
         label="Software",
     )
@@ -126,7 +126,7 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
         model = ValidatedSoftwareLCM
 
         fields = [
-            "softwarelcm",
+            "software",
             "start",
             "end",
             "preferred",

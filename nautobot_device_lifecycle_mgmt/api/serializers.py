@@ -88,7 +88,7 @@ class ValidatedSoftwareLCMSerializer(
     url = serializers.HyperlinkedIdentityField(
         view_name="plugins-api:nautobot_plugin_device_lifecycle_mgmt-api:validatedsoftwarelcm-detail"
     )
-    softwarelcm = NestedSoftwareLCMSerializer()
+    software = NestedSoftwareLCMSerializer()
 
     assigned_to_content_type = ContentTypeField(
         queryset=ContentType.objects.filter(
@@ -111,7 +111,7 @@ class ValidatedSoftwareLCMSerializer(
         fields = [
             "id",
             "url",
-            "softwarelcm",
+            "software",
             "assigned_to_content_type",
             "assigned_to_object_id",
             "assigned_to",

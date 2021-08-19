@@ -62,8 +62,8 @@
                 <tr>
                     <td>Software Version</td>
                     <td>
-                        {% if object.softwarelcm %}
-                            <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm' pk=object.softwarelcm.pk %}">{{ object.softwarelcm }}</a>
+                        {% if object.software %}
+                            <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:softwarelcm' pk=object.software.pk %}">{{ object.software }}</a>
                         {% else %}
                             &mdash;
                         {% endif %}

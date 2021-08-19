@@ -187,7 +187,7 @@ class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, Relationshi
 
         model = ValidatedSoftwareLCM
         fields = (
-            "softwarelcm",
+            "software",
             "assigned_to_device",
             "assigned_to_device_type",
             "assigned_to_inventory_item",
@@ -257,7 +257,7 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
         label="Search",
         help_text="Search for start or end date of validity.",
     )
-    softwarelcm = forms.ModelChoiceField(required=False, queryset=SoftwareLCM.objects.all())
+    software = forms.ModelChoiceField(required=False, queryset=SoftwareLCM.objects.all())
     start = forms.DateField(required=False, widget=DatePicker())
     end = forms.DateField(required=False, widget=DatePicker())
     preferred = forms.BooleanField(required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES))
@@ -268,7 +268,7 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
         model = ValidatedSoftwareLCM
         fields = [
             "q",
-            "softwarelcm",
+            "software",
             "start",
             "end",
             "preferred",
