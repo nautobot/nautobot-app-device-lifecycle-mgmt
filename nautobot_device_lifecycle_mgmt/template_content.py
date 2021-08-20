@@ -66,58 +66,190 @@ class InventoryItemHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
         )
 
 
-class DeviceSoftwareLCMAndValidatedSoftwareLCM(PluginTemplateExtension):  # pylint: disable=abstract-method
-    """Class to add table for ValidatedSoftwareLCM related to device."""
+class ValidatedSoftwareLCMListMixIn:
+    """Mixin to add `validated_soft_list` and `validated_soft_table` properties."""
+
+    @property
+    def validated_soft_list(self):
+        qfilters = [
+            Q(
+                assigned_to_content_type=ContentType.objects.get(app_label="dcim", model=qmodel),
+                assigned_to_object_id=qattr,
+            )
+            for qmodel, qattr in self.valid_soft_filters
+        ]
+
+        valid_soft_filter = qfilters.pop()
+        for qfilter in qfilters:
+            valid_soft_filter = valid_soft_filter | qfilter
+
+        validsoft_list = ValidatedSoftwareLCM.objects.filter(valid_soft_filter)
+        if not validsoft_list.exists():
+            return None
+
+        return validsoft_list
+
+    @property
+    def validated_soft_table(self):
+        if not self.validated_soft_list:
+            return None
+
+        return ValidatedSoftwareLCMTable(
+            list(self.validated_soft_list),
+            orderable=False,
+            exclude=(
+                "name",
+                "actions",
+            ),
+        )
+
+
+class SoftwareLCMMixIn:
+    @property
+    def software(self):
+        try:
+            obj_soft_relation = RelationshipAssociation.objects.get(
+                relationship__slug=self.soft_relation_name,
+                destination_type=ContentType.objects.get_for_model(self.obj_model),
+                destination_id=self.dst_obj_id,
+            )
+            obj_soft = SoftwareLCM.objects.get(id=obj_soft_relation.source_id)
+        except (RelationshipAssociation.DoesNotExist, SoftwareLCM.DoesNotExist):
+            obj_soft = None
+
+        return obj_soft
+
+    @property
+    def valid_software(self):
+        if not (self.validated_soft_list and self.software):
+            return False
+
+        soft_valid_obj = self.validated_soft_list.filter(software_id=self.software)
+        return soft_valid_obj.exists() and soft_valid_obj[0].valid
+
+
+def get_validsoft_list_and_table(filters):
+    qfilters = [
+        Q(assigned_to_content_type=ContentType.objects.get(app_label="dcim", model=qmodel), assigned_to_object_id=qattr)
+        for qmodel, qattr in filters
+    ]
+
+    valid_soft_filter = qfilters.pop()
+    for qfilter in qfilters:
+        valid_soft_filter = valid_soft_filter | qfilter
+
+    validsoft_list = ValidatedSoftwareLCM.objects.filter(valid_soft_filter)
+    if validsoft_list.exists():
+        validsoft_table = ValidatedSoftwareLCMTable(
+            list(validsoft_list),
+            orderable=False,
+            exclude=(
+                "name",
+                "actions",
+            ),
+        )
+    else:
+        validsoft_list = None
+        validsoft_table = None
+
+    return validsoft_list, validsoft_table
+
+
+def get_object_software(relation_name, obj_model, dst_obj_id):
+    try:
+        obj_soft_relation = RelationshipAssociation.objects.get(
+            relationship__slug=relation_name,
+            destination_type=ContentType.objects.get_for_model(obj_model),
+            destination_id=dst_obj_id,
+        )
+        obj_soft = SoftwareLCM.objects.get(id=obj_soft_relation.source_id)
+    except (RelationshipAssociation.DoesNotExist, SoftwareLCM.DoesNotExist):
+        obj_soft = None
+
+    return obj_soft
+
+
+def is_object_soft_valid(validsoft_list, obj_soft):
+    if validsoft_list and obj_soft:
+        soft_valid_obj = validsoft_list.filter(software_id=obj_soft)
+        is_obj_soft_valid = soft_valid_obj.exists() and soft_valid_obj[0].valid
+    else:
+        is_obj_soft_valid = False
+
+    return is_obj_soft_valid
+
+
+class DeviceSoftwareLCMAndValidatedSoftwareLCM(
+    PluginTemplateExtension, ValidatedSoftwareLCMListMixIn, SoftwareLCMMixIn
+):  # pylint: disable=abstract-method
+    """Class to add table for SoftwareLCM and ValidatedSoftwareLCM related to device."""
 
     model = "dcim.device"
 
+    def __init__(self, context):
+        super().__init__(context)
+        self.soft_relation_name = "device_soft"
+        self.obj_model = Device
+        self.parent_obj = self.context["object"]
+        self.dst_obj_id = self.parent_obj.pk
+        self.valid_soft_filters = (("device", self.parent_obj.pk), ("devicetype", self.parent_obj.device_type.pk))
+
     def right_page(self):
         """Display table on right side of page."""
-        dev_obj = self.context["object"]
-        validsoft_list = ValidatedSoftwareLCM.objects.filter(
-            Q(
-                assigned_to_content_type=ContentType.objects.get(app_label="dcim", model="device"),
-                assigned_to_object_id=dev_obj.pk,
-            )
-            | Q(
-                assigned_to_content_type=ContentType.objects.get(app_label="dcim", model="devicetype"),
-                assigned_to_object_id=dev_obj.device_type.pk,
-            )
-        )
-        if validsoft_list.exists():
-            validsoft_table = ValidatedSoftwareLCMTable(
-                list(validsoft_list),
-                orderable=False,
-                exclude=(
-                    "name",
-                    "actions",
-                ),
-            )
-        else:
-            validsoft_list = None
-            validsoft_table = None
-
-        try:
-            device_soft_relation = RelationshipAssociation.objects.get(
-                relationship__slug="device_soft",
-                destination_type=ContentType.objects.get_for_model(Device),
-                destination_id=dev_obj.pk,
-            )
-            device_soft = SoftwareLCM.objects.get(id=device_soft_relation.source_id)
-        except (RelationshipAssociation.DoesNotExist, SoftwareLCM.DoesNotExist):
-            device_soft = None
-
-        if validsoft_list and device_soft:
-            soft_valid_obj = validsoft_list.filter(software_id=device_soft)
-            is_device_soft_valid = soft_valid_obj.exists() and soft_valid_obj[0].valid
-        else:
-            is_device_soft_valid = False
 
         extra_context = {
-            "validsoft_list": validsoft_list,
+            "validsoft_list": self.validated_soft_list,
+            "validsoft_table": self.validated_soft_table,
+            "obj_soft": self.software,
+            "obj_soft_valid": self.valid_software,
+        }
+
+        return self.render(
+            "nautobot_device_lifecycle_mgmt/inc/software_and_validatedsoftware_info.html",
+            extra_context=extra_context,
+        )
+
+
+class InventoryItemSoftwareLCMAndValidatedSoftwareLCM(PluginTemplateExtension):  # pylint: disable=abstract-method
+    """Class to add table for SoftwareLCM and ValidatedSoftwareLCM related to inventory item."""
+
+    model = "dcim.inventoryitem"
+
+    def right_page(self):
+        """Display table on right side of page."""
+        parent_obj = self.context["object"]
+        filters = (("inventoryitem", parent_obj.pk),)
+        validsoft_list, validsoft_table = get_validsoft_list_and_table(qfilters)
+
+        obj_soft = get_object_software("inventory_item_soft", InventoryItem, parent_obj.pk)
+
+        obj_soft_valid = is_object_soft_valid(validsoft_list, obj_soft)
+
+        extra_context = {
             "validsoft_table": validsoft_table,
-            "device_soft": device_soft,
-            "is_device_soft_valid": is_device_soft_valid,
+            "obj_soft": obj_soft,
+            "obj_soft_valid": obj_soft_valid,
+        }
+
+        return self.render(
+            "nautobot_device_lifecycle_mgmt/inc/software_and_validatedsoftware_info.html",
+            extra_context=extra_context,
+        )
+
+
+class DeviceTypeValidatedSoftwareLCM(PluginTemplateExtension):  # pylint: disable=abstract-method
+    """Class to add table for ValidatedSoftwareLCM related to device type."""
+
+    model = "dcim.devicetype"
+
+    def right_page(self):
+        """Display table on right side of page."""
+        parent_obj = self.context["object"]
+        qfilters = (("devicetype", parent_obj.pk),)
+        _, validsoft_table = get_validsoft_list_and_table(qfilters)
+
+        extra_context = {
+            "validsoft_table": validsoft_table,
         }
 
         return self.render(
@@ -126,4 +258,11 @@ class DeviceSoftwareLCMAndValidatedSoftwareLCM(PluginTemplateExtension):  # pyli
         )
 
 
-template_extensions = [DeviceTypeHWLCM, DeviceHWLCM, InventoryItemHWLCM, DeviceSoftwareLCMAndValidatedSoftwareLCM]
+template_extensions = [
+    DeviceTypeHWLCM,
+    DeviceHWLCM,
+    InventoryItemHWLCM,
+    DeviceSoftwareLCMAndValidatedSoftwareLCM,
+    InventoryItemSoftwareLCMAndValidatedSoftwareLCM,
+    DeviceTypeValidatedSoftwareLCM,
+]
