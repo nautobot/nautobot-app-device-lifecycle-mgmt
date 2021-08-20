@@ -1,15 +1,25 @@
 """Views implementation for the LifeCycle Management plugin."""
 from nautobot.core.views import generic
 from nautobot.dcim.models import Device
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM
-from nautobot_device_lifecycle_mgmt.tables import HardwareLCMTable
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.tables import HardwareLCMTable, SoftwareLCMTable, ValidatedSoftwareLCMTable
 from nautobot_device_lifecycle_mgmt.forms import (
     HardwareLCMForm,
     HardwareLCMBulkEditForm,
     HardwareLCMFilterForm,
     HardwareLCMCSVForm,
+    SoftwareLCMForm,
+    SoftwareLCMFilterForm,
+    ValidatedSoftwareLCMForm,
+    ValidatedSoftwareLCMFilterForm,
 )
-from nautobot_device_lifecycle_mgmt.filters import HardwareLCMFilterSet
+from nautobot_device_lifecycle_mgmt.filters import (
+    HardwareLCMFilterSet,
+    SoftwareLCMFilterSet,
+    ValidatedSoftwareLCMFilterSet,
+)
+
+from nautobot_device_lifecycle_mgmt.const import URL
 
 # ---------------------------------------------------------------------------------
 #  Hardware LifeCycle Management Views
@@ -99,3 +109,87 @@ class HardwareLCMBulkEditView(generic.BulkEditView):
     table = HardwareLCMTable
     form = HardwareLCMBulkEditForm
     bulk_edit_url = "plugins:nautobot_device_lifecycle_mgmt.hardwarelcm_bulk_edit"
+
+
+class SoftwareLCMListView(generic.ObjectListView):
+    """SoftwareLCM List view."""
+
+    queryset = SoftwareLCM.objects.prefetch_related("device_platform")
+    filterset = SoftwareLCMFilterSet
+    filterset_form = SoftwareLCMFilterForm
+    table = SoftwareLCMTable
+    action_buttons = (
+        "add",
+        "delete",
+    )
+
+
+class SoftwareLCMView(generic.ObjectView):
+    """SoftwareLCM Detail view."""
+
+    queryset = SoftwareLCM.objects.prefetch_related("device_platform")
+
+
+class SoftwareLCMCreateView(generic.ObjectEditView):
+    """SoftwareLCM Create view."""
+
+    model = SoftwareLCM
+    queryset = SoftwareLCM.objects.prefetch_related("device_platform")
+    model_form = SoftwareLCMForm
+    default_return_url = URL.SoftwareLCM.List
+
+
+class SoftwareLCMDeleteView(generic.ObjectDeleteView):
+    """SoftwareLCM Delete view."""
+
+    model = SoftwareLCM
+    queryset = SoftwareLCM.objects.prefetch_related("device_platform")
+    default_return_url = URL.SoftwareLCM.List
+    template_name = "nautobot_device_lifecycle_mgmt/softwarelcm_delete.html"
+
+
+class SoftwareLCMEditView(generic.ObjectEditView):
+    """SoftwareLCM Edit view."""
+
+    model = SoftwareLCM
+    queryset = SoftwareLCM.objects.prefetch_related("device_platform")
+    model_form = SoftwareLCMForm
+    default_return_url = URL.SoftwareLCM.View
+
+
+class ValidatedSoftwareLCMListView(generic.ObjectListView):
+    """ValidatedSoftware List view."""
+
+    queryset = ValidatedSoftwareLCM.objects.all()
+    filterset = ValidatedSoftwareLCMFilterSet
+    filterset_form = ValidatedSoftwareLCMFilterForm
+    table = ValidatedSoftwareLCMTable
+    action_buttons = (
+        "add",
+        "delete",
+    )
+
+
+class ValidatedSoftwareLCMView(generic.ObjectView):
+    """ValidatedSoftware Detail view."""
+
+    queryset = ValidatedSoftwareLCM.objects.all()
+
+
+class ValidatedSoftwareLCMEditView(generic.ObjectEditView):
+    """ValidatedSoftware Create view."""
+
+    # model = ValidatedSoftwareLCM
+    queryset = ValidatedSoftwareLCM.objects.all()
+    model_form = ValidatedSoftwareLCMForm
+    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_edit.html"
+    default_return_url = URL.ValidatedSoftwareLCM.List
+
+
+class ValidatedSoftwareLCMDeleteView(generic.ObjectDeleteView):
+    """SoftwareLCM Delete view."""
+
+    model = ValidatedSoftwareLCM
+    queryset = ValidatedSoftwareLCM.objects.all()
+    default_return_url = URL.ValidatedSoftwareLCM.List
+    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_delete.html"

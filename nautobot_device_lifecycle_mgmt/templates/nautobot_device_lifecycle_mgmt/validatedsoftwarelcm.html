@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load plugins %}
+{% load buttons %}
+{% load custom_links %}
+{% load helpers %}
+
+{% block title %}{{ object }}{% endblock %}
+
+{% block header %}
+    <div class="row noprint">
+        <div class="col-sm-8 col-md-9">
+            <ol class="breadcrumb">
+                <li><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_list' %}">ValidatedSoftware</a></li>
+                <li><a>{{ object }}</a></li>
+            </ol>
+        </div>
+        <div class="col-sm-4 col-md-3">
+            <form action="{% url 'plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_list' %}" method="get">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" />
+                    <span class="input-group-btn">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="mdi mdi-magnify" aria-hidden="true"></span> Search
+                        </button>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="pull-right noprint">
+        {% plugin_buttons object %}
+        {% if perms.nautobot_device_lifecycle_mgmt.change_validatedsoftwarelcm %}
+            {% edit_button object %}
+        {% endif %}
+        {% if perms.nautobot_device_lifecycle_mgmt.delete_validatedsoftwarelcm %}
+            {% delete_button object %}
+        {% endif %}
+    </div>
+    <h2>{{ object }}</h2>
+        {% include 'inc/created_updated.html' with obj=object %}
+    <div class="pull-right noprint">
+        {% custom_links object %}
+    </div>
+    <ul class="nav nav-tabs">
+        <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
+            <a href="{{ object.get_absolute_url }}">ValidatedSoftware</a>
+        </li>
+        <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_changelog' pk=object.id %}">Change Log</a>
+        </li>
+    </ul>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>ValidatedSoftware</strong>
+            </div>
+            <table class="table table-hover panel-body attr-table">
+                <tr>
+                    <td>Software Version</td>
+                    <td>
+                        {% if object.software %}
+                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwarelcm' pk=object.software.pk %}">{{ object.software }}</a>
+                        {% else %}
+                            &mdash;
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Assigned To</td>
+                    <td>
+                        {% if object.assigned_to %}
+                            <a href="{{ object.assigned_to.get_absolute_url }}">{{ object.assigned_to }}</a>
+                        {% else %}
+                            &mdash;
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Valid Start</td>
+                    <td>{{ object.start }}</td>
+                </tr>
+                <tr>
+                    <td>Valid End</td>
+                    <td>{{ object.end }}</td>
+                </tr>
+                <tr>
+                    <td>Preferred Version</td>
+                    <td>
+                    {% if object.preferred is True %}
+                        <span class="text-success"><i class="mdi mdi-check-bold"></i></span>
+                    {% else %}
+                        <span class="text-danger"><i class="mdi mdi-close"></i></span>
+                    {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+        {% include 'inc/custom_fields_panel.html' %}
+        {% include 'inc/relationships_panel.html' %}
+        {% include 'extras/inc/tags_panel.html' with tags=object.tags.all %}
+    </div>
+</div>
+{% endblock %}

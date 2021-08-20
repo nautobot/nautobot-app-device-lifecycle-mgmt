@@ -1,7 +1,11 @@
 """Django models for the LifeCycle Management plugin."""
 
 from datetime import datetime
+
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.db.models import Q
 from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.conf import settings
@@ -135,4 +139,154 @@ class HardwareLCM(PrimaryModel):
             self.end_of_security_patches,
             self.documentation_url,
             self.comments,
+        )
+
+
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "graphql",
+    "relationships",
+    "statuses",
+    "webhooks",
+)
+class SoftwareLCM(PrimaryModel):
+    """Software Life-Cycle Management model."""
+
+    device_platform = models.ForeignKey(to="dcim.Platform", on_delete=models.CASCADE, verbose_name="Device Platform")
+    version = models.CharField(max_length=50)
+    alias = models.CharField(max_length=50, blank=True, null=True)
+    end_of_support = models.DateField(null=True, blank=True, verbose_name="End of Software Support")
+    end_of_security_patches = models.DateField(null=True, blank=True, verbose_name="End of Security Patches")
+    documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
+    download_url = models.URLField(blank=True, verbose_name="Download URL")
+    image_file_name = models.CharField(blank=True, max_length=100, verbose_name="Image File Name")
+    image_file_checksum = models.CharField(blank=True, max_length=256, verbose_name="Image File Checksum")
+    long_term_support = models.BooleanField(verbose_name="Long Term Support", default=False)
+    pre_release = models.BooleanField(verbose_name="Pre-Release", default=False)
+
+    csv_headers = [
+        "device_platform",
+        "version",
+        "alias",
+        "end_of_support",
+        "end_of_security_patches",
+        "documentation_url",
+        "download_url",
+        "image_file_name",
+        "image_file_checksum",
+        "long_term_support",
+        "pre_release",
+    ]
+
+    class Meta:
+        """Meta attributes for SoftwareLCM."""
+
+        verbose_name = "Software"
+        ordering = ("end_of_support", "end_of_security_patches")
+        unique_together = ("device_platform", "version")
+
+    def __str__(self):
+        """String representation of SoftwareLCM."""
+        return f"{self.device_platform} - {self.version}"
+
+    def get_absolute_url(self):
+        """Returns the Detail view for SoftwareLCM models."""
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:softwarelcm", kwargs={"pk": self.pk})
+
+    def to_csv(self):
+        """Return fields for bulk view."""
+        return (
+            self.device_platform,
+            self.version,
+            self.alias,
+            self.end_of_support,
+            self.end_of_security_patches,
+            self.documentation_url,
+            self.download_url,
+            self.image_file_name,
+            self.image_file_checksum,
+            self.long_term_support,
+            self.pre_release,
+        )
+
+
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "graphql",
+    "relationships",
+    "statuses",
+    "webhooks",
+)
+class ValidatedSoftwareLCM(PrimaryModel):
+    """ValidatedSoftwareLCM model."""
+
+    software = models.ForeignKey(to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Software Version")
+    assigned_to_content_type = models.ForeignKey(
+        to=ContentType,
+        limit_choices_to=Q(
+            app_label="dcim",
+            model__in=(
+                "device",
+                "devicetype",
+                "inventoryitem",
+            ),
+        ),
+        on_delete=models.PROTECT,
+        related_name="+",
+    )
+    assigned_to_object_id = models.UUIDField()
+    assigned_to = GenericForeignKey(ct_field="assigned_to_content_type", fk_field="assigned_to_object_id")
+    start = models.DateField(verbose_name="Valid Since")
+    end = models.DateField(verbose_name="Valid Until", blank=True, null=True)
+    preferred = models.BooleanField(verbose_name="Preferred Version", default=False)
+
+    csv_headers = [
+        "software",
+        "assigned_to_content_type",
+        "assigned_to_object_id",
+        "start",
+        "end",
+        "preferred",
+    ]
+
+    class Meta:
+        """Meta attributes for ValidatedSoftwareLCM."""
+
+        verbose_name = "Validated Software"
+        ordering = ("software", "preferred", "start")
+        unique_together = ("software", "assigned_to_content_type", "assigned_to_object_id")
+
+    def __str__(self):
+        """String representation of ValidatedSoftwareLCM."""
+        msg = f"{self.software} - Valid since: {self.start}"
+        return msg
+
+    def get_absolute_url(self):
+        """Returns the Detail view for ValidatedSoftwareLCM models."""
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm", kwargs={"pk": self.pk})
+
+    @property
+    def valid(self):
+        """Return True or False if software is currently valid."""
+        today = datetime.today().date()
+        if self.end:
+            return self.end >= today > self.start
+
+        return True
+
+    def to_csv(self):
+        """Return fields for bulk view."""
+        return (
+            self.software,
+            self.assigned_to_content_type,
+            self.assigned_to_object_id,
+            self.start,
+            self.end,
+            self.preferred,
         )

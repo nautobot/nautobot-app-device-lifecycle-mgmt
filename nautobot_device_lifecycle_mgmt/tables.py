@@ -3,7 +3,7 @@
 import django_tables2 as tables
 from django_tables2.utils import A
 from nautobot.utilities.tables import BaseTable, ButtonsColumn, ToggleColumn
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
 
 
 class HardwareLCMTable(BaseTable):
@@ -47,5 +47,68 @@ class HardwareLCMTable(BaseTable):
             "end_of_sw_releases",
             "end_of_security_patches",
             "documentation_url",
+            "actions",
+        )
+
+
+class SoftwareLCMTable(BaseTable):
+    """Table for SoftwareLCMListView."""
+
+    pk = ToggleColumn()
+    name = tables.LinkColumn(
+        "plugins:nautobot_device_lifecycle_mgmt:softwarelcm",
+        text=lambda record: record,
+        args=[A("pk")],
+        orderable=False,
+    )
+    device_platform = tables.TemplateColumn("{{ record.device_platform }}")
+    actions = ButtonsColumn(SoftwareLCM, buttons=("edit", "delete"))
+
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = SoftwareLCM
+        fields = (
+            "pk",
+            "name",
+            "version",
+            "alias",
+            "device_platform",
+            "end_of_support",
+            "end_of_security_patches",
+            "long_term_support",
+            "pre_release",
+            "actions",
+        )
+
+
+class ValidatedSoftwareLCMTable(BaseTable):
+    """Table for ValidatedSoftwareLCMListView."""
+
+    pk = ToggleColumn()
+    name = tables.LinkColumn(
+        "plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm",
+        text=lambda record: record,
+        args=[
+            A("pk"),
+        ],
+        orderable=False,
+    )
+    software = tables.LinkColumn(verbose_name="Software")
+    assigned_to = tables.LinkColumn(verbose_name="Assigned To", orderable=False)
+    actions = ButtonsColumn(ValidatedSoftwareLCM, buttons=("edit", "delete"))
+
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = ValidatedSoftwareLCM
+        fields = (
+            "pk",
+            "name",
+            "software",
+            "assigned_to",
+            "start",
+            "end",
+            "preferred",
             "actions",
         )
