@@ -71,6 +71,7 @@ class ValidatedSoftwareLCMListMixIn:
 
     @property
     def validated_soft_list(self):
+        """Property returning list of validated software linked to the object."""
         qfilters = [
             Q(
                 assigned_to_content_type=ContentType.objects.get(app_label="dcim", model=qmodel),
@@ -91,6 +92,7 @@ class ValidatedSoftwareLCMListMixIn:
 
     @property
     def validated_soft_table(self):
+        """Property returning table of validated software linked to the object."""
         if not self.validated_soft_list:
             return None
 
@@ -105,8 +107,11 @@ class ValidatedSoftwareLCMListMixIn:
 
 
 class SoftwareLCMMixIn:
+    """Mixin to add `software` and `valid_software` properties."""
+
     @property
     def software(self):
+        """Property software assigned to the object."""
         try:
             obj_soft_relation = RelationshipAssociation.objects.get(
                 relationship__slug=self.soft_relation_name,
@@ -121,6 +126,7 @@ class SoftwareLCMMixIn:
 
     @property
     def valid_software(self):
+        """Property checking whether software is valid."""
         if not (self.validated_soft_list and self.software):
             return False
 
@@ -136,6 +142,7 @@ class DeviceSoftwareLCMAndValidatedSoftwareLCM(
     model = "dcim.device"
 
     def __init__(self, context):
+        """Init setting up the DeviceSoftwareLCMAndValidatedSoftwareLCM object."""
         super().__init__(context)
         self.soft_relation_name = "device_soft"
         self.obj_model = Device
@@ -145,7 +152,6 @@ class DeviceSoftwareLCMAndValidatedSoftwareLCM(
 
     def right_page(self):
         """Display table on right side of page."""
-
         extra_context = {
             "validsoft_table": self.validated_soft_table,
             "obj_soft": self.software,
@@ -166,6 +172,7 @@ class InventoryItemSoftwareLCMAndValidatedSoftwareLCM(
     model = "dcim.inventoryitem"
 
     def __init__(self, context):
+        """Init setting up the InventoryItemSoftwareLCMAndValidatedSoftwareLCM object."""
         super().__init__(context)
         self.soft_relation_name = "inventory_item_soft"
         self.obj_model = InventoryItem
@@ -175,7 +182,6 @@ class InventoryItemSoftwareLCMAndValidatedSoftwareLCM(
 
     def right_page(self):
         """Display table on right side of page."""
-
         extra_context = {
             "validsoft_table": self.validated_soft_table,
             "obj_soft": self.software,
@@ -196,13 +202,13 @@ class DeviceTypeValidatedSoftwareLCM(
     model = "dcim.devicetype"
 
     def __init__(self, context):
+        """Init setting up the DeviceTypeValidatedSoftwareLCM object."""
         super().__init__(context)
         self.parent_obj = self.context["object"]
         self.valid_soft_filters = (("devicetype", self.parent_obj.pk),)
 
     def right_page(self):
         """Display table on right side of page."""
-
         extra_context = {
             "validsoft_table": self.validated_soft_table,
         }
