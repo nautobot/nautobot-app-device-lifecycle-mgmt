@@ -2,7 +2,7 @@
 
 import django_tables2 as tables
 from django_tables2.utils import A
-from nautobot.utilities.tables import BaseTable, ButtonsColumn, ToggleColumn
+from nautobot.utilities.tables import BaseTable, ButtonsColumn, BooleanColumn, ToggleColumn
 from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
 
 
@@ -97,6 +97,7 @@ class ValidatedSoftwareLCMTable(BaseTable):
     software = tables.LinkColumn(verbose_name="Software")
     assigned_to = tables.LinkColumn(verbose_name="Assigned To", orderable=False)
     actions = ButtonsColumn(ValidatedSoftwareLCM, buttons=("edit", "delete"))
+    preferred = BooleanColumn()
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
         """Meta attributes."""

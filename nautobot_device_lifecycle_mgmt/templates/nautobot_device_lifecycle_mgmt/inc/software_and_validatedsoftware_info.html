@@ -1,0 +1,16 @@
+{% load helpers %}
+{% if perms.nautobot_device_lifecycle_mgmt.view_softwarelcm and perms.nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm %}
+<div class="row">
+    {% if obj_soft %}
+    <div class="col-md-12">
+        {% include 'nautobot_device_lifecycle_mgmt/inc/software_info.html' %}
+    </div>
+    {% endif %}
+    {% if validsoft_table %}
+    <div class="col-md-12">
+        {% include 'panel_table.html' with table=validsoft_table heading='Validated Software' panel_class="panel panel-default" %}
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
