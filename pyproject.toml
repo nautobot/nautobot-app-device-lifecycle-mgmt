@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-plugin-device-lifecycle-mgmt"
-version = "1.0.0-beta.0"
+version = "0.1.0"
 description = "Manages device lifecycles for platforms and software."
 authors = ["Mikhail Yohman <mikhail.yohman@gmail.com>"]
 license = "Apache-2.0"

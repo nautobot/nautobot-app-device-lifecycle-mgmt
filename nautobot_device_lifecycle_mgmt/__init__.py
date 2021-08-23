@@ -1,6 +1,6 @@
 """Plugin declaration for the Device LifeCycle Management."""
 
-__version__ = "1.0.0-beta.0"
+__version__ = "0.1.0"
 
 from nautobot.extras.plugins import PluginConfig
 
