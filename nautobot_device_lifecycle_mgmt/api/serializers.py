@@ -68,6 +68,7 @@ class SoftwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):
             "device_platform",
             "version",
             "alias",
+            "release_date",
             "end_of_support",
             "documentation_url",
             "download_url",

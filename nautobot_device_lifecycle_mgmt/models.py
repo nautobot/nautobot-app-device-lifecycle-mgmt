@@ -158,8 +158,8 @@ class SoftwareLCM(PrimaryModel):
     device_platform = models.ForeignKey(to="dcim.Platform", on_delete=models.CASCADE, verbose_name="Device Platform")
     version = models.CharField(max_length=50)
     alias = models.CharField(max_length=50, blank=True, null=True)
+    release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
     end_of_support = models.DateField(null=True, blank=True, verbose_name="End of Software Support")
-    end_of_security_patches = models.DateField(null=True, blank=True, verbose_name="End of Security Patches")
     documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
     download_url = models.URLField(blank=True, verbose_name="Download URL")
     image_file_name = models.CharField(blank=True, max_length=100, verbose_name="Image File Name")
@@ -171,8 +171,8 @@ class SoftwareLCM(PrimaryModel):
         "device_platform",
         "version",
         "alias",
+        "release_date",
         "end_of_support",
-        "end_of_security_patches",
         "documentation_url",
         "download_url",
         "image_file_name",
@@ -185,8 +185,11 @@ class SoftwareLCM(PrimaryModel):
         """Meta attributes for SoftwareLCM."""
 
         verbose_name = "Software"
-        ordering = ("end_of_support", "end_of_security_patches")
-        unique_together = ("device_platform", "version")
+        ordering = ("end_of_support", "release_date")
+        unique_together = (
+            "device_platform",
+            "version",
+        )
 
     def __str__(self):
         """String representation of SoftwareLCM."""
@@ -202,8 +205,8 @@ class SoftwareLCM(PrimaryModel):
             self.device_platform,
             self.version,
             self.alias,
+            self.release_date,
             self.end_of_support,
-            self.end_of_security_patches,
             self.documentation_url,
             self.download_url,
             self.image_file_name,
