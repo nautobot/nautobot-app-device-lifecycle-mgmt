@@ -7,7 +7,7 @@ x-nautobot-build: &nautobot-build
     context: "../"
     dockerfile: "development/Dockerfile"
 x-nautobot-base: &nautobot-base
-  image: "nautobot-plugin-device-lifecycle-mgmt/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
+  image: "nautobot-device-lifecycle-mgmt/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
   env_file:
     - "dev.env"
     - "creds.env"
