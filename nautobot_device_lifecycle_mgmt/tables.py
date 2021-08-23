@@ -145,13 +145,13 @@ class ContractLCMTable(BaseTable):
         model = ContractLCM
         fields = (
             "pk",
-            "provider",
             "name",
             "start",
             "end",
             "cost",
             "support_level",
             "contract_type",
+            "provider",
             "actions",
         )
 

@@ -26,7 +26,7 @@
             </a>
         {% endif %}
     </div>
-    <h2>Provider: {{ object }}</h2>
+    <h2>Contact: {{ object }}</h2>
         {% include 'inc/created_updated.html' with obj=object %}
     <div class="pull-right noprint">
         {% custom_links object %}
@@ -83,6 +83,8 @@
                 </tr>
             </table>
         </div>
+        {% include 'inc/custom_fields_panel.html' %}
+        {% include 'inc/relationships_panel.html' %}
     </div>
 </div>
 {% endblock %}
