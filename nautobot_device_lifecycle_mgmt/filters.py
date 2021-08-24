@@ -99,8 +99,8 @@ class SoftwareLCMFilterSet(django_filters.FilterSet):
         fields = [
             "version",
             "alias",
+            "release_date",
             "end_of_support",
-            "end_of_security_patches",
             "documentation_url",
             "download_url",
             "image_file_name",
@@ -117,8 +117,8 @@ class SoftwareLCMFilterSet(django_filters.FilterSet):
         qs_filter = (
             Q(version__icontains=value)
             | Q(alias__icontains=value)
+            | Q(release_date__icontains=value)
             | Q(end_of_support__icontains=value)
-            | Q(end_of_security_patches__icontains=value)
         )
         return queryset.filter(qs_filter)
 

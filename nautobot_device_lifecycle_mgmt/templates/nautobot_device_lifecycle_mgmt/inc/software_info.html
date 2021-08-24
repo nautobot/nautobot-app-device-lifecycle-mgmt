@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-12">
-        {% if is_device_soft_valid %}
+        {% if obj_soft_valid %}
         <div class="panel panel-success">
         {% else %}
         <div class="panel panel-danger">
@@ -12,19 +12,19 @@
                 <tr>
                     <td>Name</td>
                     <td>
-                        <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwarelcm' pk=device_soft.id %}">{{ device_soft }}</a>
+                        <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwarelcm' pk=obj_soft.id %}">{{ obj_soft }}</a>
                     </td>
                 </tr>
                 <tr>
                     <td>Device Platform</td>
                     <td>
-                        {{ device_soft.device_platform }}
+                        {{ obj_soft.device_platform }}
                     </td>
                 </tr>
                 <tr>
                     <td>Version</td>
                     <td>
-                        {{ device_soft.version }}
+                        {{ obj_soft.version }}
                     </td>
                 </tr>
             </table>

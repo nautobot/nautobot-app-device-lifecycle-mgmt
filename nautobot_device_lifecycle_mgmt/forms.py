@@ -148,8 +148,8 @@ class SoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelFor
         )
 
         widgets = {
+            "release_date": DatePicker(),
             "end_of_support": DatePicker(),
-            "end_of_security_patches": DatePicker(),
         }
 
 
@@ -159,7 +159,7 @@ class SoftwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
     q = forms.CharField(
         required=False,
         label="Search",
-        help_text="Search for version, alias, or date for end_of_support or end_of_security_patches.",
+        help_text="Search for version, alias, or date for release_date or end_of_support.",
     )
     version = forms.CharField(required=False)
     device_platform = forms.ModelMultipleChoiceField(
@@ -174,8 +174,8 @@ class SoftwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
             "q",
             "version",
             "device_platform",
+            "release_date",
             "end_of_support",
-            "end_of_security_patches",
             "documentation_url",
             "download_url",
             "image_file_name",
@@ -185,8 +185,8 @@ class SoftwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
         ]
 
         widgets = {
+            "release_date": DatePicker(),
             "end_of_support": DatePicker(),
-            "end_of_security_patches": DatePicker(),
             "long_term_support": StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
             "pre_release": StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
         }
