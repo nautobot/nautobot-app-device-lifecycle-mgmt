@@ -10,6 +10,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     ContractLCM,
     ProviderLCM,
+    ContactLCM,
 )
 
 
@@ -168,9 +169,9 @@ class ContractLCMFilterSet(django_filters.FilterSet):
     q = django_filters.CharFilter(method="search", label="Search")
 
     provider = django_filters.ModelMultipleChoiceFilter(
-        field_name="provider__slug",
+        field_name="provider__pk",
         queryset=ProviderLCM.objects.all(),
-        to_field_name="slug",
+        to_field_name="pk",
         label="Provider",
     )
 
@@ -184,7 +185,6 @@ class ContractLCMFilterSet(django_filters.FilterSet):
         fields = [
             "provider",
             "name",
-            "slug",
             "start",
             "end",
             "cost",
@@ -239,5 +239,31 @@ class ProviderLCMFilterSet(django_filters.FilterSet):
             | Q(contact_email__icontains=value)
             | Q(contact_phone__icontains=value)
             | Q(description__icontains=value)
+        )
+        return queryset.filter(qs_filter)
+
+
+class ContactLCMFilterSet(django_filters.FilterSet):
+    """Filter for ContactLCMFilterSet."""
+
+    q = django_filters.CharFilter(method="search", label="Search")
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = ContactLCM
+
+        fields = ContactLCM.csv_headers
+
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+
+        qs_filter = (
+            Q(first_name__icontains=value)
+            | Q(last_name__icontains=value)
+            | Q(email__icontains=value)
+            | Q(phone__icontains=value)
         )
         return queryset.filter(qs_filter)

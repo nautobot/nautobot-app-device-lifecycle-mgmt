@@ -9,6 +9,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     ContractLCM,
     ProviderLCM,
+    ContactLCM,
 )
 
 
@@ -176,4 +177,30 @@ class ProviderLCMTable(BaseTable):
             "contact_phone",
             "contact_email",
             "actions",
+        )
+
+
+class ContactLCMTable(BaseTable):
+    """Table for list view."""
+
+    pk = ToggleColumn()
+    name = tables.LinkColumn(
+        "plugins:nautobot_device_lifecycle_mgmt:contactlcm", text=lambda record: record, args=[A("pk")]
+    )
+    actions = ButtonsColumn(ContactLCM, buttons=("changelog", "edit", "delete"))
+
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = ContactLCM
+        fields = (
+            "pk",
+            "first_name",
+            "last_name",
+            "address",
+            "phone",
+            "email",
+            "comments",
+            "priority",
+            "contract" "actions",
         )

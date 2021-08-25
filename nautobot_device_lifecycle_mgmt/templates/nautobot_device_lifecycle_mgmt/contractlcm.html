@@ -10,19 +10,19 @@
     <div class="row noprint">
         <div class="col-sm-12 col-md-12">
             <ol class="breadcrumb">
-                <li><a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_list' %}">Contracts</a></li>
+                <li><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm_list' %}">Contracts</a></li>
                 <li><a>{{ object }}</a></li>
             </ol>
         </div>
     </div>
     <div class="pull-right noprint">
         {% if perms.change %}
-            <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_edit' pk=object.id %}" class="btn btn-warning">
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm_edit' pk=object.id %}" class="btn btn-warning">
                 <span class="mdi mdi-pencil" aria-hidden="true"></span> Edit
             </a>
         {% endif %}
         {% if perms.delete %}
-            <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_delete' pk=object.id %}" class="btn btn-danger">
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm_delete' pk=object.id %}" class="btn btn-danger">
                 <span class="mdi mdi-trash-can-outline" aria-hidden="true"></span> Delete
             </a>
         {% endif %}
@@ -37,7 +37,7 @@
             <a href="{{ object.get_absolute_url }}">Contract</a>
         </li>
         <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
-            <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_changelog' pk=object.id %}">Change Log</a>
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm_changelog' pk=object.id %}">Change Log</a>
         </li>
     </ul>
 {% endblock %}

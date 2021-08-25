@@ -8,6 +8,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     ContractLCM,
     ProviderLCM,
+    ContactLCM,
 )
 
 
@@ -88,5 +89,20 @@ urlpatterns = [
         name="providerlcm_changelog",
         kwargs={"model": ProviderLCM},
     ),
-    path("contract-lcm/import/", views.ProviderLCMBulkImportView.as_view(), name="providerlcm_import"),
+    path("provider-lcm/import/", views.ProviderLCMBulkImportView.as_view(), name="providerlcm_import"),
+    # Contract Resources LifeCycle Management URLs
+    path("contact-lcm/", views.ContactLCMListView.as_view(), name="contactlcm_list"),
+    path("contact-lcm/<uuid:pk>/", views.ContactLCMView.as_view(), name="contactlcm"),
+    path("contact-lcm/add/", views.ContactLCMCreateView.as_view(), name="contactlcm_add"),
+    path("contact-lcm/delete/", views.ContactLCMBulkDeleteView.as_view(), name="contactlcm_bulk_delete"),
+    path("contact-lcm/edit/", views.ContactLCMBulkEditView.as_view(), name="contactlcm_bulk_edit"),
+    path("contact-lcm/<uuid:pk>/delete/", views.ContactLCMDeleteView.as_view(), name="contactlcm_delete"),
+    path("contact-lcm/<uuid:pk>/edit/", views.ContactLCMEditView.as_view(), name="contactlcm_edit"),
+    path(
+        "contact-lcm/<uuid:pk>/changelog/",
+        ObjectChangeLogView.as_view(),
+        name="contactlcm_changelog",
+        kwargs={"model": ContactLCM},
+    ),
+    path("contact-lcm/import/", views.ContactLCMBulkImportView.as_view(), name="contactlcm_import"),
 ]

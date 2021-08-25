@@ -148,7 +148,6 @@ class ProviderLCMSerializer(ValidatedModelSerializer):
         fields = [
             "id",
             "name",
-            "slug",
             "description",
             "physical_address",
             "contact_name",
@@ -159,12 +158,15 @@ class ProviderLCMSerializer(ValidatedModelSerializer):
 
 
 class NestedProviderLCMSerializer(WritableNestedSerializer):
+    """Nested serializer for the provider class."""
+
     class Meta:
+        """Meta magic method for the Provider nested serializer."""
+
         model = ProviderLCM
         fields = [
             "id",
             "name",
-            "slug",
             "description",
             "physical_address",
             "contact_name",
@@ -187,7 +189,6 @@ class ContractLCMSerializer(ValidatedModelSerializer):
             "id",
             "provider",
             "name",
-            "slug",
             "start",
             "end",
             "cost",

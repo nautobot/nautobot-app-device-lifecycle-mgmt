@@ -9,7 +9,8 @@ from django.db.models import Q
 from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.conf import settings
-
+from nautobot.utilities.choices import ColorChoices
+from nautobot.utilities.fields import ColorField
 from nautobot.extras.utils import extras_features
 from nautobot.core.models.generics import PrimaryModel, OrganizationalModel
 
@@ -57,6 +58,7 @@ class HardwareLCM(PrimaryModel):
     class Meta:
         """Meta attributes for the HardwareLCM class."""
 
+        verbose_name = "Hardware Notice"
         ordering = ("end_of_support", "end_of_sale")
         constraints = [
             models.UniqueConstraint(fields=["device_type"], name="unique_device_type"),
@@ -308,14 +310,14 @@ class ContractLCM(PrimaryModel):
 
     # Set model columns
     provider = models.ForeignKey(
-        to="nautobot_plugin_device_lifecycle_mgmt.ProviderLCM",
+        to="nautobot_device_lifecycle_mgmt.ProviderLCM",
         on_delete=models.CASCADE,
         verbose_name="Contract Provider",
         blank=True,
         null=True,
     )
     name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=100, unique=True)
+    number = models.CharField(max_length=100, null=True, blank=True)
     start = models.DateField(null=True, blank=True, verbose_name="Contract Start Date")
     end = models.DateField(null=True, blank=True, verbose_name="Contract End Date")
     cost = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=15, verbose_name="Contract Cost")
@@ -327,7 +329,6 @@ class ContractLCM(PrimaryModel):
     csv_headers = [
         "provider",
         "name",
-        "slug",
         "start",
         "end",
         "cost",
@@ -339,6 +340,7 @@ class ContractLCM(PrimaryModel):
     class Meta:
         """Meta attributes for the ContractLCM class."""
 
+        verbose_name = "Contract"
         ordering = ("name", "start")
 
     def __str__(self):
@@ -347,12 +349,11 @@ class ContractLCM(PrimaryModel):
 
     def get_absolute_url(self):
         """Returns the Detail view for ContractLCM models."""
-        return reverse("plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm", kwargs={"pk": self.pk})
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:contractlcm", kwargs={"pk": self.pk})
 
     @property
     def expired(self):
         """Return True or False if chosen field is expired."""
-
         return datetime.today().date() >= self.end
 
     def save(self, *args, **kwargs):
@@ -366,14 +367,13 @@ class ContractLCM(PrimaryModel):
         super().clean()
 
         if self.end <= self.start:
-            raise ValidationError(_("End date must be after the start date of the contract."))
+            raise ValidationError("End date must be after the start date of the contract.")
 
     def to_csv(self):
         """Return fields for bulk view."""
         return (
             self.provider,
             self.name,
-            self.slug,
             self.start,
             self.end,
             self.cost,
@@ -396,7 +396,6 @@ class ProviderLCM(OrganizationalModel):
 
     # Set model columns
     name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=100, unique=True)
     description = models.CharField(max_length=200, blank=True)
     physical_address = models.CharField(max_length=200, blank=True)
     contact_name = models.CharField(max_length=50, blank=True)
@@ -406,7 +405,6 @@ class ProviderLCM(OrganizationalModel):
 
     csv_headers = [
         "name",
-        "slug",
         "description",
         "physical_address",
         "contact_name",
@@ -418,6 +416,7 @@ class ProviderLCM(OrganizationalModel):
     class Meta:
         """Meta attributes for the class."""
 
+        verbose_name = "Contract Provider"
         ordering = ("name",)
 
     def __str__(self):
@@ -426,7 +425,7 @@ class ProviderLCM(OrganizationalModel):
 
     def get_absolute_url(self):
         """Returns the Detail view for ProviderLCM models."""
-        return reverse("plugins:nautobot_plugin_device_lifecycle_mgmt:providerlcm", kwargs={"pk": self.pk})
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:providerlcm", kwargs={"pk": self.pk})
 
     def save(self, *args, **kwargs):
         """Override save to assert a full clean."""
@@ -438,11 +437,63 @@ class ProviderLCM(OrganizationalModel):
         """Return fields for bulk view."""
         return (
             self.name,
-            self.slug,
             self.description,
             self.physical_address,
             self.contact_name,
             self.contact_phone,
             self.contact_email,
             self.comments,
+        )
+
+
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "relationships",
+    "webhooks",
+)
+class ContactLCM(PrimaryModel):
+    """ContactLCM is a model representation of a contact used in Contracts."""
+
+    first_name = models.CharField(max_length=50, unique=True)
+    last_name = models.CharField(max_length=50, unique=True)
+    address = models.CharField(max_length=200, blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(blank=True, verbose_name="Contact E-mail")
+    comments = models.TextField(blank=True)
+    priority = models.PositiveIntegerField(default=100)
+    contract = models.ForeignKey(
+        to="nautobot_device_lifecycle_mgmt.ContractLCM",
+        on_delete=models.CASCADE,
+        verbose_name="Contract",
+        blank=True,
+        null=True,
+    )
+
+    csv_headers = ["first_name", "last_name", "address", "phone", "email", "comments", "priority", "contract"]
+
+    class Meta:
+        verbose_name = "Contract Resource"
+
+        ordering = ("contract", "priority", "last_name")
+        unique_together = ("first_name", "last_name")
+
+    def get_absolute_url(self):
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:contactlcm", kwargs={"pk": self.pk})
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+
+    def to_csv(self):
+        return (
+            self.first_name,
+            self.last_name,
+            self.address,
+            self.phone,
+            self.email,
+            self.comments,
+            self.priority,
+            self.contract,
         )

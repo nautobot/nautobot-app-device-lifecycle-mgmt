@@ -19,6 +19,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     ContractLCM,
     ProviderLCM,
+    ContactLCM,
 )
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
@@ -404,7 +405,7 @@ class ContractLCMCSVForm(CustomFieldModelCSVForm):
     """Form for creating bulk Device Lifecycle contracts."""
 
     provider = forms.ModelChoiceField(
-        required=True, queryset=ProviderLCM.objects.all(), to_field_name="slug", label="Contract Provider"
+        required=True, queryset=ProviderLCM.objects.all(), to_field_name="pk", label="Contract Provider"
     )
 
     class Meta:
@@ -478,3 +479,53 @@ class ProviderLCMCSVForm(CustomFieldModelCSVForm):
 
         model = ProviderLCM
         fields = ProviderLCM.csv_headers
+
+
+class ContactLCMForm(BootstrapMixin, forms.ModelForm):
+    """Device LifeCycle Contract Resources creation/edit form."""
+
+    class Meta:
+        """Meta attributes for the ContactLCMForm class."""
+
+        model = ContactLCM
+        fields = ContactLCM.csv_headers
+
+
+class ContactLCMBulkEditForm(BootstrapMixin, BulkEditForm):
+    """Device LifeCycle Contract Resources bulk edit form."""
+
+    pk = forms.ModelMultipleChoiceField(queryset=ContractLCM.objects.all(), widget=forms.MultipleHiddenInput)
+    address = forms.CharField(required=False)
+    phone = forms.CharField(required=False)
+    email = forms.EmailField(required=False)
+    priority = forms.IntegerField(required=False)
+    comments = forms.CharField(required=False)
+    contract = forms.ModelChoiceField(queryset=ContractLCM.objects.all())
+
+    class Meta:
+        """Meta attributes for the ContactLCMBulkEditForm class."""
+
+        nullable_fields = ["address", "phone", "email", "comments", "priority", "contract"]
+
+
+class ContactLCMFilterForm(BootstrapMixin, forms.ModelForm):
+    """Filter form to filter searches."""
+
+    q = forms.CharField(required=False, label="Search")
+
+    class Meta:
+        """Meta attributes for the ContactLCMFilterForm class."""
+
+        model = ContactLCM
+        # Define the fields above for ordering and widget purposes
+        fields = ["q", "first_name", "last_name", "address", "phone", "email", "comments", "priority", "contract"]
+
+
+class ContactLCMCSVForm(CustomFieldModelCSVForm):
+    """Form for creating bulk Device Lifecycle resources/contacts."""
+
+    class Meta:
+        """Meta attributes for the ContactLCMCSVForm class."""
+
+        model = ContactLCM
+        fields = ContactLCM.csv_headers

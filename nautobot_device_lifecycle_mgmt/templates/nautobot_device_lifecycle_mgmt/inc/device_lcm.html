@@ -87,7 +87,7 @@
                     </div>
                     {% elif forloop.counter == 6 %}
                     <div class="panel-footer text-right noprint">
-                        <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:hardwarelcm_list'  %}?q={% for inv in object.inventoryitems.all %}&inventory_item={{ inv.part_id }}{% endfor %}" target="_blank" class="btn btn-primary btn-xs">
+                        <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list'  %}?q={% for inv in object.inventoryitems.all %}&inventory_item={{ inv.part_id }}{% endfor %}" target="_blank" class="btn btn-primary btn-xs">
                             <span class="mdi mdi-open-in-new" aria-hidden="true"></span>  See More Notices
                         </a>
                     </div>

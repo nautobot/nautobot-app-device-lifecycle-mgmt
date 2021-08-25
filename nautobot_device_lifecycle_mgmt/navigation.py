@@ -84,19 +84,19 @@ try:
                     weight=100,
                     items=(
                         NavMenuItem(
-                            link="plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_list",
+                            link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_list",
                             name="Contracts",
                             permissions=["view"],
                             buttons=(
                                 NavMenuButton(
-                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_add",
+                                    link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_add",
                                     title="Add",
                                     icon_class="mdi mdi-plus-thick",
                                     button_class=ButtonColorChoices.GREEN,
                                     permissions=["add"],
                                 ),
                                 NavMenuButton(
-                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_import",
+                                    link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_import",
                                     title="Import",
                                     icon_class="mdi mdi-database-import-outline",
                                     button_class=ButtonColorChoices.BLUE,
@@ -105,19 +105,40 @@ try:
                             ),
                         ),
                         NavMenuItem(
-                            link="plugins:nautobot_plugin_device_lifecycle_mgmt:providerlcm_list",
-                            name="Contract Providers",
+                            link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_list",
+                            name="Providers",
                             permissions=["view"],
                             buttons=(
                                 NavMenuButton(
-                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:providerlcm_add",
+                                    link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_add",
                                     title="Add",
                                     icon_class="mdi mdi-plus-thick",
                                     button_class=ButtonColorChoices.GREEN,
                                     permissions=["add"],
                                 ),
                                 NavMenuButton(
-                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:providerlcm_import",
+                                    link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_import",
+                                    title="Import",
+                                    icon_class="mdi mdi-database-import-outline",
+                                    button_class=ButtonColorChoices.BLUE,
+                                    permissions=["add"],
+                                ),
+                            ),
+                        ),
+                        NavMenuItem(
+                            link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_list",
+                            name="Contacts",
+                            permissions=["view"],
+                            buttons=(
+                                NavMenuButton(
+                                    link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_add",
+                                    title="Add",
+                                    icon_class="mdi mdi-plus-thick",
+                                    button_class=ButtonColorChoices.GREEN,
+                                    permissions=["add"],
+                                ),
+                                NavMenuButton(
+                                    link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_import",
                                     title="Import",
                                     icon_class="mdi mdi-database-import-outline",
                                     button_class=ButtonColorChoices.BLUE,
@@ -147,6 +168,66 @@ except ModuleNotFoundError:
                 ),
                 PluginMenuButton(
                     link="plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_import",
+                    title="Import",
+                    icon_class="mdi mdi-database-import-outline",
+                    color=ButtonColorChoices.BLUE,
+                    permissions=["add"],
+                ),
+            ),
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_list",
+            link_text="Contracts",
+            buttons=(
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_add",
+                    title="Add",
+                    icon_class="mdi mdi-plus-thick",
+                    color=ButtonColorChoices.GREEN,
+                    permissions=["add"],
+                ),
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_import",
+                    title="Import",
+                    icon_class="mdi mdi-database-import-outline",
+                    color=ButtonColorChoices.BLUE,
+                    permissions=["add"],
+                ),
+            ),
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_list",
+            link_text="Providers",
+            buttons=(
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_add",
+                    title="Add",
+                    icon_class="mdi mdi-plus-thick",
+                    color=ButtonColorChoices.GREEN,
+                    permissions=["add"],
+                ),
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_import",
+                    title="Import",
+                    icon_class="mdi mdi-database-import-outline",
+                    color=ButtonColorChoices.BLUE,
+                    permissions=["add"],
+                ),
+            ),
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_list",
+            link_text="Resources/Contacts",
+            buttons=(
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_add",
+                    title="Add",
+                    icon_class="mdi mdi-plus-thick",
+                    color=ButtonColorChoices.GREEN,
+                    permissions=["add"],
+                ),
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_import",
                     title="Import",
                     icon_class="mdi mdi-database-import-outline",
                     color=ButtonColorChoices.BLUE,
