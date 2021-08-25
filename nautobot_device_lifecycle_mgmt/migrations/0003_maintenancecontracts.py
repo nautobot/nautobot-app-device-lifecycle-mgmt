@@ -12,9 +12,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("extras", "0005_configcontext_device_types"),
-        ("dcim", "0004_initial_part_4"),
-        ("contenttypes", "0002_remove_content_type_name"),
+        ("nautobot_device_lifecycle_mgmt", "0001_hardwarelcm"),
     ]
 
     operations = [
@@ -68,7 +66,6 @@ class Migration(migrations.Migration):
                     models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
                 ),
                 ("name", models.CharField(max_length=100, unique=True)),
-                ("slug", models.SlugField(max_length=100, unique=True)),
                 ("description", models.CharField(blank=True, max_length=200)),
                 ("physical_address", models.CharField(blank=True, max_length=200)),
                 ("contact_name", models.CharField(blank=True, max_length=50)),
@@ -77,11 +74,12 @@ class Migration(migrations.Migration):
                 ("comments", models.TextField(blank=True)),
             ],
             options={
+                "verbose_name": "Contract Provider",
                 "ordering": ("name",),
             },
         ),
         migrations.CreateModel(
-            name="HardwareLCM",
+            name="ContractLCM",
             fields=[
                 (
                     "id",
@@ -95,24 +93,29 @@ class Migration(migrations.Migration):
                     "_custom_field_data",
                     models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
                 ),
-                ("inventory_item", models.CharField(blank=True, max_length=255, null=True)),
-                ("release_date", models.DateField(blank=True, null=True)),
-                ("end_of_sale", models.DateField(blank=True, null=True)),
-                ("end_of_support", models.DateField(blank=True, null=True)),
-                ("end_of_sw_releases", models.DateField(blank=True, null=True)),
-                ("end_of_security_patches", models.DateField(blank=True, null=True)),
-                ("documentation_url", models.URLField(blank=True)),
-                ("comments", models.TextField(blank=True, null=True)),
+                ("name", models.CharField(max_length=100, unique=True)),
+                ("number", models.CharField(blank=True, max_length=100, null=True)),
+                ("start", models.DateField(blank=True, null=True)),
+                ("end", models.DateField(blank=True, null=True)),
+                ("cost", models.DecimalField(blank=True, decimal_places=2, max_digits=15, null=True)),
+                ("support_level", models.CharField(blank=True, max_length=64, null=True)),
+                ("currency", models.CharField(blank=True, max_length=4, null=True)),
+                ("contract_type", models.CharField(blank=True, max_length=32, null=True)),
+                ("comments", models.TextField(blank=True)),
                 (
-                    "device_type",
+                    "provider",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="dcim.devicetype"
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="nautobot_device_lifecycle_mgmt.providerlcm",
                     ),
                 ),
                 ("tags", taggit.managers.TaggableManager(through="extras.TaggedItem", to="extras.Tag")),
             ],
             options={
-                "ordering": ("end_of_support", "end_of_sale"),
+                "verbose_name": "Contract",
+                "ordering": ("name", "start"),
             },
         ),
         migrations.CreateModel(
@@ -160,7 +163,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name="ContractLCM",
+            name="ContactLCM",
             fields=[
                 (
                     "id",
@@ -174,54 +177,31 @@ class Migration(migrations.Migration):
                     "_custom_field_data",
                     models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
                 ),
-                ("name", models.CharField(max_length=100, unique=True)),
-                ("slug", models.SlugField(max_length=100, unique=True)),
-                ("start", models.DateField(blank=True, null=True)),
-                ("end", models.DateField(blank=True, null=True)),
-                ("cost", models.DecimalField(blank=True, decimal_places=2, max_digits=15, null=True)),
-                ("support_level", models.CharField(blank=True, max_length=64, null=True)),
-                ("currency", models.CharField(blank=True, max_length=4, null=True)),
-                ("contract_type", models.CharField(blank=True, max_length=32, null=True)),
+                ("first_name", models.CharField(max_length=50, unique=True)),
+                ("last_name", models.CharField(max_length=50, unique=True)),
+                ("address", models.CharField(blank=True, max_length=200)),
+                ("phone", models.CharField(blank=True, max_length=20)),
+                ("email", models.EmailField(blank=True, max_length=254)),
                 ("comments", models.TextField(blank=True)),
+                ("priority", models.PositiveIntegerField(default=100)),
                 (
-                    "provider",
+                    "contract",
                     models.ForeignKey(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="nautobot_device_lifecycle_mgmt.providerlcm",
+                        to="nautobot_device_lifecycle_mgmt.contractlcm",
                     ),
                 ),
                 ("tags", taggit.managers.TaggableManager(through="extras.TaggedItem", to="extras.Tag")),
             ],
             options={
-                "ordering": ("name", "start"),
+                "verbose_name": "Contract Resource",
+                "ordering": ("contract", "priority", "last_name"),
             },
         ),
-        migrations.AddConstraint(
-            model_name="hardwarelcm",
-            constraint=models.UniqueConstraint(fields=("device_type",), name="unique_device_type"),
-        ),
-        migrations.AddConstraint(
-            model_name="hardwarelcm",
-            constraint=models.UniqueConstraint(fields=("inventory_item",), name="unique_inventory_item_part"),
-        ),
-        migrations.AddConstraint(
-            model_name="hardwarelcm",
-            constraint=models.CheckConstraint(
-                check=models.Q(
-                    models.Q(("device_type__isnull", False), ("inventory_item__isnull", True)),
-                    models.Q(("device_type__isnull", True), ("inventory_item__isnull", False)),
-                    _connector="OR",
-                ),
-                name="At least one of InventoryItem or DeviceType specified.",
-            ),
-        ),
-        migrations.AddConstraint(
-            model_name="hardwarelcm",
-            constraint=models.CheckConstraint(
-                check=models.Q(("end_of_sale__isnull", False), ("end_of_support__isnull", False), _connector="OR"),
-                name="End of Sale or End of Support must be specified.",
-            ),
+        migrations.AlterUniqueTogether(
+            name="contactlcm",
+            unique_together={("first_name", "last_name")},
         ),
     ]
