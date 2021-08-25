@@ -195,12 +195,12 @@ class ContactLCMTable(BaseTable):
         model = ContactLCM
         fields = (
             "pk",
-            "first_name",
-            "last_name",
+            "name",
             "address",
             "phone",
             "email",
             "comments",
             "priority",
-            "contract" "actions",
+            "contract",
+            "actions",
         )

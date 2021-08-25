@@ -27,7 +27,7 @@
             </a>
         {% endif %}
     </div>
-    <h2>Provider: {{ object }}</h2>
+    <h2>Contract: {{ object }}</h2>
         {% include 'inc/created_updated.html' with obj=object %}
     <div class="pull-right noprint">
         {% custom_links object %}
@@ -52,7 +52,11 @@
             <table class="table table-hover panel-body attr-table">
                 <tr>
                     <td>Provider</td>
-                    <td>{{ object.provider }}</td>
+                    <td>
+                        <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:providerlcm' pk=object.provider.id %}">
+                            {{ object.provider }}
+                        </a>
+                    </td>
                 </tr>
                 <tr>
                     <td>Name</td>
