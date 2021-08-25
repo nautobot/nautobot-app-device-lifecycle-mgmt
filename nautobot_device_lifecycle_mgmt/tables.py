@@ -127,7 +127,7 @@ class ContractLCMTable(BaseTable):
 
     pk = ToggleColumn()
     name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:contractlcm", text=lambda record: record, args=[A("pk")]
+        "plugins:nautobot_device_lifecycle_mgmt:contract", text=lambda record: record, args=[A("pk")]
     )
     provider = tables.LinkColumn(
         "plugins:nautobot_device_lifecycle_mgmt:providerlcm",

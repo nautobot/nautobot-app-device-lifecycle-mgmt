@@ -190,7 +190,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="nautobot_device_lifecycle_mgmt.contractlcm",
+                        to="nautobot_device_lifecycle_mgmt.ContractLCM",
                     ),
                 ),
                 ("tags", taggit.managers.TaggableManager(through="extras.TaggedItem", to="extras.Tag")),

@@ -96,7 +96,7 @@ try:
                                     permissions=["add"],
                                 ),
                                 NavMenuButton(
-                                    link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_import",
+                                    link="plugins:nautobot_device_lifecycle_mgmt:contract_import",
                                     title="Import",
                                     icon_class="mdi mdi-database-import-outline",
                                     button_class=ButtonColorChoices.BLUE,
@@ -187,7 +187,7 @@ except ModuleNotFoundError:
                     permissions=["add"],
                 ),
                 PluginMenuButton(
-                    link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_import",
+                    link="plugins:nautobot_device_lifecycle_mgmt:contract_import",
                     title="Import",
                     icon_class="mdi mdi-database-import-outline",
                     color=ButtonColorChoices.BLUE,

@@ -236,6 +236,7 @@ class ContractLCMListView(generic.ObjectListView):
     filterset = ContractLCMFilterSet
     filterset_form = ContractLCMFilterForm
     table = ContractLCMTable
+    action_buttons = ("export",)
 
 
 class ContractLCMView(generic.ObjectView):
@@ -267,7 +268,7 @@ class ContractLCMEditView(generic.ObjectEditView):
     model = ContractLCM
     queryset = ContractLCM.objects.all()
     model_form = ContractLCMForm
-    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:contractlcm"
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:contract"
 
 
 class ContractLCMBulkImportView(generic.BulkImportView):

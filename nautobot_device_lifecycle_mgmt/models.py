@@ -349,7 +349,7 @@ class ContractLCM(PrimaryModel):
 
     def get_absolute_url(self):
         """Returns the Detail view for ContractLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:contractlcm", kwargs={"pk": self.pk})
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:contract", kwargs={"pk": self.pk})
 
     @property
     def expired(self):

@@ -3,16 +3,25 @@
 from nautobot.core.api.views import ModelViewSet
 from nautobot.extras.api.views import CustomFieldModelViewSet
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM, ContractLCM
+from nautobot_device_lifecycle_mgmt.models import (
+    HardwareLCM,
+    ContractLCM,
+    ContactLCM,
+    SoftwareLCM,
+    ValidatedSoftwareLCM,
+)
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
     ContractLCMFilterSet,
+    ContactLCMFilterSet,
     SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
 )
 
 from .serializers import (
     HardwareLCMSerializer,
+    ContractLCMSerializer,
+    ContactLCMSerializer,
     SoftwareLCMSerializer,
     ValidatedSoftwareLCMSerializer,
     ContractLCMSerializer,
@@ -25,6 +34,22 @@ class HardwareLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
     queryset = HardwareLCM.objects.all()
     filterset_class = HardwareLCMFilterSet
     serializer_class = HardwareLCMSerializer
+
+
+class ContractLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
+    """CRUD operations set for the Contract LifeCycle Management view."""
+
+    queryset = ContractLCM.objects.all()
+    filterset_class = ContractLCMFilterSet
+    serializer_class = ContractLCMSerializer
+
+
+class ContactLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
+    """CRUD operations set for the Contact LifeCycle Management view."""
+
+    queryset = ContactLCM.objects.all()
+    filterset_class = ContactLCMFilterSet
+    serializer_class = ContactLCMSerializer
 
 
 class SoftwareLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-ancestors
@@ -41,11 +66,3 @@ class ValidatedSoftwareLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=t
     queryset = ValidatedSoftwareLCM.objects.all()
     serializer_class = ValidatedSoftwareLCMSerializer
     filterset_class = ValidatedSoftwareLCMFilterSet
-
-
-class ContractLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
-    """CRUD operations set for the Contract LifeCycle Management view."""
-
-    queryset = ContractLCM.objects.all()
-    filterset_class = ContractLCMFilterSet
-    serializer_class = ContractLCMSerializer

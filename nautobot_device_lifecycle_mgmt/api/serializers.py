@@ -55,6 +55,84 @@ class HardwareLCMSerializer(ValidatedModelSerializer):
         ]
 
 
+class ProviderLCMSerializer(ValidatedModelSerializer):
+    """API serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = ProviderLCM
+        fields = [
+            "id",
+            "name",
+            "description",
+            "physical_address",
+            "contact_name",
+            "contact_phone",
+            "contact_email",
+            "comments",
+        ]
+
+
+class NestedProviderLCMSerializer(WritableNestedSerializer):
+    """Nested serializer for the provider class."""
+
+    class Meta:
+        """Meta magic method for the Provider nested serializer."""
+
+        model = ProviderLCM
+        fields = [
+            "id",
+            "name",
+            "description",
+            "physical_address",
+            "contact_name",
+            "contact_phone",
+            "contact_email",
+            "comments",
+        ]
+
+
+class ContractLCMSerializer(ValidatedModelSerializer):
+    """API serializer."""
+
+    provider = NestedProviderLCMSerializer(many=False, read_only=False, required=True, help_text="Contract Provider")
+
+    class Meta:
+        """Meta attributes."""
+
+        model = ContractLCM
+        fields = [
+            "id",
+            "provider",
+            "name",
+            "start",
+            "end",
+            "cost",
+            "support_level",
+            "contract_type",
+        ]
+
+
+class ContactLCMSerializer(ValidatedModelSerializer):
+    """API serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = ContactLCM
+        fields = [
+            "first_name",
+            "last_name",
+            "address",
+            "phone",
+            "email",
+            "comments",
+            "priority",
+            "contract",
+        ]
+
+
 class SoftwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=too-many-ancestors
     """REST API serializer for SoftwareLCM records."""
 
