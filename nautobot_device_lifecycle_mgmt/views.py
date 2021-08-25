@@ -1,8 +1,20 @@
 """Views implementation for the LifeCycle Management plugin."""
 from nautobot.core.views import generic
 from nautobot.dcim.models import Device
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
-from nautobot_device_lifecycle_mgmt.tables import HardwareLCMTable, SoftwareLCMTable, ValidatedSoftwareLCMTable
+from nautobot_device_lifecycle_mgmt.models import (
+    HardwareLCM,
+    SoftwareLCM,
+    ValidatedSoftwareLCM,
+    ContractLCM,
+    ProviderLCM,
+)
+from nautobot_device_lifecycle_mgmt.tables import (
+    HardwareLCMTable,
+    SoftwareLCMTable,
+    ValidatedSoftwareLCMTable,
+    ContractLCMTable,
+    ProviderLCMTable,
+)
 from nautobot_device_lifecycle_mgmt.forms import (
     HardwareLCMForm,
     HardwareLCMBulkEditForm,
@@ -12,9 +24,19 @@ from nautobot_device_lifecycle_mgmt.forms import (
     SoftwareLCMFilterForm,
     ValidatedSoftwareLCMForm,
     ValidatedSoftwareLCMFilterForm,
+    ContractLCMForm,
+    ContractLCMBulkEditForm,
+    ContractLCMFilterForm,
+    ContractLCMCSVForm,
+    ProviderLCMForm,
+    ProviderLCMBulkEditForm,
+    ProviderLCMFilterForm,
+    ProviderLCMCSVForm,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
+    ContractLCMFilterSet,
+    ProviderLCMFilterSet,
     SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
 )
@@ -193,3 +215,151 @@ class ValidatedSoftwareLCMDeleteView(generic.ObjectDeleteView):
     queryset = ValidatedSoftwareLCM.objects.all()
     default_return_url = URL.ValidatedSoftwareLCM.List
     template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_delete.html"
+
+
+# ---------------------------------------------------------------------------------
+#  Contract LifeCycle Management Views
+# ---------------------------------------------------------------------------------
+
+
+class ContractLCMListView(generic.ObjectListView):
+    """List view."""
+
+    queryset = ContractLCM.objects.all()
+    filterset = ContractLCMFilterSet
+    filterset_form = ContractLCMFilterForm
+    table = ContractLCMTable
+
+
+class ContractLCMView(generic.ObjectView):
+    """Detail view."""
+
+    queryset = ContractLCM.objects.all()
+
+
+class ContractLCMCreateView(generic.ObjectEditView):
+    """Create view."""
+
+    model = ContractLCM
+    queryset = ContractLCM.objects.all()
+    model_form = ContractLCMForm
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_list"
+
+
+class ContractLCMDeleteView(generic.ObjectDeleteView):
+    """Delete view."""
+
+    model = ContractLCM
+    queryset = ContractLCM.objects.all()
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_list"
+
+
+class ContractLCMEditView(generic.ObjectEditView):
+    """Edit view."""
+
+    model = ContractLCM
+    queryset = ContractLCM.objects.all()
+    model_form = ContractLCMForm
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm"
+
+
+class ContractLCMBulkImportView(generic.BulkImportView):
+    """View for bulk import of hardware lcm."""
+
+    queryset = ContractLCM.objects.all()
+    model_form = ContractLCMCSVForm
+    table = ContractLCMTable
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_list"
+
+
+class ContractLCMBulkDeleteView(generic.BulkDeleteView):
+    """View for deleting one or more HardwareLCM records."""
+
+    queryset = ContractLCM.objects.all()
+    table = ContractLCMTable
+    bulk_delete_url = "plugins:nautobot_plugin_device_lifecycle_mgmt.contractlcm_bulk_delete"
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_list"
+
+
+class ContractLCMBulkEditView(generic.BulkEditView):
+    """View for editing one or more HardwareLCM records."""
+
+    queryset = ContractLCM.objects.all()
+    filterset = ContractLCMFilterSet
+    table = ContractLCMTable
+    form = ContractLCMBulkEditForm
+    bulk_edit_url = "plugins:nautobot_plugin_device_lifecycle_mgmt.contractlcm_bulk_edit"
+
+
+# ---------------------------------------------------------------------------------
+#  Contract Provider LifeCycle Management Views
+# ---------------------------------------------------------------------------------
+
+
+class ProviderLCMListView(generic.ObjectListView):
+    """List view."""
+
+    queryset = ProviderLCM.objects.all()
+    filterset = ProviderLCMFilterSet
+    filterset_form = ProviderLCMFilterForm
+    table = ProviderLCMTable
+
+
+class ProviderLCMView(generic.ObjectView):
+    """Detail view."""
+
+    queryset = ProviderLCM.objects.all()
+
+
+class ProviderLCMCreateView(generic.ObjectEditView):
+    """Create view."""
+
+    model = ProviderLCM
+    queryset = ProviderLCM.objects.all()
+    model_form = ProviderLCMForm
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:providerlcm_list"
+
+
+class ProviderLCMDeleteView(generic.ObjectDeleteView):
+    """Delete view."""
+
+    model = ProviderLCM
+    queryset = ProviderLCM.objects.all()
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:providerlcm_list"
+
+
+class ProviderLCMEditView(generic.ObjectEditView):
+    """Edit view."""
+
+    model = ProviderLCM
+    queryset = ProviderLCM.objects.all()
+    model_form = ProviderLCMForm
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:providerlcm"
+
+
+class ProviderLCMBulkImportView(generic.BulkImportView):
+    """Bulk import view."""
+
+    queryset = ProviderLCM.objects.all()
+    model_form = ProviderLCMCSVForm
+    table = ProviderLCMTable
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:providerlcm_list"
+
+
+class ProviderLCMBulkDeleteView(generic.BulkDeleteView):
+    """View for deleting one or more HardwareLCM records."""
+
+    queryset = ProviderLCM.objects.all()
+    table = ProviderLCMTable
+    bulk_delete_url = "plugins:nautobot_plugin_device_lifecycle_mgmt.providerlcm_bulk_delete"
+    default_return_url = "plugins:nautobot_plugin_device_lifecycle_mgmt:providerlcm_list"
+
+
+class ProviderLCMBulkEditView(generic.BulkEditView):
+    """View for editing one or more HardwareLCM records."""
+
+    queryset = ProviderLCM.objects.all()
+    filterset = ProviderLCMFilterSet
+    table = ProviderLCMTable
+    form = ProviderLCMBulkEditForm
+    bulk_edit_url = "plugins:nautobot_plugin_device_lifecycle_mgmt.providerlcm_bulk_edit"

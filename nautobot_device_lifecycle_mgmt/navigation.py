@@ -79,6 +79,54 @@ try:
                         ),
                     ),
                 ),
+                NavMenuGroup(
+                    name="Contracts",
+                    weight=100,
+                    items=(
+                        NavMenuItem(
+                            link="plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_list",
+                            name="Contracts",
+                            permissions=["view"],
+                            buttons=(
+                                NavMenuButton(
+                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_add",
+                                    title="Add",
+                                    icon_class="mdi mdi-plus-thick",
+                                    button_class=ButtonColorChoices.GREEN,
+                                    permissions=["add"],
+                                ),
+                                NavMenuButton(
+                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_import",
+                                    title="Import",
+                                    icon_class="mdi mdi-database-import-outline",
+                                    button_class=ButtonColorChoices.BLUE,
+                                    permissions=["add"],
+                                ),
+                            ),
+                        ),
+                        NavMenuItem(
+                            link="plugins:nautobot_plugin_device_lifecycle_mgmt:providerlcm_list",
+                            name="Contract Providers",
+                            permissions=["view"],
+                            buttons=(
+                                NavMenuButton(
+                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:providerlcm_add",
+                                    title="Add",
+                                    icon_class="mdi mdi-plus-thick",
+                                    button_class=ButtonColorChoices.GREEN,
+                                    permissions=["add"],
+                                ),
+                                NavMenuButton(
+                                    link="plugins:nautobot_plugin_device_lifecycle_mgmt:providerlcm_import",
+                                    title="Import",
+                                    icon_class="mdi mdi-database-import-outline",
+                                    button_class=ButtonColorChoices.BLUE,
+                                    permissions=["add"],
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
             ),
         ),
     )

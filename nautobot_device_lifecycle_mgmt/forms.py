@@ -5,9 +5,21 @@ from nautobot.utilities.forms import BootstrapMixin, DatePicker, DynamicModelMul
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Platform
 from nautobot.extras.forms import CustomFieldModelCSVForm, CustomFieldModelForm, RelationshipModelForm
 from nautobot.extras.models import Tag
-from nautobot.utilities.forms import BulkEditForm, DynamicModelChoiceField, StaticSelect2, BOOLEAN_WITH_BLANK_CHOICES
-
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
+from nautobot.utilities.forms import (
+    BulkEditForm,
+    DynamicModelChoiceField,
+    StaticSelect2,
+    BOOLEAN_WITH_BLANK_CHOICES,
+    add_blank_choice,
+)
+from nautobot_plugin_device_lifecycle_mgmt.choices import ContractTypeChoices, CurrencyChoices
+from nautobot_device_lifecycle_mgmt.models import (
+    HardwareLCM,
+    SoftwareLCM,
+    ValidatedSoftwareLCM,
+    ContractLCM,
+    ProviderLCM,
+)
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 
@@ -307,3 +319,162 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
             "end",
             "preferred",
         ]
+
+
+class ContractLCMForm(BootstrapMixin, RelationshipModelForm):
+    """Device LifeCycle Contracts creation/edit form."""
+
+    provider = forms.ModelChoiceField(
+        queryset=ProviderLCM.objects.all(),
+        label="Contract Provider",
+        to_field_name="pk",
+        required=True,
+    )
+    contract_type = forms.ChoiceField(choices=add_blank_choice(ContractTypeChoices.CHOICES), label="Contract Type")
+    currency = forms.ChoiceField(required=False, choices=add_blank_choice(CurrencyChoices.CHOICES))
+
+    class Meta:
+        """Meta attributes for the ContractLCMForm class."""
+
+        model = ContractLCM
+        fields = ContractLCM.csv_headers
+
+        widgets = {
+            "end": DatePicker(),
+            "start": DatePicker(),
+        }
+
+
+class ContractLCMBulkEditForm(BootstrapMixin, BulkEditForm):
+    """Device LifeCycle Contrcts bulk edit form."""
+
+    pk = forms.ModelMultipleChoiceField(queryset=ContractLCM.objects.all(), widget=forms.MultipleHiddenInput)
+    provider = forms.ModelMultipleChoiceField(queryset=ProviderLCM.objects.all(), required=False)
+    start = forms.DateField(widget=DatePicker(), required=False)
+    end = forms.DateField(widget=DatePicker(), required=False)
+    cost = forms.FloatField(required=False)
+    currency = forms.ChoiceField(required=False, choices=CurrencyChoices.CHOICES)
+    contract_type = forms.ChoiceField(choices=ContractTypeChoices.CHOICES, required=False)
+    support_level = forms.CharField(required=False)
+
+    class Meta:
+        """Meta attributes for the ContractLCMBulkEditForm class."""
+
+        nullable_fields = [
+            "start",
+            "end",
+            "cost",
+            "currency",
+            "support_level",
+            "contract_type",
+        ]
+
+
+class ContractLCMFilterForm(BootstrapMixin, forms.ModelForm):
+    """Filter form to filter searches."""
+
+    q = forms.CharField(required=False, label="Search")
+    provider = forms.ModelMultipleChoiceField(required=False, queryset=ProviderLCM.objects.all(), to_field_name="pk")
+    currency = forms.ChoiceField(required=False, choices=CurrencyChoices.CHOICES)
+
+    class Meta:
+        """Meta attributes for the ContractLCMFilterForm class."""
+
+        model = ContractLCM
+        # Define the fields above for ordering and widget purposes
+        fields = [
+            "q",
+            "provider",
+            "name",
+            "start",
+            "end",
+            "cost",
+            "currency",
+            "support_level",
+            "contract_type",
+        ]
+
+        widgets = {
+            "start": DatePicker(),
+            "end": DatePicker(),
+        }
+
+
+class ContractLCMCSVForm(CustomFieldModelCSVForm):
+    """Form for creating bulk Device Lifecycle contracts."""
+
+    provider = forms.ModelChoiceField(
+        required=True, queryset=ProviderLCM.objects.all(), to_field_name="slug", label="Contract Provider"
+    )
+
+    class Meta:
+        """Meta attributes for the ContractLCMCSVForm class."""
+
+        model = ContractLCM
+        fields = ContractLCM.csv_headers
+
+
+class ProviderLCMForm(BootstrapMixin, forms.ModelForm):
+    """Device LifeCycle Contract Providers creation/edit form."""
+
+    class Meta:
+        """Meta attributes for the ProviderLCMForm class."""
+
+        model = ProviderLCM
+        fields = ProviderLCM.csv_headers
+
+
+class ProviderLCMBulkEditForm(BootstrapMixin, BulkEditForm):
+    """Device LifeCycle Contract Providers bulk edit form."""
+
+    pk = forms.ModelMultipleChoiceField(queryset=ProviderLCM.objects.all(), widget=forms.MultipleHiddenInput)
+    description = forms.CharField(required=False)
+    physical_address = forms.CharField(required=False)
+    contact_name = forms.CharField(required=False)
+    contact_phone = forms.CharField(required=False)
+    contact_email = forms.EmailField(required=False)
+    comments = forms.CharField(required=False)
+
+    class Meta:
+        """Meta attributes for the ProviderLCMBulkEditForm class."""
+
+        nullable_fields = [
+            "description",
+            "physical_address",
+            "contact_name",
+            "contact_phone",
+            "contact_email",
+            "comments",
+        ]
+
+
+class ProviderLCMFilterForm(BootstrapMixin, forms.ModelForm):
+    """Filter form to filter searches."""
+
+    q = forms.CharField(required=False, label="Search")
+
+    class Meta:
+        """Meta attributes for the ProviderLCMFilterForm class."""
+
+        model = ProviderLCM
+        # Define the fields above for ordering and widget purposes
+        fields = [
+            "q",
+            "name",
+            "description",
+            "physical_address",
+            "contact_name",
+            "contact_phone",
+            "contact_email",
+            "comments",
+        ]
+
+
+class ProviderLCMCSVForm(CustomFieldModelCSVForm):
+    """Form for creating bulk Device Lifecycle providers."""
+
+    class Meta:
+        """Meta attributes for the ProviderLCMCSVForm class."""
+
+        model = ProviderLCM
+        fields = ProviderLCM.csv_headers

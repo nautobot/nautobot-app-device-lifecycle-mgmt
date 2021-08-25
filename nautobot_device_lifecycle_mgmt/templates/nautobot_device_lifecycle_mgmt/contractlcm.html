@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load buttons %}
+{% load custom_links %}
+{% load helpers %}
+{% load humanize %}
+
+{% block title %}{{ object }}{% endblock %}
+
+{% block header %}
+    <div class="row noprint">
+        <div class="col-sm-12 col-md-12">
+            <ol class="breadcrumb">
+                <li><a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_list' %}">Contracts</a></li>
+                <li><a>{{ object }}</a></li>
+            </ol>
+        </div>
+    </div>
+    <div class="pull-right noprint">
+        {% if perms.change %}
+            <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_edit' pk=object.id %}" class="btn btn-warning">
+                <span class="mdi mdi-pencil" aria-hidden="true"></span> Edit
+            </a>
+        {% endif %}
+        {% if perms.delete %}
+            <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_delete' pk=object.id %}" class="btn btn-danger">
+                <span class="mdi mdi-trash-can-outline" aria-hidden="true"></span> Delete
+            </a>
+        {% endif %}
+    </div>
+    <h2>Provider: {{ object }}</h2>
+        {% include 'inc/created_updated.html' with obj=object %}
+    <div class="pull-right noprint">
+        {% custom_links object %}
+    </div>
+    <ul class="nav nav-tabs">
+        <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
+            <a href="{{ object.get_absolute_url }}">Contract</a>
+        </li>
+        <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
+            <a href="{% url 'plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm_changelog' pk=object.id %}">Change Log</a>
+        </li>
+    </ul>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Contract</strong>
+            </div>
+            <table class="table table-hover panel-body attr-table">
+                <tr>
+                    <td>Provider</td>
+                    <td>{{ object.provider }}</td>
+                </tr>
+                <tr>
+                    <td>Name</td>
+                    <td>{{ object.name }}</td>
+                </tr>
+                <tr>
+                    <td>Start Date</td>
+                    <td>{% if object.start %} {{ object.start }} {% else %} &mdash; {% endif %}</td>
+                </tr>
+                <tr>
+                    <td>End Date</td>
+                    <td>{% if object.end %} {{ object.end }} {% else %} &mdash; {% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Cost</td>
+                    <td>{% if object.cost %} {{ object.cost | intcomma }} {% else %} &mdash; {% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Currency</td>
+                    <td>{% if object.currency %} {{ object.currency }} {% else %} &mdash; {% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Support Level</td>
+                    <td>{% if object.support_level %} {{ object.support_level }} {% else %} &mdash; {% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Contract Type</td>
+                    <td>{% if object.contract_type %} {{ object.contract_type }} {% else %} &mdash; {% endif %}</td>
+                </tr>
+            </table>
+        </div>
+        {% include 'inc/custom_fields_panel.html' %}
+        {% include 'inc/relationships_panel.html' %}
+    </div>
+</div>
+{% endblock %}

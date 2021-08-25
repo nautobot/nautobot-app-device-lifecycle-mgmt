@@ -53,6 +53,34 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name="ProviderLCM",
+            fields=[
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True
+                    ),
+                ),
+                ("created", models.DateField(auto_now_add=True, null=True)),
+                ("last_updated", models.DateTimeField(auto_now=True, null=True)),
+                (
+                    "_custom_field_data",
+                    models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
+                ),
+                ("name", models.CharField(max_length=100, unique=True)),
+                ("slug", models.SlugField(max_length=100, unique=True)),
+                ("description", models.CharField(blank=True, max_length=200)),
+                ("physical_address", models.CharField(blank=True, max_length=200)),
+                ("contact_name", models.CharField(blank=True, max_length=50)),
+                ("contact_phone", models.CharField(blank=True, max_length=20)),
+                ("contact_email", models.EmailField(blank=True, max_length=254)),
+                ("comments", models.TextField(blank=True)),
+            ],
+            options={
+                "ordering": ("name",),
+            },
+        ),
+        migrations.CreateModel(
             name="HardwareLCM",
             fields=[
                 (
@@ -129,6 +157,44 @@ class Migration(migrations.Migration):
                 "verbose_name": "Validated Software",
                 "ordering": ("software", "preferred", "start"),
                 "unique_together": {("software", "assigned_to_content_type", "assigned_to_object_id")},
+            },
+        ),
+        migrations.CreateModel(
+            name="ContractLCM",
+            fields=[
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True
+                    ),
+                ),
+                ("created", models.DateField(auto_now_add=True, null=True)),
+                ("last_updated", models.DateTimeField(auto_now=True, null=True)),
+                (
+                    "_custom_field_data",
+                    models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
+                ),
+                ("name", models.CharField(max_length=100, unique=True)),
+                ("slug", models.SlugField(max_length=100, unique=True)),
+                ("start", models.DateField(blank=True, null=True)),
+                ("end", models.DateField(blank=True, null=True)),
+                ("cost", models.FloatField(blank=True, null=True)),
+                ("support_level", models.CharField(blank=True, max_length=64, null=True)),
+                ("contract_type", models.CharField(blank=True, max_length=32, null=True)),
+                ("comments", models.TextField(blank=True)),
+                (
+                    "provider",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="nautobot_plugin_device_lifecycle_mgmt.providerlcm",
+                    ),
+                ),
+                ("tags", taggit.managers.TaggableManager(through="extras.TaggedItem", to="extras.Tag")),
+            ],
+            options={
+                "ordering": ("name", "start"),
             },
         ),
         migrations.AddConstraint(

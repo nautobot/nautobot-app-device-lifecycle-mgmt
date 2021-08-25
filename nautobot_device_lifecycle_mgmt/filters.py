@@ -4,7 +4,13 @@ import django_filters
 from django.db.models import Q
 
 from nautobot.dcim.models import DeviceType, Platform
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import (
+    HardwareLCM,
+    SoftwareLCM,
+    ValidatedSoftwareLCM,
+    ContractLCM,
+    ProviderLCM,
+)
 
 
 class HardwareLCMFilterSet(django_filters.FilterSet):
@@ -153,4 +159,85 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
             return queryset
 
         qs_filter = Q(start__icontains=value) | Q(end__icontains=value)
+        return queryset.filter(qs_filter)
+
+
+class ContractLCMFilterSet(django_filters.FilterSet):
+    """Filter for ContractLCMFilter."""
+
+    q = django_filters.CharFilter(method="search", label="Search")
+
+    provider = django_filters.ModelMultipleChoiceFilter(
+        field_name="provider__slug",
+        queryset=ProviderLCM.objects.all(),
+        to_field_name="slug",
+        label="Provider",
+    )
+
+    expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = ContractLCM
+
+        fields = [
+            "provider",
+            "name",
+            "slug",
+            "start",
+            "end",
+            "cost",
+            "support_level",
+            "contract_type",
+            "expired",
+        ]
+
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+
+        qs_filter = (
+            Q(start__icontains=value)
+            | Q(end__icontains=value)
+            | Q(name__icontains=value)
+            | Q(cost__icontains=value)
+            | Q(contract_type__icontains=value)
+        )
+        return queryset.filter(qs_filter)
+
+    def expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the filtered search."""
+        today = datetime.datetime.today().date()
+        lookup = "gte" if not value else "lt"
+
+        qs_filter = Q(**{f"end__{lookup}": today})
+        return queryset.filter(qs_filter)
+
+
+class ProviderLCMFilterSet(django_filters.FilterSet):
+    """Filter for ProviderLCMFilter."""
+
+    q = django_filters.CharFilter(method="search", label="Search")
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = ProviderLCM
+
+        fields = ProviderLCM.csv_headers
+
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+
+        qs_filter = (
+            Q(name__icontains=value)
+            | Q(contact_name__icontains=value)
+            | Q(contact_email__icontains=value)
+            | Q(contact_phone__icontains=value)
+            | Q(description__icontains=value)
+        )
         return queryset.filter(qs_filter)

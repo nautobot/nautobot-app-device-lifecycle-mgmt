@@ -3,7 +3,13 @@
 import django_tables2 as tables
 from django_tables2.utils import A
 from nautobot.utilities.tables import BaseTable, ButtonsColumn, BooleanColumn, ToggleColumn
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import (
+    HardwareLCM,
+    SoftwareLCM,
+    ValidatedSoftwareLCM,
+    ContractLCM,
+    ProviderLCM,
+)
 
 
 class HardwareLCMTable(BaseTable):
@@ -111,5 +117,63 @@ class ValidatedSoftwareLCMTable(BaseTable):
             "start",
             "end",
             "preferred",
+            "actions",
+        )
+
+
+class ContractLCMTable(BaseTable):
+    """Table for list view."""
+
+    pk = ToggleColumn()
+    name = tables.LinkColumn(
+        "plugins:nautobot_device_lifecycle_mgmt:contractlcm", text=lambda record: record, args=[A("pk")]
+    )
+    provider = tables.LinkColumn(
+        "plugins:nautobot_device_lifecycle_mgmt:providerlcm",
+        text=lambda record: record.provider,
+        args=[A("provider.pk")],
+    )
+    cost = tables.TemplateColumn(
+        template_code="""{{ record.cost }}{% if record.currency %} {{ record.currency }}{% endif %}"""
+    )
+    actions = ButtonsColumn(ContractLCM, buttons=("changelog", "edit", "delete"))
+
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = ContractLCM
+        fields = (
+            "pk",
+            "provider",
+            "name",
+            "start",
+            "end",
+            "cost",
+            "support_level",
+            "contract_type",
+            "actions",
+        )
+
+
+class ProviderLCMTable(BaseTable):
+    """Table for list view."""
+
+    pk = ToggleColumn()
+    name = tables.LinkColumn(
+        "plugins:nautobot_device_lifecycle_mgmt:providerlcm", text=lambda record: record, args=[A("pk")]
+    )
+    actions = ButtonsColumn(ProviderLCM, buttons=("changelog", "edit", "delete"))
+
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = ProviderLCM
+        fields = (
+            "pk",
+            "name",
+            "physical_address",
+            "contact_name",
+            "contact_phone",
+            "contact_email",
             "actions",
         )

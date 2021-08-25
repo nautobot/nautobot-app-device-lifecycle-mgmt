@@ -2,7 +2,13 @@
 from django.urls import path
 from nautobot.extras.views import ObjectChangeLogView
 from nautobot_device_lifecycle_mgmt import views
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import (
+    HardwareLCM,
+    SoftwareLCM,
+    ValidatedSoftwareLCM,
+    ContractLCM,
+    ProviderLCM,
+)
 
 
 urlpatterns = [
@@ -53,4 +59,34 @@ urlpatterns = [
         name="validatedsoftwarelcm_changelog",
         kwargs={"model": ValidatedSoftwareLCM},
     ),
+    # Contract LifeCycle Management URLs
+    path("contract-lcm/", views.ContractLCMListView.as_view(), name="contractlcm_list"),
+    path("contract-lcm/<uuid:pk>/", views.ContractLCMView.as_view(), name="contractlcm"),
+    path("contract-lcm/add/", views.ContractLCMCreateView.as_view(), name="contractlcm_add"),
+    path("contract-lcm/delete/", views.ContractLCMBulkDeleteView.as_view(), name="contractlcm_bulk_delete"),
+    path("contract-lcm/edit/", views.ContractLCMBulkEditView.as_view(), name="contractlcm_bulk_edit"),
+    path("contract-lcm/<uuid:pk>/delete/", views.ContractLCMDeleteView.as_view(), name="contractlcm_delete"),
+    path("contract-lcm/<uuid:pk>/edit/", views.ContractLCMEditView.as_view(), name="contractlcm_edit"),
+    path(
+        "contract-lcm/<uuid:pk>/changelog/",
+        ObjectChangeLogView.as_view(),
+        name="contractlcm_changelog",
+        kwargs={"model": ContractLCM},
+    ),
+    path("contract-lcm/import/", views.ContractLCMBulkImportView.as_view(), name="contractlcm_import"),
+    # Contract Provider LifeCycle Management URLs
+    path("provider-lcm/", views.ProviderLCMListView.as_view(), name="providerlcm_list"),
+    path("provider-lcm/<uuid:pk>/", views.ProviderLCMView.as_view(), name="providerlcm"),
+    path("provider-lcm/add/", views.ProviderLCMCreateView.as_view(), name="providerlcm_add"),
+    path("provider-lcm/delete/", views.ProviderLCMBulkDeleteView.as_view(), name="providerlcm_bulk_delete"),
+    path("provider-lcm/edit/", views.ProviderLCMBulkEditView.as_view(), name="providerlcm_bulk_edit"),
+    path("provider-lcm/<uuid:pk>/delete/", views.ProviderLCMDeleteView.as_view(), name="providerlcm_delete"),
+    path("provider-lcm/<uuid:pk>/edit/", views.ProviderLCMEditView.as_view(), name="providerlcm_edit"),
+    path(
+        "provider-lcm/<uuid:pk>/changelog/",
+        ObjectChangeLogView.as_view(),
+        name="providerlcm_changelog",
+        kwargs={"model": ProviderLCM},
+    ),
+    path("contract-lcm/import/", views.ProviderLCMBulkImportView.as_view(), name="providerlcm_import"),
 ]

@@ -11,7 +11,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 
 from nautobot.extras.utils import extras_features
-from nautobot.core.models.generics import PrimaryModel
+from nautobot.core.models.generics import PrimaryModel, OrganizationalModel
 
 
 @extras_features(
@@ -292,4 +292,157 @@ class ValidatedSoftwareLCM(PrimaryModel):
             self.start,
             self.end,
             self.preferred,
+        )
+
+
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "relationships",
+    "webhooks",
+)
+class ContractLCM(PrimaryModel):
+    """ContractLCM model for plugin."""
+
+    # Set model columns
+    provider = models.ForeignKey(
+        to="nautobot_plugin_device_lifecycle_mgmt.ProviderLCM",
+        on_delete=models.CASCADE,
+        verbose_name="Contract Provider",
+        blank=True,
+        null=True,
+    )
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True)
+    start = models.DateField(null=True, blank=True, verbose_name="Contract Start Date")
+    end = models.DateField(null=True, blank=True, verbose_name="Contract End Date")
+    cost = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=15, verbose_name="Contract Cost")
+    support_level = models.CharField(verbose_name="Support Level", max_length=64, blank=True, null=True)
+    currency = models.CharField(verbose_name="Currency", max_length=4, blank=True, null=True)
+    contract_type = models.CharField(null=True, blank=True, max_length=32, verbose_name="Contract Type")
+    comments = models.TextField(blank=True)
+
+    csv_headers = [
+        "provider",
+        "name",
+        "slug",
+        "start",
+        "end",
+        "cost",
+        "currency",
+        "support_level",
+        "contract_type",
+    ]
+
+    class Meta:
+        """Meta attributes for the ContractLCM class."""
+
+        ordering = ("name", "start")
+
+    def __str__(self):
+        """String representation of ContractLCM."""
+        return self.name
+
+    def get_absolute_url(self):
+        """Returns the Detail view for ContractLCM models."""
+        return reverse("plugins:nautobot_plugin_device_lifecycle_mgmt:contractlcm", kwargs={"pk": self.pk})
+
+    @property
+    def expired(self):
+        """Return True or False if chosen field is expired."""
+
+        return datetime.today().date() >= self.end
+
+    def save(self, *args, **kwargs):
+        """Override save to assert a full clean."""
+        # Full clean to assert custom validation in clean() for ORM, etc.
+        super().full_clean()
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        """Override clean to do custom validation."""
+        super().clean()
+
+        if self.end <= self.start:
+            raise ValidationError(_("End date must be after the start date of the contract."))
+
+    def to_csv(self):
+        """Return fields for bulk view."""
+        return (
+            self.provider,
+            self.name,
+            self.slug,
+            self.start,
+            self.end,
+            self.cost,
+            self.currency,
+            self.support_level,
+            self.contract_type,
+        )
+
+
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "relationships",
+    "webhooks",
+)
+class ProviderLCM(OrganizationalModel):
+    """ProviderLCM model for plugin."""
+
+    # Set model columns
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True)
+    description = models.CharField(max_length=200, blank=True)
+    physical_address = models.CharField(max_length=200, blank=True)
+    contact_name = models.CharField(max_length=50, blank=True)
+    contact_phone = models.CharField(max_length=20, blank=True)
+    contact_email = models.EmailField(blank=True, verbose_name="Contact E-mail")
+    comments = models.TextField(blank=True)
+
+    csv_headers = [
+        "name",
+        "slug",
+        "description",
+        "physical_address",
+        "contact_name",
+        "contact_phone",
+        "contact_email",
+        "comments",
+    ]
+
+    class Meta:
+        """Meta attributes for the class."""
+
+        ordering = ("name",)
+
+    def __str__(self):
+        """String representation of ProviderLCM."""
+        return self.name
+
+    def get_absolute_url(self):
+        """Returns the Detail view for ProviderLCM models."""
+        return reverse("plugins:nautobot_plugin_device_lifecycle_mgmt:providerlcm", kwargs={"pk": self.pk})
+
+    def save(self, *args, **kwargs):
+        """Override save to assert a full clean."""
+        # Full clean to assert custom validation in clean() for ORM, etc.
+        super().full_clean()
+        super().save(*args, **kwargs)
+
+    def to_csv(self):
+        """Return fields for bulk view."""
+        return (
+            self.name,
+            self.slug,
+            self.description,
+            self.physical_address,
+            self.contact_name,
+            self.contact_phone,
+            self.contact_email,
+            self.comments,
         )

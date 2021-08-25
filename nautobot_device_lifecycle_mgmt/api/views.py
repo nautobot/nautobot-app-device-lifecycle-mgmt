@@ -3,14 +3,20 @@
 from nautobot.core.api.views import ModelViewSet
 from nautobot.extras.api.views import CustomFieldModelViewSet
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM, ContractLCM
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
+    ContractLCMFilterSet,
     SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
 )
 
-from .serializers import HardwareLCMSerializer, SoftwareLCMSerializer, ValidatedSoftwareLCMSerializer
+from .serializers import (
+    HardwareLCMSerializer,
+    SoftwareLCMSerializer,
+    ValidatedSoftwareLCMSerializer,
+    ContractLCMSerializer,
+)
 
 
 class HardwareLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
@@ -35,3 +41,11 @@ class ValidatedSoftwareLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=t
     queryset = ValidatedSoftwareLCM.objects.all()
     serializer_class = ValidatedSoftwareLCMSerializer
     filterset_class = ValidatedSoftwareLCMFilterSet
+
+
+class ContractLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
+    """CRUD operations set for the Contract LifeCycle Management view."""
+
+    queryset = ContractLCM.objects.all()
+    filterset_class = ContractLCMFilterSet
+    serializer_class = ContractLCMSerializer

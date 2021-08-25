@@ -1,5 +1,4 @@
 """API serializers implementation for the LifeCycle Management plugin."""
-
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 
@@ -7,7 +6,7 @@ from drf_yasg.utils import swagger_serializer_method
 from rest_framework import serializers
 
 from nautobot.core.api import ContentTypeField
-from nautobot.core.api.serializers import ValidatedModelSerializer
+from nautobot.core.api.serializers import ValidatedModelSerializer, WritableNestedSerializer
 
 from nautobot.dcim.api.nested_serializers import (
     NestedDeviceSerializer,
@@ -18,7 +17,13 @@ from nautobot.extras.api.customfields import CustomFieldModelSerializer
 from nautobot.extras.api.serializers import TaggedObjectSerializer
 from nautobot.utilities.api import get_serializer_for_model
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import (
+    HardwareLCM,
+    SoftwareLCM,
+    ValidatedSoftwareLCM,
+    ContractLCM,
+    ProviderLCM,
+)
 
 from .nested_serializers import NestedSoftwareLCMSerializer
 
@@ -131,3 +136,61 @@ class ValidatedSoftwareLCMSerializer(
         serializer = get_serializer_for_model(obj.assigned_to, prefix="Nested")
         context = {"request": self.context["request"]}
         return serializer(obj.assigned_to, context=context).data
+
+
+class ProviderLCMSerializer(ValidatedModelSerializer):
+    """API serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = ProviderLCM
+        fields = [
+            "id",
+            "name",
+            "slug",
+            "description",
+            "physical_address",
+            "contact_name",
+            "contact_phone",
+            "contact_email",
+            "comments",
+        ]
+
+
+class NestedProviderLCMSerializer(WritableNestedSerializer):
+    class Meta:
+        model = ProviderLCM
+        fields = [
+            "id",
+            "name",
+            "slug",
+            "description",
+            "physical_address",
+            "contact_name",
+            "contact_phone",
+            "contact_email",
+            "comments",
+        ]
+
+
+class ContractLCMSerializer(ValidatedModelSerializer):
+    """API serializer."""
+
+    provider = NestedProviderLCMSerializer(many=False, read_only=False, required=True, help_text="Contract Provider")
+
+    class Meta:
+        """Meta attributes."""
+
+        model = ContractLCM
+        fields = [
+            "id",
+            "provider",
+            "name",
+            "slug",
+            "start",
+            "end",
+            "cost",
+            "support_level",
+            "contract_type",
+        ]
