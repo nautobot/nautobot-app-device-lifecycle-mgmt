@@ -1,6 +1,6 @@
 """Plugin declaration for the Device LifeCycle Management."""
 
-__version__ = "1.0.0-beta.0"
+__version__ = "0.1.0-beta.0"
 
 from django.db.models.signals import post_migrate
 
