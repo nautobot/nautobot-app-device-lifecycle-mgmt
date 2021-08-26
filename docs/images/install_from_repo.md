@@ -16,7 +16,7 @@ sudo -iu nautobot
 ```
 2. Execute pip install of Device Lifecycle Management Plugin using the HTTPS url and Personal Access Token
 ```
-pip install git+https://github.com/networktocode/nautobot-plugin-device-lifecycle-mgmt.git
+pip install git+https://github.com/networktocode/nautobot-plugin-device-lifecycle-mgmt.git@v0.1.0
 ```
 
 **Example Output**
