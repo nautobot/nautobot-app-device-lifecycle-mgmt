@@ -4,13 +4,20 @@ A plugin for [Nautobot](https://github.com/nautobot/nautobot) to manage device l
 
 ## Installation
 
+### Pre-Publicly Available Installation
+
+For notes how to [install the plugin from a Git Repository](docs/images/install_from_repo.md).
+
+After completing the install of the plugin from Git repository continue to the next [install step](#installation-continued).
+### Public Installation
+
 The plugin is available as a Python package in pypi and can be installed with pip
 
 ```shell
 pip install nautobot-device-lifecycle-mgmt
 ```
 
-> The plugin is compatible with Nautobot 1.0.0b1 and higher
+> The plugin is compatible with Nautobot 1.0.1 and higher
 
 To ensure Nautobot Device Life Cycle Management plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-plugin-device-lifecycle-mgmt` package:
 
@@ -18,11 +25,37 @@ To ensure Nautobot Device Life Cycle Management plugin is automatically re-insta
 # echo nautobot-device-lifecycle-mgmt >> local_requirements.txt
 ```
 
+### Installation Continued
+
 Once installed, the plugin needs to be enabled in your `configuration.py`
 
 ```python
-# In your configuration.py
+# In your configuration.py, if following docs -> /opt/nautobot/nautobot_config.py
 PLUGINS = ["nautobot_device_lifecycle_mgmt"]
+```
+
+### Run Post Upgrade Steps
+
+Once the configuration has been updated, run the post migration script as the Nautobot user
+
+```
+nautobot-server post_upgrade
+```
+
+This should run migrations for the plugin to be ready for use.
+
+### Restart Nautobot Services
+
+As a user account that has privileges to restart services, restart the Nautobot services
+
+```
+sudo systemctl restart nautobot nautobot-worker
+```
+
+If you are on Nautobot >= 1.1.0 and have the RQ worker continuing on, also restart the RQ worker service.
+
+```
+sudo systemctl restart nautobot-rq-worker
 ```
 
 ## Usage
