@@ -43,7 +43,7 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <strong>Hardware Notice</strong>
@@ -96,12 +96,17 @@
                 </tr>
                 <tr>
                     <td>Comments</td>
-                    <td><pre>{{ object.comments }}</pre></td>
+                    <td>
+                        {% if object.comments %}
+                        <pre>{{ object.comments }}</pre>
+                        {% else %} &mdash; {% endif %}
+                    </td>
                 </tr>
             </table>
         </div>
         {% include 'inc/custom_fields_panel.html' %}
         {% include 'inc/relationships_panel.html' %}
+        {% include 'extras/inc/tags_panel.html' with tags=object.tags.all %}
     </div>
 </div>
 {% endblock %}

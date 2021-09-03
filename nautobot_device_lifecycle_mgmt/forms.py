@@ -3,7 +3,11 @@ import logging
 from django import forms
 from nautobot.utilities.forms import BootstrapMixin, DatePicker, DynamicModelMultipleChoiceField
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Platform
-from nautobot.extras.forms import CustomFieldModelCSVForm, CustomFieldModelForm, RelationshipModelForm
+from nautobot.extras.forms import (
+    CustomFieldModelCSVForm,
+    CustomFieldModelForm,
+    RelationshipModelForm,
+)
 from nautobot.extras.models import Tag
 from nautobot.utilities.forms import (
     BulkEditForm,
@@ -12,7 +16,7 @@ from nautobot.utilities.forms import (
     BOOLEAN_WITH_BLANK_CHOICES,
     add_blank_choice,
 )
-from nautobot_plugin_device_lifecycle_mgmt.choices import ContractTypeChoices, CurrencyChoices
+from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, CurrencyChoices, PoCTypeChoices
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
@@ -25,7 +29,7 @@ from nautobot_device_lifecycle_mgmt.models import (
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 
 
-class HardwareLCMForm(BootstrapMixin, forms.ModelForm):
+class HardwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
     """Hardware Device LifeCycle creation/edit form."""
 
     inventory_item = forms.ModelChoiceField(
@@ -322,7 +326,7 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
         ]
 
 
-class ContractLCMForm(BootstrapMixin, RelationshipModelForm):
+class ContractLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
     """Device LifeCycle Contracts creation/edit form."""
 
     provider = forms.ModelChoiceField(
@@ -333,12 +337,25 @@ class ContractLCMForm(BootstrapMixin, RelationshipModelForm):
     )
     contract_type = forms.ChoiceField(choices=add_blank_choice(ContractTypeChoices.CHOICES), label="Contract Type")
     currency = forms.ChoiceField(required=False, choices=add_blank_choice(CurrencyChoices.CHOICES))
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
     class Meta:
         """Meta attributes for the ContractLCMForm class."""
 
         model = ContractLCM
-        fields = ContractLCM.csv_headers
+        fields = [
+            "provider",
+            "name",
+            "number",
+            "start",
+            "end",
+            "cost",
+            "currency",
+            "support_level",
+            "contract_type",
+            "comments",
+            "tags",
+        ]
 
         widgets = {
             "end": DatePicker(),
@@ -377,6 +394,7 @@ class ContractLCMFilterForm(BootstrapMixin, forms.ModelForm):
     q = forms.CharField(required=False, label="Search")
     provider = forms.ModelMultipleChoiceField(required=False, queryset=ProviderLCM.objects.all(), to_field_name="pk")
     currency = forms.ChoiceField(required=False, choices=CurrencyChoices.CHOICES)
+    name = forms.CharField(required=False)
 
     class Meta:
         """Meta attributes for the ContractLCMFilterForm class."""
@@ -405,7 +423,7 @@ class ContractLCMCSVForm(CustomFieldModelCSVForm):
     """Form for creating bulk Device Lifecycle contracts."""
 
     provider = forms.ModelChoiceField(
-        required=True, queryset=ProviderLCM.objects.all(), to_field_name="pk", label="Contract Provider"
+        required=True, queryset=ProviderLCM.objects.all(), to_field_name="name", label="Contract Provider"
     )
 
     class Meta:
@@ -415,14 +433,25 @@ class ContractLCMCSVForm(CustomFieldModelCSVForm):
         fields = ContractLCM.csv_headers
 
 
-class ProviderLCMForm(BootstrapMixin, forms.ModelForm):
+class ProviderLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
     """Device LifeCycle Contract Providers creation/edit form."""
+
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
     class Meta:
         """Meta attributes for the ProviderLCMForm class."""
 
         model = ProviderLCM
-        fields = ProviderLCM.csv_headers
+        fields = [
+            "name",
+            "description",
+            "physical_address",
+            "phone",
+            "email",
+            "portal_url",
+            "comments",
+            "tags",
+        ]
 
 
 class ProviderLCMBulkEditForm(BootstrapMixin, BulkEditForm):
@@ -464,9 +493,8 @@ class ProviderLCMFilterForm(BootstrapMixin, forms.ModelForm):
             "name",
             "description",
             "physical_address",
-            "contact_name",
-            "contact_phone",
-            "contact_email",
+            "phone",
+            "email",
             "comments",
         ]
 
@@ -481,14 +509,27 @@ class ProviderLCMCSVForm(CustomFieldModelCSVForm):
         fields = ProviderLCM.csv_headers
 
 
-class ContactLCMForm(BootstrapMixin, forms.ModelForm):
+class ContactLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
     """Device LifeCycle Contract Resources creation/edit form."""
+
+    type = forms.ChoiceField(choices=PoCTypeChoices.CHOICES, required=False)
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
     class Meta:
         """Meta attributes for the ContactLCMForm class."""
 
         model = ContactLCM
-        fields = ContactLCM.csv_headers
+        fields = [
+            "contract",
+            "name",
+            "address",
+            "phone",
+            "email",
+            "comments",
+            "type",
+            "priority",
+            "tags",
+        ]
 
 
 class ContactLCMBulkEditForm(BootstrapMixin, BulkEditForm):
@@ -512,17 +553,33 @@ class ContactLCMFilterForm(BootstrapMixin, forms.ModelForm):
     """Filter form to filter searches."""
 
     q = forms.CharField(required=False, label="Search")
+    name = forms.CharField(required=False)
+    contract = forms.ModelChoiceField(queryset=ContractLCM.objects.all(), required=False)
+    priority = forms.IntegerField(required=False)
 
     class Meta:
         """Meta attributes for the ContactLCMFilterForm class."""
 
         model = ContactLCM
         # Define the fields above for ordering and widget purposes
-        fields = ["q", "first_name", "last_name", "address", "phone", "email", "comments", "priority", "contract"]
+        fields = [
+            "q",
+            "contract",
+            "name",
+            "address",
+            "phone",
+            "email",
+            "priority",
+        ]
 
 
 class ContactLCMCSVForm(CustomFieldModelCSVForm):
     """Form for creating bulk Device Lifecycle resources/contacts."""
+
+    contract = forms.ModelChoiceField(
+        required=True, queryset=ContractLCM.objects.all(), to_field_name="name", label="Contract Name"
+    )
+    type = forms.ChoiceField(choices=PoCTypeChoices.CHOICES, label="PoC Type")
 
     class Meta:
         """Meta attributes for the ContactLCMCSVForm class."""

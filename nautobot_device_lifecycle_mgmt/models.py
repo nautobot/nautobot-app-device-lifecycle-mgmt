@@ -9,10 +9,9 @@ from django.db.models import Q
 from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.conf import settings
-from nautobot.utilities.choices import ColorChoices
-from nautobot.utilities.fields import ColorField
 from nautobot.extras.utils import extras_features
 from nautobot.core.models.generics import PrimaryModel, OrganizationalModel
+from nautobot_device_lifecycle_mgmt import choices
 
 
 @extras_features(
@@ -20,6 +19,7 @@ from nautobot.core.models.generics import PrimaryModel, OrganizationalModel
     "custom_links",
     "custom_validators",
     "export_templates",
+    "graphql",
     "relationships",
     "webhooks",
 )
@@ -302,6 +302,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
     "custom_links",
     "custom_validators",
     "export_templates",
+    "graphql",
     "relationships",
     "webhooks",
 )
@@ -329,12 +330,14 @@ class ContractLCM(PrimaryModel):
     csv_headers = [
         "provider",
         "name",
+        "number",
         "start",
         "end",
         "cost",
         "currency",
         "support_level",
         "contract_type",
+        "comments",
     ]
 
     class Meta:
@@ -349,11 +352,13 @@ class ContractLCM(PrimaryModel):
 
     def get_absolute_url(self):
         """Returns the Detail view for ContractLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:contract", kwargs={"pk": self.pk})
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:contractlcm", kwargs={"pk": self.pk})
 
     @property
     def expired(self):
         """Return True or False if chosen field is expired."""
+        if not self.end:
+            return False
         return datetime.today().date() >= self.end
 
     def save(self, *args, **kwargs):
@@ -366,20 +371,23 @@ class ContractLCM(PrimaryModel):
         """Override clean to do custom validation."""
         super().clean()
 
-        if self.end <= self.start:
-            raise ValidationError("End date must be after the start date of the contract.")
+        if self.end and self.start:
+            if self.end <= self.start:
+                raise ValidationError("End date must be after the start date of the contract.")
 
     def to_csv(self):
         """Return fields for bulk view."""
         return (
             self.provider,
             self.name,
+            self.number,
             self.start,
             self.end,
             self.cost,
             self.currency,
             self.support_level,
             self.contract_type,
+            self.comments,
         )
 
 
@@ -388,6 +396,7 @@ class ContractLCM(PrimaryModel):
     "custom_links",
     "custom_validators",
     "export_templates",
+    "graphql",
     "relationships",
     "webhooks",
 )
@@ -398,18 +407,18 @@ class ProviderLCM(OrganizationalModel):
     name = models.CharField(max_length=100, unique=True)
     description = models.CharField(max_length=200, blank=True)
     physical_address = models.CharField(max_length=200, blank=True)
-    contact_name = models.CharField(max_length=50, blank=True)
-    contact_phone = models.CharField(max_length=20, blank=True)
-    contact_email = models.EmailField(blank=True, verbose_name="Contact E-mail")
+    phone = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(blank=True, verbose_name="E-mail")
+    portal_url = models.URLField(blank=True, verbose_name="Portal URL")
     comments = models.TextField(blank=True)
 
     csv_headers = [
         "name",
         "description",
         "physical_address",
-        "contact_name",
-        "contact_phone",
-        "contact_email",
+        "phone",
+        "email",
+        "portal_url",
         "comments",
     ]
 
@@ -439,9 +448,9 @@ class ProviderLCM(OrganizationalModel):
             self.name,
             self.description,
             self.physical_address,
-            self.contact_name,
-            self.contact_phone,
-            self.contact_email,
+            self.phone,
+            self.email,
+            self.portal_url,
             self.comments,
         )
 
@@ -451,49 +460,74 @@ class ProviderLCM(OrganizationalModel):
     "custom_links",
     "custom_validators",
     "export_templates",
+    "graphql",
     "relationships",
     "webhooks",
 )
 class ContactLCM(PrimaryModel):
     """ContactLCM is a model representation of a contact used in Contracts."""
 
-    first_name = models.CharField(max_length=50, unique=True)
-    last_name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=80, null=True)
     address = models.CharField(max_length=200, blank=True)
     phone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True, verbose_name="Contact E-mail")
     comments = models.TextField(blank=True)
     priority = models.PositiveIntegerField(default=100)
+    type = models.CharField(max_length=50, default=choices.PoCTypeChoices.UNASSIGNED)
     contract = models.ForeignKey(
-        to="nautobot_device_lifecycle_mgmt.ContractLCM",
-        on_delete=models.CASCADE,
-        verbose_name="Contract",
-        blank=True,
-        null=True,
+        to="nautobot_device_lifecycle_mgmt.ContractLCM", on_delete=models.CASCADE, verbose_name="Contract", null=True
     )
 
-    csv_headers = ["first_name", "last_name", "address", "phone", "email", "comments", "priority", "contract"]
+    csv_headers = [
+        "contract",
+        "name",
+        "address",
+        "phone",
+        "email",
+        "comments",
+        "type",
+        "priority",
+    ]
 
     class Meta:
-        verbose_name = "Contract Resource"
+        """Meta attributes for the class."""
 
-        ordering = ("contract", "priority", "last_name")
-        unique_together = ("first_name", "last_name")
+        verbose_name = "Contract POC"
+
+        unique_together = ("contract", "name")
+
+        ordering = ("contract", "priority", "name")
 
     def get_absolute_url(self):
+        """Returns the Detail view for ContactLCM models."""
         return reverse("plugins:nautobot_device_lifecycle_mgmt:contactlcm", kwargs={"pk": self.pk})
 
+    def clean(self):
+        """Override clean to do custom validation."""
+        super().clean()
+        if not any([self.phone, self.email]):
+            raise ValidationError("Must specify at least one of phone or email for contact.")
+
+        # Would to an exist() here, but we need to compare the pk in the event we are editing an
+        # existing record.
+        primary = ContactLCM.objects.filter(contract=self.contract, type=choices.PoCTypeChoices.PRIMARY).first()
+        if primary:
+            if self.pk != primary.pk and self.type == choices.PoCTypeChoices.PRIMARY:
+                raise ValidationError(f"A primary contact already exist for contract {self.contract.name}.")
+
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        """String representation of the model."""
+        return f"{self.name}"
 
     def to_csv(self):
+        """Return fields for bulk view."""
         return (
-            self.first_name,
-            self.last_name,
+            self.contract,
+            self.name,
             self.address,
             self.phone,
             self.email,
             self.comments,
+            self.type,
             self.priority,
-            self.contract,
         )

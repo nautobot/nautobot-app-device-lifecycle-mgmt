@@ -63,7 +63,7 @@ urlpatterns = [
     path("hardware/import/", views.HardwareLCMBulkImportView.as_view(), name="hardwarelcm_import"),
     # Contract LifeCycle Management URLs
     path("contract/", views.ContractLCMListView.as_view(), name="contractlcm_list"),
-    path("contract/<uuid:pk>/", views.ContractLCMView.as_view(), name="contract"),
+    path("contract/<uuid:pk>/", views.ContractLCMView.as_view(), name="contractlcm"),
     path("contract/add/", views.ContractLCMCreateView.as_view(), name="contractlcm_add"),
     path("contract/delete/", views.ContractLCMBulkDeleteView.as_view(), name="contractlcm_bulk_delete"),
     path("contract/edit/", views.ContractLCMBulkEditView.as_view(), name="contractlcm_bulk_edit"),
@@ -75,7 +75,7 @@ urlpatterns = [
         name="contractlcm_changelog",
         kwargs={"model": ContractLCM},
     ),
-    path("contract/import/", views.ContractLCMBulkImportView.as_view(), name="contract_import"),
+    path("contract/import/", views.ContractLCMBulkImportView.as_view(), name="contractlcm_import"),
     # Contract Provider LifeCycle Management URLs
     path("provider/", views.ProviderLCMListView.as_view(), name="providerlcm_list"),
     path("provider/<uuid:pk>/", views.ProviderLCMView.as_view(), name="providerlcm"),

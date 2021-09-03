@@ -177,6 +177,14 @@ class ContractLCMFilterSet(django_filters.FilterSet):
 
     expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
 
+    start = django_filters.DateFilter()
+    start__gte = django_filters.DateFilter(field_name="start", lookup_expr="gte")
+    start__lte = django_filters.DateFilter(field_name="start", lookup_expr="lte")
+
+    end = django_filters.DateFilter()
+    end__gte = django_filters.DateFilter(field_name="end", lookup_expr="gte")
+    end__lte = django_filters.DateFilter(field_name="end", lookup_expr="lte")
+
     class Meta:
         """Meta attributes for filter."""
 
@@ -199,11 +207,10 @@ class ContractLCMFilterSet(django_filters.FilterSet):
             return queryset
 
         qs_filter = (
-            Q(start__icontains=value)
-            | Q(end__icontains=value)
-            | Q(name__icontains=value)
+            Q(name__icontains=value)
             | Q(cost__icontains=value)
             | Q(contract_type__icontains=value)
+            | Q(support_level__icontains=value)
         )
         return queryset.filter(qs_filter)
 
@@ -235,10 +242,10 @@ class ProviderLCMFilterSet(django_filters.FilterSet):
 
         qs_filter = (
             Q(name__icontains=value)
-            | Q(contact_name__icontains=value)
-            | Q(contact_email__icontains=value)
-            | Q(contact_phone__icontains=value)
             | Q(description__icontains=value)
+            | Q(physical_address__icontains=value)
+            | Q(phone__icontains=value)
+            | Q(email__icontains=value)
         )
         return queryset.filter(qs_filter)
 
@@ -261,9 +268,9 @@ class ContactLCMFilterSet(django_filters.FilterSet):
             return queryset
 
         qs_filter = (
-            Q(first_name__icontains=value)
-            | Q(last_name__icontains=value)
+            Q(name__icontains=value)
             | Q(email__icontains=value)
             | Q(phone__icontains=value)
+            | Q(address__icontains=value)
         )
         return queryset.filter(qs_filter)

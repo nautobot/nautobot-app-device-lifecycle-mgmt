@@ -43,7 +43,7 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <strong>Provider</strong>
@@ -55,30 +55,69 @@
                 </tr>
                 <tr>
                     <td>Description</td>
-                    <td>{% if object.description %} {{ object.description }} {% else %} &mdash; {% endif %}</td>
-                </tr>
-                <tr>
-                    <td>Contact Name</td>
-                    <td>{% if object.contact_name %} {{ object.contact_name }} {% else %} &mdash; {% endif %}</td>
+                    <td>{{ object.description|placeholder }}</td>
                 </tr>
                 <tr>
                     <td>Contact E-Mail</td>
-                    <td>{% if object.contact_email %} {{ object.contact_email }} {% else %} &mdash; {% endif %}</td>
+                    <td>{{ object.contact_email|placeholder }}</td>
                 </tr>
                 <tr>
                     <td>Contact Phone</td>
-                    <td>{% if object.contact_phone %} {{ object.contact_phone }} {% else %} &mdash; {% endif %}</td>
+                    <td>{{ object.contact_phone|placeholder }}</td>
                 </tr>
                 <tr>
                     <td>Address</td>
-                    <td>{% if object.physical_address %} {{ object.physical_address }} {% else %} &mdash; {% endif %}</td>
+                    <td>{% if object.physical_address %}
+                        {{ object.physical_address }}
+                        {% else %} &mdash; {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <td>Comments</td>
-                    <td><pre>{{ object.comments }}</pre></td>
+                    <td>
+                        {% if object.comments %}
+                        <pre>{{ object.comments }}</pre>
+                        {% else %} &mdash; {% endif %}
+                    </td>
                 </tr>
             </table>
         </div>
+        {% include 'inc/custom_fields_panel.html' %}
+        {% include 'inc/relationships_panel.html' %}
+        {% include 'extras/inc/tags_panel.html' with tags=object.tags.all %}
+    </div>
+
+    <div class="col-md-6">
+        {% if contracts.count > 0 %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Service Contracts</strong>
+            </div>
+            <table class="table panel-body attr-table">
+                <tr class="active">
+                    <th>Name</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Support Level</th>
+                    <th>Type</th>
+                </tr>
+                {% for contract in contracts %}
+                <tr class="{% if contract.expired %}bg-danger{% endif %}">
+                    <td><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm' pk=contract.id %}">{{ contract.name }}</a></td>
+                    <td>{{ contract.start|placeholder }}</td>
+                    <td>{{ contract.end|placeholder }}</td>
+                    <td>{{ contract.support_level }}</td>
+                    <td>{{ contract.contract_type }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            <div class="panel-footer text-right no-print">
+                <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm_add' %}" class="btn btn-primary btn-xs">
+                    <span class="mdi mdi-plus-thick" aria-hidden="true"></span> Add Contract
+                </a>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

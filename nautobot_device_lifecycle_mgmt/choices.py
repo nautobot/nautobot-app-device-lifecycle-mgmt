@@ -7,12 +7,30 @@ from nautobot.utilities.choices import ChoiceSet
 class ContractTypeChoices(ChoiceSet):
     """Choices for the types of supported contracts."""
 
-    HARDWARE = "hardware"
-    SOFTWARE = "software"
+    HARDWARE = "Hardware"
+    SOFTWARE = "Software"
 
     CHOICES = (
         (HARDWARE, "Hardware"),
         (SOFTWARE, "Software"),
+    )
+
+
+class PoCTypeChoices(ChoiceSet):
+    """Choices for the types of point-of-contacts."""
+
+    PRIMARY = "Primary"
+    TIER1 = "Tier 1"
+    TIER2 = "Tier 2"
+    TIER3 = "Tier 3"
+    UNASSIGNED = "Unassigned"
+
+    CHOICES = (
+        (UNASSIGNED, UNASSIGNED),
+        (PRIMARY, PRIMARY),
+        (TIER1, TIER1),
+        (TIER2, TIER2),
+        (TIER3, TIER3),
     )
 
 
@@ -21,330 +39,24 @@ class CurrencyChoices(ChoiceSet):
 
     USD = "USD"
     EUR = "EUR"
-    AED = "AED"
-    AFN = "AFN"
-    ALL = "ALL"
-    AMD = "AMD"
-    ANG = "ANG"
-    AOA = "AOA"
-    ARS = "ARS"
-    AUD = "AUD"
-    AWG = "AWG"
-    AZN = "AZN"
-    BAM = "BAM"
-    BBD = "BBD"
-    BDT = "BDT"
-    BGN = "BGN"
-    BHD = "BHD"
-    BIF = "BIF"
-    BMD = "BMD"
-    BND = "BND"
-    BOB = "BOB"
-    BRL = "BRL"
-    BSD = "BSD"
-    BTN = "BTN"
-    BWP = "BWP"
-    BYN = "BYN"
-    BZD = "BZD"
-    CAD = "CAD"
-    CDF = "CDF"
-    CHF = "CHF"
-    CKD = "CKD"
-    CLP = "CLP"
-    CNY = "CNY"
-    COP = "COP"
-    CRC = "CRC"
-    CUP = "CUP"
-    CVE = "CVE"
-    CZK = "CZK"
-    DJF = "DJF"
     DKK = "DKK"
-    DOP = "DOP"
-    DZD = "DZD"
-    EGP = "EGP"
-    ERN = "ERN"
-    ETB = "ETB"
-    FJD = "FJD"
-    FKP = "FKP"
-    FOK = "FOK"
     GBP = "GBP"
-    GEL = "GEL"
-    GGP = "GGP"
-    GHS = "GHS"
-    GIP = "GIP"
-    GMD = "GMD"
-    GNF = "GNF"
-    GTQ = "GTQ"
-    GYD = "GYD"
-    HKD = "HKD"
-    HNL = "HNL"
-    HRK = "HRK"
-    HTG = "HTG"
-    HUF = "HUF"
-    IDR = "IDR"
-    ILS = "ILS"
-    IMP = "IMP"
-    INR = "INR"
-    IQD = "IQD"
-    IRR = "IRR"
-    ISK = "ISK"
-    JEP = "JEP"
-    JMD = "JMD"
-    JOD = "JOD"
+    CAD = "CAD"
     JPY = "JPY"
-    KES = "KES"
-    KGS = "KGS"
-    KHR = "KHR"
-    KID = "KID"
-    KMF = "KMF"
-    KPW = "KPW"
-    KRW = "KRW"
-    KWD = "KWD"
-    KYD = "KYD"
-    KZT = "KZT"
-    LAK = "LAK"
-    LBP = "LBP"
-    LKR = "LKR"
-    LRD = "LRD"
-    LSL = "LSL"
-    LYD = "LYD"
-    MAD = "MAD"
-    MDL = "MDL"
-    MGA = "MGA"
-    MKD = "MKD"
-    MMK = "MMK"
-    MNT = "MNT"
-    MOP = "MOP"
-    MRU = "MRU"
-    MUR = "MUR"
-    MVR = "MVR"
-    MWK = "MWK"
-    MXN = "MXN"
-    MYR = "MYR"
-    MZN = "MZN"
-    NAD = "NAD"
-    NGN = "NGN"
-    NIO = "NIO"
-    NOK = "NOK"
-    NPR = "NPR"
-    NZD = "NZD"
-    OMR = "OMR"
-    PAB = "PAB"
-    PEN = "PEN"
-    PGK = "PGK"
-    PHP = "PHP"
-    PKR = "PKR"
-    PLN = "PLN"
-    PND = "PND"
-    PRB = "PRB"
-    PYG = "PYG"
-    QAR = "QAR"
-    RON = "RON"
-    RSD = "RSD"
-    RUB = "RUB"
-    RWF = "RWF"
-    SAR = "SAR"
-    SBD = "SBD"
-    SCR = "SCR"
-    SDG = "SDG"
-    SEK = "SEK"
-    SGD = "SGD"
-    SHP = "SHP"
-    SLL = "SLL"
-    SLS = "SLS"
-    SOS = "SOS"
-    SRD = "SRD"
-    SSP = "SSP"
-    STN = "STN"
-    SYP = "SYP"
-    SZL = "SZL"
-    THB = "THB"
-    TJS = "TJS"
-    TMT = "TMT"
-    TND = "TND"
-    TOP = "TOP"
-    TRY = "TRY"
-    TTD = "TTD"
-    TVD = "TVD"
-    TWD = "TWD"
-    TZS = "TZS"
-    UAH = "UAH"
-    UGX = "UGX"
-    UYU = "UYU"
-    UZS = "UZS"
-    VES = "VES"
-    VND = "VND"
-    VUV = "VUV"
-    WST = "WST"
-    XAF = "XAF"
-    XCD = "XCD"
-    XOF = "XOF"
-    XPF = "XPF"
-    YER = "YER"
+    CHF = "CHF"
     ZAR = "ZAR"
+    AUD = "AUD"
+    NZD = "NZD"
 
     CHOICES = (
-        (AED, f"{AED} د.إ"),
-        (AFN, f"{AFN} ؋"),
-        (ALL, f"{ALL} L"),
-        (AMD, f"{AMD} ֏"),
-        (ANG, f"{ANG} ƒ"),
-        (AOA, f"{AOA} Kz"),
-        (ARS, f"{ARS} $"),
         (AUD, f"{AUD} $"),
-        (AWG, f"{AWG} ƒ"),
-        (AZN, f"{AZN} ₼"),
-        (BAM, f"{BAM} KM"),
-        (BBD, f"{BBD} $"),
-        (BDT, f"{BDT} ৳"),
-        (BGN, f"{BGN} лв."),
-        (BHD, f"{BHD} .د.ب"),
-        (BIF, f"{BIF} Fr"),
-        (BMD, f"{BMD} $"),
-        (BND, f"{BND} $"),
-        (BOB, f"{BOB} Bs."),
-        (BRL, f"{BRL} R$"),
-        (BSD, f"{BSD} $"),
-        (BTN, f"{BTN} Nu."),
-        (BWP, f"{BWP} P"),
-        (BYN, f"{BYN} Br"),
-        (BZD, f"{BZD} $"),
         (CAD, f"{CAD} $"),
-        (CDF, f"{CDF} Fr"),
         (CHF, f"{CHF} Fr."),
-        (CKD, f"{CKD} $"),
-        (CLP, f"{CLP} $"),
-        (CNY, f"{CNY} ¥"),
-        (COP, f"{COP} $"),
-        (CRC, f"{CRC} ₡"),
-        (CUP, f"{CUP} $"),
-        (CVE, f"{CVE} $"),
-        (CZK, f"{CZK} Kč"),
-        (DJF, f"{DJF} Fr"),
         (DKK, f"{DKK} kr"),
-        (DOP, f"{DOP} RD$"),
-        (DZD, f"{DZD} د.ج"),
-        (EGP, f"{EGP} £"),
-        (ERN, f"{ERN} Nfk"),
-        (ETB, f"{ETB} Br"),
         (EUR, f"{EUR} €"),
-        (FJD, f"{FJD} $"),
-        (FKP, f"{FKP} £"),
-        (FOK, f"{FOK} kr"),
         (GBP, f"{GBP} £"),
-        (GEL, f"{GEL} ₾"),
-        (GGP, f"{GGP} £"),
-        (GHS, f"{GHS} ₵"),
-        (GIP, f"{GIP} £"),
-        (GMD, f"{GMD} D"),
-        (GNF, f"{GNF} Fr"),
-        (GTQ, f"{GTQ} Q"),
-        (GYD, f"{GYD} $"),
-        (HKD, f"{HKD} $"),
-        (HNL, f"{HNL} L"),
-        (HRK, f"{HRK} kn"),
-        (HTG, f"{HTG} G"),
-        (HUF, f"{HUF} Ft"),
-        (IDR, f"{IDR} Rp"),
-        (ILS, f"{ILS} ₪"),
-        (IMP, f"{IMP} £"),
-        (INR, f"{INR} ₹"),
-        (IQD, f"{IQD} ع.د"),
-        (IRR, f"{IRR} ﷼"),
-        (ISK, f"{ISK} kr"),
-        (JEP, f"{JEP} £"),
-        (JMD, f"{JMD} $"),
-        (JOD, f"{JOD} د.ا"),
-        (JPY, f"{JPY} ¥ or 円"),
-        (KES, f"{KES} Sh"),
-        (KGS, f"{KGS} с"),
-        (KHR, f"{KHR} ៛"),
-        (KID, f"{KID} $"),
-        (KMF, f"{KMF} Fr"),
-        (KPW, f"{KPW} ₩"),
-        (KRW, f"{KRW} ₩"),
-        (KWD, f"{KWD} د.ك"),
-        (KYD, f"{KYD} $"),
-        (KZT, f"{KZT} ₸"),
-        (LAK, f"{LAK} ₭"),
-        (LBP, f"{LBP} ل.ل"),
-        (LKR, f"{LKR} Rs"),
-        (LRD, f"{LRD} $"),
-        (LSL, f"{LSL} L"),
-        (LYD, f"{LYD} ل.د"),
-        (MAD, f"{MAD} د. م."),
-        (MDL, f"{MDL} L"),
-        (MGA, f"{MGA} Ar"),
-        (MKD, f"{MKD} ден"),
-        (MMK, f"{MMK} Ks"),
-        (MNT, f"{MNT} ₮"),
-        (MOP, f"{MOP} MOP$"),
-        (MRU, f"{MRU} UM"),
-        (MUR, f"{MUR} ₨"),
-        (MVR, f"{MVR} .ރ"),
-        (MWK, f"{MWK} MK"),
-        (MXN, f"{MXN} $"),
-        (MYR, f"{MYR} RM"),
-        (MZN, f"{MZN} MT"),
-        (NAD, f"{NAD} $"),
-        (NGN, f"{NGN} ₦"),
-        (NIO, f"{NIO} C$"),
-        (NOK, f"{NOK} kr"),
-        (NPR, f"{NPR} रू"),
+        (JPY, f"{JPY} ¥"),
         (NZD, f"{NZD} $"),
-        (OMR, f"{OMR} ر.ع."),
-        (PAB, f"{PAB} B/."),
-        (PEN, f"{PEN} S/."),
-        (PGK, f"{PGK} K"),
-        (PHP, f"{PHP} ₱"),
-        (PKR, f"{PKR} ₨"),
-        (PLN, f"{PLN} zł"),
-        (PND, f"{PND} $"),
-        (PRB, f"{PRB} р."),
-        (PYG, f"{PYG} ₲"),
-        (QAR, f"{QAR} ر.ق"),
-        (RON, f"{RON} lei"),
-        (RSD, f"{RSD} din"),
-        (RUB, f"{RUB} ₽"),
-        (RWF, f"{RWF} Fr"),
-        (SAR, f"{SAR} ﷼"),
-        (SBD, f"{SBD} $"),
-        (SCR, f"{SCR} ₨"),
-        (SDG, f"{SDG} ج.س."),
-        (SEK, f"{SEK} kr"),
-        (SGD, f"{SGD} $"),
-        (SHP, f"{SHP} £"),
-        (SLL, f"{SLL} Le"),
-        (SLS, f"{SLS} Sl"),
-        (SOS, f"{SOS} Sh"),
-        (SRD, f"{SRD} $"),
-        (SSP, f"{SSP} £"),
-        (STN, f"{STN} Db"),
-        (SYP, f"{SYP} £"),
-        (SZL, f"{SZL} L"),
-        (THB, f"{THB} ฿"),
-        (TJS, f"{TJS} с."),
-        (TMT, f"{TMT} m."),
-        (TND, f"{TND} د.ت "),
-        (TOP, f"{TOP} T$"),
-        (TRY, f"{TRY} ₺"),
-        (TTD, f"{TTD} $"),
-        (TVD, f"{TVD} $"),
-        (TWD, f"{TWD} $"),
-        (TZS, f"{TZS} Sh"),
-        (UAH, f"{UAH} ₴"),
-        (UGX, f"{UGX} Sh"),
         (USD, f"{USD} $"),
-        (UYU, f"{UYU} $"),
-        (UZS, f"{UZS} Sʻ"),
-        (VES, f"{VES} Bs.S."),
-        (VND, f"{VND} ₫"),
-        (VUV, f"{VUV} Vt"),
-        (WST, f"{WST} T"),
-        (XAF, f"{XAF} Fr"),
-        (XCD, f"{XCD} $"),
-        (XOF, f"{XOF} Fr"),
-        (XPF, f"{XPF} ₣"),
-        (YER, f"{YER} ﷼"),
         (ZAR, f"{ZAR} R"),
     )

@@ -106,7 +106,7 @@ try:
                         ),
                         NavMenuItem(
                             link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_list",
-                            name="Providers",
+                            name="Contract Providers",
                             permissions=["view"],
                             buttons=(
                                 NavMenuButton(
@@ -127,7 +127,7 @@ try:
                         ),
                         NavMenuItem(
                             link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_list",
-                            name="Contacts",
+                            name="Contract POC",
                             permissions=["view"],
                             buttons=(
                                 NavMenuButton(
@@ -187,7 +187,7 @@ except ModuleNotFoundError:
                     permissions=["add"],
                 ),
                 PluginMenuButton(
-                    link="plugins:nautobot_device_lifecycle_mgmt:contract_import",
+                    link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_import",
                     title="Import",
                     icon_class="mdi mdi-database-import-outline",
                     color=ButtonColorChoices.BLUE,
@@ -197,7 +197,7 @@ except ModuleNotFoundError:
         ),
         PluginMenuItem(
             link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_list",
-            link_text="Providers",
+            link_text="Contract Providers",
             buttons=(
                 PluginMenuButton(
                     link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_add",
@@ -217,7 +217,7 @@ except ModuleNotFoundError:
         ),
         PluginMenuItem(
             link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_list",
-            link_text="Resources/Contacts",
+            link_text="Contract POC",
             buttons=(
                 PluginMenuButton(
                     link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_add",

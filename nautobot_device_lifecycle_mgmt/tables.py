@@ -127,7 +127,7 @@ class ContractLCMTable(BaseTable):
 
     pk = ToggleColumn()
     name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:contract", text=lambda record: record, args=[A("pk")]
+        "plugins:nautobot_device_lifecycle_mgmt:contractlcm", text=lambda record: record, args=[A("pk")]
     )
     provider = tables.LinkColumn(
         "plugins:nautobot_device_lifecycle_mgmt:providerlcm",
@@ -163,6 +163,13 @@ class ProviderLCMTable(BaseTable):
     name = tables.LinkColumn(
         "plugins:nautobot_device_lifecycle_mgmt:providerlcm", text=lambda record: record, args=[A("pk")]
     )
+    portal_url = tables.TemplateColumn(
+        template_code="""{% if record.portal_url %}
+                    <a href="{{ record.portal_url }}" target="_blank" data-toggle="tooltip" data-placement="left" title="{{ record.portal_url }}">
+                        <span class="mdi mdi-open-in-new"></span>
+                    </a>{% else %} — {% endif %}""",
+        verbose_name="URL",
+    )
     actions = ButtonsColumn(ProviderLCM, buttons=("changelog", "edit", "delete"))
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
@@ -173,9 +180,9 @@ class ProviderLCMTable(BaseTable):
             "pk",
             "name",
             "physical_address",
-            "contact_name",
-            "contact_phone",
-            "contact_email",
+            "phone",
+            "email",
+            "portal_url",
             "actions",
         )
 

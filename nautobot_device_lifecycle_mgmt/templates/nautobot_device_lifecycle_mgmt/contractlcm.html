@@ -44,12 +44,16 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <strong>Contract</strong>
             </div>
             <table class="table table-hover panel-body attr-table">
+                <tr style="font-weight: bold">
+                    <td>Name</td>
+                    <td>{{ object.name }}</td>
+                </tr>
                 <tr>
                     <td>Provider</td>
                     <td>
@@ -57,10 +61,6 @@
                             {{ object.provider }}
                         </a>
                     </td>
-                </tr>
-                <tr>
-                    <td>Name</td>
-                    <td>{{ object.name }}</td>
                 </tr>
                 <tr>
                     <td>Start Date</td>
@@ -86,10 +86,61 @@
                     <td>Contract Type</td>
                     <td>{% if object.contract_type %} {{ object.contract_type }} {% else %} &mdash; {% endif %}</td>
                 </tr>
+                <tr>
+                    <td>Comments</td>
+                    <td>{% if object.comments %}<pre>{{ object.comments|placeholder  }}</pre>{% else %} &mdash; {% endif %}</td>
+                </tr>
             </table>
         </div>
         {% include 'inc/custom_fields_panel.html' %}
         {% include 'inc/relationships_panel.html' %}
+        {% include 'extras/inc/tags_panel.html' with tags=object.tags.all %}
     </div>
+    {% if contacts.count %}
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Contacts</strong>
+            </div>
+            <table class="table table-hover panel-body attr-table">
+                <thead>
+                <tr>
+                    <th style="width: 5%"></th>
+                    <th>Name</th>
+                    <th>E-Mail</th>
+                    <th>Phone</th>
+                    <th>Tier</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for contact in contacts %}
+                <tr>
+                    <td style="width: 5%">
+                        {% if contact.type == "Primary" %}
+                        <span class="mdi mdi-star" data-toggle="tooltip" title="Primary Contact"></span>
+                        {% endif %}
+                    </td>
+                    <td><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contactlcm' pk=contact.id %}">{{ contact.name }}</a></td>
+                    <td>
+                        {% if contact.email %}
+                        <a href="mailto:{{ contact.email }}">{{ contact.email }}</a>
+                        {% else %}
+                        &mdash;
+                        {% endif %}
+                    </td>
+                    <td>{{ contact.phone|placeholder }}</td>
+                    <td>{{ contact.type }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="panel-footer text-right no-print">
+                <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contactlcm_add' %}" class="btn btn-primary btn-xs">
+                    <span class="mdi mdi-plus-thick" aria-hidden="true"></span> Add PoC
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

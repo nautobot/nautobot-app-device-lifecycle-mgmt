@@ -236,13 +236,24 @@ class ContractLCMListView(generic.ObjectListView):
     filterset = ContractLCMFilterSet
     filterset_form = ContractLCMFilterForm
     table = ContractLCMTable
-    action_buttons = ("export",)
 
 
 class ContractLCMView(generic.ObjectView):
     """Detail view."""
 
     queryset = ContractLCM.objects.all()
+
+    def get_extra_context(self, request, instance):
+        """Return any additional context data for the template.
+
+        request: The current request
+        instance: The object being viewed
+        """
+        return {
+            "contacts": ContactLCM.objects.restrict(request.user, "view")
+            .filter(contract=instance)
+            .order_by("type", "priority"),
+        }
 
 
 class ContractLCMCreateView(generic.ObjectEditView):
@@ -268,7 +279,7 @@ class ContractLCMEditView(generic.ObjectEditView):
     model = ContractLCM
     queryset = ContractLCM.objects.all()
     model_form = ContractLCMForm
-    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:contract"
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:contractlcm"
 
 
 class ContractLCMBulkImportView(generic.BulkImportView):
@@ -317,6 +328,14 @@ class ProviderLCMView(generic.ObjectView):
     """Detail view."""
 
     queryset = ProviderLCM.objects.all()
+
+    def get_extra_context(self, request, instance):
+        """Return any additional context data for the template.
+
+        request: The current request
+        instance: The object being viewed
+        """
+        return {"contracts": ContractLCM.objects.restrict(request.user, "view").filter(provider=instance)}
 
 
 class ProviderLCMCreateView(generic.ObjectEditView):
@@ -374,7 +393,7 @@ class ProviderLCMBulkEditView(generic.BulkEditView):
 
 
 # ---------------------------------------------------------------------------------
-#  Contract Resources LifeCycle Management Views
+#  Contact POC LifeCycle Management Views
 # ---------------------------------------------------------------------------------
 
 

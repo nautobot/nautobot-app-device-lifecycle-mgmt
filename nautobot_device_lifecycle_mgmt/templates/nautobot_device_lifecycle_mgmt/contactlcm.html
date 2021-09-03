@@ -9,7 +9,7 @@
     <div class="row noprint">
         <div class="col-sm-12 col-md-12">
             <ol class="breadcrumb">
-                <li><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contactlcm_list' %}">Provider Resources/Contacts</a></li>
+                <li><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contactlcm_list' %}">Contract Point-of-Contacts</a></li>
                 <li><a>{{ object }}</a></li>
             </ol>
         </div>
@@ -43,7 +43,7 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-8">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <strong>Contact</strong>
@@ -51,7 +51,7 @@
             <table class="table table-hover panel-body attr-table">
                 <tr>
                     <td>Name</td>
-                    <td>{{ object.first_name }} {{ object.last_name }}</td>
+                    <td>{{ object.name }}</td>
                 </tr>
                 <tr>
                     <td>Address</td>
@@ -74,6 +74,14 @@
                     <td>{% if object.email %} <a href="mailto:{{ object.email }}">{{ object.email }}</a>{% else %} &mdash; {% endif %}</td>
                 </tr>
                 <tr>
+                    <td>PoC Type</td>
+                    <td>{{ object.type }}</td>
+                </tr>
+                <tr>
+                    <td>Assign to Contract</td>
+                    <td><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm' pk=object.contract.id %}">{{ object.contract.name }}</a></td>
+                </tr>
+                <tr>
                     <td>Priority</td>
                     <td>{{ object.priority }}</td>
                 </tr>
@@ -85,6 +93,7 @@
         </div>
         {% include 'inc/custom_fields_panel.html' %}
         {% include 'inc/relationships_panel.html' %}
+        {% include 'extras/inc/tags_panel.html' with tags=object.tags.all %}
     </div>
 </div>
 {% endblock %}
