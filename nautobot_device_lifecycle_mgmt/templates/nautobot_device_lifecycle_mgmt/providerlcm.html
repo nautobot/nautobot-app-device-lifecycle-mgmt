@@ -58,17 +58,22 @@
                     <td>{{ object.description|placeholder }}</td>
                 </tr>
                 <tr>
-                    <td>Contact E-Mail</td>
-                    <td>{{ object.contact_email|placeholder }}</td>
+                    <td>E-Mail</td>
+                    <td>{% if object.email %} <a href="mailto:{{ object.email }}">{{ object.email }}</a>{% else %} &mdash; {% endif %}</td>
                 </tr>
                 <tr>
-                    <td>Contact Phone</td>
-                    <td>{{ object.contact_phone|placeholder }}</td>
+                    <td>Phone</td>
+                    <td>{{ object.phone|placeholder }}</td>
                 </tr>
                 <tr>
                     <td>Address</td>
                     <td>{% if object.physical_address %}
-                        {{ object.physical_address }}
+                        <div class="pull-right noprint">
+                            <a href="https://maps.google.com/?q={{ object.physical_address|urlencode }}" target="_blank" class="btn btn-primary btn-xs">
+                                <i class="mdi mdi-map-marker"></i> Map it
+                            </a>
+                        </div>
+                        <span>{{ object.physical_address|linebreaksbr }}</span>
                         {% else %} &mdash; {% endif %}
                     </td>
                 </tr>
