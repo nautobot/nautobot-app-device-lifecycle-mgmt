@@ -3,10 +3,11 @@ from datetime import date
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 
-from nautobot.dcim.models import DeviceType, Manufacturer
+from nautobot.dcim.models import DeviceType, Manufacturer, Platform
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
 
 
 class TestModelBasic(TestCase):
@@ -114,3 +115,103 @@ class TestModelBasic(TestCase):
         settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]["expired_field"] = "end_of_sale"
         hwlcm_obj = HardwareLCM.objects.create(device_type=self.device_type, end_of_support=date(2999, 4, 1))
         self.assertFalse(hwlcm_obj.expired)
+
+
+class SoftwareLCMTestCase(TestCase):
+    """Tests for the SoftwareLCM model."""
+
+    def setUp(self):
+        """Set up base objects."""
+        self.device_platform = Platform.objects.create(name="Cisco IOS", slug="cisco_ios")
+
+    def test_create_softwarelcm_required_only(self):
+        """Successfully create SoftwareLCM with required fields only."""
+        softwarelcm = SoftwareLCM.objects.create(device_platform=self.device_platform, version="4.21.3F")
+
+        self.assertEqual(softwarelcm.device_platform, self.device_platform)
+        self.assertEqual(softwarelcm.version, "4.21.3F")
+
+    def test_create_softwarelcm_all(self):
+        """Successfully create SoftwareLCM with all fields."""
+        softwarelcm_full = SoftwareLCM.objects.create(
+            device_platform=self.device_platform,
+            version="17.3.3 MD",
+            alias="Amsterdam-17.3.3 MD",
+            release_date="2019-01-10",
+            end_of_support="2022-05-15",
+            documentation_url="https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
+            download_url="ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin",
+            image_file_name="asr1001x-universalk9.17.03.03.SPA.bin",
+            image_file_checksum="9cf2e09b59207a4d8ea40886fbbe5b4b68e19e58a8f96b34240e4cea9971f6ae6facab9a1855a34e1ed8755f3ffe4c969cf6e6ef1df95d42a91540a44d4b9e14",
+            long_term_support=False,
+            pre_release=True,
+        )
+
+        self.assertEqual(softwarelcm_full.device_platform, self.device_platform)
+        self.assertEqual(softwarelcm_full.version, "17.3.3 MD")
+        self.assertEqual(softwarelcm_full.alias, "Amsterdam-17.3.3 MD")
+        self.assertEqual(str(softwarelcm_full.release_date), "2019-01-10")
+        self.assertEqual(str(softwarelcm_full.end_of_support), "2022-05-15")
+        self.assertEqual(
+            softwarelcm_full.documentation_url,
+            "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
+        )
+        self.assertEqual(
+            softwarelcm_full.download_url, "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin"
+        )
+        self.assertEqual(softwarelcm_full.image_file_name, "asr1001x-universalk9.17.03.03.SPA.bin")
+        self.assertEqual(
+            softwarelcm_full.image_file_checksum,
+            "9cf2e09b59207a4d8ea40886fbbe5b4b68e19e58a8f96b34240e4cea9971f6ae6facab9a1855a34e1ed8755f3ffe4c969cf6e6ef1df95d42a91540a44d4b9e14",
+        )
+        self.assertEqual(softwarelcm_full.long_term_support, False)
+        self.assertEqual(softwarelcm_full.pre_release, True)
+        self.assertEqual(str(softwarelcm_full), f"{self.device_platform.name} - {softwarelcm_full.version}")
+
+
+class ValidatedSoftwareLCMTestCase(TestCase):
+    """Tests for the ValidatedSoftwareLCM model."""
+
+    def setUp(self):
+        """Set up base objects."""
+        device_platform = Platform.objects.create(name="Cisco IOS", slug="cisco_ios")
+        self.software = SoftwareLCM.objects.create(
+            device_platform=device_platform,
+            version="17.3.3 MD",
+            release_date="2019-01-10",
+        )
+        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        self.device_type = DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000")
+        self.content_type_devicetype = ContentType.objects.get(app_label="dcim", model="devicetype")
+
+    def test_create_validatedsoftwarelcm_required_only(self):
+        """Successfully create ValidatedSoftwareLCM with required fields only."""
+
+        validatedsoftwarelcm = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start="2019-01-10",
+            assigned_to_content_type=self.content_type_devicetype,
+            assigned_to_object_id=self.device_type.id,
+        )
+
+        self.assertEqual(validatedsoftwarelcm.software, self.software)
+        self.assertEqual(str(validatedsoftwarelcm.start), "2019-01-10")
+        self.assertEqual(validatedsoftwarelcm.assigned_to, self.device_type)
+
+    def test_create_validatedsoftwarelcm_all(self):
+        """Successfully create ValidatedSoftwareLCM with all fields."""
+        validatedsoftwarelcm = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start="2020-04-15",
+            end="2022-11-01",
+            preferred=False,
+            assigned_to_content_type=self.content_type_devicetype,
+            assigned_to_object_id=self.device_type.id,
+        )
+
+        self.assertEqual(validatedsoftwarelcm.software, self.software)
+        self.assertEqual(str(validatedsoftwarelcm.start), "2020-04-15")
+        self.assertEqual(str(validatedsoftwarelcm.end), "2022-11-01")
+        self.assertEqual(validatedsoftwarelcm.assigned_to, self.device_type)
+        self.assertEqual(validatedsoftwarelcm.preferred, False)
+        self.assertEqual(str(validatedsoftwarelcm), f"{self.software} - Valid since: {validatedsoftwarelcm.start}")
