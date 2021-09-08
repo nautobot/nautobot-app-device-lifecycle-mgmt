@@ -165,6 +165,10 @@ class SoftwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
     device_platform = forms.ModelMultipleChoiceField(
         required=False, queryset=Platform.objects.all(), to_field_name="slug"
     )
+    release_date_before = forms.DateField(label="Release Date Before", required=False, widget=DatePicker())
+    release_date_after = forms.DateField(label="Release Date After", required=False, widget=DatePicker())
+    end_of_support_before = forms.DateField(label="End of Software Support Before", required=False, widget=DatePicker())
+    end_of_support_after = forms.DateField(label="End of Software Support After", required=False, widget=DatePicker())
 
     class Meta:
         """Meta attributes."""
@@ -174,8 +178,10 @@ class SoftwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
             "q",
             "version",
             "device_platform",
-            "release_date",
-            "end_of_support",
+            "release_date_before",
+            "release_date_after",
+            "end_of_support_before",
+            "end_of_support_after",
             "documentation_url",
             "download_url",
             "image_file_name",
@@ -185,8 +191,6 @@ class SoftwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
         ]
 
         widgets = {
-            "release_date": DatePicker(),
-            "end_of_support": DatePicker(),
             "long_term_support": StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
             "pre_release": StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
         }
