@@ -1,11 +1,14 @@
 """Unit tests for nautobot_device_lifecycle_mgmt."""
 import datetime
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
 
 from nautobot.utilities.testing import APIViewTestCases
-from nautobot.dcim.models import DeviceType, Manufacturer, Platform
+from nautobot.dcim.models import DeviceType, Manufacturer, Platform, Device, DeviceRole, InventoryItem, Site
+from nautobot.extras.models import Status
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ContractLCM, ProviderLCM
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ContractLCM, ProviderLCM, ValidatedSoftwareLCM
+
 
 User = get_user_model()
 
@@ -142,7 +145,7 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=t
         "start",
         "support_level",
     ]
-
+    
     @classmethod
     def setUpTestData(cls):
         """Create a superuser and token for API calls."""
@@ -202,6 +205,140 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=t
             start=datetime.date(2021, 4, 1),
             end=datetime.date(2022, 4, 1),
             provider=provider,
+          
+          
+class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
+    """Test the SoftwareLCM API."""
+
+    model = ValidatedSoftwareLCM
+    brief_fields = [
+        "assigned_to",
+        "assigned_to_content_type",
+        "assigned_to_object_id",
+        "custom_fields",
+        "display",
+        "end",
+        "id",
+        "preferred",
+        "software",
+        "start",
+        "tags",
+        "url",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        """Create a superuser and token for API calls."""
+        device_platform = Platform.objects.create(name="Cisco IOS", slug="cisco_ios")
+        softwares = (
+            SoftwareLCM.objects.create(
+                **{
+                    "device_platform": device_platform,
+                    "version": "17.3.3 MD",
+                    "alias": "Amsterdam-17.3.3 MD",
+                    "end_of_support": "2022-05-15",
+                    "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
+                    "download_url": "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin",
+                    "image_file_name": "asr1001x-universalk9.17.03.03.SPA.bin",
+                    "image_file_checksum": "9cf2e09b59207a4d8ea40886fbbe5b4b68e19e58a8f96b34240e4cea9971f6ae6facab9a1855a34e1ed8755f3ffe4c969cf6e6ef1df95d42a91540a44d4b9e14",
+                    "long_term_support": True,
+                    "pre_release": False,
+                }
+            ),
+            SoftwareLCM.objects.create(
+                **{
+                    "device_platform": device_platform,
+                    "version": "15.5(1)SY",
+                    "alias": "Catalyst-15.5(1)SY",
+                    "end_of_support": "2019-02-5",
+                    "documentation_url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst6500/ios/15-1SY/config_guide/sup2T/15_1_sy_swcg_2T/cef.html",
+                    "download_url": "ftp://device-images.local.com/cisco/s2t54-ipservicesk9_npe-mz.SPA.155-1.SY1.bin",
+                    "image_file_name": "s2t54-ipservicesk9_npe-mz.SPA.155-1.SY1.bin",
+                    "image_file_checksum": "74e61320f5518a2954b2d307b7e6a038",
+                    "long_term_support": False,
+                    "pre_release": True,
+                }
+            ),
+        )
+
+        status_active = Status.objects.get(slug="active")
+        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        site = Site.objects.create(name="Site 1", slug="site-1")
+        deviceroles = (
+            DeviceRole.objects.create(name="Router", slug="router", color="ff0000"),
+            DeviceRole.objects.create(name="Switch", slug="switch", color="ffff00"),
+        )
+        devicetypes = (
+            DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000"),
+            DeviceType.objects.create(manufacturer=manufacturer, model="Catalyst 6500", slug="catalyst-6500"),
+        )
+        devices = (
+            Device.objects.create(
+                device_type=devicetypes[0], device_role=deviceroles[0], name="Device 1", site=site, status=status_active
+            ),
+            Device.objects.create(
+                device_type=devicetypes[1], device_role=deviceroles[1], name="Device 2", site=site, status=status_active
+            ),
+        )
+        inventoryitems = (
+            InventoryItem.objects.create(device=devices[0], name="SwitchModule1"),
+            InventoryItem.objects.create(device=devices[1], name="Supervisor Engine 720"),
+        )
+
+        content_type_device = ContentType.objects.get(app_label="dcim", model="device")
+        content_type_devicetype = ContentType.objects.get(app_label="dcim", model="devicetype")
+        content_type_inventoryitem = ContentType.objects.get(app_label="dcim", model="inventoryitem")
+
+        cls.create_data = [
+            {
+                "software": softwares[0].id,
+                "assigned_to_content_type": "dcim.device",
+                "assigned_to_object_id": devices[0].id,
+                "start": datetime.date(2020, 1, 14),
+                "end": datetime.date(2024, 10, 18),
+                "preferred": False,
+            },
+            {
+                "software": softwares[0].id,
+                "assigned_to_content_type": "dcim.devicetype",
+                "assigned_to_object_id": devicetypes[0].id,
+                "start": datetime.date(2021, 6, 4),
+                "end": datetime.date(2025, 1, 8),
+                "preferred": True,
+            },
+            {
+                "software": softwares[0].id,
+                "assigned_to_content_type": "dcim.inventoryitem",
+                "assigned_to_object_id": inventoryitems[0].id,
+                "start": datetime.date(2019, 3, 6),
+                "end": datetime.date(2023, 6, 1),
+                "preferred": False,
+            },
+        ]
+
+        ValidatedSoftwareLCM.objects.create(
+            software=softwares[1],
+            assigned_to_content_type=content_type_device,
+            assigned_to_object_id=devices[1].id,
+            start=datetime.date(2021, 6, 4),
+            end=datetime.date(2025, 1, 8),
+            preferred=True,
+        )
+        ValidatedSoftwareLCM.objects.create(
+            software=softwares[1],
+            assigned_to_content_type=content_type_devicetype,
+            assigned_to_object_id=devicetypes[1].id,
+            start=datetime.date(2018, 2, 23),
+            end=datetime.date(2019, 6, 12),
+            preferred=False,
+        )
+        ValidatedSoftwareLCM.objects.create(
+            software=softwares[1],
+            assigned_to_content_type=content_type_inventoryitem,
+            assigned_to_object_id=inventoryitems[1].id,
+            start=datetime.date(2019, 11, 19),
+            end=datetime.date(2030, 7, 30),
+            preferred=False,
         )
 
     def test_bulk_create_objects(self):

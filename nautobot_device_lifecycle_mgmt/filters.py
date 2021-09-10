@@ -98,6 +98,9 @@ class SoftwareLCMFilterSet(django_filters.FilterSet):
         label="Device Platform (Slug)",
     )
 
+    release_date = django_filters.DateTimeFromToRangeFilter()
+    end_of_support = django_filters.DateTimeFromToRangeFilter()
+
     class Meta:
         """Meta attributes for filter."""
 
@@ -106,8 +109,6 @@ class SoftwareLCMFilterSet(django_filters.FilterSet):
         fields = [
             "version",
             "alias",
-            "release_date",
-            "end_of_support",
             "documentation_url",
             "download_url",
             "image_file_name",
