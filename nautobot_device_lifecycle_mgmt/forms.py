@@ -1,6 +1,7 @@
 """Forms implementation for the LifeCycle Management plugin."""
 import logging
 from django import forms
+
 from nautobot.utilities.forms import BootstrapMixin, DatePicker, DynamicModelMultipleChoiceField
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Platform
 from nautobot.extras.forms import (
@@ -16,7 +17,7 @@ from nautobot.utilities.forms import (
     BOOLEAN_WITH_BLANK_CHOICES,
     add_blank_choice,
 )
-from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, CurrencyChoices, PoCTypeChoices
+from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, CurrencyChoices, PoCTypeChoices, CountryCodes
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
@@ -340,7 +341,9 @@ class ContractLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelFor
         required=True,
     )
     contract_type = forms.ChoiceField(choices=add_blank_choice(ContractTypeChoices.CHOICES), label="Contract Type")
-    currency = forms.ChoiceField(required=False, choices=add_blank_choice(CurrencyChoices.CHOICES))
+    currency = forms.ChoiceField(
+        required=False, widget=StaticSelect2, choices=add_blank_choice(CurrencyChoices.CHOICES)
+    )
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
     class Meta:
@@ -365,6 +368,10 @@ class ContractLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelFor
             "end": DatePicker(),
             "start": DatePicker(),
         }
+
+    def get_form_kwargs(self):
+        """Get from kwargs override to capture the query params sent from other pages withing the LCM project."""
+        return {"provider": self.request.GET.get("provider")}  # pylint: disable=E1101
 
 
 class ContractLCMBulkEditForm(BootstrapMixin, BulkEditForm):
@@ -397,7 +404,7 @@ class ContractLCMFilterForm(BootstrapMixin, forms.ModelForm):
 
     q = forms.CharField(required=False, label="Search")
     provider = forms.ModelMultipleChoiceField(required=False, queryset=ProviderLCM.objects.all(), to_field_name="pk")
-    currency = forms.ChoiceField(required=False, choices=CurrencyChoices.CHOICES)
+    currency = forms.ChoiceField(required=False, widget=StaticSelect2, choices=CurrencyChoices.CHOICES)
     name = forms.CharField(required=False)
 
     class Meta:
@@ -441,6 +448,11 @@ class ProviderLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelFor
     """Device LifeCycle Contract Providers creation/edit form."""
 
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+    country = forms.ChoiceField(
+        widget=StaticSelect2,
+        required=False,
+        choices=add_blank_choice(CountryCodes.CHOICES),
+    )
 
     class Meta:
         """Meta attributes for the ProviderLCMForm class."""
@@ -450,6 +462,7 @@ class ProviderLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelFor
             "name",
             "description",
             "physical_address",
+            "country",
             "phone",
             "email",
             "portal_url",
@@ -475,6 +488,7 @@ class ProviderLCMBulkEditForm(BootstrapMixin, BulkEditForm):
         nullable_fields = [
             "description",
             "physical_address",
+            "country",
             "contact_name",
             "contact_phone",
             "contact_email",
@@ -486,6 +500,12 @@ class ProviderLCMFilterForm(BootstrapMixin, forms.ModelForm):
     """Filter form to filter searches."""
 
     q = forms.CharField(required=False, label="Search")
+    name = forms.CharField(required=False)
+    country = forms.ChoiceField(
+        widget=StaticSelect2,
+        required=False,
+        choices=add_blank_choice(CountryCodes.CHOICES),
+    )
 
     class Meta:
         """Meta attributes for the ProviderLCMFilterForm class."""
@@ -497,6 +517,7 @@ class ProviderLCMFilterForm(BootstrapMixin, forms.ModelForm):
             "name",
             "description",
             "physical_address",
+            "country",
             "phone",
             "email",
             "comments",
@@ -534,6 +555,13 @@ class ContactLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm
             "priority",
             "tags",
         ]
+
+    def get_form_kwargs(self):
+        """Get from kwargs override to capture the query params sent from other pages withing the LCM project."""
+        return {
+            "type": self.request.GET.get("type"),  # pylint: disable=E1101
+            "contract": self.request.GET.get("contract"),  # pylint: disable=E1101
+        }
 
 
 class ContactLCMBulkEditForm(BootstrapMixin, BulkEditForm):

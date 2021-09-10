@@ -252,6 +252,10 @@ class ContractLCMView(generic.ObjectView):
         return {
             "contacts": ContactLCM.objects.restrict(request.user, "view")
             .filter(contract=instance)
+            .exclude(type="Owner")
+            .order_by("type", "priority"),
+            "owners": ContactLCM.objects.restrict(request.user, "view")
+            .filter(contract=instance, type="Owner")
             .order_by("type", "priority"),
         }
 
