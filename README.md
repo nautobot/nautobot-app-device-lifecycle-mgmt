@@ -151,7 +151,7 @@ You can also click a Hardware/Software Notice and see the detail view. This view
 
 ### Device View
 
-You can also view the associated Hardware notice from the device. If the device is end of life or end of supoort the notice will be red.
+You can also view the associated Hardware notice from the device. If the device is end of life or end of support the notice will be red.
 
 ![](docs/images/lcm_hardware_device_view.png)
 
@@ -160,3 +160,16 @@ You can also view the associated Hardware notice from the device. If the device 
 This provides the same UI element as the device view, but within the specific device type's view.
 
 ![](docs/images/lcm_hardware_device_type_view.png)
+
+### Contracts: Device Life Cycle Management Contract Detail View
+
+You can view the details of a contract along with the primary and escalation contacts. This view will also give you an association to the devices under this contract.
+
+![](docs/images/lcm_contract_detail.png)
+
+
+### Contracts: Device Life Cycle Management Contract Provider View
+
+You can view the details of a provider, along with a listing of the service contracts associated to the provider. Contracts that are expired will display in red.
+
+![](docs/images/lcm_contract_provider_detail.png)

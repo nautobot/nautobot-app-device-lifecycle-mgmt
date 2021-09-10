@@ -79,6 +79,75 @@ try:
                         ),
                     ),
                 ),
+                NavMenuGroup(
+                    name="Contracts",
+                    weight=100,
+                    items=(
+                        NavMenuItem(
+                            link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_list",
+                            name="Contracts",
+                            permissions=["view"],
+                            buttons=(
+                                NavMenuButton(
+                                    link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_add",
+                                    title="Add",
+                                    icon_class="mdi mdi-plus-thick",
+                                    button_class=ButtonColorChoices.GREEN,
+                                    permissions=["add"],
+                                ),
+                                NavMenuButton(
+                                    link="plugins:nautobot_device_lifecycle_mgmt:contract_import",
+                                    title="Import",
+                                    icon_class="mdi mdi-database-import-outline",
+                                    button_class=ButtonColorChoices.BLUE,
+                                    permissions=["add"],
+                                ),
+                            ),
+                        ),
+                        NavMenuItem(
+                            link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_list",
+                            name="Contract Providers",
+                            permissions=["view"],
+                            buttons=(
+                                NavMenuButton(
+                                    link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_add",
+                                    title="Add",
+                                    icon_class="mdi mdi-plus-thick",
+                                    button_class=ButtonColorChoices.GREEN,
+                                    permissions=["add"],
+                                ),
+                                NavMenuButton(
+                                    link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_import",
+                                    title="Import",
+                                    icon_class="mdi mdi-database-import-outline",
+                                    button_class=ButtonColorChoices.BLUE,
+                                    permissions=["add"],
+                                ),
+                            ),
+                        ),
+                        NavMenuItem(
+                            link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_list",
+                            name="Contract POC",
+                            permissions=["view"],
+                            buttons=(
+                                NavMenuButton(
+                                    link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_add",
+                                    title="Add",
+                                    icon_class="mdi mdi-plus-thick",
+                                    button_class=ButtonColorChoices.GREEN,
+                                    permissions=["add"],
+                                ),
+                                NavMenuButton(
+                                    link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_import",
+                                    title="Import",
+                                    icon_class="mdi mdi-database-import-outline",
+                                    button_class=ButtonColorChoices.BLUE,
+                                    permissions=["add"],
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
             ),
         ),
     )
@@ -99,6 +168,66 @@ except ModuleNotFoundError:
                 ),
                 PluginMenuButton(
                     link="plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_import",
+                    title="Import",
+                    icon_class="mdi mdi-database-import-outline",
+                    color=ButtonColorChoices.BLUE,
+                    permissions=["add"],
+                ),
+            ),
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_list",
+            link_text="Contracts",
+            buttons=(
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_add",
+                    title="Add",
+                    icon_class="mdi mdi-plus-thick",
+                    color=ButtonColorChoices.GREEN,
+                    permissions=["add"],
+                ),
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_import",
+                    title="Import",
+                    icon_class="mdi mdi-database-import-outline",
+                    color=ButtonColorChoices.BLUE,
+                    permissions=["add"],
+                ),
+            ),
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_list",
+            link_text="Contract Providers",
+            buttons=(
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_add",
+                    title="Add",
+                    icon_class="mdi mdi-plus-thick",
+                    color=ButtonColorChoices.GREEN,
+                    permissions=["add"],
+                ),
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_import",
+                    title="Import",
+                    icon_class="mdi mdi-database-import-outline",
+                    color=ButtonColorChoices.BLUE,
+                    permissions=["add"],
+                ),
+            ),
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_list",
+            link_text="Contract POC",
+            buttons=(
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_add",
+                    title="Add",
+                    icon_class="mdi mdi-plus-thick",
+                    color=ButtonColorChoices.GREEN,
+                    permissions=["add"],
+                ),
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_import",
                     title="Import",
                     icon_class="mdi mdi-database-import-outline",
                     color=ButtonColorChoices.BLUE,

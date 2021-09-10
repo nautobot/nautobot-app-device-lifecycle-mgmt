@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load buttons %}
+{% load custom_links %}
+{% load helpers %}
+
+{% block title %}{{ object }}{% endblock %}
+
+{% block header %}
+    <div class="row noprint">
+        <div class="col-sm-12 col-md-12">
+            <ol class="breadcrumb">
+                <li><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contactlcm_list' %}">Contract Point-of-Contacts</a></li>
+                <li><a>{{ object }}</a></li>
+            </ol>
+        </div>
+    </div>
+    <div class="pull-right noprint">
+        {% if perms.change %}
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contactlcm_edit' pk=object.id %}" class="btn btn-warning">
+                <span class="mdi mdi-pencil" aria-hidden="true"></span> Edit
+            </a>
+        {% endif %}
+        {% if perms.delete %}
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contactlcm_delete' pk=object.id %}" class="btn btn-danger">
+                <span class="mdi mdi-trash-can-outline" aria-hidden="true"></span> Delete
+            </a>
+        {% endif %}
+    </div>
+    <h2>Contact: {{ object }}</h2>
+        {% include 'inc/created_updated.html' with obj=object %}
+    <div class="pull-right noprint">
+        {% custom_links object %}
+    </div>
+    <ul class="nav nav-tabs">
+        <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
+            <a href="{{ object.get_absolute_url }}">Contact</a>
+        </li>
+        <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contactlcm_changelog' pk=object.id %}">Change Log</a>
+        </li>
+    </ul>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Contact</strong>
+            </div>
+            <table class="table table-hover panel-body attr-table">
+                <tr>
+                    <td>Name</td>
+                    <td>{{ object.name }}</td>
+                </tr>
+                <tr>
+                    <td>Address</td>
+                    <td>{% if object.address %}
+                        <div class="pull-right noprint">
+                            <a href="https://maps.google.com/?q={{ object.address|urlencode }}" target="_blank" class="btn btn-primary btn-xs">
+                                <i class="mdi mdi-map-marker"></i> Map it
+                            </a>
+                        </div>
+                        <span>{{ object.address|linebreaksbr }}</span>
+                        {% else %} &mdash; {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Phone</td>
+                    <td>{{ object.phone|placeholder }}</td>
+                </tr>
+                <tr>
+                    <td>E-Mail</td>
+                    <td>{% if object.email %} <a href="mailto:{{ object.email }}">{{ object.email }}</a>{% else %} &mdash; {% endif %}</td>
+                </tr>
+                <tr>
+                    <td>PoC Type</td>
+                    <td>{{ object.type }}</td>
+                </tr>
+                <tr>
+                    <td>Assign to Contract</td>
+                    <td><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm' pk=object.contract.id %}">{{ object.contract.name }}</a></td>
+                </tr>
+                <tr>
+                    <td>Priority</td>
+                    <td>{{ object.priority }}</td>
+                </tr>
+                <tr>
+                    <td>Comments</td>
+                    <td>{% if object.comments %}<pre>{{ object.comments|placeholder  }}</pre>{% else %} &mdash; {% endif %}</td>
+                </tr>
+            </table>
+        </div>
+        {% include 'inc/custom_fields_panel.html' %}
+        {% include 'inc/relationships_panel.html' %}
+        {% include 'extras/inc/tags_panel.html' with tags=object.tags.all %}
+    </div>
+</div>
+{% endblock %}

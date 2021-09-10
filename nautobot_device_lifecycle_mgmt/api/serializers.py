@@ -1,5 +1,4 @@
 """API serializers implementation for the LifeCycle Management plugin."""
-
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 
@@ -7,7 +6,6 @@ from drf_yasg.utils import swagger_serializer_method
 from rest_framework import serializers
 
 from nautobot.core.api import ContentTypeField
-from nautobot.core.api.serializers import ValidatedModelSerializer
 
 from nautobot.dcim.api.nested_serializers import (
     NestedDeviceSerializer,
@@ -18,12 +16,23 @@ from nautobot.extras.api.customfields import CustomFieldModelSerializer
 from nautobot.extras.api.serializers import TaggedObjectSerializer
 from nautobot.utilities.api import get_serializer_for_model
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import (
+    HardwareLCM,
+    SoftwareLCM,
+    ContactLCM,
+    ValidatedSoftwareLCM,
+    ContractLCM,
+    ProviderLCM,
+)
 
-from .nested_serializers import NestedSoftwareLCMSerializer
+from .nested_serializers import (
+    NestedSoftwareLCMSerializer,
+    NestedProviderLCMSerializer,
+    NestedContractLCMSerializer,
+)
 
 
-class HardwareLCMSerializer(ValidatedModelSerializer):
+class HardwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=R0901
     """API serializer."""
 
     device_type = NestedDeviceTypeSerializer(
@@ -47,6 +56,74 @@ class HardwareLCMSerializer(ValidatedModelSerializer):
             "end_of_sw_releases",
             "end_of_security_patches",
             "documentation_url",
+            "custom_fields",
+            "tags",
+        ]
+
+
+class ProviderLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=R0901
+    """API serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = ProviderLCM
+        fields = [
+            "id",
+            "name",
+            "description",
+            "physical_address",
+            "phone",
+            "email",
+            "comments",
+            "custom_fields",
+            "tags",
+        ]
+
+
+class ContractLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=R0901
+    """API serializer."""
+
+    provider = NestedProviderLCMSerializer(many=False, read_only=False, required=True, help_text="Contract Provider")
+
+    class Meta:
+        """Meta attributes."""
+
+        model = ContractLCM
+        fields = [
+            "id",
+            "provider",
+            "name",
+            "start",
+            "end",
+            "cost",
+            "support_level",
+            "contract_type",
+            "expired",
+            "custom_fields",
+            "tags",
+        ]
+
+
+class ContactLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=R0901
+    """API serializer."""
+
+    contract = NestedContractLCMSerializer(many=False, read_only=False, required=True, help_text="Associated Contract")
+
+    class Meta:
+        """Meta attributes."""
+
+        model = ContactLCM
+        fields = [
+            "name",
+            "address",
+            "phone",
+            "email",
+            "comments",
+            "priority",
+            "contract",
+            "custom_fields",
+            "tags",
         ]
 
 

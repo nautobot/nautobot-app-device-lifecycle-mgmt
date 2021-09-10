@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load buttons %}
+{% load custom_links %}
+{% load helpers %}
+
+{% block title %}{{ object }}{% endblock %}
+
+{% block header %}
+    <div class="row noprint">
+        <div class="col-sm-12 col-md-12">
+            <ol class="breadcrumb">
+                <li><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:providerlcm_list' %}">Contract Providers</a></li>
+                <li><a>{{ object }}</a></li>
+            </ol>
+        </div>
+    </div>
+    <div class="pull-right noprint">
+        {% if perms.change %}
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:providerlcm_edit' pk=object.id %}" class="btn btn-warning">
+                <span class="mdi mdi-pencil" aria-hidden="true"></span> Edit
+            </a>
+        {% endif %}
+        {% if perms.delete %}
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:providerlcm_delete' pk=object.id %}" class="btn btn-danger">
+                <span class="mdi mdi-trash-can-outline" aria-hidden="true"></span> Delete
+            </a>
+        {% endif %}
+    </div>
+    <h2>Provider: {{ object }}</h2>
+        {% include 'inc/created_updated.html' with obj=object %}
+    <div class="pull-right noprint">
+        {% custom_links object %}
+    </div>
+    <ul class="nav nav-tabs">
+        <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
+            <a href="{{ object.get_absolute_url }}">Provider</a>
+        </li>
+        <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:providerlcm_changelog' pk=object.id %}">Change Log</a>
+        </li>
+    </ul>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Provider</strong>
+            </div>
+            <table class="table table-hover panel-body attr-table">
+                <tr>
+                    <td>Name</td>
+                    <td>{{ object.name }}</td>
+                </tr>
+                <tr>
+                    <td>Description</td>
+                    <td>{{ object.description|placeholder }}</td>
+                </tr>
+                <tr>
+                    <td>E-Mail</td>
+                    <td>{% if object.email %} <a href="mailto:{{ object.email }}">{{ object.email }}</a>{% else %} &mdash; {% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Phone</td>
+                    <td>{{ object.phone|placeholder }}</td>
+                </tr>
+                <tr>
+                    <td>Address</td>
+                    <td>{% if object.physical_address %}
+                        <div class="pull-right noprint">
+                            <a href="https://maps.google.com/?q={{ object.physical_address|urlencode }}" target="_blank" class="btn btn-primary btn-xs">
+                                <i class="mdi mdi-map-marker"></i> Map it
+                            </a>
+                        </div>
+                        <span>{{ object.physical_address|linebreaksbr }}</span>
+                        {% else %} &mdash; {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Comments</td>
+                    <td>
+                        {% if object.comments %}
+                        <pre>{{ object.comments }}</pre>
+                        {% else %} &mdash; {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+        {% include 'inc/custom_fields_panel.html' %}
+        {% include 'inc/relationships_panel.html' %}
+        {% include 'extras/inc/tags_panel.html' with tags=object.tags.all %}
+    </div>
+
+    <div class="col-md-6">
+        {% if contracts.count > 0 %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Service Contracts</strong>
+            </div>
+            <table class="table panel-body attr-table">
+                <tr class="active">
+                    <th>Name</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Support Level</th>
+                    <th>Type</th>
+                </tr>
+                {% for contract in contracts %}
+                <tr class="{% if contract.expired %}bg-danger{% endif %}">
+                    <td><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm' pk=contract.id %}">{{ contract.name }}</a></td>
+                    <td>{{ contract.start|placeholder }}</td>
+                    <td>{{ contract.end|placeholder }}</td>
+                    <td>{{ contract.support_level }}</td>
+                    <td>{{ contract.contract_type }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            <div class="panel-footer text-right no-print">
+                <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm_add' %}" class="btn btn-primary btn-xs">
+                    <span class="mdi mdi-plus-thick" aria-hidden="true"></span> Add Contract
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

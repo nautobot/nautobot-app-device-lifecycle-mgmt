@@ -20,3 +20,43 @@ class NestedSoftwareLCMSerializer(WritableNestedSerializer):
         model = models.SoftwareLCM
         fields = ["id", "url", "device_platform", "version", "end_of_support"]
         read_only_fields = ["device_platform"]
+
+
+class NestedProviderLCMSerializer(WritableNestedSerializer):
+    """Nested serializer for the provider class."""
+
+    class Meta:
+        """Meta magic method for the Provider nested serializer."""
+
+        model = models.ProviderLCM
+        fields = [
+            "id",
+            "name",
+            "description",
+            "physical_address",
+            "phone",
+            "email",
+            "comments",
+        ]
+
+
+class NestedContractLCMSerializer(WritableNestedSerializer):
+    """API serializer."""
+
+    provider = NestedProviderLCMSerializer(many=False, read_only=False, required=True, help_text="Contract Provider")
+
+    class Meta:
+        """Meta attributes."""
+
+        model = models.ContractLCM
+        fields = [
+            "id",
+            "provider",
+            "name",
+            "start",
+            "end",
+            "cost",
+            "support_level",
+            "contract_type",
+            "expired",
+        ]

@@ -7,7 +7,14 @@ from nautobot.utilities.testing import APIViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer, Platform, Device, DeviceRole, InventoryItem, Site
 from nautobot.extras.models import Status
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import (
+    HardwareLCM,
+    SoftwareLCM,
+    ContractLCM,
+    ProviderLCM,
+    ValidatedSoftwareLCM,
+)
+
 
 User = get_user_model()
 
@@ -18,6 +25,7 @@ class HardwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=t
     model = HardwareLCM
     bulk_update_data = {"documentation_url": "https://cisco.com/eox"}
     brief_fields = [
+        "custom_fields",
         "device_type",
         "display",
         "documentation_url",
@@ -29,6 +37,7 @@ class HardwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=t
         "id",
         "inventory_item",
         "release_date",
+        "tags",
     ]
 
     @classmethod
@@ -125,6 +134,95 @@ class SoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=t
         """Currently don't support bulk operations."""
 
 
+class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
+    """Test the ContractLCM API."""
+
+    model = ContractLCM
+    bulk_update_data = {"documentation_url": "https://cisco.com/eox"}
+    brief_fields = [
+        "contract_type",
+        "cost",
+        "display",
+        "end",
+        "expired",
+        "id",
+        "name",
+        "provider",
+        "start",
+        "support_level",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        """Create a superuser and token for API calls."""
+        provider = ProviderLCM.objects.create(
+            name="Cisco",
+            description="Cisco Support",
+            physical_address="123 Cisco Way, San Jose, CA",
+            phone="(123) 456-7890",
+            email="email@cisco.com",
+            portal_url="https://www.cisco.com/",
+            comments="Test Comment",
+        )
+        cls.create_data = [
+            {
+                "name": "Nexus Support - Hardware",
+                "start": datetime.date(2021, 4, 1),
+                "end": datetime.date(2022, 4, 1),
+                "support_level": "24/7",
+                "contract_type": "Hardware",
+                "provider": provider.id,
+            },
+            {
+                "name": "Nexus Support - Software",
+                "start": datetime.date(2021, 4, 1),
+                "end": datetime.date(2022, 4, 1),
+                "support_level": "8-5, M-F",
+                "contract_type": "Software",
+                "provider": provider.id,
+            },
+            {
+                "name": "ASA Support - Hardware",
+                "start": datetime.date(2021, 4, 1),
+                "end": datetime.date(2022, 4, 1),
+                "support_level": "24/7",
+                "contract_type": "Hardware",
+                "provider": provider.id,
+            },
+        ]
+
+        ContractLCM.objects.create(
+            name="Meraki Hardware Support",
+            number="MERK00001",
+            start=datetime.date(2021, 4, 1),
+            end=datetime.date(2022, 4, 1),
+            provider=provider,
+        )
+        ContractLCM.objects.create(
+            name="Meraki Software Support",
+            number="MERK00002",
+            start=datetime.date(2021, 4, 1),
+            end=datetime.date(2022, 4, 1),
+            provider=provider,
+        )
+        ContractLCM.objects.create(
+            name="Juniper Hardware Support",
+            number="CSCO0000001",
+            start=datetime.date(2021, 4, 1),
+            end=datetime.date(2022, 4, 1),
+            provider=provider,
+        )
+
+    def test_bulk_create_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_bulk_delete_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_bulk_update_objects(self):
+        """Currently don't support bulk operations."""
+
+
 class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
     """Test the SoftwareLCM API."""
 
@@ -146,7 +244,7 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: 
 
     @classmethod
     def setUpTestData(cls):
-
+        """Create a superuser and token for API calls."""
         device_platform = Platform.objects.create(name="Cisco IOS", slug="cisco_ios")
         softwares = (
             SoftwareLCM.objects.create(

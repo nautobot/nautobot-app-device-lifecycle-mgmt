@@ -16,6 +16,8 @@ def post_migrate_create_relationships(sender, apps, **kwargs):  # pylint: disabl
     InventoryItem = apps.get_model("dcim", "InventoryItem")
     _Relationship = apps.get_model("extras", "Relationship")
 
+    contract_lcm = sender.get_model("ContractLCM")
+
     for relationship_dict in [
         {
             "name": "Software on Device",
@@ -34,6 +36,24 @@ def post_migrate_create_relationships(sender, apps, **kwargs):  # pylint: disabl
             "source_label": "Running on Inventory Items",
             "destination_type": ContentType.objects.get_for_model(InventoryItem),
             "destination_label": "Software Version",
+        },
+        {
+            "name": "Contract to dcim.Device",
+            "slug": "contractlcm-to-device",
+            "type": RelationshipTypeChoices.TYPE_MANY_TO_MANY,
+            "source_type": ContentType.objects.get_for_model(contract_lcm),
+            "source_label": "Devices",
+            "destination_type": ContentType.objects.get_for_model(_Device),
+            "destination_label": "Contracts",
+        },
+        {
+            "name": "Contract to dcim.InventoryItem",
+            "slug": "contractlcm-to-inventoryitem",
+            "type": RelationshipTypeChoices.TYPE_ONE_TO_MANY,
+            "source_type": ContentType.objects.get_for_model(contract_lcm),
+            "source_label": "Inventory Items",
+            "destination_type": ContentType.objects.get_for_model(InventoryItem),
+            "destination_label": "Contract",
         },
     ]:
         _Relationship.objects.get_or_create(name=relationship_dict["name"], defaults=relationship_dict)
