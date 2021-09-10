@@ -7,7 +7,13 @@ from nautobot.utilities.testing import APIViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer, Platform, Device, DeviceRole, InventoryItem, Site
 from nautobot.extras.models import Status
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ContractLCM, ProviderLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import (
+    HardwareLCM,
+    SoftwareLCM,
+    ContractLCM,
+    ProviderLCM,
+    ValidatedSoftwareLCM,
+)
 
 
 User = get_user_model()
@@ -145,7 +151,7 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=t
         "start",
         "support_level",
     ]
-    
+
     @classmethod
     def setUpTestData(cls):
         """Create a superuser and token for API calls."""
@@ -205,8 +211,18 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=t
             start=datetime.date(2021, 4, 1),
             end=datetime.date(2022, 4, 1),
             provider=provider,
-          
-          
+        )
+
+    def test_bulk_create_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_bulk_delete_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_bulk_update_objects(self):
+        """Currently don't support bulk operations."""
+
+
 class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
     """Test the SoftwareLCM API."""
 
