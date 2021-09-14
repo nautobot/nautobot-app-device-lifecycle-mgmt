@@ -2,8 +2,9 @@
 import datetime
 import django_filters
 from django.db.models import Q
+from django.contrib.contenttypes.models import ContentType
 
-from nautobot.dcim.models import DeviceType, Platform
+from nautobot.dcim.models import DeviceType, Platform, Device
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
@@ -140,7 +141,8 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
         queryset=SoftwareLCM.objects.all(),
         label="Software",
     )
-
+    device_name = django_filters.CharFilter(method="device", label="Device Name")
+    device_id = django_filters.CharFilter(method="device", label="Device ID")
     # expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
 
     class Meta:
@@ -150,6 +152,8 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
 
         fields = [
             "software",
+            "device_name",
+            "device_id",
             "start",
             "end",
             "preferred",
@@ -162,6 +166,32 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
 
         qs_filter = Q(start__icontains=value) | Q(end__icontains=value)
         return queryset.filter(qs_filter)
+
+    def device(self, queryset, name, value):  # pylint: disable=no-self-use
+        """Search validated software list for a given device."""
+        value = value.strip()
+        if not value:
+            return queryset
+
+        if name == "device_name":
+            devices = Device.objects.filter(name=value)
+        elif name == "device_id":
+            devices = Device.objects.filter(id=value)
+        else:
+            devices = Device.objects.none()
+
+        if devices.count() != 1:
+            return queryset.none()
+
+        device = devices.first()
+        valid_soft_filter = Q(
+            assigned_to_content_type=ContentType.objects.get(app_label="dcim", model="device"),
+            assigned_to_object_id=device.pk,
+        ) | Q(
+            assigned_to_content_type=ContentType.objects.get(app_label="dcim", model="devicetype"),
+            assigned_to_object_id=device.device_type.pk,
+        )
+        return ValidatedSoftwareLCM.objects.filter(valid_soft_filter)
 
 
 class ContractLCMFilterSet(django_filters.FilterSet):
