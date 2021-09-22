@@ -407,6 +407,7 @@ class ProviderLCM(OrganizationalModel):
     name = models.CharField(max_length=100, unique=True)
     description = models.CharField(max_length=200, blank=True)
     physical_address = models.CharField(max_length=200, blank=True)
+    country = models.CharField(max_length=3, blank=True)
     phone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True, verbose_name="E-mail")
     portal_url = models.URLField(blank=True, verbose_name="Portal URL")
@@ -416,6 +417,7 @@ class ProviderLCM(OrganizationalModel):
         "name",
         "description",
         "physical_address",
+        "country",
         "phone",
         "email",
         "portal_url",
@@ -448,6 +450,7 @@ class ProviderLCM(OrganizationalModel):
             self.name,
             self.description,
             self.physical_address,
+            self.country,
             self.phone,
             self.email,
             self.portal_url,

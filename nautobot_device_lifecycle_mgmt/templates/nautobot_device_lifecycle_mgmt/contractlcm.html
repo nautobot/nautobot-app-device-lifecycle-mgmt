@@ -96,11 +96,10 @@
         {% include 'inc/relationships_panel.html' %}
         {% include 'extras/inc/tags_panel.html' with tags=object.tags.all %}
     </div>
-    {% if contacts.count %}
     <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <strong>Contacts</strong>
+                <strong>Escalation Contacts</strong>
             </div>
             <table class="table table-hover panel-body attr-table">
                 <thead>
@@ -113,6 +112,13 @@
                 </tr>
                 </thead>
                 <tbody>
+                {% if not contacts %}
+                <tr>
+                    <td colspan="5" class="text-muted text-center">
+                        No contacts defined. Click the 'Add PoC' button below to add contacts.
+                    </td>
+                </tr>
+                {% endif %}
                 {% for contact in contacts %}
                 <tr>
                     <td style="width: 5%">
@@ -124,9 +130,7 @@
                     <td>
                         {% if contact.email %}
                         <a href="mailto:{{ contact.email }}">{{ contact.email }}</a>
-                        {% else %}
-                        &mdash;
-                        {% endif %}
+                        {% else %}&mdash;{% endif %}
                     </td>
                     <td>{{ contact.phone|placeholder }}</td>
                     <td>{{ contact.type }}</td>
@@ -135,12 +139,55 @@
                 </tbody>
             </table>
             <div class="panel-footer text-right no-print">
-                <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contactlcm_add' %}" class="btn btn-primary btn-xs">
+                <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contactlcm_add' %}?contract={{ object.id }}&return_url={% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm' pk=object.pk %}" class="btn btn-primary btn-xs">
                     <span class="mdi mdi-plus-thick" aria-hidden="true"></span> Add PoC
                 </a>
             </div>
         </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Service Contract Owner</strong>
+            </div>
+            <table class="table table-hover panel-body attr-table">
+                <thead>
+                <tr>
+                    <th style="width: 5%"></th>
+                    <th>Name</th>
+                    <th>E-Mail</th>
+                    <th>Phone</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% if not owners %}
+                <tr>
+                    <td colspan="5" class="text-muted text-center">
+                        No contract owner defined. Click the 'Add Owner' button below to add an owner.
+                    </td>
+                </tr>
+                {% endif %}
+                {% for contact in owners %}
+                <tr>
+                    <td style="width: 5%">
+                        <span class="mdi mdi-crown-outline" data-toggle="tooltip" title="Contract Owner"></span>
+                    </td>
+                    <td><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contactlcm' pk=contact.id %}">{{ contact.name }}</a></td>
+                    <td>
+                        {% if contact.email %}
+                        <a href="mailto:{{ contact.email }}">{{ contact.email }}</a>
+                        {% else %}&mdash{% endif %}
+                    </td>
+                    <td>{{ contact.phone|placeholder }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="panel-footer text-right no-print">
+                <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contactlcm_add' %}?type=Owner&contract={{ object.id }}&return_url={% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm' pk=object.pk %}" class="btn btn-primary btn-xs">
+                    <span class="mdi mdi-plus-thick" aria-hidden="true"></span> Add Owner
+                </a>
+            </div>
+        </div>
     </div>
-    {% endif %}
 </div>
 {% endblock %}

@@ -78,6 +78,10 @@
                     </td>
                 </tr>
                 <tr>
+                    <td>Country</td>
+                    <td>{{ object.country|placeholder }}</td>
+                </tr>
+                <tr>
                     <td>Comments</td>
                     <td>
                         {% if object.comments %}
@@ -117,7 +121,7 @@
                 {% endfor %}
             </table>
             <div class="panel-footer text-right no-print">
-                <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm_add' %}" class="btn btn-primary btn-xs">
+                <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm_add' %}?provider={{ object.pk }}&return_url={% url 'plugins:nautobot_device_lifecycle_mgmt:providerlcm' pk=object.pk %}" class="btn btn-primary btn-xs">
                     <span class="mdi mdi-plus-thick" aria-hidden="true"></span> Add Contract
                 </a>
             </div>
