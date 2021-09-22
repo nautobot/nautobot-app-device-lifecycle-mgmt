@@ -1,6 +1,11 @@
 # CHANGELOG
 
-## 1.0.0-beta.0 - 08-05-2021
+## v0.2.0 - 09-22-2021
+- **Adds Maintenance/Service Contracts to the LifeCycle Plugin.**
+- **Adds Software and Validated Software tracking to the LifeCycle Plugin.**
+
+
+## v0.1.0 - 08-05-2021
 - Initial fork and rename of project from [Nautobot EoX Notices](https://github.com/FragmentedPacket/nautobot-eox-notices)
 - Rename model and related references to the Device LifeCycle Management naming scheme. 
 - Add comments and documentation URL to the hardware model.
