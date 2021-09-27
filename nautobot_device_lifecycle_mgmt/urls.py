@@ -40,6 +40,7 @@ urlpatterns = [
         name="softwarelcm_changelog",
         kwargs={"model": SoftwareLCM},
     ),
+    path("software/import/", views.SoftwareLCMBulkImportView.as_view(), name="softwarelcm_import"),
     # ValidatedSoftware
     path("validated-software/", views.ValidatedSoftwareLCMListView.as_view(), name="validatedsoftwarelcm_list"),
     path("validated-software/<uuid:pk>/", views.ValidatedSoftwareLCMView.as_view(), name="validatedsoftwarelcm"),
@@ -60,7 +61,11 @@ urlpatterns = [
         name="validatedsoftwarelcm_changelog",
         kwargs={"model": ValidatedSoftwareLCM},
     ),
-    path("hardware/import/", views.HardwareLCMBulkImportView.as_view(), name="hardwarelcm_import"),
+    path(
+        "validated-software/import/",
+        views.ValidatedSoftwareLCMBulkImportView.as_view(),
+        name="validatedsoftwarelcm_import",
+    ),
     # Contract LifeCycle Management URLs
     path("contract/", views.ContractLCMListView.as_view(), name="contractlcm_list"),
     path("contract/<uuid:pk>/", views.ContractLCMView.as_view(), name="contractlcm"),

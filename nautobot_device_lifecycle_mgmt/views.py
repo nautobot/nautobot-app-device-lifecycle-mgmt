@@ -24,8 +24,10 @@ from nautobot_device_lifecycle_mgmt.forms import (
     HardwareLCMCSVForm,
     SoftwareLCMForm,
     SoftwareLCMFilterForm,
+    SoftwareLCMCSVForm,
     ValidatedSoftwareLCMForm,
     ValidatedSoftwareLCMFilterForm,
+    ValidatedSoftwareLCMCSVForm,
     ContractLCMForm,
     ContractLCMBulkEditForm,
     ContractLCMFilterForm,
@@ -150,6 +152,8 @@ class SoftwareLCMListView(generic.ObjectListView):
     action_buttons = (
         "add",
         "delete",
+        "import",
+        "export",
     )
 
 
@@ -186,6 +190,15 @@ class SoftwareLCMEditView(generic.ObjectEditView):
     default_return_url = URL.SoftwareLCM.View
 
 
+class SoftwareLCMBulkImportView(generic.BulkImportView):
+    """View for bulk import of SoftwareLCM."""
+
+    queryset = SoftwareLCM.objects.prefetch_related("device_platform")
+    model_form = SoftwareLCMCSVForm
+    table = SoftwareLCMTable
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:softwarelcm_list"
+
+
 class ValidatedSoftwareLCMListView(generic.ObjectListView):
     """ValidatedSoftware List view."""
 
@@ -196,6 +209,8 @@ class ValidatedSoftwareLCMListView(generic.ObjectListView):
     action_buttons = (
         "add",
         "delete",
+        "import",
+        "export",
     )
 
 
@@ -222,6 +237,15 @@ class ValidatedSoftwareLCMDeleteView(generic.ObjectDeleteView):
     queryset = ValidatedSoftwareLCM.objects.all()
     default_return_url = URL.ValidatedSoftwareLCM.List
     template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_delete.html"
+
+
+class ValidatedSoftwareLCMBulkImportView(generic.BulkImportView):
+    """View for bulk import of ValidatedSoftwareLCM."""
+
+    queryset = ValidatedSoftwareLCM.objects.all()
+    model_form = ValidatedSoftwareLCMCSVForm
+    table = ValidatedSoftwareLCMTable
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_list"
 
 
 # ---------------------------------------------------------------------------------

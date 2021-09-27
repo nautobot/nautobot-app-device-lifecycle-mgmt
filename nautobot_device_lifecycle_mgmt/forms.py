@@ -1,6 +1,7 @@
 """Forms implementation for the LifeCycle Management plugin."""
 import logging
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 
 from nautobot.utilities.forms import BootstrapMixin, DatePicker, DynamicModelMultipleChoiceField
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Platform
@@ -16,6 +17,7 @@ from nautobot.utilities.forms import (
     StaticSelect2,
     BOOLEAN_WITH_BLANK_CHOICES,
     add_blank_choice,
+    CSVModelChoiceField,
 )
 from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, CurrencyChoices, PoCTypeChoices, CountryCodes
 from nautobot_device_lifecycle_mgmt.models import (
@@ -214,6 +216,23 @@ class SoftwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
         }
 
 
+class SoftwareLCMCSVForm(CustomFieldModelCSVForm):
+    """Form for bulk creating SoftwareLCM objects."""
+
+    device_platform = CSVModelChoiceField(
+        queryset=Platform.objects.all(),
+        required=True,
+        to_field_name="slug",
+        help_text="Device platform",
+    )
+
+    class Meta:
+        """Meta attributes for the SoftwareLCMCSVForm class."""
+
+        model = SoftwareLCM
+        fields = SoftwareLCM.csv_headers
+
+
 class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
     """ValidatedSoftwareLCM creation/edit form."""
 
@@ -329,6 +348,23 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
             "end",
             "preferred",
         ]
+
+
+class ValidatedSoftwareLCMCSVForm(CustomFieldModelCSVForm):
+    """Form for bulk creating ValidatedSoftwareLCM objects."""
+
+    assigned_to_content_type = CSVModelChoiceField(
+        queryset=ContentType.objects.all(),
+        required=True,
+        to_field_name="model",
+        help_text="Assigned to object type",
+    )
+
+    class Meta:
+        """Meta attributes for the ValidatedSoftwareLCM class."""
+
+        model = ValidatedSoftwareLCM
+        fields = ValidatedSoftwareLCM.csv_headers
 
 
 class ContractLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
