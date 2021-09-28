@@ -54,6 +54,13 @@ try:
                                         "nautobot_device_lifecycle_mgmt.add_softwarelcm",
                                     ],
                                 ),
+                                NavMenuButton(
+                                    link="plugins:nautobot_device_lifecycle_mgmt:softwarelcm_import",
+                                    title="Import",
+                                    icon_class="mdi mdi-database-import-outline",
+                                    button_class=ButtonColorChoices.BLUE,
+                                    permissions=["nautobot_device_lifecycle_mgmt.add_softwarelcm"],
+                                ),
                             ),
                             permissions=[
                                 "nautobot_device_lifecycle_mgmt.view_softwarelcm",
@@ -71,6 +78,13 @@ try:
                                     permissions=[
                                         "nautobot_device_lifecycle_mgmt.add_validatedsoftwarelcm",
                                     ],
+                                ),
+                                NavMenuButton(
+                                    link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_import",
+                                    title="Import",
+                                    icon_class="mdi mdi-database-import-outline",
+                                    button_class=ButtonColorChoices.BLUE,
+                                    permissions=["nautobot_device_lifecycle_mgmt.add_validatedsoftwarelcm"],
                                 ),
                             ),
                             permissions=[
@@ -246,6 +260,13 @@ except ModuleNotFoundError:
                     color=ButtonColorChoices.GREEN,
                     permissions=["nautobot_device_lifecycle_mgmt.add_softwarelcm"],
                 ),
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:softwarelcm_import",
+                    title="Import",
+                    icon_class="mdi mdi-database-import-outline",
+                    color=ButtonColorChoices.BLUE,
+                    permissions=["nautobot_device_lifecycle_mgmt.add_softwarelcm"],
+                ),
             ),
         ),
         PluginMenuItem(
@@ -257,6 +278,13 @@ except ModuleNotFoundError:
                     title="Add",
                     icon_class="mdi mdi-plus-thick",
                     color=ButtonColorChoices.GREEN,
+                    permissions=["nautobot_device_lifecycle_mgmt.add_validatedsoftwarelcm"],
+                ),
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_import",
+                    title="Import",
+                    icon_class="mdi mdi-database-import-outline",
+                    color=ButtonColorChoices.BLUE,
                     permissions=["nautobot_device_lifecycle_mgmt.add_validatedsoftwarelcm"],
                 ),
             ),

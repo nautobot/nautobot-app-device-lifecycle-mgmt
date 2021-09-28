@@ -204,7 +204,7 @@ class SoftwareLCM(PrimaryModel):
     def to_csv(self):
         """Return fields for bulk view."""
         return (
-            self.device_platform,
+            self.device_platform.slug,
             self.version,
             self.alias,
             self.release_date,
@@ -288,8 +288,8 @@ class ValidatedSoftwareLCM(PrimaryModel):
     def to_csv(self):
         """Return fields for bulk view."""
         return (
-            self.software,
-            self.assigned_to_content_type,
+            self.software.id,
+            self.assigned_to_content_type.model,
             self.assigned_to_object_id,
             self.start,
             self.end,
