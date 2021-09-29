@@ -240,6 +240,7 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: 
         "start",
         "tags",
         "url",
+        "valid",
     ]
 
     @classmethod

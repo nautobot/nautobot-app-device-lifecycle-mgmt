@@ -196,6 +196,7 @@ class ValidatedSoftwareLCMSerializer(
             "start",
             "end",
             "preferred",
+            "valid",
             "custom_fields",
             "tags",
         ]

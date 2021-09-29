@@ -5,6 +5,8 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
+import time_machine
+
 from nautobot.dcim.models import DeviceType, Manufacturer, Platform
 
 from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
@@ -137,8 +139,8 @@ class SoftwareLCMTestCase(TestCase):
             device_platform=self.device_platform,
             version="17.3.3 MD",
             alias="Amsterdam-17.3.3 MD",
-            release_date="2019-01-10",
-            end_of_support="2022-05-15",
+            release_date=date(2019, 1, 10),
+            end_of_support=date(2022, 5, 15),
             documentation_url="https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
             download_url="ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin",
             image_file_name="asr1001x-universalk9.17.03.03.SPA.bin",
@@ -178,10 +180,11 @@ class ValidatedSoftwareLCMTestCase(TestCase):
         self.software = SoftwareLCM.objects.create(
             device_platform=device_platform,
             version="17.3.3 MD",
-            release_date="2019-01-10",
+            release_date=date(2019, 1, 10),
         )
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
-        self.device_type = DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000")
+        self.device_type_1 = DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000")
+        self.device_type_2 = DeviceType.objects.create(manufacturer=manufacturer, model="CAT-3750", slug="cat-3750")
         self.content_type_devicetype = ContentType.objects.get(app_label="dcim", model="devicetype")
 
     def test_create_validatedsoftwarelcm_required_only(self):
@@ -189,29 +192,63 @@ class ValidatedSoftwareLCMTestCase(TestCase):
 
         validatedsoftwarelcm = ValidatedSoftwareLCM.objects.create(
             software=self.software,
-            start="2019-01-10",
+            start=date(2019, 1, 10),
             assigned_to_content_type=self.content_type_devicetype,
-            assigned_to_object_id=self.device_type.id,
+            assigned_to_object_id=self.device_type_1.id,
         )
 
         self.assertEqual(validatedsoftwarelcm.software, self.software)
         self.assertEqual(str(validatedsoftwarelcm.start), "2019-01-10")
-        self.assertEqual(validatedsoftwarelcm.assigned_to, self.device_type)
+        self.assertEqual(validatedsoftwarelcm.assigned_to, self.device_type_1)
 
     def test_create_validatedsoftwarelcm_all(self):
         """Successfully create ValidatedSoftwareLCM with all fields."""
         validatedsoftwarelcm = ValidatedSoftwareLCM.objects.create(
             software=self.software,
-            start="2020-04-15",
-            end="2022-11-01",
+            start=date(2020, 4, 15),
+            end=date(2022, 11, 1),
             preferred=False,
             assigned_to_content_type=self.content_type_devicetype,
-            assigned_to_object_id=self.device_type.id,
+            assigned_to_object_id=self.device_type_1.id,
         )
 
         self.assertEqual(validatedsoftwarelcm.software, self.software)
         self.assertEqual(str(validatedsoftwarelcm.start), "2020-04-15")
         self.assertEqual(str(validatedsoftwarelcm.end), "2022-11-01")
-        self.assertEqual(validatedsoftwarelcm.assigned_to, self.device_type)
+        self.assertEqual(validatedsoftwarelcm.assigned_to, self.device_type_1)
         self.assertEqual(validatedsoftwarelcm.preferred, False)
         self.assertEqual(str(validatedsoftwarelcm), f"{self.software} - Valid since: {validatedsoftwarelcm.start}")
+
+    def test_validatedsoftwarelcm_valid_property(self):
+        """Test behavior of the 'valid' property."""
+        validatedsoftwarelcm_start_only = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2020, 4, 15),
+            preferred=False,
+            assigned_to_content_type=self.content_type_devicetype,
+            assigned_to_object_id=self.device_type_1.id,
+        )
+        validatedsoftwarelcm_start_end = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2020, 4, 15),
+            end=date(2022, 11, 1),
+            preferred=False,
+            assigned_to_content_type=self.content_type_devicetype,
+            assigned_to_object_id=self.device_type_2.id,
+        )
+
+        date_valid = date(2021, 6, 11)
+        date_before_valid_start = date(2018, 9, 26)
+        date_after_valid_end = date(2023, 1, 4)
+
+        with time_machine.travel(date_valid):
+            self.assertEqual(validatedsoftwarelcm_start_only.valid, True)
+            self.assertEqual(validatedsoftwarelcm_start_end.valid, True)
+
+        with time_machine.travel(date_before_valid_start):
+            self.assertEqual(validatedsoftwarelcm_start_only.valid, False)
+            self.assertEqual(validatedsoftwarelcm_start_end.valid, False)
+
+        with time_machine.travel(date_after_valid_end):
+            self.assertEqual(validatedsoftwarelcm_start_only.valid, True)
+            self.assertEqual(validatedsoftwarelcm_start_end.valid, False)
