@@ -283,7 +283,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
         if self.end:
             return self.end >= today > self.start
 
-        return True
+        return today > self.start
 
     def to_csv(self):
         """Return fields for bulk view."""
