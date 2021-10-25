@@ -1,7 +1,8 @@
 # CHANGELOG
 
 ## v0.2.1 - 10-24-2021
-- Fixes navigation menu for Contract Imports.
+- PR#26: Sets view permissions on all models in the navigation menu.
+- PR#26: Fixes navigation menu for Contract Imports.
 - PR#25: Add documentation for use-cases and plugin info to repo.
 - PR#20: Adds `valid` property to the validated software serializers. 
 - PR#18: Adds CSV export option to software and validated software models.
