@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.2.1 - 10-24-2021
+- Fixes navigation menu for Contract Imports.
+- PR#25: Add documentation for use-cases and plugin info to repo.
+- PR#20: Adds `valid` property to the validated software serializers. 
+- PR#18: Adds CSV export option to software and validated software models.
+
 ## v0.2.0 - 09-22-2021
 - **Adds Maintenance/Service Contracts to the LifeCycle Plugin.**
 - **Adds Software and Validated Software tracking to the LifeCycle Plugin.**
