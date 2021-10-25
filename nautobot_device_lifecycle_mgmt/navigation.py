@@ -110,7 +110,7 @@ try:
                                     permissions=["add"],
                                 ),
                                 NavMenuButton(
-                                    link="plugins:nautobot_device_lifecycle_mgmt:contract_import",
+                                    link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_import",
                                     title="Import",
                                     icon_class="mdi mdi-database-import-outline",
                                     button_class=ButtonColorChoices.BLUE,
