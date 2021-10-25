@@ -1,6 +1,6 @@
 # Nautobot Plugin - Device Lifecycle Management
 
-A plugin for [Nautobot](https://github.com/nautobot/nautobot) to manage device lifecycles.
+A plugin for [Nautobot](https://github.com/nautobot/nautobot) to manage device lifecycles. This plugin works by making related associations to Devices, Device Types, and Inventory Items to help provide data about the hardware end of life notices, appropriate software versions to be running on the devices, and the maintenance contracts associated with devices. This will help with the various aspects of planning life cycle events, and provides quick access to ancillary data about the devices in Nautobot.
 
 ## Installation
 
@@ -59,6 +59,10 @@ sudo systemctl restart nautobot-rq-worker
 ```
 
 ## Usage
+
+### Adding Information into the Plugin
+
+The system currently has manual/API entry of data only. There are currently no connections to any particular vendor APIs that provide this data today. See [adding data docs](docs/add_information.md) for more info.
 ### Hardware LifeCycle Management
 #### API
 ![](docs/images/lcm_hardware_api_view.png)
