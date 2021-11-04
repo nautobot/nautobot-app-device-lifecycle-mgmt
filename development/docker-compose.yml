@@ -1,3 +1,4 @@
+---
 version: "3"
 services:
   nautobot:
@@ -5,7 +6,7 @@ services:
       context: "../"
       dockerfile: "development/Dockerfile"
       args:
-        python_ver: ${PYTHON_VER}
+        python_ver: "${PYTHON_VER}"
     image: "nautobot-plugin-device-lifecycle-mgmt/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
     command: "nautobot-server runserver 0.0.0.0:8000"
     ports:
@@ -24,8 +25,8 @@ services:
       context: "../"
       dockerfile: "development/Dockerfile"
       args:
-        nautobot_ver: ${NAUTOBOT_VER}
-        python_ver: ${PYTHON_VER}
+        nautobot_ver: "${NAUTOBOT_VER}"
+        python_ver: "${PYTHON_VER}"
     image: "nautobot-plugin-device-lifecycle-mgmt/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
     entrypoint: "nautobot-server rqworker"
     depends_on:
