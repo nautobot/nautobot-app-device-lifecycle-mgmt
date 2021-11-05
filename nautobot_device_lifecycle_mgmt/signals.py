@@ -1,4 +1,4 @@
-"""Custom signals for the LifeCycle Management plugin."""
+"""Custom signals for the Lifecycle Management plugin."""
 
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver

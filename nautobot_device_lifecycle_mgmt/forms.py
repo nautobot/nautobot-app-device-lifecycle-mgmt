@@ -1,4 +1,4 @@
-"""Forms implementation for the LifeCycle Management plugin."""
+"""Forms implementation for the Lifecycle Management plugin."""
 import logging
 from django import forms
 from django.contrib.contenttypes.models import ContentType
@@ -33,7 +33,7 @@ logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 
 
 class HardwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
-    """Hardware Device LifeCycle creation/edit form."""
+    """Hardware Device Lifecycle creation/edit form."""
 
     inventory_item = forms.ModelChoiceField(
         queryset=InventoryItem.objects.exclude(part_id__exact="")
@@ -61,7 +61,7 @@ class HardwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelFor
 
 
 class HardwareLCMBulkEditForm(BootstrapMixin, BulkEditForm):
-    """Hardware Device LifeCycle bulk edit form."""
+    """Hardware Device Lifecycle bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=HardwareLCM.objects.all(), widget=forms.MultipleHiddenInput)
     release_date = forms.DateField(widget=DatePicker(), required=False)
@@ -368,11 +368,11 @@ class ValidatedSoftwareLCMCSVForm(CustomFieldModelCSVForm):
 
 
 class ContractLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
-    """Device LifeCycle Contracts creation/edit form."""
+    """Device Lifecycle Contracts creation/edit form."""
 
     provider = forms.ModelChoiceField(
         queryset=ProviderLCM.objects.all(),
-        label="Contract Provider",
+        label="Vendor",
         to_field_name="pk",
         required=True,
     )
@@ -411,7 +411,7 @@ class ContractLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelFor
 
 
 class ContractLCMBulkEditForm(BootstrapMixin, BulkEditForm):
-    """Device LifeCycle Contrcts bulk edit form."""
+    """Device Lifecycle Contrcts bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=ContractLCM.objects.all(), widget=forms.MultipleHiddenInput)
     provider = forms.ModelMultipleChoiceField(queryset=ProviderLCM.objects.all(), required=False)
@@ -481,7 +481,7 @@ class ContractLCMCSVForm(CustomFieldModelCSVForm):
 
 
 class ProviderLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
-    """Device LifeCycle Contract Providers creation/edit form."""
+    """Device Lifecycle Contract Providers creation/edit form."""
 
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     country = forms.ChoiceField(
@@ -508,7 +508,7 @@ class ProviderLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelFor
 
 
 class ProviderLCMBulkEditForm(BootstrapMixin, BulkEditForm):
-    """Device LifeCycle Contract Providers bulk edit form."""
+    """Device Lifecycle Contract Providers bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=ProviderLCM.objects.all(), widget=forms.MultipleHiddenInput)
     description = forms.CharField(required=False)
@@ -571,7 +571,7 @@ class ProviderLCMCSVForm(CustomFieldModelCSVForm):
 
 
 class ContactLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
-    """Device LifeCycle Contract Resources creation/edit form."""
+    """Device Lifecycle Contract Resources creation/edit form."""
 
     type = forms.ChoiceField(choices=PoCTypeChoices.CHOICES, required=False)
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
@@ -601,7 +601,7 @@ class ContactLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm
 
 
 class ContactLCMBulkEditForm(BootstrapMixin, BulkEditForm):
-    """Device LifeCycle Contract Resources bulk edit form."""
+    """Device Lifecycle Contract Resources bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=ContractLCM.objects.all(), widget=forms.MultipleHiddenInput)
     address = forms.CharField(required=False)

@@ -1,4 +1,4 @@
-"""Extended core templates for the LifeCycle Management plugin."""
+"""Extended core templates for the Lifecycle Management plugin."""
 from abc import ABCMeta
 
 from django.contrib.contenttypes.models import ContentType

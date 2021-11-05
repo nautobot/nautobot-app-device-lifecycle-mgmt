@@ -1,4 +1,4 @@
-"""Filtering implementation for the LifeCycle Management plugin."""
+"""Filtering implementation for the Lifecycle Management plugin."""
 import datetime
 import django_filters
 from django.db.models import Q

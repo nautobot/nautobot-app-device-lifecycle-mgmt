@@ -1,4 +1,4 @@
-"""Menu items for the LifeCycle Management plugin."""
+"""Menu items for the Lifecycle Management plugin."""
 # pylint: disable=C0412
 from nautobot.utilities.choices import ButtonColorChoices
 
@@ -7,7 +7,7 @@ try:
 
     menu_items = (
         NavMenuTab(
-            name="Device LifeCycle",
+            name="Device Lifecycle",
             weight=600,
             groups=(
                 NavMenuGroup(
@@ -132,7 +132,7 @@ try:
                         ),
                         NavMenuItem(
                             link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_list",
-                            name="Contract Providers",
+                            name="Vendors",
                             buttons=(
                                 NavMenuButton(
                                     link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_add",
@@ -159,7 +159,7 @@ try:
                         ),
                         NavMenuItem(
                             link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_list",
-                            name="Contract POC",
+                            name="POC",
                             buttons=(
                                 NavMenuButton(
                                     link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_add",
@@ -235,7 +235,7 @@ except ModuleNotFoundError:
         ),
         PluginMenuItem(
             link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_list",
-            link_text="Contract Providers",
+            link_text="Vendors",
             buttons=(
                 PluginMenuButton(
                     link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_add",
@@ -255,7 +255,7 @@ except ModuleNotFoundError:
         ),
         PluginMenuItem(
             link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_list",
-            link_text="Contract POC",
+            link_text="POC",
             buttons=(
                 PluginMenuButton(
                     link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_add",

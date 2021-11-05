@@ -63,7 +63,7 @@ sudo systemctl restart nautobot-rq-worker
 ### Adding Information into the Plugin
 
 The system currently has manual/API entry of data only. There are currently no connections to any particular vendor APIs that provide this data today. See [adding data docs](docs/add_information.md) for more info.
-### Hardware LifeCycle Management
+### Hardware Lifecycle Management
 #### API
 ![](docs/images/lcm_hardware_api_view.png)
 

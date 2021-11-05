@@ -1,4 +1,4 @@
-"""Jobs for the LifeCycle Management plugin."""
+"""Jobs for the Lifecycle Management plugin."""
 
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q

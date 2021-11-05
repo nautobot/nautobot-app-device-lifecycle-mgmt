@@ -1,4 +1,4 @@
-"""Static choices uses for the Device LifeCycle plugin."""
+"""Static choices uses for the Device Lifecycle plugin."""
 from pycountry import countries
 
 from nautobot.utilities.choices import ChoiceSet

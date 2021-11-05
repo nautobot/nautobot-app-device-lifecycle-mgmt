@@ -1,4 +1,4 @@
-"""Views implementation for the LifeCycle Management plugin."""
+"""Views implementation for the Lifecycle Management plugin."""
 from nautobot.core.views import generic
 from nautobot.dcim.models import Device
 from nautobot_device_lifecycle_mgmt.models import (
@@ -53,7 +53,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
 from nautobot_device_lifecycle_mgmt.const import URL
 
 # ---------------------------------------------------------------------------------
-#  Hardware LifeCycle Management Views
+#  Hardware Lifecycle Management Views
 # ---------------------------------------------------------------------------------
 
 
@@ -249,7 +249,7 @@ class ValidatedSoftwareLCMBulkImportView(generic.BulkImportView):
 
 
 # ---------------------------------------------------------------------------------
-#  Contract LifeCycle Management Views
+#  Contract Lifecycle Management Views
 # ---------------------------------------------------------------------------------
 
 
@@ -339,7 +339,7 @@ class ContractLCMBulkEditView(generic.BulkEditView):
 
 
 # ---------------------------------------------------------------------------------
-#  Contract Provider LifeCycle Management Views
+#  Contract Provider Lifecycle Management Views
 # ---------------------------------------------------------------------------------
 
 
@@ -421,7 +421,7 @@ class ProviderLCMBulkEditView(generic.BulkEditView):
 
 
 # ---------------------------------------------------------------------------------
-#  Contact POC LifeCycle Management Views
+#  Contact POC Lifecycle Management Views
 # ---------------------------------------------------------------------------------
 
 
