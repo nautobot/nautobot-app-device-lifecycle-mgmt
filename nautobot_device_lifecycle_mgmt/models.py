@@ -187,7 +187,6 @@ class SoftwareLCM(PrimaryModel):
         """Meta attributes for SoftwareLCM."""
 
         verbose_name = "Software"
-        verbose_name_plural = "Software"
         ordering = ("end_of_support", "release_date")
         unique_together = (
             "device_platform",
@@ -265,7 +264,6 @@ class ValidatedSoftwareLCM(PrimaryModel):
         """Meta attributes for ValidatedSoftwareLCM."""
 
         verbose_name = "Validated Software"
-        verbose_name_plural = "Validated Software"
         ordering = ("software", "preferred", "start")
         unique_together = ("software", "assigned_to_content_type", "assigned_to_object_id")
 
