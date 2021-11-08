@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v0.2.2 - TDB
+- PR#XX: Changes plural name handling on software models.
+- PR#XX: Updates case on LifeCycle to be Lifecycle.
+- PR#XX: Changes visual representation of Providers to be Vendors.
+- PR#XX: Updates documentation image for Hardware Notices.
+
+
 ## v0.2.1 - 10-24-2021
 - PR#26: Sets view permissions on all models in the navigation menu.
 - PR#26: Fixes navigation menu for Contract Imports.
@@ -8,13 +15,13 @@
 - PR#18: Adds CSV export option to software and validated software models.
 
 ## v0.2.0 - 09-22-2021
-- **Adds Maintenance/Service Contracts to the LifeCycle Plugin.**
-- **Adds Software and Validated Software tracking to the LifeCycle Plugin.**
+- **Adds Maintenance/Service Contracts to the Lifecycle Plugin.**
+- **Adds Software and Validated Software tracking to the Lifecycle Plugin.**
 
 
 ## v0.1.0 - 08-05-2021
 - Initial fork and rename of project from [Nautobot EoX Notices](https://github.com/FragmentedPacket/nautobot-eox-notices)
-- Rename model and related references to the Device LifeCycle Management naming scheme. 
+- Rename model and related references to the Device Lifecycle Management naming scheme. 
 - Add comments and documentation URL to the hardware model.
 - Remove devices relationship to the hardware model.
 - Add `expired` as a filter on to the REST API.
@@ -22,7 +29,7 @@
 - Set bulk import device_type to use the model instead of the slug.
 - Adds dynamic menu depending on the version of nautobot running.
 - Handles table not existing prior to migrations.
-- Add GraphQL endpoint for the Device LifeCycle Hardware model.
+- Add GraphQL endpoint for the Device Lifecycle Hardware model.
 - Add `InventoryItem.part_id` field to the Hardware model association options.
 - Add shell_plus and ipython to dev dependencies. 
 

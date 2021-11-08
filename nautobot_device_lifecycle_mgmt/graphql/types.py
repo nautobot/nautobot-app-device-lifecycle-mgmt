@@ -1,4 +1,4 @@
-"""GraphQL implementation for the Device LifeCycle Management plugin."""
+"""GraphQL implementation for the Device Lifecycle Management plugin."""
 from nautobot.extras.graphql.types import DjangoObjectType
 from nautobot_device_lifecycle_mgmt.models import HardwareLCM, ContractLCM, ProviderLCM, ContactLCM
 from nautobot_device_lifecycle_mgmt.filters import (

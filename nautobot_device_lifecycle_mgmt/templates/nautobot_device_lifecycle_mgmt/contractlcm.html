@@ -140,7 +140,7 @@
             </table>
             <div class="panel-footer text-right no-print">
                 <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contactlcm_add' %}?contract={{ object.id }}&return_url={% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm' pk=object.pk %}" class="btn btn-primary btn-xs">
-                    <span class="mdi mdi-plus-thick" aria-hidden="true"></span> Add PoC
+                    <span class="mdi mdi-plus-thick" aria-hidden="true"></span> Add Contact
                 </a>
             </div>
         </div>
@@ -168,9 +168,7 @@
                 {% endif %}
                 {% for contact in owners %}
                 <tr>
-                    <td style="width: 5%">
-                        <span class="mdi mdi-crown-outline" data-toggle="tooltip" title="Contract Owner"></span>
-                    </td>
+                    <td style="width: 5%"></td>
                     <td><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contactlcm' pk=contact.id %}">{{ contact.name }}</a></td>
                     <td>
                         {% if contact.email %}

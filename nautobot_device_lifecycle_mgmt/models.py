@@ -1,4 +1,4 @@
-"""Django models for the LifeCycle Management plugin."""
+"""Django models for the Lifecycle Management plugin."""
 
 from datetime import datetime
 
@@ -313,7 +313,7 @@ class ContractLCM(PrimaryModel):
     provider = models.ForeignKey(
         to="nautobot_device_lifecycle_mgmt.ProviderLCM",
         on_delete=models.CASCADE,
-        verbose_name="Contract Provider",
+        verbose_name="Vendor",
         blank=True,
         null=True,
     )
@@ -427,7 +427,7 @@ class ProviderLCM(OrganizationalModel):
     class Meta:
         """Meta attributes for the class."""
 
-        verbose_name = "Contract Provider"
+        verbose_name = "Vendor"
         ordering = ("name",)
 
     def __str__(self):

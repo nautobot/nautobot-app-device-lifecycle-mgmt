@@ -1,4 +1,4 @@
-"""API serializers implementation for the LifeCycle Management plugin."""
+"""API serializers implementation for the Lifecycle Management plugin."""
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 
@@ -84,7 +84,7 @@ class ProviderLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):
 class ContractLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=R0901
     """API serializer."""
 
-    provider = NestedProviderLCMSerializer(many=False, read_only=False, required=True, help_text="Contract Provider")
+    provider = NestedProviderLCMSerializer(many=False, read_only=False, required=True, help_text="Vendor")
 
     class Meta:
         """Meta attributes."""

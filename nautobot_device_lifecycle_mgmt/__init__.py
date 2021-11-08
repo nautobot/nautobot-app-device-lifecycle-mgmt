@@ -13,7 +13,7 @@ from nautobot.extras.plugins import PluginConfig
 
 
 class DeviceLifeCycleConfig(PluginConfig):
-    """Plugin configuration for the Device LifeCycle Management plugin."""
+    """Plugin configuration for the Device Lifecycle Management plugin."""
 
     name = "nautobot_device_lifecycle_mgmt"
     verbose_name = "Nautobot Device Lifecycle Management"

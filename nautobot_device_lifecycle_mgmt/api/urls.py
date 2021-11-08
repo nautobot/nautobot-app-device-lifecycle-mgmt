@@ -1,4 +1,4 @@
-"""API URLs for the LifeCycle Management plugin."""
+"""API URLs for the Lifecycle Management plugin."""
 
 from rest_framework import routers
 from nautobot_device_lifecycle_mgmt.api.views import (
