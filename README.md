@@ -4,12 +4,7 @@ A plugin for [Nautobot](https://github.com/nautobot/nautobot) to manage device l
 
 ## Installation
 
-### Pre-Publicly Available Installation
-
-For notes how to [install the plugin from a Git Repository](docs/images/install_from_repo.md).
-
-After completing the install of the plugin from Git repository continue to the next [install step](#installation-continued).
-### Public Installation
+### Installation
 
 The plugin is available as a Python package in pypi and can be installed with pip
 

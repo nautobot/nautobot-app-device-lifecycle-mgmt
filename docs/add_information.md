@@ -1,6 +1,6 @@
 # Adding Data to Device Life Cycle Plugin
 
-To add data into the Device Life Cycle Plugin, you need to either add it manually throught the UI, or through the REST API endpoint. In this current version there is no synchronization of data from a vendor API endpoint, but this may be a feature request in the future.
+To add data into the Device Life Cycle Plugin, you need to either add it manually throughout the UI, or through the REST API endpoint. In this current version there is no synchronization of data from a vendor API endpoint, but this may be a feature request in the future.
 
 ## Plugin API Definition
 
