@@ -20,18 +20,18 @@ services:
       - "0.0.0.0:8080:8080"
     depends_on:
       redis:
-        condition: service_started
+        condition: "service_started"
       db:
-        condition: service_healthy
+        condition: "service_healthy"
     <<: *nautobot-build
     <<: *nautobot-base
   worker:
     entrypoint: "nautobot-server rqworker"
     depends_on:
       nautobot:
-        condition: service_started
+        condition: "service_started"
       db:
-        condition: service_healthy
+        condition: "service_healthy"
     healthcheck:
       disable: true
     <<: *nautobot-base
