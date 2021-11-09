@@ -14,6 +14,7 @@ limitations under the License.
 
 from distutils.util import strtobool
 from invoke import Collection, task as invoke_task
+from dotenv import dotenv_values
 import os
 
 
@@ -32,6 +33,25 @@ def is_truthy(arg):
     return bool(strtobool(arg))
 
 
+def _compose_files():
+    """Helper function to dynamically determine if we need to use mysql or postgres as a DB backend.
+
+    Returns:
+        list: List of docker-compose files.
+    """
+    files = [
+        "docker-compose.redis.yml",
+        "docker-compose.base.yml",
+    ]
+    env_vars = dotenv_values(os.path.join(os.path.dirname(__file__), "development/dev.env"))
+    if env_vars.get("NAUTOBOT_DB_ENGINE", "") == "django.db.backends.mysql":
+        print("Using MySQL as a database backend!")
+        files.append("docker-compose.mysql.yml")
+    else:
+        files.append("docker-compose.postgres.yml")
+    return files
+
+
 # Use pyinvoke configuration for default values, see http://docs.pyinvoke.org/en/stable/concepts/configuration.html
 # Variables may be overwritten in invoke.yml or by the environment variables
 # INVOKE_nautobot_device_lifecycle_mgmt_xxx
@@ -44,7 +64,7 @@ namespace.configure(
             "python_ver": "3.7",
             "local": False,
             "compose_dir": os.path.join(os.path.dirname(__file__), "development"),
-            "compose_files": ["docker-compose.requirements.yml", "docker-compose.base.yml", "docker-compose.dev.yml"],
+            "compose_files": _compose_files(),
         }
     }
 )

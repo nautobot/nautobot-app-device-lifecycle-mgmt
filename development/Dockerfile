@@ -8,6 +8,8 @@ ARG NAUTOBOT_ROOT=/opt/nautobot
 
 ENV NAUTOBOT_ROOT ${NAUTOBOT_ROOT}
 
+RUN apt-get update && apt-get install -y gcc libmariadb-dev-compat libmariadb-dev
+
 WORKDIR $NAUTOBOT_ROOT
 
 # Configure poetry

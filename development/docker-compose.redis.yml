@@ -1,15 +1,6 @@
 ---
 version: "3.4"
 services:
-  postgres:
-    image: "postgres:13-alpine"
-    env_file:
-      - "dev.env"
-      - "creds.env"
-    volumes:
-      - "postgres_data:/var/lib/postgresql/data"
-    ports:
-      - "127.0.0.1:5432:5432"
   redis:
     image: "redis:6-alpine"
     command:
@@ -21,5 +12,3 @@ services:
       - "creds.env"
     ports:
       - "127.0.0.1:6379:6379"
-volumes:
-  postgres_data: {}
