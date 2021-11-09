@@ -1,11 +1,5 @@
-"""API serializers implementation for the Lifecycle Management plugin."""
-from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q
-
-from drf_yasg.utils import swagger_serializer_method
+"""API serializers implementation for the LifeCycle Management plugin."""
 from rest_framework import serializers
-
-from nautobot.core.api import ContentTypeField
 
 from nautobot.dcim.api.nested_serializers import (
     NestedDeviceSerializer,
@@ -14,7 +8,6 @@ from nautobot.dcim.api.nested_serializers import (
 )
 from nautobot.extras.api.customfields import CustomFieldModelSerializer
 from nautobot.extras.api.serializers import TaggedObjectSerializer
-from nautobot.utilities.api import get_serializer_for_model
 
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
@@ -168,20 +161,6 @@ class ValidatedSoftwareLCMSerializer(
     )
     software = NestedSoftwareLCMSerializer()
 
-    assigned_to_content_type = ContentTypeField(
-        queryset=ContentType.objects.filter(
-            Q(
-                app_label="dcim",
-                model__in=(
-                    "device",
-                    "devicetype",
-                    "inventoryitem",
-                ),
-            )
-        ),
-    )
-    assigned_to = serializers.SerializerMethodField(read_only=True)
-
     class Meta:
         """Meta attributes."""
 
@@ -190,9 +169,11 @@ class ValidatedSoftwareLCMSerializer(
             "id",
             "url",
             "software",
-            "assigned_to_content_type",
-            "assigned_to_object_id",
-            "assigned_to",
+            "devices",
+            "device_types",
+            "device_roles",
+            "inventory_items",
+            "object_tags",
             "start",
             "end",
             "preferred",
@@ -200,12 +181,3 @@ class ValidatedSoftwareLCMSerializer(
             "custom_fields",
             "tags",
         ]
-
-    @swagger_serializer_method(serializer_or_field=serializers.DictField)
-    def get_assigned_to(self, obj):
-        """Serializer method for 'assigned_to' GenericForeignKey field."""
-        if obj.assigned_to is None:
-            return None
-        serializer = get_serializer_for_model(obj.assigned_to, prefix="Nested")
-        context = {"request": self.context["request"]}
-        return serializer(obj.assigned_to, context=context).data

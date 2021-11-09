@@ -2,9 +2,9 @@
 import datetime
 import django_filters
 from django.db.models import Q
-from django.contrib.contenttypes.models import ContentType
 
-from nautobot.dcim.models import DeviceType, Platform, Device
+from nautobot.dcim.models import DeviceType, Platform, Device, DeviceRole, InventoryItem
+from nautobot.extras.models import Tag
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
@@ -13,6 +13,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ProviderLCM,
     ContactLCM,
 )
+from nautobot_device_lifecycle_mgmt.software import DeviceSoftware
 
 
 class HardwareLCMFilterSet(django_filters.FilterSet):
@@ -141,9 +142,66 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
         queryset=SoftwareLCM.objects.all(),
         label="Software",
     )
+    devices_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="devices",
+        queryset=Device.objects.all(),
+        label="Devices",
+    )
+    devices = django_filters.ModelMultipleChoiceFilter(
+        field_name="devices__name",
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        label="Devices (name)",
+    )
+    device_types_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_types",
+        queryset=DeviceType.objects.all(),
+        label="Device Types",
+    )
+    device_types = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_types__model",
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        label="Device Types (model)",
+    )
+    device_roles_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_roles",
+        queryset=DeviceRole.objects.all(),
+        label="Device Roles",
+    )
+    device_roles = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_roles__slug",
+        queryset=DeviceRole.objects.all(),
+        to_field_name="slug",
+        label="Device Roles (slug)",
+    )
+    inventory_items_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_items",
+        queryset=InventoryItem.objects.all(),
+        label="Inventory Items",
+    )
+    inventory_items = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_items__name",
+        queryset=InventoryItem.objects.all(),
+        to_field_name="name",
+        label="Inventory Items (name)",
+    )
+    object_tags_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="object_tags",
+        queryset=Tag.objects.all(),
+        label="Object Tags",
+    )
+    object_tags = django_filters.ModelMultipleChoiceFilter(
+        field_name="object_tags__slug",
+        queryset=Tag.objects.all(),
+        to_field_name="slug",
+        label="Object Tags (slug)",
+    )
     device_name = django_filters.CharFilter(method="device", label="Device Name")
     device_id = django_filters.CharFilter(method="device", label="Device ID")
-    # expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
+    start = django_filters.DateTimeFromToRangeFilter()
+    end = django_filters.DateTimeFromToRangeFilter()
+    valid = django_filters.BooleanFilter(method="valid_search", label="Currently valid")
 
     class Meta:
         """Meta attributes for filter."""
@@ -152,11 +210,17 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
 
         fields = [
             "software",
+            "devices",
+            "device_types",
+            "device_roles",
+            "inventory_items",
+            "object_tags",
             "device_name",
             "device_id",
             "start",
             "end",
             "preferred",
+            "valid",
         ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
@@ -167,8 +231,17 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
         qs_filter = Q(start__icontains=value) | Q(end__icontains=value)
         return queryset.filter(qs_filter)
 
+    def valid_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the valid_search search."""
+        today = datetime.date.today()
+        if value is True:
+            qs_filter = Q(start__lte=today, end=None) | Q(start__lte=today, end__gte=today)
+        else:
+            qs_filter = Q(start__gt=today) | Q(end__lt=today)
+        return queryset.filter(qs_filter)
+
     def device(self, queryset, name, value):  # pylint: disable=no-self-use
-        """Search validated software list for a given device."""
+        """Search for validated software for a given device."""
         value = value.strip()
         if not value:
             return queryset
@@ -184,14 +257,9 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
             return queryset.none()
 
         device = devices.first()
-        valid_soft_filter = Q(
-            assigned_to_content_type=ContentType.objects.get(app_label="dcim", model="device"),
-            assigned_to_object_id=device.pk,
-        ) | Q(
-            assigned_to_content_type=ContentType.objects.get(app_label="dcim", model="devicetype"),
-            assigned_to_object_id=device.device_type.pk,
-        )
-        return ValidatedSoftwareLCM.objects.filter(valid_soft_filter)
+        device_validated_soft = DeviceSoftware(device)
+
+        return device_validated_soft.get_validated_software_qs()
 
 
 class ContractLCMFilterSet(django_filters.FilterSet):

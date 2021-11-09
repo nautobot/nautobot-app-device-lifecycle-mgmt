@@ -69,6 +69,8 @@ class SoftwareLCMTable(BaseTable):
         orderable=False,
     )
     device_platform = tables.TemplateColumn("{{ record.device_platform }}")
+    long_term_support = BooleanColumn()
+    pre_release = BooleanColumn()
     actions = ButtonsColumn(SoftwareLCM, buttons=("edit", "delete"))
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
@@ -101,8 +103,8 @@ class ValidatedSoftwareLCMTable(BaseTable):
         ],
         orderable=False,
     )
+    valid = BooleanColumn(verbose_name="Valid Now", orderable=False)
     software = tables.LinkColumn(verbose_name="Software")
-    assigned_to = tables.LinkColumn(verbose_name="Assigned To", orderable=False)
     actions = ButtonsColumn(ValidatedSoftwareLCM, buttons=("edit", "delete"))
     preferred = BooleanColumn()
 
@@ -114,9 +116,9 @@ class ValidatedSoftwareLCMTable(BaseTable):
             "pk",
             "name",
             "software",
-            "assigned_to",
             "start",
             "end",
+            "valid",
             "preferred",
             "actions",
         )

@@ -1,11 +1,8 @@
 """Django models for the Lifecycle Management plugin."""
 
-from datetime import datetime
+from datetime import datetime, date
 
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import Q
 from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.conf import settings
@@ -187,7 +184,7 @@ class SoftwareLCM(PrimaryModel):
         """Meta attributes for SoftwareLCM."""
 
         verbose_name = "Software"
-        ordering = ("end_of_support", "release_date")
+        ordering = ("device_platform", "version", "end_of_support", "release_date")
         unique_together = (
             "device_platform",
             "version",
@@ -223,7 +220,6 @@ class SoftwareLCM(PrimaryModel):
     "custom_links",
     "custom_validators",
     "export_templates",
-    "graphql",
     "relationships",
     "statuses",
     "webhooks",
@@ -232,29 +228,22 @@ class ValidatedSoftwareLCM(PrimaryModel):
     """ValidatedSoftwareLCM model."""
 
     software = models.ForeignKey(to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Software Version")
-    assigned_to_content_type = models.ForeignKey(
-        to=ContentType,
-        limit_choices_to=Q(
-            app_label="dcim",
-            model__in=(
-                "device",
-                "devicetype",
-                "inventoryitem",
-            ),
-        ),
-        on_delete=models.PROTECT,
-        related_name="+",
-    )
-    assigned_to_object_id = models.UUIDField()
-    assigned_to = GenericForeignKey(ct_field="assigned_to_content_type", fk_field="assigned_to_object_id")
+    devices = models.ManyToManyField(to="dcim.Device", related_name="+", blank=True)
+    device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
+    device_roles = models.ManyToManyField(to="dcim.DeviceRole", related_name="+", blank=True)
+    inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="+", blank=True)
+    object_tags = models.ManyToManyField(to="extras.Tag", related_name="+", blank=True)
     start = models.DateField(verbose_name="Valid Since")
     end = models.DateField(verbose_name="Valid Until", blank=True, null=True)
     preferred = models.BooleanField(verbose_name="Preferred Version", default=False)
 
     csv_headers = [
         "software",
-        "assigned_to_content_type",
-        "assigned_to_object_id",
+        "devices",
+        "device_types",
+        "device_roles",
+        "inventory_items",
+        "object_tags",
         "start",
         "end",
         "preferred",
@@ -265,7 +254,6 @@ class ValidatedSoftwareLCM(PrimaryModel):
 
         verbose_name = "Validated Software"
         ordering = ("software", "preferred", "start")
-        unique_together = ("software", "assigned_to_content_type", "assigned_to_object_id")
 
     def __str__(self):
         """String representation of ValidatedSoftwareLCM."""
@@ -278,19 +266,41 @@ class ValidatedSoftwareLCM(PrimaryModel):
 
     @property
     def valid(self):
-        """Return True or False if software is currently valid."""
-        today = datetime.today().date()
+        """Return True if software is currently valid, else return False."""
+        today = date.today()
         if self.end:
             return self.end >= today > self.start
 
         return today > self.start
 
+    def save(self, *args, **kwargs):
+        """Override save to assert a full clean."""
+        # Full clean to assert custom validation in clean() for ORM, etc.
+        super().full_clean()
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        """Override clean to do custom validation."""
+        super().clean()
+
+        if (
+            ValidatedSoftwareLCM.objects.filter(software=self.software, start=self.start, end=self.end)
+            .exclude(pk=self.pk)
+            .exists()
+        ):
+            raise ValidationError(
+                "Validated Software object with this Software and Valid Since and Valid Until dates already exists."
+            )
+
     def to_csv(self):
         """Return fields for bulk view."""
         return (
             self.software.id,
-            self.assigned_to_content_type.model,
-            self.assigned_to_object_id,
+            f'"{",".join(str(device["name"]) for device in self.devices.values())}"',
+            f'"{",".join(str(device_type["model"]) for device_type in self.device_types.values())}"',
+            f'"{",".join(str(device_role["slug"]) for device_role in self.device_roles.values())}"',
+            f'"{",".join(str(inventory_item["id"]) for inventory_item in self.inventory_items.values())}"',
+            f'"{",".join(str(object_tag["slug"]) for object_tag in self.object_tags.values())}"',
             self.start,
             self.end,
             self.preferred,

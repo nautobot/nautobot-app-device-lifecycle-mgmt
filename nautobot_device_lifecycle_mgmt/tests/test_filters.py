@@ -1,5 +1,4 @@
 """Test filters for lifecycle management."""
-from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site, Platform
@@ -244,26 +243,24 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
 
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
         device_type = DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000")
-        content_type_devicetype = ContentType.objects.get(app_label="dcim", model="devicetype")
 
-        self.validated_softwares = (
-            ValidatedSoftwareLCM.objects.create(
-                software=self.softwares[0],
-                start="2019-01-10",
-                end="2023-05-14",
-                preferred=True,
-                assigned_to_content_type=content_type_devicetype,
-                assigned_to_object_id=device_type.id,
-            ),
-            ValidatedSoftwareLCM.objects.create(
-                software=self.softwares[1],
-                start="2020-04-15",
-                end="2022-11-01",
-                preferred=False,
-                assigned_to_content_type=content_type_devicetype,
-                assigned_to_object_id=device_type.id,
-            ),
+        validated_software = ValidatedSoftwareLCM(
+            software=self.softwares[0],
+            start="2019-01-10",
+            end="2023-05-14",
+            preferred=True,
         )
+        validated_software.device_types.set([device_type.pk])
+        validated_software.save()
+
+        validated_software = ValidatedSoftwareLCM(
+            software=self.softwares[1],
+            start="2020-04-15",
+            end="2022-11-01",
+            preferred=False,
+        )
+        validated_software.device_types.set([device_type.pk])
+        validated_software.save()
 
     def test_q_one_start(self):
         """Test q filter to find single record based on start date."""

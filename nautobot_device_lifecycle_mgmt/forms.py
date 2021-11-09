@@ -1,10 +1,8 @@
 """Forms implementation for the Lifecycle Management plugin."""
 import logging
 from django import forms
-from django.contrib.contenttypes.models import ContentType
 
-from nautobot.utilities.forms import BootstrapMixin, DatePicker, DynamicModelMultipleChoiceField
-from nautobot.dcim.models import Device, DeviceType, InventoryItem, Platform
+from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Platform
 from nautobot.extras.forms import (
     CustomFieldModelCSVForm,
     CustomFieldModelForm,
@@ -12,8 +10,11 @@ from nautobot.extras.forms import (
 )
 from nautobot.extras.models import Tag
 from nautobot.utilities.forms import (
+    BootstrapMixin,
     BulkEditForm,
+    DatePicker,
     DynamicModelChoiceField,
+    DynamicModelMultipleChoiceField,
     StaticSelect2,
     BOOLEAN_WITH_BLANK_CHOICES,
     add_blank_choice,
@@ -236,24 +237,12 @@ class SoftwareLCMCSVForm(CustomFieldModelCSVForm):
 class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
     """ValidatedSoftwareLCM creation/edit form."""
 
-    assigned_to_device = DynamicModelChoiceField(
-        queryset=Device.objects.all(),
-        required=False,
-        query_params={"id": "$assigned_to_device"},
-        label="Assigned To",
-    )
-    assigned_to_device_type = DynamicModelChoiceField(
-        queryset=DeviceType.objects.all(),
-        required=False,
-        query_params={"id": "$assigned_to_device_type"},
-        label="Assigned To",
-    )
-    assigned_to_inventory_item = DynamicModelChoiceField(
-        queryset=InventoryItem.objects.all(),
-        required=False,
-        query_params={"id": "$assigned_to_inventory_item"},
-        label="Assigned To",
-    )
+    software = DynamicModelChoiceField(queryset=SoftwareLCM.objects.all(), required=True)
+    devices = DynamicModelMultipleChoiceField(queryset=Device.objects.all(), required=False)
+    device_types = DynamicModelMultipleChoiceField(queryset=DeviceType.objects.all(), required=False)
+    device_roles = DynamicModelMultipleChoiceField(queryset=DeviceRole.objects.all(), required=False)
+    inventory_items = DynamicModelMultipleChoiceField(queryset=InventoryItem.objects.all(), required=False)
+    object_tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
@@ -263,9 +252,11 @@ class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, Relationshi
         model = ValidatedSoftwareLCM
         fields = (
             "software",
-            "assigned_to_device",
-            "assigned_to_device_type",
-            "assigned_to_inventory_item",
+            "devices",
+            "device_types",
+            "device_roles",
+            "inventory_items",
+            "object_tags",
             "start",
             "end",
             "preferred",
@@ -277,51 +268,19 @@ class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, Relationshi
             "end": DatePicker(),
         }
 
-    def __init__(self, *args, **kwargs):
-        """Set up initial data for this form."""
-        instance = kwargs.get("instance")
-        initial = kwargs.get("initial", {}).copy()
-
-        if instance:
-            if isinstance(instance.assigned_to, Device):
-                initial["assigned_to_device"] = instance.assigned_to
-            elif isinstance(instance.assigned_to, DeviceType):
-                initial["assigned_to_device_type"] = instance.assigned_to
-            elif isinstance(instance.assigned_to, InventoryItem):
-                initial["assigned_to_inventory_item"] = instance.assigned_to
-
-        kwargs["initial"] = initial
-
-        super().__init__(*args, **kwargs)
-
     def clean(self):
-        """Form validation logic."""
+        """Custom validation of the ValidatedSoftwareLCMForm."""
         super().clean()
 
-        if (
-            sum(
-                1
-                for data in (
-                    self.cleaned_data.get("assigned_to_device"),
-                    self.cleaned_data.get("assigned_to_device_type"),
-                    self.cleaned_data.get("assigned_to_inventory_item"),
-                )
-                if data
-            )
-            > 1
-        ):
-            raise forms.ValidationError(
-                "Cannot assign to more than one object. Choose either device, device type or inventory item."
-            )
+        devices = self.cleaned_data.get("devices")
+        device_types = self.cleaned_data.get("device_types")
+        device_roles = self.cleaned_data.get("device_roles")
+        inventory_items = self.cleaned_data.get("inventory_items")
+        object_tags = self.cleaned_data.get("object_tags")
 
-        if self.cleaned_data.get("assigned_to_device"):
-            self.instance.assigned_to = self.cleaned_data.get("assigned_to_device")
-        elif self.cleaned_data.get("assigned_to_device_type"):
-            self.instance.assigned_to = self.cleaned_data.get("assigned_to_device_type")
-        elif self.cleaned_data.get("assigned_to_inventory_item"):
-            self.instance.assigned_to = self.cleaned_data.get("assigned_to_inventory_item")
-        else:
-            raise forms.ValidationError("A device, device type or inventory item must be selected.")
+        if sum(obj.count() for obj in (devices, device_types, device_roles, inventory_items, object_tags)) == 0:
+            msg = "You need to assign to at least one object."
+            self.add_error(None, msg)
 
 
 class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
@@ -332,10 +291,38 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
         label="Search",
         help_text="Search for start or end date of validity.",
     )
-    software = forms.ModelChoiceField(required=False, queryset=SoftwareLCM.objects.all())
-    start = forms.DateField(required=False, widget=DatePicker())
-    end = forms.DateField(required=False, widget=DatePicker())
+    software = DynamicModelChoiceField(required=False, queryset=SoftwareLCM.objects.all())
+    devices = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
+    device_types = DynamicModelMultipleChoiceField(
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        required=False,
+    )
+    device_roles = DynamicModelMultipleChoiceField(
+        queryset=DeviceRole.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    inventory_items = DynamicModelMultipleChoiceField(
+        queryset=InventoryItem.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
+    object_tags = DynamicModelMultipleChoiceField(
+        queryset=Tag.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    start_before = forms.DateField(label="Valid Since Date Before", required=False, widget=DatePicker())
+    start_after = forms.DateField(label="Valid Since Date After", required=False, widget=DatePicker())
     preferred = forms.BooleanField(required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES))
+    valid = forms.BooleanField(
+        label="Valid Now", required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES)
+    )
 
     class Meta:
         """Meta attributes."""
@@ -344,20 +331,59 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
         fields = [
             "q",
             "software",
-            "start",
-            "end",
+            "devices",
+            "device_types",
+            "device_roles",
+            "inventory_items",
+            "object_tags",
             "preferred",
+            "valid",
+            "start_before",
+            "start_after",
         ]
+
+
+class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):
+    """Reference a list of PKs."""
+
+    def prepare_value(self, value):
+        """Parse a comma-separated string of PKs into a list of PKs."""
+        pk_list = []
+        if isinstance(value, str):
+            pk_list = [val.strip() for val in value.split(",") if val]
+
+        return super().prepare_value(pk_list)
 
 
 class ValidatedSoftwareLCMCSVForm(CustomFieldModelCSVForm):
     """Form for bulk creating ValidatedSoftwareLCM objects."""
 
-    assigned_to_content_type = CSVModelChoiceField(
-        queryset=ContentType.objects.all(),
-        required=True,
+    devices = CSVMultipleModelChoiceField(
+        queryset=Device.objects.all(),
+        required=False,
+        to_field_name="name",
+        help_text="Comma-separated list of Device Names",
+    )
+    device_types = CSVMultipleModelChoiceField(
+        queryset=DeviceType.objects.all(),
+        required=False,
         to_field_name="model",
-        help_text="Assigned to object type",
+        help_text="Comma-separated list of DeviceType Models",
+    )
+    device_roles = CSVMultipleModelChoiceField(
+        queryset=DeviceRole.objects.all(),
+        required=False,
+        to_field_name="slug",
+        help_text="Comma-separated list of DeviceRole Slugs",
+    )
+    inventory_items = CSVMultipleModelChoiceField(
+        queryset=InventoryItem.objects.all(),
+        required=False,
+        to_field_name="name",
+        help_text="Comma-separated list of InventoryItem Names",
+    )
+    object_tags = CSVMultipleModelChoiceField(
+        queryset=Tag.objects.all(), required=False, to_field_name="slug", help_text="Comma-separated list of Tag Slugs"
     )
 
     class Meta:
