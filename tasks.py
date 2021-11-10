@@ -42,6 +42,7 @@ def _compose_files():
     files = [
         "docker-compose.redis.yml",
         "docker-compose.base.yml",
+        "docker-compose.dev.yml",
     ]
     env_vars = dotenv_values(os.path.join(os.path.dirname(__file__), "development/dev.env"))
     if env_vars.get("NAUTOBOT_DB_ENGINE", "") == "django.db.backends.mysql":
