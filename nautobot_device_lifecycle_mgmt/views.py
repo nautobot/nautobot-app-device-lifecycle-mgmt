@@ -1,11 +1,24 @@
 """Views implementation for the Lifecycle Management plugin."""
+import base64
+import io
+import logging
+import urllib
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from django.db.models import Q, F, Count, ExpressionWrapper, FloatField
+
 from nautobot.core.views import generic
 from nautobot.dcim.models import Device
+from nautobot.utilities.views import ContentTypePermissionRequiredMixin
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
     ContactLCM,
     ValidatedSoftwareLCM,
+    DeviceSoftwareValidationResult,
+    InventoryItemSoftwareValidationResult,
     ContractLCM,
     ProviderLCM,
 )
@@ -13,6 +26,7 @@ from nautobot_device_lifecycle_mgmt.tables import (
     HardwareLCMTable,
     SoftwareLCMTable,
     ValidatedSoftwareLCMTable,
+    SoftwareReportOverviewTable,
     ContractLCMTable,
     ProviderLCMTable,
     ContactLCMTable,
@@ -28,6 +42,7 @@ from nautobot_device_lifecycle_mgmt.forms import (
     ValidatedSoftwareLCMForm,
     ValidatedSoftwareLCMFilterForm,
     ValidatedSoftwareLCMCSVForm,
+    SoftwareReportOverviewFilterForm,
     ContractLCMForm,
     ContractLCMBulkEditForm,
     ContractLCMFilterForm,
@@ -48,13 +63,15 @@ from nautobot_device_lifecycle_mgmt.filters import (
     ContactLCMFilterSet,
     SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
+    SoftwareReportOverviewFilterSet,
 )
 
-from nautobot_device_lifecycle_mgmt.const import URL
+from nautobot_device_lifecycle_mgmt.const import URL, PLUGIN_CFG
 
 # ---------------------------------------------------------------------------------
 #  Hardware Lifecycle Management Views
 # ---------------------------------------------------------------------------------
+GREEN, RED, GREY = ("#D5E8D4", "#F8CECC", "#808080")
 
 
 class HardwareLCMListView(generic.ObjectListView):
@@ -245,6 +262,200 @@ class ValidatedSoftwareLCMBulkImportView(generic.BulkImportView):
     model_form = ValidatedSoftwareLCMCSVForm
     table = ValidatedSoftwareLCMTable
     default_return_url = "plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_list"
+
+
+class ValidatedSoftwareReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
+    """Customized overview view reports aggregation and filterset."""
+
+    def get_required_permission(self):
+        """Manually set permission when not tied to a model for global report."""
+        return "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm"
+
+    @staticmethod
+    def plot_piechart_visual(aggr):
+        """Plot aggregation visual."""
+        if aggr["valid"] is None:
+            return None
+        sizes = [aggr["valid"], aggr["invalid"], aggr["sw_missing"]]
+        explode = (0.1, 0.1, 0.1)  # "explode" slices
+        fig1, ax1 = plt.subplots()
+        logging.debug(fig1)
+        labels = "Valid", "Invalid", "No Software"
+        ax1.pie(
+            sizes,
+            explode=explode,
+            labels=labels,
+            autopct="%1.1f%%",
+            colors=[GREEN, RED, GREY],
+            shadow=True,
+            startangle=90,
+        )
+        ax1.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
+        plt.title(aggr["name"], y=-0.1)
+        fig = plt.gcf()
+        # convert graph into string buffer and then we convert 64 bit code into image
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png")
+        buf.seek(0)
+        string = base64.b64encode(buf.read())
+        return urllib.parse.quote(string)
+
+    @staticmethod
+    def plot_barchart_visual(qs):  # pylint: disable=too-many-locals
+        """Construct report visual from queryset."""
+        labels = [item["device__platform__name"] for item in qs]
+        valid = [item["valid"] for item in qs]
+        invalid = [item["invalid"] for item in qs]
+        sw_missing = [item["sw_missing"] for item in qs]
+
+        label_locations = np.arange(len(labels))  # the label locations
+
+        per_platform_bar_width = PLUGIN_CFG["per_platform_bar_width"]
+        per_platform_width = PLUGIN_CFG["per_platform_width"]
+        per_platform_height = PLUGIN_CFG["per_platform_height"]
+
+        width = per_platform_bar_width  # the width of the bars
+
+        fig, axis = plt.subplots(figsize=(per_platform_width, per_platform_height))
+        rects1 = axis.bar(label_locations - width, valid, width, label="Valid", color=GREEN)
+        rects2 = axis.bar(label_locations, invalid, width, label="Invalid", color=RED)
+        rects3 = axis.bar(label_locations + width, sw_missing, width, label="No Software", color=GREY)
+
+        # Add some text for labels, title and custom x-axis tick labels, etc.
+        axis.set_ylabel("Devices")
+        axis.set_title("Valid per Platform")
+        axis.set_xticks(label_locations)
+        axis.set_xticklabels(labels, rotation=0)
+        axis.margins(0.2, 0.2)
+        axis.legend()
+
+        def autolabel(rects):
+            """Attach a text label above each bar in *rects*, displaying its height."""
+            for rect in rects:
+                height = rect.get_height()
+                axis.annotate(
+                    f"{height}",
+                    xy=(rect.get_x() + rect.get_width() / 2, 0.5),
+                    xytext=(0, 3),  # 3 points vertical offset
+                    textcoords="offset points",
+                    ha="center",
+                    va="bottom",
+                    rotation=90,
+                )
+
+        autolabel(rects1)
+        autolabel(rects2)
+        autolabel(rects3)
+
+        # convert graph into dtring buffer and then we convert 64 bit code into image
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png")
+        buf.seek(0)
+        string = base64.b64encode(buf.read())
+        bar_chart = urllib.parse.quote(string)
+        return bar_chart
+
+    @staticmethod
+    def calculate_aggr_percentage(aggr):
+        """Calculate percentage of validated given aggregation fields.
+
+        Returns:
+            aggr: same aggr dict given as parameter with one new key
+                - valid_percent
+        """
+        try:
+            aggr["valid_percent"] = round(aggr["valid"] / aggr["total"] * 100, 2)
+        except ZeroDivisionError:
+            aggr["valid_percent"] = 0
+        return aggr
+
+
+class SoftwareReportOverview(generic.ObjectListView):
+    """View for executive report on software Validation."""
+
+    filterset = SoftwareReportOverviewFilterSet
+    filterset_form = SoftwareReportOverviewFilterForm
+    table = SoftwareReportOverviewTable
+    template_name = "nautobot_device_lifecycle_mgmt/software_overview_report.html"
+    queryset = (
+        DeviceSoftwareValidationResult.objects.values("device__device_type__model")
+        .distinct()
+        .annotate(
+            total=Count("device__device_type__model"),
+            valid=Count("device__device_type__model", filter=Q(is_validated=True)),
+            invalid=Count("device__device_type__model", filter=Q(is_validated=False, sw_missing=False)),
+            sw_missing=Count("device__device_type__model", filter=Q(sw_missing=True)),
+            valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
+        )
+        .order_by("-valid_percent")
+    )
+
+    # extra content dict to be returned by self.extra_context() method
+    extra_content = {}
+
+    def setup(self, request, *args, **kwargs):
+        """Using request object to perform filtering based on query params."""
+        super().setup(request, *args, **kwargs)
+        device_aggr, inventory_aggr = self.get_global_aggr(request)
+        _platform_qs = (
+            DeviceSoftwareValidationResult.objects.values("device__platform__name")
+            .distinct()
+            .annotate(
+                total=Count("device__platform__name"),
+                valid=Count("device__platform__name", filter=Q(is_validated=True)),
+                invalid=Count("device__platform__name", filter=Q(is_validated=False, sw_missing=False)),
+                sw_missing=Count("device__platform__name", filter=Q(sw_missing=True)),
+            )
+            .order_by("-total")
+        )
+        platform_qs = self.filterset(request.GET, _platform_qs).qs
+        self.extra_content = {
+            "bar_chart": ValidatedSoftwareReportOverviewHelper.plot_barchart_visual(platform_qs),
+            "device_aggr": device_aggr,
+            "device_visual": ValidatedSoftwareReportOverviewHelper.plot_piechart_visual(device_aggr),
+            "inventory_aggr": inventory_aggr,
+            "inventory_visual": ValidatedSoftwareReportOverviewHelper.plot_piechart_visual(inventory_aggr),
+        }
+
+    def get_global_aggr(self, request):
+        """Get device and inventory global reports.
+
+        Returns:
+            device_aggr: device global report dict
+            invetory_aggr: inventory item global report dict
+        """
+        device_qs = DeviceSoftwareValidationResult.objects
+        inventory_item_qs = InventoryItemSoftwareValidationResult.objects
+
+        device_aggr, inventory_aggr = {}, {}
+        if self.filterset is not None:
+            device_aggr = self.filterset(request.GET, device_qs).qs.aggregate(
+                total=Count("device"),
+                valid=Count("device", filter=Q(is_validated=True)),
+                invalid=Count("device", filter=Q(is_validated=False, sw_missing=False)),
+                sw_missing=Count("device", filter=Q(sw_missing=True)),
+            )
+
+            inventory_aggr = inventory_item_qs.aggregate(
+                total=Count("inventory_item"),
+                valid=Count("inventory_item", filter=Q(is_validated=True)),
+                invalid=Count("inventory_item", filter=Q(is_validated=False, sw_missing=False)),
+                sw_missing=Count("inventory_item", filter=Q(sw_missing=True)),
+            )
+
+            device_aggr["name"] = "Devices"
+            inventory_aggr["name"] = "Inventory Items"
+
+        return (
+            ValidatedSoftwareReportOverviewHelper.calculate_aggr_percentage(device_aggr),
+            ValidatedSoftwareReportOverviewHelper.calculate_aggr_percentage(inventory_aggr),
+        )
+
+    def extra_context(self):
+        """Extra content method on."""
+        # add global aggregations to extra context.
+
+        return self.extra_content
 
 
 # ---------------------------------------------------------------------------------

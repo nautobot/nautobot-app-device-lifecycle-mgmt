@@ -97,6 +97,13 @@ try:
                                 "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
                             ],
                         ),
+                        NavMenuItem(
+                            link="plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list",
+                            name="Software Validation Report",
+                            permissions=[
+                                "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
+                            ],
+                        ),
                     ),
                 ),
                 NavMenuGroup(
@@ -312,5 +319,9 @@ except ModuleNotFoundError:
                     permissions=["nautobot_device_lifecycle_mgmt.add_validatedsoftwarelcm"],
                 ),
             ),
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list",
+            link_text="Software Validation Report",
         ),
     )

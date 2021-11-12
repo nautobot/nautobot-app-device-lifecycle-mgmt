@@ -333,6 +333,44 @@ class ValidatedSoftwareLCM(PrimaryModel):
     objects = ValidatedSoftwareLCMQuerySet.as_manager()
 
 
+class DeviceSoftwareValidationResult(PrimaryModel):
+    """Configuration compliance details."""
+
+    device = models.ForeignKey(to="dcim.Device", on_delete=models.CASCADE, help_text="The device", blank=False)
+    software = models.ForeignKey(
+        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Device software", null=True, blank=True
+    )
+    is_validated = models.BooleanField(null=True, blank=True)
+    sw_missing = models.BooleanField(null=True, blank=True)
+    last_run = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        """Meta attributes for DeviceSoftwareValidationResult."""
+
+        verbose_name = "Device Software Validation Report"
+        ordering = ("device",)
+
+
+class InventoryItemSoftwareValidationResult(PrimaryModel):
+    """Configuration compliance details."""
+
+    inventory_item = models.ForeignKey(
+        to="dcim.InventoryItem", on_delete=models.CASCADE, help_text="The inventory", blank=False
+    )
+    software = models.ForeignKey(
+        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Inventory software", blank=True, null=True
+    )
+    is_validated = models.BooleanField(null=True, blank=True)
+    sw_missing = models.BooleanField(null=True, blank=True)
+    last_run = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        """Meta attributes for InventoryItemSoftwareValidationResult."""
+
+        verbose_name = "Inventory Item Software Validation Report"
+        ordering = ("inventory_item",)
+
+
 @extras_features(
     "custom_fields",
     "custom_links",

@@ -7,10 +7,19 @@ from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
     ValidatedSoftwareLCM,
+    DeviceSoftwareValidationResult,
     ContractLCM,
     ProviderLCM,
     ContactLCM,
 )
+
+
+class PercentageColumn(tables.Column):
+    """Column used to display percentage."""
+
+    def render(self, value):
+        """Render percentage value."""
+        return f"{value} %"
 
 
 class HardwareLCMTable(BaseTable):
@@ -122,6 +131,31 @@ class ValidatedSoftwareLCMTable(BaseTable):
             "preferred",
             "actions",
         )
+
+
+class SoftwareReportOverviewTable(BaseTable):
+    """Table for feature software compliance report."""
+
+    name = tables.Column(accessor="device__device_type__model", verbose_name="Device-Type")
+    total = tables.Column(accessor="total", verbose_name="Total")
+    valid = tables.Column(accessor="valid", verbose_name="Valid")
+    invalid = tables.Column(accessor="invalid", verbose_name="Invalid")
+    sw_missing = tables.Column(accessor="sw_missing", verbose_name="No Software")
+    valid_percent = PercentageColumn(accessor="valid_percent", verbose_name="Validation (%)")
+
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+        """Metaclass attributes of SoftwareReportOverviewTable."""
+
+        model = DeviceSoftwareValidationResult
+        fields = ["name", "total", "valid", "invalid", "sw_missing", "valid_percent"]
+        default_columns = [
+            "name",
+            "total",
+            "valid",
+            "invalid",
+            "sw_missing",
+            "valid_percent",
+        ]
 
 
 class ContractLCMTable(BaseTable):

@@ -251,7 +251,11 @@ PLUGINS = [
 # Plugins configuration settings. These settings are used by various plugins that the user may have installed.
 # Each key in the dictionary is the name of an installed plugin and its value is a dictionary of settings.
 PLUGINS_CONFIG = {
-    "nautobot_device_lifecycle_mgmt": {},
+    "nautobot_device_lifecycle_mgmt": {
+        "per_platform_bar_width": float(os.environ.get("PER_PLATFORM_BAR_WIDTH", 0.1)),
+        "per_platform_width": int(os.environ.get("PER_PLATFORM_WIDTH", 12)),
+        "per_platform_height": int(os.environ.get("PER_PLATFORM_HEIGHT", 5)),
+    },
 }
 
 # When determining the primary IP address for a device, IPv6 is preferred over IPv4 by default. Set this to True to

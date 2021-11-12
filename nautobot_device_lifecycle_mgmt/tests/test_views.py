@@ -1,11 +1,16 @@
 """Unit tests for views."""
 import datetime
+
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
+from django.urls import reverse
 
 from nautobot.utilities.testing import ViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer
+from nautobot.users.models import ObjectPermission
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM, DeviceSoftwareValidationResult
+from .conftest import create_devices
 
 User = get_user_model()
 
@@ -57,3 +62,55 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: d
 
     # def test_bulk_import_objects_with_constrained_permission(self):
     #     pass
+
+
+class DeviceSoftwareValidationResultViewTest(
+    ViewTestCases.ListObjectsViewTestCase
+):  # pylint: disable=too-many-ancestors
+    """Test DeviceSoftwareValidationResult Views"""
+
+    model = DeviceSoftwareValidationResult
+
+    @classmethod
+    def setUpTestData(cls):
+        """Set up test objects."""
+        device_1, device_2, _ = create_devices()
+        DeviceSoftwareValidationResult.objects.create(
+            device=device_1,
+            software=None,
+            is_validated=False,
+            sw_missing=True,
+        )
+        DeviceSoftwareValidationResult.objects.create(
+            device=device_2,
+            software=None,
+            is_validated=False,
+            sw_missing=True,
+        )
+
+    def test_validation_report_view_without_permission(self):
+        """Test the SoftwareReportOverview."""
+
+        self.assertHttpStatus(
+            self.client.get(
+                reverse(
+                    "plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list",
+                )
+            ),
+            403,
+        )
+
+    def test_validation_report_view_with_permission(self):
+        """Test the SoftwareReportOverview."""
+        obj_perm = ObjectPermission(name="Test permission", actions=["view"])
+        obj_perm.save()
+        obj_perm.users.add(self.user)
+        obj_perm.object_types.add(ContentType.objects.get_for_model(self.model))
+        self.assertHttpStatus(
+            self.client.get(
+                reverse(
+                    "plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list",
+                )
+            ),
+            200,
+        )

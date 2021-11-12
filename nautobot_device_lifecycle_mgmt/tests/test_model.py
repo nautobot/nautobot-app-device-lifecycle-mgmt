@@ -9,7 +9,13 @@ import time_machine
 
 from nautobot.dcim.models import DeviceType, Manufacturer, Platform
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import (
+    HardwareLCM,
+    SoftwareLCM,
+    ValidatedSoftwareLCM,
+    DeviceSoftwareValidationResult,
+)
+from .conftest import create_devices
 
 
 class TestModelBasic(TestCase):
@@ -253,3 +259,31 @@ class ValidatedSoftwareLCMTestCase(TestCase):
         with time_machine.travel(date_after_valid_end):
             self.assertEqual(validatedsoftwarelcm_start_only.valid, True)
             self.assertEqual(validatedsoftwarelcm_start_end.valid, False)
+
+
+class DeviceSoftwareValidationResultTestCase(TestCase):
+    """Tests for the DeviceSoftwareValidationResult model."""
+
+    def setUp(self):
+        """Set up test objects."""
+        self.device = create_devices()[0]
+        self.platform = Platform.objects.all().first()
+        self.software = SoftwareLCM.objects.create(
+            device_platform=self.platform,
+            version="17.3.3 MD",
+            release_date="2019-01-10",
+        )
+
+    def test_create_devicesoftwarevalidationresult(self):
+        """Successfully create SoftwareLCM with required fields only."""
+        validation_result = DeviceSoftwareValidationResult.objects.create(
+            device=self.device,
+            software=self.software,
+            is_validated=True,
+            sw_missing=False,
+        )
+
+        self.assertEqual(validation_result.device, self.device)
+        self.assertEqual(validation_result.software, self.software)
+        self.assertEqual(validation_result.is_validated, True)
+        self.assertEqual(validation_result.sw_missing, False)

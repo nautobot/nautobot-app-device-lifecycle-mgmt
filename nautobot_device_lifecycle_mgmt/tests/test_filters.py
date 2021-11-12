@@ -6,12 +6,19 @@ import time_machine
 
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site, Platform
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import (
+    HardwareLCM,
+    SoftwareLCM,
+    ValidatedSoftwareLCM,
+    DeviceSoftwareValidationResult,
+)
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
     SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
+    SoftwareReportOverviewFilterSet,
 )
+from .conftest import create_devices
 
 
 class HardwareLCMTestCase(TestCase):
@@ -308,3 +315,86 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
             self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
             params = {"valid": False}
             self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+
+class SoftwareReportOverviewFilterSetTestCase(TestCase):
+    """Tests for the DeviceSoftwareValidationResult model."""
+
+    queryset = DeviceSoftwareValidationResult.objects.all()
+    filterset = SoftwareReportOverviewFilterSet
+
+    def setUp(self):
+        """Set up test objects."""
+        self.device_1, self.device_2, self.device_3 = create_devices()
+        self.platform = Platform.objects.all().first()
+        self.software = SoftwareLCM.objects.create(
+            device_platform=self.platform,
+            version="17.3.3 MD",
+            release_date="2019-01-10",
+        )
+
+        DeviceSoftwareValidationResult.objects.create(
+            device=self.device_1,
+            software=self.software,
+            is_validated=True,
+            sw_missing=False,
+        )
+        DeviceSoftwareValidationResult.objects.create(
+            device=self.device_2,
+            software=self.software,
+            is_validated=False,
+            sw_missing=False,
+        )
+        DeviceSoftwareValidationResult.objects.create(
+            device=self.device_3,
+            software=None,
+            is_validated=False,
+            sw_missing=True,
+        )
+
+    def test_devices_name_one(self):
+        """Test devices filter."""
+        params = {"devices": ["r1"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_devices_name_all(self):
+        """Test devices filter."""
+        params = {"devices": ["r1", "r2", "r3"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_device_type_slug(self):
+        """Test device_type filter."""
+        params = {"device_types": ["ASR-1000"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_device_roles_slug(self):
+        """Test device_roles filter."""
+        params = {"device_roles": ["core-switch"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_device_type_id(self):
+        """Test device_type_id filter."""
+        device_type = DeviceType.objects.get(model="ASR-1000")
+        params = {"device_types_id": [device_type.id]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_device_role_id(self):
+        """Test device_role_id filter."""
+        device_role = DeviceRole.objects.get(slug="core-switch")
+        params = {"device_roles_id": [device_role.id]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_device_id_all(self):
+        """Test device_id filter."""
+        params = {"device_id": [self.device_1.id, self.device_2.id, self.device_3.id]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_software(self):
+        """Test software version filter."""
+        params = {"software": ["17.3.3 MD"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_sw_missing(self):
+        """Test sw_missing filter."""
+        params = {"exclude_sw_missing": True}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
