@@ -3,7 +3,6 @@ from abc import ABCMeta
 
 from django.db.models import Q
 
-from nautobot.dcim.models import Device
 from nautobot.extras.plugins import PluginTemplateExtension
 from nautobot.dcim.models import InventoryItem
 from .models import HardwareLCM
@@ -73,17 +72,11 @@ class DeviceSoftwareLCMAndValidatedSoftwareLCM(
     """Class to add table for SoftwareLCM and ValidatedSoftwareLCM related to device."""
 
     model = "dcim.device"
-    soft_obj_model = Device
-    soft_relation_name = "device_soft"
-    valid_only = False
 
     def __init__(self, context):
         """Init setting up the DeviceSoftwareLCMAndValidatedSoftwareLCM object."""
         super().__init__(context)
-        self.item_obj = self.context["object"]
-        self.device_software = DeviceSoftware(
-            self.item_obj, self.soft_obj_model, self.soft_relation_name, self.valid_only
-        )
+        self.device_software = DeviceSoftware(item_obj=self.context["object"])
 
     def right_page(self):
         """Display table on right side of page."""
@@ -105,17 +98,11 @@ class InventoryItemSoftwareLCMAndValidatedSoftwareLCM(
     """Class to add table for SoftwareLCM and ValidatedSoftwareLCM related to inventory item."""
 
     model = "dcim.inventoryitem"
-    soft_obj_model = InventoryItem
-    soft_relation_name = "inventory_item_soft"
-    valid_only = False
 
     def __init__(self, context):
         """Init setting up the InventoryItemSoftwareLCMAndValidatedSoftwareLCM object."""
         super().__init__(context)
-        self.item_obj = self.context["object"]
-        self.inventory_item_software = InventoryItemSoftware(
-            self.item_obj, self.soft_obj_model, self.soft_relation_name, self.valid_only
-        )
+        self.inventory_item_software = InventoryItemSoftware(item_obj=self.context["object"])
 
     def right_page(self):
         """Display table on right side of page."""

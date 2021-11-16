@@ -24,8 +24,8 @@ class SoftwareComplianceCheck(Job):
     def test_device_software_validity(self) -> None:
         """Check if software assigned to each device is valid. If no software is assigned return warning message."""
         for device in Device.objects.all():
-            device_software = DeviceSoftware(device, Device, "device_soft", valid_only=True)
-            software_version = device_software.get_software()
+            device_software = DeviceSoftware(device)
+            software_version = device_software.software
 
             if device_software.validate_software():
                 self.log_success(
@@ -43,10 +43,8 @@ class SoftwareComplianceCheck(Job):
     def test_inventory_item_software_validity(self):
         """Check if software assigned to each inventory item is valid. If no software is assigned return warning message."""
         for inventoryitem in InventoryItem.objects.all():
-            inventoryitem_software = InventoryItemSoftware(
-                inventoryitem, InventoryItem, "inventory_item_soft", valid_only=True
-            )
-            software_version = inventoryitem_software.get_software()
+            inventoryitem_software = InventoryItemSoftware(inventoryitem)
+            software_version = inventoryitem_software.software
 
             if inventoryitem_software.validate_software():
                 self.log_success(

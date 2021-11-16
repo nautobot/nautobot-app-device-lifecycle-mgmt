@@ -13,7 +13,6 @@ from nautobot_device_lifecycle_mgmt.models import (
     ProviderLCM,
     ContactLCM,
 )
-from nautobot_device_lifecycle_mgmt.software import DeviceSoftware
 
 
 class HardwareLCMFilterSet(django_filters.FilterSet):
@@ -199,6 +198,7 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
     )
     device_name = django_filters.CharFilter(method="device", label="Device Name")
     device_id = django_filters.CharFilter(method="device", label="Device ID")
+    inventory_item_id = django_filters.CharFilter(method="inventory_item", label="InventoryItem ID")
     start = django_filters.DateTimeFromToRangeFilter()
     end = django_filters.DateTimeFromToRangeFilter()
     valid = django_filters.BooleanFilter(method="valid_search", label="Currently valid")
@@ -217,6 +217,7 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
             "object_tags",
             "device_name",
             "device_id",
+            "inventory_item_id",
             "start",
             "end",
             "preferred",
@@ -257,9 +258,24 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
             return queryset.none()
 
         device = devices.first()
-        device_validated_soft = DeviceSoftware(device)
 
-        return device_validated_soft.get_validated_software_qs()
+        return ValidatedSoftwareLCM.objects.get_for_object(device)
+
+    def inventory_item(self, queryset, name, value):  # pylint: disable=no-self-use
+        """Search for validated software for a given inventory item."""
+        value = value.strip()
+        if not value:
+            return queryset
+
+        print(value)
+        inventory_items = InventoryItem.objects.filter(id=value)
+
+        if inventory_items.count() != 1:
+            return queryset.none()
+
+        inventory_item = inventory_items.first()
+
+        return ValidatedSoftwareLCM.objects.get_for_object(inventory_item)
 
 
 class ContractLCMFilterSet(django_filters.FilterSet):

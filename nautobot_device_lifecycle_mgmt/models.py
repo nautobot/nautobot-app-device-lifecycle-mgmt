@@ -8,7 +8,14 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from nautobot.extras.utils import extras_features
 from nautobot.core.models.generics import PrimaryModel, OrganizationalModel
+from nautobot.dcim.models import Device, InventoryItem
+from nautobot.utilities.querysets import RestrictedQuerySet
+
 from nautobot_device_lifecycle_mgmt import choices
+from nautobot_device_lifecycle_mgmt.software_filters import (
+    DeviceValidatedSoftwareFilter,
+    InventoryItemValidatedSoftwareFilter,
+)
 
 
 @extras_features(
@@ -215,6 +222,23 @@ class SoftwareLCM(PrimaryModel):
         )
 
 
+class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):
+    """Queryset for `ValidatedSoftwareLCM` objects."""
+
+    def get_for_object(self, obj):
+        """Return all `ValidatedSoftwareLCM` assigned to the given object."""
+        if not isinstance(obj, models.Model):
+            raise TypeError(f"{obj} is not an instance of Django Model class")
+        if isinstance(obj, Device):
+            qs = DeviceValidatedSoftwareFilter(qs=self, item_obj=obj).filter_qs()
+        elif isinstance(obj, InventoryItem):
+            qs = InventoryItemValidatedSoftwareFilter(qs=self, item_obj=obj).filter_qs()
+        else:
+            qs = self
+
+        return qs
+
+
 @extras_features(
     "custom_fields",
     "custom_links",
@@ -305,6 +329,8 @@ class ValidatedSoftwareLCM(PrimaryModel):
             self.end,
             self.preferred,
         )
+
+    objects = ValidatedSoftwareLCMQuerySet.as_manager()
 
 
 @extras_features(
