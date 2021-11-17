@@ -261,7 +261,7 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
 
         return ValidatedSoftwareLCM.objects.get_for_object(device)
 
-    def inventory_item(self, queryset, name, value):  # pylint: disable=no-self-use
+    def inventory_item(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Search for validated software for a given inventory item."""
         value = value.strip()
         if not value:

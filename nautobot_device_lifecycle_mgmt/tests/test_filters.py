@@ -1,5 +1,8 @@
 """Test filters for lifecycle management."""
+from datetime import date
+
 from django.test import TestCase
+import time_machine
 
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site, Platform
 
@@ -281,3 +284,27 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
         """Test preferred filter."""
         params = {"preferred": True}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_valid(self):
+        """Test valid filter."""
+        date_valid_and_invalid = date(2019, 6, 11)
+        date_two_valid = date(2021, 1, 4)
+        date_two_invalid = date(2024, 1, 4)
+
+        with time_machine.travel(date_valid_and_invalid):
+            params = {"valid": True}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+            params = {"valid": False}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+        with time_machine.travel(date_two_valid):
+            params = {"valid": True}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+            params = {"valid": False}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+
+        with time_machine.travel(date_two_invalid):
+            params = {"valid": True}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+            params = {"valid": False}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
