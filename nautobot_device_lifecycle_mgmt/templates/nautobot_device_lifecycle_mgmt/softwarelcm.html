@@ -53,7 +53,7 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-12">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <strong>Software</strong>
@@ -105,7 +105,7 @@
                     <td>Image File Name</td>
                     <td>
                     {% if object.image_file_name %}
-                        <a href="{{ object.image_file_name }}">{{ object.image_file_name }}</a>
+                        {{ object.image_file_name }}
                     {% else %}
                        <span class="text-muted"></span>&mdash;</span>
                     {% endif %}
@@ -115,7 +115,7 @@
                     <td>Image File Checksum</td>
                     <td>
                     {% if object.image_file_checksum %}
-                        <a href="{{ object.image_file_checksum }}">{{ object.image_file_checksum }}</a>
+                        {{ object.image_file_checksum }}
                     {% else %}
                        <span class="text-muted"></span>&mdash;</span>
                     {% endif %}

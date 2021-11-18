@@ -190,52 +190,53 @@ class ValidatedSoftwareLCMTestCase(TestCase):
     def test_create_validatedsoftwarelcm_required_only(self):
         """Successfully create ValidatedSoftwareLCM with required fields only."""
 
-        validatedsoftwarelcm = ValidatedSoftwareLCM.objects.create(
+        validatedsoftwarelcm = ValidatedSoftwareLCM(
             software=self.software,
             start=date(2019, 1, 10),
-            assigned_to_content_type=self.content_type_devicetype,
-            assigned_to_object_id=self.device_type_1.id,
         )
+        validatedsoftwarelcm.device_types.set([self.device_type_1])
+        validatedsoftwarelcm.save()
 
         self.assertEqual(validatedsoftwarelcm.software, self.software)
         self.assertEqual(str(validatedsoftwarelcm.start), "2019-01-10")
-        self.assertEqual(validatedsoftwarelcm.assigned_to, self.device_type_1)
+        self.assertEqual(list(validatedsoftwarelcm.device_types.all()), [self.device_type_1])
 
     def test_create_validatedsoftwarelcm_all(self):
         """Successfully create ValidatedSoftwareLCM with all fields."""
-        validatedsoftwarelcm = ValidatedSoftwareLCM.objects.create(
+        validatedsoftwarelcm = ValidatedSoftwareLCM(
             software=self.software,
             start=date(2020, 4, 15),
             end=date(2022, 11, 1),
             preferred=False,
-            assigned_to_content_type=self.content_type_devicetype,
-            assigned_to_object_id=self.device_type_1.id,
         )
+        validatedsoftwarelcm.device_types.set([self.device_type_1])
+        validatedsoftwarelcm.save()
 
         self.assertEqual(validatedsoftwarelcm.software, self.software)
         self.assertEqual(str(validatedsoftwarelcm.start), "2020-04-15")
         self.assertEqual(str(validatedsoftwarelcm.end), "2022-11-01")
-        self.assertEqual(validatedsoftwarelcm.assigned_to, self.device_type_1)
+        self.assertEqual(list(validatedsoftwarelcm.device_types.all()), [self.device_type_1])
         self.assertEqual(validatedsoftwarelcm.preferred, False)
         self.assertEqual(str(validatedsoftwarelcm), f"{self.software} - Valid since: {validatedsoftwarelcm.start}")
 
     def test_validatedsoftwarelcm_valid_property(self):
         """Test behavior of the 'valid' property."""
-        validatedsoftwarelcm_start_only = ValidatedSoftwareLCM.objects.create(
+        validatedsoftwarelcm_start_only = ValidatedSoftwareLCM(
             software=self.software,
             start=date(2020, 4, 15),
             preferred=False,
-            assigned_to_content_type=self.content_type_devicetype,
-            assigned_to_object_id=self.device_type_1.id,
         )
-        validatedsoftwarelcm_start_end = ValidatedSoftwareLCM.objects.create(
+        validatedsoftwarelcm_start_only.device_types.set([self.device_type_1])
+        validatedsoftwarelcm_start_only.save()
+
+        validatedsoftwarelcm_start_end = ValidatedSoftwareLCM(
             software=self.software,
             start=date(2020, 4, 15),
             end=date(2022, 11, 1),
             preferred=False,
-            assigned_to_content_type=self.content_type_devicetype,
-            assigned_to_object_id=self.device_type_2.id,
         )
+        validatedsoftwarelcm_start_end.device_types.set([self.device_type_2])
+        validatedsoftwarelcm_start_end.save()
 
         date_valid = date(2021, 6, 11)
         date_before_valid_start = date(2018, 9, 26)

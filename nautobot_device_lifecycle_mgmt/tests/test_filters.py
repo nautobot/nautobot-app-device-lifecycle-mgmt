@@ -1,6 +1,8 @@
 """Test filters for lifecycle management."""
-from django.contrib.contenttypes.models import ContentType
+from datetime import date
+
 from django.test import TestCase
+import time_machine
 
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site, Platform
 
@@ -244,26 +246,24 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
 
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
         device_type = DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000")
-        content_type_devicetype = ContentType.objects.get(app_label="dcim", model="devicetype")
 
-        self.validated_softwares = (
-            ValidatedSoftwareLCM.objects.create(
-                software=self.softwares[0],
-                start="2019-01-10",
-                end="2023-05-14",
-                preferred=True,
-                assigned_to_content_type=content_type_devicetype,
-                assigned_to_object_id=device_type.id,
-            ),
-            ValidatedSoftwareLCM.objects.create(
-                software=self.softwares[1],
-                start="2020-04-15",
-                end="2022-11-01",
-                preferred=False,
-                assigned_to_content_type=content_type_devicetype,
-                assigned_to_object_id=device_type.id,
-            ),
+        validated_software = ValidatedSoftwareLCM(
+            software=self.softwares[0],
+            start="2019-01-10",
+            end="2023-05-14",
+            preferred=True,
         )
+        validated_software.device_types.set([device_type.pk])
+        validated_software.save()
+
+        validated_software = ValidatedSoftwareLCM(
+            software=self.softwares[1],
+            start="2020-04-15",
+            end="2022-11-01",
+            preferred=False,
+        )
+        validated_software.device_types.set([device_type.pk])
+        validated_software.save()
 
     def test_q_one_start(self):
         """Test q filter to find single record based on start date."""
@@ -284,3 +284,27 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
         """Test preferred filter."""
         params = {"preferred": True}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_valid(self):
+        """Test valid filter."""
+        date_valid_and_invalid = date(2019, 6, 11)
+        date_two_valid = date(2021, 1, 4)
+        date_two_invalid = date(2024, 1, 4)
+
+        with time_machine.travel(date_valid_and_invalid):
+            params = {"valid": True}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+            params = {"valid": False}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+        with time_machine.travel(date_two_valid):
+            params = {"valid": True}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+            params = {"valid": False}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+
+        with time_machine.travel(date_two_invalid):
+            params = {"valid": True}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+            params = {"valid": False}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)

@@ -1,7 +1,6 @@
 """Unit tests for nautobot_device_lifecycle_mgmt."""
 import datetime
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.models import ContentType
 
 from nautobot.utilities.testing import APIViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer, Platform, Device, DeviceRole, InventoryItem, Site
@@ -228,13 +227,15 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: 
 
     model = ValidatedSoftwareLCM
     brief_fields = [
-        "assigned_to",
-        "assigned_to_content_type",
-        "assigned_to_object_id",
         "custom_fields",
+        "device_roles",
+        "device_types",
+        "devices",
         "display",
         "end",
         "id",
+        "inventory_items",
+        "object_tags",
         "preferred",
         "software",
         "start",
@@ -302,61 +303,72 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: 
             InventoryItem.objects.create(device=devices[1], name="Supervisor Engine 720"),
         )
 
-        content_type_device = ContentType.objects.get(app_label="dcim", model="device")
-        content_type_devicetype = ContentType.objects.get(app_label="dcim", model="devicetype")
-        content_type_inventoryitem = ContentType.objects.get(app_label="dcim", model="inventoryitem")
-
         cls.create_data = [
             {
                 "software": softwares[0].id,
-                "assigned_to_content_type": "dcim.device",
-                "assigned_to_object_id": devices[0].id,
+                "devices": [device.pk for device in devices],
                 "start": datetime.date(2020, 1, 14),
                 "end": datetime.date(2024, 10, 18),
                 "preferred": False,
             },
             {
                 "software": softwares[0].id,
-                "assigned_to_content_type": "dcim.devicetype",
-                "assigned_to_object_id": devicetypes[0].id,
+                "device_types": [devicetype.pk for devicetype in devicetypes],
                 "start": datetime.date(2021, 6, 4),
                 "end": datetime.date(2025, 1, 8),
                 "preferred": True,
             },
             {
                 "software": softwares[0].id,
-                "assigned_to_content_type": "dcim.inventoryitem",
-                "assigned_to_object_id": inventoryitems[0].id,
+                "device_roles": [devicerole.pk for devicerole in deviceroles],
                 "start": datetime.date(2019, 3, 6),
                 "end": datetime.date(2023, 6, 1),
                 "preferred": False,
             },
+            {
+                "software": softwares[0].id,
+                "inventory_items": [inventoryitem.pk for inventoryitem in inventoryitems],
+                "start": datetime.date(2019, 5, 4),
+                "end": datetime.date(2023, 9, 15),
+                "preferred": False,
+            },
         ]
 
-        ValidatedSoftwareLCM.objects.create(
+        validated_software = ValidatedSoftwareLCM(
             software=softwares[1],
-            assigned_to_content_type=content_type_device,
-            assigned_to_object_id=devices[1].id,
             start=datetime.date(2021, 6, 4),
             end=datetime.date(2025, 1, 8),
             preferred=True,
         )
-        ValidatedSoftwareLCM.objects.create(
+        validated_software.devices.set([device.pk for device in devices])
+        validated_software.save()
+
+        validated_software = ValidatedSoftwareLCM(
             software=softwares[1],
-            assigned_to_content_type=content_type_devicetype,
-            assigned_to_object_id=devicetypes[1].id,
             start=datetime.date(2018, 2, 23),
             end=datetime.date(2019, 6, 12),
             preferred=False,
         )
-        ValidatedSoftwareLCM.objects.create(
+        validated_software.device_types.set([devicetype.pk for devicetype in devicetypes])
+        validated_software.save()
+
+        validated_software = ValidatedSoftwareLCM(
             software=softwares[1],
-            assigned_to_content_type=content_type_inventoryitem,
-            assigned_to_object_id=inventoryitems[1].id,
             start=datetime.date(2019, 11, 19),
             end=datetime.date(2030, 7, 30),
             preferred=False,
         )
+        validated_software.device_roles.set([devicerole.pk for devicerole in deviceroles])
+        validated_software.save()
+
+        ValidatedSoftwareLCM(
+            software=softwares[1],
+            start=datetime.date(2020, 10, 9),
+            end=datetime.date(2025, 1, 16),
+            preferred=False,
+        )
+        validated_software.inventory_items.set([inventoryitem.pk for inventoryitem in inventoryitems])
+        validated_software.save()
 
     def test_bulk_create_objects(self):
         """Currently don't support bulk operations."""

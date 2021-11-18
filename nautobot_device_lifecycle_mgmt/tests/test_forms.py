@@ -253,10 +253,10 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
         )
         self.inventoryitem_1 = InventoryItem.objects.create(device=self.device_1, name="SwitchModule1")
 
-    def test_specifying_all_fields_w_device(self):
+    def test_specifying_all_fields_w_devices(self):
         data = {
             "software": self.software,
-            "assigned_to_device": self.device_1,
+            "devices": [self.device_1],
             "start": "2021-06-06",
             "end": "2023-08-31",
             "preferred": False,
@@ -268,7 +268,7 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
     def test_specifying_all_fields_w_device_type(self):
         data = {
             "software": self.software,
-            "assigned_to_device_type": self.devicetype_1,
+            "device_types": [self.devicetype_1],
             "start": "2021-06-06",
             "end": "2023-08-31",
             "preferred": False,
@@ -280,7 +280,7 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
     def test_specifying_all_fields_w_inventory_item_type(self):
         data = {
             "software": self.software,
-            "assigned_to_inventory_item": self.inventoryitem_1,
+            "inventory_items": [self.inventoryitem_1],
             "start": "2021-06-06",
             "end": "2023-08-31",
             "preferred": False,
@@ -289,26 +289,19 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
         self.assertTrue(form.is_valid())
         self.assertTrue(form.save())
 
-    def test_required_fields_missing(self):
+    def test_software_missing(self):
         data = {
             "end": "2023-08-31",
             "preferred": False,
         }
         form = self.form_class(data)
-        self.assertFalse(form.is_valid())
-        self.assertDictEqual(
-            {
-                "__all__": ["A device, device type or inventory item must be selected."],
-                "software": ["This field is required."],
-                "start": ["This field is required."],
-            },
-            form.errors,
-        )
+        with self.assertRaises(SoftwareLCM.DoesNotExist):
+            form.is_valid()
 
     def test_validation_error_start(self):
         data = {
             "software": self.software,
-            "assigned_to_device": self.device_1,
+            "devices": [self.device_1],
             "start": "2020 May 15th",
         }
         form = self.form_class(data)
@@ -319,7 +312,7 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
     def test_validation_error_end(self):
         data = {
             "software": self.software,
-            "assigned_to_device": self.device_1,
+            "devices": [self.device_1],
             "start": "2021-06-06",
             "end": "2024 June 2nd",
         }
@@ -328,18 +321,15 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
         self.assertIn("end", form.errors)
         self.assertIn("Enter a valid date.", form.errors["end"])
 
-    def test_assigned_to_cannot_be_more_than_one(self):
-        """Assigned to cannot be more than one of Device, DeviceType or InventoryItem"""
+    def test_assigned_to_must_specify_at_least_one_object(self):
+        """ValidatedSoftwareLCM must be assigned to at least one object."""
         data = {
             "software": self.software,
-            "assigned_to_device": self.device_1,
-            "assigned_to_device_type": self.devicetype_1,
-            "assigned_to_inventory_item": self.inventoryitem_1,
             "start": "2021-06-06",
         }
         form = self.form_class(data)
         self.assertFalse(form.is_valid())
         self.assertEqual(
-            "Cannot assign to more than one object. Choose either device, device type or inventory item.",
+            "You need to assign to at least one object.",
             form.errors["__all__"][0],
         )

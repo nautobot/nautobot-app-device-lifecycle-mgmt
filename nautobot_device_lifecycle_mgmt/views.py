@@ -223,7 +223,6 @@ class ValidatedSoftwareLCMView(generic.ObjectView):
 class ValidatedSoftwareLCMEditView(generic.ObjectEditView):
     """ValidatedSoftware Create view."""
 
-    # model = ValidatedSoftwareLCM
     queryset = ValidatedSoftwareLCM.objects.all()
     model_form = ValidatedSoftwareLCMForm
     template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_edit.html"
