@@ -172,3 +172,40 @@ You can view the details of a contract along with the primary and escalation con
 You can view the details of a provider, along with a listing of the service contracts associated to the provider. Contracts that are expired will display in red.
 
 ![](docs/images/lcm_contract_provider_detail.png)
+
+### Software: Software Life Cycle Management List View
+
+You can view the list of Software versions as well as filter the table.
+
+![](docs/images/lcm_software_list_view.png)
+
+
+### Software: Software Life Cycle Detail View
+
+You can also click a Software version and see the detail view. This view provides link to the list of devices and inventory items that are associated with this software object.
+
+![](docs/images/lcm_software_detail_view.png)
+
+### Software: Validated Software Life Cycle Management List View
+
+You can view the list of Validated Software versions as well as filter the table.
+
+![](docs/images/lcm_validated_software_list_view.png)
+
+### Software: Validated Software Life Cycle Detail View
+
+You can also click a Validated Software version and see the detail view. This view provides view of the device and inventory item attributes this validated software applies to.
+
+![](docs/images/lcm_validated_software_detail_view.png)
+
+### Software: Device View
+
+You can also view the associated Software and Validated Software versions from the device. If the Software assigned to the device matches Validated Software for this device, the Software will be displayed in green. If it's invalid it will be displayed in red.
+
+**Valid software:**
+
+![](docs/images/lcm_software_device_view_valid.png)
+
+**Invalid software:**
+
+![](docs/images/lcm_software_device_view_invalid.png)
