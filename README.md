@@ -53,6 +53,9 @@ If you are on Nautobot >= 1.1.0 and have the RQ worker continuing on, also resta
 sudo systemctl restart nautobot-rq-worker
 ```
 
+## Documentation
+- [Software lifecycle](./docs/software_lifecycle.md)
+
 ## Usage
 
 ### Adding Information into the Plugin

@@ -1,6 +1,6 @@
 # Software Lifecycle
 
-Software Lifecycle portion of the plugin helps in managing lifecycle of the software running on the devices and inventory items.
+The Software Lifecycle portion of the plugin helps in managing the lifecycle of the software running on the devices and inventory items.
 
 To help in achieving this goal the plugin provides two types of objects: Software and Validated Software.
 
@@ -8,7 +8,60 @@ Software objects can be used on their own and are used to record detailed inform
 
 Validated Software objects are used to specify which versions of the Software are currently valid/approved within the organization, and for which subset of the devices/inventory items. Validated Software requires Software object to be defined before it can be created.
 
-# Validated Software assignment rules
+## Software objects
+
+Software objects represent software releases that can be assigned to devices and inventory items.
+
+When creating the Software object, the following fields are available. Fields in **bold** are mandatory.
+
+| Field | Description |
+| -- | -- |
+| **Device Platform** | Device platform (software family) matching this software release |
+| **Version** | Version of the software as specified by the vendor |
+| Alias | Arbitrary name that can help distinguish this software inside of the organization |
+| Release Date | Date when the software was released |
+| End of Software Support | Date when the support for this software version ends |
+| Documentation URL | URL pointing to the documentation for this software version |
+| Download URL | Either internal or external link to the image for this software |
+| Image File Name | Name of the image file |
+| Image File Checksum | MD5 or SHA checksum of the image file |
+| Long Term Support | Toggle to specify whether this software is designated as a long term support release |
+| Pre-Release | Toggle to specify whether this is a beta/pre-release version of the software |
+| Running on Devices | List of devices having this software assigned |
+| Running on Inventory Items | List of inventory items having this software assigned |
+| Tags | Arbitrary tags that can be applied to this software |
+
+Example of a Software object with most fields filled in:
+
+![](images/lcm_software_software_add_example.png)
+
+## Validated Software objects
+
+Validated Software objects are used to check if the software assigned to devices and inventory items is valid/approved.
+
+These objects represent rules defined in an organization during the software approval/qualification process.
+
+Multiple Validated Software objects can be created for the same software. This allows specifying different validity periods and preference settings for different subsets of devices and inventory items.
+
+When creating the validated software the following fields are available. Fields in **bold** are mandatory.
+
+| Field | Description |
+| -- | -- |
+| **Software** | Software object this Validated Software object is tied to |
+| **Valid Since** | Start date when the rules defined by this object start applying |
+| Valid Until | End date when the rules defined by this object stop applying |
+| Preferred Version | Whether the Software specified by this Validated Software should be considered a preferred version |
+| Devices -> Devices | Devices whose software will be validated by this Validated Software |
+| Devices -> Device types | Devices having these device types will have software validated by this Validated Software |
+| Devices -> Device roles | Devices having these device roles will have software validated by this Validated Software |
+| Inventory Items -> Inventory items | Inventory items whose software will be validated by this Validated Software |
+| Object Tags -> Object tags | Devices and Inventory items with these tags will be validated by this Validated Software |
+
+Example of a Validated Software object with most fields filled in:
+
+![](images/lcm_software_validated_software_add_example.png)
+
+## Validated Software assignment rules
 
 Validated Software object can be assigned to:
 
@@ -22,32 +75,32 @@ One Validated Software object can be assigned to multiple other objects.
 
 ## Validated Software matching logic
 
-When device or inventory item has Software assigned plugin will attempt to find Validated Software object that is linked to the Software and matches the device/inventory item through assignment resolution.
+When a device or inventory item has Software assigned plugin will attempt to find a Validated Software object that is linked to the Software and matches the device/inventory item through assignment resolution.
 
-If at least one Validated Software object, which is currently valid, matching Software and device/inventory item is found, then the Software is marked as valid. Otherwise it is marked as invalid.
+If at least one Validated Software object, which is currently valid, matching Software and device/inventory item is found, then the Software is marked as valid. Otherwise, it is marked as invalid.
 
 When resolving whether Validated Software is taken into account when validating software on a given device, the following logic applies.
 
-For device, Validated Software will be used if one, or more, of the following applies:
+For device, Validated Software will be used if one, or more, of the following, applies:
 
-- Device is explicitly listed in Validated Software `devices` attribute.
+- Device is explicitly listed in the Validated Software `devices` attribute.
 - Device's device type AND device role match `device_types` AND `device_roles` in Validated Software. This applies only if BOTH are set. See the **Special cases** subsection that follows.
 - Device's device type is listed in the Validated Software `device_types` attribute.
 - Device's role is listed in the Validated Software `device_roles` attribute.
 - Device's tags are listed in the Validated Software `object_tags` attribute.
 
-For inventory item, Validated Software will be used if one, or more, of the following applies:
+For inventory items, Validated Software will be used if one, or more, of the following, applies:
 
-- Inventory item is explicitly listed in Validated Software `devices` attribute.
+- Inventory item is explicitly listed in the Validated Software `devices` attribute.
 - Inventory item's tags are listed in the Validated Software `object_tags` attribute.
 
 ### Special cases - device type and device role defined together
 
-When Validated Software object is assigned to both device type and device role then these are used in conjunction (logical AND). That is, such an object will apply to devices that are assigned both, specified device type AND device role.
+When a Validated Software object is assigned to both device type and device role then these are used in conjunction (logical AND). That is, such an object will apply to devices that are assigned both, specified device type AND device role.
 
-This logic is used to allow specifying subset of the devices of given type by adding additional constraint in the form of device role.
+This logic is used to allow to specify a subset of the devices of a given type by adding additional constraint in the form of device role.
 
-For example, in the below case **Validated Software 4.21M** will apply to **Device 1** only since **Device 2** has match for device type only.
+For example, in the below case **Validated Software 4.21M** will apply to **Device 1** only since **Device 2** has a match for device type only.
 
 - Device 1
     - device type: 7150-S64
@@ -64,16 +117,16 @@ For example, in the below case **Validated Software 4.21M** will apply to **Devi
   - device roles: leaf
   - software: 4.21M
 
-# Behavior when using API to retrieve Validated Software list for devices and inventory items
+### Behavior when using API to retrieve Validated Software list for devices and inventory items
 
-By default when retrieving a list of Validated Software object it is possible to filter results by assignments used when object was created.
+By default when retrieving a list of Validated Software objects it is possible to filter results by assignments used when the object was created.
 
-To get a list of Validated Software objects that match given device/inventory item matching using logic described in the previous section, one must specify one of the below parameters:
+To get a list of Validated Software objects that match given device/inventory item matching using the logic described in the previous section, one must specify one of the below parameters:
 
 - For devices: `device_name` or `device_id`
 - For inventory items: `inventory_item_id`
 
-## API Examples
+#### API Examples for getting Validated Software matching specific objects
 
 1. Return Validated Software objects taken into account when validating software assigned to device `ams-leaf-01`.
 
@@ -257,13 +310,13 @@ To get a list of Validated Software objects that match given device/inventory it
     ```
 
 
-## Ordering of the Validated Software objects
+### Ordering of the Validated Software objects in a list
 
 A given device/inventory item can be matched by multiple Validated Software objects.
 
-If there is more than one Validated Software object matching software assigned to the device then the list of Validated Software object device is ordered according to the following rules:
+If there is more than one Validated Software object matching software assigned to the device/inventory item then the list of Validated Software objects ordered according to the following rules.
 
-### Ordering for devices
+#### Ordering for devices
 
 1. Device is listed in the `devices` attribute, `preferred` flag set to `True`
 2. Device's device type AND device role are listed in the `device_types` and `device_roles` attributes,  `preferred` flag set to `True`
@@ -276,7 +329,7 @@ If there is more than one Validated Software object matching software assigned t
 9. Device's device role is listed in the `device_roles` attribute, `preferred` flag set to `False`
 10. Device's tag is listed in the `object_tags` attribute, `preferred` flag set to `False`
 
-### Ordering for inventory items
+#### Ordering for inventory items
 
 1. Inventory item is listed in the `inventory_items` attribute, `preferred` flag set to `True`
 2. Inventory item's tag is listed in the `object_tags` attribute, `preferred` flag set to `True`
