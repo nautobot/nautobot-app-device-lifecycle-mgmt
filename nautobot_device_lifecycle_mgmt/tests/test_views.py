@@ -64,12 +64,13 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: d
     #     pass
 
 
-class DeviceSoftwareValidationResultViewTest(
-    ViewTestCases.ListObjectsViewTestCase
-):  # pylint: disable=too-many-ancestors
+class SoftwareReportOverviewTest(ViewTestCases.ListObjectsViewTestCase):  # pylint: disable=too-many-ancestors
     """Test DeviceSoftwareValidationResult Views"""
 
     model = DeviceSoftwareValidationResult
+
+    def _get_base_url(self):
+        return "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_report"
 
     @classmethod
     def setUpTestData(cls):
@@ -94,7 +95,7 @@ class DeviceSoftwareValidationResultViewTest(
         self.assertHttpStatus(
             self.client.get(
                 reverse(
-                    "plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list",
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_report",
                 )
             ),
             403,
@@ -109,7 +110,7 @@ class DeviceSoftwareValidationResultViewTest(
         self.assertHttpStatus(
             self.client.get(
                 reverse(
-                    "plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list",
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_report",
                 )
             ),
             200,

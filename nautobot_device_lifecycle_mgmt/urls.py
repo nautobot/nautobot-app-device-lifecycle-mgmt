@@ -67,9 +67,9 @@ urlpatterns = [
         name="validatedsoftwarelcm_import",
     ),
     path(
-        "validated-software/report_overview/",
+        "validated-software/report/",
         views.SoftwareReportOverview.as_view(),
-        name="devicesoftwarevalidationresult_list",
+        name="validatedsoftware_report",
     ),
     # Contract Lifecycle Management URLs
     path("contract/", views.ContractLCMListView.as_view(), name="contractlcm_list"),
