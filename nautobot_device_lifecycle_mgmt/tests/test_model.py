@@ -280,7 +280,6 @@ class DeviceSoftwareValidationResultTestCase(TestCase):
             device=self.device,
             software=self.software,
             is_validated=True,
-            sw_missing=False,
         )
 
         self.assertEqual(validation_result.device, self.device)

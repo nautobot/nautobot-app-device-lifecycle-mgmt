@@ -11,7 +11,7 @@
         <span class="mdi mdi-plus-thick" aria-hidden="true"></span> Execute <span class="caret"></span>
     </button>
     <ul class="dropdown-menu">
-            <li><a href="{% url 'extras:job' class_path='plugins/nautobot_device_lifecycle_mgmt.jobs/SoftwareValidation' %}">Run Software Validation</a></li>
+        <li><a href="{% url 'extras:job' class_path='plugins/nautobot_device_lifecycle_mgmt.jobs/InventoryItemSoftwareValidationFullReport' %}">Run Inventory Item Software Validation</a></li>
     </ul>
 </div>
 {% if request.user.is_authenticated and table_config_form %}
@@ -25,7 +25,7 @@
     <div class="row">
         <div class="col-md-9">
             <!-- VISUAL BLOCK -->
-            {% if "total" not in inventory_aggr or inventory_aggr.total == 0 or inventory_aggr.total is None %}
+            {% if report_last_run is None %}
                 <h4 class="text-center alert-danger p-4 m-4">-- No validation results found, you need to run the report at least once before seeing the results! --</h4>
             {% endif %}
             {% if bar_chart is not None %}
@@ -57,7 +57,7 @@
                         <td>{% if inventory_aggr.total is not None %} {{ inventory_aggr.total }} {% else %} -- {% endif %}</td>
                         <td>{% if inventory_aggr.valid is not None %} {{ inventory_aggr.valid }} {% else %} -- {% endif %}</td>
                         <td>{% if inventory_aggr.invalid is not None %} {{ inventory_aggr.invalid }} {% else %} -- {% endif %}</td>
-                        <td>{% if inventory_aggr.sw_missing is not None %} {{ inventory_aggr.sw_missing }} {% else %} -- {% endif %}</td>
+                        <td>{% if inventory_aggr.no_software is not None %} {{ inventory_aggr.no_software }} {% else %} -- {% endif %}</td>
                         <td>{% if inventory_aggr.valid_percent is not None %} {{ inventory_aggr.valid_percent }} % {% else %} -- {% endif %}</td>
                         <td><a target="_blank" href="data:image/png;base64,{{ inventory_visual|safe }}" title="Inventory Pie Chart">
                             <img style="width:150px;" src="data:image/png;base64,{{ inventory_visual|safe }}" alt="Inventory Pie Chart">

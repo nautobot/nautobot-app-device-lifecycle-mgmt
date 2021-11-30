@@ -374,8 +374,8 @@ class ValidatedSoftwareDeviceReportFilterForm(BootstrapMixin, CustomFieldModelFo
     )
     exclude_sw_missing = forms.BooleanField(
         required=False,
-        widget=StaticSelect2(choices=(("", "---------"), ("True", "Yes"))),
-        label="Exclude No Software",
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Exclude missing software",
     )
 
     class Meta:
@@ -392,6 +392,16 @@ class ValidatedSoftwareInventoryItemReportFilterForm(BootstrapMixin, CustomField
         required=False,
         label="Search",
     )
+    software = DynamicModelMultipleChoiceField(
+        queryset=SoftwareLCM.objects.all(),
+        to_field_name="version",
+        required=False,
+    )
+    inventory_items = DynamicModelMultipleChoiceField(
+        queryset=InventoryItem.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
     devices = DynamicModelMultipleChoiceField(
         queryset=Device.objects.all(),
         to_field_name="name",
@@ -407,22 +417,17 @@ class ValidatedSoftwareInventoryItemReportFilterForm(BootstrapMixin, CustomField
         to_field_name="slug",
         required=False,
     )
-    software = DynamicModelMultipleChoiceField(
-        queryset=SoftwareLCM.objects.all(),
-        to_field_name="version",
-        required=False,
-    )
     exclude_sw_missing = forms.BooleanField(
         required=False,
-        widget=StaticSelect2(choices=(("", "---------"), ("True", "Yes"))),
-        label="Exclude No Software",
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Exclude missing software",
     )
 
     class Meta:
         """Meta attributes."""
 
         model = InventoryItemSoftwareValidationResult
-        fields = ["q", "devices", "device_types", "device_roles", "software", "exclude_sw_missing"]
+        fields = ["q", "inventory_items", "devices", "device_types", "device_roles", "software", "exclude_sw_missing"]
 
 
 class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):

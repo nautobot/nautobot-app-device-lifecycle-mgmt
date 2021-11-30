@@ -11,7 +11,7 @@
         <span class="mdi mdi-plus-thick" aria-hidden="true"></span> Execute <span class="caret"></span>
     </button>
     <ul class="dropdown-menu">
-            <li><a href="{% url 'extras:job' class_path='plugins/nautobot_device_lifecycle_mgmt.jobs/SoftwareValidation' %}">Run Software Validation</a></li>
+            <li><a href="{% url 'extras:job' class_path='plugins/nautobot_device_lifecycle_mgmt.jobs/DeviceSoftwareValidationFullReport' %}">Run Device Software Validation</a></li>
     </ul>
 </div>
 {% if request.user.is_authenticated and table_config_form %}
@@ -35,7 +35,7 @@
                     </div>
                 {% endblock %}
             {% else %}
-                    <span class=" text-center alert-danger p-4 m-4 ">-- Oops, no config validation found, visual not made! --</span>
+                    <span class="text-center alert-danger p-4 m-4">-- Oops, no config validation found, visual not made! --</span>
             {% endif %}
             <!-- END VISUAL BLOCK -->
             <h3 class="text-center m-2 p-3">Executive Summary</h3>
@@ -44,11 +44,11 @@
                     <tr>
                         <th><a>Type</a></th>
                         <th><a>Total</a></th>
-                        <th><a >Valid</a></th>
-                        <th ><a>Invalid</a></th>
-                        <th ><a>No Software</a></th>
-                        <th ><a>Validation (%)</a></th>
-                        <th ><a>Summary</a></th>
+                        <th><a>Valid</a></th>
+                        <th><a>Invalid</a></th>
+                        <th><a>No Software</a></th>
+                        <th><a>Compliance (%)</a></th>
+                        <th><a>Summary</a></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -57,7 +57,7 @@
                         <td>{% if device_aggr.total is not None %} {{ device_aggr.total }} {% else %} -- {% endif %}</td>
                         <td>{% if device_aggr.valid is not None %} {{ device_aggr.valid }} {% else %} -- {% endif %}</td>
                         <td>{% if device_aggr.invalid is not None %} {{ device_aggr.invalid }} {% else %} -- {% endif %}</td>
-                        <td>{% if device_aggr.sw_missing is not None %} {{ device_aggr.sw_missing }} {% else %} -- {% endif %}</td>
+                        <td>{% if device_aggr.no_software is not None %} {{ device_aggr.no_software }} {% else %} -- {% endif %}</td>
                         <td>{% if device_aggr.valid_percent is not None %} {{ device_aggr.valid_percent }} % {% else %} -- {% endif %}</td>
                         <td><a target="_blank" href="data:image/png;base64,{{ device_visual|safe }}" title="Devices Pie Chart">
                             <img style="width:150px;" src="data:image/png;base64,{{ device_visual|safe }}" alt="Devices Pie Chart">

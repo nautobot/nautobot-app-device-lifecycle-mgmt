@@ -398,8 +398,8 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
         .annotate(
             total=Count("device__device_type__model"),
             valid=Count("device__device_type__model", filter=Q(is_validated=True)),
-            invalid=Count("device__device_type__model", filter=Q(is_validated=False, sw_missing=False)),
-            sw_missing=Count("device__device_type__model", filter=Q(sw_missing=True)),
+            invalid=Count("device__device_type__model", filter=Q(is_validated=False) and ~Q(software=None)),
+            no_software=Count("device__device_type__model", filter=Q(software=None)),
             valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
         )
         .order_by("-valid_percent")
@@ -427,14 +427,14 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
             .annotate(
                 total=Count("device__platform__name"),
                 valid=Count("device__platform__name", filter=Q(is_validated=True)),
-                invalid=Count("device__platform__name", filter=Q(is_validated=False, sw_missing=False)),
-                sw_missing=Count("device__platform__name", filter=Q(sw_missing=True)),
+                invalid=Count("device__platform__name", filter=Q(is_validated=False) & ~Q(software=None)),
+                no_software=Count("device__platform__name", filter=Q(software=None)),
             )
             .order_by("-total")
         )
         platform_qs = self.filterset(request.GET, _platform_qs).qs
         pie_chart_attrs = {
-            "aggr_labels": ["valid", "invalid", "sw_missing"],
+            "aggr_labels": ["valid", "invalid", "no_software"],
             "chart_labels": ["Valid", "Invalid", "No Software"],
         }
         bar_chart_attrs = {
@@ -444,7 +444,7 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
             "chart_bars": [
                 {"label": "Valid", "data_attr": "valid", "color": GREEN},
                 {"label": "Invalid", "data_attr": "invalid", "color": RED},
-                {"label": "No Software", "data_attr": "sw_missing", "color": GREY},
+                {"label": "No Software", "data_attr": "no_software", "color": GREY},
             ],
         }
         self.extra_content = {
@@ -467,8 +467,8 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
             device_aggr = self.filterset(request.GET, device_qs).qs.aggregate(
                 total=Count("device"),
                 valid=Count("device", filter=Q(is_validated=True)),
-                invalid=Count("device", filter=Q(is_validated=False, sw_missing=False)),
-                sw_missing=Count("device", filter=Q(sw_missing=True)),
+                invalid=Count("device", filter=Q(is_validated=False) & ~Q(software=None)),
+                no_software=Count("device", filter=Q(software=None)),
             )
 
             device_aggr["name"] = "Devices"
@@ -495,8 +495,8 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
         .annotate(
             total=Count("inventory_item__name"),
             valid=Count("inventory_item__name", filter=Q(is_validated=True)),
-            invalid=Count("inventory_item__name", filter=Q(is_validated=False, sw_missing=False)),
-            sw_missing=Count("inventory_item__name", filter=Q(sw_missing=True)),
+            invalid=Count("inventory_item__name", filter=Q(is_validated=False) & ~Q(software=None)),
+            no_software=Count("inventory_item__name", filter=Q(software=None)),
             valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
         )
         .order_by("-valid_percent")
@@ -508,6 +508,17 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
     def setup(self, request, *args, **kwargs):
         """Using request object to perform filtering based on query params."""
         super().setup(request, *args, **kwargs)
+        try:
+            report_last_run = (
+                InventoryItemSoftwareValidationResult.objects.filter(
+                    run_type=choices.ReportRunTypeChoices.REPORT_FULL_RUN
+                )
+                .latest("last_updated")
+                .last_run
+            )
+        except InventoryItemSoftwareValidationResult.DoesNotExist:
+            report_last_run = None
+
         inventory_aggr = self.get_global_aggr(request)
         _platform_qs = (
             InventoryItemSoftwareValidationResult.objects.values("inventory_item__manufacturer__name")
@@ -515,15 +526,15 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
             .annotate(
                 total=Count("inventory_item__manufacturer__name"),
                 valid=Count("inventory_item__manufacturer__name", filter=Q(is_validated=True)),
-                invalid=Count("inventory_item__manufacturer__name", filter=Q(is_validated=False, sw_missing=False)),
-                sw_missing=Count("inventory_item__manufacturer__name", filter=Q(sw_missing=True)),
+                invalid=Count("inventory_item__manufacturer__name", filter=Q(is_validated=False) & ~Q(software=None)),
+                no_software=Count("inventory_item__manufacturer__name", filter=Q(software=None)),
             )
             .order_by("-total")
         )
         platform_qs = self.filterset(request.GET, _platform_qs).qs
 
         pie_chart_attrs = {
-            "aggr_labels": ["valid", "invalid", "sw_missing"],
+            "aggr_labels": ["valid", "invalid", "no_software"],
             "chart_labels": ["Valid", "Invalid", "No Software"],
         }
         bar_chart_attrs = {
@@ -533,7 +544,7 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
             "chart_bars": [
                 {"label": "Valid", "data_attr": "valid", "color": GREEN},
                 {"label": "Invalid", "data_attr": "invalid", "color": RED},
-                {"label": "No Software", "data_attr": "sw_missing", "color": GREY},
+                {"label": "No Software", "data_attr": "no_software", "color": GREY},
             ],
         }
 
@@ -541,6 +552,7 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
             "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
             "inventory_aggr": inventory_aggr,
             "inventory_visual": ReportOverviewHelper.plot_piechart_visual(inventory_aggr, pie_chart_attrs),
+            "report_last_run": report_last_run,
         }
 
     def get_global_aggr(self, request):
@@ -556,8 +568,8 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
             inventory_aggr = self.filterset(request.GET, inventory_item_qs).qs.aggregate(
                 total=Count("inventory_item"),
                 valid=Count("inventory_item", filter=Q(is_validated=True)),
-                invalid=Count("inventory_item", filter=Q(is_validated=False, sw_missing=False)),
-                sw_missing=Count("inventory_item", filter=Q(sw_missing=True)),
+                invalid=Count("inventory_item", filter=Q(is_validated=False) & ~Q(software=None)),
+                no_software=Count("inventory_item", filter=Q(software=None)),
             )
             inventory_aggr["name"] = "Inventory Items"
 

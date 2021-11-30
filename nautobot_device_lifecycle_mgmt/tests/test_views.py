@@ -80,13 +80,11 @@ class SoftwareReportOverviewTest(ViewTestCases.ListObjectsViewTestCase):  # pyli
             device=device_1,
             software=None,
             is_validated=False,
-            sw_missing=True,
         )
         DeviceSoftwareValidationResult.objects.create(
             device=device_2,
             software=None,
             is_validated=False,
-            sw_missing=True,
         )
 
     def test_validation_report_view_without_permission(self):

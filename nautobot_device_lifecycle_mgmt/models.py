@@ -351,7 +351,6 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         to="SoftwareLCM", on_delete=models.CASCADE, help_text="Device software", null=True, blank=True, related_name="+"
     )
     is_validated = models.BooleanField(null=True, blank=True)
-    sw_missing = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
     run_type = models.CharField(max_length=50, choices=choices.ReportRunTypeChoices)
 
@@ -375,7 +374,6 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
         to="SoftwareLCM", on_delete=models.CASCADE, help_text="Inventory software", blank=True, null=True
     )
     is_validated = models.BooleanField(null=True, blank=True)
-    sw_missing = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
     run_type = models.CharField(max_length=50, choices=choices.ReportRunTypeChoices)
 

@@ -16,7 +16,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
     SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
-    SoftwareReportOverviewFilterSet,
+    ValidatedSoftwareDeviceReportFilterSet,
 )
 from .conftest import create_devices
 
@@ -321,7 +321,7 @@ class SoftwareReportOverviewFilterSetTestCase(TestCase):
     """Tests for the DeviceSoftwareValidationResult model."""
 
     queryset = DeviceSoftwareValidationResult.objects.all()
-    filterset = SoftwareReportOverviewFilterSet
+    filterset = ValidatedSoftwareDeviceReportFilterSet
 
     def setUp(self):
         """Set up test objects."""
@@ -337,19 +337,16 @@ class SoftwareReportOverviewFilterSetTestCase(TestCase):
             device=self.device_1,
             software=self.software,
             is_validated=True,
-            sw_missing=False,
         )
         DeviceSoftwareValidationResult.objects.create(
             device=self.device_2,
             software=self.software,
             is_validated=False,
-            sw_missing=False,
         )
         DeviceSoftwareValidationResult.objects.create(
             device=self.device_3,
             software=None,
             is_validated=False,
-            sw_missing=True,
         )
 
     def test_devices_name_one(self):

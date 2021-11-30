@@ -284,6 +284,12 @@ class ValidatedSoftwareDeviceReportFilterSet(django_filters.FilterSet):
 
     q = django_filters.CharFilter(method="search", label="Search")
 
+    software = django_filters.ModelMultipleChoiceFilter(
+        field_name="software__version",
+        to_field_name="version",
+        queryset=SoftwareLCM.objects.all(),
+        label="Software",
+    )
     devices_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device",
         queryset=Device.objects.all(),
@@ -317,15 +323,9 @@ class ValidatedSoftwareDeviceReportFilterSet(django_filters.FilterSet):
         to_field_name="slug",
         label="Device Roles (slug)",
     )
-    software = django_filters.ModelMultipleChoiceFilter(
-        field_name="software__version",
-        to_field_name="version",
-        queryset=SoftwareLCM.objects.all(),
-        label="Software",
-    )
     exclude_sw_missing = django_filters.BooleanFilter(
         method="_exclude_sw_missing",
-        label="Exclude No Software",
+        label="Exclude missing software",
     )
 
     class Meta:
@@ -334,11 +334,11 @@ class ValidatedSoftwareDeviceReportFilterSet(django_filters.FilterSet):
         model = DeviceSoftwareValidationResult
 
         fields = [
+            "software",
             "devices",
             "device_types",
             "device_roles",
-            "software",
-            "sw_missing",
+            "exclude_sw_missing",
         ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
@@ -351,7 +351,10 @@ class ValidatedSoftwareDeviceReportFilterSet(django_filters.FilterSet):
 
     def _exclude_sw_missing(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Exclude devices with missing software."""
-        return queryset.filter(~Q(sw_missing=value))
+        if value:
+            return queryset.filter(~Q(software=None))
+
+        return queryset
 
 
 class ValidatedSoftwareInventoryItemReportFilterSet(django_filters.FilterSet):
@@ -360,12 +363,12 @@ class ValidatedSoftwareInventoryItemReportFilterSet(django_filters.FilterSet):
     q = django_filters.CharFilter(method="search", label="Search")
 
     inventory_items_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="inventory_items",
+        field_name="inventory_item",
         queryset=InventoryItem.objects.all(),
         label="Inventory Items",
     )
     inventory_items = django_filters.ModelMultipleChoiceFilter(
-        field_name="inventory_items__name",
+        field_name="inventory_item__name",
         queryset=InventoryItem.objects.all(),
         to_field_name="name",
         label="Inventory Items (name)",
@@ -422,7 +425,7 @@ class ValidatedSoftwareInventoryItemReportFilterSet(django_filters.FilterSet):
     )
     exclude_sw_missing = django_filters.BooleanFilter(
         method="_exclude_sw_missing",
-        label="Exclude No Software",
+        label="Exclude missing software",
     )
 
     class Meta:
@@ -437,7 +440,7 @@ class ValidatedSoftwareInventoryItemReportFilterSet(django_filters.FilterSet):
             "device_roles",
             "object_tags",
             "software",
-            "sw_missing",
+            "exclude_sw_missing",
         ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
@@ -450,7 +453,10 @@ class ValidatedSoftwareInventoryItemReportFilterSet(django_filters.FilterSet):
 
     def _exclude_sw_missing(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Exclude devices with missing software."""
-        return queryset.filter(~Q(sw_missing=value))
+        if value:
+            return queryset.filter(~Q(software=None))
+
+        return queryset
 
 
 class ContractLCMFilterSet(django_filters.FilterSet):

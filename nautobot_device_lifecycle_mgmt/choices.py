@@ -71,6 +71,7 @@ class CountryCodes(ChoiceSet):
 
 
 class ReportRunTypeChoices(ChoiceSet):
+    """Choices for the types of report runs."""
 
     REPORT_SINGLE_OBJECT_RUN = "single-object-run"
     REPORT_FULL_RUN = "full-report-run"
