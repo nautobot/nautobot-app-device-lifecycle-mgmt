@@ -5,6 +5,7 @@ import logging
 import urllib
 
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 import numpy as np
 
 from django.db.models import Q, F, Count, ExpressionWrapper, FloatField
@@ -12,6 +13,7 @@ from django.db.models import Q, F, Count, ExpressionWrapper, FloatField
 from nautobot.core.views import generic
 from nautobot.dcim.models import Device
 from nautobot.utilities.views import ContentTypePermissionRequiredMixin
+from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
@@ -26,7 +28,8 @@ from nautobot_device_lifecycle_mgmt.tables import (
     HardwareLCMTable,
     SoftwareLCMTable,
     ValidatedSoftwareLCMTable,
-    SoftwareReportOverviewTable,
+    ValidatedSoftwareDeviceReportTable,
+    ValidatedSoftwareInventoryItemReportTable,
     ContractLCMTable,
     ProviderLCMTable,
     ContactLCMTable,
@@ -42,7 +45,8 @@ from nautobot_device_lifecycle_mgmt.forms import (
     ValidatedSoftwareLCMForm,
     ValidatedSoftwareLCMFilterForm,
     ValidatedSoftwareLCMCSVForm,
-    SoftwareReportOverviewFilterForm,
+    ValidatedSoftwareDeviceReportFilterForm,
+    ValidatedSoftwareInventoryItemReportFilterForm,
     ContractLCMForm,
     ContractLCMBulkEditForm,
     ContractLCMFilterForm,
@@ -63,10 +67,13 @@ from nautobot_device_lifecycle_mgmt.filters import (
     ContactLCMFilterSet,
     SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
-    SoftwareReportOverviewFilterSet,
+    ValidatedSoftwareDeviceReportFilterSet,
+    ValidatedSoftwareInventoryItemReportFilterSet,
 )
 
 from nautobot_device_lifecycle_mgmt.const import URL, PLUGIN_CFG
+
+logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 
 # ---------------------------------------------------------------------------------
 #  Hardware Lifecycle Management Views
@@ -264,7 +271,7 @@ class ValidatedSoftwareLCMBulkImportView(generic.BulkImportView):
     default_return_url = "plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_list"
 
 
-class ValidatedSoftwareReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
+class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
     """Customized overview view reports aggregation and filterset."""
 
     def get_required_permission(self):
@@ -272,19 +279,19 @@ class ValidatedSoftwareReportOverviewHelper(ContentTypePermissionRequiredMixin, 
         return "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm"
 
     @staticmethod
-    def plot_piechart_visual(aggr):
+    def plot_piechart_visual(aggr, pie_chart_attrs):
         """Plot aggregation visual."""
-        if aggr["valid"] is None:
+        if aggr[pie_chart_attrs["aggr_labels"][0]] is None:
             return None
-        sizes = [aggr["valid"], aggr["invalid"], aggr["sw_missing"]]
+        sizes = [aggr[aggr_label] for aggr_label in pie_chart_attrs["aggr_labels"]]
         explode = (0.1, 0.1, 0.1)  # "explode" slices
         fig1, ax1 = plt.subplots()
         logging.debug(fig1)
-        labels = "Valid", "Invalid", "No Software"
+        # labels = "Valid", "Invalid", "No Software"
         ax1.pie(
             sizes,
             explode=explode,
-            labels=labels,
+            labels=pie_chart_attrs["chart_labels"],
             autopct="%1.1f%%",
             colors=[GREEN, RED, GREY],
             shadow=True,
@@ -301,12 +308,9 @@ class ValidatedSoftwareReportOverviewHelper(ContentTypePermissionRequiredMixin, 
         return urllib.parse.quote(string)
 
     @staticmethod
-    def plot_barchart_visual(qs):  # pylint: disable=too-many-locals
+    def plot_barchart_visual(qs, chart_attrs):  # pylint: disable=too-many-locals
         """Construct report visual from queryset."""
-        labels = [item["device__platform__name"] for item in qs]
-        valid = [item["valid"] for item in qs]
-        invalid = [item["invalid"] for item in qs]
-        sw_missing = [item["sw_missing"] for item in qs]
+        labels = [item[chart_attrs["label_accessor"]] for item in qs]
 
         label_locations = np.arange(len(labels))  # the label locations
 
@@ -317,15 +321,27 @@ class ValidatedSoftwareReportOverviewHelper(ContentTypePermissionRequiredMixin, 
         width = per_platform_bar_width  # the width of the bars
 
         fig, axis = plt.subplots(figsize=(per_platform_width, per_platform_height))
-        rects1 = axis.bar(label_locations - width, valid, width, label="Valid", color=GREEN)
-        rects2 = axis.bar(label_locations, invalid, width, label="Invalid", color=RED)
-        rects3 = axis.bar(label_locations + width, sw_missing, width, label="No Software", color=GREY)
+
+        rects = []
+        for bar_pos, chart_bar in enumerate(chart_attrs["chart_bars"]):
+            bar_label_item = [item[chart_bar["data_attr"]] for item in qs]
+            rects.append(
+                axis.bar(
+                    label_locations - width + (bar_pos * width),
+                    bar_label_item,
+                    width,
+                    label=chart_bar["label"],
+                    color=chart_bar["color"],
+                )
+            )
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
-        axis.set_ylabel("Devices")
-        axis.set_title("Valid per Platform")
+        axis.set_ylabel(chart_attrs["ylabel"])
+        axis.set_title(chart_attrs["title"])
         axis.set_xticks(label_locations)
         axis.set_xticklabels(labels, rotation=0)
+        # Force integer y-axis labels
+        axis.yaxis.set_major_locator(MaxNLocator(integer=True))
         axis.margins(0.2, 0.2)
         axis.legend()
 
@@ -343,9 +359,8 @@ class ValidatedSoftwareReportOverviewHelper(ContentTypePermissionRequiredMixin, 
                     rotation=90,
                 )
 
-        autolabel(rects1)
-        autolabel(rects2)
-        autolabel(rects3)
+        for rect in rects:
+            autolabel(rect)
 
         # convert graph into dtring buffer and then we convert 64 bit code into image
         buf = io.BytesIO()
@@ -370,13 +385,13 @@ class ValidatedSoftwareReportOverviewHelper(ContentTypePermissionRequiredMixin, 
         return aggr
 
 
-class SoftwareReportOverview(generic.ObjectListView):
+class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
     """View for executive report on software Validation."""
 
-    filterset = SoftwareReportOverviewFilterSet
-    filterset_form = SoftwareReportOverviewFilterForm
-    table = SoftwareReportOverviewTable
-    template_name = "nautobot_device_lifecycle_mgmt/software_overview_report.html"
+    filterset = ValidatedSoftwareDeviceReportFilterSet
+    filterset_form = ValidatedSoftwareDeviceReportFilterForm
+    table = ValidatedSoftwareDeviceReportTable
+    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftware_device_report.html"
     queryset = (
         DeviceSoftwareValidationResult.objects.values("device__device_type__model")
         .distinct()
@@ -395,8 +410,17 @@ class SoftwareReportOverview(generic.ObjectListView):
 
     def setup(self, request, *args, **kwargs):
         """Using request object to perform filtering based on query params."""
-        super().setup(request, *args, **kwargs)
-        device_aggr, inventory_aggr = self.get_global_aggr(request)
+        super().setup(request, *args, **kwargs)  #
+        try:
+            report_last_run = (
+                DeviceSoftwareValidationResult.objects.filter(run_type=choices.ReportRunTypeChoices.REPORT_FULL_RUN)
+                .latest("last_updated")
+                .last_run
+            )
+        except DeviceSoftwareValidationResult.DoesNotExist:
+            report_last_run = None
+
+        device_aggr = self.get_global_aggr(request)
         _platform_qs = (
             DeviceSoftwareValidationResult.objects.values("device__platform__name")
             .distinct()
@@ -409,12 +433,25 @@ class SoftwareReportOverview(generic.ObjectListView):
             .order_by("-total")
         )
         platform_qs = self.filterset(request.GET, _platform_qs).qs
+        pie_chart_attrs = {
+            "aggr_labels": ["valid", "invalid", "sw_missing"],
+            "chart_labels": ["Valid", "Invalid", "No Software"],
+        }
+        bar_chart_attrs = {
+            "label_accessor": "device__platform__name",
+            "ylabel": "Device",
+            "title": "Valid per Platform",
+            "chart_bars": [
+                {"label": "Valid", "data_attr": "valid", "color": GREEN},
+                {"label": "Invalid", "data_attr": "invalid", "color": RED},
+                {"label": "No Software", "data_attr": "sw_missing", "color": GREY},
+            ],
+        }
         self.extra_content = {
-            "bar_chart": ValidatedSoftwareReportOverviewHelper.plot_barchart_visual(platform_qs),
+            "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
             "device_aggr": device_aggr,
-            "device_visual": ValidatedSoftwareReportOverviewHelper.plot_piechart_visual(device_aggr),
-            "inventory_aggr": inventory_aggr,
-            "inventory_visual": ValidatedSoftwareReportOverviewHelper.plot_piechart_visual(inventory_aggr),
+            "device_visual": ReportOverviewHelper.plot_piechart_visual(device_aggr, pie_chart_attrs),
+            "report_last_run": report_last_run,
         }
 
     def get_global_aggr(self, request):
@@ -422,12 +459,10 @@ class SoftwareReportOverview(generic.ObjectListView):
 
         Returns:
             device_aggr: device global report dict
-            invetory_aggr: inventory item global report dict
         """
         device_qs = DeviceSoftwareValidationResult.objects
-        inventory_item_qs = InventoryItemSoftwareValidationResult.objects
 
-        device_aggr, inventory_aggr = {}, {}
+        device_aggr = {}
         if self.filterset is not None:
             device_aggr = self.filterset(request.GET, device_qs).qs.aggregate(
                 total=Count("device"),
@@ -436,20 +471,97 @@ class SoftwareReportOverview(generic.ObjectListView):
                 sw_missing=Count("device", filter=Q(sw_missing=True)),
             )
 
-            inventory_aggr = inventory_item_qs.aggregate(
+            device_aggr["name"] = "Devices"
+
+        return ReportOverviewHelper.calculate_aggr_percentage(device_aggr)
+
+    def extra_context(self):
+        """Extra content method on."""
+        # add global aggregations to extra context.
+
+        return self.extra_content
+
+
+class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
+    """View for executive report on inventory item software validation."""
+
+    filterset = ValidatedSoftwareInventoryItemReportFilterSet
+    filterset_form = ValidatedSoftwareInventoryItemReportFilterForm
+    table = ValidatedSoftwareInventoryItemReportTable
+    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftware_inventoryitem_report.html"
+    queryset = (
+        InventoryItemSoftwareValidationResult.objects.values("inventory_item__name")
+        .distinct()
+        .annotate(
+            total=Count("inventory_item__name"),
+            valid=Count("inventory_item__name", filter=Q(is_validated=True)),
+            invalid=Count("inventory_item__name", filter=Q(is_validated=False, sw_missing=False)),
+            sw_missing=Count("inventory_item__name", filter=Q(sw_missing=True)),
+            valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
+        )
+        .order_by("-valid_percent")
+    )
+
+    # extra content dict to be returned by self.extra_context() method
+    extra_content = {}
+
+    def setup(self, request, *args, **kwargs):
+        """Using request object to perform filtering based on query params."""
+        super().setup(request, *args, **kwargs)
+        inventory_aggr = self.get_global_aggr(request)
+        _platform_qs = (
+            InventoryItemSoftwareValidationResult.objects.values("inventory_item__manufacturer__name")
+            .distinct()
+            .annotate(
+                total=Count("inventory_item__manufacturer__name"),
+                valid=Count("inventory_item__manufacturer__name", filter=Q(is_validated=True)),
+                invalid=Count("inventory_item__manufacturer__name", filter=Q(is_validated=False, sw_missing=False)),
+                sw_missing=Count("inventory_item__manufacturer__name", filter=Q(sw_missing=True)),
+            )
+            .order_by("-total")
+        )
+        platform_qs = self.filterset(request.GET, _platform_qs).qs
+
+        pie_chart_attrs = {
+            "aggr_labels": ["valid", "invalid", "sw_missing"],
+            "chart_labels": ["Valid", "Invalid", "No Software"],
+        }
+        bar_chart_attrs = {
+            "label_accessor": "inventory_item__manufacturer__name",
+            "ylabel": "Inventory Item",
+            "title": "Valid per Manufacturer",
+            "chart_bars": [
+                {"label": "Valid", "data_attr": "valid", "color": GREEN},
+                {"label": "Invalid", "data_attr": "invalid", "color": RED},
+                {"label": "No Software", "data_attr": "sw_missing", "color": GREY},
+            ],
+        }
+
+        self.extra_content = {
+            "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
+            "inventory_aggr": inventory_aggr,
+            "inventory_visual": ReportOverviewHelper.plot_piechart_visual(inventory_aggr, pie_chart_attrs),
+        }
+
+    def get_global_aggr(self, request):
+        """Get device and inventory global reports.
+
+        Returns:
+            inventory_aggr: inventory item global report dict
+        """
+        inventory_item_qs = InventoryItemSoftwareValidationResult.objects
+
+        inventory_aggr = {}
+        if self.filterset is not None:
+            inventory_aggr = self.filterset(request.GET, inventory_item_qs).qs.aggregate(
                 total=Count("inventory_item"),
                 valid=Count("inventory_item", filter=Q(is_validated=True)),
                 invalid=Count("inventory_item", filter=Q(is_validated=False, sw_missing=False)),
                 sw_missing=Count("inventory_item", filter=Q(sw_missing=True)),
             )
-
-            device_aggr["name"] = "Devices"
             inventory_aggr["name"] = "Inventory Items"
 
-        return (
-            ValidatedSoftwareReportOverviewHelper.calculate_aggr_percentage(device_aggr),
-            ValidatedSoftwareReportOverviewHelper.calculate_aggr_percentage(inventory_aggr),
-        )
+        return ReportOverviewHelper.calculate_aggr_percentage(inventory_aggr)
 
     def extra_context(self):
         """Extra content method on."""

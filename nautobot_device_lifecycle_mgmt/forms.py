@@ -23,6 +23,7 @@ from nautobot.utilities.forms import (
 from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, CurrencyChoices, PoCTypeChoices, CountryCodes
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
+    InventoryItemSoftwareValidationResult,
     SoftwareLCM,
     ValidatedSoftwareLCM,
     DeviceSoftwareValidationResult,
@@ -344,7 +345,7 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
         ]
 
 
-class SoftwareReportOverviewFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+class ValidatedSoftwareDeviceReportFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
     """Filter form to filter searches for SoftwareReportOverview."""
 
     q = forms.CharField(
@@ -381,6 +382,46 @@ class SoftwareReportOverviewFilterForm(BootstrapMixin, CustomFieldModelForm, Rel
         """Meta attributes."""
 
         model = DeviceSoftwareValidationResult
+        fields = ["q", "devices", "device_types", "device_roles", "software", "exclude_sw_missing"]
+
+
+class ValidatedSoftwareInventoryItemReportFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+    """Filter form to filter searches for SoftwareReportOverview."""
+
+    q = forms.CharField(
+        required=False,
+        label="Search",
+    )
+    devices = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
+    device_types = DynamicModelMultipleChoiceField(
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        required=False,
+    )
+    device_roles = DynamicModelMultipleChoiceField(
+        queryset=DeviceRole.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    software = DynamicModelMultipleChoiceField(
+        queryset=SoftwareLCM.objects.all(),
+        to_field_name="version",
+        required=False,
+    )
+    exclude_sw_missing = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=(("", "---------"), ("True", "Yes"))),
+        label="Exclude No Software",
+    )
+
+    class Meta:
+        """Meta attributes."""
+
+        model = InventoryItemSoftwareValidationResult
         fields = ["q", "devices", "device_types", "device_roles", "software", "exclude_sw_missing"]
 
 

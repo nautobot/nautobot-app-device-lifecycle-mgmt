@@ -4,6 +4,7 @@ from datetime import datetime
 from nautobot.dcim.models import Device, InventoryItem
 from nautobot.extras.jobs import Job
 
+from nautobot_device_lifecycle_mgmt import choices
 from .models import (
     DeviceSoftwareValidationResult,
     InventoryItemSoftwareValidationResult,
@@ -39,6 +40,7 @@ class SoftwareValidation(Job):
             validate_obj.sw_missing = device_software.software is None
             validate_obj.software = device_software.software
             validate_obj.last_run = job_run_time
+            validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
             validate_obj.validated_save()
         self.log_success(message=f"Performed validation on: {devices.count()} devices.")
 
@@ -55,6 +57,7 @@ class SoftwareValidation(Job):
             validate_obj.sw_missing = inventoryitem_software.software is None
             validate_obj.software = inventoryitem_software.software
             validate_obj.last_run = job_run_time
+            validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
             validate_obj.validated_save()
 
         self.log_success(message=f"Performed validation on: {inventory_items.count()} inventory items.")

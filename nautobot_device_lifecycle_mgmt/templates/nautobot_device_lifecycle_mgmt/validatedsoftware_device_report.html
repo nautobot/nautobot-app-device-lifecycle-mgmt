@@ -21,10 +21,13 @@
     {% export_button content_type %}
 {% endif %}
 </div>
-    <h1>{% block title %}Software Validation Overview Reports{% endblock %}</h1>
+    <h1>{% block title %}Device Software Validation Reports{% endblock %}</h1>
     <div class="row">
         <div class="col-md-9">
             <!-- VISUAL BLOCK -->
+            {% if report_last_run is None %}
+                <h4 class="text-center alert-danger p-4 m-4">-- No validation results found, you need to run the report at least once before seeing the results! --</h4>
+            {% endif %}
             {% if bar_chart is not None %}
                 {% block graphic  %}
                     <div id="content">
@@ -58,18 +61,6 @@
                         <td>{% if device_aggr.valid_percent is not None %} {{ device_aggr.valid_percent }} % {% else %} -- {% endif %}</td>
                         <td><a target="_blank" href="data:image/png;base64,{{ device_visual|safe }}" title="Devices Pie Chart">
                             <img style="width:150px;" src="data:image/png;base64,{{ device_visual|safe }}" alt="Devices Pie Chart">
-                            </a>
-                        </td>
-                    </tr>
-                        <tr class="even">
-                        <td>Inventory Items</td>
-                        <td>{% if inventory_aggr.total is not None %} {{ inventory_aggr.total }} {% else %} -- {% endif %}</td>
-                        <td>{% if inventory_aggr.valid is not None %} {{ inventory_aggr.valid }} {% else %} -- {% endif %}</td>
-                        <td>{% if inventory_aggr.invalid is not None %} {{ inventory_aggr.invalid }} {% else %} -- {% endif %}</td>
-                        <td>{% if inventory_aggr.sw_missing is not None %} {{ inventory_aggr.sw_missing }} {% else %} -- {% endif %}</td>
-                        <td>{% if inventory_aggr.valid_percent is not None %} {{ inventory_aggr.valid_percent }} % {% else %} -- {% endif %}</td>
-                        <td ><a target="_blank" href="data:image/png;base64,{{ inventory_visual|safe }}" title="Inventory Pie Chart">
-                            <img style="width:150px;" src="data:image/png;base64,{{ inventory_visual|safe }}" alt="Inventory Pie Chart">
                             </a>
                         </td>
                     </tr>

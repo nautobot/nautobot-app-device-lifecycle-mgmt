@@ -333,16 +333,27 @@ class ValidatedSoftwareLCM(PrimaryModel):
     objects = ValidatedSoftwareLCMQuerySet.as_manager()
 
 
+@extras_features(
+    "graphql",
+)
 class DeviceSoftwareValidationResult(PrimaryModel):
     """Configuration compliance details."""
 
-    device = models.ForeignKey(to="dcim.Device", on_delete=models.CASCADE, help_text="The device", blank=False)
+    device = models.ForeignKey(
+        to="dcim.Device",
+        on_delete=models.CASCADE,
+        help_text="The device",
+        blank=False,
+        related_name="device_software_validated",
+        unique=True,
+    )
     software = models.ForeignKey(
-        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Device software", null=True, blank=True
+        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Device software", null=True, blank=True, related_name="+"
     )
     is_validated = models.BooleanField(null=True, blank=True)
     sw_missing = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
+    run_type = models.CharField(max_length=50, choices=choices.ReportRunTypeChoices)
 
     class Meta:
         """Meta attributes for DeviceSoftwareValidationResult."""
@@ -351,11 +362,14 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         ordering = ("device",)
 
 
+@extras_features(
+    "graphql",
+)
 class InventoryItemSoftwareValidationResult(PrimaryModel):
     """Configuration compliance details."""
 
     inventory_item = models.ForeignKey(
-        to="dcim.InventoryItem", on_delete=models.CASCADE, help_text="The inventory", blank=False
+        to="dcim.InventoryItem", on_delete=models.CASCADE, help_text="The inventory", unique=True
     )
     software = models.ForeignKey(
         to="SoftwareLCM", on_delete=models.CASCADE, help_text="Inventory software", blank=True, null=True
@@ -363,6 +377,7 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
     is_validated = models.BooleanField(null=True, blank=True)
     sw_missing = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
+    run_type = models.CharField(max_length=50, choices=choices.ReportRunTypeChoices)
 
     class Meta:
         """Meta attributes for InventoryItemSoftwareValidationResult."""

@@ -97,13 +97,6 @@ try:
                                 "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
                             ],
                         ),
-                        NavMenuItem(
-                            link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_report",
-                            name="Software Validation Report",
-                            permissions=[
-                                "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
-                            ],
-                        ),
                     ),
                 ),
                 NavMenuGroup(
@@ -189,6 +182,26 @@ try:
                             ),
                             permissions=[
                                 "nautobot_device_lifecycle_mgmt.view_contactlcm",
+                            ],
+                        ),
+                    ),
+                ),
+                NavMenuGroup(
+                    name="Reports",
+                    weight=100,
+                    items=(
+                        NavMenuItem(
+                            link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
+                            name="Device Software Validation",
+                            permissions=[
+                                "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
+                            ],
+                        ),
+                        NavMenuItem(
+                            link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
+                            name="Inventory Item Software Validation",
+                            permissions=[
+                                "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
                             ],
                         ),
                     ),
