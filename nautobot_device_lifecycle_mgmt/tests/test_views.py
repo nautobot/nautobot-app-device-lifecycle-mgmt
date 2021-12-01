@@ -9,8 +9,12 @@ from nautobot.utilities.testing import ViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer
 from nautobot.users.models import ObjectPermission
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, DeviceSoftwareValidationResult
-from .conftest import create_devices
+from nautobot_device_lifecycle_mgmt.models import (
+    HardwareLCM,
+    DeviceSoftwareValidationResult,
+    InventoryItemSoftwareValidationResult,
+)
+from .conftest import create_devices, create_inventory_items
 
 User = get_user_model()
 
@@ -64,13 +68,15 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: d
     #     pass
 
 
-class SoftwareReportOverviewTest(ViewTestCases.ListObjectsViewTestCase):  # pylint: disable=too-many-ancestors
-    """Test DeviceSoftwareValidationResult Views"""
+class ValidatedSoftwareDeviceReportViewTest(
+    ViewTestCases.ListObjectsViewTestCase
+):  # pylint: disable=too-many-ancestors
+    """Test ValidatedSoftwareDeviceReportView"""
 
     model = DeviceSoftwareValidationResult
 
     def _get_base_url(self):
-        return "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_report"
+        return "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report"
 
     @classmethod
     def setUpTestData(cls):
@@ -93,7 +99,7 @@ class SoftwareReportOverviewTest(ViewTestCases.ListObjectsViewTestCase):  # pyli
         self.assertHttpStatus(
             self.client.get(
                 reverse(
-                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_report",
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
                 )
             ),
             403,
@@ -108,7 +114,65 @@ class SoftwareReportOverviewTest(ViewTestCases.ListObjectsViewTestCase):  # pyli
         self.assertHttpStatus(
             self.client.get(
                 reverse(
-                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_report",
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
+                )
+            ),
+            200,
+        )
+
+
+class ValidatedSoftwareInventoryItemReportViewTest(
+    ViewTestCases.ListObjectsViewTestCase
+):  # pylint: disable=too-many-ancestors
+    """Test ValidatedSoftwareInventoryItemReportView"""
+
+    model = InventoryItemSoftwareValidationResult
+
+    def _get_base_url(self):
+        return "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report"
+
+    @classmethod
+    def setUpTestData(cls):
+        """Set up test objects."""
+        inventory_items = create_inventory_items()
+        InventoryItemSoftwareValidationResult.objects.create(
+            inventory_item=inventory_items[0],
+            software=None,
+            is_validated=False,
+        )
+        InventoryItemSoftwareValidationResult.objects.create(
+            inventory_item=inventory_items[1],
+            software=None,
+            is_validated=False,
+        )
+        InventoryItemSoftwareValidationResult.objects.create(
+            inventory_item=inventory_items[2],
+            software=None,
+            is_validated=False,
+        )
+
+    def test_validation_report_view_without_permission(self):
+        """Test the SoftwareReportOverview."""
+
+        self.assertHttpStatus(
+            self.client.get(
+                reverse(
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
+                )
+            ),
+            403,
+        )
+
+    def test_validation_report_view_with_permission(self):
+        """Test the SoftwareReportOverview."""
+        obj_perm = ObjectPermission(name="Test permission", actions=["view"])
+        obj_perm.save()
+        obj_perm.users.add(self.user)
+        obj_perm.object_types.add(ContentType.objects.get_for_model(self.model))
+        self.assertHttpStatus(
+            self.client.get(
+                reverse(
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
                 )
             ),
             200,

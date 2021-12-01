@@ -339,13 +339,12 @@ class ValidatedSoftwareLCM(PrimaryModel):
 class DeviceSoftwareValidationResult(PrimaryModel):
     """Configuration compliance details."""
 
-    device = models.ForeignKey(
+    device = models.OneToOneField(
         to="dcim.Device",
         on_delete=models.CASCADE,
         help_text="The device",
         blank=False,
-        related_name="device_software_validated",
-        unique=True,
+        related_name="device_software_validation",
     )
     software = models.ForeignKey(
         to="SoftwareLCM", on_delete=models.CASCADE, help_text="Device software", null=True, blank=True, related_name="+"
@@ -367,11 +366,14 @@ class DeviceSoftwareValidationResult(PrimaryModel):
 class InventoryItemSoftwareValidationResult(PrimaryModel):
     """Configuration compliance details."""
 
-    inventory_item = models.ForeignKey(
-        to="dcim.InventoryItem", on_delete=models.CASCADE, help_text="The inventory", unique=True
+    inventory_item = models.OneToOneField(
+        to="dcim.InventoryItem",
+        on_delete=models.CASCADE,
+        help_text="The Inventory Item",
+        related_name="inventoryitem_software_validation",
     )
     software = models.ForeignKey(
-        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Inventory software", blank=True, null=True
+        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Inventory Item software", blank=True, null=True
     )
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)

@@ -11,11 +11,12 @@ from nautobot.dcim.models import DeviceType, Manufacturer, Platform
 
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
+    InventoryItemSoftwareValidationResult,
     SoftwareLCM,
     ValidatedSoftwareLCM,
     DeviceSoftwareValidationResult,
 )
-from .conftest import create_devices
+from .conftest import create_devices, create_inventory_items
 
 
 class TestModelBasic(TestCase):
@@ -285,4 +286,29 @@ class DeviceSoftwareValidationResultTestCase(TestCase):
         self.assertEqual(validation_result.device, self.device)
         self.assertEqual(validation_result.software, self.software)
         self.assertEqual(validation_result.is_validated, True)
-        self.assertEqual(validation_result.sw_missing, False)
+
+
+class InventoryItemSoftwareValidationResultTestCase(TestCase):
+    """Tests for the DeviceSoftwareValidationResult model."""
+
+    def setUp(self):
+        """Set up test objects."""
+        self.inventory_item = create_inventory_items()[0]
+        self.platform = Platform.objects.all().first()
+        self.software = SoftwareLCM.objects.create(
+            device_platform=self.platform,
+            version="17.3.3 MD",
+            release_date="2019-01-10",
+        )
+
+    def test_create_devicesoftwarevalidationresult(self):
+        """Successfully create SoftwareLCM with required fields only."""
+        validation_result = InventoryItemSoftwareValidationResult.objects.create(
+            inventory_item=self.inventory_item,
+            software=self.software,
+            is_validated=True,
+        )
+
+        self.assertEqual(validation_result.inventory_item, self.inventory_item)
+        self.assertEqual(validation_result.software, self.software)
+        self.assertEqual(validation_result.is_validated, True)

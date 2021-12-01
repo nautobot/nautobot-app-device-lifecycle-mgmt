@@ -451,6 +451,12 @@ class ValidatedSoftwareLCMCSVForm(CustomFieldModelCSVForm):
         to_field_name="name",
         help_text="Comma-separated list of Device Names",
     )
+    devices = CSVMultipleModelChoiceField(
+        queryset=Device.objects.all(),
+        required=False,
+        to_field_name="name",
+        help_text="Comma-separated list of Device Names",
+    )
     device_types = CSVMultipleModelChoiceField(
         queryset=DeviceType.objects.all(),
         required=False,

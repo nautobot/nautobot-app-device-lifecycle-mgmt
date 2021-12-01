@@ -11,14 +11,16 @@ from nautobot_device_lifecycle_mgmt.models import (
     SoftwareLCM,
     ValidatedSoftwareLCM,
     DeviceSoftwareValidationResult,
+    InventoryItemSoftwareValidationResult,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
     SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
     ValidatedSoftwareDeviceReportFilterSet,
+    ValidatedSoftwareInventoryItemReportFilterSet,
 )
-from .conftest import create_devices
+from .conftest import create_devices, create_inventory_items
 
 
 class HardwareLCMTestCase(TestCase):
@@ -317,7 +319,7 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
             self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
 
-class SoftwareReportOverviewFilterSetTestCase(TestCase):
+class ValidatedSoftwareDeviceReportFilterSetTestCase(TestCase):
     """Tests for the DeviceSoftwareValidationResult model."""
 
     queryset = DeviceSoftwareValidationResult.objects.all()
@@ -351,17 +353,17 @@ class SoftwareReportOverviewFilterSetTestCase(TestCase):
 
     def test_devices_name_one(self):
         """Test devices filter."""
-        params = {"devices": ["r1"]}
+        params = {"devices": ["sw1"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_devices_name_all(self):
         """Test devices filter."""
-        params = {"devices": ["r1", "r2", "r3"]}
+        params = {"devices": ["sw1", "sw2", "sw3"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_device_type_slug(self):
         """Test device_type filter."""
-        params = {"device_types": ["ASR-1000"]}
+        params = {"device_types": ["6509-E"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_device_roles_slug(self):
@@ -371,7 +373,7 @@ class SoftwareReportOverviewFilterSetTestCase(TestCase):
 
     def test_device_type_id(self):
         """Test device_type_id filter."""
-        device_type = DeviceType.objects.get(model="ASR-1000")
+        device_type = DeviceType.objects.get(model="6509-E")
         params = {"device_types_id": [device_type.id]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
@@ -384,6 +386,81 @@ class SoftwareReportOverviewFilterSetTestCase(TestCase):
     def test_device_id_all(self):
         """Test device_id filter."""
         params = {"device_id": [self.device_1.id, self.device_2.id, self.device_3.id]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_software(self):
+        """Test software version filter."""
+        params = {"software": ["17.3.3 MD"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_sw_missing(self):
+        """Test sw_missing filter."""
+        params = {"exclude_sw_missing": True}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+
+class ValidatedSoftwareInventoryItemReportFilterSetTestCase(TestCase):
+    """Tests for the DeviceSoftwareValidationResult model."""
+
+    queryset = InventoryItemSoftwareValidationResult.objects.all()
+    filterset = ValidatedSoftwareInventoryItemReportFilterSet
+
+    def setUp(self):
+        """Set up test objects."""
+        self.inventory_items = create_inventory_items()
+        self.platform = Platform.objects.all().first()
+        self.software = SoftwareLCM.objects.create(
+            device_platform=self.platform,
+            version="17.3.3 MD",
+            release_date="2019-01-10",
+        )
+
+        InventoryItemSoftwareValidationResult.objects.create(
+            inventory_item=self.inventory_items[0],
+            software=self.software,
+            is_validated=True,
+        )
+        InventoryItemSoftwareValidationResult.objects.create(
+            inventory_item=self.inventory_items[1],
+            software=self.software,
+            is_validated=False,
+        )
+        InventoryItemSoftwareValidationResult.objects.create(
+            inventory_item=self.inventory_items[2],
+            software=None,
+            is_validated=False,
+        )
+
+    def test_inventory_item_name_one(self):
+        """Test inventory items filter."""
+        params = {"inventory_items": ["SUP2T Card"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_inventory_items_name_all(self):
+        """Test devices filter."""
+        params = {"inventory_items": ["SUP2T Card", "100GBASE-SR4 QSFP Transceiver", "48x RJ-45 Line Card"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_inventory_items_device_type_slug(self):
+        """Test device_type filter."""
+        params = {"device_types": ["6509-E"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_inventory_items_device_roles_slug(self):
+        """Test device_roles filter."""
+        params = {"device_roles": ["core-switch"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_inventory_items_device_type_id(self):
+        """Test device_type_id filter."""
+        device_type = DeviceType.objects.get(model="6509-E")
+        params = {"device_types_id": [device_type.id]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_inventory_items_device_role_id(self):
+        """Test device_role_id filter."""
+        device_role = DeviceRole.objects.get(slug="core-switch")
+        params = {"device_roles_id": [device_role.id]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_software(self):
