@@ -179,6 +179,7 @@ class SoftwareLCMListView(generic.ObjectListView):
         "import",
         "export",
     )
+    template_name = "nautobot_device_lifecycle_mgmt/softwarelcm_list.html"
 
 
 class SoftwareLCMView(generic.ObjectView):
@@ -236,6 +237,7 @@ class ValidatedSoftwareLCMListView(generic.ObjectListView):
         "import",
         "export",
     )
+    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_list.html"
 
 
 class ValidatedSoftwareLCMView(generic.ObjectView):
