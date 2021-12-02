@@ -7,9 +7,16 @@ except ImportError:
 
 __version__ = metadata.version(__name__)
 
+from packaging import version
+
+from django.conf import settings
 from django.db.models.signals import post_migrate
 
 from nautobot.extras.plugins import PluginConfig
+
+
+current_nautobot_version = version.parse(settings.VERSION)
+NAUTOBOT_GRAPHQL_FIX = version.parse("1.2.0b1")
 
 
 class DeviceLifeCycleConfig(PluginConfig):
@@ -30,21 +37,14 @@ class DeviceLifeCycleConfig(PluginConfig):
 
     def ready(self):
         """Register custom signals."""
-        import graphene  # pylint: disable=import-outside-toplevel
-        from graphene_django.converter import convert_django_field  # pylint: disable=import-outside-toplevel
-        from taggit.managers import TaggableManager  # pylint: disable=import-outside-toplevel
-        from nautobot.extras.graphql.types import TagType  # pylint: disable=import-outside-toplevel
-
         import nautobot_device_lifecycle_mgmt.signals  # pylint: disable=C0415,W0611 # noqa: F401
-
-        @convert_django_field.register(TaggableManager)
-        def convert_field_to_list_tags(field, registry=None):
-            """Convert TaggableManager to List of Tags."""
-            return graphene.List(TagType)
-
         from .signals import (  # pylint: disable=import-outside-toplevel
             post_migrate_create_relationships,
         )
+
+        # Workaround for https://github.com/nautobot/nautobot/issues/567 for Nautobot < 1.2.0b1
+        if current_nautobot_version < NAUTOBOT_GRAPHQL_FIX:
+            import nautobot.extras.graphql.types  # pylint: disable=import-outside-toplevel, unused-import # noqa: F401
 
         post_migrate.connect(post_migrate_create_relationships, sender=self)
 
