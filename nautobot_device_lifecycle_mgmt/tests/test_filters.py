@@ -353,34 +353,34 @@ class DeviceSoftwareValidationResultFilterSetTestCase(TestCase):
 
     def test_devices_name_one(self):
         """Test devices filter."""
-        params = {"devices": ["sw1"]}
+        params = {"device": ["sw1"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_devices_name_all(self):
         """Test devices filter."""
-        params = {"devices": ["sw1", "sw2", "sw3"]}
+        params = {"device": ["sw1", "sw2", "sw3"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_device_type_slug(self):
         """Test device_type filter."""
-        params = {"device_types": ["6509-E"]}
+        params = {"device_type": ["6509-E"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_device_roles_slug(self):
         """Test device_roles filter."""
-        params = {"device_roles": ["core-switch"]}
+        params = {"device_role": ["core-switch"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_device_type_id(self):
         """Test device_type_id filter."""
         device_type = DeviceType.objects.get(model="6509-E")
-        params = {"device_types_id": [device_type.id]}
+        params = {"device_type_id": [device_type.id]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_device_role_id(self):
         """Test device_role_id filter."""
         device_role = DeviceRole.objects.get(slug="core-switch")
-        params = {"device_roles_id": [device_role.id]}
+        params = {"device_role_id": [device_role.id]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_device_id_all(self):
@@ -433,35 +433,40 @@ class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
 
     def test_inventory_item_name_one(self):
         """Test inventory items filter."""
-        params = {"inventory_items": ["SUP2T Card"]}
+        params = {"inventory_item": ["SUP2T Card"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_inventory_items_name_all(self):
         """Test devices filter."""
-        params = {"inventory_items": ["SUP2T Card", "100GBASE-SR4 QSFP Transceiver", "48x RJ-45 Line Card"]}
+        params = {"inventory_item": ["SUP2T Card", "100GBASE-SR4 QSFP Transceiver", "48x RJ-45 Line Card"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_inventory_items_device_type_slug(self):
         """Test device_type filter."""
-        params = {"device_types": ["6509-E"]}
+        params = {"device_type": ["6509-E"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_inventory_items_device_roles_slug(self):
         """Test device_roles filter."""
-        params = {"device_roles": ["core-switch"]}
+        params = {"device_role": ["core-switch"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_inventory_items_device_type_id(self):
         """Test device_type_id filter."""
         device_type = DeviceType.objects.get(model="6509-E")
-        params = {"device_types_id": [device_type.id]}
+        params = {"device_type_id": [device_type.id]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_inventory_items_device_role_id(self):
         """Test device_role_id filter."""
         device_role = DeviceRole.objects.get(slug="core-switch")
-        params = {"device_roles_id": [device_role.id]}
+        params = {"device_role_id": [device_role.id]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_inventory_items_part_id(self):
+        """Test device_type filter."""
+        params = {"part_id": "WS-X6548-GE-TX"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_software(self):
         """Test software version filter."""
