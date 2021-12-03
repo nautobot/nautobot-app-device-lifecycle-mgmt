@@ -11,7 +11,7 @@
         <span class="mdi mdi-plus-thick" aria-hidden="true"></span> Execute <span class="caret"></span>
     </button>
     <ul class="dropdown-menu">
-        <li><a href="{% url 'extras:job' class_path='plugins/nautobot_device_lifecycle_mgmt.jobs/InventoryItemSoftwareValidationFullReport' %}">Run Inventory Item Software Validation</a></li>
+        <li><a href="{% url 'extras:job' class_path='plugins/nautobot_device_lifecycle_mgmt.jobs/InventoryItemSoftwareValidationFullReport' %}">Run Software Validation</a></li>
     </ul>
 </div>
 {% if request.user.is_authenticated and table_config_form %}
@@ -27,6 +27,8 @@
             <!-- VISUAL BLOCK -->
             {% if report_last_run is None %}
                 <h4 class="text-center alert-danger p-4 m-4">-- No validation results found, you need to run the report at least once before seeing the results! --</h4>
+            {% else %}
+            <h4 class="text-left alert-info p-4 m-4">Last full run of the report: {{ report_last_run }} - {{ report_last_run|timesince }} ago </h4>
             {% endif %}
             {% if bar_chart is not None %}
                 {% block graphic  %}
@@ -66,7 +68,7 @@
                     </tr>
                 </tbody>
             </table>
-            <h3 class="text-center m-2 p-3">Inventory Item Name Summary</h3>
+            <h3 class="text-center m-2 p-3">Inventory Item Part ID Summary</h3>
             {% include 'utilities/obj_table.html' %}
             </div>
         <div class="col-md-3 noprint">

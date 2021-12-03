@@ -37,7 +37,6 @@ class DeviceSoftwareValidationFullReport(Job):
 
             validate_obj, _ = DeviceSoftwareValidationResult.objects.get_or_create(device=device)
             validate_obj.is_validated = device_software.validate_software()
-            # validate_obj.sw_missing = device_software.software is None
             validate_obj.software = device_software.software
             validate_obj.last_run = job_run_time
             validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
@@ -67,7 +66,6 @@ class InventoryItemSoftwareValidationFullReport(Job):
 
             validate_obj, _ = InventoryItemSoftwareValidationResult.objects.get_or_create(inventory_item=inventoryitem)
             validate_obj.is_validated = inventoryitem_software.validate_software()
-            # validate_obj.sw_missing = inventoryitem_software.software is None
             validate_obj.software = inventoryitem_software.software
             validate_obj.last_run = job_run_time
             validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN

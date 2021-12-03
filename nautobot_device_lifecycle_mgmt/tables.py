@@ -5,13 +5,13 @@ from django_tables2.utils import A
 from nautobot.utilities.tables import BaseTable, ButtonsColumn, BooleanColumn, ToggleColumn
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
-    InventoryItemSoftwareValidationResult,
     SoftwareLCM,
     ValidatedSoftwareLCM,
-    DeviceSoftwareValidationResult,
     ContractLCM,
     ProviderLCM,
     ContactLCM,
+    DeviceSoftwareValidationResult,
+    InventoryItemSoftwareValidationResult,
 )
 
 
@@ -134,8 +134,8 @@ class ValidatedSoftwareLCMTable(BaseTable):
         )
 
 
-class ValidatedSoftwareDeviceReportTable(BaseTable):
-    """Table for feature software compliance report."""
+class DeviceSoftwareValidationResultTable(BaseTable):
+    """Table for device software validation report."""
 
     name = tables.Column(accessor="device__device_type__model", verbose_name="Device Type")
     total = tables.Column(accessor="total", verbose_name="Total")
@@ -145,7 +145,7 @@ class ValidatedSoftwareDeviceReportTable(BaseTable):
     valid_percent = PercentageColumn(accessor="valid_percent", verbose_name="Compliance (%)")
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
-        """Metaclass attributes of SoftwareReportOverviewTable."""
+        """Metaclass attributes of DeviceSoftwareValidationResultTable."""
 
         model = DeviceSoftwareValidationResult
         fields = ["name", "total", "valid", "invalid", "no_software", "valid_percent"]
@@ -159,10 +159,10 @@ class ValidatedSoftwareDeviceReportTable(BaseTable):
         ]
 
 
-class ValidatedSoftwareInventoryItemReportTable(BaseTable):
-    """Table for feature software compliance report."""
+class InventoryItemSoftwareValidationResultTable(BaseTable):
+    """Table for inventory item software validation report."""
 
-    name = tables.Column(accessor="inventory_item__name", verbose_name="Inventory Item Name")
+    part_id = tables.Column(accessor="inventory_item__part_id", verbose_name="Part ID")
     total = tables.Column(accessor="total", verbose_name="Total")
     valid = tables.Column(accessor="valid", verbose_name="Valid")
     invalid = tables.Column(accessor="invalid", verbose_name="Invalid")
@@ -170,12 +170,12 @@ class ValidatedSoftwareInventoryItemReportTable(BaseTable):
     valid_percent = PercentageColumn(accessor="valid_percent", verbose_name="Compliance (%)")
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
-        """Metaclass attributes of SoftwareReportOverviewTable."""
+        """Metaclass attributes of InventoryItemSoftwareValidationResultTable."""
 
         model = InventoryItemSoftwareValidationResult
-        fields = ["name", "total", "valid", "invalid", "no_software", "valid_percent"]
+        fields = ["part_id", "total", "valid", "invalid", "no_software", "valid_percent"]
         default_columns = [
-            "name",
+            "part_id",
             "total",
             "valid",
             "invalid",

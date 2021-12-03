@@ -28,8 +28,8 @@ from nautobot_device_lifecycle_mgmt.tables import (
     HardwareLCMTable,
     SoftwareLCMTable,
     ValidatedSoftwareLCMTable,
-    ValidatedSoftwareDeviceReportTable,
-    ValidatedSoftwareInventoryItemReportTable,
+    DeviceSoftwareValidationResultTable,
+    InventoryItemSoftwareValidationResultTable,
     ContractLCMTable,
     ProviderLCMTable,
     ContactLCMTable,
@@ -45,8 +45,8 @@ from nautobot_device_lifecycle_mgmt.forms import (
     ValidatedSoftwareLCMForm,
     ValidatedSoftwareLCMFilterForm,
     ValidatedSoftwareLCMCSVForm,
-    ValidatedSoftwareDeviceReportFilterForm,
-    ValidatedSoftwareInventoryItemReportFilterForm,
+    DeviceSoftwareValidationResultFilterForm,
+    InventoryItemSoftwareValidationResultFilterForm,
     ContractLCMForm,
     ContractLCMBulkEditForm,
     ContractLCMFilterForm,
@@ -67,8 +67,8 @@ from nautobot_device_lifecycle_mgmt.filters import (
     ContactLCMFilterSet,
     SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
-    ValidatedSoftwareDeviceReportFilterSet,
-    ValidatedSoftwareInventoryItemReportFilterSet,
+    DeviceSoftwareValidationResultFilterSet,
+    InventoryItemSoftwareValidationResultFilterSet,
 )
 
 from nautobot_device_lifecycle_mgmt.const import URL, PLUGIN_CFG
@@ -274,40 +274,60 @@ class ValidatedSoftwareLCMBulkImportView(generic.BulkImportView):
 
 
 class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
-    """Customized overview view reports aggregation and filterset."""
+    """Customized overview view for reports aggregation and filterset."""
 
     def get_required_permission(self):
         """Manually set permission when not tied to a model for global report."""
+        # TODO: more generic permission should be used here
         return "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm"
 
     @staticmethod
+    def url_encode_figure(figure):
+        """Save graph into string buffer and convert 64 bit code into image."""
+        buf = io.BytesIO()
+        figure.savefig(buf, format="png")
+        buf.seek(0)
+        string = base64.b64encode(buf.read())
+
+        return urllib.parse.quote(string)
+
+    @staticmethod
     def plot_piechart_visual(aggr, pie_chart_attrs):
-        """Plot aggregation visual."""
+        """Plot pie chart aggregation visual."""
         if aggr[pie_chart_attrs["aggr_labels"][0]] is None:
             return None
-        sizes = [aggr[aggr_label] for aggr_label in pie_chart_attrs["aggr_labels"]]
-        explode = (0.1, 0.1, 0.1)  # "explode" slices
+
+        colors = [GREEN, RED, GREY]
+        sizes = []
+        pie_chart_labels = []
+        pie_chart_colors = []
+        for aggr_label, chart_label, color in zip(
+            pie_chart_attrs["aggr_labels"], pie_chart_attrs["chart_labels"], colors
+        ):
+            if aggr[aggr_label] == 0:
+                continue
+            sizes.append(aggr[aggr_label])
+            pie_chart_labels.append(chart_label)
+            pie_chart_colors.append(color)
+
+        explode = len(sizes) * (0.1,)
         fig1, ax1 = plt.subplots()
         logging.debug(fig1)
-        # labels = "Valid", "Invalid", "No Software"
         ax1.pie(
             sizes,
             explode=explode,
-            labels=pie_chart_attrs["chart_labels"],
+            labels=pie_chart_labels,
             autopct="%1.1f%%",
-            colors=[GREEN, RED, GREY],
+            colors=pie_chart_colors,
             shadow=True,
             startangle=90,
+            normalize=True,
         )
         ax1.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
         plt.title(aggr["name"], y=-0.1)
         fig = plt.gcf()
-        # convert graph into string buffer and then we convert 64 bit code into image
-        buf = io.BytesIO()
-        fig.savefig(buf, format="png")
-        buf.seek(0)
-        string = base64.b64encode(buf.read())
-        return urllib.parse.quote(string)
+
+        return ReportOverviewHelper.url_encode_figure(fig)
 
     @staticmethod
     def plot_barchart_visual(qs, chart_attrs):  # pylint: disable=too-many-locals
@@ -316,13 +336,13 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
 
         label_locations = np.arange(len(labels))  # the label locations
 
-        per_platform_bar_width = PLUGIN_CFG["per_platform_bar_width"]
-        per_platform_width = PLUGIN_CFG["per_platform_width"]
-        per_platform_height = PLUGIN_CFG["per_platform_height"]
+        barchart_bar_width = PLUGIN_CFG["barchart_bar_width"]
+        barchart_width = PLUGIN_CFG["barchart_width"]
+        barchart_height = PLUGIN_CFG["barchart_height"]
 
-        width = per_platform_bar_width  # the width of the bars
+        width = barchart_bar_width  # the width of the bars
 
-        fig, axis = plt.subplots(figsize=(per_platform_width, per_platform_height))
+        fig, axis = plt.subplots(figsize=(barchart_width, barchart_height))
 
         rects = []
         for bar_pos, chart_bar in enumerate(chart_attrs["chart_bars"]):
@@ -364,13 +384,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
         for rect in rects:
             autolabel(rect)
 
-        # convert graph into dtring buffer and then we convert 64 bit code into image
-        buf = io.BytesIO()
-        fig.savefig(buf, format="png")
-        buf.seek(0)
-        string = base64.b64encode(buf.read())
-        bar_chart = urllib.parse.quote(string)
-        return bar_chart
+        return ReportOverviewHelper.url_encode_figure(fig)
 
     @staticmethod
     def calculate_aggr_percentage(aggr):
@@ -390,9 +404,9 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
 class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
     """View for executive report on software Validation."""
 
-    filterset = ValidatedSoftwareDeviceReportFilterSet
-    filterset_form = ValidatedSoftwareDeviceReportFilterForm
-    table = ValidatedSoftwareDeviceReportTable
+    filterset = DeviceSoftwareValidationResultFilterSet
+    filterset_form = DeviceSoftwareValidationResultFilterForm
+    table = DeviceSoftwareValidationResultTable
     template_name = "nautobot_device_lifecycle_mgmt/validatedsoftware_device_report.html"
     queryset = (
         DeviceSoftwareValidationResult.objects.values("device__device_type__model")
@@ -487,18 +501,18 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
 class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
     """View for executive report on inventory item software validation."""
 
-    filterset = ValidatedSoftwareInventoryItemReportFilterSet
-    filterset_form = ValidatedSoftwareInventoryItemReportFilterForm
-    table = ValidatedSoftwareInventoryItemReportTable
+    filterset = InventoryItemSoftwareValidationResultFilterSet
+    filterset_form = InventoryItemSoftwareValidationResultFilterForm
+    table = InventoryItemSoftwareValidationResultTable
     template_name = "nautobot_device_lifecycle_mgmt/validatedsoftware_inventoryitem_report.html"
     queryset = (
-        InventoryItemSoftwareValidationResult.objects.values("inventory_item__name")
+        InventoryItemSoftwareValidationResult.objects.values("inventory_item__part_id")
         .distinct()
         .annotate(
-            total=Count("inventory_item__name"),
-            valid=Count("inventory_item__name", filter=Q(is_validated=True)),
-            invalid=Count("inventory_item__name", filter=Q(is_validated=False) & ~Q(software=None)),
-            no_software=Count("inventory_item__name", filter=Q(software=None)),
+            total=Count("inventory_item__part_id"),
+            valid=Count("inventory_item__part_id", filter=Q(is_validated=True)),
+            invalid=Count("inventory_item__part_id", filter=Q(is_validated=False) & ~Q(software=None)),
+            no_software=Count("inventory_item__part_id", filter=Q(software=None)),
             valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
         )
         .order_by("-valid_percent")

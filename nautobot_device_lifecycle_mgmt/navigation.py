@@ -334,7 +334,11 @@ except ModuleNotFoundError:
             ),
         ),
         PluginMenuItem(
-            link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_report",
-            link_text="Software Validation Report",
+            link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
+            link_text="Report: Device OS Validation",
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
+            link_text="Report: Inventory Item OS Validation",
         ),
     )

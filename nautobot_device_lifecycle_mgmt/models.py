@@ -337,7 +337,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
     "graphql",
 )
 class DeviceSoftwareValidationResult(PrimaryModel):
-    """Configuration compliance details."""
+    """Device Software validation details model."""
 
     device = models.OneToOneField(
         to="dcim.Device",
@@ -364,7 +364,7 @@ class DeviceSoftwareValidationResult(PrimaryModel):
     "graphql",
 )
 class InventoryItemSoftwareValidationResult(PrimaryModel):
-    """Configuration compliance details."""
+    """InventoryItem Software validation details model."""
 
     inventory_item = models.OneToOneField(
         to="dcim.InventoryItem",

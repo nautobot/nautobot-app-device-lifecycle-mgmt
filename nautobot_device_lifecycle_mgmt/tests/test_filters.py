@@ -17,8 +17,8 @@ from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
     SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
-    ValidatedSoftwareDeviceReportFilterSet,
-    ValidatedSoftwareInventoryItemReportFilterSet,
+    DeviceSoftwareValidationResultFilterSet,
+    InventoryItemSoftwareValidationResultFilterSet,
 )
 from .conftest import create_devices, create_inventory_items
 
@@ -319,11 +319,11 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
             self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
 
-class ValidatedSoftwareDeviceReportFilterSetTestCase(TestCase):
+class DeviceSoftwareValidationResultFilterSetTestCase(TestCase):
     """Tests for the DeviceSoftwareValidationResult model."""
 
     queryset = DeviceSoftwareValidationResult.objects.all()
-    filterset = ValidatedSoftwareDeviceReportFilterSet
+    filterset = DeviceSoftwareValidationResultFilterSet
 
     def setUp(self):
         """Set up test objects."""
@@ -399,11 +399,11 @@ class ValidatedSoftwareDeviceReportFilterSetTestCase(TestCase):
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
 
-class ValidatedSoftwareInventoryItemReportFilterSetTestCase(TestCase):
+class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
     """Tests for the DeviceSoftwareValidationResult model."""
 
     queryset = InventoryItemSoftwareValidationResult.objects.all()
-    filterset = ValidatedSoftwareInventoryItemReportFilterSet
+    filterset = InventoryItemSoftwareValidationResultFilterSet
 
     def setUp(self):
         """Set up test objects."""

@@ -2,7 +2,7 @@
 import logging
 from django import forms
 
-from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Platform
+from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Platform, Region, Site
 from nautobot.extras.forms import (
     CustomFieldModelCSVForm,
     CustomFieldModelForm,
@@ -345,31 +345,41 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
         ]
 
 
-class ValidatedSoftwareDeviceReportFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
-    """Filter form to filter searches for SoftwareReportOverview."""
+class DeviceSoftwareValidationResultFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+    """Filter form to filter searches for DeviceSoftwareValidationResult."""
 
     q = forms.CharField(
         required=False,
         label="Search",
     )
-    devices = DynamicModelMultipleChoiceField(
+    software = DynamicModelMultipleChoiceField(
+        queryset=SoftwareLCM.objects.all(),
+        to_field_name="version",
+        required=False,
+    )
+    site = DynamicModelMultipleChoiceField(
+        queryset=Site.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    region = DynamicModelMultipleChoiceField(
+        queryset=Region.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    device = DynamicModelMultipleChoiceField(
         queryset=Device.objects.all(),
         to_field_name="name",
         required=False,
     )
-    device_types = DynamicModelMultipleChoiceField(
+    device_type = DynamicModelMultipleChoiceField(
         queryset=DeviceType.objects.all(),
         to_field_name="model",
         required=False,
     )
-    device_roles = DynamicModelMultipleChoiceField(
+    device_role = DynamicModelMultipleChoiceField(
         queryset=DeviceRole.objects.all(),
         to_field_name="slug",
-        required=False,
-    )
-    software = DynamicModelMultipleChoiceField(
-        queryset=SoftwareLCM.objects.all(),
-        to_field_name="version",
         required=False,
     )
     exclude_sw_missing = forms.BooleanField(
@@ -382,11 +392,11 @@ class ValidatedSoftwareDeviceReportFilterForm(BootstrapMixin, CustomFieldModelFo
         """Meta attributes."""
 
         model = DeviceSoftwareValidationResult
-        fields = ["q", "devices", "device_types", "device_roles", "software", "exclude_sw_missing"]
+        fields = ["q", "software", "site", "region", "device", "device_type", "device_role", "exclude_sw_missing"]
 
 
-class ValidatedSoftwareInventoryItemReportFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
-    """Filter form to filter searches for SoftwareReportOverview."""
+class InventoryItemSoftwareValidationResultFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+    """Filter form to filter searches for InventoryItemSoftwareValidationResult."""
 
     q = forms.CharField(
         required=False,
@@ -397,22 +407,36 @@ class ValidatedSoftwareInventoryItemReportFilterForm(BootstrapMixin, CustomField
         to_field_name="version",
         required=False,
     )
-    inventory_items = DynamicModelMultipleChoiceField(
+    site = DynamicModelMultipleChoiceField(
+        queryset=Site.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    region = DynamicModelMultipleChoiceField(
+        queryset=Region.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    inventory_item = DynamicModelMultipleChoiceField(
         queryset=InventoryItem.objects.all(),
         to_field_name="name",
         required=False,
     )
-    devices = DynamicModelMultipleChoiceField(
+    part_id = forms.CharField(
+        required=False,
+        label="Part ID",
+    )
+    device = DynamicModelMultipleChoiceField(
         queryset=Device.objects.all(),
         to_field_name="name",
         required=False,
     )
-    device_types = DynamicModelMultipleChoiceField(
+    device_type = DynamicModelMultipleChoiceField(
         queryset=DeviceType.objects.all(),
         to_field_name="model",
         required=False,
     )
-    device_roles = DynamicModelMultipleChoiceField(
+    device_role = DynamicModelMultipleChoiceField(
         queryset=DeviceRole.objects.all(),
         to_field_name="slug",
         required=False,
@@ -427,7 +451,18 @@ class ValidatedSoftwareInventoryItemReportFilterForm(BootstrapMixin, CustomField
         """Meta attributes."""
 
         model = InventoryItemSoftwareValidationResult
-        fields = ["q", "inventory_items", "devices", "device_types", "device_roles", "software", "exclude_sw_missing"]
+        fields = [
+            "q",
+            "software",
+            "site",
+            "region",
+            "inventory_item",
+            "part_id",
+            "device",
+            "device_type",
+            "device_role",
+            "exclude_sw_missing",
+        ]
 
 
 class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):
