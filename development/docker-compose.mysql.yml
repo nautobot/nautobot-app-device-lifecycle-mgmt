@@ -16,6 +16,6 @@ services:
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: "20s"
-      retries: "10"
+      retries: 10
 volumes:
   lcm_mysql_data:  # yamllint disable-line rule:empty-values
