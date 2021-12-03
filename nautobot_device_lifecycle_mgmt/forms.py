@@ -38,7 +38,7 @@ class HardwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelFor
 
     inventory_item = forms.ModelChoiceField(
         queryset=InventoryItem.objects.exclude(part_id__exact="")
-        .distinct("part_id")
+        .distinct()
         .order_by("part_id")
         .values_list("part_id", flat=True),
         label="Inventory Part ID",
@@ -137,10 +137,11 @@ class HardwareLCMCSVForm(CustomFieldModelCSVForm):
     device_type = forms.ModelChoiceField(
         required=False, queryset=DeviceType.objects.all(), to_field_name="model", label="Device type"
     )
+
     inventory_item = forms.ModelChoiceField(
         required=False,
         queryset=InventoryItem.objects.exclude(part_id__exact="")
-        .distinct("part_id")
+        .distinct()
         .order_by("part_id")
         .values_list("part_id", flat=True),
         to_field_name="part_id",

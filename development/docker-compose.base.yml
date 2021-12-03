@@ -19,14 +19,19 @@ services:
     ports:
       - "0.0.0.0:8080:8080"
     depends_on:
-      - "postgres"
-      - "redis"
+      redis:
+        condition: "service_started"
+      db:
+        condition: "service_healthy"
     <<: *nautobot-build
     <<: *nautobot-base
   worker:
     entrypoint: "nautobot-server rqworker"
     depends_on:
-      - "nautobot"
+      nautobot:
+        condition: "service_started"
+      db:
+        condition: "service_healthy"
     healthcheck:
       disable: true
     <<: *nautobot-base
