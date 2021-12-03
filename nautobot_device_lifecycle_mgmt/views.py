@@ -414,7 +414,7 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
         .annotate(
             total=Count("device__device_type__model"),
             valid=Count("device__device_type__model", filter=Q(is_validated=True)),
-            invalid=Count("device__device_type__model", filter=Q(is_validated=False) and ~Q(software=None)),
+            invalid=Count("device__device_type__model", filter=Q(is_validated=False) & ~Q(software=None)),
             no_software=Count("device__device_type__model", filter=Q(software=None)),
             valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
         )
@@ -496,6 +496,41 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
         # add global aggregations to extra context.
 
         return self.extra_content
+
+    def queryset_to_csv(self):
+        """Export queryset of objects as comma-separated value (CSV)."""
+        csv_data = []
+
+        csv_data.append(",".join(["Type", "Total", "Valid", "Invalid", "No Software", "Compliance"]))
+        csv_data.append(
+            ",".join(
+                ["Devices"]
+                + [
+                    f"{str(val)} %" if key == "valid_percent" else str(val)
+                    for key, val in self.extra_content["device_aggr"].items()
+                    if key != "name"
+                ]
+            )
+        )
+        csv_data.append(",".join([]))
+
+        qs = self.queryset.values(
+            "device__device_type__model", "total", "valid", "invalid", "no_software", "valid_percent"
+        )
+        csv_data.append(
+            ",".join(
+                [
+                    "Device Model" if item == "device__device_type__model" else item.replace("_", " ").title()
+                    for item in qs[0].keys()
+                ]
+            )
+        )
+        for obj in qs:
+            csv_data.append(
+                ",".join([f"{str(val)} %" if key == "valid_percent" else str(val) for key, val in obj.items()])
+            )
+
+        return "\n".join(csv_data)
 
 
 class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
@@ -596,6 +631,41 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
         # add global aggregations to extra context.
 
         return self.extra_content
+
+    def queryset_to_csv(self):
+        """Export queryset of objects as comma-separated value (CSV)."""
+        csv_data = []
+
+        csv_data.append(",".join(["Type", "Total", "Valid", "Invalid", "No Software", "Compliance"]))
+        csv_data.append(
+            ",".join(
+                ["Inventory Items"]
+                + [
+                    f"{str(val)} %" if key == "valid_percent" else str(val)
+                    for key, val in self.extra_content["inventory_aggr"].items()
+                    if key != "name"
+                ]
+            )
+        )
+        csv_data.append(",".join([]))
+
+        qs = self.queryset.values(
+            "inventory_item__part_id", "total", "valid", "invalid", "no_software", "valid_percent"
+        )
+        csv_data.append(
+            ",".join(
+                [
+                    "Part ID" if item == "inventory_item__part_id" else item.replace("_", " ").title()
+                    for item in qs[0].keys()
+                ]
+            )
+        )
+        for obj in qs:
+            csv_data.append(
+                ",".join([f"{str(val)} %" if key == "valid_percent" else str(val) for key, val in obj.items()])
+            )
+
+        return "\n".join(csv_data)
 
 
 # ---------------------------------------------------------------------------------

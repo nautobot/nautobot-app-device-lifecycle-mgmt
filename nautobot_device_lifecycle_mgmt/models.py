@@ -359,6 +359,10 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         verbose_name = "Device Software Validation Report"
         ordering = ("device",)
 
+    def to_csv(self):
+        """Indicates model fields to return as csv."""
+        return (self.device.name, self.software.version, self.is_validated, self.last_run, self.run_type)
+
 
 @extras_features(
     "graphql",
@@ -384,6 +388,10 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
 
         verbose_name = "Inventory Item Software Validation Report"
         ordering = ("inventory_item",)
+
+    def to_csv(self):
+        """Indicates model fields to return as csv."""
+        return (self.inventory_item.name, self.software.version, self.is_validated, self.last_run, self.run_type)
 
 
 @extras_features(
