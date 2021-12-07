@@ -118,6 +118,7 @@ class HardwareLCMCreateView(generic.ObjectEditView):
     model = HardwareLCM
     queryset = HardwareLCM.objects.prefetch_related("device_type")
     model_form = HardwareLCMForm
+    template_name = "nautobot_device_lifecycle_mgmt/hardwarelcm_edit.html"
     default_return_url = "plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list"
 
 
@@ -135,6 +136,7 @@ class HardwareLCMEditView(generic.ObjectEditView):
     model = HardwareLCM
     queryset = HardwareLCM.objects.prefetch_related("device_type")
     model_form = HardwareLCMForm
+    template_name = "nautobot_device_lifecycle_mgmt/hardwarelcm_edit.html"
     default_return_url = "plugins:nautobot_device_lifecycle_mgmt:hardwarelcm"
 
 

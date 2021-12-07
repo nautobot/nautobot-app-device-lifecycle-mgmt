@@ -1,0 +1,42 @@
+{% extends 'generic/object_edit.html' %}
+{% load static %}
+{% load form_helpers %}
+{% load helpers %}
+
+{% block form %}
+{% block pre_form %}{% endblock %}
+<div class="panel panel-default">
+    <div class="panel-heading"><strong>Assign To</strong></div>
+    <div class="panel-body">
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#device_type" role="tab" data-toggle="tab">Device Type</a>
+            </li>
+            <li role="presentation">
+                <a href="#inventory_item" role="tab" data-toggle="tab">Inventory Item</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane active" id="device_type">
+                {% render_field form.device_type %}
+            </div>
+            <div class="tab-pane" id="inventory_item">
+                {% render_field form.inventory_item %}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading"><strong>Attributes</strong></div>
+    <div class="panel-body">
+        {% render_field form.release_date %}
+        {% render_field form.end_of_sale %}
+        {% render_field form.end_of_support %}
+        {% render_field form.end_of_sw_releases %}
+        {% render_field form.end_of_security_patches %}
+        {% render_field form.documentation_url %}
+        {% render_field form.comments %}
+    </div>
+</div>
+{% include 'inc/extras_features_edit_form_fields.html' %}
+{% endblock %}
