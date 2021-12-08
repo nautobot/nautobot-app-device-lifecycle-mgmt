@@ -1,11 +1,20 @@
 """Unit tests for views."""
 import datetime
+
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
+from django.urls import reverse
 
 from nautobot.utilities.testing import ViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer
+from nautobot.users.models import ObjectPermission
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM
+from nautobot_device_lifecycle_mgmt.models import (
+    HardwareLCM,
+    DeviceSoftwareValidationResult,
+    InventoryItemSoftwareValidationResult,
+)
+from .conftest import create_devices, create_inventory_items
 
 User = get_user_model()
 
@@ -57,3 +66,114 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: d
 
     # def test_bulk_import_objects_with_constrained_permission(self):
     #     pass
+
+
+class ValidatedSoftwareDeviceReportViewTest(
+    ViewTestCases.ListObjectsViewTestCase
+):  # pylint: disable=too-many-ancestors
+    """Test ValidatedSoftwareDeviceReportView"""
+
+    model = DeviceSoftwareValidationResult
+
+    def _get_base_url(self):
+        return "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report"
+
+    @classmethod
+    def setUpTestData(cls):
+        """Set up test objects."""
+        device_1, device_2, _ = create_devices()
+        DeviceSoftwareValidationResult.objects.create(
+            device=device_1,
+            software=None,
+            is_validated=False,
+        )
+        DeviceSoftwareValidationResult.objects.create(
+            device=device_2,
+            software=None,
+            is_validated=False,
+        )
+
+    def test_validation_report_view_without_permission(self):
+        """Test the SoftwareReportOverview."""
+
+        self.assertHttpStatus(
+            self.client.get(
+                reverse(
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
+                )
+            ),
+            403,
+        )
+
+    def test_validation_report_view_with_permission(self):
+        """Test the SoftwareReportOverview."""
+        obj_perm = ObjectPermission(name="Test permission", actions=["view"])
+        obj_perm.save()
+        obj_perm.users.add(self.user)
+        obj_perm.object_types.add(ContentType.objects.get_for_model(self.model))
+        self.assertHttpStatus(
+            self.client.get(
+                reverse(
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
+                )
+            ),
+            200,
+        )
+
+
+class ValidatedSoftwareInventoryItemReportViewTest(
+    ViewTestCases.ListObjectsViewTestCase
+):  # pylint: disable=too-many-ancestors
+    """Test ValidatedSoftwareInventoryItemReportView"""
+
+    model = InventoryItemSoftwareValidationResult
+
+    def _get_base_url(self):
+        return "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report"
+
+    @classmethod
+    def setUpTestData(cls):
+        """Set up test objects."""
+        inventory_items = create_inventory_items()
+        InventoryItemSoftwareValidationResult.objects.create(
+            inventory_item=inventory_items[0],
+            software=None,
+            is_validated=False,
+        )
+        InventoryItemSoftwareValidationResult.objects.create(
+            inventory_item=inventory_items[1],
+            software=None,
+            is_validated=False,
+        )
+        InventoryItemSoftwareValidationResult.objects.create(
+            inventory_item=inventory_items[2],
+            software=None,
+            is_validated=False,
+        )
+
+    def test_validation_report_view_without_permission(self):
+        """Test the SoftwareReportOverview."""
+
+        self.assertHttpStatus(
+            self.client.get(
+                reverse(
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
+                )
+            ),
+            403,
+        )
+
+    def test_validation_report_view_with_permission(self):
+        """Test the SoftwareReportOverview."""
+        obj_perm = ObjectPermission(name="Test permission", actions=["view"])
+        obj_perm.save()
+        obj_perm.users.add(self.user)
+        obj_perm.object_types.add(ContentType.objects.get_for_model(self.model))
+        self.assertHttpStatus(
+            self.client.get(
+                reverse(
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
+                )
+            ),
+            200,
+        )

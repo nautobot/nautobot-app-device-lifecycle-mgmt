@@ -186,6 +186,26 @@ try:
                         ),
                     ),
                 ),
+                NavMenuGroup(
+                    name="Reports",
+                    weight=100,
+                    items=(
+                        NavMenuItem(
+                            link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
+                            name="Device Software Validation",
+                            permissions=[
+                                "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
+                            ],
+                        ),
+                        NavMenuItem(
+                            link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
+                            name="Inventory Item Software Validation",
+                            permissions=[
+                                "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
+                            ],
+                        ),
+                    ),
+                ),
             ),
         ),
     )
@@ -312,5 +332,13 @@ except ModuleNotFoundError:
                     permissions=["nautobot_device_lifecycle_mgmt.add_validatedsoftwarelcm"],
                 ),
             ),
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
+            link_text="Report: Device OS Validation",
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
+            link_text="Report: Inventory Item OS Validation",
         ),
     )

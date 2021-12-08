@@ -2,7 +2,7 @@
 import logging
 from django import forms
 
-from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Platform
+from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Platform, Region, Site
 from nautobot.extras.forms import (
     CustomFieldModelCSVForm,
     CustomFieldModelForm,
@@ -23,8 +23,10 @@ from nautobot.utilities.forms import (
 from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, CurrencyChoices, PoCTypeChoices, CountryCodes
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
+    InventoryItemSoftwareValidationResult,
     SoftwareLCM,
     ValidatedSoftwareLCM,
+    DeviceSoftwareValidationResult,
     ContractLCM,
     ProviderLCM,
     ContactLCM,
@@ -344,6 +346,126 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
         ]
 
 
+class DeviceSoftwareValidationResultFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+    """Filter form to filter searches for DeviceSoftwareValidationResult."""
+
+    q = forms.CharField(
+        required=False,
+        label="Search",
+    )
+    software = DynamicModelMultipleChoiceField(
+        queryset=SoftwareLCM.objects.all(),
+        to_field_name="version",
+        required=False,
+    )
+    site = DynamicModelMultipleChoiceField(
+        queryset=Site.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    region = DynamicModelMultipleChoiceField(
+        queryset=Region.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    device = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
+    device_type = DynamicModelMultipleChoiceField(
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        required=False,
+    )
+    device_role = DynamicModelMultipleChoiceField(
+        queryset=DeviceRole.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    exclude_sw_missing = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Exclude missing software",
+    )
+
+    class Meta:
+        """Meta attributes."""
+
+        model = DeviceSoftwareValidationResult
+        fields = ["q", "software", "site", "region", "device", "device_type", "device_role", "exclude_sw_missing"]
+
+
+class InventoryItemSoftwareValidationResultFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+    """Filter form to filter searches for InventoryItemSoftwareValidationResult."""
+
+    q = forms.CharField(
+        required=False,
+        label="Search",
+    )
+    software = DynamicModelMultipleChoiceField(
+        queryset=SoftwareLCM.objects.all(),
+        to_field_name="version",
+        required=False,
+    )
+    site = DynamicModelMultipleChoiceField(
+        queryset=Site.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    region = DynamicModelMultipleChoiceField(
+        queryset=Region.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    inventory_item = DynamicModelMultipleChoiceField(
+        queryset=InventoryItem.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
+    part_id = forms.CharField(
+        required=False,
+        label="Part ID",
+    )
+    device = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
+    device_type = DynamicModelMultipleChoiceField(
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        required=False,
+    )
+    device_role = DynamicModelMultipleChoiceField(
+        queryset=DeviceRole.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    exclude_sw_missing = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Exclude missing software",
+    )
+
+    class Meta:
+        """Meta attributes."""
+
+        model = InventoryItemSoftwareValidationResult
+        fields = [
+            "q",
+            "software",
+            "site",
+            "region",
+            "inventory_item",
+            "part_id",
+            "device",
+            "device_type",
+            "device_role",
+            "exclude_sw_missing",
+        ]
+
+
 class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):
     """Reference a list of PKs."""
 
@@ -359,6 +481,12 @@ class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):
 class ValidatedSoftwareLCMCSVForm(CustomFieldModelCSVForm):
     """Form for bulk creating ValidatedSoftwareLCM objects."""
 
+    devices = CSVMultipleModelChoiceField(
+        queryset=Device.objects.all(),
+        required=False,
+        to_field_name="name",
+        help_text="Comma-separated list of Device Names",
+    )
     devices = CSVMultipleModelChoiceField(
         queryset=Device.objects.all(),
         required=False,

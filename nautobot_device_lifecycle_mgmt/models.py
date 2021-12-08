@@ -334,6 +334,67 @@ class ValidatedSoftwareLCM(PrimaryModel):
 
 
 @extras_features(
+    "graphql",
+)
+class DeviceSoftwareValidationResult(PrimaryModel):
+    """Device Software validation details model."""
+
+    device = models.OneToOneField(
+        to="dcim.Device",
+        on_delete=models.CASCADE,
+        help_text="The device",
+        blank=False,
+        related_name="device_software_validation",
+    )
+    software = models.ForeignKey(
+        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Device software", null=True, blank=True, related_name="+"
+    )
+    is_validated = models.BooleanField(null=True, blank=True)
+    last_run = models.DateTimeField(null=True, blank=True)
+    run_type = models.CharField(max_length=50, choices=choices.ReportRunTypeChoices)
+
+    class Meta:
+        """Meta attributes for DeviceSoftwareValidationResult."""
+
+        verbose_name = "Device Software Validation Report"
+        ordering = ("device",)
+
+    def to_csv(self):
+        """Indicates model fields to return as csv."""
+        return (self.device.name, self.software.version, self.is_validated, self.last_run, self.run_type)
+
+
+@extras_features(
+    "graphql",
+)
+class InventoryItemSoftwareValidationResult(PrimaryModel):
+    """InventoryItem Software validation details model."""
+
+    inventory_item = models.OneToOneField(
+        to="dcim.InventoryItem",
+        on_delete=models.CASCADE,
+        help_text="The Inventory Item",
+        related_name="inventoryitem_software_validation",
+    )
+    software = models.ForeignKey(
+        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Inventory Item software", blank=True, null=True
+    )
+    is_validated = models.BooleanField(null=True, blank=True)
+    last_run = models.DateTimeField(null=True, blank=True)
+    run_type = models.CharField(max_length=50, choices=choices.ReportRunTypeChoices)
+
+    class Meta:
+        """Meta attributes for InventoryItemSoftwareValidationResult."""
+
+        verbose_name = "Inventory Item Software Validation Report"
+        ordering = ("inventory_item",)
+
+    def to_csv(self):
+        """Indicates model fields to return as csv."""
+        return (self.inventory_item.name, self.software.version, self.is_validated, self.last_run, self.run_type)
+
+
+@extras_features(
     "custom_fields",
     "custom_links",
     "custom_validators",
