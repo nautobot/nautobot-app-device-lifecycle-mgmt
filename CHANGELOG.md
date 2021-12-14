@@ -1,11 +1,18 @@
 # CHANGELOG
 
-## v0.2.2 - TDB
-- PR#XX: Changes plural name handling on software models.
-- PR#XX: Updates case on LifeCycle to be Lifecycle.
-- PR#XX: Changes visual representation of Providers to be Vendors.
-- PR#XX: Updates documentation image for Hardware Notices.
+## v0.3.0 - 12-14-2021
 
+- PR#39: Adds feature-rich reporting functionality for Software Validation.
+- PR#37: Fixes GraphQL incompatibility with Nautobot >= 1.2.0.
+- PR#36: Adds documentation for the Software Lifecycle part of the plugin.
+- PR#33: Updates Hardware LCM to support MySQL Compliant Queries.
+- PR#32: Refactors ValidatedSoftwareLCM model to support assignment to multiple objects.
+
+## v0.2.2 - 10-07-2021
+- PR#30: Documentation updates for initial release.
+- PR#29: Updates case on LifeCycle to be Lifecycle.
+- PR#29: Changes visual representation of Providers to be Vendors.
+- PR#29: Updates documentation image for Hardware Notices.
 
 ## v0.2.1 - 10-24-2021
 - PR#26: Sets view permissions on all models in the navigation menu.
@@ -17,7 +24,6 @@
 ## v0.2.0 - 09-22-2021
 - **Adds Maintenance/Service Contracts to the Lifecycle Plugin.**
 - **Adds Software and Validated Software tracking to the Lifecycle Plugin.**
-
 
 ## v0.1.0 - 08-05-2021
 - Initial fork and rename of project from [Nautobot EoX Notices](https://github.com/FragmentedPacket/nautobot-eox-notices)
