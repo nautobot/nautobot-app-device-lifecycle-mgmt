@@ -193,6 +193,7 @@ try:
                         NavMenuItem(
                             link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
                             name="Device Software Validation",
+                            buttons=(),
                             permissions=[
                                 "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
                             ],
@@ -200,6 +201,7 @@ try:
                         NavMenuItem(
                             link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
                             name="Inventory Item Software Validation",
+                            buttons=(),
                             permissions=[
                                 "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
                             ],
@@ -336,9 +338,11 @@ except ModuleNotFoundError:
         PluginMenuItem(
             link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
             link_text="Report: Device OS Validation",
+            buttons=(),
         ),
         PluginMenuItem(
             link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
             link_text="Report: Inventory Item OS Validation",
+            buttons=(),
         ),
     )
