@@ -631,3 +631,76 @@ class ContactLCM(PrimaryModel):
             self.type,
             self.priority,
         )
+
+
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "graphql",
+    "relationships",
+    "webhooks",
+)
+class CVELCM(PrimaryModel):
+    """CVELCM is a model representation of a cve vulnerability record."""
+
+    name = models.CharField(max_length=16, blank=False)
+    software = models.ManyToManyField(to="nautobot_device_lifecycle_mgmt.SoftwareLCM", related_name="+", blank=True)
+    published_date = models.DateField(verbose_name="Published Date")
+    status = models.CharField(max_length=255, blank=True, null=True)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    severity = models.CharField(max_length=50, default=choices.CVESeverityChoices.NONE)
+    cvss = models.FloatField(blank=True, null=True, verbose_name="CVSS Base Score")
+    cvss_v2 = models.FloatField(blank=True, null=True, verbose_name="CVSSv2 Score")
+    cvss_v3 = models.FloatField(blank=True, null=True, verbose_name="CVSSv3 Score")
+    fix = models.CharField(max_length=255, blank=True, null=True)
+    comments = models.TextField(blank=True)
+    link = models.URLField()
+
+    csv_headers = [
+        "name",
+        "software",
+        "published_date",
+        "status",
+        "description",
+        "severity",
+        "cvss",
+        "cvss_v2",
+        "cvss_v3",
+        "fix",
+        "comments",
+        "link",
+    ]
+
+    class Meta:
+        """Meta attributes for the class."""
+
+        verbose_name = "CVE"
+
+        ordering = ("severity", "name")
+
+    def get_absolute_url(self):
+        """Returns the Detail view for CVELCM models."""
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:cvelcm", kwargs={"pk": self.pk})
+
+    def __str__(self):
+        """String representation of the model."""
+        return f"{self.name}"
+
+    def to_csv(self):
+        """Return fields for bulk view."""
+        return (
+            self.name,
+            self.software,
+            self.published_date,
+            self.status,
+            self.description,
+            self.severity,
+            self.cvss,
+            self.cvss_v2,
+            self.cvss_v3,
+            self.fix,
+            self.comments,
+            self.link,
+        )

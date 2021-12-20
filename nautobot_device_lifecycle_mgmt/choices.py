@@ -80,3 +80,21 @@ class ReportRunTypeChoices(ChoiceSet):
         (REPORT_SINGLE_OBJECT_RUN, "Single Object Run"),
         (REPORT_FULL_RUN, "Full Report Run"),
     )
+
+
+class CVESeverityChoices(ChoiceSet):
+    """Choices for the types of CVE severities."""
+
+    CRITICAL = "Critical"
+    HIGH = "High"
+    MEDIUM = "Medium"
+    LOW = "Low"
+    NONE = "None"
+
+    CHOICES = (
+        (CRITICAL, CRITICAL),
+        (HIGH, HIGH),
+        (MEDIUM, MEDIUM),
+        (LOW, LOW),
+        (NONE, NONE),
+    )
