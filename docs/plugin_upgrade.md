@@ -6,7 +6,7 @@ in pypi and can be upgraded using pip. (https://pypi.org/project/nautobot-device
 
 ```pip3 install --upgrade nautobot-device-lifecycle-mgmt```
 
-#### Check that the plugin will be installed for future upgrades.
+## Check that the plugin will be installed for future upgrades.
 To ensure Nautobot Device Life Cycle Management plugin is automatically re-installed during future
 upgrades, create a file named local_requirements.txt (if not already existing) in the Nautobot root directory
 (alongside requirements.txt) and list the nautobot-plugin-device-lifecycle-mgmt package:
