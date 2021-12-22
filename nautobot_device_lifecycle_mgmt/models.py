@@ -646,8 +646,8 @@ class CVELCM(PrimaryModel):
     """CVELCM is a model representation of a cve vulnerability record."""
 
     name = models.CharField(max_length=16, blank=False)
-    software = models.ManyToManyField(to="nautobot_device_lifecycle_mgmt.SoftwareLCM", related_name="+", blank=True)
     published_date = models.DateField(verbose_name="Published Date")
+    link = models.URLField()
     status = models.CharField(max_length=255, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
     severity = models.CharField(max_length=50, default=choices.CVESeverityChoices.NONE)
@@ -656,12 +656,11 @@ class CVELCM(PrimaryModel):
     cvss_v3 = models.FloatField(blank=True, null=True, verbose_name="CVSSv3 Score")
     fix = models.CharField(max_length=255, blank=True, null=True)
     comments = models.TextField(blank=True)
-    link = models.URLField()
 
     csv_headers = [
         "name",
-        "software",
         "published_date",
+        "link",
         "status",
         "description",
         "severity",
@@ -670,7 +669,6 @@ class CVELCM(PrimaryModel):
         "cvss_v3",
         "fix",
         "comments",
-        "link",
     ]
 
     class Meta:
@@ -692,8 +690,8 @@ class CVELCM(PrimaryModel):
         """Return fields for bulk view."""
         return (
             self.name,
-            self.software,
             self.published_date,
+            self.link,
             self.status,
             self.description,
             self.severity,
@@ -702,5 +700,4 @@ class CVELCM(PrimaryModel):
             self.cvss_v3,
             self.fix,
             self.comments,
-            self.link,
         )
