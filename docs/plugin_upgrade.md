@@ -19,7 +19,7 @@ If not, add the plugin name to the requriements.
 
 ```echo nautobot-device-lifecycle-mgmt >> local_requirements.txt```
 
-#### Run Post Upgrade Steps
+## Run Post Upgrade Steps
 Once the configuration has been updated, run the post migration script as the Nautobot user
 
 ```nautobot-server post_upgrade```
