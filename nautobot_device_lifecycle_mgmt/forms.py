@@ -20,7 +20,13 @@ from nautobot.utilities.forms import (
     add_blank_choice,
     CSVModelChoiceField,
 )
-from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, CurrencyChoices, PoCTypeChoices, CountryCodes
+from nautobot_device_lifecycle_mgmt.choices import (
+    ContractTypeChoices,
+    CurrencyChoices,
+    PoCTypeChoices,
+    CountryCodes,
+    CVESeverityChoices,
+)
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -30,6 +36,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContractLCM,
     ProviderLCM,
     ContactLCM,
+    CVELCM,
 )
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
@@ -809,3 +816,78 @@ class ContactLCMCSVForm(CustomFieldModelCSVForm):
 
         model = ContactLCM
         fields = ContactLCM.csv_headers
+
+
+class CVELCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+    """CVE Lifecycle Management creation/edit form."""
+
+    published_date = forms.DateField(widget=DatePicker())
+    severity = forms.ChoiceField(choices=CVESeverityChoices.CHOICES, label="Severity", required=False)
+
+    class Meta:
+        """Meta attributes for the CVELCMForm class."""
+
+        model = CVELCM
+
+        fields = CVELCM.csv_headers
+
+        widgets = {
+            "published_date": DatePicker(),
+        }
+
+
+class CVELCMBulkEditForm(BootstrapMixin, BulkEditForm):
+    """CVE Lifecycle Management bulk edit form."""
+
+    pk = forms.ModelMultipleChoiceField(queryset=CVELCM.objects.all(), widget=forms.MultipleHiddenInput)
+    status = forms.CharField(required=False)
+    comments = forms.CharField(required=False)
+
+    class Meta:
+        """Meta attributes for the CVELCMBulkEditForm class."""
+
+        nullable_fields = [
+            "status",
+            "comments",
+        ]
+
+
+class CVELCMFilterForm(BootstrapMixin, forms.ModelForm):
+    """Filter form to filter searches for CVELCM."""
+
+    q = forms.CharField(
+        required=False,
+        label="Search",
+        help_text="Search for name or link.",
+    )
+    severity = forms.ChoiceField(
+        widget=StaticSelect2,
+        required=False,
+        choices=add_blank_choice(CVESeverityChoices.CHOICES),
+    )
+
+    published_date_before = forms.DateField(label="Published Date Before", required=False, widget=DatePicker())
+    published_date_after = forms.DateField(label="Published Date After", required=False, widget=DatePicker())
+
+    class Meta:
+        """Meta attributes."""
+
+        model = CVELCM
+        fields = [
+            "q",
+            "published_date_before",
+            "published_date_after",
+            "severity",
+        ]
+
+
+class CVELCMCSVForm(CustomFieldModelCSVForm):
+    """Form for creating bulk CVEs."""
+
+    severity = forms.ChoiceField(choices=CVESeverityChoices.CHOICES, label="CVE Severity")
+
+    class Meta:
+        """Meta attributes for the CVELCMCSVForm class."""
+
+        model = CVELCM
+        fields = CVELCM.csv_headers

@@ -9,6 +9,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContractLCM,
     ProviderLCM,
     ContactLCM,
+    CVELCM,
 )
 
 
@@ -121,4 +122,19 @@ urlpatterns = [
         kwargs={"model": ContactLCM},
     ),
     path("contact/import/", views.ContactLCMBulkImportView.as_view(), name="contactlcm_import"),
+    # CVE Lifecycle Management URLs
+    path("cve/", views.CVELCMListView.as_view(), name="cvelcm_list"),
+    path("cve/<uuid:pk>/", views.CVELCMView.as_view(), name="cvelcm"),
+    path("cve/add/", views.CVELCMCreateView.as_view(), name="cvelcm_add"),
+    path("cve/delete/", views.CVELCMBulkDeleteView.as_view(), name="cvelcm_bulk_delete"),
+    path("cve/edit/", views.CVELCMBulkEditView.as_view(), name="cvelcm_bulk_edit"),
+    path("cve/<uuid:pk>/delete/", views.CVELCMDeleteView.as_view(), name="cvelcm_delete"),
+    path("cve/<uuid:pk>/edit/", views.CVELCMEditView.as_view(), name="cvelcm_edit"),
+    path(
+        "cve/<uuid:pk>/changelog/",
+        ObjectChangeLogView.as_view(),
+        name="cvelcm_changelog",
+        kwargs={"model": CVELCM},
+    ),
+    path("cve/import/", views.CVELCMBulkImportView.as_view(), name="cvelcm_import"),
 ]

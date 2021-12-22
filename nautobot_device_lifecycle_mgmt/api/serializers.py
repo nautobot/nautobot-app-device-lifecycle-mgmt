@@ -16,6 +16,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     ContractLCM,
     ProviderLCM,
+    CVELCM,
 )
 
 from .nested_serializers import (
@@ -178,6 +179,33 @@ class ValidatedSoftwareLCMSerializer(
             "end",
             "preferred",
             "valid",
+            "custom_fields",
+            "tags",
+        ]
+
+
+class CVELCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=too-many-ancestors
+    """REST API serializer for CVELCM records."""
+
+    url = serializers.HyperlinkedIdentityField(view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:cvelcm-detail")
+
+    class Meta:
+        """Meta attributes."""
+
+        model = CVELCM
+        fields = [
+            "id",
+            "url",
+            "published_date",
+            "link",
+            "status",
+            "description",
+            "severity",
+            "cvss",
+            "cvss_v2",
+            "cvss_v3",
+            "fix",
+            "comments",
             "custom_fields",
             "tags",
         ]

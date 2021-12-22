@@ -13,6 +13,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContractLCM,
     ProviderLCM,
     ContactLCM,
+    CVELCM,
 )
 
 
@@ -628,4 +629,27 @@ class ContactLCMFilterSet(django_filters.FilterSet):
             | Q(phone__icontains=value)
             | Q(address__icontains=value)
         )
+        return queryset.filter(qs_filter)
+
+
+class CVELCMFilterSet(django_filters.FilterSet):
+    """Filter for CVELCMFilterSet."""
+
+    q = django_filters.CharFilter(method="search", label="Search")
+
+    published_date = django_filters.DateTimeFromToRangeFilter()
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = CVELCM
+
+        fields = CVELCM.csv_headers
+
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+
+        qs_filter = Q(name__icontains=value) | Q(link__icontains=value)
         return queryset.filter(qs_filter)

@@ -8,6 +8,7 @@ from nautobot_device_lifecycle_mgmt.api.views import (
     ContactLCMView,
     SoftwareLCMViewSet,
     ValidatedSoftwareLCMViewSet,
+    CVELCMViewSet,
 )
 
 router = routers.DefaultRouter()
@@ -18,6 +19,7 @@ router.register(r"provider", ProviderLCMView)
 router.register(r"contact", ContactLCMView)
 router.register(r"software", SoftwareLCMViewSet)
 router.register(r"validated-software", ValidatedSoftwareLCMViewSet)
+router.register(r"cve", CVELCMViewSet)
 
 app_name = "nautobot_device_lifecycle_mgmt"
 

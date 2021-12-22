@@ -10,6 +10,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContactLCM,
     SoftwareLCM,
     ValidatedSoftwareLCM,
+    CVELCM,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -18,6 +19,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     ContactLCMFilterSet,
     SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
+    CVELCMFilterSet,
 )
 
 from .serializers import (
@@ -27,6 +29,7 @@ from .serializers import (
     ContactLCMSerializer,
     SoftwareLCMSerializer,
     ValidatedSoftwareLCMSerializer,
+    CVELCMSerializer,
 )
 
 
@@ -76,3 +79,11 @@ class ValidatedSoftwareLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=t
     queryset = ValidatedSoftwareLCM.objects.all()
     serializer_class = ValidatedSoftwareLCMSerializer
     filterset_class = ValidatedSoftwareLCMFilterSet
+
+
+class CVELCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-ancestors
+    """REST API viewset for CVELCM records."""
+
+    queryset = CVELCM.objects.all()
+    serializer_class = CVELCMSerializer
+    filterset_class = CVELCMFilterSet

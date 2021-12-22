@@ -10,6 +10,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContractLCM,
     ProviderLCM,
     ContactLCM,
+    CVELCM,
     DeviceSoftwareValidationResult,
     InventoryItemSoftwareValidationResult,
 )
@@ -271,5 +272,43 @@ class ContactLCMTable(BaseTable):
             "comments",
             "priority",
             "contract",
+            "actions",
+        )
+
+
+class CVELCMTable(BaseTable):
+    """Table for list view."""
+
+    pk = ToggleColumn()
+    name = tables.LinkColumn(
+        "plugins:nautobot_device_lifecycle_mgmt:cvelcm", text=lambda record: record, args=[A("pk")]
+    )
+    link = tables.TemplateColumn(
+        template_code="""{% if record.link %}
+                    <a href="{{ record.link }}" target="_blank" data-toggle="tooltip" data-placement="left" title="{{ record.link }}">
+                        <span class="mdi mdi-open-in-new"></span>
+                    </a>
+                    {% else %}
+                    —
+                    {% endif %}""",
+        verbose_name="Link",
+    )
+    actions = ButtonsColumn(CVELCM, buttons=("changelog", "edit", "delete"))
+
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = CVELCM
+        fields = (
+            "pk",
+            "name",
+            "published_date",
+            "link",
+            "status",
+            "severity",
+            "cvss",
+            "cvss_v2",
+            "cvss_v3",
+            "fix",
             "actions",
         )

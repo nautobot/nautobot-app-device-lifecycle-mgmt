@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load buttons %}
+{% load custom_links %}
+{% load helpers %}
+{% load humanize %}
+
+{% block title %}{{ object }}{% endblock %}
+
+{% block header %}
+    <div class="row noprint">
+        <div class="col-sm-12 col-md-12">
+            <ol class="breadcrumb">
+                <li><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:cvelcm_list' %}">CVEs</a></li>
+                <li><a>{{ object }}</a></li>
+            </ol>
+        </div>
+    </div>
+    <div class="pull-right noprint">
+        {% if perms.change %}
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:cvelcm_edit' pk=object.id %}" class="btn btn-warning">
+                <span class="mdi mdi-pencil" aria-hidden="true"></span> Edit
+            </a>
+        {% endif %}
+        {% if perms.delete %}
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:cvelcm_delete' pk=object.id %}" class="btn btn-danger">
+                <span class="mdi mdi-trash-can-outline" aria-hidden="true"></span> Delete
+            </a>
+        {% endif %}
+    </div>
+    <h2>CVE: {{ object }}</h2>
+        {% include 'inc/created_updated.html' with obj=object %}
+    <div class="pull-right noprint">
+        {% custom_links object %}
+    </div>
+    <ul class="nav nav-tabs">
+        <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
+            <a href="{{ object.get_absolute_url }}">CVE</a>
+        </li>
+        <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:cvelcm_changelog' pk=object.id %}">Change Log</a>
+        </li>
+    </ul>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>CVE</strong>
+            </div>
+            <table class="table table-hover panel-body attr-table">
+                <tr style="font-weight: bold">
+                    <td>Name</td>
+                    <td>{{ object.name }}</td>
+                </tr>
+                <tr>
+                    <td>Published Date</td>
+                    <td>{% if object.published_date %} {{ object.published_date }} {% else %} &mdash; {% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Link</td>
+                    <td><a href="{{ object.link }}" target="_blank">{{ object.link }}</td>
+                </tr>
+                <tr>
+                    <td>Status</td>
+                    <td>{% if object.status %} {{ object.status }} {% else %} &mdash; {% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Description</td>
+                    <td>{% if object.description %} {{ object.description }} {% else %} &mdash; {% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Severity</td>
+                    <td>{% if object.severity %} {{ object.severity }} {% else %} &mdash; {% endif %}</td>
+                </tr>
+                <tr>
+                    <td>CVSS Base Score</td>
+                    <td>{% if object.cvss %} {{ object.cvss }} {% else %} &mdash; {% endif %}</td>
+                </tr>
+                <tr>
+                    <td>CVSSv2 Score</td>
+                    <td>{% if object.cvss_v2 %} {{ object.cvss_v2 }} {% else %} &mdash; {% endif %}</td>
+                </tr>
+                <tr>
+                    <td>CVSSv3 Score</td>
+                    <td>{% if object.cvss_v3 %} {{ object.cvss_v3 }} {% else %} &mdash; {% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Fix</td>
+                    <td>{% if object.fix %} {{ object.fix }} {% else %} &mdash; {% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Comments</td>
+                    <td>{% if object.comments %}<pre>{{ object.comments|placeholder  }}</pre>{% else %} &mdash; {% endif %}</td>
+                </tr>
+            </table>
+        </div>
+        {% include 'inc/custom_fields_panel.html' %}
+        {% include 'inc/relationships_panel.html' %}
+        {% include 'extras/inc/tags_panel.html' with tags=object.tags.all %}
+    </div>
+</div>
+{% endblock %}
