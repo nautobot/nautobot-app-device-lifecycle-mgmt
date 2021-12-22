@@ -26,7 +26,7 @@ Once the configuration has been updated, run the post migration script as the Na
 
 This should run migrations for the plugin to be ready for use.
 
-#### Restart Nautobot Services
+## Restart Nautobot Services
 As a user account that has privileges to restart services, restart the Nautobot services
 
 ```sudo systemctl restart nautobot nautobot-worker```
