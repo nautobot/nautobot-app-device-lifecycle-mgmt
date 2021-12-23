@@ -196,6 +196,7 @@ class CVELCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # p
         fields = [
             "id",
             "url",
+            "name",
             "published_date",
             "link",
             "status",
