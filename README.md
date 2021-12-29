@@ -54,6 +54,7 @@ sudo systemctl restart nautobot-rq-worker
 ```
 
 ## Documentation
+- [Plugin Upgrade Guide](./docs/plugin_upgrade.md)
 - [Software lifecycle](./docs/software_lifecycle.md)
 
 ## Usage
