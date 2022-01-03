@@ -2,9 +2,11 @@
 from datetime import date
 
 from django.test import TestCase
+from django.contrib.contenttypes.models import ContentType
 import time_machine
 
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site, Platform
+from nautobot.extras.models import Status
 
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
@@ -12,6 +14,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     DeviceSoftwareValidationResult,
     InventoryItemSoftwareValidationResult,
+    CVELCM,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -19,6 +22,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     ValidatedSoftwareLCMFilterSet,
     DeviceSoftwareValidationResultFilterSet,
     InventoryItemSoftwareValidationResultFilterSet,
+    CVELCMFilterSet,
 )
 from .conftest import create_devices, create_inventory_items
 
@@ -476,4 +480,74 @@ class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
     def test_sw_missing(self):
         """Test sw_missing filter."""
         params = {"exclude_sw_missing": True}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+
+class CVELCMTestCase(TestCase):
+    """Tests for CVELCMFilter."""
+
+    queryset = CVELCM.objects.all()
+    filterset = CVELCMFilterSet
+
+    def setUp(self):
+        cve_ct = ContentType.objects.get_for_model(CVELCM)
+        fixed = Status.objects.create(name="Fixed", slug="fixed", color="4caf50", description="Unit has been fixed")
+        fixed.content_types.set([cve_ct])
+        not_fixed = Status.objects.create(
+            name="Not Fixed", slug="not-fixed", color="f44336", description="Unit is not fixed"
+        )
+        not_fixed.content_types.set([cve_ct])
+
+        CVELCM.objects.create(
+            name="CVE-2021-1391",
+            published_date="2021-03-24",
+            link="https://www.cvedetails.com/cve/CVE-2021-1391/",
+        )
+        CVELCM.objects.create(
+            name="CVE-2021-44228",
+            published_date="2021-12-10",
+            link="https://www.cvedetails.com/cve/CVE-2021-44228/",
+            status=not_fixed,
+        )
+        CVELCM.objects.create(
+            name="CVE-2020-27134",
+            published_date="2020-12-11",
+            link="https://www.cvedetails.com/cve/CVE-2020-27134/",
+            severity="Critical",
+            status=fixed,
+        )
+
+    def test_q_one_year(self):
+        """Test q filter to find single record based on year."""
+        params = {"q": "2020"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_two_year(self):
+        """Test q filter to find two records based on year."""
+        params = {"q": "2021"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_q_link(self):
+        """Test q filter to all records from link."""
+        params = {"q": "cvedetails"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_status(self):
+        """Test status filter."""
+        params = {"status": ["fixed"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_severity(self):
+        """Test severity filter."""
+        params = {"severity": "Critical"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_published_date_before(self):
+        """Test published_date_before filter."""
+        params = {"published_date_before": "2021-01-01"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_published_date_after(self):
+        """Test published_date_after filter."""
+        params = {"published_date_after": "2021-01-01"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)

@@ -12,6 +12,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContractLCM,
     ProviderLCM,
     ValidatedSoftwareLCM,
+    CVELCM,
 )
 
 
@@ -369,6 +370,76 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: 
         )
         validated_software.inventory_items.set([inventoryitem.pk for inventoryitem in inventoryitems])
         validated_software.save()
+
+    def test_bulk_create_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_bulk_delete_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_bulk_update_objects(self):
+        """Currently don't support bulk operations."""
+
+
+class CVELCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
+    """Test the CVELCM API."""
+
+    model = CVELCM
+    brief_fields = [
+        "comments",
+        "custom_fields",
+        "cvss",
+        "cvss_v2",
+        "cvss_v3",
+        "description",
+        "display",
+        "fix",
+        "id",
+        "link",
+        "name",
+        "published_date",
+        "severity",
+        "status",
+        "tags",
+        "url",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+
+        cls.create_data = [
+            {
+                "name": "CVE-2021-40128",
+                "published_date": datetime.date(2021, 11, 4),
+                "link": "https://www.cvedetails.com/cve/CVE-2021-40128/",
+            },
+            {
+                "name": "CVE-2021-40126",
+                "published_date": datetime.date(2021, 11, 4),
+                "link": "https://www.cvedetails.com/cve/CVE-2021-40126/",
+            },
+            {
+                "name": "CVE-2021-40125",
+                "published_date": datetime.date(2021, 10, 27),
+                "link": "https://www.cvedetails.com/cve/CVE-2021-40125/",
+            },
+        ]
+
+        CVELCM.objects.create(
+            name="CVE-2021-1391",
+            published_date="2021-03-24",
+            link="https://www.cvedetails.com/cve/CVE-2021-1391/",
+        )
+        CVELCM.objects.create(
+            name="CVE-2021-44228",
+            published_date="2021-12-10",
+            link="https://www.cvedetails.com/cve/CVE-2021-44228/",
+        )
+        CVELCM.objects.create(
+            name="CVE-2020-27134",
+            published_date="2020-12-11",
+            link="https://www.cvedetails.com/cve/CVE-2020-27134/",
+        )
 
     def test_bulk_create_objects(self):
         """Currently don't support bulk operations."""
