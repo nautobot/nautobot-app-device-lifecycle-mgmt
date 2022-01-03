@@ -3,6 +3,7 @@
 import django_tables2 as tables
 from django_tables2.utils import A
 from nautobot.utilities.tables import BaseTable, ButtonsColumn, BooleanColumn, ToggleColumn
+from nautobot.extras.tables import StatusTableMixin
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
@@ -276,9 +277,10 @@ class ContactLCMTable(BaseTable):
         )
 
 
-class CVELCMTable(BaseTable):
+class CVELCMTable(StatusTableMixin, BaseTable):
     """Table for list view."""
 
+    model = CVELCM
     pk = ToggleColumn()
     name = tables.LinkColumn(
         "plugins:nautobot_device_lifecycle_mgmt:cvelcm", text=lambda record: record, args=[A("pk")]

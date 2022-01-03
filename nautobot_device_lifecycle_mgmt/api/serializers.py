@@ -7,7 +7,7 @@ from nautobot.dcim.api.nested_serializers import (
     NestedPlatformSerializer,
 )
 from nautobot.extras.api.customfields import CustomFieldModelSerializer
-from nautobot.extras.api.serializers import TaggedObjectSerializer
+from nautobot.extras.api.serializers import TaggedObjectSerializer, StatusModelSerializerMixin
 
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
@@ -184,7 +184,9 @@ class ValidatedSoftwareLCMSerializer(
         ]
 
 
-class CVELCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=too-many-ancestors
+class CVELCMSerializer(
+    CustomFieldModelSerializer, TaggedObjectSerializer, StatusModelSerializerMixin
+):  # pylint: disable=too-many-ancestors
     """REST API serializer for CVELCM records."""
 
     url = serializers.HyperlinkedIdentityField(view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:cvelcm-detail")

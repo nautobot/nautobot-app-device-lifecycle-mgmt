@@ -7,6 +7,9 @@ from nautobot.extras.forms import (
     CustomFieldModelCSVForm,
     CustomFieldModelForm,
     RelationshipModelForm,
+    StatusBulkEditFormMixin,
+    StatusModelCSVFormMixin,
+    StatusFilterFormMixin,
 )
 from nautobot.extras.models import Tag
 from nautobot.utilities.forms import (
@@ -818,11 +821,14 @@ class ContactLCMCSVForm(CustomFieldModelCSVForm):
         fields = ContactLCM.csv_headers
 
 
-class CVELCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+class CVELCMForm(
+    StatusBulkEditFormMixin, BootstrapMixin, CustomFieldModelForm, RelationshipModelForm
+):  # pylint: disable=too-many-ancestors
     """CVE Lifecycle Management creation/edit form."""
 
     published_date = forms.DateField(widget=DatePicker())
     severity = forms.ChoiceField(choices=CVESeverityChoices.CHOICES, label="Severity", required=False)
+    model = CVELCM
 
     class Meta:
         """Meta attributes for the CVELCMForm class."""
@@ -836,25 +842,30 @@ class CVELCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
         }
 
 
-class CVELCMBulkEditForm(BootstrapMixin, BulkEditForm):
+class CVELCMBulkEditForm(StatusBulkEditFormMixin, BootstrapMixin, BulkEditForm):
     """CVE Lifecycle Management bulk edit form."""
 
+    model = CVELCM
     pk = forms.ModelMultipleChoiceField(queryset=CVELCM.objects.all(), widget=forms.MultipleHiddenInput)
-    status = forms.CharField(required=False)
+    description = forms.CharField(required=False)
     comments = forms.CharField(required=False)
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
     class Meta:
         """Meta attributes for the CVELCMBulkEditForm class."""
 
         nullable_fields = [
-            "status",
+            "description",
             "comments",
+            "status",
+            "tags",
         ]
 
 
-class CVELCMFilterForm(BootstrapMixin, forms.ModelForm):
+class CVELCMFilterForm(BootstrapMixin, forms.ModelForm, StatusFilterFormMixin):
     """Filter form to filter searches for CVELCM."""
 
+    model = CVELCM
     q = forms.CharField(
         required=False,
         label="Search",
@@ -878,10 +889,11 @@ class CVELCMFilterForm(BootstrapMixin, forms.ModelForm):
             "published_date_before",
             "published_date_after",
             "severity",
+            "status",
         ]
 
 
-class CVELCMCSVForm(CustomFieldModelCSVForm):
+class CVELCMCSVForm(CustomFieldModelCSVForm, StatusModelCSVFormMixin):
     """Form for creating bulk CVEs."""
 
     severity = forms.ChoiceField(choices=CVESeverityChoices.CHOICES, label="CVE Severity")

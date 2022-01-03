@@ -5,6 +5,7 @@ from django.db.models import Q
 
 from nautobot.dcim.models import DeviceType, Platform, Device, DeviceRole, InventoryItem, Region, Site
 from nautobot.extras.models import Tag
+from nautobot.extras.filters import StatusModelFilterSetMixin
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
@@ -632,7 +633,7 @@ class ContactLCMFilterSet(django_filters.FilterSet):
         return queryset.filter(qs_filter)
 
 
-class CVELCMFilterSet(django_filters.FilterSet):
+class CVELCMFilterSet(StatusModelFilterSetMixin, django_filters.FilterSet):
     """Filter for CVELCMFilterSet."""
 
     q = django_filters.CharFilter(method="search", label="Search")

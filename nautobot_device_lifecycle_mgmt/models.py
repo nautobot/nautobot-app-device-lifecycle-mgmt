@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from nautobot.extras.utils import extras_features
+from nautobot.extras.models.statuses import StatusField
 from nautobot.core.models.generics import PrimaryModel, OrganizationalModel
 from nautobot.dcim.models import Device, InventoryItem
 from nautobot.utilities.querysets import RestrictedQuerySet
@@ -641,6 +642,7 @@ class ContactLCM(PrimaryModel):
     "graphql",
     "relationships",
     "webhooks",
+    "statuses",
 )
 class CVELCM(PrimaryModel):
     """CVELCM is a model representation of a cve vulnerability record."""
@@ -648,7 +650,12 @@ class CVELCM(PrimaryModel):
     name = models.CharField(max_length=16, blank=False)
     published_date = models.DateField(verbose_name="Published Date")
     link = models.URLField()
-    status = models.CharField(max_length=255, blank=True, null=True)
+    status = StatusField(
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        to="extras.status",
+    )
     description = models.CharField(max_length=255, blank=True, null=True)
     severity = models.CharField(max_length=50, default=choices.CVESeverityChoices.NONE)
     cvss = models.FloatField(blank=True, null=True, verbose_name="CVSS Base Score")
