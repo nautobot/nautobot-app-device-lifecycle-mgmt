@@ -1,5 +1,5 @@
 {% load helpers %}
-{% if perms.view and hw_notices %}
+{% if perms.nautobot_device_lifecycle_mgmt.view_hardwarelcm and hw_notices %}
 {% for notice in hw_notices %}
 <div class="row">
     <div class="col-md-12">
