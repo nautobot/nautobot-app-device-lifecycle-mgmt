@@ -639,6 +639,8 @@ class CVELCMFilterSet(StatusModelFilterSetMixin, django_filters.FilterSet):
     q = django_filters.CharFilter(method="search", label="Search")
 
     published_date = django_filters.DateTimeFromToRangeFilter()
+    published_date__gte = django_filters.DateFilter(field_name="published_date", lookup_expr="gte")
+    published_date__lte = django_filters.DateFilter(field_name="published_date", lookup_expr="lte")
 
     class Meta:
         """Meta attributes for filter."""
