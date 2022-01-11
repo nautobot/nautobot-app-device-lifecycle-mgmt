@@ -387,7 +387,6 @@ class CVELCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-ma
     model = CVELCM
     brief_fields = [
         "comments",
-        "custom_fields",
         "cvss",
         "cvss_v2",
         "cvss_v3",
@@ -400,7 +399,6 @@ class CVELCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-ma
         "published_date",
         "severity",
         "status",
-        "tags",
         "url",
     ]
 
