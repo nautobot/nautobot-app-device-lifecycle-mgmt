@@ -207,16 +207,13 @@ LOGGING = {
     },
     "handlers": {
         "normal_console": {
-            "level": "DEBUG",
+            "level": LOG_LEVEL,
             "class": "logging.StreamHandler",
             "formatter": "normal",
         },
     },
     "loggers": {
-        "django": {
-            "handlers": ["normal_console"],
-            "level": "INFO"
-        },
+        "django": {"handlers": ["normal_console"], "level": LOG_LEVEL},
         "nautobot": {
             "handlers": ["normal_console"],
             "level": LOG_LEVEL,
