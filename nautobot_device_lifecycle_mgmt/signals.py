@@ -57,13 +57,13 @@ def post_migrate_create_relationships(sender, apps, **kwargs):  # pylint: disabl
             "destination_label": "Contract",
         },
         {
-            "name": "CVE to Software",
-            "slug": "cve_soft",
+            "name": "Software to CVE",
+            "slug": "soft_cve",
             "type": RelationshipTypeChoices.TYPE_MANY_TO_MANY,
-            "source_type": ContentType.objects.get_for_model(CVELCM),
-            "source_label": "Affected Softwares",
-            "destination_type": ContentType.objects.get_for_model(SoftwareLCM),
-            "destination_label": "Corresponding CVEs",
+            "source_type": ContentType.objects.get_for_model(SoftwareLCM),
+            "source_label": "Corresponding CVEs",
+            "destination_type": ContentType.objects.get_for_model(CVELCM),
+            "destination_label": "Affected Softwares",
         },
     ]:
         _Relationship.objects.get_or_create(name=relationship_dict["name"], defaults=relationship_dict)
