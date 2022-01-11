@@ -5,6 +5,7 @@ from nautobot.dcim.api.nested_serializers import (
     NestedDeviceSerializer,
     NestedDeviceTypeSerializer,
     NestedPlatformSerializer,
+    NestedInventoryItemSerializer,
 )
 from nautobot.extras.api.customfields import CustomFieldModelSerializer
 from nautobot.extras.api.serializers import TaggedObjectSerializer, StatusModelSerializerMixin
@@ -17,12 +18,14 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContractLCM,
     ProviderLCM,
     CVELCM,
+    VulnerabilityLCM,
 )
 
 from .nested_serializers import (
     NestedSoftwareLCMSerializer,
     NestedProviderLCMSerializer,
     NestedContractLCMSerializer,
+    NestedCVELCMSerializer,
 )
 
 
@@ -211,4 +214,44 @@ class CVELCMSerializer(
             "comments",
             "custom_fields",
             "tags",
+        ]
+
+
+class VulnerabilityLCMSerializer(
+    CustomFieldModelSerializer, TaggedObjectSerializer, StatusModelSerializerMixin
+):  # pylint: disable=too-many-ancestors
+    """REST API serializer for VulnerabilityLCM records."""
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:vulnerabilitylcm-detail"
+    )
+    cve = NestedCVELCMSerializer(read_only=True)
+    software = NestedSoftwareLCMSerializer(read_only=True)
+    device = NestedDeviceSerializer(read_only=True)
+    inventory_item = NestedInventoryItemSerializer(read_only=True)
+
+    class Meta:
+        """Meta attributes."""
+
+        model = VulnerabilityLCM
+        fields = [
+            "id",
+            "display",
+            "url",
+            "cve",
+            "software",
+            "device",
+            "inventory_item",
+            "status",
+            "custom_fields",
+            "tags",
+        ]
+        read_only_fields = [
+            "id",
+            "display",
+            "url",
+            "cve",
+            "software",
+            "device",
+            "inventory_item",
         ]

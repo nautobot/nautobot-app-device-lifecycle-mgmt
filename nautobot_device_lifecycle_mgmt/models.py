@@ -708,3 +708,60 @@ class CVELCM(PrimaryModel):
             self.fix,
             self.comments,
         )
+
+
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "graphql",
+    "relationships",
+    "webhooks",
+    "statuses",
+)
+class VulnerabilityLCM(PrimaryModel):
+    """VulnerabilityLCM is a model representation of vulnerability that affects a device."""
+
+    cve = models.ForeignKey(CVELCM, on_delete=models.CASCADE)
+    software = models.ForeignKey(SoftwareLCM, on_delete=models.CASCADE)
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, blank=True, null=True)
+    inventory_item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, blank=True, null=True)
+    status = StatusField(
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        to="extras.status",
+    )
+
+    csv_headers = [
+        "cve",
+        "software",
+        "device",
+        "inventory_item",
+        "status",
+    ]
+
+    class Meta:
+        """Meta attributes for the class."""
+
+        verbose_name_plural = "Vulnerabilities"
+
+    def get_absolute_url(self):
+        """Returns the Detail view for VulnerabilityLCM models."""
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm", kwargs={"pk": self.pk})
+
+    def __str__(self):
+        """String representation of the model."""
+        name = f"Device: {self.device}" if self.device else f"Inventory Part: {self.inventory_item}"
+        return f"{name} - Software: {self.software} - CVE: {self.cve}"
+
+    def to_csv(self):
+        """Return fields for bulk view."""
+        return (
+            self.cve,
+            self.software,
+            self.device,
+            self.inventory_item,
+            self.status,
+        )

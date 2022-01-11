@@ -122,6 +122,13 @@ try:
                                 "nautobot_device_lifecycle_mgmt.view_cvelcm",
                             ],
                         ),
+                        NavMenuItem(
+                            link="plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm_list",
+                            name="Vulnerability",
+                            permissions=[
+                                "nautobot_device_lifecycle_mgmt.view_vulnerabilitylcm",
+                            ],
+                        ),
                     ),
                 ),
                 NavMenuGroup(
@@ -377,6 +384,10 @@ except ModuleNotFoundError:
                     permissions=["nautobot_device_lifecycle_mgmt.add_cvelcm"],
                 ),
             ),
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm_list",
+            link_text="Vulnerability",
         ),
         PluginMenuItem(
             link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",

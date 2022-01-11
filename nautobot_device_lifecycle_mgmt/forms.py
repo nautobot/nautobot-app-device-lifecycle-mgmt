@@ -6,6 +6,8 @@ from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, 
 from nautobot.extras.forms import (
     CustomFieldModelCSVForm,
     CustomFieldModelForm,
+    CustomFieldFilterForm,
+    CustomFieldBulkEditForm,
     RelationshipModelForm,
     StatusBulkEditFormMixin,
     StatusModelCSVFormMixin,
@@ -40,6 +42,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ProviderLCM,
     ContactLCM,
     CVELCM,
+    VulnerabilityLCM,
 )
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
@@ -842,7 +845,7 @@ class CVELCMForm(
         }
 
 
-class CVELCMBulkEditForm(StatusBulkEditFormMixin, BootstrapMixin, BulkEditForm):
+class CVELCMBulkEditForm(StatusBulkEditFormMixin, BootstrapMixin, CustomFieldBulkEditForm):
     """CVE Lifecycle Management bulk edit form."""
 
     model = CVELCM
@@ -862,7 +865,7 @@ class CVELCMBulkEditForm(StatusBulkEditFormMixin, BootstrapMixin, BulkEditForm):
         ]
 
 
-class CVELCMFilterForm(BootstrapMixin, forms.ModelForm, StatusFilterFormMixin):
+class CVELCMFilterForm(BootstrapMixin, StatusFilterFormMixin, CustomFieldFilterForm):
     """Filter form to filter searches for CVELCM."""
 
     model = CVELCM
@@ -879,6 +882,15 @@ class CVELCMFilterForm(BootstrapMixin, forms.ModelForm, StatusFilterFormMixin):
 
     published_date_before = forms.DateField(label="Published Date Before", required=False, widget=DatePicker())
     published_date_after = forms.DateField(label="Published Date After", required=False, widget=DatePicker())
+
+    cvss__gte = forms.FloatField(label="CVSS Score Above", required=False)
+    cvss__lte = forms.FloatField(label="CVSS Score Below", required=False)
+
+    cvss_v2__gte = forms.FloatField(label="CVSSv2 Score Above", required=False)
+    cvss_v2__lte = forms.FloatField(label="CVSSv2 Score Below", required=False)
+
+    cvss_v3__gte = forms.FloatField(label="CVSSv3 Score Above", required=False)
+    cvss_v3__lte = forms.FloatField(label="CVSSv3 Score Below", required=False)
 
     class Meta:
         """Meta attributes."""
@@ -903,3 +915,71 @@ class CVELCMCSVForm(CustomFieldModelCSVForm, StatusModelCSVFormMixin):
 
         model = CVELCM
         fields = CVELCM.csv_headers
+
+
+class VulnerabilityLCMForm(
+    StatusBulkEditFormMixin, BootstrapMixin, CustomFieldModelForm, RelationshipModelForm
+):  # pylint: disable=too-many-ancestors
+    """Vulnerability Lifecycle Management creation/edit form."""
+
+    model = VulnerabilityLCM
+
+    class Meta:
+        """Meta attributes for the VulnerabilityLCMForm class."""
+
+        model = VulnerabilityLCM
+
+        fields = [
+            "status",
+            "tags",
+        ]
+
+
+class VulnerabilityLCMBulkEditForm(StatusBulkEditFormMixin, BootstrapMixin, CustomFieldBulkEditForm):
+    """Vulnerability Lifecycle Management bulk edit form."""
+
+    model = VulnerabilityLCM
+    pk = forms.ModelMultipleChoiceField(queryset=VulnerabilityLCM.objects.all(), widget=forms.MultipleHiddenInput)
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+
+    class Meta:
+        """Meta attributes for the VulnerabilityLCMBulkEditForm class."""
+
+        nullable_fields = [
+            "status",
+            "tags",
+        ]
+
+
+class VulnerabilityLCMFilterForm(BootstrapMixin, StatusFilterFormMixin, CustomFieldFilterForm):
+    """Filter form to filter searches for VulnerabilityLCM."""
+
+    model = VulnerabilityLCM
+    q = forms.CharField(
+        required=False,
+        label="Search",
+        help_text="Search for name or link.",
+    )
+    cve = DynamicModelMultipleChoiceField(required=False, queryset=CVELCM.objects.all(), label="CVE")
+    cve__published_date__lte = forms.DateField(label="CVE Published Date Before", required=False, widget=DatePicker())
+    cve__published_date__gte = forms.DateField(label="CVE Published Date After", required=False, widget=DatePicker())
+    cve__severity = forms.ChoiceField(
+        label="CVE Severity",
+        widget=StaticSelect2,
+        required=False,
+        choices=add_blank_choice(CVESeverityChoices.CHOICES),
+    )
+    software = DynamicModelMultipleChoiceField(required=False, queryset=SoftwareLCM.objects.all())
+    device = DynamicModelMultipleChoiceField(required=False, queryset=Device.objects.all())
+    inventory_item = DynamicModelMultipleChoiceField(required=False, queryset=InventoryItem.objects.all())
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+
+    class Meta:
+        """Meta attributes."""
+
+        model = VulnerabilityLCM
+        fields = [
+            "q",
+            *ValidatedSoftwareLCM.csv_headers,
+            "tags",
+        ]

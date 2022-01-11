@@ -24,6 +24,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContractLCM,
     ProviderLCM,
     CVELCM,
+    VulnerabilityLCM,
 )
 from nautobot_device_lifecycle_mgmt.tables import (
     HardwareLCMTable,
@@ -35,6 +36,7 @@ from nautobot_device_lifecycle_mgmt.tables import (
     ProviderLCMTable,
     ContactLCMTable,
     CVELCMTable,
+    VulnerabilityLCMTable,
 )
 from nautobot_device_lifecycle_mgmt.forms import (
     HardwareLCMForm,
@@ -65,6 +67,9 @@ from nautobot_device_lifecycle_mgmt.forms import (
     CVELCMFilterForm,
     CVELCMBulkEditForm,
     CVELCMCSVForm,
+    VulnerabilityLCMForm,
+    VulnerabilityLCMFilterForm,
+    VulnerabilityLCMBulkEditForm,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -76,6 +81,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     DeviceSoftwareValidationResultFilterSet,
     InventoryItemSoftwareValidationResultFilterSet,
     CVELCMFilterSet,
+    VulnerabilityLCMFilterSet,
 )
 
 from nautobot_device_lifecycle_mgmt.const import URL, PLUGIN_CFG
@@ -995,3 +1001,61 @@ class CVELCMBulkEditView(generic.BulkEditView):
     table = CVELCMTable
     form = CVELCMBulkEditForm
     bulk_edit_url = "plugins:nautobot_device_lifecycle_mgmt.cvelcm_bulk_edit"
+
+
+# ---------------------------------------------------------------------------------
+#  Vulnerability Lifecycle Management Views
+# ---------------------------------------------------------------------------------
+
+
+class VulnerabilityLCMListView(generic.ObjectListView):
+    """List view."""
+
+    queryset = VulnerabilityLCM.objects.all()
+    filterset = VulnerabilityLCMFilterSet
+    filterset_form = VulnerabilityLCMFilterForm
+    table = VulnerabilityLCMTable
+    action_buttons = ("export",)
+    template_name = "nautobot_device_lifecycle_mgmt/vulnerabilitylcm_list.html"
+
+
+class VulnerabilityLCMView(generic.ObjectView):
+    """Detail view."""
+
+    queryset = VulnerabilityLCM.objects.all()
+
+
+class VulnerabilityLCMDeleteView(generic.ObjectDeleteView):
+    """Delete view."""
+
+    model = VulnerabilityLCM
+    queryset = VulnerabilityLCM.objects.all()
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm_list"
+
+
+class VulnerabilityLCMEditView(generic.ObjectEditView):
+    """Edit view."""
+
+    model = VulnerabilityLCM
+    queryset = VulnerabilityLCM.objects.all()
+    model_form = VulnerabilityLCMForm
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm"
+
+
+class VulnerabilityLCMBulkDeleteView(generic.BulkDeleteView):
+    """View for deleting one or more HardwareLCM records."""
+
+    queryset = VulnerabilityLCM.objects.all()
+    table = VulnerabilityLCMTable
+    bulk_delete_url = "plugins:nautobot_device_lifecycle_mgmt.vulnerabilitylcm_bulk_delete"
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm_list"
+
+
+class VulnerabilityLCMBulkEditView(generic.BulkEditView):
+    """View for editing one or more HardwareLCM records."""
+
+    queryset = VulnerabilityLCM.objects.all()
+    filterset = VulnerabilityLCMFilterSet
+    table = VulnerabilityLCMTable
+    form = VulnerabilityLCMBulkEditForm
+    bulk_edit_url = "plugins:nautobot_device_lifecycle_mgmt.vulnerabilitylcm_bulk_edit"

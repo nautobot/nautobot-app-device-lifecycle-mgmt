@@ -11,6 +11,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     SoftwareLCM,
     ValidatedSoftwareLCM,
     CVELCM,
+    VulnerabilityLCM,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -20,6 +21,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
     CVELCMFilterSet,
+    VulnerabilityLCMFilterSet,
 )
 
 from .serializers import (
@@ -30,6 +32,7 @@ from .serializers import (
     SoftwareLCMSerializer,
     ValidatedSoftwareLCMSerializer,
     CVELCMSerializer,
+    VulnerabilityLCMSerializer,
 )
 
 
@@ -87,3 +90,14 @@ class CVELCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-ancest
     queryset = CVELCM.objects.all()
     serializer_class = CVELCMSerializer
     filterset_class = CVELCMFilterSet
+
+
+class VulnerabilityLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-ancestors
+    """REST API viewset for VulnerabilityLCM records."""
+
+    queryset = VulnerabilityLCM.objects.all()
+    serializer_class = VulnerabilityLCMSerializer
+    filterset_class = VulnerabilityLCMFilterSet
+
+    # Disabling POST as these should only be created via Job.
+    http_method_names = ["get", "put", "patch", "delete", "head", "options"]

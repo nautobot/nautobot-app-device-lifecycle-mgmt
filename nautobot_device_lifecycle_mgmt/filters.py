@@ -5,7 +5,7 @@ from django.db.models import Q
 
 from nautobot.dcim.models import DeviceType, Platform, Device, DeviceRole, InventoryItem, Region, Site
 from nautobot.extras.models import Tag
-from nautobot.extras.filters import StatusModelFilterSetMixin
+from nautobot.extras.filters import StatusModelFilterSetMixin, CustomFieldModelFilterSet
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
@@ -15,6 +15,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ProviderLCM,
     ContactLCM,
     CVELCM,
+    VulnerabilityLCM,
 )
 
 
@@ -633,7 +634,7 @@ class ContactLCMFilterSet(django_filters.FilterSet):
         return queryset.filter(qs_filter)
 
 
-class CVELCMFilterSet(StatusModelFilterSetMixin, django_filters.FilterSet):
+class CVELCMFilterSet(StatusModelFilterSetMixin, CustomFieldModelFilterSet):
     """Filter for CVELCMFilterSet."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -641,6 +642,15 @@ class CVELCMFilterSet(StatusModelFilterSetMixin, django_filters.FilterSet):
     published_date = django_filters.DateTimeFromToRangeFilter()
     published_date__gte = django_filters.DateFilter(field_name="published_date", lookup_expr="gte")
     published_date__lte = django_filters.DateFilter(field_name="published_date", lookup_expr="lte")
+
+    cvss__gte = django_filters.NumberFilter(field_name="cvss", lookup_expr="gte")
+    cvss__lte = django_filters.NumberFilter(field_name="cvss", lookup_expr="lte")
+
+    cvss_v2__gte = django_filters.NumberFilter(field_name="cvss_v2", lookup_expr="gte")
+    cvss_v2__lte = django_filters.NumberFilter(field_name="cvss_v2", lookup_expr="lte")
+
+    cvss_v3__gte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="gte")
+    cvss_v3__lte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="lte")
 
     class Meta:
         """Meta attributes for filter."""
@@ -655,4 +665,29 @@ class CVELCMFilterSet(StatusModelFilterSetMixin, django_filters.FilterSet):
             return queryset
 
         qs_filter = Q(name__icontains=value) | Q(link__icontains=value)
+        return queryset.filter(qs_filter)
+
+
+class VulnerabilityLCMFilterSet(StatusModelFilterSetMixin, CustomFieldModelFilterSet):
+    """Filter for VulnerabilityLCMFilterSet."""
+
+    q = django_filters.CharFilter(method="search", label="Search")
+
+    cve__published_date = django_filters.DateTimeFromToRangeFilter()
+    cve__published_date__gte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="gte")
+    cve__published_date__lte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="lte")
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = VulnerabilityLCM
+
+        fields = VulnerabilityLCM.csv_headers
+
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+
+        qs_filter = Q(name__icontains=value)
         return queryset.filter(qs_filter)

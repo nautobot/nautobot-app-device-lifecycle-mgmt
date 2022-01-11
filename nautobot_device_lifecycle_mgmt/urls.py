@@ -10,6 +10,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ProviderLCM,
     ContactLCM,
     CVELCM,
+    VulnerabilityLCM,
 )
 
 
@@ -137,4 +138,17 @@ urlpatterns = [
         kwargs={"model": CVELCM},
     ),
     path("cve/import/", views.CVELCMBulkImportView.as_view(), name="cvelcm_import"),
+    # Vulnerability Lifecycle Management URLs
+    path("vulnerability/", views.VulnerabilityLCMListView.as_view(), name="vulnerabilitylcm_list"),
+    path("vulnerability/<uuid:pk>/", views.VulnerabilityLCMView.as_view(), name="vulnerabilitylcm"),
+    path("vulnerability/delete/", views.VulnerabilityLCMBulkDeleteView.as_view(), name="vulnerabilitylcm_bulk_delete"),
+    path("vulnerability/edit/", views.VulnerabilityLCMBulkEditView.as_view(), name="vulnerabilitylcm_bulk_edit"),
+    path("vulnerability/<uuid:pk>/delete/", views.VulnerabilityLCMDeleteView.as_view(), name="vulnerabilitylcm_delete"),
+    path("vulnerability/<uuid:pk>/edit/", views.VulnerabilityLCMEditView.as_view(), name="vulnerabilitylcm_edit"),
+    path(
+        "vulnerability/<uuid:pk>/changelog/",
+        ObjectChangeLogView.as_view(),
+        name="vulnerabilitylcm_changelog",
+        kwargs={"model": VulnerabilityLCM},
+    ),
 ]

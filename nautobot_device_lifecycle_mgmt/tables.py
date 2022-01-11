@@ -12,6 +12,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ProviderLCM,
     ContactLCM,
     CVELCM,
+    VulnerabilityLCM,
     DeviceSoftwareValidationResult,
     InventoryItemSoftwareValidationResult,
 )
@@ -306,11 +307,40 @@ class CVELCMTable(StatusTableMixin, BaseTable):
             "name",
             "published_date",
             "link",
-            "status",
             "severity",
             "cvss",
             "cvss_v2",
             "cvss_v3",
-            "fix",
+            "status",
+            "actions",
+        )
+
+
+class VulnerabilityLCMTable(StatusTableMixin, BaseTable):
+    """Table for list view."""
+
+    model = VulnerabilityLCM
+    pk = ToggleColumn()
+    name = tables.LinkColumn(
+        "plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm", text=lambda record: record, args=[A("pk")]
+    )
+    cve = tables.LinkColumn(verbose_name="CVE")
+    software = tables.LinkColumn()
+    device = tables.LinkColumn()
+    inventory_item = tables.LinkColumn(verbose_name="Inventory Item")
+    actions = ButtonsColumn(VulnerabilityLCM, buttons=("changelog", "edit", "delete"))
+
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = VulnerabilityLCM
+        fields = (
+            "pk",
+            "name",
+            "cve",
+            "software",
+            "device",
+            "inventory_item",
+            "status",
             "actions",
         )
