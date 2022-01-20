@@ -923,6 +923,7 @@ class VulnerabilityLCMForm(
     """Vulnerability Lifecycle Management creation/edit form."""
 
     model = VulnerabilityLCM
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
     class Meta:
         """Meta attributes for the VulnerabilityLCMForm class."""
