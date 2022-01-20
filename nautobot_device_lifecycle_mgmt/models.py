@@ -745,6 +745,7 @@ class VulnerabilityLCM(PrimaryModel):
     class Meta:
         """Meta attributes for the class."""
 
+        verbose_name = "Vulnerability"
         verbose_name_plural = "Vulnerabilities"
 
     def get_absolute_url(self):
