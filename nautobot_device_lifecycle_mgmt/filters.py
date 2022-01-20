@@ -5,7 +5,12 @@ from django.db.models import Q
 
 from nautobot.dcim.models import DeviceType, Platform, Device, DeviceRole, InventoryItem, Region, Site
 from nautobot.extras.models import Tag
-from nautobot.extras.filters import StatusModelFilterSetMixin, CustomFieldModelFilterSet
+from nautobot.extras.filters import (
+    StatusModelFilterSetMixin,
+    CustomFieldModelFilterSet,
+    TagFilter,
+    StatusFilter,
+)
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
@@ -652,6 +657,10 @@ class CVELCMFilterSet(StatusModelFilterSetMixin, CustomFieldModelFilterSet):
     cvss_v3__gte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="gte")
     cvss_v3__lte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="lte")
 
+    status = StatusFilter()
+    exclude_status = StatusFilter(field_name="status", exclude=True)
+    tag = TagFilter()
+
     class Meta:
         """Meta attributes for filter."""
 
@@ -676,6 +685,10 @@ class VulnerabilityLCMFilterSet(StatusModelFilterSetMixin, CustomFieldModelFilte
     cve__published_date = django_filters.DateTimeFromToRangeFilter()
     cve__published_date__gte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="gte")
     cve__published_date__lte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="lte")
+
+    status = StatusFilter()
+    exclude_status = StatusFilter(field_name="status", exclude=True)
+    tag = TagFilter()
 
     class Meta:
         """Meta attributes for filter."""

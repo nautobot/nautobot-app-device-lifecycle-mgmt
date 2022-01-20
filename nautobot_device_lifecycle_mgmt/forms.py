@@ -13,7 +13,7 @@ from nautobot.extras.forms import (
     StatusModelCSVFormMixin,
     StatusFilterFormMixin,
 )
-from nautobot.extras.models import Tag
+from nautobot.extras.models import Tag, Status
 from nautobot.utilities.forms import (
     BootstrapMixin,
     BulkEditForm,
@@ -24,6 +24,7 @@ from nautobot.utilities.forms import (
     BOOLEAN_WITH_BLANK_CHOICES,
     add_blank_choice,
     CSVModelChoiceField,
+    TagFilterField,
 )
 from nautobot_device_lifecycle_mgmt.choices import (
     ContractTypeChoices,
@@ -892,6 +893,16 @@ class CVELCMFilterForm(BootstrapMixin, StatusFilterFormMixin, CustomFieldFilterF
     cvss_v3__gte = forms.FloatField(label="CVSSv3 Score Above", required=False)
     cvss_v3__lte = forms.FloatField(label="CVSSv3 Score Below", required=False)
 
+    status = DynamicModelMultipleChoiceField(queryset=Status.objects.all(), required=False, to_field_name="slug")
+    exclude_status = DynamicModelMultipleChoiceField(
+        label="Exclude Status",
+        required=False,
+        queryset=Status.objects.all(),
+        query_params={"content_types": model._meta.label_lower},
+        to_field_name="slug",
+    )
+    tag = TagFilterField(model)
+
     class Meta:
         """Meta attributes."""
 
@@ -973,7 +984,15 @@ class VulnerabilityLCMFilterForm(BootstrapMixin, StatusFilterFormMixin, CustomFi
     software = DynamicModelMultipleChoiceField(required=False, queryset=SoftwareLCM.objects.all())
     device = DynamicModelMultipleChoiceField(required=False, queryset=Device.objects.all())
     inventory_item = DynamicModelMultipleChoiceField(required=False, queryset=InventoryItem.objects.all())
-    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+    status = DynamicModelMultipleChoiceField(queryset=Status.objects.all(), required=False, to_field_name="slug")
+    exclude_status = DynamicModelMultipleChoiceField(
+        label="Exclude Status",
+        required=False,
+        queryset=Status.objects.all(),
+        query_params={"content_types": model._meta.label_lower},
+        to_field_name="slug",
+    )
+    tag = TagFilterField(model)
 
     class Meta:
         """Meta attributes."""

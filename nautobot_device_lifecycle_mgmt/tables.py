@@ -3,7 +3,7 @@
 import django_tables2 as tables
 from django_tables2.utils import A
 from nautobot.utilities.tables import BaseTable, ButtonsColumn, BooleanColumn, ToggleColumn
-from nautobot.extras.tables import StatusTableMixin
+from nautobot.extras.tables import StatusTableMixin, TagColumn
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
@@ -296,6 +296,7 @@ class CVELCMTable(StatusTableMixin, BaseTable):
                     {% endif %}""",
         verbose_name="Link",
     )
+    tags = TagColumn()
     actions = ButtonsColumn(CVELCM, buttons=("changelog", "edit", "delete"))
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
@@ -303,6 +304,19 @@ class CVELCMTable(StatusTableMixin, BaseTable):
 
         model = CVELCM
         fields = (
+            "pk",
+            "name",
+            "published_date",
+            "link",
+            "severity",
+            "cvss",
+            "cvss_v2",
+            "cvss_v3",
+            "status",
+            "tags",
+            "actions",
+        )
+        default_columns = (
             "pk",
             "name",
             "published_date",
@@ -328,6 +342,7 @@ class VulnerabilityLCMTable(StatusTableMixin, BaseTable):
     software = tables.LinkColumn()
     device = tables.LinkColumn()
     inventory_item = tables.LinkColumn(verbose_name="Inventory Item")
+    tags = TagColumn()
     actions = ButtonsColumn(VulnerabilityLCM, buttons=("changelog", "edit", "delete"))
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
@@ -335,6 +350,17 @@ class VulnerabilityLCMTable(StatusTableMixin, BaseTable):
 
         model = VulnerabilityLCM
         fields = (
+            "pk",
+            "name",
+            "cve",
+            "software",
+            "device",
+            "inventory_item",
+            "status",
+            "tags",
+            "actions",
+        )
+        default_columns = (
             "pk",
             "name",
             "cve",
