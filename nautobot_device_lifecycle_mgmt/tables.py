@@ -2,8 +2,8 @@
 
 import django_tables2 as tables
 from django_tables2.utils import A
-from nautobot.utilities.tables import BaseTable, ButtonsColumn, BooleanColumn, ToggleColumn
-from nautobot.extras.tables import StatusTableMixin, TagColumn
+from nautobot.utilities.tables import BaseTable, ButtonsColumn, BooleanColumn, ToggleColumn, TagColumn
+from nautobot.extras.tables import StatusTableMixin
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
