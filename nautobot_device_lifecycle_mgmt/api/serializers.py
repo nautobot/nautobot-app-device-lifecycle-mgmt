@@ -218,7 +218,7 @@ class CVELCMSerializer(
 
 
 class VulnerabilityLCMSerializer(
-    CustomFieldModelSerializer, TaggedObjectSerializer, StatusModelSerializerMixin
+    TaggedObjectSerializer, CustomFieldModelSerializer, StatusModelSerializerMixin
 ):  # pylint: disable=too-many-ancestors
     """REST API serializer for VulnerabilityLCM records."""
 
