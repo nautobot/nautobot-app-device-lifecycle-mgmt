@@ -29,7 +29,7 @@ from .nested_serializers import (
 )
 
 
-class HardwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=R0901
+class HardwareLCMSerializer(TaggedObjectSerializer, CustomFieldModelSerializer):  # pylint: disable=R0901
     """API serializer."""
 
     device_type = NestedDeviceTypeSerializer(
@@ -58,7 +58,7 @@ class HardwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):
         ]
 
 
-class ProviderLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=R0901
+class ProviderLCMSerializer(TaggedObjectSerializer, CustomFieldModelSerializer):  # pylint: disable=R0901
     """API serializer."""
 
     class Meta:
@@ -78,7 +78,7 @@ class ProviderLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):
         ]
 
 
-class ContractLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=R0901
+class ContractLCMSerializer(TaggedObjectSerializer, CustomFieldModelSerializer):  # pylint: disable=R0901
     """API serializer."""
 
     provider = NestedProviderLCMSerializer(many=False, read_only=False, required=True, help_text="Vendor")
@@ -102,7 +102,7 @@ class ContractLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):
         ]
 
 
-class ContactLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=R0901
+class ContactLCMSerializer(TaggedObjectSerializer, CustomFieldModelSerializer):  # pylint: disable=R0901
     """API serializer."""
 
     contract = NestedContractLCMSerializer(many=False, read_only=False, required=True, help_text="Associated Contract")
@@ -124,7 +124,7 @@ class ContactLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer): 
         ]
 
 
-class SoftwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=too-many-ancestors
+class SoftwareLCMSerializer(TaggedObjectSerializer, CustomFieldModelSerializer):  # pylint: disable=too-many-ancestors
     """REST API serializer for SoftwareLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
@@ -156,7 +156,7 @@ class SoftwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):
 
 
 class ValidatedSoftwareLCMSerializer(
-    CustomFieldModelSerializer, TaggedObjectSerializer
+    TaggedObjectSerializer, CustomFieldModelSerializer
 ):  # pylint: disable=too-many-ancestors
     """REST API serializer for ValidatedSoftwareLCM records."""
 
@@ -188,7 +188,7 @@ class ValidatedSoftwareLCMSerializer(
 
 
 class CVELCMSerializer(
-    CustomFieldModelSerializer, TaggedObjectSerializer, StatusModelSerializerMixin
+    TaggedObjectSerializer, CustomFieldModelSerializer, StatusModelSerializerMixin
 ):  # pylint: disable=too-many-ancestors
     """REST API serializer for CVELCM records."""
 
