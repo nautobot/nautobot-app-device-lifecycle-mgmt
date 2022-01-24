@@ -18,8 +18,9 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     DeviceSoftwareValidationResult,
     CVELCM,
+    VulnerabilityLCM,
 )
-from .conftest import create_devices, create_inventory_items
+from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
 
 
 class HardwareLCMTestCase(TestCase):
@@ -344,7 +345,7 @@ class CVELCMTestCase(TestCase):
         self.status.content_types.set([self.cve_ct])
 
     def test_create_cvelcm_required_only(self):
-        """Successfully create SoftwareLCM with required fields only."""
+        """Successfully create CVELCM with required fields only."""
         cvelcm = CVELCM.objects.create(
             name="CVE-2021-1391", published_date="2021-03-24", link="https://www.cvedetails.com/cve/CVE-2021-1391/"
         )
@@ -398,3 +399,56 @@ class CVELCMTestCase(TestCase):
         cve_rels = cvelcm.get_relationships()
 
         self.assertEqual(cve_rels["source"][self.relationship].first(), association)
+
+
+class VulnerabilityLCMTestCase(TestCase):
+    """Tests for the VulnerabilityLCM model."""
+
+    def setUp(self):
+        """Set up the test objects."""
+        self.inv_items = create_inventory_items()
+        self.devices = [inv_item.device for inv_item in self.inv_items]
+        self.cves = create_cves()
+        self.softwares = create_softwares()
+        vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
+        self.status = Status.objects.create(
+            name="Exempt", slug="exempt", color="4caf50", description="This unit is exempt."
+        )
+        self.status.content_types.set([vuln_ct])
+
+    def test_create_vulnerabilitylcm_device_required_only(self):
+        """Successfully create VulnerabilityLCM with required fields only."""
+        vulnerability = VulnerabilityLCM.objects.create(
+            cve=self.cves[0], software=self.softwares[0], device=self.devices[0]
+        )
+
+        self.assertEqual(str(vulnerability), "Device: sw1 - Software: Cisco IOS - 15.1(2)M - CVE: CVE-2021-1391")
+        self.assertEqual(vulnerability.cve, self.cves[0])
+        self.assertEqual(vulnerability.software, self.softwares[0])
+        self.assertEqual(vulnerability.device, self.devices[0])
+
+    def test_create_vulnerabilitylcm_inventory_item_required_only(self):
+        """Successfully create VulnerabilityLCM with required fields only."""
+        vulnerability = VulnerabilityLCM.objects.create(
+            cve=self.cves[1], software=self.softwares[1], inventory_item=self.inv_items[1]
+        )
+
+        self.assertEqual(
+            str(vulnerability),
+            "Inventory Part: 100GBASE-SR4 QSFP Transceiver - Software: Cisco IOS - 4.22.9M - CVE: CVE-2021-44228",
+        )
+        self.assertEqual(vulnerability.cve, self.cves[1])
+        self.assertEqual(vulnerability.software, self.softwares[1])
+        self.assertEqual(vulnerability.inventory_item, self.inv_items[1])
+
+    def test_create_vulnerabilitylcm_all(self):
+        """Successfully create VulnerabilityLCM with all fields."""
+        vulnerability = VulnerabilityLCM.objects.create(
+            cve=self.cves[2], software=self.softwares[2], device=self.devices[2], status=self.status
+        )
+
+        self.assertEqual(str(vulnerability), "Device: sw3 - Software: Cisco IOS - 21.4R3 - CVE: CVE-2020-27134")
+        self.assertEqual(vulnerability.cve, self.cves[2])
+        self.assertEqual(vulnerability.software, self.softwares[2])
+        self.assertEqual(vulnerability.device, self.devices[2])
+        self.assertEqual(vulnerability.status, self.status)

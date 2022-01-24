@@ -8,14 +8,16 @@ from django.urls import reverse
 from nautobot.utilities.testing import ViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer
 from nautobot.users.models import ObjectPermission
+from nautobot.extras.models import Status
 
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     DeviceSoftwareValidationResult,
     InventoryItemSoftwareValidationResult,
     CVELCM,
+    VulnerabilityLCM,
 )
-from .conftest import create_devices, create_inventory_items
+from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
 
 User = get_user_model()
 
@@ -209,4 +211,44 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disabl
         pass
 
     def test_bulk_import_objects_without_permission(self):
+        pass
+
+
+class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
+    """Test the VulnerabilityLCM views."""
+
+    model = VulnerabilityLCM
+
+    @classmethod
+    def setUpTestData(cls):
+        devices = create_devices()
+        softwares = create_softwares()
+        cves = create_cves()
+        for i, cve in enumerate(cves):
+            VulnerabilityLCM.objects.create(cve=cve, software=softwares[i], device=devices[i])
+
+        vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
+        status = Status.objects.create(name="Exempt", slug="exempt", color="4caf50", description="This unit is exempt.")
+        status.content_types.set([vuln_ct])
+        cls.bulk_edit_data = {"status": status.id}
+
+    def test_bulk_import_objects_with_constrained_permission(self):
+        pass
+
+    def test_bulk_import_objects_with_permission(self):
+        pass
+
+    def test_bulk_import_objects_without_permission(self):
+        pass
+
+    # Disabling create view as these models are generated via Job.
+    def test_create_object_with_constrained_permission(self):
+        pass
+
+    # Disabling create view as these models are generated via Job.
+    def test_create_object_with_permission(self):
+        pass
+
+    # Disabling create view as these models are generated via Job.
+    def test_create_object_without_permission(self):
         pass

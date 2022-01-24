@@ -15,6 +15,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     DeviceSoftwareValidationResult,
     InventoryItemSoftwareValidationResult,
     CVELCM,
+    VulnerabilityLCM,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -23,8 +24,9 @@ from nautobot_device_lifecycle_mgmt.filters import (
     DeviceSoftwareValidationResultFilterSet,
     InventoryItemSoftwareValidationResultFilterSet,
     CVELCMFilterSet,
+    VulnerabilityLCMFilterSet,
 )
-from .conftest import create_devices, create_inventory_items
+from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
 
 
 class HardwareLCMTestCase(TestCase):
@@ -502,12 +504,18 @@ class CVELCMTestCase(TestCase):
             name="CVE-2021-1391",
             published_date="2021-03-24",
             link="https://www.cvedetails.com/cve/CVE-2021-1391/",
+            cvss=3,
+            cvss_v2=3,
+            cvss_v3=3,
         )
         CVELCM.objects.create(
             name="CVE-2021-44228",
             published_date="2021-12-10",
             link="https://www.cvedetails.com/cve/CVE-2021-44228/",
             status=not_fixed,
+            cvss=5,
+            cvss_v2=5,
+            cvss_v3=5,
         )
         CVELCM.objects.create(
             name="CVE-2020-27134",
@@ -515,6 +523,9 @@ class CVELCMTestCase(TestCase):
             link="https://www.cvedetails.com/cve/CVE-2020-27134/",
             severity="Critical",
             status=fixed,
+            cvss=7,
+            cvss_v2=7,
+            cvss_v3=7,
         )
 
     def test_q_one_year(self):
@@ -537,6 +548,11 @@ class CVELCMTestCase(TestCase):
         params = {"status": ["fixed"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
+    def test_exclude_status(self):
+        """Test exclude_status filter."""
+        params = {"exclude_status": ["fixed"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
     def test_severity(self):
         """Test severity filter."""
         params = {"severity": "Critical"}
@@ -551,3 +567,127 @@ class CVELCMTestCase(TestCase):
         """Test published_date_after filter."""
         params = {"published_date_after": "2021-01-01"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_cvss_gte(self):
+        """Test cvss__gte filter."""
+        params = {"cvss__gte": 1}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+        params = {"cvss__gte": 4}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"cvss__gte": 6}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+        params = {"cvss__gte": 9}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+
+    def test_cvss_lte(self):
+        """Test cvss__lte filter."""
+        params = {"cvss__lte": 1}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+        params = {"cvss__lte": 4}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+        params = {"cvss__lte": 6}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"cvss__lte": 9}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_cvss_v2_gte(self):
+        """Test cvss_v2__gte filter."""
+        params = {"cvss_v2__gte": 1}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+        params = {"cvss_v2__gte": 4}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"cvss_v2__gte": 6}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+        params = {"cvss_v2__gte": 9}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+
+    def test_cvss_v2_lte(self):
+        """Test cvss_v2__lte filter."""
+        params = {"cvss_v2__lte": 1}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+        params = {"cvss_v2__lte": 4}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+        params = {"cvss_v2__lte": 6}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"cvss_v2__lte": 9}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_cvss_v3_gte(self):
+        """Test cvss_v3__gte filter."""
+        params = {"cvss_v3__gte": 1}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+        params = {"cvss_v3__gte": 4}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"cvss_v3__gte": 6}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+        params = {"cvss_v3__gte": 9}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+
+    def test_cvss_v3_lte(self):
+        """Test cvss_v3__lte filter."""
+        params = {"cvss_v3__lte": 1}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+        params = {"cvss_v3__lte": 4}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+        params = {"cvss_v3__lte": 6}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"cvss_v3__lte": 9}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+
+class VulnerabilityLCMTestCase(TestCase):
+    """Tests for VulnerabilityLCMFilter."""
+
+    queryset = VulnerabilityLCM.objects.all()
+    filterset = VulnerabilityLCMFilterSet
+
+    def setUp(self):
+        inventory_items = create_inventory_items()
+        cves = create_cves()
+        softwares = create_softwares()
+        vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
+        fix_me = Status.objects.create(name="Fix Me", slug="fix_me", color="4caf50", description="Please fix me.")
+        fix_me.content_types.set([vuln_ct])
+
+        VulnerabilityLCM.objects.create(
+            cve=cves[0],
+            device=inventory_items[0].device,
+            software=softwares[0],
+        )
+        VulnerabilityLCM.objects.create(
+            cve=cves[1],
+            device=inventory_items[1].device,
+            software=softwares[1],
+            status=fix_me,
+        )
+        VulnerabilityLCM.objects.create(
+            cve=cves[2],
+            inventory_item=inventory_items[2],
+            software=softwares[2],
+            status=fix_me,
+        )
+
+    def test_q_cve(self):
+        """Test q filter to find single record based on CVE name."""
+        params = {"q": "2020"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_device(self):
+        """Test q filter to find single record based on Device name."""
+        params = {"q": "sw1"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_inventory_item(self):
+        """Test q filter to find single record based on Inventory Item name."""
+        params = {"q": "48x RJ-45"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_software_device_platform(self):
+        """Test q filter to find single record based on Software Device Platform name."""
+        params = {"q": "Cisco IOS"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_q_software_version(self):
+        """Test q filter to find single record based on Software version."""
+        params = {"q": "4.22.9M"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
