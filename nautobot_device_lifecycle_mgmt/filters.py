@@ -702,5 +702,12 @@ class VulnerabilityLCMFilterSet(StatusModelFilterSetMixin, CustomFieldModelFilte
         if not value.strip():
             return queryset
 
-        qs_filter = Q(name__icontains=value)
+        # Searching all of the items that make up the __str__ method.
+        qs_filter = (
+            Q(cve__name__icontains=value)
+            | Q(software__device_platform__name__icontains=value)
+            | Q(software__version__icontains=value)
+            | Q(device__name__icontains=value)
+            | Q(inventory_item__name__icontains=value)
+        )
         return queryset.filter(qs_filter)
