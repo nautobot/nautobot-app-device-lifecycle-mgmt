@@ -196,38 +196,7 @@ INTERNAL_IPS = ("127.0.0.1", "::1")
 # Enable custom logging. Please see the Django documentation for detailed guidance on configuring custom logs:
 #   https://docs.djangoproject.com/en/stable/topics/logging/
 LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "normal": {
-            "format": "%(asctime)s.%(msecs)03d %(levelname)-7s %(name)s:  %(message)s",
-            "datefmt": "%H:%M:%S",
-        },
-    },
-    "handlers": {
-        "normal_console": {
-            "level": LOG_LEVEL,
-            "class": "logging.StreamHandler",
-            "formatter": "normal",
-        },
-    },
-    "loggers": {
-        "django": {"handlers": ["normal_console"], "level": LOG_LEVEL},
-        "nautobot": {
-            "handlers": ["normal_console"],
-            "level": LOG_LEVEL,
-        },
-        "rq.worker": {
-            "handlers": ["normal_console"],
-            "level": LOG_LEVEL,
-        },
-    },
-    "root": {
-        "handlers": ["normal_console"],
-        "level": LOG_LEVEL,
-    },
-}
+LOGGING = {}
 
 # Setting this to True will display a "maintenance mode" banner at the top of every page.
 MAINTENANCE_MODE = False
