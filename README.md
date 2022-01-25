@@ -12,7 +12,7 @@ The plugin is available as a Python package in pypi and can be installed with pi
 pip install nautobot-device-lifecycle-mgmt
 ```
 
-> The plugin is compatible with Nautobot 1.0.1 and higher
+> The plugin is compatible with Nautobot 1.1.6 and higher
 
 To ensure Nautobot Device Life Cycle Management plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-plugin-device-lifecycle-mgmt` package:
 
