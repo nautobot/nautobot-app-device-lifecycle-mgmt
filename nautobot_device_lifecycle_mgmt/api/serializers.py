@@ -8,7 +8,8 @@ from nautobot.dcim.api.nested_serializers import (
     NestedInventoryItemSerializer,
 )
 from nautobot.extras.api.customfields import CustomFieldModelSerializer
-from nautobot.extras.api.serializers import TaggedObjectSerializer, StatusModelSerializerMixin
+from nautobot.extras.api.serializers import TaggedObjectSerializer, StatusModelSerializerMixin, StatusSerializerField
+from nautobot.extras.models import Status
 
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
@@ -193,6 +194,7 @@ class CVELCMSerializer(
     """REST API serializer for CVELCM records."""
 
     url = serializers.HyperlinkedIdentityField(view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:cvelcm-detail")
+    status = StatusSerializerField(required=False, queryset=Status.objects.all())
 
     class Meta:
         """Meta attributes."""
