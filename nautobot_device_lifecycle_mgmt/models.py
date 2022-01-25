@@ -1,6 +1,7 @@
 """Django models for the Lifecycle Management plugin."""
 
 from datetime import datetime, date
+from enum import unique
 
 from django.db import models
 from django.urls import reverse
@@ -221,6 +222,44 @@ class SoftwareLCM(PrimaryModel):
             self.long_term_support,
             self.pre_release,
         )
+
+
+class SoftwareImage(PrimaryModel):
+    """SoftwareImage model."""
+
+    image_file_name = models.CharField(blank=False, max_length=100, verbose_name="Image File Name")
+    software = models.ForeignKey(to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Software Version")
+    device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
+    download_url = models.URLField(blank=True, verbose_name="Download URL")
+    image_file_checksum = models.CharField(blank=True, max_length=256, verbose_name="Image File Checksum")
+    default_image = models.BooleanField(verbose_name="Default Image", default=False)
+
+    csv_headers = [
+        "software",
+        "device_types",
+        "download_url",
+        "image_file_name",
+        "image_file_checksum",
+        "default_image",
+    ]
+
+    class Meta:
+        """Meta attributes for SoftwareImage."""
+
+        verbose_name = "Software Image"
+        ordering = ("software", "default_image", "image_file_name")
+        unique_together = ("image_file_name", "software")
+
+    def __str__(self):
+        """String representation of SoftwareImage."""
+        msg = f"{self.image_file_name}"
+        return msg
+
+    def get_absolute_url(self):
+        """Returns the Detail view for SoftwareImage models."""
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:softwareimage", kwargs={"pk": self.pk})
+
+    # objects = ValidatedSoftwareLCMQuerySet.as_manager()
 
 
 class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):

@@ -25,6 +25,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ProviderLCM,
     CVELCM,
     VulnerabilityLCM,
+    SoftwareImage,
 )
 from nautobot_device_lifecycle_mgmt.tables import (
     HardwareLCMTable,
@@ -37,6 +38,7 @@ from nautobot_device_lifecycle_mgmt.tables import (
     ContactLCMTable,
     CVELCMTable,
     VulnerabilityLCMTable,
+    SoftwareImageTable,
 )
 from nautobot_device_lifecycle_mgmt.forms import (
     HardwareLCMForm,
@@ -70,6 +72,8 @@ from nautobot_device_lifecycle_mgmt.forms import (
     VulnerabilityLCMForm,
     VulnerabilityLCMFilterForm,
     VulnerabilityLCMBulkEditForm,
+    SoftwareImageForm,
+    SoftwareImageFilterForm,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -82,6 +86,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     InventoryItemSoftwareValidationResultFilterSet,
     CVELCMFilterSet,
     VulnerabilityLCMFilterSet,
+    SoftwareImageFilterSet,
 )
 
 from nautobot_device_lifecycle_mgmt.const import URL, PLUGIN_CFG
@@ -228,6 +233,55 @@ class SoftwareLCMEditView(generic.ObjectEditView):
     queryset = SoftwareLCM.objects.prefetch_related("device_platform")
     model_form = SoftwareLCMForm
     default_return_url = URL.SoftwareLCM.View
+
+
+class SoftwareImageListView(generic.ObjectListView):
+    """SoftwareImage List view."""
+
+    queryset = SoftwareImage.objects.prefetch_related("device_platform")
+    filterset = SoftwareImageFilterSet
+    filterset_form = SoftwareImageFilterForm
+    table = SoftwareImageTable
+    action_buttons = (
+        "add",
+        "delete",
+        # "import",
+        # "export",
+    )
+    template_name = "nautobot_device_lifecycle_mgmt/softwareimage_list.html"
+
+
+class SoftwareImageView(generic.ObjectView):
+    """SoftwareImage Detail view."""
+
+    queryset = SoftwareImage.objects.all()
+
+
+class SoftwareImageCreateView(generic.ObjectEditView):
+    """SoftwareImage Create view."""
+
+    model = SoftwareImage
+    queryset = SoftwareImage.objects.all()
+    model_form = SoftwareImageForm
+    default_return_url = URL.SoftwareImage.List
+
+
+class SoftwareImageDeleteView(generic.ObjectDeleteView):
+    """SoftwareImage Delete view."""
+
+    model = SoftwareImage
+    queryset = SoftwareImage.objects.all()
+    default_return_url = URL.SoftwareImage.List
+    template_name = "nautobot_device_lifecycle_mgmt/softwareimage_delete.html"
+
+
+class SoftwareImageEditView(generic.ObjectEditView):
+    """SoftwareImage Edit view."""
+
+    model = SoftwareImage
+    queryset = SoftwareImage.objects.all()
+    model_form = SoftwareImageForm
+    default_return_url = URL.SoftwareImage.View
 
 
 class SoftwareLCMBulkImportView(generic.BulkImportView):

@@ -15,6 +15,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     VulnerabilityLCM,
     DeviceSoftwareValidationResult,
     InventoryItemSoftwareValidationResult,
+    SoftwareImage,
 )
 
 
@@ -100,6 +101,33 @@ class SoftwareLCMTable(BaseTable):
             "end_of_support",
             "long_term_support",
             "pre_release",
+            "actions",
+        )
+
+
+class SoftwareImageTable(BaseTable):
+    """Table for SoftwareImage."""
+
+    pk = ToggleColumn()
+    name = tables.LinkColumn(
+        "plugins:nautobot_device_lifecycle_mgmt:softwareimage",
+        text=lambda record: record,
+        args=[A("pk")],
+        orderable=False,
+    )
+    software = tables.LinkColumn(verbose_name="Software")
+    default_image = BooleanColumn()
+    actions = ButtonsColumn(SoftwareImage, buttons=("edit", "delete"))
+
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = SoftwareLCM
+        fields = (
+            "pk",
+            "name",
+            "software",
+            "default_image",
             "actions",
         )
 

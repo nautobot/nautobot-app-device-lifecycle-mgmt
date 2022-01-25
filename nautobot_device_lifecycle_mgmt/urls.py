@@ -4,6 +4,7 @@ from nautobot.extras.views import ObjectChangeLogView
 from nautobot_device_lifecycle_mgmt import views
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
+    SoftwareImage,
     SoftwareLCM,
     ValidatedSoftwareLCM,
     ContractLCM,
@@ -43,6 +44,18 @@ urlpatterns = [
         kwargs={"model": SoftwareLCM},
     ),
     path("software/import/", views.SoftwareLCMBulkImportView.as_view(), name="softwarelcm_import"),
+    # SoftwareImage
+    path("software-image/", views.SoftwareImageListView.as_view(), name="softwareimage_list"),
+    path("software-image/<uuid:pk>/", views.SoftwareImageView.as_view(), name="softwareimage"),
+    path("software-image/add/", views.SoftwareImageCreateView.as_view(), name="softwareimage_add"),
+    path("software-image/<uuid:pk>/delete/", views.SoftwareImageDeleteView.as_view(), name="softwareimage_delete"),
+    path("software-image/<uuid:pk>/edit/", views.SoftwareImageEditView.as_view(), name="softwareimage_edit"),
+    path(
+        "software-image/<uuid:pk>/changelog/",
+        ObjectChangeLogView.as_view(),
+        name="softwareimage_changelog",
+        kwargs={"model": SoftwareImage},
+    ),
     # ValidatedSoftware
     path("validated-software/", views.ValidatedSoftwareLCMListView.as_view(), name="validatedsoftwarelcm_list"),
     path("validated-software/<uuid:pk>/", views.ValidatedSoftwareLCMView.as_view(), name="validatedsoftwarelcm"),

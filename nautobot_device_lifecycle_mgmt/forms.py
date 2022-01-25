@@ -44,6 +44,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContactLCM,
     CVELCM,
     VulnerabilityLCM,
+    SoftwareImage,
 )
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
@@ -249,6 +250,70 @@ class SoftwareLCMCSVForm(CustomFieldModelCSVForm):
 
         model = SoftwareLCM
         fields = SoftwareLCM.csv_headers
+
+
+class SoftwareImageForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+    """SoftwareImage creation/edit form."""
+
+    software = DynamicModelChoiceField(queryset=SoftwareLCM.objects.all(), required=True)
+    device_types = DynamicModelMultipleChoiceField(queryset=DeviceType.objects.all(), required=False)
+
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+
+    class Meta:
+        """Meta attributes."""
+
+        model = SoftwareImage
+        fields = (
+            *SoftwareImage.csv_headers,
+            "tags",
+        )
+
+    def clean(self):
+        """Custom validation of the SoftwareImageForm."""
+        super().clean()
+
+        device_types = self.cleaned_data.get("device_types")
+        default_image = self.cleaned_data.get("default_image")
+
+        if not (device_types.count() > 0 or default_image):
+            msg = "SoftwareImage must have at least one DeviceType or be marked the default image."
+            self.add_error(None, msg)
+
+
+class SoftwareImageFilterForm(BootstrapMixin, forms.ModelForm):
+    """Filter form to filter searches for SoftwareImage."""
+
+    q = forms.CharField(
+        required=False,
+        label="Search",
+        help_text="Search for image name or software version.",
+    )
+    software = forms.CharField(required=False)
+    device_types = DynamicModelMultipleChoiceField(
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        required=False,
+    )
+    default_image = forms.BooleanField(required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES))
+
+    class Meta:
+        """Meta attributes."""
+
+        model = SoftwareLCM
+        fields = [
+            "q",
+            "software",
+            "image_file_name",
+            "image_file_checksum",
+            "download_url",
+            "device_types",
+            "default_image",
+        ]
+
+        widgets = {
+            "default_image": StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        }
 
 
 class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):

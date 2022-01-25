@@ -21,6 +21,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContactLCM,
     CVELCM,
     VulnerabilityLCM,
+    SoftwareImage,
 )
 
 
@@ -138,6 +139,50 @@ class SoftwareLCMFilterSet(django_filters.FilterSet):
             | Q(release_date__icontains=value)
             | Q(end_of_support__icontains=value)
         )
+        return queryset.filter(qs_filter)
+
+
+class SoftwareImageFilterSet(django_filters.FilterSet):
+    """Filter for SoftwareImage."""
+
+    q = django_filters.CharFilter(method="search", label="Search")
+
+    software = django_filters.ModelMultipleChoiceFilter(
+        queryset=SoftwareLCM.objects.all(),
+        label="Software",
+    )
+    device_types_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_types",
+        queryset=DeviceType.objects.all(),
+        label="Device Types",
+    )
+    device_types = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_types__model",
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        label="Device Types (model)",
+    )
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = SoftwareImage
+
+        fields = [
+            "image_file_name",
+            "software",
+            "image_file_checksum",
+            "download_url",
+            "device_types",
+            "default_image",
+        ]
+
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+
+        qs_filter = Q(image_file_name__icontains=value) | Q(software__version__icontains=value)
         return queryset.filter(qs_filter)
 
 
