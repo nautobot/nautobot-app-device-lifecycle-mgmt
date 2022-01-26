@@ -8,10 +8,10 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import numpy as np
 
-from django.db.models import Q, F, Count, ExpressionWrapper, FloatField
+from django.db.models import Q, F, Count, ExpressionWrapper, FloatField, Prefetch
 
 from nautobot.core.views import generic
-from nautobot.dcim.models import Device
+from nautobot.dcim.models import Device, DeviceType
 from nautobot.utilities.views import ContentTypePermissionRequiredMixin
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.models import (
@@ -207,6 +207,24 @@ class SoftwareLCMView(generic.ObjectView):
 
     queryset = SoftwareLCM.objects.prefetch_related("device_platform")
 
+    def get_extra_context(self, request, instance):
+        """Display SoftwareImage objects associated with the SoftwareLCM object."""
+        softwareimages = instance.software_images.restrict(request.user, "view")
+        if softwareimages.exists():
+            softwareimages_table = SoftwareImageTable(data=softwareimages, user=request.user, orderable=False)
+        else:
+            softwareimages_table = None
+
+        extra_context = {
+            "softwareimages_table": softwareimages_table,
+        }
+
+        return extra_context
+        # return self.render(
+        #     "nautobot_device_lifecycle_mgmt/software.html",
+        #     extra_context=extra_context,
+        # )
+
 
 class SoftwareLCMCreateView(generic.ObjectEditView):
     """SoftwareLCM Create view."""
@@ -235,10 +253,19 @@ class SoftwareLCMEditView(generic.ObjectEditView):
     default_return_url = URL.SoftwareLCM.View
 
 
+class SoftwareLCMBulkImportView(generic.BulkImportView):
+    """View for bulk import of SoftwareLCM."""
+
+    queryset = SoftwareLCM.objects.prefetch_related("device_platform")
+    model_form = SoftwareLCMCSVForm
+    table = SoftwareLCMTable
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:softwarelcm_list"
+
+
 class SoftwareImageListView(generic.ObjectListView):
     """SoftwareImage List view."""
 
-    queryset = SoftwareImage.objects.prefetch_related("device_platform")
+    queryset = SoftwareImage.objects.all()
     filterset = SoftwareImageFilterSet
     filterset_form = SoftwareImageFilterForm
     table = SoftwareImageTable
@@ -282,15 +309,6 @@ class SoftwareImageEditView(generic.ObjectEditView):
     queryset = SoftwareImage.objects.all()
     model_form = SoftwareImageForm
     default_return_url = URL.SoftwareImage.View
-
-
-class SoftwareLCMBulkImportView(generic.BulkImportView):
-    """View for bulk import of SoftwareLCM."""
-
-    queryset = SoftwareLCM.objects.prefetch_related("device_platform")
-    model_form = SoftwareLCMCSVForm
-    table = SoftwareLCMTable
-    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:softwarelcm_list"
 
 
 class ValidatedSoftwareLCMListView(generic.ObjectListView):

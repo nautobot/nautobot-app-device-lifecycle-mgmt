@@ -228,7 +228,9 @@ class SoftwareImage(PrimaryModel):
     """SoftwareImage model."""
 
     image_file_name = models.CharField(blank=False, max_length=100, verbose_name="Image File Name")
-    software = models.ForeignKey(to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Software Version")
+    software = models.ForeignKey(
+        to="SoftwareLCM", on_delete=models.CASCADE, related_name="software_images", verbose_name="Software Version"
+    )
     device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
     download_url = models.URLField(blank=True, verbose_name="Download URL")
     image_file_checksum = models.CharField(blank=True, max_length=256, verbose_name="Image File Checksum")

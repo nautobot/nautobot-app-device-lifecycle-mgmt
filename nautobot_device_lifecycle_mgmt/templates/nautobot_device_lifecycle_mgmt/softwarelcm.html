@@ -52,8 +52,15 @@
 {% endblock %}
 
 {% block content %}
+<style>
+    p.break-word {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
+    }
+</style>
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <strong>Software</strong>
@@ -113,9 +120,9 @@
                 </tr>
                 <tr>
                     <td>Image File Checksum</td>
-                    <td>
+                    <td class="text-wrap">
                     {% if object.image_file_checksum %}
-                        {{ object.image_file_checksum }}
+                        <p class="break-word">{{ object.image_file_checksum }}</p>
                     {% else %}
                        <span class="text-muted"></span>&mdash;</span>
                     {% endif %}
@@ -146,6 +153,16 @@
         {% include 'inc/custom_fields_panel.html' %}
         {% include 'inc/relationships_panel.html' %}
         {% include 'extras/inc/tags_panel.html' with tags=object.tags.all %}
+    </div>
+    <div class="col-md-6">
+        {% if softwareimages_table and softwareimages_table != None%}
+            {% include 'panel_table.html' with table=softwareimages_table heading='Software Images for this Software' panel_class="panel panel-default" %}
+        {% else %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>No Software Images found for this Software.</strong>
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
