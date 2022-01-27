@@ -151,6 +151,13 @@ class SoftwareImageFilterSet(django_filters.FilterSet):
         queryset=SoftwareLCM.objects.all(),
         label="Software",
     )
+    software_version = django_filters.ModelMultipleChoiceFilter(
+        field_name="software__version",
+        queryset=SoftwareLCM.objects.all(),
+        to_field_name="version",
+        label="Software (version)",
+    )
+
     device_types_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device_types",
         queryset=DeviceType.objects.all(),
@@ -162,6 +169,7 @@ class SoftwareImageFilterSet(django_filters.FilterSet):
         to_field_name="model",
         label="Device Types (model)",
     )
+    device_name = django_filters.CharFilter(method="device", label="Device Name")
 
     class Meta:
         """Meta attributes for filter."""
@@ -171,10 +179,12 @@ class SoftwareImageFilterSet(django_filters.FilterSet):
         fields = [
             "image_file_name",
             "software",
+            "software_version",
             "image_file_checksum",
             "download_url",
             "device_types",
             "default_image",
+            "device_name",
         ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
@@ -184,6 +194,26 @@ class SoftwareImageFilterSet(django_filters.FilterSet):
 
         qs_filter = Q(image_file_name__icontains=value) | Q(software__version__icontains=value)
         return queryset.filter(qs_filter)
+
+    def device(self, queryset, name, value):  # pylint: disable=no-self-use
+        """Search for validated software for a given device."""
+        value = value.strip()
+        if not value:
+            return queryset
+
+        if name == "device_name":
+            devices = Device.objects.filter(name=value)
+        elif name == "device_id":
+            devices = Device.objects.filter(id=value)
+        else:
+            devices = Device.objects.none()
+
+        if devices.count() != 1:
+            return queryset.none()
+
+        device = devices.first()
+
+        return queryset.filter(device_types__in=[device.device_type])
 
 
 class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
