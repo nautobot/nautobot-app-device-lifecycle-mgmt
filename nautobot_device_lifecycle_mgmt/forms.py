@@ -1,6 +1,7 @@
 """Forms implementation for the Lifecycle Management plugin."""
 import logging
 from django import forms
+from django.db.models import Q
 
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Platform, Region, Site
 from nautobot.extras.forms import (
@@ -272,10 +273,35 @@ class SoftwareImageForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelF
     def clean(self):
         """Custom validation of the SoftwareImageForm."""
         super().clean()
-
         device_types = self.cleaned_data.get("device_types")
         default_image = self.cleaned_data.get("default_image")
+        software = self.cleaned_data.get("software")
 
+        if software:
+            software_images = SoftwareImage.objects.filter(software=software)
+
+        if software and not default_image:
+            software_default_image = software_images.filter(default_image=True)
+            if not software_default_image.exists():
+                msg = f"No other Software Images found for the selected Software. This Software Image must be marked as the default."
+                self.add_error("default_image", msg)
+
+        if software and device_types.count() > 0:
+            if self.instance is not None and self.instance.pk is not None:
+                software_images = software_images.filter(~Q(pk=self.instance.pk))
+
+            software_manufacturer = software.device_platform.manufacturer
+            for device_type in device_types:
+                if device_type.manufacturer != software_manufacturer:
+                    msg = f"Manufacturer for {device_type.model} doesn't match the Software Platform Manufacturer."
+                    self.add_error("device_types", msg)
+
+                software_img_for_dt = software_images.filter(device_types__in=[device_type])
+                if software_img_for_dt.exists():
+                    msg = f"Device Type {device_type.model} already assigned to another Software Image."
+                    self.add_error("device_types", msg)
+
+        # ToDo: Revisit this requirement. Maybe I'm assuming too much.
         if not (device_types.count() > 0 or default_image):
             msg = "SoftwareImage must have at least one DeviceType or be marked the default image."
             self.add_error(None, msg)
@@ -289,7 +315,7 @@ class SoftwareImageFilterForm(BootstrapMixin, forms.ModelForm):
         label="Search",
         help_text="Search for image name or software version.",
     )
-    software = forms.CharField(required=False)
+    software = DynamicModelChoiceField(required=False, queryset=SoftwareLCM.objects.all())
     device_types = DynamicModelMultipleChoiceField(
         queryset=DeviceType.objects.all(),
         to_field_name="model",
