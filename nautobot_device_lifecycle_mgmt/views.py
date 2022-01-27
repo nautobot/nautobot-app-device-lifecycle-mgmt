@@ -88,6 +88,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     VulnerabilityLCMFilterSet,
     SoftwareImageFilterSet,
 )
+from nautobot.utilities.utils import count_related
 
 from nautobot_device_lifecycle_mgmt.const import URL, PLUGIN_CFG
 
@@ -220,10 +221,6 @@ class SoftwareLCMView(generic.ObjectView):
         }
 
         return extra_context
-        # return self.render(
-        #     "nautobot_device_lifecycle_mgmt/software.html",
-        #     extra_context=extra_context,
-        # )
 
 
 class SoftwareLCMCreateView(generic.ObjectEditView):
@@ -262,10 +259,52 @@ class SoftwareLCMBulkImportView(generic.BulkImportView):
     default_return_url = "plugins:nautobot_device_lifecycle_mgmt:softwarelcm_list"
 
 
+class SoftwareSoftwareImagesView(generic.ObjectView):
+    """Software Images tab for Software view."""
+
+    queryset = SoftwareLCM.objects.all()
+    template_name = "nautobot_device_lifecycle_mgmt/softwarelcm_software_images.html"
+
+    def get_extra_context(self, request, instance):
+        # Software Images table
+        softwareimages = instance.software_images.annotate(device_type_count=Count("device_types")).restrict(
+            request.user, "view"
+        )
+
+        if softwareimages.exists():
+            softwareimages_table = SoftwareImageTable(data=softwareimages, user=request.user, orderable=False)
+        else:
+            softwareimages_table = None
+
+        # Enable if we want to add buttons
+        # if request.user.has_perm("ipam.change_softwareimage") or request.user.has_perm("ipam.delete_softwareimage"):
+        #    prefix_table.columns.show("pk")
+
+        # paginate = {
+        #     "paginator_class": EnhancedPaginator,
+        #     "per_page": get_paginate_count(request),
+        # }
+        # RequestConfig(request, paginate).configure(softwareimages_table)
+
+        # Compile permissions list for rendering the object table
+        # permissions = {
+        #     "add": request.user.has_perm("ipam.add_prefix"),
+        #     "change": request.user.has_perm("ipam.change_prefix"),
+        #     "delete": request.user.has_perm("ipam.delete_prefix"),
+        # }
+
+        return {
+            # "first_available_prefix": instance.get_first_available_prefix(),
+            "softwareimages_table": softwareimages_table,
+            # "permissions": permissions,
+            "active_tab": "software-images",
+        }
+
+
 class SoftwareImageListView(generic.ObjectListView):
     """SoftwareImage List view."""
 
-    queryset = SoftwareImage.objects.all()
+    queryset = SoftwareImage.objects.annotate(device_type_count=Count("device_types"))
     filterset = SoftwareImageFilterSet
     filterset_form = SoftwareImageFilterForm
     table = SoftwareImageTable

@@ -44,6 +44,11 @@ urlpatterns = [
         kwargs={"model": SoftwareLCM},
     ),
     path("software/import/", views.SoftwareLCMBulkImportView.as_view(), name="softwarelcm_import"),
+    path(
+        "software/<uuid:pk>/software-images/",
+        views.SoftwareSoftwareImagesView.as_view(),
+        name="software_software_images",
+    ),
     # SoftwareImage
     path("software-image/", views.SoftwareImageListView.as_view(), name="softwareimage_list"),
     path("software-image/<uuid:pk>/", views.SoftwareImageView.as_view(), name="softwareimage"),
