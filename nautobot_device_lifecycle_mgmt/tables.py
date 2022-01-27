@@ -17,6 +17,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     InventoryItemSoftwareValidationResult,
     SoftwareImage,
 )
+from nautobot_device_lifecycle_mgmt.utils import M2MLinkedCountColumn
 
 
 class PercentageColumn(tables.Column):
@@ -116,17 +117,21 @@ class SoftwareImageTable(BaseTable):
         orderable=False,
     )
     software = tables.LinkColumn(verbose_name="Software")
+    device_type_count = M2MLinkedCountColumn(
+        viewname="dcim:devicetype_list", url_params={"model": ("device_types", "model")}, verbose_name="Device Types"
+    )
     default_image = BooleanColumn()
     actions = ButtonsColumn(SoftwareImage, buttons=("edit", "delete"))
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
         """Meta attributes."""
 
-        model = SoftwareLCM
+        model = SoftwareImage
         fields = (
             "pk",
             "name",
             "software",
+            "device_type_count",
             "default_image",
             "actions",
         )
