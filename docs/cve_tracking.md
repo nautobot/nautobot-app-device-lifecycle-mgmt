@@ -29,9 +29,13 @@ When creating a CVE object, the following fields are available. Fields in **bold
 
 As stated previously, you can associate a CVE to one or many [Software objects](./software_lifecycle.md#software-objects). These relationships will present themselves as breadcrumb links on each item's detail view.
 
-> Example of a breadcrumb link on a CVE item's view: ![](images/lcm_cve_breadcrumb.png)
+> Example of a breadcrumb link on a CVE item's view:
 
-> Example of a breadcrumb link on a Software item's view: ![](images/lcm_software_breadcrumb.png)
+![](images/lcm_cve_breadcrumb.png)
+
+> Example of a breadcrumb link on a Software item's view:
+
+![](images/lcm_software_breadcrumb.png)
 
 ## Vulnerability objects
 
