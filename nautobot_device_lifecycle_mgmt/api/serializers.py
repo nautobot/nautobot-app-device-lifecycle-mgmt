@@ -1,6 +1,8 @@
 """API serializers implementation for the LifeCycle Management plugin."""
 from rest_framework import serializers
 
+from nautobot.core.api import SerializedPKRelatedField
+
 from nautobot.dcim.api.nested_serializers import (
     NestedDeviceSerializer,
     NestedDeviceTypeSerializer,
@@ -13,6 +15,7 @@ from nautobot.extras.models import Status
 
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
+    SoftwareImage,
     SoftwareLCM,
     ContactLCM,
     ValidatedSoftwareLCM,
@@ -23,6 +26,7 @@ from nautobot_device_lifecycle_mgmt.models import (
 )
 
 from .nested_serializers import (
+    NestedSoftwareImageSerializer,
     NestedSoftwareLCMSerializer,
     NestedProviderLCMSerializer,
     NestedContractLCMSerializer,
@@ -132,6 +136,13 @@ class SoftwareLCMSerializer(TaggedObjectSerializer, CustomFieldModelSerializer):
         view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwarelcm-detail"
     )
     device_platform = NestedPlatformSerializer()
+    software_images = SerializedPKRelatedField(
+        queryset=SoftwareImage.objects.all(),
+        serializer=NestedSoftwareImageSerializer,
+        required=False,
+        many=True,
+    )
+    # software_images = NestedSoftwareImageSerializer()
 
     class Meta:
         """Meta attributes."""
@@ -146,11 +157,38 @@ class SoftwareLCMSerializer(TaggedObjectSerializer, CustomFieldModelSerializer):
             "release_date",
             "end_of_support",
             "documentation_url",
+            "software_images",
             "download_url",
             "image_file_name",
             "image_file_checksum",
             "long_term_support",
             "pre_release",
+            "custom_fields",
+            "tags",
+        ]
+
+
+class SoftwareImageSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=too-many-ancestors
+    """REST API serializer for SoftwareImage records."""
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwareimage-detail"
+    )
+    software = NestedSoftwareLCMSerializer()
+
+    class Meta:
+        """Meta attributes."""
+
+        model = SoftwareImage
+        fields = [
+            "id",
+            "url",
+            "image_file_name",
+            "software",
+            "device_types",
+            "download_url",
+            "image_file_checksum",
+            "default_image",
             "custom_fields",
             "tags",
         ]

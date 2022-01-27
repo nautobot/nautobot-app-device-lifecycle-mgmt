@@ -7,6 +7,7 @@ from nautobot_device_lifecycle_mgmt.api.views import (
     ProviderLCMView,
     ContactLCMView,
     SoftwareLCMViewSet,
+    SoftwareImageViewSet,
     ValidatedSoftwareLCMViewSet,
     CVELCMViewSet,
     VulnerabilityLCMViewSet,
@@ -19,6 +20,7 @@ router.register(r"contract", ContractLCMView)
 router.register(r"provider", ProviderLCMView)
 router.register(r"contact", ContactLCMView)
 router.register(r"software", SoftwareLCMViewSet)
+router.register(r"software-image", SoftwareImageViewSet)
 router.register(r"validated-software", ValidatedSoftwareLCMViewSet)
 router.register(r"cve", CVELCMViewSet)
 router.register(r"vulnerability", VulnerabilityLCMViewSet)
