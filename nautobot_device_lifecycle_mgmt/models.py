@@ -723,8 +723,8 @@ class CVELCM(PrimaryModel):
 class VulnerabilityLCM(PrimaryModel):
     """VulnerabilityLCM is a model representation of vulnerability that affects a device."""
 
-    cve = models.ForeignKey(CVELCM, on_delete=models.CASCADE)
-    software = models.ForeignKey(SoftwareLCM, on_delete=models.CASCADE)
+    cve = models.ForeignKey(CVELCM, on_delete=models.CASCADE, blank=True, null=True)
+    software = models.ForeignKey(SoftwareLCM, on_delete=models.CASCADE, blank=True, null=True)
     device = models.ForeignKey(Device, on_delete=models.CASCADE, blank=True, null=True)
     inventory_item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, blank=True, null=True)
     status = StatusField(
@@ -755,7 +755,11 @@ class VulnerabilityLCM(PrimaryModel):
     def __str__(self):
         """String representation of the model."""
         name = f"Device: {self.device}" if self.device else f"Inventory Part: {self.inventory_item}"
-        return f"{name} - Software: {self.software} - CVE: {self.cve}"
+        if self.software:
+            name += f" - Software: {self.software}"
+        if self.cve:
+            name += f" - CVE: {self.cve}"
+        return name
 
     def to_csv(self):
         """Return fields for bulk view."""
