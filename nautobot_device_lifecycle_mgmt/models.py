@@ -224,6 +224,16 @@ class SoftwareLCM(PrimaryModel):
         )
 
 
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "graphql",
+    "relationships",
+    "statuses",
+    "webhooks",
+)
 class SoftwareImage(PrimaryModel):
     """SoftwareImage model."""
 
@@ -237,10 +247,10 @@ class SoftwareImage(PrimaryModel):
     default_image = models.BooleanField(verbose_name="Default Image", default=False)
 
     csv_headers = [
+        "image_file_name",
         "software",
         "device_types",
         "download_url",
-        "image_file_name",
         "image_file_checksum",
         "default_image",
     ]
@@ -260,8 +270,6 @@ class SoftwareImage(PrimaryModel):
     def get_absolute_url(self):
         """Returns the Detail view for SoftwareImage models."""
         return reverse("plugins:nautobot_device_lifecycle_mgmt:softwareimage", kwargs={"pk": self.pk})
-
-    # objects = ValidatedSoftwareLCMQuerySet.as_manager()
 
 
 class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):
