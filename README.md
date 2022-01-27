@@ -55,6 +55,7 @@ sudo systemctl restart nautobot-rq-worker
 
 ## Documentation
 - [Software lifecycle](./docs/software_lifecycle.md)
+- [CVE Tracking](./docs/cve_tracking.md)
 
 ## Usage
 
