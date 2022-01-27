@@ -29,6 +29,12 @@
     </div>
     <div class="pull-right noprint">
         {% plugin_buttons object %}
+        {% if perms.nautobot_device_lifecycle_mgmt.add_softwareimage and active_tab == 'software-images' %}
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwareimage_add' %}?software={{ object.pk }}" class="btn btn-success">
+                <span class="mdi mdi-plus-thick" aria-hidden="true"></span>
+                Add a Software Image
+            </a>
+        {% endif %}
         {% if perms.nautobot_device_lifecycle_mgmt.change_softwarelcm %}
             {% edit_button object %}
         {% endif %}
@@ -44,6 +50,9 @@
     <ul class="nav nav-tabs">
         <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
             <a href="{{ object.get_absolute_url }}">Software</a>
+        </li>
+        <li role="presentation"{% if active_tab == 'software-images' %} class="active"{% endif %}>
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:software_software_images' pk=object.pk %}">Software Images <span class="badge">{{ object.get_software_images.count }}</span></a>
         </li>
         <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
             <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwarelcm_changelog' pk=object.id %}">Change Log</a>
@@ -153,16 +162,6 @@
         {% include 'inc/custom_fields_panel.html' %}
         {% include 'inc/relationships_panel.html' %}
         {% include 'extras/inc/tags_panel.html' with tags=object.tags.all %}
-    </div>
-    <div class="col-md-6">
-        {% if softwareimages_table and softwareimages_table != None%}
-            {% include 'panel_table.html' with table=softwareimages_table heading='Software Images for this Software' panel_class="panel panel-default" %}
-        {% else %}
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <strong>No Software Images found for this Software.</strong>
-            </div>
-        {% endif %}
     </div>
 </div>
 {% endblock %}

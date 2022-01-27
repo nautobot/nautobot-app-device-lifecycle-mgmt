@@ -52,6 +52,13 @@
 {% endblock %}
 
 {% block content %}
+<style>
+    p.break-word {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
+    }
+</style>
 <div class="row">
     <div class="col-md-6">
         <div class="panel panel-default">
@@ -85,7 +92,7 @@
                     <td>Image File Checksum</td>
                     <td>
                     {% if object.image_file_checksum %}
-                        {{ object.image_file_checksum }}
+                        <p class="break-word">{{ object.image_file_checksum }}</p>
                     {% else %}
                        <span class="text-muted"></span>&mdash;</span>
                     {% endif %}
