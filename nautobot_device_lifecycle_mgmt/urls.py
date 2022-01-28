@@ -52,7 +52,7 @@ urlpatterns = [
     # SoftwareImage
     path("software-image/", views.SoftwareImageListView.as_view(), name="softwareimage_list"),
     path("software-image/<uuid:pk>/", views.SoftwareImageView.as_view(), name="softwareimage"),
-    path("software-image/add/", views.SoftwareImageCreateView.as_view(), name="softwareimage_add"),
+    path("software-image/add/", views.SoftwareImageEditView.as_view(), name="softwareimage_add"),
     path("software-image/<uuid:pk>/delete/", views.SoftwareImageDeleteView.as_view(), name="softwareimage_delete"),
     path("software-image/<uuid:pk>/edit/", views.SoftwareImageEditView.as_view(), name="softwareimage_edit"),
     path(

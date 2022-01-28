@@ -323,12 +323,12 @@ class SoftwareImageView(generic.ObjectView):
     queryset = SoftwareImage.objects.all()
 
 
-class SoftwareImageCreateView(generic.ObjectEditView):
-    """SoftwareImage Create view."""
+class SoftwareImageEditView(generic.ObjectEditView):
+    """SoftwareImage Create/Edit view."""
 
-    model = SoftwareImage
     queryset = SoftwareImage.objects.all()
     model_form = SoftwareImageForm
+    template_name = "nautobot_device_lifecycle_mgmt/softwareimage_edit.html"
     default_return_url = URL.SoftwareImage.List
 
 
@@ -339,15 +339,6 @@ class SoftwareImageDeleteView(generic.ObjectDeleteView):
     queryset = SoftwareImage.objects.all()
     default_return_url = URL.SoftwareImage.List
     template_name = "nautobot_device_lifecycle_mgmt/softwareimage_delete.html"
-
-
-class SoftwareImageEditView(generic.ObjectEditView):
-    """SoftwareImage Edit view."""
-
-    model = SoftwareImage
-    queryset = SoftwareImage.objects.all()
-    model_form = SoftwareImageForm
-    default_return_url = URL.SoftwareImage.View
 
 
 class ValidatedSoftwareLCMListView(generic.ObjectListView):
