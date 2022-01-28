@@ -99,20 +99,6 @@
                     </td>
                 </tr>
                 <tr>
-                    <td>Device Types</td>
-                    <td>
-                        {% if object.device_types.all %}
-                        <ul>
-                            {% for device_type in object.device_types.all %}
-                                <li><a href="{{ device_type.get_absolute_url }}">{{ device_type }}</a></li>
-                            {% endfor %}
-                        </ul>
-                        {% else %}
-                            <span class="text-muted">None</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
                     <td>Default Image</td>
                     <td>
                     {% if object.default_image is True %}
@@ -127,6 +113,77 @@
         {% include 'inc/custom_fields_panel.html' %}
         {% include 'inc/relationships_panel.html' %}
         {% include 'extras/inc/tags_panel.html' with tags=object.tags.all %}
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Device assignments</strong>
+            </div>
+            <table class="table table-hover panel-body attr-table">
+                <tr>
+                    <td>
+                        Device Types
+                    </td>
+                    <td>
+                        {% if object.device_types.all %}
+                        <ul>
+                            {% for device_type in object.device_types.all %}
+                                <li><a href="{{ device_type.get_absolute_url }}">{{ device_type }}</a></li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                            <span class="text-muted">None</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Inventory Items assignments</strong>
+            </div>
+            <table class="table table-hover panel-body attr-table">
+                <tr>
+                    <td>
+                        Inventory Items
+                    </td>
+                    <td>
+                        {% if object.inventory_items.all %}
+                        <ul>
+                            {% for inventory_item in object.inventory_items.all %}
+                                <li><a href="{{ inventory_item.get_absolute_url }}">{{ inventory_item }}</a></li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                            <span class="text-muted">None</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Object Tags assignments</strong>
+            </div>
+            <table class="table table-hover panel-body attr-table">
+                <tr>
+                    <td>
+                        Object Tags
+                    </td>
+                    <td>
+                        {% if object.object_tags.all %}
+                        <ul>
+                            {% for object_tag in object.object_tags.all %}
+                                <li><a href="{{ object_tag.get_absolute_url }}">{{ object_tag }}</a></li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                            <span class="text-muted">None</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}
