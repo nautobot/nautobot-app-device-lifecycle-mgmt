@@ -19,6 +19,7 @@ from nautobot_device_lifecycle_mgmt.software_filters import (
     InventoryItemValidatedSoftwareFilter,
     DeviceSoftwareFilter,
     InventoryItemSoftwareFilter,
+    DeviceSoftwareImageFilter,
 )
 
 
@@ -245,6 +246,21 @@ class SoftwareLCM(PrimaryModel):
     objects = SoftwareLCMQuerySet.as_manager()
 
 
+class SoftwareImageQuerySet(RestrictedQuerySet):
+    """Queryset for `SoftwareImage` objects."""
+
+    def get_for_object(self, obj):
+        """Return all `SoftwareImage` assigned to the given object."""
+        if not isinstance(obj, models.Model):
+            raise TypeError(f"{obj} is not an instance of Django Model class")
+        if isinstance(obj, Device):
+            qs = DeviceSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()
+        else:
+            qs = self
+
+        return qs
+
+
 @extras_features(
     "custom_fields",
     "custom_links",
@@ -263,6 +279,8 @@ class SoftwareImage(PrimaryModel):
         to="SoftwareLCM", on_delete=models.CASCADE, related_name="software_images", verbose_name="Software Version"
     )
     device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
+    inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="+", blank=True)
+    object_tags = models.ManyToManyField(to="extras.Tag", related_name="+", blank=True)
     download_url = models.URLField(blank=True, verbose_name="Download URL")
     image_file_checksum = models.CharField(blank=True, max_length=256, verbose_name="Image File Checksum")
     default_image = models.BooleanField(verbose_name="Default Image", default=False)
@@ -271,6 +289,8 @@ class SoftwareImage(PrimaryModel):
         "image_file_name",
         "software",
         "device_types",
+        "inventory_items",
+        "object_tags",
         "download_url",
         "image_file_checksum",
         "default_image",
@@ -291,6 +311,8 @@ class SoftwareImage(PrimaryModel):
     def get_absolute_url(self):
         """Returns the Detail view for SoftwareImage models."""
         return reverse("plugins:nautobot_device_lifecycle_mgmt:softwareimage", kwargs={"pk": self.pk})
+
+    objects = SoftwareImageQuerySet.as_manager()
 
 
 class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):
