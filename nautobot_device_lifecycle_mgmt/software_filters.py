@@ -3,18 +3,16 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Case, IntegerField, Q, Value, When, Subquery
 
-from nautobot.dcim.models import Device
+from nautobot.dcim.models import Device, InventoryItem
 from nautobot.extras.models import RelationshipAssociation
 
 
-class DeviceSoftwareFilter:  # pylint: disable=too-few-public-methods
-    """Filter SoftwareLCM objects based on the Device object."""
-
-    soft_obj_model = Device
-    soft_relation_name = "device_soft"
+class BaseSoftwareFilter:
+    soft_obj_model = None
+    soft_relation_name = None
 
     def __init__(self, qs, item_obj):
-        """Initalize DeviceSoftwareFilter."""
+        """Initalize BaseSoftwareFilter."""
         self.software_qs = qs
         self.item_obj = item_obj
 
@@ -28,6 +26,20 @@ class DeviceSoftwareFilter:  # pylint: disable=too-few-public-methods
         self.software_qs = self.software_qs.filter(id=Subquery(soft_rel_sq))
 
         return self.software_qs
+
+
+class DeviceSoftwareFilter(BaseSoftwareFilter):  # pylint: disable=too-few-public-methods
+    """Filter SoftwareLCM objects based on the Device object."""
+
+    soft_obj_model = Device
+    soft_relation_name = "device_soft"
+
+
+class InventoryItemSoftwareFilter(BaseSoftwareFilter):  # pylint: disable=too-few-public-methods
+    """Filter SoftwareLCM objects based on the Device object."""
+
+    soft_obj_model = InventoryItem
+    soft_relation_name = "inventory_item_soft"
 
 
 class DeviceValidatedSoftwareFilter:  # pylint: disable=too-few-public-methods

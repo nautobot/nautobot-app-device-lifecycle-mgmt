@@ -18,6 +18,7 @@ from nautobot_device_lifecycle_mgmt.software_filters import (
     DeviceValidatedSoftwareFilter,
     InventoryItemValidatedSoftwareFilter,
     DeviceSoftwareFilter,
+    InventoryItemSoftwareFilter,
 )
 
 
@@ -160,6 +161,8 @@ class SoftwareLCMQuerySet(RestrictedQuerySet):
             raise TypeError(f"{obj} is not an instance of Django Model class")
         if isinstance(obj, Device):
             qs = DeviceSoftwareFilter(qs=self, item_obj=obj).filter_qs()
+        elif isinstance(obj, InventoryItem):
+            qs = InventoryItemSoftwareFilter(qs=self, item_obj=obj).filter_qs()
         else:
             qs = self
 
