@@ -258,6 +258,8 @@ class SoftwareImageForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelF
 
     software = DynamicModelChoiceField(queryset=SoftwareLCM.objects.all(), required=True)
     device_types = DynamicModelMultipleChoiceField(queryset=DeviceType.objects.all(), required=False)
+    inventory_items = DynamicModelMultipleChoiceField(queryset=InventoryItem.objects.all(), required=False)
+    object_tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
@@ -274,22 +276,30 @@ class SoftwareImageForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelF
         """Custom validation of the SoftwareImageForm."""
         super().clean()
         device_types = self.cleaned_data.get("device_types")
+        inventory_items = self.cleaned_data.get("inventory_items")
+        object_tags = self.cleaned_data.get("object_tags")
         default_image = self.cleaned_data.get("default_image")
         software = self.cleaned_data.get("software")
 
+        assigned_objects_count = sum(obj.count() for obj in (device_types, inventory_items, object_tags))
+
         if software:
             software_images = SoftwareImage.objects.filter(software=software)
-
-        if software and not default_image:
             software_default_image = software_images.filter(default_image=True)
-            if not software_default_image.exists():
-                msg = f"No other Software Images found for the selected Software. This Software Image must be marked as the default."
-                self.add_error("default_image", msg)
 
-        if software and device_types.count() > 0:
-            if self.instance is not None and self.instance.pk is not None:
-                software_images = software_images.filter(~Q(pk=self.instance.pk))
+        if self.instance is not None and self.instance.pk is not None:
+            software_images = software_images.filter(~Q(pk=self.instance.pk))
+            software_default_image = software_default_image.filter(~Q(pk=self.instance.pk))
 
+        if software and not default_image and not software_default_image.exists():
+            msg = f"No other Software Images found for the selected Software. This Software Image must be marked as the default."
+            self.add_error("default_image", msg)
+
+        if software and default_image and software_default_image.exists():
+            msg = f"Only one default Software Image is allowed for each Software."
+            self.add_error("default_image", msg)
+
+        if software and assigned_objects_count > 0:
             software_manufacturer = software.device_platform.manufacturer
             for device_type in device_types:
                 if device_type.manufacturer != software_manufacturer:
@@ -302,8 +312,8 @@ class SoftwareImageForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelF
                     self.add_error("device_types", msg)
 
         # ToDo: Revisit this requirement. Maybe I'm assuming too much.
-        if not (device_types.count() > 0 or default_image):
-            msg = "SoftwareImage must have at least one DeviceType or be marked the default image."
+        if not (assigned_objects_count > 0 or default_image):
+            msg = "SoftwareImage must be assigned to at least one object or be marked as the default image."
             self.add_error(None, msg)
 
 
