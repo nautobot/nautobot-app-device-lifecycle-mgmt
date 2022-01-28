@@ -17,6 +17,7 @@ from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.software_filters import (
     DeviceValidatedSoftwareFilter,
     InventoryItemValidatedSoftwareFilter,
+    DeviceSoftwareFilter,
 )
 
 
@@ -150,6 +151,21 @@ class HardwareLCM(PrimaryModel):
         )
 
 
+class SoftwareLCMQuerySet(RestrictedQuerySet):
+    """Queryset for `SoftwareLCM` objects."""
+
+    def get_for_object(self, obj):
+        """Return all `SoftwareLCM` assigned to the given object."""
+        if not isinstance(obj, models.Model):
+            raise TypeError(f"{obj} is not an instance of Django Model class")
+        if isinstance(obj, Device):
+            qs = DeviceSoftwareFilter(qs=self, item_obj=obj).filter_qs()
+        else:
+            qs = self
+
+        return qs
+
+
 @extras_features(
     "custom_fields",
     "custom_links",
@@ -222,6 +238,8 @@ class SoftwareLCM(PrimaryModel):
             self.long_term_support,
             self.pre_release,
         )
+
+    objects = SoftwareLCMQuerySet.as_manager()
 
 
 @extras_features(

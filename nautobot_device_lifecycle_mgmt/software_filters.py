@@ -1,6 +1,33 @@
 """Filters for Software Lifecycle QuerySets."""
 
-from django.db.models import Case, IntegerField, Q, Value, When
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Case, IntegerField, Q, Value, When, Subquery
+
+from nautobot.dcim.models import Device
+from nautobot.extras.models import RelationshipAssociation
+
+
+class DeviceSoftwareFilter:  # pylint: disable=too-few-public-methods
+    """Filter SoftwareLCM objects based on the Device object."""
+
+    soft_obj_model = Device
+    soft_relation_name = "device_soft"
+
+    def __init__(self, qs, item_obj):
+        """Initalize DeviceSoftwareFilter."""
+        self.software_qs = qs
+        self.item_obj = item_obj
+
+    def filter_qs(self):
+        """Returns filtered SoftwareLCM query set."""
+        soft_rel_sq = RelationshipAssociation.objects.filter(
+            relationship__slug=self.soft_relation_name,
+            destination_type=ContentType.objects.get_for_model(self.soft_obj_model),
+            destination_id=self.item_obj.id,
+        ).values("source_id")[:1]
+        self.software_qs = self.software_qs.filter(id=Subquery(soft_rel_sq))
+
+        return self.software_qs
 
 
 class DeviceValidatedSoftwareFilter:  # pylint: disable=too-few-public-methods
