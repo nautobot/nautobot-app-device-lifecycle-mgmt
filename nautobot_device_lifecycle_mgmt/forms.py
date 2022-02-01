@@ -1000,6 +1000,6 @@ class VulnerabilityLCMFilterForm(BootstrapMixin, StatusFilterFormMixin, CustomFi
         model = VulnerabilityLCM
         fields = [
             "q",
-            *ValidatedSoftwareLCM.csv_headers,
+            *VulnerabilityLCM.csv_headers,
             "tags",
         ]
