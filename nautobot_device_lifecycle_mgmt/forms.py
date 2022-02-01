@@ -832,6 +832,8 @@ class CVELCMForm(
 
     published_date = forms.DateField(widget=DatePicker())
     severity = forms.ChoiceField(choices=CVESeverityChoices.CHOICES, label="Severity", required=False)
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+
     model = CVELCM
 
     class Meta:
@@ -839,7 +841,10 @@ class CVELCMForm(
 
         model = CVELCM
 
-        fields = CVELCM.csv_headers
+        fields = [
+            *CVELCM.csv_headers,
+            "tags",
+        ]
 
         widgets = {
             "published_date": DatePicker(),
