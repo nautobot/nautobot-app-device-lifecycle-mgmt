@@ -976,7 +976,7 @@ class CVELCMEditView(generic.ObjectEditView):
 
 
 class CVELCMBulkImportView(generic.BulkImportView):
-    """View for bulk import of hardware lcm."""
+    """View for bulk import of CVELCM."""
 
     queryset = CVELCM.objects.all()
     model_form = CVELCMCSVForm
@@ -985,7 +985,7 @@ class CVELCMBulkImportView(generic.BulkImportView):
 
 
 class CVELCMBulkDeleteView(generic.BulkDeleteView):
-    """View for deleting one or more HardwareLCM records."""
+    """View for deleting one or more CVELCM records."""
 
     queryset = CVELCM.objects.all()
     table = CVELCMTable
@@ -994,7 +994,7 @@ class CVELCMBulkDeleteView(generic.BulkDeleteView):
 
 
 class CVELCMBulkEditView(generic.BulkEditView):
-    """View for editing one or more HardwareLCM records."""
+    """View for editing one or more CVELCM records."""
 
     queryset = CVELCM.objects.all()
     filterset = CVELCMFilterSet
@@ -1043,7 +1043,7 @@ class VulnerabilityLCMEditView(generic.ObjectEditView):
 
 
 class VulnerabilityLCMBulkDeleteView(generic.BulkDeleteView):
-    """View for deleting one or more HardwareLCM records."""
+    """View for deleting one or more VulnerabilityLCM records."""
 
     queryset = VulnerabilityLCM.objects.all()
     table = VulnerabilityLCMTable
@@ -1052,7 +1052,7 @@ class VulnerabilityLCMBulkDeleteView(generic.BulkDeleteView):
 
 
 class VulnerabilityLCMBulkEditView(generic.BulkEditView):
-    """View for editing one or more HardwareLCM records."""
+    """View for editing one or more VulnerabilityLCM records."""
 
     queryset = VulnerabilityLCM.objects.all()
     filterset = VulnerabilityLCMFilterSet
