@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from nautobot.extras.utils import extras_features
+from nautobot.extras.models.statuses import StatusField
 from nautobot.core.models.generics import PrimaryModel, OrganizationalModel
 from nautobot.dcim.models import Device, InventoryItem
 from nautobot.utilities.querysets import RestrictedQuerySet
@@ -630,4 +631,142 @@ class ContactLCM(PrimaryModel):
             self.comments,
             self.type,
             self.priority,
+        )
+
+
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "graphql",
+    "relationships",
+    "webhooks",
+    "statuses",
+)
+class CVELCM(PrimaryModel):
+    """CVELCM is a model representation of a cve vulnerability record."""
+
+    name = models.CharField(max_length=16, blank=False, unique=True)
+    published_date = models.DateField(verbose_name="Published Date")
+    link = models.URLField()
+    status = StatusField(
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        to="extras.status",
+    )
+    description = models.CharField(max_length=255, blank=True, null=True)
+    severity = models.CharField(max_length=50, default=choices.CVESeverityChoices.NONE)
+    cvss = models.FloatField(blank=True, null=True, verbose_name="CVSS Base Score")
+    cvss_v2 = models.FloatField(blank=True, null=True, verbose_name="CVSSv2 Score")
+    cvss_v3 = models.FloatField(blank=True, null=True, verbose_name="CVSSv3 Score")
+    fix = models.CharField(max_length=255, blank=True, null=True)
+    comments = models.TextField(blank=True)
+
+    csv_headers = [
+        "name",
+        "published_date",
+        "link",
+        "status",
+        "description",
+        "severity",
+        "cvss",
+        "cvss_v2",
+        "cvss_v3",
+        "fix",
+        "comments",
+    ]
+
+    class Meta:
+        """Meta attributes for the class."""
+
+        verbose_name = "CVE"
+
+        ordering = ("severity", "name")
+
+    def get_absolute_url(self):
+        """Returns the Detail view for CVELCM models."""
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:cvelcm", kwargs={"pk": self.pk})
+
+    def __str__(self):
+        """String representation of the model."""
+        return f"{self.name}"
+
+    def to_csv(self):
+        """Return fields for bulk view."""
+        return (
+            self.name,
+            self.published_date,
+            self.link,
+            self.status,
+            self.description,
+            self.severity,
+            self.cvss,
+            self.cvss_v2,
+            self.cvss_v3,
+            self.fix,
+            self.comments,
+        )
+
+
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "graphql",
+    "relationships",
+    "webhooks",
+    "statuses",
+)
+class VulnerabilityLCM(PrimaryModel):
+    """VulnerabilityLCM is a model representation of vulnerability that affects a device."""
+
+    cve = models.ForeignKey(CVELCM, on_delete=models.CASCADE, blank=True, null=True)
+    software = models.ForeignKey(SoftwareLCM, on_delete=models.CASCADE, blank=True, null=True)
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, blank=True, null=True)
+    inventory_item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, blank=True, null=True)
+    status = StatusField(
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        to="extras.status",
+    )
+
+    csv_headers = [
+        "cve",
+        "software",
+        "device",
+        "inventory_item",
+        "status",
+    ]
+
+    class Meta:
+        """Meta attributes for the class."""
+
+        verbose_name = "Vulnerability"
+        verbose_name_plural = "Vulnerabilities"
+
+    def get_absolute_url(self):
+        """Returns the Detail view for VulnerabilityLCM models."""
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm", kwargs={"pk": self.pk})
+
+    def __str__(self):
+        """String representation of the model."""
+        name = f"Device: {self.device}" if self.device else f"Inventory Part: {self.inventory_item}"
+        if self.software:
+            name += f" - Software: {self.software}"
+        if self.cve:
+            name += f" - CVE: {self.cve}"
+        return name
+
+    def to_csv(self):
+        """Return fields for bulk view."""
+        return (
+            self.cve,
+            self.software,
+            self.device,
+            self.inventory_item,
+            self.status,
         )

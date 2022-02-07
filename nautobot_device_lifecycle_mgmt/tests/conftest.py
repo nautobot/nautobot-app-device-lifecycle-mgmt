@@ -2,6 +2,8 @@
 from nautobot.dcim.models import DeviceType, Manufacturer, Platform, Site, Device, DeviceRole, InventoryItem
 from nautobot.extras.models import Status
 
+from nautobot_device_lifecycle_mgmt.models import CVELCM, SoftwareLCM
+
 
 def create_devices():
     """Create devices for tests."""
@@ -65,3 +67,36 @@ def create_inventory_items():
             part_id="WS-X6548-GE-TX",
         ),
     )
+
+
+def create_cves():
+    """Create CVELCM items for tests."""
+    cves = (
+        CVELCM.objects.create(
+            name="CVE-2021-1391",
+            published_date="2021-03-24",
+            link="https://www.cvedetails.com/cve/CVE-2021-1391/",
+        ),
+        CVELCM.objects.create(
+            name="CVE-2021-44228",
+            published_date="2021-12-10",
+            link="https://www.cvedetails.com/cve/CVE-2021-44228/",
+        ),
+        CVELCM.objects.create(
+            name="CVE-2020-27134",
+            published_date="2020-12-11",
+            link="https://www.cvedetails.com/cve/CVE-2020-27134/",
+        ),
+    )
+    return cves
+
+
+def create_softwares():
+    """Create SoftwareLCM items for tests."""
+    device_platform = Platform.objects.get_or_create(name="Cisco IOS", slug="cisco_ios")[0]
+    softwares = (
+        SoftwareLCM.objects.create(device_platform=device_platform, version="15.1(2)M"),
+        SoftwareLCM.objects.create(device_platform=device_platform, version="4.22.9M"),
+        SoftwareLCM.objects.create(device_platform=device_platform, version="21.4R3"),
+    )
+    return softwares

@@ -5,9 +5,11 @@ from nautobot.dcim.api.nested_serializers import (
     NestedDeviceSerializer,
     NestedDeviceTypeSerializer,
     NestedPlatformSerializer,
+    NestedInventoryItemSerializer,
 )
 from nautobot.extras.api.customfields import CustomFieldModelSerializer
-from nautobot.extras.api.serializers import TaggedObjectSerializer
+from nautobot.extras.api.serializers import TaggedObjectSerializer, StatusModelSerializerMixin, StatusSerializerField
+from nautobot.extras.models import Status
 
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
@@ -16,16 +18,19 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     ContractLCM,
     ProviderLCM,
+    CVELCM,
+    VulnerabilityLCM,
 )
 
 from .nested_serializers import (
     NestedSoftwareLCMSerializer,
     NestedProviderLCMSerializer,
     NestedContractLCMSerializer,
+    NestedCVELCMSerializer,
 )
 
 
-class HardwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=R0901
+class HardwareLCMSerializer(TaggedObjectSerializer, CustomFieldModelSerializer):  # pylint: disable=R0901
     """API serializer."""
 
     device_type = NestedDeviceTypeSerializer(
@@ -54,7 +59,7 @@ class HardwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):
         ]
 
 
-class ProviderLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=R0901
+class ProviderLCMSerializer(TaggedObjectSerializer, CustomFieldModelSerializer):  # pylint: disable=R0901
     """API serializer."""
 
     class Meta:
@@ -74,7 +79,7 @@ class ProviderLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):
         ]
 
 
-class ContractLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=R0901
+class ContractLCMSerializer(TaggedObjectSerializer, CustomFieldModelSerializer):  # pylint: disable=R0901
     """API serializer."""
 
     provider = NestedProviderLCMSerializer(many=False, read_only=False, required=True, help_text="Vendor")
@@ -98,7 +103,7 @@ class ContractLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):
         ]
 
 
-class ContactLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=R0901
+class ContactLCMSerializer(TaggedObjectSerializer, CustomFieldModelSerializer):  # pylint: disable=R0901
     """API serializer."""
 
     contract = NestedContractLCMSerializer(many=False, read_only=False, required=True, help_text="Associated Contract")
@@ -120,7 +125,7 @@ class ContactLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer): 
         ]
 
 
-class SoftwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=too-many-ancestors
+class SoftwareLCMSerializer(TaggedObjectSerializer, CustomFieldModelSerializer):  # pylint: disable=too-many-ancestors
     """REST API serializer for SoftwareLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
@@ -152,7 +157,7 @@ class SoftwareLCMSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):
 
 
 class ValidatedSoftwareLCMSerializer(
-    CustomFieldModelSerializer, TaggedObjectSerializer
+    TaggedObjectSerializer, CustomFieldModelSerializer
 ):  # pylint: disable=too-many-ancestors
     """REST API serializer for ValidatedSoftwareLCM records."""
 
@@ -180,4 +185,75 @@ class ValidatedSoftwareLCMSerializer(
             "valid",
             "custom_fields",
             "tags",
+        ]
+
+
+class CVELCMSerializer(
+    TaggedObjectSerializer, CustomFieldModelSerializer, StatusModelSerializerMixin
+):  # pylint: disable=too-many-ancestors
+    """REST API serializer for CVELCM records."""
+
+    url = serializers.HyperlinkedIdentityField(view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:cvelcm-detail")
+    status = StatusSerializerField(required=False, queryset=Status.objects.all())
+
+    class Meta:
+        """Meta attributes."""
+
+        model = CVELCM
+        fields = [
+            "id",
+            "url",
+            "name",
+            "published_date",
+            "link",
+            "status",
+            "description",
+            "severity",
+            "cvss",
+            "cvss_v2",
+            "cvss_v3",
+            "fix",
+            "comments",
+            "custom_fields",
+            "tags",
+        ]
+
+
+class VulnerabilityLCMSerializer(
+    TaggedObjectSerializer, CustomFieldModelSerializer, StatusModelSerializerMixin
+):  # pylint: disable=too-many-ancestors
+    """REST API serializer for VulnerabilityLCM records."""
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:vulnerabilitylcm-detail"
+    )
+    cve = NestedCVELCMSerializer(read_only=True)
+    software = NestedSoftwareLCMSerializer(read_only=True)
+    device = NestedDeviceSerializer(read_only=True)
+    inventory_item = NestedInventoryItemSerializer(read_only=True)
+
+    class Meta:
+        """Meta attributes."""
+
+        model = VulnerabilityLCM
+        fields = [
+            "id",
+            "display",
+            "url",
+            "cve",
+            "software",
+            "device",
+            "inventory_item",
+            "status",
+            "custom_fields",
+            "tags",
+        ]
+        read_only_fields = [
+            "id",
+            "display",
+            "url",
+            "cve",
+            "software",
+            "device",
+            "inventory_item",
         ]

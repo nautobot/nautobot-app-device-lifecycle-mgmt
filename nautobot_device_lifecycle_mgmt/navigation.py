@@ -97,6 +97,38 @@ try:
                                 "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
                             ],
                         ),
+                        NavMenuItem(
+                            link="plugins:nautobot_device_lifecycle_mgmt:cvelcm_list",
+                            name="CVE",
+                            buttons=(
+                                NavMenuButton(
+                                    link="plugins:nautobot_device_lifecycle_mgmt:cvelcm_add",
+                                    title="Add",
+                                    icon_class="mdi mdi-plus-thick",
+                                    button_class=ButtonColorChoices.GREEN,
+                                    permissions=[
+                                        "nautobot_device_lifecycle_mgmt.add_cvelcm",
+                                    ],
+                                ),
+                                NavMenuButton(
+                                    link="plugins:nautobot_device_lifecycle_mgmt:cvelcm_import",
+                                    title="Import",
+                                    icon_class="mdi mdi-database-import-outline",
+                                    button_class=ButtonColorChoices.BLUE,
+                                    permissions=["nautobot_device_lifecycle_mgmt.add_cvelcm"],
+                                ),
+                            ),
+                            permissions=[
+                                "nautobot_device_lifecycle_mgmt.view_cvelcm",
+                            ],
+                        ),
+                        NavMenuItem(
+                            link="plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm_list",
+                            name="Vulnerability",
+                            permissions=[
+                                "nautobot_device_lifecycle_mgmt.view_vulnerabilitylcm",
+                            ],
+                        ),
                     ),
                 ),
                 NavMenuGroup(
@@ -332,6 +364,30 @@ except ModuleNotFoundError:
                     permissions=["nautobot_device_lifecycle_mgmt.add_validatedsoftwarelcm"],
                 ),
             ),
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:cvelcm_list",
+            link_text="CVE",
+            buttons=(
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:cvelcm_add",
+                    title="Add",
+                    icon_class="mdi mdi-plus-thick",
+                    color=ButtonColorChoices.GREEN,
+                    permissions=["nautobot_device_lifecycle_mgmt.add_cvelcm"],
+                ),
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:cvelcm_import",
+                    title="Import",
+                    icon_class="mdi mdi-database-import-outline",
+                    color=ButtonColorChoices.BLUE,
+                    permissions=["nautobot_device_lifecycle_mgmt.add_cvelcm"],
+                ),
+            ),
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm_list",
+            link_text="Vulnerability",
         ),
         PluginMenuItem(
             link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",

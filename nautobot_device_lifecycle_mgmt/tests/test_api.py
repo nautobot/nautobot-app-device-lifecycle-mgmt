@@ -1,6 +1,7 @@
 """Unit tests for nautobot_device_lifecycle_mgmt."""
 import datetime
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
 
 from nautobot.utilities.testing import APIViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer, Platform, Device, DeviceRole, InventoryItem, Site
@@ -12,7 +13,10 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContractLCM,
     ProviderLCM,
     ValidatedSoftwareLCM,
+    CVELCM,
+    VulnerabilityLCM,
 )
+from nautobot_device_lifecycle_mgmt.tests.conftest import create_devices, create_cves, create_softwares
 
 
 User = get_user_model()
@@ -378,3 +382,122 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: 
 
     def test_bulk_update_objects(self):
         """Currently don't support bulk operations."""
+
+
+class CVELCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
+    """Test the CVELCM API."""
+
+    model = CVELCM
+    brief_fields = [
+        "comments",
+        "cvss",
+        "cvss_v2",
+        "cvss_v3",
+        "description",
+        "display",
+        "fix",
+        "id",
+        "link",
+        "name",
+        "published_date",
+        "severity",
+        "status",
+        "url",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+
+        cls.create_data = [
+            {
+                "name": "CVE-2021-40128",
+                "published_date": datetime.date(2021, 11, 4),
+                "link": "https://www.cvedetails.com/cve/CVE-2021-40128/",
+            },
+            {
+                "name": "CVE-2021-40126",
+                "published_date": datetime.date(2021, 11, 4),
+                "link": "https://www.cvedetails.com/cve/CVE-2021-40126/",
+            },
+            {
+                "name": "CVE-2021-40125",
+                "published_date": datetime.date(2021, 10, 27),
+                "link": "https://www.cvedetails.com/cve/CVE-2021-40125/",
+            },
+        ]
+
+        CVELCM.objects.create(
+            name="CVE-2021-1391",
+            published_date="2021-03-24",
+            link="https://www.cvedetails.com/cve/CVE-2021-1391/",
+        )
+        CVELCM.objects.create(
+            name="CVE-2021-44228",
+            published_date="2021-12-10",
+            link="https://www.cvedetails.com/cve/CVE-2021-44228/",
+        )
+        CVELCM.objects.create(
+            name="CVE-2020-27134",
+            published_date="2020-12-11",
+            link="https://www.cvedetails.com/cve/CVE-2020-27134/",
+        )
+
+    def test_bulk_create_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_bulk_delete_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_bulk_update_objects(self):
+        """Currently don't support bulk operations."""
+
+
+class VulnerabilityLCMAPITest(
+    # Not inheriting CreateObjectViewTestCase
+    APIViewTestCases.GetObjectViewTestCase,
+    APIViewTestCases.ListObjectsViewTestCase,
+    APIViewTestCases.UpdateObjectViewTestCase,
+    APIViewTestCases.DeleteObjectViewTestCase,
+):  # pylint: disable=too-many-ancestors
+    """Test the VulnerabilityLCM API."""
+
+    model = VulnerabilityLCM
+    brief_fields = [
+        "custom_fields",
+        "cve",
+        "device",
+        "display",
+        "id",
+        "inventory_item",
+        "software",
+        "status",
+        "tags",
+        "url",
+    ]
+    validation_excluded_fields = ["status"]
+
+    @classmethod
+    def setUpTestData(cls):
+        devices = create_devices()
+        cves = create_cves()
+        softwares = create_softwares()
+
+        for i, cve in enumerate(cves):
+            VulnerabilityLCM.objects.create(cve=cve, device=devices[i], software=softwares[i])
+
+        vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
+        status = Status.objects.create(name="Exempt", slug="exempt", color="4caf50", description="This unit is exempt.")
+        status.content_types.set([vuln_ct])
+        cls.create_data = [{"status": "exempt"}]
+
+    def test_bulk_delete_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_bulk_update_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_options_returns_expected_choices(self):
+        """Disabling inherited test that uses POST."""
+
+    def test_options_objects_returns_display_and_value(self):
+        """Disabling inherited test that uses POST."""

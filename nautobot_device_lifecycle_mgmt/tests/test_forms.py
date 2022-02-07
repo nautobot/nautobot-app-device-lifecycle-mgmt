@@ -1,11 +1,12 @@
 """Test forms."""
 from django.test import TestCase
+from django.contrib.contenttypes.models import ContentType
 
 from nautobot.dcim.models import DeviceType, Manufacturer, Device, DeviceRole, Site, InventoryItem, Platform
 from nautobot.extras.models import Status
 
-from nautobot_device_lifecycle_mgmt.forms import HardwareLCMForm, SoftwareLCMForm, ValidatedSoftwareLCMForm
-from nautobot_device_lifecycle_mgmt.models import SoftwareLCM
+from nautobot_device_lifecycle_mgmt.forms import HardwareLCMForm, SoftwareLCMForm, ValidatedSoftwareLCMForm, CVELCMForm
+from nautobot_device_lifecycle_mgmt.models import SoftwareLCM, CVELCM
 
 
 class HardwareLCMFormTest(TestCase):
@@ -332,4 +333,46 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
         self.assertEqual(
             "You need to assign to at least one object.",
             form.errors["__all__"][0],
+        )
+
+
+class CVELCMFormTest(TestCase):
+    """Test class for Device Lifecycle forms."""
+
+    def setUp(self):
+        """Create necessary objects."""
+        self.cve_ct = ContentType.objects.get_for_model(CVELCM)
+        self.status = Status.objects.create(
+            name="Fixed", slug="fixed", color="4caf50", description="Unit has been fixed"
+        )
+        self.status.content_types.set([self.cve_ct])
+
+    def test_specifying_all_fields(self):
+        form = CVELCMForm(
+            data={
+                "name": "CVE-2021-34699",
+                "published_date": "2021-09-23",
+                "link": "https://www.cvedetails.com/cve/CVE-2021-34699/",
+                "status": self.status,
+                "description": "Thanos",
+                "severity": "High",
+                "cvss": 6.8,
+                "cvss_v2": 6.9,
+                "cvss_v3": 6.7,
+                "fix": "Avengers",
+                "comments": "This is very bad juju.",
+            }
+        )
+        self.assertTrue(form.is_valid())
+        self.assertTrue(form.save())
+
+    def test_required_fields_missing(self):
+        form = CVELCMForm(data={"name": "CVE-2022-0002"})
+        self.assertFalse(form.is_valid())
+        self.assertDictEqual(
+            {
+                "published_date": ["This field is required."],
+                "link": ["This field is required."],
+            },
+            form.errors,
         )

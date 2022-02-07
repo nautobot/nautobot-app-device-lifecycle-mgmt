@@ -26,12 +26,10 @@ services:
     <<: *nautobot-build
     <<: *nautobot-base
   worker:
-    entrypoint: "nautobot-server rqworker"
+    entrypoint: "nautobot-server celery worker -B -l INFO"
     depends_on:
       nautobot:
         condition: "service_started"
-      db:
-        condition: "service_healthy"
     healthcheck:
       disable: true
     <<: *nautobot-base

@@ -23,6 +23,8 @@ from nautobot_device_lifecycle_mgmt.models import (
     InventoryItemSoftwareValidationResult,
     ContractLCM,
     ProviderLCM,
+    CVELCM,
+    VulnerabilityLCM,
 )
 from nautobot_device_lifecycle_mgmt.tables import (
     HardwareLCMTable,
@@ -33,6 +35,8 @@ from nautobot_device_lifecycle_mgmt.tables import (
     ContractLCMTable,
     ProviderLCMTable,
     ContactLCMTable,
+    CVELCMTable,
+    VulnerabilityLCMTable,
 )
 from nautobot_device_lifecycle_mgmt.forms import (
     HardwareLCMForm,
@@ -59,6 +63,13 @@ from nautobot_device_lifecycle_mgmt.forms import (
     ContactLCMBulkEditForm,
     ContactLCMFilterForm,
     ContactLCMCSVForm,
+    CVELCMForm,
+    CVELCMFilterForm,
+    CVELCMBulkEditForm,
+    CVELCMCSVForm,
+    VulnerabilityLCMForm,
+    VulnerabilityLCMFilterForm,
+    VulnerabilityLCMBulkEditForm,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -69,6 +80,8 @@ from nautobot_device_lifecycle_mgmt.filters import (
     ValidatedSoftwareLCMFilterSet,
     DeviceSoftwareValidationResultFilterSet,
     InventoryItemSoftwareValidationResultFilterSet,
+    CVELCMFilterSet,
+    VulnerabilityLCMFilterSet,
 )
 
 from nautobot_device_lifecycle_mgmt.const import URL, PLUGIN_CFG
@@ -914,3 +927,135 @@ class ContactLCMBulkEditView(generic.BulkEditView):
     table = ContactLCMTable
     form = ContactLCMBulkEditForm
     bulk_edit_url = "plugins:nautobot_device_lifecycle_mgmt.contactlcm_bulk_edit"
+
+
+# ---------------------------------------------------------------------------------
+#  CVE Lifecycle Management Views
+# ---------------------------------------------------------------------------------
+
+
+class CVELCMListView(generic.ObjectListView):
+    """List view."""
+
+    queryset = CVELCM.objects.all()
+    filterset = CVELCMFilterSet
+    filterset_form = CVELCMFilterForm
+    table = CVELCMTable
+
+
+class CVELCMView(generic.ObjectView):
+    """Detail view."""
+
+    queryset = CVELCM.objects.all()
+
+
+class CVELCMCreateView(generic.ObjectEditView):
+    """Create view."""
+
+    model = CVELCM
+    queryset = CVELCM.objects.all()
+    model_form = CVELCMForm
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:cvelcm_list"
+
+
+class CVELCMDeleteView(generic.ObjectDeleteView):
+    """Delete view."""
+
+    model = CVELCM
+    queryset = CVELCM.objects.all()
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:cvelcm_list"
+
+
+class CVELCMEditView(generic.ObjectEditView):
+    """Edit view."""
+
+    model = CVELCM
+    queryset = CVELCM.objects.all()
+    model_form = CVELCMForm
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:cvelcm"
+
+
+class CVELCMBulkImportView(generic.BulkImportView):
+    """View for bulk import of CVELCM."""
+
+    queryset = CVELCM.objects.all()
+    model_form = CVELCMCSVForm
+    table = CVELCMTable
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:cvelcm_list"
+
+
+class CVELCMBulkDeleteView(generic.BulkDeleteView):
+    """View for deleting one or more CVELCM records."""
+
+    queryset = CVELCM.objects.all()
+    table = CVELCMTable
+    bulk_delete_url = "plugins:nautobot_device_lifecycle_mgmt.cvelcm_bulk_delete"
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:cvelcm_list"
+
+
+class CVELCMBulkEditView(generic.BulkEditView):
+    """View for editing one or more CVELCM records."""
+
+    queryset = CVELCM.objects.all()
+    filterset = CVELCMFilterSet
+    table = CVELCMTable
+    form = CVELCMBulkEditForm
+    bulk_edit_url = "plugins:nautobot_device_lifecycle_mgmt.cvelcm_bulk_edit"
+
+
+# ---------------------------------------------------------------------------------
+#  Vulnerability Lifecycle Management Views
+# ---------------------------------------------------------------------------------
+
+
+class VulnerabilityLCMListView(generic.ObjectListView):
+    """List view."""
+
+    queryset = VulnerabilityLCM.objects.all()
+    filterset = VulnerabilityLCMFilterSet
+    filterset_form = VulnerabilityLCMFilterForm
+    table = VulnerabilityLCMTable
+    action_buttons = ("export",)
+    template_name = "nautobot_device_lifecycle_mgmt/vulnerabilitylcm_list.html"
+
+
+class VulnerabilityLCMView(generic.ObjectView):
+    """Detail view."""
+
+    queryset = VulnerabilityLCM.objects.all()
+
+
+class VulnerabilityLCMDeleteView(generic.ObjectDeleteView):
+    """Delete view."""
+
+    model = VulnerabilityLCM
+    queryset = VulnerabilityLCM.objects.all()
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm_list"
+
+
+class VulnerabilityLCMEditView(generic.ObjectEditView):
+    """Edit view."""
+
+    model = VulnerabilityLCM
+    queryset = VulnerabilityLCM.objects.all()
+    model_form = VulnerabilityLCMForm
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm"
+
+
+class VulnerabilityLCMBulkDeleteView(generic.BulkDeleteView):
+    """View for deleting one or more VulnerabilityLCM records."""
+
+    queryset = VulnerabilityLCM.objects.all()
+    table = VulnerabilityLCMTable
+    bulk_delete_url = "plugins:nautobot_device_lifecycle_mgmt.vulnerabilitylcm_bulk_delete"
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm_list"
+
+
+class VulnerabilityLCMBulkEditView(generic.BulkEditView):
+    """View for editing one or more VulnerabilityLCM records."""
+
+    queryset = VulnerabilityLCM.objects.all()
+    filterset = VulnerabilityLCMFilterSet
+    table = VulnerabilityLCMTable
+    form = VulnerabilityLCMBulkEditForm
+    bulk_edit_url = "plugins:nautobot_device_lifecycle_mgmt.vulnerabilitylcm_bulk_edit"

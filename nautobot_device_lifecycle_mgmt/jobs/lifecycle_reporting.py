@@ -5,11 +5,11 @@ from nautobot.dcim.models import Device, InventoryItem
 from nautobot.extras.jobs import Job
 
 from nautobot_device_lifecycle_mgmt import choices
-from .models import (
+from nautobot_device_lifecycle_mgmt.models import (
     DeviceSoftwareValidationResult,
     InventoryItemSoftwareValidationResult,
 )
-from .software import DeviceSoftware, InventoryItemSoftware
+from nautobot_device_lifecycle_mgmt.software import DeviceSoftware, InventoryItemSoftware
 
 
 name = "Device/Software Lifecycle Reporting"  # pylint: disable=invalid-name
@@ -72,6 +72,3 @@ class InventoryItemSoftwareValidationFullReport(Job):
             validate_obj.validated_save()
 
         self.log_success(message=f"Performed validation on: {inventory_items.count()} inventory items.")
-
-
-jobs = [DeviceSoftwareValidationFullReport, InventoryItemSoftwareValidationFullReport]

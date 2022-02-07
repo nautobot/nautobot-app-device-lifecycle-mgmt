@@ -2,7 +2,8 @@
 
 import django_tables2 as tables
 from django_tables2.utils import A
-from nautobot.utilities.tables import BaseTable, ButtonsColumn, BooleanColumn, ToggleColumn
+from nautobot.utilities.tables import BaseTable, ButtonsColumn, BooleanColumn, ToggleColumn, TagColumn
+from nautobot.extras.tables import StatusTableMixin
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
@@ -10,6 +11,8 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContractLCM,
     ProviderLCM,
     ContactLCM,
+    CVELCM,
+    VulnerabilityLCM,
     DeviceSoftwareValidationResult,
     InventoryItemSoftwareValidationResult,
 )
@@ -271,5 +274,99 @@ class ContactLCMTable(BaseTable):
             "comments",
             "priority",
             "contract",
+            "actions",
+        )
+
+
+class CVELCMTable(StatusTableMixin, BaseTable):
+    """Table for list view."""
+
+    model = CVELCM
+    pk = ToggleColumn()
+    name = tables.LinkColumn(
+        "plugins:nautobot_device_lifecycle_mgmt:cvelcm", text=lambda record: record, args=[A("pk")]
+    )
+    link = tables.TemplateColumn(
+        template_code="""{% if record.link %}
+                    <a href="{{ record.link }}" target="_blank" data-toggle="tooltip" data-placement="left" title="{{ record.link }}">
+                        <span class="mdi mdi-open-in-new"></span>
+                    </a>
+                    {% else %}
+                    —
+                    {% endif %}""",
+        verbose_name="Link",
+    )
+    tags = TagColumn()
+    actions = ButtonsColumn(CVELCM, buttons=("changelog", "edit", "delete"))
+
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = CVELCM
+        fields = (
+            "pk",
+            "name",
+            "published_date",
+            "link",
+            "severity",
+            "cvss",
+            "cvss_v2",
+            "cvss_v3",
+            "status",
+            "tags",
+            "actions",
+        )
+        default_columns = (
+            "pk",
+            "name",
+            "published_date",
+            "link",
+            "severity",
+            "cvss",
+            "cvss_v2",
+            "cvss_v3",
+            "status",
+            "actions",
+        )
+
+
+class VulnerabilityLCMTable(StatusTableMixin, BaseTable):
+    """Table for list view."""
+
+    model = VulnerabilityLCM
+    pk = ToggleColumn()
+    name = tables.LinkColumn(
+        "plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm", text=lambda record: record, args=[A("pk")]
+    )
+    cve = tables.LinkColumn(verbose_name="CVE")
+    software = tables.LinkColumn()
+    device = tables.LinkColumn()
+    inventory_item = tables.LinkColumn(verbose_name="Inventory Item")
+    tags = TagColumn()
+    actions = ButtonsColumn(VulnerabilityLCM, buttons=("changelog", "edit", "delete"))
+
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = VulnerabilityLCM
+        fields = (
+            "pk",
+            "name",
+            "cve",
+            "software",
+            "device",
+            "inventory_item",
+            "status",
+            "tags",
+            "actions",
+        )
+        default_columns = (
+            "pk",
+            "name",
+            "cve",
+            "software",
+            "device",
+            "inventory_item",
+            "status",
             "actions",
         )
