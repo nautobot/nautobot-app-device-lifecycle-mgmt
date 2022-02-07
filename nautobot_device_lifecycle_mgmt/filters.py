@@ -170,6 +170,10 @@ class SoftwareImageFilterSet(django_filters.FilterSet):
         label="Device Types (model)",
     )
     device_name = django_filters.CharFilter(method="device", label="Device Name")
+    device_id = django_filters.CharFilter(method="device", label="Device ID")
+    inventory_item_id = django_filters.CharFilter(method="inventory_item", label="InventoryItem ID")
+    device_name = django_filters.CharFilter(method="device", label="Device Name")
+    device_id = django_filters.CharFilter(method="device", label="Device ID")
 
     class Meta:
         """Meta attributes for filter."""
@@ -196,7 +200,7 @@ class SoftwareImageFilterSet(django_filters.FilterSet):
         return queryset.filter(qs_filter)
 
     def device(self, queryset, name, value):  # pylint: disable=no-self-use
-        """Search for validated software for a given device."""
+        """Search for software image for a given device."""
         value = value.strip()
         if not value:
             return queryset
@@ -213,7 +217,23 @@ class SoftwareImageFilterSet(django_filters.FilterSet):
 
         device = devices.first()
 
-        return queryset.filter(device_types__in=[device.device_type])
+        return SoftwareImage.objects.get_for_object(device)
+        # return queryset.filter(device_types__in=[device.device_type])
+
+    def inventory_item(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Search for software image for a given inventory item."""
+        value = value.strip()
+        if not value:
+            return queryset
+
+        inventory_items = InventoryItem.objects.filter(id=value)
+
+        if inventory_items.count() != 1:
+            return queryset.none()
+
+        inventory_item = inventory_items.first()
+
+        return SoftwareImage.objects.get_for_object(inventory_item)
 
 
 class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
@@ -351,7 +371,6 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
         if not value:
             return queryset
 
-        print(value)
         inventory_items = InventoryItem.objects.filter(id=value)
 
         if inventory_items.count() != 1:

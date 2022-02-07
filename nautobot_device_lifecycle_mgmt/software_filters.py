@@ -28,31 +28,6 @@ class BaseSoftwareFilter:
         return self.software_qs
 
 
-class DeviceSoftwareImageFilter:
-    soft_obj_model = Device
-    soft_relation_name = "device_soft"
-
-    def __init__(self, qs, item_obj):
-        """Initalize BaseSoftwareImageFilter."""
-        self.softwareimage_qs = qs
-        self.item_obj = item_obj
-
-    def filter_qs(self):
-        """Returns filtered SoftwareImage query set."""
-        soft_rel_sq = RelationshipAssociation.objects.filter(
-            relationship__slug=self.soft_relation_name,
-            destination_type=ContentType.objects.get_for_model(self.soft_obj_model),
-            destination_id=self.item_obj.id,
-        ).values("source_id")[:1]
-        device_type_q = Q(software=Subquery(soft_rel_sq), device_types__in=[self.item_obj.device_type])
-        default_image_q = Q(software=Subquery(soft_rel_sq), default_image=True) & ~Q(
-            device_types__in=[self.item_obj.device_type]
-        )
-        self.softwareimage_qs = self.softwareimage_qs.filter(device_type_q | default_image_q)
-
-        return self.softwareimage_qs
-
-
 class DeviceSoftwareFilter(BaseSoftwareFilter):  # pylint: disable=too-few-public-methods
     """Filter SoftwareLCM objects based on the Device object."""
 
@@ -148,3 +123,53 @@ class InventoryItemValidatedSoftwareFilter:  # pylint: disable=too-few-public-me
                 output_field=IntegerField(),
             )
         )
+
+
+class DeviceSoftwareImageFilter:
+    soft_obj_model = Device
+    soft_relation_name = "device_soft"
+
+    def __init__(self, qs, item_obj):
+        """Initalize BaseSoftwareImageFilter."""
+        self.softwareimage_qs = qs
+        self.item_obj = item_obj
+
+    def filter_qs(self):
+        """Returns filtered SoftwareImage query set."""
+        soft_rel_obj = RelationshipAssociation.objects.filter(
+            relationship__slug=self.soft_relation_name,
+            destination_type=ContentType.objects.get_for_model(self.soft_obj_model),
+            destination_id=self.item_obj.id,
+        ).values("source_id")[:1]
+        device_type_q = Q(software=soft_rel_obj, device_types=self.item_obj.device_type) | Q(
+            software=soft_rel_obj, object_tags__in=self.item_obj.tags.all()
+        )
+        default_image_q = Q(software=soft_rel_obj, default_image=True) & ~Q(device_types=self.item_obj.device_type)
+        self.softwareimage_qs = self.softwareimage_qs.filter(device_type_q | default_image_q)
+
+        return self.softwareimage_qs
+
+
+class InventoryItemSoftwareImageFilter:
+    soft_obj_model = InventoryItem
+    soft_relation_name = "inventory_item_soft"
+
+    def __init__(self, qs, item_obj):
+        """Initalize BaseSoftwareImageFilter."""
+        self.softwareimage_qs = qs
+        self.item_obj = item_obj
+
+    def filter_qs(self):
+        """Returns filtered SoftwareImage query set."""
+        soft_rel_obj = RelationshipAssociation.objects.filter(
+            relationship__slug=self.soft_relation_name,
+            destination_type=ContentType.objects.get_for_model(self.soft_obj_model),
+            destination_id=self.item_obj.id,
+        ).values("source_id")[:1]
+        inv_item_q = Q(software=soft_rel_obj, inventory_items=self.item_obj.pk) | Q(
+            software=soft_rel_obj, object_tags__in=self.item_obj.tags.all()
+        )
+        default_image_q = Q(software=soft_rel_obj, default_image=True) & ~Q(inventory_items=self.item_obj.pk)
+        self.softwareimage_qs = self.softwareimage_qs.filter(inv_item_q | default_image_q)
+
+        return self.softwareimage_qs
