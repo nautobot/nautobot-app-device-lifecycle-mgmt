@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-lifecycle-mgmt"
-version = "0.3.0"
+version = "0.4.0"
 description = "Manages device lifecycles for platforms and software."
 authors = [
     "Josh Silvas <josh.silvas@networktocode.com>",
