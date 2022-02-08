@@ -61,6 +61,11 @@ urlpatterns = [
         name="softwareimage_changelog",
         kwargs={"model": SoftwareImage},
     ),
+    path(
+        "software-image/import/",
+        views.SoftwareImageBulkImportView.as_view(),
+        name="softwareimage_import",
+    ),
     # ValidatedSoftware
     path("validated-software/", views.ValidatedSoftwareLCMListView.as_view(), name="validatedsoftwarelcm_list"),
     path("validated-software/<uuid:pk>/", views.ValidatedSoftwareLCMView.as_view(), name="validatedsoftwarelcm"),

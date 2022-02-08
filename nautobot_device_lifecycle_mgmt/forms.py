@@ -51,6 +51,18 @@ from nautobot_device_lifecycle_mgmt.models import (
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 
 
+class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):
+    """Reference a list of PKs."""
+
+    def prepare_value(self, value):
+        """Parse a comma-separated string of PKs into a list of PKs."""
+        pk_list = []
+        if isinstance(value, str):
+            pk_list = [val.strip() for val in value.split(",") if val]
+
+        return super().prepare_value(pk_list)
+
+
 class HardwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
     """Hardware Device Lifecycle creation/edit form."""
 
@@ -325,10 +337,20 @@ class SoftwareImageFilterForm(BootstrapMixin, forms.ModelForm):
         label="Search",
         help_text="Search for image name or software version.",
     )
-    software = DynamicModelChoiceField(required=False, queryset=SoftwareLCM.objects.all())
+    software = DynamicModelMultipleChoiceField(required=False, queryset=SoftwareLCM.objects.all())
     device_types = DynamicModelMultipleChoiceField(
         queryset=DeviceType.objects.all(),
         to_field_name="model",
+        required=False,
+    )
+    inventory_items = DynamicModelMultipleChoiceField(
+        queryset=InventoryItem.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
+    object_tags = DynamicModelMultipleChoiceField(
+        queryset=Tag.objects.all(),
+        to_field_name="slug",
         required=False,
     )
     default_image = forms.BooleanField(required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES))
@@ -344,12 +366,40 @@ class SoftwareImageFilterForm(BootstrapMixin, forms.ModelForm):
             "image_file_checksum",
             "download_url",
             "device_types",
+            "inventory_items",
+            "object_tags",
             "default_image",
         ]
 
         widgets = {
             "default_image": StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
         }
+
+
+class SoftwareImageCSVForm(CustomFieldModelCSVForm):
+    """Form for bulk creating SoftwareImage objects."""
+
+    device_types = CSVMultipleModelChoiceField(
+        queryset=DeviceType.objects.all(),
+        required=False,
+        to_field_name="model",
+        help_text="Comma-separated list of DeviceType Models",
+    )
+    inventory_items = CSVMultipleModelChoiceField(
+        queryset=InventoryItem.objects.all(),
+        required=False,
+        to_field_name="id",
+        help_text="Comma-separated list of InventoryItem IDs",
+    )
+    object_tags = CSVMultipleModelChoiceField(
+        queryset=Tag.objects.all(), required=False, to_field_name="slug", help_text="Comma-separated list of Tag Slugs"
+    )
+
+    class Meta:
+        """Meta attributes for the SoftwareImage class."""
+
+        model = SoftwareImage
+        fields = SoftwareImage.csv_headers
 
 
 class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
@@ -579,18 +629,6 @@ class InventoryItemSoftwareValidationResultFilterForm(BootstrapMixin, CustomFiel
             "device_role",
             "exclude_sw_missing",
         ]
-
-
-class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):
-    """Reference a list of PKs."""
-
-    def prepare_value(self, value):
-        """Parse a comma-separated string of PKs into a list of PKs."""
-        pk_list = []
-        if isinstance(value, str):
-            pk_list = [val.strip() for val in value.split(",") if val]
-
-        return super().prepare_value(pk_list)
 
 
 class ValidatedSoftwareLCMCSVForm(CustomFieldModelCSVForm):

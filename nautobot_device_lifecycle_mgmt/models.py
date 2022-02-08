@@ -315,6 +315,19 @@ class SoftwareImage(PrimaryModel):
         """Returns the Detail view for SoftwareImage models."""
         return reverse("plugins:nautobot_device_lifecycle_mgmt:softwareimage", kwargs={"pk": self.pk})
 
+    def to_csv(self):
+        """Return fields for bulk view."""
+        return (
+            self.image_file_name,
+            self.software.id,
+            f'"{",".join(str(device_type["model"]) for device_type in self.device_types.values())}"',
+            f'"{",".join(str(inventory_item["id"]) for inventory_item in self.inventory_items.values())}"',
+            f'"{",".join(str(object_tag["slug"]) for object_tag in self.object_tags.values())}"',
+            self.download_url,
+            self.image_file_checksum,
+            self.default_image,
+        )
+
     objects = SoftwareImageQuerySet.as_manager()
 
 

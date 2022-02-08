@@ -85,6 +85,13 @@ try:
                                         "nautobot_device_lifecycle_mgmt.add_softwareimage",
                                     ],
                                 ),
+                                NavMenuButton(
+                                    link="plugins:nautobot_device_lifecycle_mgmt:softwareimage_import",
+                                    title="Import",
+                                    icon_class="mdi mdi-database-import-outline",
+                                    button_class=ButtonColorChoices.BLUE,
+                                    permissions=["nautobot_device_lifecycle_mgmt.add_softwarelcm"],
+                                ),
                             ),
                             permissions=[
                                 "nautobot_device_lifecycle_mgmt.view_softwareimage",
@@ -372,6 +379,13 @@ except ModuleNotFoundError:
                     title="Add",
                     icon_class="mdi mdi-plus-thick",
                     color=ButtonColorChoices.GREEN,
+                    permissions=["nautobot_device_lifecycle_mgmt.add_softwareimage"],
+                ),
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:softwareimage_import",
+                    title="Import",
+                    icon_class="mdi mdi-database-import-outline",
+                    color=ButtonColorChoices.BLUE,
                     permissions=["nautobot_device_lifecycle_mgmt.add_softwareimage"],
                 ),
             ),

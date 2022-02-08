@@ -1,5 +1,8 @@
 """Utility functions and classes used by the plugin."""
 
+
+from django.db.models import Count, Subquery, OuterRef
+from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
@@ -23,3 +26,12 @@ class M2MLinkedCountColumn(LinkedCountColumn):
                         url += f"&{k}={getattr(record, v)}"
             return mark_safe(f'<a href="{url}">{value}</a>')
         return value
+
+
+def count_related_m2m(model, field):
+    """
+    Return a Subquery suitable for annotating a m2m field count.
+    """
+    subquery = Subquery(model.objects.filter(**{"pk": OuterRef("pk")}).order_by().annotate(c=Count(field)).values("c"))
+
+    return Coalesce(subquery, 0)
