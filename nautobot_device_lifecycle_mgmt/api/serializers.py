@@ -186,6 +186,8 @@ class SoftwareImageSerializer(CustomFieldModelSerializer, TaggedObjectSerializer
             "image_file_name",
             "software",
             "device_types",
+            "inventory_items",
+            "object_tags",
             "download_url",
             "image_file_checksum",
             "default_image",
