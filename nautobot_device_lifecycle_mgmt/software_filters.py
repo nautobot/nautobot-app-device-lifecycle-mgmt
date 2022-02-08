@@ -125,12 +125,14 @@ class InventoryItemValidatedSoftwareFilter:  # pylint: disable=too-few-public-me
         )
 
 
-class DeviceSoftwareImageFilter:
+class DeviceSoftwareImageFilter:  # pylint: disable=too-few-public-methods
+    """Filter SoftwareImage objects based on the Device object."""
+
     soft_obj_model = Device
     soft_relation_name = "device_soft"
 
     def __init__(self, qs, item_obj):
-        """Initalize BaseSoftwareImageFilter."""
+        """Initalize DeviceSoftwareImageFilter."""
         self.softwareimage_qs = qs
         self.item_obj = item_obj
 
@@ -147,15 +149,17 @@ class DeviceSoftwareImageFilter:
         default_image_q = Q(software=soft_rel_obj, default_image=True) & ~Q(device_types=self.item_obj.device_type)
         self.softwareimage_qs = self.softwareimage_qs.filter(device_type_q | default_image_q)
 
-        return self.softwareimage_qs
+        return self.softwareimage_qs.distinct()
 
 
-class InventoryItemSoftwareImageFilter:
+class InventoryItemSoftwareImageFilter:  # pylint: disable=too-few-public-methods
+    """Filter SoftwareImage objects based on the InventoryItem object."""
+
     soft_obj_model = InventoryItem
     soft_relation_name = "inventory_item_soft"
 
     def __init__(self, qs, item_obj):
-        """Initalize BaseSoftwareImageFilter."""
+        """Initalize InventoryItemSoftwareImageFilter."""
         self.softwareimage_qs = qs
         self.item_obj = item_obj
 
@@ -172,4 +176,4 @@ class InventoryItemSoftwareImageFilter:
         default_image_q = Q(software=soft_rel_obj, default_image=True) & ~Q(inventory_items=self.item_obj.pk)
         self.softwareimage_qs = self.softwareimage_qs.filter(inv_item_q | default_image_q)
 
-        return self.softwareimage_qs
+        return self.softwareimage_qs.distinct()

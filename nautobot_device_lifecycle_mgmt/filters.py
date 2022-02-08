@@ -157,7 +157,6 @@ class SoftwareImageFilterSet(django_filters.FilterSet):
         to_field_name="version",
         label="Software (version)",
     )
-
     device_types_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device_types",
         queryset=DeviceType.objects.all(),
@@ -168,6 +167,28 @@ class SoftwareImageFilterSet(django_filters.FilterSet):
         queryset=DeviceType.objects.all(),
         to_field_name="model",
         label="Device Types (model)",
+    )
+    inventory_items_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_items",
+        queryset=InventoryItem.objects.all(),
+        label="Inventory Items",
+    )
+    inventory_items = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_items__name",
+        queryset=InventoryItem.objects.all(),
+        to_field_name="name",
+        label="Inventory Items (name)",
+    )
+    object_tags_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="object_tags",
+        queryset=Tag.objects.all(),
+        label="Object Tags",
+    )
+    object_tags = django_filters.ModelMultipleChoiceFilter(
+        field_name="object_tags__slug",
+        queryset=Tag.objects.all(),
+        to_field_name="slug",
+        label="Object Tags (slug)",
     )
     device_name = django_filters.CharFilter(method="device", label="Device Name")
     device_id = django_filters.CharFilter(method="device", label="Device ID")
@@ -187,6 +208,8 @@ class SoftwareImageFilterSet(django_filters.FilterSet):
             "image_file_checksum",
             "download_url",
             "device_types",
+            "inventory_items",
+            "object_tags",
             "default_image",
             "device_name",
         ]
@@ -217,8 +240,7 @@ class SoftwareImageFilterSet(django_filters.FilterSet):
 
         device = devices.first()
 
-        return SoftwareImage.objects.get_for_object(device)
-        # return queryset.filter(device_types__in=[device.device_type])
+        return queryset.intersection(SoftwareImage.objects.get_for_object(device).distinct())
 
     def inventory_item(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Search for software image for a given inventory item."""
@@ -233,7 +255,7 @@ class SoftwareImageFilterSet(django_filters.FilterSet):
 
         inventory_item = inventory_items.first()
 
-        return SoftwareImage.objects.get_for_object(inventory_item)
+        return queryset.intersection(SoftwareImage.objects.get_for_object(inventory_item).distinct())
 
 
 class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
