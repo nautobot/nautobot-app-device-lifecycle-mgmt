@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.4.0 - 02-08-2022
+- PR#47: Added Plugin Upgrade Guide to the README
+- PR#50: Fixed view permissions for Device Notices
+- PR#57: Added CVE Tracking model and Vulnerability model
+
 ## v0.3.0 - 12-14-2021
 
 - PR#39: Adds feature-rich reporting functionality for Software Validation.
