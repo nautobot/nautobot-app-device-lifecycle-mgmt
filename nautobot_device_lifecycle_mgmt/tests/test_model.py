@@ -7,7 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 
 import time_machine
 
-from nautobot.dcim.models import DeviceType, Manufacturer, Platform, InventoryItem
+from nautobot.dcim.models import DeviceType, Manufacturer, Platform
 from nautobot.extras.choices import RelationshipTypeChoices
 from nautobot.extras.models import Relationship, RelationshipAssociation, Status, Tag
 

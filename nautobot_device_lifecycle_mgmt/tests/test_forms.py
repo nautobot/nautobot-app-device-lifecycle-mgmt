@@ -1,11 +1,18 @@
 """Test forms."""
+from sys import platform
 from django.test import TestCase
 from django.contrib.contenttypes.models import ContentType
 
 from nautobot.dcim.models import DeviceType, Manufacturer, Device, DeviceRole, Site, InventoryItem, Platform
-from nautobot.extras.models import Status
+from nautobot.extras.models import Status, Tag
 
-from nautobot_device_lifecycle_mgmt.forms import HardwareLCMForm, SoftwareLCMForm, ValidatedSoftwareLCMForm, CVELCMForm
+from nautobot_device_lifecycle_mgmt.forms import (
+    HardwareLCMForm,
+    SoftwareLCMForm,
+    ValidatedSoftwareLCMForm,
+    CVELCMForm,
+    SoftwareImageForm,
+)
 from nautobot_device_lifecycle_mgmt.models import SoftwareLCM, CVELCM
 
 
@@ -375,4 +382,109 @@ class CVELCMFormTest(TestCase):
                 "link": ["This field is required."],
             },
             form.errors,
+        )
+
+
+class SoftwareImageFormTest(TestCase):  # pylint: disable=no-member
+    """Test class for SoftwareImageForm forms."""
+
+    form_class = SoftwareImageForm
+
+    def setUp(self):
+        """Create necessary objects."""
+        manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco", slug="cisco")
+        device_platform, _ = Platform.objects.get_or_create(
+            name="Cisco IOS", slug="cisco_ios", manufacturer=manufacturer
+        )
+        self.software = SoftwareLCM.objects.create(
+            **{
+                "device_platform": device_platform,
+                "version": "17.3.5 MD",
+                "alias": "Amsterdam-17.3.5 MD",
+                "end_of_support": "2022-05-15",
+                "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-17.03/series.html",
+                "download_url": "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.05.SPA.bin",
+                "image_file_name": "asr1001x-universalk9.17.03.05.SPA.bin",
+                "image_file_checksum": "9cf2e09b5cag7a4d8ea40886fbbe5b4b68e19e58a8f96b34240e4cea9971f6ae6facab9a1855a34e1ed8755f3ffe4c969cf6e6ef1df95d42a91540a44d4b9e14",
+                "long_term_support": True,
+                "pre_release": False,
+            }
+        )
+
+        status_active, _ = Status.objects.get_or_create(slug="active")
+        manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco", slug="cisco")
+        site, _ = Site.objects.get_or_create(name="Site 1", slug="site-1")
+        devicerole, _ = DeviceRole.objects.get_or_create(name="Router", slug="router", defaults={"color": "ff0000"})
+        self.devicetype_1, _ = DeviceType.objects.get_or_create(
+            manufacturer=manufacturer, model="ASR-1000", slug="asr-1000"
+        )
+        self.device_1, _ = Device.objects.get_or_create(
+            device_type=self.devicetype_1, device_role=devicerole, name="Device 1", site=site, status=status_active
+        )
+        self.inventoryitem_1, _ = InventoryItem.objects.get_or_create(device=self.device_1, name="SwitchModule1")
+        self.tag, _ = Tag.objects.get_or_create(name="asr", slug="asr")
+
+    def test_specifying_all_fields_w_device_type(self):
+        data = {
+            "image_file_name": "ios17.3.3md.img",
+            "software": self.software,
+            "device_types": [self.devicetype_1],
+            "download_url": "ftp://images.local/cisco/ios17.3.3md.img",
+            "image_file_checksum": "441rfabd75b0512r7fde7a7a66faa596",
+            "default_image": True,
+        }
+        form = self.form_class(data)
+        self.assertTrue(form.is_valid())
+        self.assertTrue(form.save())
+
+    def test_specifying_all_fields_w_inventory_item(self):
+        data = {
+            "image_file_name": "ios17.3.3md.img",
+            "software": self.software,
+            "inventory_items": [self.inventoryitem_1],
+            "download_url": "ftp://images.local/cisco/ios17.3.3md.img",
+            "image_file_checksum": "441rfabd75b0512r7fde7a7a66faa596",
+            "default_image": True,
+        }
+        form = self.form_class(data)
+        self.assertTrue(form.is_valid())
+        self.assertTrue(form.save())
+
+    def test_specifying_all_fields_w_object_tag(self):
+        data = {
+            "image_file_name": "ios17.3.3md.img",
+            "software": self.software,
+            "object_tags": [self.tag],
+            "download_url": "ftp://images.local/cisco/ios17.3.3md.img",
+            "image_file_checksum": "441rfabd75b0512r7fde7a7a66faa596",
+            "default_image": True,
+        }
+        form = self.form_class(data)
+        self.assertTrue(form.is_valid())
+        self.assertTrue(form.save())
+
+    def test_software_missing(self):
+        data = {
+            "image_file_name": "ios17.3.3md.img",
+        }
+        form = self.form_class(data)
+        form.is_valid()
+        self.assertIn("software", form.errors)
+        self.assertIn(
+            "This field is required.",
+            form.errors["software"],
+        )
+
+    def test_at_least_one_default_image_required(self):
+        data = {
+            "image_file_name": "ios17.3.3md.img",
+            "software": self.software,
+            "default_image": False,
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("default_image", form.errors)
+        self.assertIn(
+            "No other Software Images found for the selected Software. This Software Image must be marked as the default.",
+            form.errors["default_image"],
         )
