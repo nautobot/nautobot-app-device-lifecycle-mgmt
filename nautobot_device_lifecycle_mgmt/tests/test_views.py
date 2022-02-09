@@ -16,6 +16,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     InventoryItemSoftwareValidationResult,
     CVELCM,
     VulnerabilityLCM,
+    SoftwareImage,
 )
 from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
 
@@ -251,4 +252,64 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pyli
 
     # Disabling create view as these models are generated via Job.
     def test_create_object_without_permission(self):
+        pass
+
+
+class SoftwareImageViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
+    """Test the SoftwareImage views."""
+
+    model = SoftwareImage
+
+    @classmethod
+    def setUpTestData(cls):
+        softwares = create_softwares()
+        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        device_type = DeviceType.objects.create(manufacturer=manufacturer, model="6509-E", slug="6509-e")
+
+        SoftwareImage.objects.create(
+            image_file_name="ios15.1.2m.img",
+            software=softwares[0],
+            download_url="ftp://images.local/cisco/ios15.1.2m.img",
+            image_file_checksum="441rfabd75b0512r7fde7a7a66faa596",
+            default_image=True,
+        )
+        si = SoftwareImage.objects.create(
+            image_file_name="ios4.22.9m.img",
+            software=softwares[1],
+            download_url="ftp://images.local/cisco/ios4.22.9m.img",
+            image_file_checksum="58arfabd75b051fr7fde7a7ac6faa3fv",
+            default_image=False,
+        )
+        si.device_types.set([device_type])
+
+        cls.form_data = {
+            "image_file_name": "eos_4.21m.swi",
+            "software": softwares[-1].id,
+            "download_url": "ftp://images.local/arista/eos_4.21m.swi",
+            "image_file_checksum": "78arfabd75b0fa2vzas1e7a7ac6faa3fc",
+            "default_image": True,
+        }
+        cls.csv_data = (
+            "image_file_name,software",
+            f"ios11.7.0m.img,{softwares[0].id}",
+            f"ios16.3.1t.img,{softwares[0].id}",
+            f"eos_4.21m.swi,{softwares[-1].id}",
+        )
+
+    def test_bulk_edit_objects_with_constrained_permission(self):
+        pass
+
+    def test_bulk_edit_objects_with_permission(self):
+        pass
+
+    def test_bulk_edit_objects_without_permission(self):
+        pass
+
+    def test_bulk_delete_objects_with_constrained_permission(self):
+        pass
+
+    def test_bulk_delete_objects_with_permission(self):
+        pass
+
+    def test_bulk_delete_objects_without_permission(self):
         pass

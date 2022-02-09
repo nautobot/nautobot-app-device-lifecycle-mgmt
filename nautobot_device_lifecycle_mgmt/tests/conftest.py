@@ -93,10 +93,13 @@ def create_cves():
 
 def create_softwares():
     """Create SoftwareLCM items for tests."""
-    device_platform = Platform.objects.get_or_create(name="Cisco IOS", slug="cisco_ios")[0]
+    device_platform_ios = Platform.objects.get_or_create(name="Cisco IOS", slug="cisco_ios")[0]
+    device_platform_eos = Platform.objects.get_or_create(name="Arista EOS", slug="arista_eos")[0]
     softwares = (
-        SoftwareLCM.objects.create(device_platform=device_platform, version="15.1(2)M"),
-        SoftwareLCM.objects.create(device_platform=device_platform, version="4.22.9M"),
-        SoftwareLCM.objects.create(device_platform=device_platform, version="21.4R3"),
+        SoftwareLCM.objects.create(device_platform=device_platform_ios, version="15.1(2)M"),
+        SoftwareLCM.objects.create(device_platform=device_platform_ios, version="4.22.9M"),
+        SoftwareLCM.objects.create(device_platform=device_platform_ios, version="21.4R3"),
+        SoftwareLCM.objects.create(device_platform=device_platform_eos, version="4.17.1M"),
+        SoftwareLCM.objects.create(device_platform=device_platform_eos, version="4.25.1F"),
     )
     return softwares
