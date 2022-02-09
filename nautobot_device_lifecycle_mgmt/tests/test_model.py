@@ -7,9 +7,9 @@ from django.contrib.contenttypes.models import ContentType
 
 import time_machine
 
-from nautobot.dcim.models import DeviceType, Manufacturer, Platform
+from nautobot.dcim.models import DeviceType, Manufacturer, Platform, InventoryItem
 from nautobot.extras.choices import RelationshipTypeChoices
-from nautobot.extras.models import Relationship, RelationshipAssociation, Status
+from nautobot.extras.models import Relationship, RelationshipAssociation, Status, Tag
 
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
@@ -19,6 +19,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     DeviceSoftwareValidationResult,
     CVELCM,
     VulnerabilityLCM,
+    SoftwareImage,
 )
 from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
 
@@ -452,3 +453,66 @@ class VulnerabilityLCMTestCase(TestCase):
         self.assertEqual(vulnerability.software, self.softwares[2])
         self.assertEqual(vulnerability.device, self.devices[2])
         self.assertEqual(vulnerability.status, self.status)
+
+
+class SoftwareImageTestCase(TestCase):
+    """Tests for the SoftwareImage model."""
+
+    def setUp(self):
+        """Set up base objects."""
+        device_platform = Platform.objects.get_or_create(name="Cisco IOS", slug="cisco_ios")[0]
+        self.software = SoftwareLCM.objects.create(
+            device_platform=device_platform,
+            version="17.3.3 MD",
+            release_date=date(2019, 1, 10),
+        )
+        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        self.device_type_1 = DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000")
+        self.device_type_2 = DeviceType.objects.create(manufacturer=manufacturer, model="CAT-3750", slug="cat-3750")
+        self.content_type_devicetype = ContentType.objects.get(app_label="dcim", model="devicetype")
+        self.inventory_item = create_inventory_items()[0]
+        self.tag = Tag.objects.create(name="asr", slug="asr")
+
+    def test_create_softwareimage_required_only(self):
+        """Successfully create SoftwareImage with required fields only."""
+        softwareimage = SoftwareImage(image_file_name="ios17.3.3md.img", software=self.software)
+        softwareimage.device_types.set([self.device_type_1])
+        softwareimage.save()
+
+        self.assertEqual(softwareimage.image_file_name, "ios17.3.3md.img")
+        self.assertEqual(softwareimage.software, self.software)
+        self.assertEqual(list(softwareimage.device_types.all()), [self.device_type_1])
+
+    def test_create_softwareimage_all(self):
+        """Successfully create SoftwareImage with all fields."""
+        softwareimage = SoftwareImage(
+            image_file_name="ios17.3.3md.img",
+            software=self.software,
+            download_url="ftp://images.local/cisco/ios17.3.3md.img",
+            image_file_checksum="441rfabd75b0512r7fde7a7a66faa596",
+            default_image=True,
+        )
+        softwareimage.device_types.set([self.device_type_1])
+        softwareimage.inventory_items.set([self.inventory_item])
+        softwareimage.object_tags.set([self.tag])
+        softwareimage.save()
+
+        self.assertEqual(softwareimage.image_file_name, "ios17.3.3md.img")
+        self.assertEqual(softwareimage.software, self.software)
+        self.assertEqual(softwareimage.download_url, "ftp://images.local/cisco/ios17.3.3md.img")
+        self.assertEqual(softwareimage.image_file_checksum, "441rfabd75b0512r7fde7a7a66faa596")
+        self.assertEqual(softwareimage.default_image, True)
+        self.assertEqual(list(softwareimage.device_types.all()), [self.device_type_1])
+        self.assertEqual(list(softwareimage.inventory_items.all()), [self.inventory_item])
+        self.assertEqual(list(softwareimage.object_tags.all()), [self.tag])
+        self.assertEqual(str(softwareimage), f"{softwareimage.image_file_name}")
+
+    def test_validatedsoftwarelcm_valid_property(self):
+        """Test behavior of the 'valid' property."""
+        validatedsoftwarelcm_start_only = ValidatedSoftwareLCM(
+            software=self.software,
+            start=date(2020, 4, 15),
+            preferred=False,
+        )
+        validatedsoftwarelcm_start_only.device_types.set([self.device_type_1])
+        validatedsoftwarelcm_start_only.save()
