@@ -298,10 +298,9 @@ class SoftwareImageForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelF
         if software:
             software_images = SoftwareImage.objects.filter(software=software)
             software_default_image = software_images.filter(default_image=True)
-
-        if self.instance is not None and self.instance.pk is not None:
-            software_images = software_images.filter(~Q(pk=self.instance.pk))
-            software_default_image = software_default_image.filter(~Q(pk=self.instance.pk))
+            if self.instance is not None and self.instance.pk is not None:
+                software_images = software_images.filter(~Q(pk=self.instance.pk))
+                software_default_image = software_default_image.filter(~Q(pk=self.instance.pk))
 
         if software and not default_image and not software_default_image.exists():
             msg = f"No other Software Images found for the selected Software. This Software Image must be marked as the default."
