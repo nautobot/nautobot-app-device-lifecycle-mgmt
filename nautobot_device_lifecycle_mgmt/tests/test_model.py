@@ -469,7 +469,6 @@ class SoftwareImageTestCase(TestCase):
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
         self.device_type_1 = DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000")
         self.device_type_2 = DeviceType.objects.create(manufacturer=manufacturer, model="CAT-3750", slug="cat-3750")
-        self.content_type_devicetype = ContentType.objects.get(app_label="dcim", model="devicetype")
         self.inventory_item = create_inventory_items()[0]
         self.tag = Tag.objects.create(name="asr", slug="asr")
 

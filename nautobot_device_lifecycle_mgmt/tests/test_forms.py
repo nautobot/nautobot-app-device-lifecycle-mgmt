@@ -392,9 +392,10 @@ class SoftwareImageFormTest(TestCase):  # pylint: disable=no-member
 
     def setUp(self):
         """Create necessary objects."""
-        manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco", slug="cisco")
+        manufacturer_cisco, _ = Manufacturer.objects.get_or_create(name="Cisco", slug="cisco")
+        manufacturer_arista, _ = Manufacturer.objects.get_or_create(name="Arista", slug="arista")
         device_platform, _ = Platform.objects.get_or_create(
-            name="Cisco IOS", slug="cisco_ios", manufacturer=manufacturer
+            name="Cisco IOS", slug="cisco_ios", manufacturer=manufacturer_cisco
         )
         self.software = SoftwareLCM.objects.create(
             **{
@@ -412,11 +413,13 @@ class SoftwareImageFormTest(TestCase):  # pylint: disable=no-member
         )
 
         status_active, _ = Status.objects.get_or_create(slug="active")
-        manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco", slug="cisco")
         site, _ = Site.objects.get_or_create(name="Site 1", slug="site-1")
         devicerole, _ = DeviceRole.objects.get_or_create(name="Router", slug="router", defaults={"color": "ff0000"})
         self.devicetype_1, _ = DeviceType.objects.get_or_create(
-            manufacturer=manufacturer, model="ASR-1000", slug="asr-1000"
+            manufacturer=manufacturer_cisco, model="ASR-1000", slug="asr-1000"
+        )
+        self.devicetype_2, _ = DeviceType.objects.get_or_create(
+            manufacturer=manufacturer_arista, model="7150S", slug="7150s"
         )
         self.device_1, _ = Device.objects.get_or_create(
             device_type=self.devicetype_1, device_role=devicerole, name="Device 1", site=site, status=status_active
@@ -487,4 +490,20 @@ class SoftwareImageFormTest(TestCase):  # pylint: disable=no-member
         self.assertIn(
             "No other Software Images found for the selected Software. This Software Image must be marked as the default.",
             form.errors["default_image"],
+        )
+
+    def test_soft_manuf_must_match_platform_manuf(self):
+        data = {
+            "image_file_name": "ios17.3.3md.img",
+            "software": self.software,
+            "device_types": [self.devicetype_2],
+            "default_image": True,
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        print(form.errors)
+        self.assertIn("device_types", form.errors)
+        self.assertIn(
+            "doesn't match the Software Platform Manufacturer.",
+            form.errors["device_types"][0],
         )

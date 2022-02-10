@@ -16,6 +16,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     InventoryItemSoftwareValidationResult,
     CVELCM,
     VulnerabilityLCM,
+    SoftwareImage,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -25,6 +26,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     InventoryItemSoftwareValidationResultFilterSet,
     CVELCMFilterSet,
     VulnerabilityLCMFilterSet,
+    SoftwareImageFilterSet,
 )
 from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
 
@@ -690,4 +692,92 @@ class VulnerabilityLCMTestCase(TestCase):
     def test_q_software_version(self):
         """Test q filter to find single record based on Software version."""
         params = {"q": "4.22.9M"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+
+class SoftwareImageFilterSetTestCase(TestCase):
+    """Tests for SoftwareImageFilterSet."""
+
+    queryset = SoftwareImage.objects.all()
+    filterset = SoftwareImageFilterSet
+
+    def setUp(self):
+        manufacturer_cisco, _ = Manufacturer.objects.get_or_create(name="Cisco", slug="cisco")
+        manufacturer_arista, _ = Manufacturer.objects.get_or_create(name="Arista", slug="arista")
+        device_platform_cisco, _ = Platform.objects.get_or_create(
+            name="Cisco IOS", slug="cisco_ios", manufacturer=manufacturer_cisco
+        )
+        device_platform_arista, _ = Platform.objects.get_or_create(
+            name="Arista EOS", slug="arista_eos", manufacturer=manufacturer_cisco
+        )
+
+        self.softwares = (
+            SoftwareLCM.objects.create(
+                device_platform=device_platform_cisco,
+                version="17.3.3 MD",
+                release_date="2019-01-10",
+            ),
+            SoftwareLCM.objects.create(
+                device_platform=device_platform_arista,
+                version="4.25M",
+                release_date="2021-01-10",
+            ),
+        )
+
+        devicetype_1, _ = DeviceType.objects.get_or_create(
+            manufacturer=manufacturer_cisco, model="ASR-1000", slug="asr-1000"
+        )
+        self.devicetype_2, _ = DeviceType.objects.get_or_create(
+            manufacturer=manufacturer_arista, model="7150S", slug="7150s"
+        )
+
+        soft_image = SoftwareImage(
+            image_file_name="ios17.3.3md.img",
+            software=self.softwares[0],
+            default_image=True,
+        )
+        soft_image.save()
+
+        soft_image = SoftwareImage(
+            image_file_name="ios17.3.3md-ssl.img",
+            software=self.softwares[0],
+            default_image=False,
+        )
+        soft_image.device_types.set([devicetype_1.pk])
+        soft_image.save()
+
+        soft_image = SoftwareImage(
+            image_file_name="eos4.25.m.swi",
+            software=self.softwares[1],
+            default_image=True,
+        )
+        soft_image.device_types.set([self.devicetype_2.pk])
+        soft_image.save()
+
+        print(SoftwareImage.objects.all())
+        print([si.device_types.all() for si in SoftwareImage.objects.all()])
+
+    def test_q_image_name(self):
+        """Test q filter to find single record based on the image name."""
+        params = {"q": "ios17.3.3"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_q_soft_version(self):
+        """Test q filter to find single record based on the software version."""
+        params = {"q": "4.25M"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_software(self):
+        """Test software filter."""
+        params = {"software": [self.softwares[0].pk]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_default_image(self):
+        """Test default_image filter."""
+        params = {"default_image": True}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_device_types(self):
+        """Test device_types filter."""
+        params = {"device_types": [self.devicetype_2.model]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
