@@ -193,8 +193,6 @@ class SoftwareImageLCMFilterSet(django_filters.FilterSet):
     device_name = django_filters.CharFilter(method="device", label="Device Name")
     device_id = django_filters.CharFilter(method="device", label="Device ID")
     inventory_item_id = django_filters.CharFilter(method="inventory_item", label="InventoryItem ID")
-    device_name = django_filters.CharFilter(method="device", label="Device Name")
-    device_id = django_filters.CharFilter(method="device", label="Device ID")
 
     class Meta:
         """Meta attributes for filter."""
@@ -212,6 +210,7 @@ class SoftwareImageLCMFilterSet(django_filters.FilterSet):
             "object_tags",
             "default_image",
             "device_name",
+            "inventory_item_id",
         ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
@@ -240,7 +239,7 @@ class SoftwareImageLCMFilterSet(django_filters.FilterSet):
 
         device = devices.first()
 
-        return queryset.intersection(SoftwareImageLCM.objects.get_for_object(device).distinct())
+        return queryset.filter(id__in=SoftwareImageLCM.objects.get_for_object(device).values("id"))
 
     def inventory_item(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Search for software image for a given inventory item."""
@@ -255,7 +254,7 @@ class SoftwareImageLCMFilterSet(django_filters.FilterSet):
 
         inventory_item = inventory_items.first()
 
-        return queryset.intersection(SoftwareImageLCM.objects.get_for_object(inventory_item).distinct())
+        return queryset.filter(id__in=SoftwareImageLCM.objects.get_for_object(inventory_item).values("id"))
 
 
 class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):

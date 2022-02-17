@@ -1,4 +1,5 @@
 """Forms implementation for the Lifecycle Management plugin."""
+from cProfile import label
 import logging
 from django import forms
 from django.db.models import Q
@@ -45,7 +46,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContactLCM,
     CVELCM,
     VulnerabilityLCM,
-    SoftwareImage,
+    SoftwareImageLCM,
 )
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
@@ -265,8 +266,8 @@ class SoftwareLCMCSVForm(CustomFieldModelCSVForm):
         fields = SoftwareLCM.csv_headers
 
 
-class SoftwareImageForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
-    """SoftwareImage creation/edit form."""
+class SoftwareImageLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+    """SoftwareImageLCM creation/edit form."""
 
     software = DynamicModelChoiceField(queryset=SoftwareLCM.objects.all(), required=True)
     device_types = DynamicModelMultipleChoiceField(queryset=DeviceType.objects.all(), required=False)
@@ -278,14 +279,14 @@ class SoftwareImageForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelF
     class Meta:
         """Meta attributes."""
 
-        model = SoftwareImage
+        model = SoftwareImageLCM
         fields = (
-            *SoftwareImage.csv_headers,
+            *SoftwareImageLCM.csv_headers,
             "tags",
         )
 
     def clean(self):
-        """Custom validation of the SoftwareImageForm."""
+        """Custom validation of the SoftwareImageLCMForm."""
         super().clean()
         device_types = self.cleaned_data.get("device_types")
         inventory_items = self.cleaned_data.get("inventory_items")
@@ -296,19 +297,28 @@ class SoftwareImageForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelF
         assigned_objects_count = sum(obj.count() for obj in (device_types, inventory_items, object_tags))
 
         if software:
-            software_images = SoftwareImage.objects.filter(software=software)
+            software_images = SoftwareImageLCM.objects.filter(software=software)
             software_default_image = software_images.filter(default_image=True)
             if self.instance is not None and self.instance.pk is not None:
                 software_images = software_images.filter(~Q(pk=self.instance.pk))
                 software_default_image = software_default_image.filter(~Q(pk=self.instance.pk))
 
-        if software and not default_image and not software_default_image.exists():
-            msg = f"No other Software Images found for the selected Software. This Software Image must be marked as the default."
-            self.add_error("default_image", msg)
-
         if software and default_image and software_default_image.exists():
             msg = f"Only one default Software Image is allowed for each Software."
             self.add_error("default_image", msg)
+
+        if default_image and assigned_objects_count > 0:
+            msg = f"Default image cannot be assigned to any objects."
+            self.add_error("default_image", msg)
+            if device_types.count() > 0:
+                msg = f"Default image cannot be assigned to any objects."
+                self.add_error("device_types", msg)
+            if inventory_items.count() > 0:
+                msg = f"Default image cannot be assigned to any objects."
+                self.add_error("inventory_items", msg)
+            if object_tags.count() > 0:
+                msg = f"Default image cannot be assigned to any objects."
+                self.add_error("object_tags", msg)
 
         if software and assigned_objects_count > 0:
             software_manufacturer = software.device_platform.manufacturer
@@ -322,14 +332,9 @@ class SoftwareImageForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelF
                     msg = f"Device Type {device_type.model} already assigned to another Software Image."
                     self.add_error("device_types", msg)
 
-        # ToDo: Revisit this requirement. Maybe I'm assuming too much.
-        if not (assigned_objects_count > 0 or default_image):
-            msg = "SoftwareImage must be assigned to at least one object or be marked as the default image."
-            self.add_error(None, msg)
 
-
-class SoftwareImageFilterForm(BootstrapMixin, forms.ModelForm):
-    """Filter form to filter searches for SoftwareImage."""
+class SoftwareImageLCMFilterForm(BootstrapMixin, forms.ModelForm):
+    """Filter form to filter searches for SoftwareImageLCM."""
 
     q = forms.CharField(
         required=False,
@@ -352,6 +357,24 @@ class SoftwareImageFilterForm(BootstrapMixin, forms.ModelForm):
         to_field_name="slug",
         required=False,
     )
+    device_name = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        required=False,
+        label="Device",
+    )
+    device_name = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        required=False,
+        label="Device",
+    )
+    inventory_item_id = DynamicModelMultipleChoiceField(
+        queryset=InventoryItem.objects.all(),
+        to_field_name="id",
+        required=False,
+        label="Inventory Item",
+    )
     default_image = forms.BooleanField(required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES))
 
     class Meta:
@@ -367,6 +390,8 @@ class SoftwareImageFilterForm(BootstrapMixin, forms.ModelForm):
             "device_types",
             "inventory_items",
             "object_tags",
+            "device_name",
+            "inventory_item_id",
             "default_image",
         ]
 
@@ -375,8 +400,8 @@ class SoftwareImageFilterForm(BootstrapMixin, forms.ModelForm):
         }
 
 
-class SoftwareImageCSVForm(CustomFieldModelCSVForm):
-    """Form for bulk creating SoftwareImage objects."""
+class SoftwareImageLCMCSVForm(CustomFieldModelCSVForm):
+    """Form for bulk creating SoftwareImageLCM objects."""
 
     device_types = CSVMultipleModelChoiceField(
         queryset=DeviceType.objects.all(),
@@ -395,10 +420,10 @@ class SoftwareImageCSVForm(CustomFieldModelCSVForm):
     )
 
     class Meta:
-        """Meta attributes for the SoftwareImage class."""
+        """Meta attributes for the SoftwareImageLCMCSVForm class."""
 
-        model = SoftwareImage
-        fields = SoftwareImage.csv_headers
+        model = SoftwareImageLCM
+        fields = SoftwareImageLCM.csv_headers
 
 
 class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):

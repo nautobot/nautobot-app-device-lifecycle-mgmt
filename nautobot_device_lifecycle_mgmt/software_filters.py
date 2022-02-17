@@ -143,13 +143,17 @@ class DeviceSoftwareImageLCMFilter:  # pylint: disable=too-few-public-methods
             destination_type=ContentType.objects.get_for_model(self.soft_obj_model),
             destination_id=self.item_obj.id,
         ).values("source_id")[:1]
-        device_type_q = Q(software=soft_rel_obj, device_types=self.item_obj.device_type) | Q(
+
+        device_q = Q(software=soft_rel_obj, device_types=self.item_obj.device_type) | Q(
             software=soft_rel_obj, object_tags__in=self.item_obj.tags.all()
         )
         default_image_q = Q(software=soft_rel_obj, default_image=True) & ~Q(device_types=self.item_obj.device_type)
-        self.softwareimage_qs = self.softwareimage_qs.filter(device_type_q | default_image_q)
 
-        return self.softwareimage_qs.distinct()
+        device_soft_image_qs = self.softwareimage_qs.filter(device_q)
+        if device_soft_image_qs.exists():
+            return device_soft_image_qs
+        else:
+            return self.softwareimage_qs.filter(default_image_q)
 
 
 class InventoryItemSoftwareImageLCMFilter:  # pylint: disable=too-few-public-methods
@@ -170,10 +174,14 @@ class InventoryItemSoftwareImageLCMFilter:  # pylint: disable=too-few-public-met
             destination_type=ContentType.objects.get_for_model(self.soft_obj_model),
             destination_id=self.item_obj.id,
         ).values("source_id")[:1]
+
         inv_item_q = Q(software=soft_rel_obj, inventory_items=self.item_obj.pk) | Q(
             software=soft_rel_obj, object_tags__in=self.item_obj.tags.all()
         )
         default_image_q = Q(software=soft_rel_obj, default_image=True) & ~Q(inventory_items=self.item_obj.pk)
-        self.softwareimage_qs = self.softwareimage_qs.filter(inv_item_q | default_image_q)
 
-        return self.softwareimage_qs.distinct()
+        invitem_soft_image_qs = self.softwareimage_qs.filter(inv_item_q)
+        if invitem_soft_image_qs.exists():
+            return invitem_soft_image_qs
+        else:
+            return self.softwareimage_qs.filter(default_image_q)
