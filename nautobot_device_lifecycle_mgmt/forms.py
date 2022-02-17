@@ -1,5 +1,4 @@
 """Forms implementation for the Lifecycle Management plugin."""
-from cProfile import label
 import logging
 from django import forms
 from django.db.models import Q

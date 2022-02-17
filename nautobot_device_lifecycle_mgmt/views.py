@@ -8,10 +8,10 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import numpy as np
 
-from django.db.models import Q, F, Count, ExpressionWrapper, FloatField, Prefetch
+from django.db.models import Q, F, Count, ExpressionWrapper, FloatField
 
 from nautobot.core.views import generic
-from nautobot.dcim.models import Device, DeviceType
+from nautobot.dcim.models import Device
 from nautobot.utilities.views import ContentTypePermissionRequiredMixin
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.models import (
