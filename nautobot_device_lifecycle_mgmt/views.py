@@ -25,7 +25,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ProviderLCM,
     CVELCM,
     VulnerabilityLCM,
-    SoftwareImage,
+    SoftwareImageLCM,
 )
 from nautobot_device_lifecycle_mgmt.tables import (
     HardwareLCMTable,
@@ -38,7 +38,7 @@ from nautobot_device_lifecycle_mgmt.tables import (
     ContactLCMTable,
     CVELCMTable,
     VulnerabilityLCMTable,
-    SoftwareImageTable,
+    SoftwareImageLCMTable,
 )
 from nautobot_device_lifecycle_mgmt.forms import (
     HardwareLCMForm,
@@ -72,9 +72,9 @@ from nautobot_device_lifecycle_mgmt.forms import (
     VulnerabilityLCMForm,
     VulnerabilityLCMFilterForm,
     VulnerabilityLCMBulkEditForm,
-    SoftwareImageForm,
-    SoftwareImageFilterForm,
-    SoftwareImageCSVForm,
+    SoftwareImageLCMForm,
+    SoftwareImageLCMFilterForm,
+    SoftwareImageLCMCSVForm,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -87,7 +87,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     InventoryItemSoftwareValidationResultFilterSet,
     CVELCMFilterSet,
     VulnerabilityLCMFilterSet,
-    SoftwareImageFilterSet,
+    SoftwareImageLCMFilterSet,
 )
 
 from nautobot_device_lifecycle_mgmt.const import URL, PLUGIN_CFG
@@ -210,10 +210,10 @@ class SoftwareLCMView(generic.ObjectView):
     queryset = SoftwareLCM.objects.prefetch_related("device_platform")
 
     def get_extra_context(self, request, instance):
-        """Display SoftwareImage objects associated with the SoftwareLCM object."""
+        """Display SoftwareImageLCM objects associated with the SoftwareLCM object."""
         softwareimages = instance.software_images.restrict(request.user, "view")
         if softwareimages.exists():
-            softwareimages_table = SoftwareImageTable(data=softwareimages, user=request.user, orderable=False)
+            softwareimages_table = SoftwareImageLCMTable(data=softwareimages, user=request.user, orderable=False)
         else:
             softwareimages_table = None
 
@@ -260,7 +260,7 @@ class SoftwareLCMBulkImportView(generic.BulkImportView):
     default_return_url = "plugins:nautobot_device_lifecycle_mgmt:softwarelcm_list"
 
 
-class SoftwareSoftwareImagesView(generic.ObjectView):
+class SoftwareSoftwareImagesLCMView(generic.ObjectView):
     """Software Images tab for Software view."""
 
     queryset = SoftwareLCM.objects.all()
@@ -269,18 +269,18 @@ class SoftwareSoftwareImagesView(generic.ObjectView):
     def get_extra_context(self, request, instance):
         """Adds Software Images table."""
         softwareimages = (
-            instance.software_images.annotate(device_type_count=count_related_m2m(SoftwareImage, "device_types"))
-            .annotate(object_tag_count=count_related_m2m(SoftwareImage, "object_tags"))
+            instance.software_images.annotate(device_type_count=count_related_m2m(SoftwareImageLCM, "device_types"))
+            .annotate(object_tag_count=count_related_m2m(SoftwareImageLCM, "object_tags"))
             .restrict(request.user, "view")
         )
 
         if softwareimages.exists():
-            softwareimages_table = SoftwareImageTable(data=softwareimages, user=request.user, orderable=False)
+            softwareimages_table = SoftwareImageLCMTable(data=softwareimages, user=request.user, orderable=False)
         else:
             softwareimages_table = None
 
         # Enable if we want to add buttons
-        # if request.user.has_perm("ipam.change_softwareimage") or request.user.has_perm("ipam.delete_softwareimage"):
+        # if request.user.has_perm("ipam.change_softwareimagelcm") or request.user.has_perm("ipam.delete_softwareimagelcm"):
         #    prefix_table.columns.show("pk")
 
         # paginate = {
@@ -304,55 +304,61 @@ class SoftwareSoftwareImagesView(generic.ObjectView):
         }
 
 
-class SoftwareImageListView(generic.ObjectListView):
-    """SoftwareImage List view."""
+class SoftwareImageLCMListView(generic.ObjectListView):
+    """SoftwareImageLCM List view."""
 
-    queryset = SoftwareImage.objects.annotate(
-        device_type_count=count_related_m2m(SoftwareImage, "device_types")
-    ).annotate(object_tag_count=count_related_m2m(SoftwareImage, "object_tags"))
-    filterset = SoftwareImageFilterSet
-    filterset_form = SoftwareImageFilterForm
-    table = SoftwareImageTable
+    queryset = SoftwareImageLCM.objects.annotate(
+        device_type_count=count_related_m2m(SoftwareImageLCM, "device_types")
+    ).annotate(object_tag_count=count_related_m2m(SoftwareImageLCM, "object_tags"))
+    filterset = SoftwareImageLCMFilterSet
+    filterset_form = SoftwareImageLCMFilterForm
+    table = SoftwareImageLCMTable
     action_buttons = (
         "add",
         "delete",
         "import",
         "export",
     )
-    template_name = "nautobot_device_lifecycle_mgmt/softwareimage_list.html"
+    template_name = "nautobot_device_lifecycle_mgmt/softwareimagelcm_list.html"
 
 
-class SoftwareImageView(generic.ObjectView):
-    """SoftwareImage Detail view."""
+class SoftwareImageLCMView(generic.ObjectView):
+    """SoftwareImageLCM Detail view."""
 
-    queryset = SoftwareImage.objects.all()
-
-
-class SoftwareImageEditView(generic.ObjectEditView):
-    """SoftwareImage Create/Edit view."""
-
-    queryset = SoftwareImage.objects.all()
-    model_form = SoftwareImageForm
-    template_name = "nautobot_device_lifecycle_mgmt/softwareimage_edit.html"
-    default_return_url = URL.SoftwareImage.List
+    queryset = SoftwareImageLCM.objects.all()
 
 
-class SoftwareImageDeleteView(generic.ObjectDeleteView):
-    """SoftwareImage Delete view."""
+class SoftwareImageLCMEditView(generic.ObjectEditView):
+    """SoftwareImageLCM Create/Edit view."""
 
-    model = SoftwareImage
-    queryset = SoftwareImage.objects.all()
-    default_return_url = URL.SoftwareImage.List
-    template_name = "nautobot_device_lifecycle_mgmt/softwareimage_delete.html"
+    queryset = SoftwareImageLCM.objects.all()
+    model_form = SoftwareImageLCMForm
+    template_name = "nautobot_device_lifecycle_mgmt/softwareimagelcm_edit.html"
+    default_return_url = URL.SoftwareImageLCM.List
+
+    def post(self, request, *args, **kwargs):
+        result = super().post(request, *args, **kwargs)
+        print(type(result))
+        print(vars(result))
+        return result
 
 
-class SoftwareImageBulkImportView(generic.BulkImportView):
-    """View for bulk import of SoftwareImage."""
+class SoftwareImageLCMDeleteView(generic.ObjectDeleteView):
+    """SoftwareImageLCM Delete view."""
 
-    queryset = SoftwareImage.objects.all()
-    model_form = SoftwareImageCSVForm
-    table = SoftwareImageTable
-    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:softwareimage_list"
+    model = SoftwareImageLCM
+    queryset = SoftwareImageLCM.objects.all()
+    default_return_url = URL.SoftwareImageLCM.List
+    template_name = "nautobot_device_lifecycle_mgmt/softwareimagelcm_delete.html"
+
+
+class SoftwareImageLCMBulkImportView(generic.BulkImportView):
+    """View for bulk import of SoftwareImageLCM."""
+
+    queryset = SoftwareImageLCM.objects.all()
+    model_form = SoftwareImageLCMCSVForm
+    table = SoftwareImageLCMTable
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_list"
 
 
 class ValidatedSoftwareLCMListView(generic.ObjectListView):

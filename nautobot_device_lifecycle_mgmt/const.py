@@ -14,11 +14,11 @@ class URL:  # pylint: disable=too-few-public-methods
         List = "plugins:nautobot_device_lifecycle_mgmt:softwarelcm_list"
         View = "plugins:nautobot_device_lifecycle_mgmt:softwarelcm"
 
-    class SoftwareImage:  # pylint: disable=too-few-public-methods
-        """URLs associated with the SoftwareImage portion of device lifecycle."""
+    class SoftwareImageLCM:  # pylint: disable=too-few-public-methods
+        """URLs associated with the SoftwareImageLCM portion of device lifecycle."""
 
-        List = "plugins:nautobot_device_lifecycle_mgmt:softwareimage_list"
-        View = "plugins:nautobot_device_lifecycle_mgmt:softwareimage"
+        List = "plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_list"
+        View = "plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm"
 
     class ValidatedSoftwareLCM:  # pylint: disable=too-few-public-methods
         """URLs associated with the ValidatedSoftwareLCM portion of device lifecycle."""

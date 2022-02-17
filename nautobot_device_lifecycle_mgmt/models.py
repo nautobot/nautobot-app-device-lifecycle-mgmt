@@ -19,8 +19,8 @@ from nautobot_device_lifecycle_mgmt.software_filters import (
     InventoryItemValidatedSoftwareFilter,
     DeviceSoftwareFilter,
     InventoryItemSoftwareFilter,
-    DeviceSoftwareImageFilter,
-    InventoryItemSoftwareImageFilter,
+    DeviceSoftwareImageLCMFilter,
+    InventoryItemSoftwareImageLCMFilter,
 )
 
 
@@ -247,17 +247,17 @@ class SoftwareLCM(PrimaryModel):
     objects = SoftwareLCMQuerySet.as_manager()
 
 
-class SoftwareImageQuerySet(RestrictedQuerySet):
-    """Queryset for `SoftwareImage` objects."""
+class SoftwareImageLCMQuerySet(RestrictedQuerySet):
+    """Queryset for `SoftwareImageLCM` objects."""
 
     def get_for_object(self, obj):
-        """Return all `SoftwareImage` assigned to the given object."""
+        """Return all `SoftwareImageLCM` assigned to the given object."""
         if not isinstance(obj, models.Model):
             raise TypeError(f"{obj} is not an instance of Django Model class")
         if isinstance(obj, Device):
-            qs = DeviceSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()
+            qs = DeviceSoftwareImageLCMFilter(qs=self, item_obj=obj).filter_qs()
         if isinstance(obj, InventoryItem):
-            qs = InventoryItemSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()
+            qs = InventoryItemSoftwareImageLCMFilter(qs=self, item_obj=obj).filter_qs()
         else:
             qs = self
 
@@ -274,8 +274,8 @@ class SoftwareImageQuerySet(RestrictedQuerySet):
     "statuses",
     "webhooks",
 )
-class SoftwareImage(PrimaryModel):
-    """SoftwareImage model."""
+class SoftwareImageLCM(PrimaryModel):
+    """SoftwareImageLCM model."""
 
     image_file_name = models.CharField(blank=False, max_length=100, verbose_name="Image File Name")
     software = models.ForeignKey(
@@ -300,20 +300,20 @@ class SoftwareImage(PrimaryModel):
     ]
 
     class Meta:
-        """Meta attributes for SoftwareImage."""
+        """Meta attributes for SoftwareImageLCM."""
 
         verbose_name = "Software Image"
         ordering = ("software", "default_image", "image_file_name")
         unique_together = ("image_file_name", "software")
 
     def __str__(self):
-        """String representation of SoftwareImage."""
+        """String representation of SoftwareImageLCM."""
         msg = f"{self.image_file_name}"
         return msg
 
     def get_absolute_url(self):
-        """Returns the Detail view for SoftwareImage models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:softwareimage", kwargs={"pk": self.pk})
+        """Returns the Detail view for SoftwareImageLCM models."""
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm", kwargs={"pk": self.pk})
 
     def to_csv(self):
         """Return fields for bulk view."""
@@ -328,7 +328,7 @@ class SoftwareImage(PrimaryModel):
             self.default_image,
         )
 
-    objects = SoftwareImageQuerySet.as_manager()
+    objects = SoftwareImageLCMQuerySet.as_manager()
 
 
 class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):

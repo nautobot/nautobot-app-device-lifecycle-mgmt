@@ -8,7 +8,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContractLCM,
     ProviderLCM,
     ContactLCM,
-    SoftwareImage,
+    SoftwareImageLCM,
     SoftwareLCM,
     ValidatedSoftwareLCM,
     CVELCM,
@@ -19,7 +19,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     ContractLCMFilterSet,
     ProviderLCMFilterSet,
     ContactLCMFilterSet,
-    SoftwareImageFilterSet,
+    SoftwareImageLCMFilterSet,
     SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
     CVELCMFilterSet,
@@ -31,7 +31,7 @@ from .serializers import (
     ContractLCMSerializer,
     ProviderLCMSerializer,
     ContactLCMSerializer,
-    SoftwareImageSerializer,
+    SoftwareImageLCMSerializer,
     SoftwareLCMSerializer,
     ValidatedSoftwareLCMSerializer,
     CVELCMSerializer,
@@ -79,12 +79,12 @@ class SoftwareLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-a
     filterset_class = SoftwareLCMFilterSet
 
 
-class SoftwareImageViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-ancestors
-    """REST API viewset for SoftwareImage records."""
+class SoftwareImageLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-ancestors
+    """REST API viewset for SoftwareImageLCM records."""
 
-    queryset = SoftwareImage.objects.prefetch_related("software")
-    serializer_class = SoftwareImageSerializer
-    filterset_class = SoftwareImageFilterSet
+    queryset = SoftwareImageLCM.objects.prefetch_related("software")
+    serializer_class = SoftwareImageLCMSerializer
+    filterset_class = SoftwareImageLCMFilterSet
 
 
 class ValidatedSoftwareLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-ancestors

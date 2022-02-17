@@ -4,7 +4,7 @@ from nautobot.extras.views import ObjectChangeLogView
 from nautobot_device_lifecycle_mgmt import views
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
-    SoftwareImage,
+    SoftwareImageLCM,
     SoftwareLCM,
     ValidatedSoftwareLCM,
     ContractLCM,
@@ -46,25 +46,27 @@ urlpatterns = [
     path("software/import/", views.SoftwareLCMBulkImportView.as_view(), name="softwarelcm_import"),
     path(
         "software/<uuid:pk>/software-images/",
-        views.SoftwareSoftwareImagesView.as_view(),
+        views.SoftwareSoftwareImagesLCMView.as_view(),
         name="software_software_images",
     ),
     # SoftwareImage
-    path("software-image/", views.SoftwareImageListView.as_view(), name="softwareimage_list"),
-    path("software-image/<uuid:pk>/", views.SoftwareImageView.as_view(), name="softwareimage"),
-    path("software-image/add/", views.SoftwareImageEditView.as_view(), name="softwareimage_add"),
-    path("software-image/<uuid:pk>/delete/", views.SoftwareImageDeleteView.as_view(), name="softwareimage_delete"),
-    path("software-image/<uuid:pk>/edit/", views.SoftwareImageEditView.as_view(), name="softwareimage_edit"),
+    path("software-image/", views.SoftwareImageLCMListView.as_view(), name="softwareimagelcm_list"),
+    path("software-image/<uuid:pk>/", views.SoftwareImageLCMView.as_view(), name="softwareimagelcm"),
+    path("software-image/add/", views.SoftwareImageLCMEditView.as_view(), name="softwareimagelcm_add"),
+    path(
+        "software-image/<uuid:pk>/delete/", views.SoftwareImageLCMDeleteView.as_view(), name="softwareimagelcm_delete"
+    ),
+    path("software-image/<uuid:pk>/edit/", views.SoftwareImageLCMEditView.as_view(), name="softwareimagelcm_edit"),
     path(
         "software-image/<uuid:pk>/changelog/",
         ObjectChangeLogView.as_view(),
-        name="softwareimage_changelog",
-        kwargs={"model": SoftwareImage},
+        name="softwareimagelcm_changelog",
+        kwargs={"model": SoftwareImageLCM},
     ),
     path(
         "software-image/import/",
-        views.SoftwareImageBulkImportView.as_view(),
-        name="softwareimage_import",
+        views.SoftwareImageLCMBulkImportView.as_view(),
+        name="softwareimagelcm_import",
     ),
     # ValidatedSoftware
     path("validated-software/", views.ValidatedSoftwareLCMListView.as_view(), name="validatedsoftwarelcm_list"),

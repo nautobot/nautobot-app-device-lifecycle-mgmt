@@ -15,7 +15,7 @@ from nautobot.extras.models import Status
 
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
-    SoftwareImage,
+    SoftwareImageLCM,
     SoftwareLCM,
     ContactLCM,
     ValidatedSoftwareLCM,
@@ -26,7 +26,7 @@ from nautobot_device_lifecycle_mgmt.models import (
 )
 
 from .nested_serializers import (
-    NestedSoftwareImageSerializer,
+    NestedSoftwareImageLCMSerializer,
     NestedSoftwareLCMSerializer,
     NestedProviderLCMSerializer,
     NestedContractLCMSerializer,
@@ -137,12 +137,11 @@ class SoftwareLCMSerializer(TaggedObjectSerializer, CustomFieldModelSerializer):
     )
     device_platform = NestedPlatformSerializer()
     software_images = SerializedPKRelatedField(
-        queryset=SoftwareImage.objects.all(),
-        serializer=NestedSoftwareImageSerializer,
+        queryset=SoftwareImageLCM.objects.all(),
+        serializer=NestedSoftwareImageLCMSerializer,
         required=False,
         many=True,
     )
-    # software_images = NestedSoftwareImageSerializer()
 
     class Meta:
         """Meta attributes."""
@@ -168,18 +167,20 @@ class SoftwareLCMSerializer(TaggedObjectSerializer, CustomFieldModelSerializer):
         ]
 
 
-class SoftwareImageSerializer(CustomFieldModelSerializer, TaggedObjectSerializer):  # pylint: disable=too-many-ancestors
-    """REST API serializer for SoftwareImage records."""
+class SoftwareImageLCMSerializer(
+    CustomFieldModelSerializer, TaggedObjectSerializer
+):  # pylint: disable=too-many-ancestors
+    """REST API serializer for SoftwareImageLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
-        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwareimage-detail"
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwareimagelcm-detail"
     )
     software = NestedSoftwareLCMSerializer()
 
     class Meta:
         """Meta attributes."""
 
-        model = SoftwareImage
+        model = SoftwareImageLCM
         fields = [
             "id",
             "url",

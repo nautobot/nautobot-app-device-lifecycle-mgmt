@@ -73,28 +73,28 @@ try:
                             ],
                         ),
                         NavMenuItem(
-                            link="plugins:nautobot_device_lifecycle_mgmt:softwareimage_list",
+                            link="plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_list",
                             name="Software Image",
                             buttons=(
                                 NavMenuButton(
-                                    link="plugins:nautobot_device_lifecycle_mgmt:softwareimage_add",
+                                    link="plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_add",
                                     title="Add",
                                     icon_class="mdi mdi-plus-thick",
                                     button_class=ButtonColorChoices.GREEN,
                                     permissions=[
-                                        "nautobot_device_lifecycle_mgmt.add_softwareimage",
+                                        "nautobot_device_lifecycle_mgmt.add_softwareimagelcm",
                                     ],
                                 ),
                                 NavMenuButton(
-                                    link="plugins:nautobot_device_lifecycle_mgmt:softwareimage_import",
+                                    link="plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_import",
                                     title="Import",
                                     icon_class="mdi mdi-database-import-outline",
                                     button_class=ButtonColorChoices.BLUE,
-                                    permissions=["nautobot_device_lifecycle_mgmt.add_softwarelcm"],
+                                    permissions=["nautobot_device_lifecycle_mgmt.add_softwareimagelcm"],
                                 ),
                             ),
                             permissions=[
-                                "nautobot_device_lifecycle_mgmt.view_softwareimage",
+                                "nautobot_device_lifecycle_mgmt.view_softwareimagelcm",
                             ],
                         ),
                         NavMenuItem(
@@ -371,22 +371,22 @@ except ModuleNotFoundError:
             ),
         ),
         PluginMenuItem(
-            link="plugins:nautobot_device_lifecycle_mgmt:softwareimage_list",
+            link="plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_list",
             link_text="Software Image",
             buttons=(
                 PluginMenuButton(
-                    link="plugins:nautobot_device_lifecycle_mgmt:softwareimage_add",
+                    link="plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_add",
                     title="Add",
                     icon_class="mdi mdi-plus-thick",
                     color=ButtonColorChoices.GREEN,
-                    permissions=["nautobot_device_lifecycle_mgmt.add_softwareimage"],
+                    permissions=["nautobot_device_lifecycle_mgmt.add_softwareimagelcm"],
                 ),
                 PluginMenuButton(
-                    link="plugins:nautobot_device_lifecycle_mgmt:softwareimage_import",
+                    link="plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_import",
                     title="Import",
                     icon_class="mdi mdi-database-import-outline",
                     color=ButtonColorChoices.BLUE,
-                    permissions=["nautobot_device_lifecycle_mgmt.add_softwareimage"],
+                    permissions=["nautobot_device_lifecycle_mgmt.add_softwareimagelcm"],
                 ),
             ),
         ),

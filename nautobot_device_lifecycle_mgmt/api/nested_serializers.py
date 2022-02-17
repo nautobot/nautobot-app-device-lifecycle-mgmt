@@ -22,17 +22,17 @@ class NestedSoftwareLCMSerializer(WritableNestedSerializer):
         read_only_fields = ["device_platform"]
 
 
-class NestedSoftwareImageSerializer(WritableNestedSerializer):
-    """Nested/brief serializer for SoftwareImage."""
+class NestedSoftwareImageLCMSerializer(WritableNestedSerializer):
+    """Nested/brief serializer for SoftwareImageLCM."""
 
     url = serializers.HyperlinkedIdentityField(
-        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwareimage-detail"
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwareimagelcm-detail"
     )
 
     class Meta:
         """Meta attributes."""
 
-        model = models.SoftwareImage
+        model = models.SoftwareImageLCM
         fields = [
             "id",
             "url",

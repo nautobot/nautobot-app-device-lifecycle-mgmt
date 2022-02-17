@@ -21,7 +21,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContactLCM,
     CVELCM,
     VulnerabilityLCM,
-    SoftwareImage,
+    SoftwareImageLCM,
 )
 
 
@@ -142,8 +142,8 @@ class SoftwareLCMFilterSet(django_filters.FilterSet):
         return queryset.filter(qs_filter)
 
 
-class SoftwareImageFilterSet(django_filters.FilterSet):
-    """Filter for SoftwareImage."""
+class SoftwareImageLCMFilterSet(django_filters.FilterSet):
+    """Filter for SoftwareImageLCM."""
 
     q = django_filters.CharFilter(method="search", label="Search")
 
@@ -199,7 +199,7 @@ class SoftwareImageFilterSet(django_filters.FilterSet):
     class Meta:
         """Meta attributes for filter."""
 
-        model = SoftwareImage
+        model = SoftwareImageLCM
 
         fields = [
             "image_file_name",
@@ -240,7 +240,7 @@ class SoftwareImageFilterSet(django_filters.FilterSet):
 
         device = devices.first()
 
-        return queryset.intersection(SoftwareImage.objects.get_for_object(device).distinct())
+        return queryset.intersection(SoftwareImageLCM.objects.get_for_object(device).distinct())
 
     def inventory_item(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Search for software image for a given inventory item."""
@@ -255,7 +255,7 @@ class SoftwareImageFilterSet(django_filters.FilterSet):
 
         inventory_item = inventory_items.first()
 
-        return queryset.intersection(SoftwareImage.objects.get_for_object(inventory_item).distinct())
+        return queryset.intersection(SoftwareImageLCM.objects.get_for_object(inventory_item).distinct())
 
 
 class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):

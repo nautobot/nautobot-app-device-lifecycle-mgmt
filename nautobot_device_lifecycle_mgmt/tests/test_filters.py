@@ -16,7 +16,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     InventoryItemSoftwareValidationResult,
     CVELCM,
     VulnerabilityLCM,
-    SoftwareImage,
+    SoftwareImageLCM,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -26,7 +26,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     InventoryItemSoftwareValidationResultFilterSet,
     CVELCMFilterSet,
     VulnerabilityLCMFilterSet,
-    SoftwareImageFilterSet,
+    SoftwareImageLCMFilterSet,
 )
 from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
 
@@ -695,11 +695,11 @@ class VulnerabilityLCMTestCase(TestCase):
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
 
-class SoftwareImageFilterSetTestCase(TestCase):
-    """Tests for SoftwareImageFilterSet."""
+class SoftwareImageLCMFilterSetTestCase(TestCase):
+    """Tests for SoftwareImageLCMFilterSet."""
 
-    queryset = SoftwareImage.objects.all()
-    filterset = SoftwareImageFilterSet
+    queryset = SoftwareImageLCM.objects.all()
+    filterset = SoftwareImageLCMFilterSet
 
     def setUp(self):
         manufacturer_cisco, _ = Manufacturer.objects.get_or_create(name="Cisco", slug="cisco")
@@ -731,14 +731,14 @@ class SoftwareImageFilterSetTestCase(TestCase):
             manufacturer=manufacturer_arista, model="7150S", slug="7150s"
         )
 
-        soft_image = SoftwareImage(
+        soft_image = SoftwareImageLCM(
             image_file_name="ios17.3.3md.img",
             software=self.softwares[0],
             default_image=True,
         )
         soft_image.save()
 
-        soft_image = SoftwareImage(
+        soft_image = SoftwareImageLCM(
             image_file_name="ios17.3.3md-ssl.img",
             software=self.softwares[0],
             default_image=False,
@@ -746,16 +746,13 @@ class SoftwareImageFilterSetTestCase(TestCase):
         soft_image.device_types.set([devicetype_1.pk])
         soft_image.save()
 
-        soft_image = SoftwareImage(
+        soft_image = SoftwareImageLCM(
             image_file_name="eos4.25.m.swi",
             software=self.softwares[1],
             default_image=True,
         )
         soft_image.device_types.set([self.devicetype_2.pk])
         soft_image.save()
-
-        print(SoftwareImage.objects.all())
-        print([si.device_types.all() for si in SoftwareImage.objects.all()])
 
     def test_q_image_name(self):
         """Test q filter to find single record based on the image name."""

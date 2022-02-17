@@ -125,19 +125,19 @@ class InventoryItemValidatedSoftwareFilter:  # pylint: disable=too-few-public-me
         )
 
 
-class DeviceSoftwareImageFilter:  # pylint: disable=too-few-public-methods
-    """Filter SoftwareImage objects based on the Device object."""
+class DeviceSoftwareImageLCMFilter:  # pylint: disable=too-few-public-methods
+    """Filter SoftwareImageLCM objects based on the Device object."""
 
     soft_obj_model = Device
     soft_relation_name = "device_soft"
 
     def __init__(self, qs, item_obj):
-        """Initalize DeviceSoftwareImageFilter."""
+        """Initalize DeviceSoftwareImageLCMFilter."""
         self.softwareimage_qs = qs
         self.item_obj = item_obj
 
     def filter_qs(self):
-        """Returns filtered SoftwareImage query set."""
+        """Returns filtered SoftwareImageLCM query set."""
         soft_rel_obj = RelationshipAssociation.objects.filter(
             relationship__slug=self.soft_relation_name,
             destination_type=ContentType.objects.get_for_model(self.soft_obj_model),
@@ -152,19 +152,19 @@ class DeviceSoftwareImageFilter:  # pylint: disable=too-few-public-methods
         return self.softwareimage_qs.distinct()
 
 
-class InventoryItemSoftwareImageFilter:  # pylint: disable=too-few-public-methods
-    """Filter SoftwareImage objects based on the InventoryItem object."""
+class InventoryItemSoftwareImageLCMFilter:  # pylint: disable=too-few-public-methods
+    """Filter SoftwareImageLCM objects based on the InventoryItem object."""
 
     soft_obj_model = InventoryItem
     soft_relation_name = "inventory_item_soft"
 
     def __init__(self, qs, item_obj):
-        """Initalize InventoryItemSoftwareImageFilter."""
+        """Initalize InventoryItemSoftwareImageLCMFilter."""
         self.softwareimage_qs = qs
         self.item_obj = item_obj
 
     def filter_qs(self):
-        """Returns filtered SoftwareImage query set."""
+        """Returns filtered SoftwareImageLCM query set."""
         soft_rel_obj = RelationshipAssociation.objects.filter(
             relationship__slug=self.soft_relation_name,
             destination_type=ContentType.objects.get_for_model(self.soft_obj_model),

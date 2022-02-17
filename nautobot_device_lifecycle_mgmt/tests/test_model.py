@@ -19,7 +19,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     DeviceSoftwareValidationResult,
     CVELCM,
     VulnerabilityLCM,
-    SoftwareImage,
+    SoftwareImageLCM,
 )
 from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
 
@@ -455,8 +455,8 @@ class VulnerabilityLCMTestCase(TestCase):
         self.assertEqual(vulnerability.status, self.status)
 
 
-class SoftwareImageTestCase(TestCase):
-    """Tests for the SoftwareImage model."""
+class SoftwareImageLCMTestCase(TestCase):
+    """Tests for the SoftwareImageLCM model."""
 
     def setUp(self):
         """Set up base objects."""
@@ -473,8 +473,8 @@ class SoftwareImageTestCase(TestCase):
         self.tag = Tag.objects.create(name="asr", slug="asr")
 
     def test_create_softwareimage_required_only(self):
-        """Successfully create SoftwareImage with required fields only."""
-        softwareimage = SoftwareImage(image_file_name="ios17.3.3md.img", software=self.software)
+        """Successfully create SoftwareImageLCM with required fields only."""
+        softwareimage = SoftwareImageLCM(image_file_name="ios17.3.3md.img", software=self.software)
         softwareimage.device_types.set([self.device_type_1])
         softwareimage.save()
 
@@ -483,8 +483,8 @@ class SoftwareImageTestCase(TestCase):
         self.assertEqual(list(softwareimage.device_types.all()), [self.device_type_1])
 
     def test_create_softwareimage_all(self):
-        """Successfully create SoftwareImage with all fields."""
-        softwareimage = SoftwareImage(
+        """Successfully create SoftwareImageLCM with all fields."""
+        softwareimage = SoftwareImageLCM(
             image_file_name="ios17.3.3md.img",
             software=self.software,
             download_url="ftp://images.local/cisco/ios17.3.3md.img",

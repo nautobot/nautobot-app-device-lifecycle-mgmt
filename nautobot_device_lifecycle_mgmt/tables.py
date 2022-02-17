@@ -15,7 +15,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     VulnerabilityLCM,
     DeviceSoftwareValidationResult,
     InventoryItemSoftwareValidationResult,
-    SoftwareImage,
+    SoftwareImageLCM,
 )
 from nautobot_device_lifecycle_mgmt.utils import M2MLinkedCountColumn
 
@@ -106,12 +106,12 @@ class SoftwareLCMTable(BaseTable):
         )
 
 
-class SoftwareImageTable(BaseTable):
-    """Table for SoftwareImage."""
+class SoftwareImageLCMTable(BaseTable):
+    """Table for SoftwareImageLCM."""
 
     pk = ToggleColumn()
     name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:softwareimage",
+        "plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm",
         text=lambda record: record,
         args=[A("pk")],
         orderable=False,
@@ -124,12 +124,12 @@ class SoftwareImageTable(BaseTable):
         viewname="extras:tag_list", url_params={"slug": ("object_tags", "slug")}, verbose_name="Object Tags"
     )
     default_image = BooleanColumn()
-    actions = ButtonsColumn(SoftwareImage, buttons=("edit", "delete"))
+    actions = ButtonsColumn(SoftwareImageLCM, buttons=("edit", "delete"))
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
         """Meta attributes."""
 
-        model = SoftwareImage
+        model = SoftwareImageLCM
         fields = (
             "pk",
             "name",

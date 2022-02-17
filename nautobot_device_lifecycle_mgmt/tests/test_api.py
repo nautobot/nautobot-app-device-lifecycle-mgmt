@@ -15,7 +15,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     CVELCM,
     VulnerabilityLCM,
-    SoftwareImage,
+    SoftwareImageLCM,
 )
 from nautobot_device_lifecycle_mgmt.tests.conftest import create_devices, create_cves, create_softwares
 
@@ -504,10 +504,10 @@ class VulnerabilityLCMAPITest(
         """Disabling inherited test that uses POST."""
 
 
-class SoftwareImageAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
-    """Test the SoftwareImage API."""
+class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
+    """Test the SoftwareImageLCM API."""
 
-    model = SoftwareImage
+    model = SoftwareImageLCM
     brief_fields = [
         "default_image",
         "device_types",
@@ -585,8 +585,6 @@ class SoftwareImageAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable
 
         tags = (Tag.objects.create(name="asr", slug="asr"), Tag.objects.create(name="edge", slug="edge"))
 
-        print(SoftwareImage.objects.all())
-
         cls.create_data = [
             {
                 "image_file_name": "asr1001x-universalk9.17.03.03.SPA.bin",
@@ -613,7 +611,7 @@ class SoftwareImageAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable
                 "default_image": True,
             },
         ]
-        software_image = SoftwareImage(
+        software_image = SoftwareImageLCM(
             image_file_name="eos2gb_4.21.6m.swi",
             software=softwares_arista[0],
             download_url="ftp://images.local/arista/eos2gb_4.21m.swi",
@@ -621,7 +619,7 @@ class SoftwareImageAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable
             default_image=True,
         )
         software_image.save()
-        software_image = SoftwareImage(
+        software_image = SoftwareImageLCM(
             image_file_name="eos_4.21.6m.swi",
             software=softwares_arista[0],
             download_url="ftp://images.local/arista/eos_4.21.6m.swi",
@@ -631,7 +629,7 @@ class SoftwareImageAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable
         software_image.inventory_items.set([inventoryitem.pk for inventoryitem in inventoryitems_arista])
         software_image.save()
 
-        software_image = SoftwareImage(
+        software_image = SoftwareImageLCM(
             image_file_name="eos_4.25.7f.swi",
             software=softwares_arista[1],
             download_url="ftp://images.local/arista/eos_4.25.7f.swi",

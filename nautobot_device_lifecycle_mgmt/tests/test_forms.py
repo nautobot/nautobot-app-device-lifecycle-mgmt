@@ -11,7 +11,7 @@ from nautobot_device_lifecycle_mgmt.forms import (
     SoftwareLCMForm,
     ValidatedSoftwareLCMForm,
     CVELCMForm,
-    SoftwareImageForm,
+    SoftwareImageLCMForm,
 )
 from nautobot_device_lifecycle_mgmt.models import SoftwareLCM, CVELCM
 
@@ -385,10 +385,10 @@ class CVELCMFormTest(TestCase):
         )
 
 
-class SoftwareImageFormTest(TestCase):  # pylint: disable=no-member
-    """Test class for SoftwareImageForm forms."""
+class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member
+    """Test class for SoftwareImageLCMForm forms."""
 
-    form_class = SoftwareImageForm
+    form_class = SoftwareImageLCMForm
 
     def setUp(self):
         """Create necessary objects."""
@@ -501,7 +501,6 @@ class SoftwareImageFormTest(TestCase):  # pylint: disable=no-member
         }
         form = self.form_class(data)
         self.assertFalse(form.is_valid())
-        print(form.errors)
         self.assertIn("device_types", form.errors)
         self.assertIn(
             "doesn't match the Software Platform Manufacturer.",
