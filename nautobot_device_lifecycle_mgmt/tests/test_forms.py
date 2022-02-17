@@ -13,7 +13,7 @@ from nautobot_device_lifecycle_mgmt.forms import (
     CVELCMForm,
     SoftwareImageLCMForm,
 )
-from nautobot_device_lifecycle_mgmt.models import SoftwareLCM, CVELCM
+from nautobot_device_lifecycle_mgmt.models import SoftwareImageLCM, SoftwareLCM, CVELCM
 
 
 class HardwareLCMFormTest(TestCase):
@@ -397,19 +397,32 @@ class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member
         device_platform, _ = Platform.objects.get_or_create(
             name="Cisco IOS", slug="cisco_ios", manufacturer=manufacturer_cisco
         )
-        self.software = SoftwareLCM.objects.create(
+        self.software_1 = SoftwareLCM.objects.create(
             **{
                 "device_platform": device_platform,
                 "version": "17.3.5 MD",
                 "alias": "Amsterdam-17.3.5 MD",
                 "end_of_support": "2022-05-15",
                 "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-17.03/series.html",
-                "download_url": "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.05.SPA.bin",
-                "image_file_name": "asr1001x-universalk9.17.03.05.SPA.bin",
-                "image_file_checksum": "9cf2e09b5cag7a4d8ea40886fbbe5b4b68e19e58a8f96b34240e4cea9971f6ae6facab9a1855a34e1ed8755f3ffe4c969cf6e6ef1df95d42a91540a44d4b9e14",
                 "long_term_support": True,
                 "pre_release": False,
             }
+        )
+        self.software_2 = SoftwareLCM.objects.create(
+            **{
+                "device_platform": device_platform,
+                "version": "17.3.6 MD",
+                "alias": "Amsterdam-17.3.6 MD",
+                "end_of_support": "2022-05-15",
+                "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-17.03/series.html",
+                "long_term_support": True,
+                "pre_release": False,
+            }
+        )
+        SoftwareImageLCM.objects.create(
+            image_file_name="ios17.3.3Dmd.img",
+            software=self.software_1,
+            default_image=True,
         )
 
         status_active, _ = Status.objects.get_or_create(slug="active")
@@ -430,11 +443,11 @@ class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member
     def test_specifying_all_fields_w_device_type(self):
         data = {
             "image_file_name": "ios17.3.3md.img",
-            "software": self.software,
+            "software": self.software_1,
             "device_types": [self.devicetype_1],
             "download_url": "ftp://images.local/cisco/ios17.3.3md.img",
             "image_file_checksum": "441rfabd75b0512r7fde7a7a66faa596",
-            "default_image": True,
+            "default_image": False,
         }
         form = self.form_class(data)
         self.assertTrue(form.is_valid())
@@ -443,11 +456,11 @@ class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member
     def test_specifying_all_fields_w_inventory_item(self):
         data = {
             "image_file_name": "ios17.3.3md.img",
-            "software": self.software,
+            "software": self.software_1,
             "inventory_items": [self.inventoryitem_1],
             "download_url": "ftp://images.local/cisco/ios17.3.3md.img",
             "image_file_checksum": "441rfabd75b0512r7fde7a7a66faa596",
-            "default_image": True,
+            "default_image": False,
         }
         form = self.form_class(data)
         self.assertTrue(form.is_valid())
@@ -456,11 +469,11 @@ class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member
     def test_specifying_all_fields_w_object_tag(self):
         data = {
             "image_file_name": "ios17.3.3md.img",
-            "software": self.software,
+            "software": self.software_1,
             "object_tags": [self.tag],
             "download_url": "ftp://images.local/cisco/ios17.3.3md.img",
             "image_file_checksum": "441rfabd75b0512r7fde7a7a66faa596",
-            "default_image": True,
+            "default_image": False,
         }
         form = self.form_class(data)
         self.assertTrue(form.is_valid())
@@ -478,26 +491,46 @@ class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member
             form.errors["software"],
         )
 
-    def test_at_least_one_default_image_required(self):
+    def test_at_most_one_default_image_per_software(self):
         data = {
             "image_file_name": "ios17.3.3md.img",
-            "software": self.software,
-            "default_image": False,
+            "software": self.software_1,
+            "default_image": True,
         }
         form = self.form_class(data)
         self.assertFalse(form.is_valid())
         self.assertIn("default_image", form.errors)
         self.assertIn(
-            "No other Software Images found for the selected Software. This Software Image must be marked as the default.",
+            "Only one default Software Image is allowed for each Software.",
             form.errors["default_image"],
+        )
+
+    def test_default_image_cannot_have_assignments(self):
+        data = {
+            "image_file_name": "ios17.3.3md.img",
+            "software": self.software_2,
+            "device_types": [self.devicetype_2],
+            "default_image": True,
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("device_types", form.errors)
+        self.assertIn("default_image", form.errors)
+        self.assertIn(
+            "Default image cannot be assigned to any objects.",
+            form.errors["device_types"][0],
+        )
+        self.assertIn(
+            "Default image cannot be assigned to any objects.",
+            form.errors["default_image"][0],
         )
 
     def test_soft_manuf_must_match_platform_manuf(self):
         data = {
             "image_file_name": "ios17.3.3md.img",
-            "software": self.software,
+            "software": self.software_1,
             "device_types": [self.devicetype_2],
-            "default_image": True,
+            "default_image": False,
         }
         form = self.form_class(data)
         self.assertFalse(form.is_valid())
