@@ -60,3 +60,30 @@ class NestedContractLCMSerializer(WritableNestedSerializer):
             "contract_type",
             "expired",
         ]
+
+
+class NestedCVELCMSerializer(WritableNestedSerializer):
+    """Nested serializer for the CVE class."""
+
+    url = serializers.HyperlinkedIdentityField(view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:cvelcm-detail")
+
+    class Meta:
+        """Meta magic method for the CVE nested serializer."""
+
+        model = models.CVELCM
+        fields = [
+            "id",
+            "url",
+            "display",
+            "name",
+            "published_date",
+            "link",
+            "status",
+            "description",
+            "severity",
+            "cvss",
+            "cvss_v2",
+            "cvss_v3",
+            "fix",
+            "comments",
+        ]

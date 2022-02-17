@@ -1,4 +1,4 @@
-"""Django urlpatterns declaration for the LifeCycle Management plugin."""
+"""Django urlpatterns declaration for the Lifecycle Management plugin."""
 from django.urls import path
 from nautobot.extras.views import ObjectChangeLogView
 from nautobot_device_lifecycle_mgmt import views
@@ -9,11 +9,13 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContractLCM,
     ProviderLCM,
     ContactLCM,
+    CVELCM,
+    VulnerabilityLCM,
 )
 
 
 urlpatterns = [
-    # Hardware LifeCycle Management URLs
+    # Hardware Lifecycle Management URLs
     path("hardware/", views.HardwareLCMListView.as_view(), name="hardwarelcm_list"),
     path("hardware/<uuid:pk>/", views.HardwareLCMView.as_view(), name="hardwarelcm"),
     path("hardware/add/", views.HardwareLCMCreateView.as_view(), name="hardwarelcm_add"),
@@ -28,7 +30,7 @@ urlpatterns = [
         kwargs={"model": HardwareLCM},
     ),
     path("hardware/import/", views.HardwareLCMBulkImportView.as_view(), name="hardwarelcm_import"),
-    # Software LifeCycle Management URLs
+    # Software Lifecycle Management URLs
     path("software/", views.SoftwareLCMListView.as_view(), name="softwarelcm_list"),
     path("software/<uuid:pk>/", views.SoftwareLCMView.as_view(), name="softwarelcm"),
     path("software/add/", views.SoftwareLCMCreateView.as_view(), name="softwarelcm_add"),
@@ -66,7 +68,17 @@ urlpatterns = [
         views.ValidatedSoftwareLCMBulkImportView.as_view(),
         name="validatedsoftwarelcm_import",
     ),
-    # Contract LifeCycle Management URLs
+    path(
+        "validated-software/device-report/",
+        views.ValidatedSoftwareDeviceReportView.as_view(),
+        name="validatedsoftware_device_report",
+    ),
+    path(
+        "validated-software/inventoryitem-report/",
+        views.ValidatedSoftwareInventoryItemReportView.as_view(),
+        name="validatedsoftware_inventoryitem_report",
+    ),
+    # Contract Lifecycle Management URLs
     path("contract/", views.ContractLCMListView.as_view(), name="contractlcm_list"),
     path("contract/<uuid:pk>/", views.ContractLCMView.as_view(), name="contractlcm"),
     path("contract/add/", views.ContractLCMCreateView.as_view(), name="contractlcm_add"),
@@ -81,7 +93,7 @@ urlpatterns = [
         kwargs={"model": ContractLCM},
     ),
     path("contract/import/", views.ContractLCMBulkImportView.as_view(), name="contractlcm_import"),
-    # Contract Provider LifeCycle Management URLs
+    # Contract Provider Lifecycle Management URLs
     path("provider/", views.ProviderLCMListView.as_view(), name="providerlcm_list"),
     path("provider/<uuid:pk>/", views.ProviderLCMView.as_view(), name="providerlcm"),
     path("provider/add/", views.ProviderLCMCreateView.as_view(), name="providerlcm_add"),
@@ -96,7 +108,7 @@ urlpatterns = [
         kwargs={"model": ProviderLCM},
     ),
     path("provider/import/", views.ProviderLCMBulkImportView.as_view(), name="providerlcm_import"),
-    # Contract Resources LifeCycle Management URLs
+    # Contract Resources Lifecycle Management URLs
     path("contact/", views.ContactLCMListView.as_view(), name="contactlcm_list"),
     path("contact/<uuid:pk>/", views.ContactLCMView.as_view(), name="contactlcm"),
     path("contact/add/", views.ContactLCMCreateView.as_view(), name="contactlcm_add"),
@@ -111,4 +123,32 @@ urlpatterns = [
         kwargs={"model": ContactLCM},
     ),
     path("contact/import/", views.ContactLCMBulkImportView.as_view(), name="contactlcm_import"),
+    # CVE Lifecycle Management URLs
+    path("cve/", views.CVELCMListView.as_view(), name="cvelcm_list"),
+    path("cve/<uuid:pk>/", views.CVELCMView.as_view(), name="cvelcm"),
+    path("cve/add/", views.CVELCMCreateView.as_view(), name="cvelcm_add"),
+    path("cve/delete/", views.CVELCMBulkDeleteView.as_view(), name="cvelcm_bulk_delete"),
+    path("cve/edit/", views.CVELCMBulkEditView.as_view(), name="cvelcm_bulk_edit"),
+    path("cve/<uuid:pk>/delete/", views.CVELCMDeleteView.as_view(), name="cvelcm_delete"),
+    path("cve/<uuid:pk>/edit/", views.CVELCMEditView.as_view(), name="cvelcm_edit"),
+    path(
+        "cve/<uuid:pk>/changelog/",
+        ObjectChangeLogView.as_view(),
+        name="cvelcm_changelog",
+        kwargs={"model": CVELCM},
+    ),
+    path("cve/import/", views.CVELCMBulkImportView.as_view(), name="cvelcm_import"),
+    # Vulnerability Lifecycle Management URLs
+    path("vulnerability/", views.VulnerabilityLCMListView.as_view(), name="vulnerabilitylcm_list"),
+    path("vulnerability/<uuid:pk>/", views.VulnerabilityLCMView.as_view(), name="vulnerabilitylcm"),
+    path("vulnerability/delete/", views.VulnerabilityLCMBulkDeleteView.as_view(), name="vulnerabilitylcm_bulk_delete"),
+    path("vulnerability/edit/", views.VulnerabilityLCMBulkEditView.as_view(), name="vulnerabilitylcm_bulk_edit"),
+    path("vulnerability/<uuid:pk>/delete/", views.VulnerabilityLCMDeleteView.as_view(), name="vulnerabilitylcm_delete"),
+    path("vulnerability/<uuid:pk>/edit/", views.VulnerabilityLCMEditView.as_view(), name="vulnerabilitylcm_edit"),
+    path(
+        "vulnerability/<uuid:pk>/changelog/",
+        ObjectChangeLogView.as_view(),
+        name="vulnerabilitylcm_changelog",
+        kwargs={"model": VulnerabilityLCM},
+    ),
 ]

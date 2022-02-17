@@ -1,4 +1,4 @@
-"""API Views implementation for the LifeCycle Management plugin."""
+"""API Views implementation for the Lifecycle Management plugin."""
 
 from nautobot.core.api.views import ModelViewSet
 from nautobot.extras.api.views import CustomFieldModelViewSet
@@ -10,6 +10,8 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContactLCM,
     SoftwareLCM,
     ValidatedSoftwareLCM,
+    CVELCM,
+    VulnerabilityLCM,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -18,6 +20,8 @@ from nautobot_device_lifecycle_mgmt.filters import (
     ContactLCMFilterSet,
     SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
+    CVELCMFilterSet,
+    VulnerabilityLCMFilterSet,
 )
 
 from .serializers import (
@@ -27,11 +31,13 @@ from .serializers import (
     ContactLCMSerializer,
     SoftwareLCMSerializer,
     ValidatedSoftwareLCMSerializer,
+    CVELCMSerializer,
+    VulnerabilityLCMSerializer,
 )
 
 
 class HardwareLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
-    """CRUD operations set for the Hardware LifeCycle Management view."""
+    """CRUD operations set for the Hardware Lifecycle Management view."""
 
     queryset = HardwareLCM.objects.all()
     filterset_class = HardwareLCMFilterSet
@@ -39,7 +45,7 @@ class HardwareLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
 
 
 class ContractLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
-    """CRUD operations set for the Contract LifeCycle Management view."""
+    """CRUD operations set for the Contract Lifecycle Management view."""
 
     queryset = ContractLCM.objects.all()
     filterset_class = ContractLCMFilterSet
@@ -47,7 +53,7 @@ class ContractLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
 
 
 class ProviderLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
-    """CRUD operations set for the Contract Provider LifeCycle Management view."""
+    """CRUD operations set for the Contract Provider Lifecycle Management view."""
 
     queryset = ProviderLCM.objects.all()
     filterset_class = ProviderLCMFilterSet
@@ -55,7 +61,7 @@ class ProviderLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
 
 
 class ContactLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
-    """CRUD operations set for the Contact LifeCycle Management view."""
+    """CRUD operations set for the Contact Lifecycle Management view."""
 
     queryset = ContactLCM.objects.all()
     filterset_class = ContactLCMFilterSet
@@ -76,3 +82,22 @@ class ValidatedSoftwareLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=t
     queryset = ValidatedSoftwareLCM.objects.all()
     serializer_class = ValidatedSoftwareLCMSerializer
     filterset_class = ValidatedSoftwareLCMFilterSet
+
+
+class CVELCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-ancestors
+    """REST API viewset for CVELCM records."""
+
+    queryset = CVELCM.objects.all()
+    serializer_class = CVELCMSerializer
+    filterset_class = CVELCMFilterSet
+
+
+class VulnerabilityLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-ancestors
+    """REST API viewset for VulnerabilityLCM records."""
+
+    queryset = VulnerabilityLCM.objects.all()
+    serializer_class = VulnerabilityLCMSerializer
+    filterset_class = VulnerabilityLCMFilterSet
+
+    # Disabling POST as these should only be created via Job.
+    http_method_names = ["get", "put", "patch", "delete", "head", "options"]

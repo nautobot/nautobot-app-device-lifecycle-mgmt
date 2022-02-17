@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load buttons %}
+{% load static %}
+{% load helpers %}
+
+{% block content %}
+<div class="pull-right noprint">
+<div class="btn-group">
+    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="mdi mdi-plus-thick" aria-hidden="true"></span>Execute<span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu">
+            <li><a href="{% url 'extras:job' class_path='plugins/nautobot_device_lifecycle_mgmt.jobs.lifecycle_reporting/DeviceSoftwareValidationFullReport' %}">Run Software Validation</a></li>
+    </ul>
+</div>
+{% if request.user.is_authenticated and table_config_form %}
+    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#ObjectTable_config" title="Configure table"><i class="mdi mdi-cog"></i>Configure</button>
+{% endif %}
+{% if request.user.is_authenticated and 'export' in action_buttons %}
+    {% export_button content_type %}
+{% endif %}
+</div>
+    <h1>{% block title %}Device Software Validation Reports{% endblock %}</h1>
+    <div class="row">
+        <div class="col-md-9">
+            <!-- VISUAL BLOCK -->
+            {% if report_last_run is None %}
+                <h4 class="text-center alert-danger p-4 m-4">-- No validation results found, you need to run the report at least once before seeing the results! --</h4>
+            {% else %}
+            <h4 class="text-left alert-info p-4 m-4">Last full run of the report: {{ report_last_run }} - {{ report_last_run|timesince }} ago </h4>
+            {% endif %}
+            {% if bar_chart is not None %}
+                {% block graphic  %}
+                    <div id="content">
+                        <img src="data:image/png;base64,{{ bar_chart|safe }}" style="width:100%" alt="Platform Bar Chart">
+                    </div>
+                {% endblock %}
+            {% else %}
+                    <span class="text-center alert-danger p-4 m-4">-- Oops, no config validation found, visual not made! --</span>
+            {% endif %}
+            <!-- END VISUAL BLOCK -->
+            <h3 class="text-center m-2 p-3">Executive Summary</h3>
+            <table class="table table-hover table-headings">
+                <thead>
+                    <tr>
+                        <th><a>Type</a></th>
+                        <th><a>Total</a></th>
+                        <th><a>Valid</a></th>
+                        <th><a>Invalid</a></th>
+                        <th><a>No Software</a></th>
+                        <th><a>Compliance (%)</a></th>
+                        <th><a>Summary</a></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="even">
+                        <td>Devices</td>
+                        <td>{% if device_aggr.total is not None %} {{ device_aggr.total }} {% else %} -- {% endif %}</td>
+                        <td>{% if device_aggr.valid is not None %} {{ device_aggr.valid }} {% else %} -- {% endif %}</td>
+                        <td>{% if device_aggr.invalid is not None %} {{ device_aggr.invalid }} {% else %} -- {% endif %}</td>
+                        <td>{% if device_aggr.no_software is not None %} {{ device_aggr.no_software }} {% else %} -- {% endif %}</td>
+                        <td>{% if device_aggr.valid_percent is not None %} {{ device_aggr.valid_percent }} % {% else %} -- {% endif %}</td>
+                        <td><a target="_blank" href="data:image/png;base64,{{ device_visual|safe }}" title="Devices Pie Chart">
+                            <img style="width:150px;" src="data:image/png;base64,{{ device_visual|safe }}" alt="Devices Pie Chart">
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3 class="text-center m-2 p-3">Device Type Summary</h3>
+            {% include 'utilities/obj_table.html' %}
+            </div>
+        <div class="col-md-3 noprint">
+        {% include 'inc/search_panel.html' %}
+    </div>
+</div>
+{% table_config_form table table_name="ObjectTable" %}
+{% endblock %}
+{% block javascript %}
+<script src="{% static 'js/tableconfig.js' %}"></script>
+{% endblock %}

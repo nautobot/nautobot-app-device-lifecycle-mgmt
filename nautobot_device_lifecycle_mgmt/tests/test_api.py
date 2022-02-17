@@ -13,7 +13,10 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContractLCM,
     ProviderLCM,
     ValidatedSoftwareLCM,
+    CVELCM,
+    VulnerabilityLCM,
 )
+from nautobot_device_lifecycle_mgmt.tests.conftest import create_devices, create_cves, create_softwares
 
 
 User = get_user_model()
@@ -228,13 +231,15 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: 
 
     model = ValidatedSoftwareLCM
     brief_fields = [
-        "assigned_to",
-        "assigned_to_content_type",
-        "assigned_to_object_id",
         "custom_fields",
+        "device_roles",
+        "device_types",
+        "devices",
         "display",
         "end",
         "id",
+        "inventory_items",
+        "object_tags",
         "preferred",
         "software",
         "start",
@@ -302,60 +307,139 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: 
             InventoryItem.objects.create(device=devices[1], name="Supervisor Engine 720"),
         )
 
-        content_type_device = ContentType.objects.get(app_label="dcim", model="device")
-        content_type_devicetype = ContentType.objects.get(app_label="dcim", model="devicetype")
-        content_type_inventoryitem = ContentType.objects.get(app_label="dcim", model="inventoryitem")
-
         cls.create_data = [
             {
                 "software": softwares[0].id,
-                "assigned_to_content_type": "dcim.device",
-                "assigned_to_object_id": devices[0].id,
+                "devices": [device.pk for device in devices],
                 "start": datetime.date(2020, 1, 14),
                 "end": datetime.date(2024, 10, 18),
                 "preferred": False,
             },
             {
                 "software": softwares[0].id,
-                "assigned_to_content_type": "dcim.devicetype",
-                "assigned_to_object_id": devicetypes[0].id,
+                "device_types": [devicetype.pk for devicetype in devicetypes],
                 "start": datetime.date(2021, 6, 4),
                 "end": datetime.date(2025, 1, 8),
                 "preferred": True,
             },
             {
                 "software": softwares[0].id,
-                "assigned_to_content_type": "dcim.inventoryitem",
-                "assigned_to_object_id": inventoryitems[0].id,
+                "device_roles": [devicerole.pk for devicerole in deviceroles],
                 "start": datetime.date(2019, 3, 6),
                 "end": datetime.date(2023, 6, 1),
                 "preferred": False,
             },
+            {
+                "software": softwares[0].id,
+                "inventory_items": [inventoryitem.pk for inventoryitem in inventoryitems],
+                "start": datetime.date(2019, 5, 4),
+                "end": datetime.date(2023, 9, 15),
+                "preferred": False,
+            },
         ]
 
-        ValidatedSoftwareLCM.objects.create(
+        validated_software = ValidatedSoftwareLCM(
             software=softwares[1],
-            assigned_to_content_type=content_type_device,
-            assigned_to_object_id=devices[1].id,
             start=datetime.date(2021, 6, 4),
             end=datetime.date(2025, 1, 8),
             preferred=True,
         )
-        ValidatedSoftwareLCM.objects.create(
+        validated_software.devices.set([device.pk for device in devices])
+        validated_software.save()
+
+        validated_software = ValidatedSoftwareLCM(
             software=softwares[1],
-            assigned_to_content_type=content_type_devicetype,
-            assigned_to_object_id=devicetypes[1].id,
             start=datetime.date(2018, 2, 23),
             end=datetime.date(2019, 6, 12),
             preferred=False,
         )
-        ValidatedSoftwareLCM.objects.create(
+        validated_software.device_types.set([devicetype.pk for devicetype in devicetypes])
+        validated_software.save()
+
+        validated_software = ValidatedSoftwareLCM(
             software=softwares[1],
-            assigned_to_content_type=content_type_inventoryitem,
-            assigned_to_object_id=inventoryitems[1].id,
             start=datetime.date(2019, 11, 19),
             end=datetime.date(2030, 7, 30),
             preferred=False,
+        )
+        validated_software.device_roles.set([devicerole.pk for devicerole in deviceroles])
+        validated_software.save()
+
+        ValidatedSoftwareLCM(
+            software=softwares[1],
+            start=datetime.date(2020, 10, 9),
+            end=datetime.date(2025, 1, 16),
+            preferred=False,
+        )
+        validated_software.inventory_items.set([inventoryitem.pk for inventoryitem in inventoryitems])
+        validated_software.save()
+
+    def test_bulk_create_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_bulk_delete_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_bulk_update_objects(self):
+        """Currently don't support bulk operations."""
+
+
+class CVELCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
+    """Test the CVELCM API."""
+
+    model = CVELCM
+    brief_fields = [
+        "comments",
+        "cvss",
+        "cvss_v2",
+        "cvss_v3",
+        "description",
+        "display",
+        "fix",
+        "id",
+        "link",
+        "name",
+        "published_date",
+        "severity",
+        "status",
+        "url",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+
+        cls.create_data = [
+            {
+                "name": "CVE-2021-40128",
+                "published_date": datetime.date(2021, 11, 4),
+                "link": "https://www.cvedetails.com/cve/CVE-2021-40128/",
+            },
+            {
+                "name": "CVE-2021-40126",
+                "published_date": datetime.date(2021, 11, 4),
+                "link": "https://www.cvedetails.com/cve/CVE-2021-40126/",
+            },
+            {
+                "name": "CVE-2021-40125",
+                "published_date": datetime.date(2021, 10, 27),
+                "link": "https://www.cvedetails.com/cve/CVE-2021-40125/",
+            },
+        ]
+
+        CVELCM.objects.create(
+            name="CVE-2021-1391",
+            published_date="2021-03-24",
+            link="https://www.cvedetails.com/cve/CVE-2021-1391/",
+        )
+        CVELCM.objects.create(
+            name="CVE-2021-44228",
+            published_date="2021-12-10",
+            link="https://www.cvedetails.com/cve/CVE-2021-44228/",
+        )
+        CVELCM.objects.create(
+            name="CVE-2020-27134",
+            published_date="2020-12-11",
+            link="https://www.cvedetails.com/cve/CVE-2020-27134/",
         )
 
     def test_bulk_create_objects(self):
@@ -366,3 +450,54 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: 
 
     def test_bulk_update_objects(self):
         """Currently don't support bulk operations."""
+
+
+class VulnerabilityLCMAPITest(
+    # Not inheriting CreateObjectViewTestCase
+    APIViewTestCases.GetObjectViewTestCase,
+    APIViewTestCases.ListObjectsViewTestCase,
+    APIViewTestCases.UpdateObjectViewTestCase,
+    APIViewTestCases.DeleteObjectViewTestCase,
+):  # pylint: disable=too-many-ancestors
+    """Test the VulnerabilityLCM API."""
+
+    model = VulnerabilityLCM
+    brief_fields = [
+        "custom_fields",
+        "cve",
+        "device",
+        "display",
+        "id",
+        "inventory_item",
+        "software",
+        "status",
+        "tags",
+        "url",
+    ]
+    validation_excluded_fields = ["status"]
+
+    @classmethod
+    def setUpTestData(cls):
+        devices = create_devices()
+        cves = create_cves()
+        softwares = create_softwares()
+
+        for i, cve in enumerate(cves):
+            VulnerabilityLCM.objects.create(cve=cve, device=devices[i], software=softwares[i])
+
+        vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
+        status = Status.objects.create(name="Exempt", slug="exempt", color="4caf50", description="This unit is exempt.")
+        status.content_types.set([vuln_ct])
+        cls.create_data = [{"status": "exempt"}]
+
+    def test_bulk_delete_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_bulk_update_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_options_returns_expected_choices(self):
+        """Disabling inherited test that uses POST."""
+
+    def test_options_objects_returns_display_and_value(self):
+        """Disabling inherited test that uses POST."""

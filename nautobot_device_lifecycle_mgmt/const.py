@@ -1,4 +1,8 @@
 """Device Lifecycle Objects."""
+from django.conf import settings
+
+
+PLUGIN_CFG = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]
 
 
 class URL:  # pylint: disable=too-few-public-methods

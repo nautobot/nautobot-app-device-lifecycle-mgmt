@@ -14,6 +14,7 @@ limitations under the License.
 
 from distutils.util import strtobool
 from invoke import Collection, task as invoke_task
+from dotenv import dotenv_values
 import os
 
 
@@ -32,6 +33,26 @@ def is_truthy(arg):
     return bool(strtobool(arg))
 
 
+def _compose_files():
+    """Helper function to dynamically determine if we need to use mysql or postgres as a DB backend.
+
+    Returns:
+        list: List of docker-compose files.
+    """
+    files = [
+        "docker-compose.redis.yml",
+        "docker-compose.base.yml",
+        "docker-compose.dev.yml",
+    ]
+    env_vars = dotenv_values(os.path.join(os.path.dirname(__file__), "development/dev.env"))
+    if env_vars.get("NAUTOBOT_DB_ENGINE", "") == "django.db.backends.mysql":
+        print("Using MySQL as a database backend!")
+        files.append("docker-compose.mysql.yml")
+    else:
+        files.append("docker-compose.postgres.yml")
+    return files
+
+
 # Use pyinvoke configuration for default values, see http://docs.pyinvoke.org/en/stable/concepts/configuration.html
 # Variables may be overwritten in invoke.yml or by the environment variables
 # INVOKE_nautobot_device_lifecycle_mgmt_xxx
@@ -39,12 +60,12 @@ namespace = Collection("nautobot_device_lifecycle_mgmt")
 namespace.configure(
     {
         "nautobot_device_lifecycle_mgmt": {
-            "nautobot_ver": "1.1.3",
+            "nautobot_ver": "1.1.6",
             "project_name": "nautobot_device_lifecycle_mgmt",
             "python_ver": "3.7",
             "local": False,
             "compose_dir": os.path.join(os.path.dirname(__file__), "development"),
-            "compose_files": ["docker-compose.requirements.yml", "docker-compose.base.yml", "docker-compose.dev.yml"],
+            "compose_files": _compose_files(),
         }
     }
 )
@@ -182,6 +203,26 @@ def vscode(context):
     command = "code nautobot.code-workspace"
 
     context.run(command)
+
+
+@task(
+    help={
+        "service": "Docker-compose service name to view (default: nautobot)",
+        "follow": "Follow logs",
+        "tail": "Tail N number of lines or 'all'",
+    }
+)
+def logs(context, service="nautobot", follow=False, tail=None):
+    """View the logs of a docker-compose service."""
+    command = "logs "
+
+    if follow:
+        command += "--follow "
+    if tail:
+        command += f"--tail={tail} "
+
+    command += service
+    docker_compose(context, command)
 
 
 # ------------------------------------------------------------------------------

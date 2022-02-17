@@ -1,15 +1,32 @@
 """Test filters for lifecycle management."""
-from django.contrib.contenttypes.models import ContentType
+from datetime import date
+
 from django.test import TestCase
+from django.contrib.contenttypes.models import ContentType
+import time_machine
 
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site, Platform
+from nautobot.extras.models import Status
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import (
+    HardwareLCM,
+    SoftwareLCM,
+    ValidatedSoftwareLCM,
+    DeviceSoftwareValidationResult,
+    InventoryItemSoftwareValidationResult,
+    CVELCM,
+    VulnerabilityLCM,
+)
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
     SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
+    DeviceSoftwareValidationResultFilterSet,
+    InventoryItemSoftwareValidationResultFilterSet,
+    CVELCMFilterSet,
+    VulnerabilityLCMFilterSet,
 )
+from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
 
 
 class HardwareLCMTestCase(TestCase):
@@ -244,26 +261,24 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
 
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
         device_type = DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000")
-        content_type_devicetype = ContentType.objects.get(app_label="dcim", model="devicetype")
 
-        self.validated_softwares = (
-            ValidatedSoftwareLCM.objects.create(
-                software=self.softwares[0],
-                start="2019-01-10",
-                end="2023-05-14",
-                preferred=True,
-                assigned_to_content_type=content_type_devicetype,
-                assigned_to_object_id=device_type.id,
-            ),
-            ValidatedSoftwareLCM.objects.create(
-                software=self.softwares[1],
-                start="2020-04-15",
-                end="2022-11-01",
-                preferred=False,
-                assigned_to_content_type=content_type_devicetype,
-                assigned_to_object_id=device_type.id,
-            ),
+        validated_software = ValidatedSoftwareLCM(
+            software=self.softwares[0],
+            start="2019-01-10",
+            end="2023-05-14",
+            preferred=True,
         )
+        validated_software.device_types.set([device_type.pk])
+        validated_software.save()
+
+        validated_software = ValidatedSoftwareLCM(
+            software=self.softwares[1],
+            start="2020-04-15",
+            end="2022-11-01",
+            preferred=False,
+        )
+        validated_software.device_types.set([device_type.pk])
+        validated_software.save()
 
     def test_q_one_start(self):
         """Test q filter to find single record based on start date."""
@@ -283,4 +298,396 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
     def test_preferred(self):
         """Test preferred filter."""
         params = {"preferred": True}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_valid(self):
+        """Test valid filter."""
+        date_valid_and_invalid = date(2019, 6, 11)
+        date_two_valid = date(2021, 1, 4)
+        date_two_invalid = date(2024, 1, 4)
+
+        with time_machine.travel(date_valid_and_invalid):
+            params = {"valid": True}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+            params = {"valid": False}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+        with time_machine.travel(date_two_valid):
+            params = {"valid": True}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+            params = {"valid": False}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+
+        with time_machine.travel(date_two_invalid):
+            params = {"valid": True}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+            params = {"valid": False}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+
+class DeviceSoftwareValidationResultFilterSetTestCase(TestCase):
+    """Tests for the DeviceSoftwareValidationResult model."""
+
+    queryset = DeviceSoftwareValidationResult.objects.all()
+    filterset = DeviceSoftwareValidationResultFilterSet
+
+    def setUp(self):
+        """Set up test objects."""
+        self.device_1, self.device_2, self.device_3 = create_devices()
+        self.platform = Platform.objects.all().first()
+        self.software = SoftwareLCM.objects.create(
+            device_platform=self.platform,
+            version="17.3.3 MD",
+            release_date="2019-01-10",
+        )
+
+        DeviceSoftwareValidationResult.objects.create(
+            device=self.device_1,
+            software=self.software,
+            is_validated=True,
+        )
+        DeviceSoftwareValidationResult.objects.create(
+            device=self.device_2,
+            software=self.software,
+            is_validated=False,
+        )
+        DeviceSoftwareValidationResult.objects.create(
+            device=self.device_3,
+            software=None,
+            is_validated=False,
+        )
+
+    def test_devices_name_one(self):
+        """Test devices filter."""
+        params = {"device": ["sw1"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_devices_name_all(self):
+        """Test devices filter."""
+        params = {"device": ["sw1", "sw2", "sw3"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_device_type_slug(self):
+        """Test device_type filter."""
+        params = {"device_type": ["6509-E"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_device_roles_slug(self):
+        """Test device_roles filter."""
+        params = {"device_role": ["core-switch"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_device_type_id(self):
+        """Test device_type_id filter."""
+        device_type = DeviceType.objects.get(model="6509-E")
+        params = {"device_type_id": [device_type.id]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_device_role_id(self):
+        """Test device_role_id filter."""
+        device_role = DeviceRole.objects.get(slug="core-switch")
+        params = {"device_role_id": [device_role.id]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_device_id_all(self):
+        """Test device_id filter."""
+        params = {"device_id": [self.device_1.id, self.device_2.id, self.device_3.id]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_software(self):
+        """Test software version filter."""
+        params = {"software": ["17.3.3 MD"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_sw_missing(self):
+        """Test sw_missing filter."""
+        params = {"exclude_sw_missing": True}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+
+class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
+    """Tests for the DeviceSoftwareValidationResult model."""
+
+    queryset = InventoryItemSoftwareValidationResult.objects.all()
+    filterset = InventoryItemSoftwareValidationResultFilterSet
+
+    def setUp(self):
+        """Set up test objects."""
+        self.inventory_items = create_inventory_items()
+        self.platform = Platform.objects.all().first()
+        self.software = SoftwareLCM.objects.create(
+            device_platform=self.platform,
+            version="17.3.3 MD",
+            release_date="2019-01-10",
+        )
+
+        InventoryItemSoftwareValidationResult.objects.create(
+            inventory_item=self.inventory_items[0],
+            software=self.software,
+            is_validated=True,
+        )
+        InventoryItemSoftwareValidationResult.objects.create(
+            inventory_item=self.inventory_items[1],
+            software=self.software,
+            is_validated=False,
+        )
+        InventoryItemSoftwareValidationResult.objects.create(
+            inventory_item=self.inventory_items[2],
+            software=None,
+            is_validated=False,
+        )
+
+    def test_inventory_item_name_one(self):
+        """Test inventory items filter."""
+        params = {"inventory_item": ["SUP2T Card"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_inventory_items_name_all(self):
+        """Test devices filter."""
+        params = {"inventory_item": ["SUP2T Card", "100GBASE-SR4 QSFP Transceiver", "48x RJ-45 Line Card"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_inventory_items_device_type_slug(self):
+        """Test device_type filter."""
+        params = {"device_type": ["6509-E"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_inventory_items_device_roles_slug(self):
+        """Test device_roles filter."""
+        params = {"device_role": ["core-switch"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_inventory_items_device_type_id(self):
+        """Test device_type_id filter."""
+        device_type = DeviceType.objects.get(model="6509-E")
+        params = {"device_type_id": [device_type.id]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_inventory_items_device_role_id(self):
+        """Test device_role_id filter."""
+        device_role = DeviceRole.objects.get(slug="core-switch")
+        params = {"device_role_id": [device_role.id]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_inventory_items_part_id(self):
+        """Test device_type filter."""
+        params = {"part_id": "WS-X6548-GE-TX"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_software(self):
+        """Test software version filter."""
+        params = {"software": ["17.3.3 MD"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_sw_missing(self):
+        """Test sw_missing filter."""
+        params = {"exclude_sw_missing": True}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+
+class CVELCMTestCase(TestCase):
+    """Tests for CVELCMFilter."""
+
+    queryset = CVELCM.objects.all()
+    filterset = CVELCMFilterSet
+
+    def setUp(self):
+        cve_ct = ContentType.objects.get_for_model(CVELCM)
+        fixed = Status.objects.create(name="Fixed", slug="fixed", color="4caf50", description="Unit has been fixed")
+        fixed.content_types.set([cve_ct])
+        not_fixed = Status.objects.create(
+            name="Not Fixed", slug="not-fixed", color="f44336", description="Unit is not fixed"
+        )
+        not_fixed.content_types.set([cve_ct])
+
+        CVELCM.objects.create(
+            name="CVE-2021-1391",
+            published_date="2021-03-24",
+            link="https://www.cvedetails.com/cve/CVE-2021-1391/",
+            cvss=3,
+            cvss_v2=3,
+            cvss_v3=3,
+        )
+        CVELCM.objects.create(
+            name="CVE-2021-44228",
+            published_date="2021-12-10",
+            link="https://www.cvedetails.com/cve/CVE-2021-44228/",
+            status=not_fixed,
+            cvss=5,
+            cvss_v2=5,
+            cvss_v3=5,
+        )
+        CVELCM.objects.create(
+            name="CVE-2020-27134",
+            published_date="2020-12-11",
+            link="https://www.cvedetails.com/cve/CVE-2020-27134/",
+            severity="Critical",
+            status=fixed,
+            cvss=7,
+            cvss_v2=7,
+            cvss_v3=7,
+        )
+
+    def test_q_one_year(self):
+        """Test q filter to find single record based on year."""
+        params = {"q": "2020"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_two_year(self):
+        """Test q filter to find two records based on year."""
+        params = {"q": "2021"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_q_link(self):
+        """Test q filter to all records from link."""
+        params = {"q": "cvedetails"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_status(self):
+        """Test status filter."""
+        params = {"status": ["fixed"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_exclude_status(self):
+        """Test exclude_status filter."""
+        params = {"exclude_status": ["fixed"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_severity(self):
+        """Test severity filter."""
+        params = {"severity": "Critical"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_published_date_before(self):
+        """Test published_date_before filter."""
+        params = {"published_date_before": "2021-01-01"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_published_date_after(self):
+        """Test published_date_after filter."""
+        params = {"published_date_after": "2021-01-01"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_cvss_gte(self):
+        """Test cvss__gte filter."""
+        params = {"cvss__gte": 1}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+        params = {"cvss__gte": 4}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"cvss__gte": 6}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+        params = {"cvss__gte": 9}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+
+    def test_cvss_lte(self):
+        """Test cvss__lte filter."""
+        params = {"cvss__lte": 1}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+        params = {"cvss__lte": 4}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+        params = {"cvss__lte": 6}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"cvss__lte": 9}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_cvss_v2_gte(self):
+        """Test cvss_v2__gte filter."""
+        params = {"cvss_v2__gte": 1}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+        params = {"cvss_v2__gte": 4}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"cvss_v2__gte": 6}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+        params = {"cvss_v2__gte": 9}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+
+    def test_cvss_v2_lte(self):
+        """Test cvss_v2__lte filter."""
+        params = {"cvss_v2__lte": 1}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+        params = {"cvss_v2__lte": 4}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+        params = {"cvss_v2__lte": 6}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"cvss_v2__lte": 9}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_cvss_v3_gte(self):
+        """Test cvss_v3__gte filter."""
+        params = {"cvss_v3__gte": 1}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+        params = {"cvss_v3__gte": 4}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"cvss_v3__gte": 6}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+        params = {"cvss_v3__gte": 9}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+
+    def test_cvss_v3_lte(self):
+        """Test cvss_v3__lte filter."""
+        params = {"cvss_v3__lte": 1}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+        params = {"cvss_v3__lte": 4}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+        params = {"cvss_v3__lte": 6}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"cvss_v3__lte": 9}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+
+class VulnerabilityLCMTestCase(TestCase):
+    """Tests for VulnerabilityLCMFilter."""
+
+    queryset = VulnerabilityLCM.objects.all()
+    filterset = VulnerabilityLCMFilterSet
+
+    def setUp(self):
+        inventory_items = create_inventory_items()
+        cves = create_cves()
+        softwares = create_softwares()
+        vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
+        fix_me = Status.objects.create(name="Fix Me", slug="fix_me", color="4caf50", description="Please fix me.")
+        fix_me.content_types.set([vuln_ct])
+
+        VulnerabilityLCM.objects.create(
+            cve=cves[0],
+            device=inventory_items[0].device,
+            software=softwares[0],
+        )
+        VulnerabilityLCM.objects.create(
+            cve=cves[1],
+            device=inventory_items[1].device,
+            software=softwares[1],
+            status=fix_me,
+        )
+        VulnerabilityLCM.objects.create(
+            cve=cves[2],
+            inventory_item=inventory_items[2],
+            software=softwares[2],
+            status=fix_me,
+        )
+
+    def test_q_cve(self):
+        """Test q filter to find single record based on CVE name."""
+        params = {"q": "2020"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_device(self):
+        """Test q filter to find single record based on Device name."""
+        params = {"q": "sw1"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_inventory_item(self):
+        """Test q filter to find single record based on Inventory Item name."""
+        params = {"q": "48x RJ-45"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_software_device_platform(self):
+        """Test q filter to find single record based on Software Device Platform name."""
+        params = {"q": "Cisco IOS"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_q_software_version(self):
+        """Test q filter to find single record based on Software version."""
+        params = {"q": "4.22.9M"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)

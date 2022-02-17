@@ -8,11 +8,22 @@ from django.contrib.contenttypes.models import ContentType
 import time_machine
 
 from nautobot.dcim.models import DeviceType, Manufacturer, Platform
+from nautobot.extras.choices import RelationshipTypeChoices
+from nautobot.extras.models import Relationship, RelationshipAssociation, Status
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import (
+    HardwareLCM,
+    InventoryItemSoftwareValidationResult,
+    SoftwareLCM,
+    ValidatedSoftwareLCM,
+    DeviceSoftwareValidationResult,
+    CVELCM,
+    VulnerabilityLCM,
+)
+from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
 
 
-class TestModelBasic(TestCase):
+class HardwareLCMTestCase(TestCase):
     """Tests for the HardwareLCM models."""
 
     def setUp(self):
@@ -190,52 +201,53 @@ class ValidatedSoftwareLCMTestCase(TestCase):
     def test_create_validatedsoftwarelcm_required_only(self):
         """Successfully create ValidatedSoftwareLCM with required fields only."""
 
-        validatedsoftwarelcm = ValidatedSoftwareLCM.objects.create(
+        validatedsoftwarelcm = ValidatedSoftwareLCM(
             software=self.software,
             start=date(2019, 1, 10),
-            assigned_to_content_type=self.content_type_devicetype,
-            assigned_to_object_id=self.device_type_1.id,
         )
+        validatedsoftwarelcm.device_types.set([self.device_type_1])
+        validatedsoftwarelcm.save()
 
         self.assertEqual(validatedsoftwarelcm.software, self.software)
         self.assertEqual(str(validatedsoftwarelcm.start), "2019-01-10")
-        self.assertEqual(validatedsoftwarelcm.assigned_to, self.device_type_1)
+        self.assertEqual(list(validatedsoftwarelcm.device_types.all()), [self.device_type_1])
 
     def test_create_validatedsoftwarelcm_all(self):
         """Successfully create ValidatedSoftwareLCM with all fields."""
-        validatedsoftwarelcm = ValidatedSoftwareLCM.objects.create(
+        validatedsoftwarelcm = ValidatedSoftwareLCM(
             software=self.software,
             start=date(2020, 4, 15),
             end=date(2022, 11, 1),
             preferred=False,
-            assigned_to_content_type=self.content_type_devicetype,
-            assigned_to_object_id=self.device_type_1.id,
         )
+        validatedsoftwarelcm.device_types.set([self.device_type_1])
+        validatedsoftwarelcm.save()
 
         self.assertEqual(validatedsoftwarelcm.software, self.software)
         self.assertEqual(str(validatedsoftwarelcm.start), "2020-04-15")
         self.assertEqual(str(validatedsoftwarelcm.end), "2022-11-01")
-        self.assertEqual(validatedsoftwarelcm.assigned_to, self.device_type_1)
+        self.assertEqual(list(validatedsoftwarelcm.device_types.all()), [self.device_type_1])
         self.assertEqual(validatedsoftwarelcm.preferred, False)
         self.assertEqual(str(validatedsoftwarelcm), f"{self.software} - Valid since: {validatedsoftwarelcm.start}")
 
     def test_validatedsoftwarelcm_valid_property(self):
         """Test behavior of the 'valid' property."""
-        validatedsoftwarelcm_start_only = ValidatedSoftwareLCM.objects.create(
+        validatedsoftwarelcm_start_only = ValidatedSoftwareLCM(
             software=self.software,
             start=date(2020, 4, 15),
             preferred=False,
-            assigned_to_content_type=self.content_type_devicetype,
-            assigned_to_object_id=self.device_type_1.id,
         )
-        validatedsoftwarelcm_start_end = ValidatedSoftwareLCM.objects.create(
+        validatedsoftwarelcm_start_only.device_types.set([self.device_type_1])
+        validatedsoftwarelcm_start_only.save()
+
+        validatedsoftwarelcm_start_end = ValidatedSoftwareLCM(
             software=self.software,
             start=date(2020, 4, 15),
             end=date(2022, 11, 1),
             preferred=False,
-            assigned_to_content_type=self.content_type_devicetype,
-            assigned_to_object_id=self.device_type_2.id,
         )
+        validatedsoftwarelcm_start_end.device_types.set([self.device_type_2])
+        validatedsoftwarelcm_start_end.save()
 
         date_valid = date(2021, 6, 11)
         date_before_valid_start = date(2018, 9, 26)
@@ -252,3 +264,191 @@ class ValidatedSoftwareLCMTestCase(TestCase):
         with time_machine.travel(date_after_valid_end):
             self.assertEqual(validatedsoftwarelcm_start_only.valid, True)
             self.assertEqual(validatedsoftwarelcm_start_end.valid, False)
+
+
+class DeviceSoftwareValidationResultTestCase(TestCase):
+    """Tests for the DeviceSoftwareValidationResult model."""
+
+    def setUp(self):
+        """Set up test objects."""
+        self.device = create_devices()[0]
+        self.platform = Platform.objects.all().first()
+        self.software = SoftwareLCM.objects.create(
+            device_platform=self.platform,
+            version="17.3.3 MD",
+            release_date="2019-01-10",
+        )
+
+    def test_create_devicesoftwarevalidationresult(self):
+        """Successfully create SoftwareLCM with required fields only."""
+        validation_result = DeviceSoftwareValidationResult.objects.create(
+            device=self.device,
+            software=self.software,
+            is_validated=True,
+        )
+
+        self.assertEqual(validation_result.device, self.device)
+        self.assertEqual(validation_result.software, self.software)
+        self.assertEqual(validation_result.is_validated, True)
+
+
+class InventoryItemSoftwareValidationResultTestCase(TestCase):
+    """Tests for the DeviceSoftwareValidationResult model."""
+
+    def setUp(self):
+        """Set up test objects."""
+        self.inventory_item = create_inventory_items()[0]
+        self.platform = Platform.objects.all().first()
+        self.software = SoftwareLCM.objects.create(
+            device_platform=self.platform,
+            version="17.3.3 MD",
+            release_date="2019-01-10",
+        )
+
+    def test_create_devicesoftwarevalidationresult(self):
+        """Successfully create SoftwareLCM with required fields only."""
+        validation_result = InventoryItemSoftwareValidationResult.objects.create(
+            inventory_item=self.inventory_item,
+            software=self.software,
+            is_validated=True,
+        )
+
+        self.assertEqual(validation_result.inventory_item, self.inventory_item)
+        self.assertEqual(validation_result.software, self.software)
+        self.assertEqual(validation_result.is_validated, True)
+
+
+class CVELCMTestCase(TestCase):
+    """Tests for the CVELCM model."""
+
+    def setUp(self):
+        """Set up the test objects."""
+        self.device_platform = Platform.objects.create(name="Cisco IOS", slug="cisco_ios")
+        self.softwarelcm = SoftwareLCM.objects.create(device_platform=self.device_platform, version="15.2(5)e")
+        self.cve_ct = ContentType.objects.get_for_model(CVELCM)
+        self.software_ct = ContentType.objects.get_for_model(SoftwareLCM)
+        self.relationship = Relationship.objects.get_or_create(
+            name="CVE to Software",
+            defaults={
+                "name": "CVE to Software",
+                "slug": "cve_soft",
+                "type": RelationshipTypeChoices.TYPE_MANY_TO_MANY,
+                "source_type": ContentType.objects.get_for_model(CVELCM),
+                "source_label": "Affected Softwares",
+                "destination_type": ContentType.objects.get_for_model(SoftwareLCM),
+                "destination_label": "Corresponding CVEs",
+            },
+        )[0]
+        self.status = Status.objects.create(
+            name="Fixed", slug="fixed", color="4caf50", description="Unit has been fixed"
+        )
+        self.status.content_types.set([self.cve_ct])
+
+    def test_create_cvelcm_required_only(self):
+        """Successfully create CVELCM with required fields only."""
+        cvelcm = CVELCM.objects.create(
+            name="CVE-2021-1391", published_date="2021-03-24", link="https://www.cvedetails.com/cve/CVE-2021-1391/"
+        )
+
+        self.assertEqual(cvelcm.name, "CVE-2021-1391")
+        self.assertEqual(cvelcm.published_date, "2021-03-24")
+        self.assertEqual(cvelcm.link, "https://www.cvedetails.com/cve/CVE-2021-1391/")
+
+    def test_create_cvelcm_all(self):
+        """Successfully create CVELCM with all fields."""
+        cvelcm = CVELCM.objects.create(
+            name="CVE-2021-34699",
+            published_date="2021-09-23",
+            link="https://www.cvedetails.com/cve/CVE-2021-34699/",
+            status=self.status,
+            description="Thanos",
+            severity="High",
+            cvss=6.8,
+            cvss_v2=6.9,
+            cvss_v3=6.7,
+            fix="Avengers",
+            comments="This is very bad juju.",
+        )
+
+        self.assertEqual(cvelcm.name, "CVE-2021-34699")
+        self.assertEqual(cvelcm.published_date, "2021-09-23")
+        self.assertEqual(cvelcm.link, "https://www.cvedetails.com/cve/CVE-2021-34699/")
+        self.assertEqual(cvelcm.status, self.status)
+        self.assertEqual(cvelcm.description, "Thanos")
+        self.assertEqual(cvelcm.severity, "High")
+        self.assertEqual(cvelcm.cvss, 6.8)
+        self.assertEqual(cvelcm.cvss_v2, 6.9)
+        self.assertEqual(cvelcm.cvss_v3, 6.7)
+        self.assertEqual(cvelcm.fix, "Avengers")
+        self.assertEqual(cvelcm.comments, "This is very bad juju.")
+
+    def test_create_cve_soft_relationship_association(self):
+        """Successfully create a relationship between CVE and Software."""
+        cvelcm = CVELCM.objects.create(
+            name="CVE-2021-1391", published_date="2021-03-24", link="https://www.cvedetails.com/cve/CVE-2021-1391/"
+        )
+
+        association = RelationshipAssociation.objects.create(
+            relationship_id=self.relationship.id,
+            source_id=cvelcm.id,
+            source_type_id=self.cve_ct.id,
+            destination_id=self.softwarelcm.id,
+            destination_type_id=self.software_ct.id,
+        )
+
+        cve_rels = cvelcm.get_relationships()
+
+        self.assertEqual(cve_rels["source"][self.relationship].first(), association)
+
+
+class VulnerabilityLCMTestCase(TestCase):
+    """Tests for the VulnerabilityLCM model."""
+
+    def setUp(self):
+        """Set up the test objects."""
+        self.inv_items = create_inventory_items()
+        self.devices = [inv_item.device for inv_item in self.inv_items]
+        self.cves = create_cves()
+        self.softwares = create_softwares()
+        vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
+        self.status = Status.objects.create(
+            name="Exempt", slug="exempt", color="4caf50", description="This unit is exempt."
+        )
+        self.status.content_types.set([vuln_ct])
+
+    def test_create_vulnerabilitylcm_device_required_only(self):
+        """Successfully create VulnerabilityLCM with required fields only."""
+        vulnerability = VulnerabilityLCM.objects.create(
+            cve=self.cves[0], software=self.softwares[0], device=self.devices[0]
+        )
+
+        self.assertEqual(str(vulnerability), "Device: sw1 - Software: Cisco IOS - 15.1(2)M - CVE: CVE-2021-1391")
+        self.assertEqual(vulnerability.cve, self.cves[0])
+        self.assertEqual(vulnerability.software, self.softwares[0])
+        self.assertEqual(vulnerability.device, self.devices[0])
+
+    def test_create_vulnerabilitylcm_inventory_item_required_only(self):
+        """Successfully create VulnerabilityLCM with required fields only."""
+        vulnerability = VulnerabilityLCM.objects.create(
+            cve=self.cves[1], software=self.softwares[1], inventory_item=self.inv_items[1]
+        )
+
+        self.assertEqual(
+            str(vulnerability),
+            "Inventory Part: 100GBASE-SR4 QSFP Transceiver - Software: Cisco IOS - 4.22.9M - CVE: CVE-2021-44228",
+        )
+        self.assertEqual(vulnerability.cve, self.cves[1])
+        self.assertEqual(vulnerability.software, self.softwares[1])
+        self.assertEqual(vulnerability.inventory_item, self.inv_items[1])
+
+    def test_create_vulnerabilitylcm_all(self):
+        """Successfully create VulnerabilityLCM with all fields."""
+        vulnerability = VulnerabilityLCM.objects.create(
+            cve=self.cves[2], software=self.softwares[2], device=self.devices[2], status=self.status
+        )
+
+        self.assertEqual(str(vulnerability), "Device: sw3 - Software: Cisco IOS - 21.4R3 - CVE: CVE-2020-27134")
+        self.assertEqual(vulnerability.cve, self.cves[2])
+        self.assertEqual(vulnerability.software, self.softwares[2])
+        self.assertEqual(vulnerability.device, self.devices[2])
+        self.assertEqual(vulnerability.status, self.status)

@@ -10,6 +10,7 @@ import sys
 from distutils.util import strtobool
 from django.core.exceptions import ImproperlyConfigured
 from nautobot.core import settings
+from nautobot.core.settings_funcs import parse_redis_connection
 
 # Enforce required configuration parameters
 for key in [
@@ -53,26 +54,19 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(" ")
 #   https://docs.djangoproject.com/en/stable/ref/settings/#databases
 DATABASES = {
     "default": {
-        "NAME": os.getenv("POSTGRES_DB", "nautobot"),  # Database name
-        "USER": os.getenv("POSTGRES_USER", ""),  # Database username
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),  # Datbase password
-        "HOST": os.getenv("POSTGRES_HOST", "localhost"),  # Database server
-        "PORT": os.getenv("POSTGRES_PORT", ""),  # Database port (leave blank for default)
-        "CONN_MAX_AGE": os.getenv("POSTGRES_TIMEOUT", 300),  # Database timeout
-        "ENGINE": "django.db.backends.postgresql",  # Database driver (Postgres only supported!)
+        "NAME": os.getenv("NAUTOBOT_DB_NAME", "nautobot"),
+        "USER": os.getenv("NAUTOBOT_DB_USER", ""),
+        "PASSWORD": os.getenv("NAUTOBOT_DB_PASSWORD", ""),
+        "HOST": os.getenv("NAUTOBOT_DB_HOST", "localhost"),
+        "PORT": os.getenv("NAUTOBOT_DB_PORT", ""),
+        "CONN_MAX_AGE": int(os.getenv("NAUTOBOT_DB_TIMEOUT", 300)),
+        "ENGINE": os.getenv("NAUTOBOT_DB_ENGINE", "django.db.backends.postgresql"),
     }
 }
 
-# Redis variables
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT = os.getenv("REDIS_PORT", 6379)
-REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
-
-# Check for Redis SSL
-REDIS_SCHEME = "redis"
-REDIS_SSL = is_truthy(os.environ.get("REDIS_SSL", False))
-if REDIS_SSL:
-    REDIS_SCHEME = "rediss"
+# Ensure proper Unicode handling for MySQL
+if DATABASES["default"]["ENGINE"] == "django.db.backends.mysql":
+    DATABASES["default"]["OPTIONS"] = {"charset": "utf8mb4"}
 
 # The django-redis cache is used to establish concurrent locks using Redis. The
 # django-rq settings will use the same instance/database by default.
@@ -82,11 +76,10 @@ if REDIS_SSL:
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"{REDIS_SCHEME}://{REDIS_HOST}:{REDIS_PORT}/0",
+        "LOCATION": parse_redis_connection(redis_database=0),
         "TIMEOUT": 300,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PASSWORD": REDIS_PASSWORD,
         },
     }
 }
@@ -95,7 +88,7 @@ CACHES = {
 # up top via `from nautobot.core.settings import *`.
 
 # REDIS CACHEOPS
-CACHEOPS_REDIS = f"{REDIS_SCHEME}://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/1"
+CACHEOPS_REDIS = parse_redis_connection(redis_database=1)
 
 # This key is used for secure generation of random numbers and strings. It must never be exposed outside of this file.
 # For optimal security, SECRET_KEY should be at least 50 characters in length and contain a mix of letters, numbers, and
@@ -202,6 +195,7 @@ INTERNAL_IPS = ("127.0.0.1", "::1")
 
 # Enable custom logging. Please see the Django documentation for detailed guidance on configuring custom logs:
 #   https://docs.djangoproject.com/en/stable/topics/logging/
+LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
 LOGGING = {}
 
 # Setting this to True will display a "maintenance mode" banner at the top of every page.
@@ -251,7 +245,11 @@ PLUGINS = [
 # Plugins configuration settings. These settings are used by various plugins that the user may have installed.
 # Each key in the dictionary is the name of an installed plugin and its value is a dictionary of settings.
 PLUGINS_CONFIG = {
-    "nautobot_device_lifecycle_mgmt": {},
+    "nautobot_device_lifecycle_mgmt": {
+        "barchart_bar_width": float(os.environ.get("BARCHART_BAR_WIDTH", 0.1)),
+        "barchart_width": int(os.environ.get("BARCHART_WIDTH", 12)),
+        "barchart_height": int(os.environ.get("BARCHART_HEIGHT", 5)),
+    },
 }
 
 # When determining the primary IP address for a device, IPv6 is preferred over IPv4 by default. Set this to True to
@@ -319,7 +317,5 @@ DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda _request: DEBUG and not 
 
 if "debug_toolbar" not in EXTRA_INSTALLED_APPS:
     EXTRA_INSTALLED_APPS.append("debug_toolbar")
-if "django_extensions" not in EXTRA_INSTALLED_APPS:
-    EXTRA_INSTALLED_APPS.append("django_extensions")
 if "debug_toolbar.middleware.DebugToolbarMiddleware" not in settings.MIDDLEWARE:
     settings.MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")

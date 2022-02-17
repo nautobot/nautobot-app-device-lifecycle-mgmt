@@ -1,4 +1,4 @@
-ARG NAUTOBOT_VER="1.1.0-beta.2"
+ARG NAUTOBOT_VER="1.1.6"
 ARG PYTHON_VER=3.8
 FROM ghcr.io/nautobot/nautobot-dev:${NAUTOBOT_VER}-py${PYTHON_VER}
 
@@ -7,6 +7,8 @@ ENV prometheus_multiproc_dir=/prom_cache
 ARG NAUTOBOT_ROOT=/opt/nautobot
 
 ENV NAUTOBOT_ROOT ${NAUTOBOT_ROOT}
+
+RUN apt-get update && apt-get install -y gcc libmariadb-dev-compat libmariadb-dev
 
 WORKDIR $NAUTOBOT_ROOT
 

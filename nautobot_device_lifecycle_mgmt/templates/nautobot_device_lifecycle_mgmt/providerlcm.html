@@ -9,7 +9,7 @@
     <div class="row noprint">
         <div class="col-sm-12 col-md-12">
             <ol class="breadcrumb">
-                <li><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:providerlcm_list' %}">Contract Providers</a></li>
+                <li><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:providerlcm_list' %}">Vendors</a></li>
                 <li><a>{{ object }}</a></li>
             </ol>
         </div>
@@ -33,7 +33,7 @@
     </div>
     <ul class="nav nav-tabs">
         <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
-            <a href="{{ object.get_absolute_url }}">Provider</a>
+            <a href="{{ object.get_absolute_url }}">Vendor</a>
         </li>
         <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
             <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:providerlcm_changelog' pk=object.id %}">Change Log</a>
@@ -46,7 +46,7 @@
     <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <strong>Provider</strong>
+                <strong>Vendor</strong>
             </div>
             <table class="table table-hover panel-body attr-table">
                 <tr>

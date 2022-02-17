@@ -1,17 +1,26 @@
-"""Filtering implementation for the LifeCycle Management plugin."""
+"""Filtering implementation for the Lifecycle Management plugin."""
 import datetime
 import django_filters
 from django.db.models import Q
-from django.contrib.contenttypes.models import ContentType
 
-from nautobot.dcim.models import DeviceType, Platform, Device
+from nautobot.dcim.models import DeviceType, Platform, Device, DeviceRole, InventoryItem, Region, Site
+from nautobot.extras.models import Tag
+from nautobot.extras.filters import (
+    StatusModelFilterSetMixin,
+    CustomFieldModelFilterSet,
+    TagFilter,
+    StatusFilter,
+)
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
     ValidatedSoftwareLCM,
+    DeviceSoftwareValidationResult,
     ContractLCM,
     ProviderLCM,
     ContactLCM,
+    CVELCM,
+    VulnerabilityLCM,
 )
 
 
@@ -141,9 +150,67 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
         queryset=SoftwareLCM.objects.all(),
         label="Software",
     )
+    devices_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="devices",
+        queryset=Device.objects.all(),
+        label="Devices",
+    )
+    devices = django_filters.ModelMultipleChoiceFilter(
+        field_name="devices__name",
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        label="Devices (name)",
+    )
+    device_types_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_types",
+        queryset=DeviceType.objects.all(),
+        label="Device Types",
+    )
+    device_types = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_types__model",
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        label="Device Types (model)",
+    )
+    device_roles_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_roles",
+        queryset=DeviceRole.objects.all(),
+        label="Device Roles",
+    )
+    device_roles = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_roles__slug",
+        queryset=DeviceRole.objects.all(),
+        to_field_name="slug",
+        label="Device Roles (slug)",
+    )
+    inventory_items_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_items",
+        queryset=InventoryItem.objects.all(),
+        label="Inventory Items",
+    )
+    inventory_items = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_items__name",
+        queryset=InventoryItem.objects.all(),
+        to_field_name="name",
+        label="Inventory Items (name)",
+    )
+    object_tags_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="object_tags",
+        queryset=Tag.objects.all(),
+        label="Object Tags",
+    )
+    object_tags = django_filters.ModelMultipleChoiceFilter(
+        field_name="object_tags__slug",
+        queryset=Tag.objects.all(),
+        to_field_name="slug",
+        label="Object Tags (slug)",
+    )
     device_name = django_filters.CharFilter(method="device", label="Device Name")
     device_id = django_filters.CharFilter(method="device", label="Device ID")
-    # expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
+    inventory_item_id = django_filters.CharFilter(method="inventory_item", label="InventoryItem ID")
+    start = django_filters.DateTimeFromToRangeFilter()
+    end = django_filters.DateTimeFromToRangeFilter()
+    valid = django_filters.BooleanFilter(method="valid_search", label="Currently valid")
 
     class Meta:
         """Meta attributes for filter."""
@@ -152,11 +219,18 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
 
         fields = [
             "software",
+            "devices",
+            "device_types",
+            "device_roles",
+            "inventory_items",
+            "object_tags",
             "device_name",
             "device_id",
+            "inventory_item_id",
             "start",
             "end",
             "preferred",
+            "valid",
         ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
@@ -167,8 +241,17 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
         qs_filter = Q(start__icontains=value) | Q(end__icontains=value)
         return queryset.filter(qs_filter)
 
+    def valid_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the valid_search search."""
+        today = datetime.date.today()
+        if value is True:
+            qs_filter = Q(start__lte=today, end=None) | Q(start__lte=today, end__gte=today)
+        else:
+            qs_filter = Q(start__gt=today) | Q(end__lt=today)
+        return queryset.filter(qs_filter)
+
     def device(self, queryset, name, value):  # pylint: disable=no-self-use
-        """Search validated software list for a given device."""
+        """Search for validated software for a given device."""
         value = value.strip()
         if not value:
             return queryset
@@ -184,14 +267,263 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
             return queryset.none()
 
         device = devices.first()
-        valid_soft_filter = Q(
-            assigned_to_content_type=ContentType.objects.get(app_label="dcim", model="device"),
-            assigned_to_object_id=device.pk,
-        ) | Q(
-            assigned_to_content_type=ContentType.objects.get(app_label="dcim", model="devicetype"),
-            assigned_to_object_id=device.device_type.pk,
+
+        return ValidatedSoftwareLCM.objects.get_for_object(device)
+
+    def inventory_item(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Search for validated software for a given inventory item."""
+        value = value.strip()
+        if not value:
+            return queryset
+
+        print(value)
+        inventory_items = InventoryItem.objects.filter(id=value)
+
+        if inventory_items.count() != 1:
+            return queryset.none()
+
+        inventory_item = inventory_items.first()
+
+        return ValidatedSoftwareLCM.objects.get_for_object(inventory_item)
+
+
+class DeviceSoftwareValidationResultFilterSet(django_filters.FilterSet):
+    """Filter for DeviceSoftwareValidationResult."""
+
+    q = django_filters.CharFilter(method="search", label="Search")
+
+    software = django_filters.ModelMultipleChoiceFilter(
+        field_name="software__version",
+        to_field_name="version",
+        queryset=SoftwareLCM.objects.all(),
+        label="Software",
+    )
+    site_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__site",
+        queryset=Site.objects.all(),
+        label="Site",
+    )
+    site = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__site__slug",
+        queryset=Site.objects.all(),
+        to_field_name="slug",
+        label="Site (slug)",
+    )
+    region_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__site__region",
+        queryset=Region.objects.all(),
+        label="Region",
+    )
+    region = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__site__region__slug",
+        queryset=Region.objects.all(),
+        to_field_name="slug",
+        label="Region (slug)",
+    )
+    device_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device",
+        queryset=Device.objects.all(),
+        label="Device",
+    )
+    device = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__name",
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        label="Device (name)",
+    )
+    device_type_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__device_type",
+        queryset=DeviceType.objects.all(),
+        label="Device Type",
+    )
+    device_type = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__device_type__model",
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        label="Device Type (model)",
+    )
+    device_role_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__device_role_id",
+        queryset=DeviceRole.objects.all(),
+        label="Device Role",
+    )
+    device_role = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__device_role__slug",
+        queryset=DeviceRole.objects.all(),
+        to_field_name="slug",
+        label="Device Role (slug)",
+    )
+    exclude_sw_missing = django_filters.BooleanFilter(
+        method="_exclude_sw_missing",
+        label="Exclude missing software",
+    )
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = DeviceSoftwareValidationResult
+
+        fields = [
+            "software",
+            "site",
+            "region",
+            "device",
+            "device_type",
+            "device_role",
+            "exclude_sw_missing",
+        ]
+
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+        qs_filter = Q(device__name__icontains=value) | Q(software__version__icontains=value)
+        return queryset.filter(qs_filter)
+
+    def _exclude_sw_missing(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Exclude devices with missing software."""
+        if value:
+            return queryset.filter(~Q(software=None))
+
+        return queryset
+
+
+class InventoryItemSoftwareValidationResultFilterSet(django_filters.FilterSet):
+    """Filter for InventoryItemSoftwareValidationResult."""
+
+    q = django_filters.CharFilter(method="search", label="Search")
+
+    software = django_filters.ModelMultipleChoiceFilter(
+        field_name="software__version",
+        to_field_name="version",
+        queryset=SoftwareLCM.objects.all(),
+        label="Software",
+    )
+    site_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item__device__site",
+        queryset=Site.objects.all(),
+        label="Site",
+    )
+    site = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item__device__site__slug",
+        queryset=Site.objects.all(),
+        to_field_name="slug",
+        label="Site (slug)",
+    )
+    region_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item__device__site__region",
+        queryset=Region.objects.all(),
+        label="Region",
+    )
+    region = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item__device__site__region__slug",
+        queryset=Region.objects.all(),
+        to_field_name="slug",
+        label="Region (slug)",
+    )
+    inventory_item_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item",
+        queryset=InventoryItem.objects.all(),
+        label="Inventory Item",
+    )
+    inventory_item = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item__name",
+        queryset=InventoryItem.objects.all(),
+        to_field_name="name",
+        label="Inventory Item (name)",
+    )
+    part_id = django_filters.CharFilter(method="search_part_id", label="Part ID")
+    device_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item__device",
+        queryset=Device.objects.all(),
+        label="Device",
+    )
+    device = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item__device__name",
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        label="Device (name)",
+    )
+    device_type_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item__device__device_type",
+        queryset=DeviceType.objects.all(),
+        label="Device Type",
+    )
+    device_type = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item__device__device_type__model",
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        label="Device Type (model)",
+    )
+    device_role_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item__device__device_role_id",
+        queryset=DeviceRole.objects.all(),
+        label="Device Role",
+    )
+    device_role = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item__device__device_role__slug",
+        queryset=DeviceRole.objects.all(),
+        to_field_name="slug",
+        label="Device Role (slug)",
+    )
+    object_tag_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="object_tags",
+        queryset=Tag.objects.all(),
+        label="Object Tag",
+    )
+    object_tag = django_filters.ModelMultipleChoiceFilter(
+        field_name="object_tags__slug",
+        queryset=Tag.objects.all(),
+        to_field_name="slug",
+        label="Object Tag (slug)",
+    )
+    exclude_sw_missing = django_filters.BooleanFilter(
+        method="_exclude_sw_missing",
+        label="Exclude missing software",
+    )
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = DeviceSoftwareValidationResult
+
+        fields = [
+            "software",
+            "site",
+            "region",
+            "inventory_item",
+            "part_id",
+            "device",
+            "device_type",
+            "device_role",
+            "object_tag",
+            "exclude_sw_missing",
+        ]
+
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+        qs_filter = (
+            Q(inventory_item__name__icontains=value)
+            | Q(inventory_item__device__name__icontains=value)
+            | Q(software__version__icontains=value)
         )
-        return ValidatedSoftwareLCM.objects.filter(valid_soft_filter)
+        return queryset.filter(qs_filter)
+
+    def search_part_id(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Filter on the inventory item part ID."""
+        if not value.strip():
+            return queryset
+        qs_filter = Q(inventory_item__part_id__icontains=value)
+        return queryset.filter(qs_filter)
+
+    def _exclude_sw_missing(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Exclude devices with missing software."""
+        if value:
+            return queryset.filter(~Q(software=None))
+
+        return queryset
 
 
 class ContractLCMFilterSet(django_filters.FilterSet):
@@ -303,5 +635,79 @@ class ContactLCMFilterSet(django_filters.FilterSet):
             | Q(email__icontains=value)
             | Q(phone__icontains=value)
             | Q(address__icontains=value)
+        )
+        return queryset.filter(qs_filter)
+
+
+class CVELCMFilterSet(StatusModelFilterSetMixin, CustomFieldModelFilterSet):
+    """Filter for CVELCMFilterSet."""
+
+    q = django_filters.CharFilter(method="search", label="Search")
+
+    published_date = django_filters.DateTimeFromToRangeFilter()
+    published_date__gte = django_filters.DateFilter(field_name="published_date", lookup_expr="gte")
+    published_date__lte = django_filters.DateFilter(field_name="published_date", lookup_expr="lte")
+
+    cvss__gte = django_filters.NumberFilter(field_name="cvss", lookup_expr="gte")
+    cvss__lte = django_filters.NumberFilter(field_name="cvss", lookup_expr="lte")
+
+    cvss_v2__gte = django_filters.NumberFilter(field_name="cvss_v2", lookup_expr="gte")
+    cvss_v2__lte = django_filters.NumberFilter(field_name="cvss_v2", lookup_expr="lte")
+
+    cvss_v3__gte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="gte")
+    cvss_v3__lte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="lte")
+
+    status = StatusFilter()
+    exclude_status = StatusFilter(field_name="status", exclude=True)
+    tag = TagFilter()
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = CVELCM
+
+        fields = CVELCM.csv_headers
+
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+
+        qs_filter = Q(name__icontains=value) | Q(link__icontains=value)
+        return queryset.filter(qs_filter)
+
+
+class VulnerabilityLCMFilterSet(StatusModelFilterSetMixin, CustomFieldModelFilterSet):
+    """Filter for VulnerabilityLCMFilterSet."""
+
+    q = django_filters.CharFilter(method="search", label="Search")
+
+    cve__published_date = django_filters.DateTimeFromToRangeFilter()
+    cve__published_date__gte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="gte")
+    cve__published_date__lte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="lte")
+
+    status = StatusFilter()
+    exclude_status = StatusFilter(field_name="status", exclude=True)
+    tag = TagFilter()
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = VulnerabilityLCM
+
+        fields = VulnerabilityLCM.csv_headers
+
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+
+        # Searching all of the items that make up the __str__ method.
+        qs_filter = (
+            Q(cve__name__icontains=value)
+            | Q(software__device_platform__name__icontains=value)
+            | Q(software__version__icontains=value)
+            | Q(device__name__icontains=value)
+            | Q(inventory_item__name__icontains=value)
         )
         return queryset.filter(qs_filter)

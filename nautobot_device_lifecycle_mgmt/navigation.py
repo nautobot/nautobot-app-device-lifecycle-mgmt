@@ -1,4 +1,4 @@
-"""Menu items for the LifeCycle Management plugin."""
+"""Menu items for the Lifecycle Management plugin."""
 # pylint: disable=C0412
 from nautobot.utilities.choices import ButtonColorChoices
 
@@ -7,7 +7,7 @@ try:
 
     menu_items = (
         NavMenuTab(
-            name="Device LifeCycle",
+            name="Device Lifecycle",
             weight=600,
             groups=(
                 NavMenuGroup(
@@ -97,6 +97,38 @@ try:
                                 "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
                             ],
                         ),
+                        NavMenuItem(
+                            link="plugins:nautobot_device_lifecycle_mgmt:cvelcm_list",
+                            name="CVE",
+                            buttons=(
+                                NavMenuButton(
+                                    link="plugins:nautobot_device_lifecycle_mgmt:cvelcm_add",
+                                    title="Add",
+                                    icon_class="mdi mdi-plus-thick",
+                                    button_class=ButtonColorChoices.GREEN,
+                                    permissions=[
+                                        "nautobot_device_lifecycle_mgmt.add_cvelcm",
+                                    ],
+                                ),
+                                NavMenuButton(
+                                    link="plugins:nautobot_device_lifecycle_mgmt:cvelcm_import",
+                                    title="Import",
+                                    icon_class="mdi mdi-database-import-outline",
+                                    button_class=ButtonColorChoices.BLUE,
+                                    permissions=["nautobot_device_lifecycle_mgmt.add_cvelcm"],
+                                ),
+                            ),
+                            permissions=[
+                                "nautobot_device_lifecycle_mgmt.view_cvelcm",
+                            ],
+                        ),
+                        NavMenuItem(
+                            link="plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm_list",
+                            name="Vulnerability",
+                            permissions=[
+                                "nautobot_device_lifecycle_mgmt.view_vulnerabilitylcm",
+                            ],
+                        ),
                     ),
                 ),
                 NavMenuGroup(
@@ -132,7 +164,7 @@ try:
                         ),
                         NavMenuItem(
                             link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_list",
-                            name="Contract Providers",
+                            name="Vendors",
                             buttons=(
                                 NavMenuButton(
                                     link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_add",
@@ -159,7 +191,7 @@ try:
                         ),
                         NavMenuItem(
                             link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_list",
-                            name="Contract POC",
+                            name="POC",
                             buttons=(
                                 NavMenuButton(
                                     link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_add",
@@ -182,6 +214,26 @@ try:
                             ),
                             permissions=[
                                 "nautobot_device_lifecycle_mgmt.view_contactlcm",
+                            ],
+                        ),
+                    ),
+                ),
+                NavMenuGroup(
+                    name="Reports",
+                    weight=100,
+                    items=(
+                        NavMenuItem(
+                            link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
+                            name="Device Software Validation",
+                            permissions=[
+                                "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
+                            ],
+                        ),
+                        NavMenuItem(
+                            link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
+                            name="Inventory Item Software Validation",
+                            permissions=[
+                                "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
                             ],
                         ),
                     ),
@@ -235,7 +287,7 @@ except ModuleNotFoundError:
         ),
         PluginMenuItem(
             link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_list",
-            link_text="Contract Providers",
+            link_text="Vendors",
             buttons=(
                 PluginMenuButton(
                     link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_add",
@@ -255,7 +307,7 @@ except ModuleNotFoundError:
         ),
         PluginMenuItem(
             link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_list",
-            link_text="Contract POC",
+            link_text="POC",
             buttons=(
                 PluginMenuButton(
                     link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_add",
@@ -312,5 +364,37 @@ except ModuleNotFoundError:
                     permissions=["nautobot_device_lifecycle_mgmt.add_validatedsoftwarelcm"],
                 ),
             ),
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:cvelcm_list",
+            link_text="CVE",
+            buttons=(
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:cvelcm_add",
+                    title="Add",
+                    icon_class="mdi mdi-plus-thick",
+                    color=ButtonColorChoices.GREEN,
+                    permissions=["nautobot_device_lifecycle_mgmt.add_cvelcm"],
+                ),
+                PluginMenuButton(
+                    link="plugins:nautobot_device_lifecycle_mgmt:cvelcm_import",
+                    title="Import",
+                    icon_class="mdi mdi-database-import-outline",
+                    color=ButtonColorChoices.BLUE,
+                    permissions=["nautobot_device_lifecycle_mgmt.add_cvelcm"],
+                ),
+            ),
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm_list",
+            link_text="Vulnerability",
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
+            link_text="Report: Device OS Validation",
+        ),
+        PluginMenuItem(
+            link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
+            link_text="Report: Inventory Item OS Validation",
         ),
     )

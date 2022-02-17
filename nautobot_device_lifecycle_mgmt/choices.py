@@ -1,4 +1,4 @@
-"""Static choices uses for the Device LifeCycle plugin."""
+"""Static choices uses for the Device Lifecycle plugin."""
 from pycountry import countries
 
 from nautobot.utilities.choices import ChoiceSet
@@ -68,3 +68,33 @@ class CountryCodes(ChoiceSet):
     """List of support country codes."""
 
     CHOICES = tuple((c.alpha_3, f"{c.name} ({c.alpha_3})") for c in countries)
+
+
+class ReportRunTypeChoices(ChoiceSet):
+    """Choices for the types of report runs."""
+
+    REPORT_SINGLE_OBJECT_RUN = "single-object-run"
+    REPORT_FULL_RUN = "full-report-run"
+
+    CHOICES = (
+        (REPORT_SINGLE_OBJECT_RUN, "Single Object Run"),
+        (REPORT_FULL_RUN, "Full Report Run"),
+    )
+
+
+class CVESeverityChoices(ChoiceSet):
+    """Choices for the types of CVE severities."""
+
+    CRITICAL = "Critical"
+    HIGH = "High"
+    MEDIUM = "Medium"
+    LOW = "Low"
+    NONE = "None"
+
+    CHOICES = (
+        (CRITICAL, CRITICAL),
+        (HIGH, HIGH),
+        (MEDIUM, MEDIUM),
+        (LOW, LOW),
+        (NONE, NONE),
+    )

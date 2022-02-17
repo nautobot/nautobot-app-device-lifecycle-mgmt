@@ -1,5 +1,5 @@
 {% load helpers %}
-{% if perms.view and hw_notices or sw_notices %}
+{% if perms.nautobot_device_lifecycle_mgmt.view_hardwarelcm and hw_notices %}
 <style type="text/css">
     .panel-heading .accordion-toggle:after {
         /* symbol for "opening" panels */
@@ -21,13 +21,13 @@
             {% if hw_notices %}
             <li role="presentation" class="active">
                 <a href="#hardware" aria-controls="hardware" role="tab" data-toggle="tab">
-                    Hardware LifeCycle Notices  <span class="badge badge-pill badge-primary">{{ hw_notices.count }}</span>
+                    Hardware Lifecycle Notices  <span class="badge badge-pill badge-primary">{{ hw_notices.count }}</span>
                 </a>
 
             </li>
             {% endif %}
             {% if sw_notices %}
-            <li role="presentation"><a href="#software" aria-controls="software" role="tab" data-toggle="tab">Software LifeCycle Notices</a></li>
+            <li role="presentation"><a href="#software" aria-controls="software" role="tab" data-toggle="tab">Software Lifecycle Notices</a></li>
             {% endif %}
         </ul>
 

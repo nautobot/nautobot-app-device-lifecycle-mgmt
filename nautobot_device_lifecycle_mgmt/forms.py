@@ -1,43 +1,60 @@
-"""Forms implementation for the LifeCycle Management plugin."""
+"""Forms implementation for the Lifecycle Management plugin."""
 import logging
 from django import forms
-from django.contrib.contenttypes.models import ContentType
 
-from nautobot.utilities.forms import BootstrapMixin, DatePicker, DynamicModelMultipleChoiceField
-from nautobot.dcim.models import Device, DeviceType, InventoryItem, Platform
+from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Platform, Region, Site
 from nautobot.extras.forms import (
     CustomFieldModelCSVForm,
     CustomFieldModelForm,
+    CustomFieldFilterForm,
+    CustomFieldBulkEditForm,
     RelationshipModelForm,
+    StatusBulkEditFormMixin,
+    StatusModelCSVFormMixin,
+    StatusFilterFormMixin,
 )
-from nautobot.extras.models import Tag
+from nautobot.extras.models import Tag, Status
 from nautobot.utilities.forms import (
+    BootstrapMixin,
     BulkEditForm,
+    DatePicker,
     DynamicModelChoiceField,
+    DynamicModelMultipleChoiceField,
     StaticSelect2,
     BOOLEAN_WITH_BLANK_CHOICES,
     add_blank_choice,
     CSVModelChoiceField,
+    TagFilterField,
 )
-from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, CurrencyChoices, PoCTypeChoices, CountryCodes
+from nautobot_device_lifecycle_mgmt.choices import (
+    ContractTypeChoices,
+    CurrencyChoices,
+    PoCTypeChoices,
+    CountryCodes,
+    CVESeverityChoices,
+)
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
+    InventoryItemSoftwareValidationResult,
     SoftwareLCM,
     ValidatedSoftwareLCM,
+    DeviceSoftwareValidationResult,
     ContractLCM,
     ProviderLCM,
     ContactLCM,
+    CVELCM,
+    VulnerabilityLCM,
 )
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 
 
 class HardwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
-    """Hardware Device LifeCycle creation/edit form."""
+    """Hardware Device Lifecycle creation/edit form."""
 
     inventory_item = forms.ModelChoiceField(
         queryset=InventoryItem.objects.exclude(part_id__exact="")
-        .distinct("part_id")
+        .distinct()
         .order_by("part_id")
         .values_list("part_id", flat=True),
         label="Inventory Part ID",
@@ -61,7 +78,7 @@ class HardwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelFor
 
 
 class HardwareLCMBulkEditForm(BootstrapMixin, BulkEditForm):
-    """Hardware Device LifeCycle bulk edit form."""
+    """Hardware Device Lifecycle bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=HardwareLCM.objects.all(), widget=forms.MultipleHiddenInput)
     release_date = forms.DateField(widget=DatePicker(), required=False)
@@ -136,10 +153,11 @@ class HardwareLCMCSVForm(CustomFieldModelCSVForm):
     device_type = forms.ModelChoiceField(
         required=False, queryset=DeviceType.objects.all(), to_field_name="model", label="Device type"
     )
+
     inventory_item = forms.ModelChoiceField(
         required=False,
         queryset=InventoryItem.objects.exclude(part_id__exact="")
-        .distinct("part_id")
+        .distinct()
         .order_by("part_id")
         .values_list("part_id", flat=True),
         to_field_name="part_id",
@@ -236,24 +254,12 @@ class SoftwareLCMCSVForm(CustomFieldModelCSVForm):
 class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
     """ValidatedSoftwareLCM creation/edit form."""
 
-    assigned_to_device = DynamicModelChoiceField(
-        queryset=Device.objects.all(),
-        required=False,
-        query_params={"id": "$assigned_to_device"},
-        label="Assigned To",
-    )
-    assigned_to_device_type = DynamicModelChoiceField(
-        queryset=DeviceType.objects.all(),
-        required=False,
-        query_params={"id": "$assigned_to_device_type"},
-        label="Assigned To",
-    )
-    assigned_to_inventory_item = DynamicModelChoiceField(
-        queryset=InventoryItem.objects.all(),
-        required=False,
-        query_params={"id": "$assigned_to_inventory_item"},
-        label="Assigned To",
-    )
+    software = DynamicModelChoiceField(queryset=SoftwareLCM.objects.all(), required=True)
+    devices = DynamicModelMultipleChoiceField(queryset=Device.objects.all(), required=False)
+    device_types = DynamicModelMultipleChoiceField(queryset=DeviceType.objects.all(), required=False)
+    device_roles = DynamicModelMultipleChoiceField(queryset=DeviceRole.objects.all(), required=False)
+    inventory_items = DynamicModelMultipleChoiceField(queryset=InventoryItem.objects.all(), required=False)
+    object_tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
@@ -263,9 +269,11 @@ class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, Relationshi
         model = ValidatedSoftwareLCM
         fields = (
             "software",
-            "assigned_to_device",
-            "assigned_to_device_type",
-            "assigned_to_inventory_item",
+            "devices",
+            "device_types",
+            "device_roles",
+            "inventory_items",
+            "object_tags",
             "start",
             "end",
             "preferred",
@@ -277,51 +285,19 @@ class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, Relationshi
             "end": DatePicker(),
         }
 
-    def __init__(self, *args, **kwargs):
-        """Set up initial data for this form."""
-        instance = kwargs.get("instance")
-        initial = kwargs.get("initial", {}).copy()
-
-        if instance:
-            if isinstance(instance.assigned_to, Device):
-                initial["assigned_to_device"] = instance.assigned_to
-            elif isinstance(instance.assigned_to, DeviceType):
-                initial["assigned_to_device_type"] = instance.assigned_to
-            elif isinstance(instance.assigned_to, InventoryItem):
-                initial["assigned_to_inventory_item"] = instance.assigned_to
-
-        kwargs["initial"] = initial
-
-        super().__init__(*args, **kwargs)
-
     def clean(self):
-        """Form validation logic."""
+        """Custom validation of the ValidatedSoftwareLCMForm."""
         super().clean()
 
-        if (
-            sum(
-                1
-                for data in (
-                    self.cleaned_data.get("assigned_to_device"),
-                    self.cleaned_data.get("assigned_to_device_type"),
-                    self.cleaned_data.get("assigned_to_inventory_item"),
-                )
-                if data
-            )
-            > 1
-        ):
-            raise forms.ValidationError(
-                "Cannot assign to more than one object. Choose either device, device type or inventory item."
-            )
+        devices = self.cleaned_data.get("devices")
+        device_types = self.cleaned_data.get("device_types")
+        device_roles = self.cleaned_data.get("device_roles")
+        inventory_items = self.cleaned_data.get("inventory_items")
+        object_tags = self.cleaned_data.get("object_tags")
 
-        if self.cleaned_data.get("assigned_to_device"):
-            self.instance.assigned_to = self.cleaned_data.get("assigned_to_device")
-        elif self.cleaned_data.get("assigned_to_device_type"):
-            self.instance.assigned_to = self.cleaned_data.get("assigned_to_device_type")
-        elif self.cleaned_data.get("assigned_to_inventory_item"):
-            self.instance.assigned_to = self.cleaned_data.get("assigned_to_inventory_item")
-        else:
-            raise forms.ValidationError("A device, device type or inventory item must be selected.")
+        if sum(obj.count() for obj in (devices, device_types, device_roles, inventory_items, object_tags)) == 0:
+            msg = "You need to assign to at least one object."
+            self.add_error(None, msg)
 
 
 class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
@@ -332,10 +308,38 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
         label="Search",
         help_text="Search for start or end date of validity.",
     )
-    software = forms.ModelChoiceField(required=False, queryset=SoftwareLCM.objects.all())
-    start = forms.DateField(required=False, widget=DatePicker())
-    end = forms.DateField(required=False, widget=DatePicker())
+    software = DynamicModelChoiceField(required=False, queryset=SoftwareLCM.objects.all())
+    devices = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
+    device_types = DynamicModelMultipleChoiceField(
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        required=False,
+    )
+    device_roles = DynamicModelMultipleChoiceField(
+        queryset=DeviceRole.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    inventory_items = DynamicModelMultipleChoiceField(
+        queryset=InventoryItem.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
+    object_tags = DynamicModelMultipleChoiceField(
+        queryset=Tag.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    start_before = forms.DateField(label="Valid Since Date Before", required=False, widget=DatePicker())
+    start_after = forms.DateField(label="Valid Since Date After", required=False, widget=DatePicker())
     preferred = forms.BooleanField(required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES))
+    valid = forms.BooleanField(
+        label="Valid Now", required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES)
+    )
 
     class Meta:
         """Meta attributes."""
@@ -344,20 +348,185 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
         fields = [
             "q",
             "software",
-            "start",
-            "end",
+            "devices",
+            "device_types",
+            "device_roles",
+            "inventory_items",
+            "object_tags",
             "preferred",
+            "valid",
+            "start_before",
+            "start_after",
         ]
+
+
+class DeviceSoftwareValidationResultFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+    """Filter form to filter searches for DeviceSoftwareValidationResult."""
+
+    q = forms.CharField(
+        required=False,
+        label="Search",
+    )
+    software = DynamicModelMultipleChoiceField(
+        queryset=SoftwareLCM.objects.all(),
+        to_field_name="version",
+        required=False,
+    )
+    site = DynamicModelMultipleChoiceField(
+        queryset=Site.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    region = DynamicModelMultipleChoiceField(
+        queryset=Region.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    device = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
+    device_type = DynamicModelMultipleChoiceField(
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        required=False,
+    )
+    device_role = DynamicModelMultipleChoiceField(
+        queryset=DeviceRole.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    exclude_sw_missing = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Exclude missing software",
+    )
+
+    class Meta:
+        """Meta attributes."""
+
+        model = DeviceSoftwareValidationResult
+        fields = ["q", "software", "site", "region", "device", "device_type", "device_role", "exclude_sw_missing"]
+
+
+class InventoryItemSoftwareValidationResultFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+    """Filter form to filter searches for InventoryItemSoftwareValidationResult."""
+
+    q = forms.CharField(
+        required=False,
+        label="Search",
+    )
+    software = DynamicModelMultipleChoiceField(
+        queryset=SoftwareLCM.objects.all(),
+        to_field_name="version",
+        required=False,
+    )
+    site = DynamicModelMultipleChoiceField(
+        queryset=Site.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    region = DynamicModelMultipleChoiceField(
+        queryset=Region.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    inventory_item = DynamicModelMultipleChoiceField(
+        queryset=InventoryItem.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
+    part_id = forms.CharField(
+        required=False,
+        label="Part ID",
+    )
+    device = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
+    device_type = DynamicModelMultipleChoiceField(
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        required=False,
+    )
+    device_role = DynamicModelMultipleChoiceField(
+        queryset=DeviceRole.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    exclude_sw_missing = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Exclude missing software",
+    )
+
+    class Meta:
+        """Meta attributes."""
+
+        model = InventoryItemSoftwareValidationResult
+        fields = [
+            "q",
+            "software",
+            "site",
+            "region",
+            "inventory_item",
+            "part_id",
+            "device",
+            "device_type",
+            "device_role",
+            "exclude_sw_missing",
+        ]
+
+
+class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):
+    """Reference a list of PKs."""
+
+    def prepare_value(self, value):
+        """Parse a comma-separated string of PKs into a list of PKs."""
+        pk_list = []
+        if isinstance(value, str):
+            pk_list = [val.strip() for val in value.split(",") if val]
+
+        return super().prepare_value(pk_list)
 
 
 class ValidatedSoftwareLCMCSVForm(CustomFieldModelCSVForm):
     """Form for bulk creating ValidatedSoftwareLCM objects."""
 
-    assigned_to_content_type = CSVModelChoiceField(
-        queryset=ContentType.objects.all(),
-        required=True,
+    devices = CSVMultipleModelChoiceField(
+        queryset=Device.objects.all(),
+        required=False,
+        to_field_name="name",
+        help_text="Comma-separated list of Device Names",
+    )
+    devices = CSVMultipleModelChoiceField(
+        queryset=Device.objects.all(),
+        required=False,
+        to_field_name="name",
+        help_text="Comma-separated list of Device Names",
+    )
+    device_types = CSVMultipleModelChoiceField(
+        queryset=DeviceType.objects.all(),
+        required=False,
         to_field_name="model",
-        help_text="Assigned to object type",
+        help_text="Comma-separated list of DeviceType Models",
+    )
+    device_roles = CSVMultipleModelChoiceField(
+        queryset=DeviceRole.objects.all(),
+        required=False,
+        to_field_name="slug",
+        help_text="Comma-separated list of DeviceRole Slugs",
+    )
+    inventory_items = CSVMultipleModelChoiceField(
+        queryset=InventoryItem.objects.all(),
+        required=False,
+        to_field_name="name",
+        help_text="Comma-separated list of InventoryItem Names",
+    )
+    object_tags = CSVMultipleModelChoiceField(
+        queryset=Tag.objects.all(), required=False, to_field_name="slug", help_text="Comma-separated list of Tag Slugs"
     )
 
     class Meta:
@@ -368,11 +537,11 @@ class ValidatedSoftwareLCMCSVForm(CustomFieldModelCSVForm):
 
 
 class ContractLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
-    """Device LifeCycle Contracts creation/edit form."""
+    """Device Lifecycle Contracts creation/edit form."""
 
     provider = forms.ModelChoiceField(
         queryset=ProviderLCM.objects.all(),
-        label="Contract Provider",
+        label="Vendor",
         to_field_name="pk",
         required=True,
     )
@@ -411,7 +580,7 @@ class ContractLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelFor
 
 
 class ContractLCMBulkEditForm(BootstrapMixin, BulkEditForm):
-    """Device LifeCycle Contrcts bulk edit form."""
+    """Device Lifecycle Contrcts bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=ContractLCM.objects.all(), widget=forms.MultipleHiddenInput)
     provider = forms.ModelMultipleChoiceField(queryset=ProviderLCM.objects.all(), required=False)
@@ -481,7 +650,7 @@ class ContractLCMCSVForm(CustomFieldModelCSVForm):
 
 
 class ProviderLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
-    """Device LifeCycle Contract Providers creation/edit form."""
+    """Device Lifecycle Contract Providers creation/edit form."""
 
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     country = forms.ChoiceField(
@@ -508,7 +677,7 @@ class ProviderLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelFor
 
 
 class ProviderLCMBulkEditForm(BootstrapMixin, BulkEditForm):
-    """Device LifeCycle Contract Providers bulk edit form."""
+    """Device Lifecycle Contract Providers bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=ProviderLCM.objects.all(), widget=forms.MultipleHiddenInput)
     description = forms.CharField(required=False)
@@ -571,7 +740,7 @@ class ProviderLCMCSVForm(CustomFieldModelCSVForm):
 
 
 class ContactLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
-    """Device LifeCycle Contract Resources creation/edit form."""
+    """Device Lifecycle Contract Resources creation/edit form."""
 
     type = forms.ChoiceField(choices=PoCTypeChoices.CHOICES, required=False)
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
@@ -601,7 +770,7 @@ class ContactLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm
 
 
 class ContactLCMBulkEditForm(BootstrapMixin, BulkEditForm):
-    """Device LifeCycle Contract Resources bulk edit form."""
+    """Device Lifecycle Contract Resources bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=ContractLCM.objects.all(), widget=forms.MultipleHiddenInput)
     address = forms.CharField(required=False)
@@ -654,3 +823,188 @@ class ContactLCMCSVForm(CustomFieldModelCSVForm):
 
         model = ContactLCM
         fields = ContactLCM.csv_headers
+
+
+class CVELCMForm(
+    StatusBulkEditFormMixin, BootstrapMixin, CustomFieldModelForm, RelationshipModelForm
+):  # pylint: disable=too-many-ancestors
+    """CVE Lifecycle Management creation/edit form."""
+
+    published_date = forms.DateField(widget=DatePicker())
+    severity = forms.ChoiceField(choices=CVESeverityChoices.CHOICES, label="Severity", required=False)
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+
+    model = CVELCM
+
+    class Meta:
+        """Meta attributes for the CVELCMForm class."""
+
+        model = CVELCM
+
+        fields = [
+            *CVELCM.csv_headers,
+            "tags",
+        ]
+
+        widgets = {
+            "published_date": DatePicker(),
+        }
+
+
+class CVELCMBulkEditForm(StatusBulkEditFormMixin, BootstrapMixin, CustomFieldBulkEditForm):
+    """CVE Lifecycle Management bulk edit form."""
+
+    model = CVELCM
+    pk = forms.ModelMultipleChoiceField(queryset=CVELCM.objects.all(), widget=forms.MultipleHiddenInput)
+    description = forms.CharField(required=False)
+    comments = forms.CharField(required=False)
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+
+    class Meta:
+        """Meta attributes for the CVELCMBulkEditForm class."""
+
+        nullable_fields = [
+            "description",
+            "comments",
+            "status",
+            "tags",
+        ]
+
+
+class CVELCMFilterForm(BootstrapMixin, StatusFilterFormMixin, CustomFieldFilterForm):
+    """Filter form to filter searches for CVELCM."""
+
+    model = CVELCM
+    q = forms.CharField(
+        required=False,
+        label="Search",
+        help_text="Search for name or link.",
+    )
+    severity = forms.ChoiceField(
+        widget=StaticSelect2,
+        required=False,
+        choices=add_blank_choice(CVESeverityChoices.CHOICES),
+    )
+
+    published_date_before = forms.DateField(label="Published Date Before", required=False, widget=DatePicker())
+    published_date_after = forms.DateField(label="Published Date After", required=False, widget=DatePicker())
+
+    cvss__gte = forms.FloatField(label="CVSS Score Above", required=False)
+    cvss__lte = forms.FloatField(label="CVSS Score Below", required=False)
+
+    cvss_v2__gte = forms.FloatField(label="CVSSv2 Score Above", required=False)
+    cvss_v2__lte = forms.FloatField(label="CVSSv2 Score Below", required=False)
+
+    cvss_v3__gte = forms.FloatField(label="CVSSv3 Score Above", required=False)
+    cvss_v3__lte = forms.FloatField(label="CVSSv3 Score Below", required=False)
+
+    status = DynamicModelMultipleChoiceField(queryset=Status.objects.all(), required=False, to_field_name="slug")
+    exclude_status = DynamicModelMultipleChoiceField(
+        label="Exclude Status",
+        required=False,
+        queryset=Status.objects.all(),
+        query_params={"content_types": model._meta.label_lower},
+        to_field_name="slug",
+    )
+    tag = TagFilterField(model)
+
+    class Meta:
+        """Meta attributes."""
+
+        model = CVELCM
+        fields = [
+            "q",
+            "published_date_before",
+            "published_date_after",
+            "severity",
+            "status",
+        ]
+
+
+class CVELCMCSVForm(CustomFieldModelCSVForm, StatusModelCSVFormMixin):
+    """Form for creating bulk CVEs."""
+
+    severity = forms.ChoiceField(choices=CVESeverityChoices.CHOICES, label="CVE Severity")
+
+    class Meta:
+        """Meta attributes for the CVELCMCSVForm class."""
+
+        model = CVELCM
+        fields = CVELCM.csv_headers
+
+
+class VulnerabilityLCMForm(
+    StatusBulkEditFormMixin, BootstrapMixin, CustomFieldModelForm, RelationshipModelForm
+):  # pylint: disable=too-many-ancestors
+    """Vulnerability Lifecycle Management creation/edit form."""
+
+    model = VulnerabilityLCM
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+
+    class Meta:
+        """Meta attributes for the VulnerabilityLCMForm class."""
+
+        model = VulnerabilityLCM
+
+        fields = [
+            "status",
+            "tags",
+        ]
+
+
+class VulnerabilityLCMBulkEditForm(StatusBulkEditFormMixin, BootstrapMixin, CustomFieldBulkEditForm):
+    """Vulnerability Lifecycle Management bulk edit form."""
+
+    model = VulnerabilityLCM
+    pk = forms.ModelMultipleChoiceField(queryset=VulnerabilityLCM.objects.all(), widget=forms.MultipleHiddenInput)
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+
+    class Meta:
+        """Meta attributes for the VulnerabilityLCMBulkEditForm class."""
+
+        nullable_fields = [
+            "status",
+            "tags",
+        ]
+
+
+class VulnerabilityLCMFilterForm(BootstrapMixin, StatusFilterFormMixin, CustomFieldFilterForm):
+    """Filter form to filter searches for VulnerabilityLCM."""
+
+    model = VulnerabilityLCM
+    q = forms.CharField(
+        required=False,
+        label="Search",
+        help_text="Search for name or link.",
+    )
+    cve = DynamicModelMultipleChoiceField(required=False, queryset=CVELCM.objects.all(), label="CVE")
+    cve__published_date__lte = forms.DateField(label="CVE Published Date Before", required=False, widget=DatePicker())
+    cve__published_date__gte = forms.DateField(label="CVE Published Date After", required=False, widget=DatePicker())
+    cve__severity = forms.ChoiceField(
+        label="CVE Severity",
+        widget=StaticSelect2,
+        required=False,
+        choices=add_blank_choice(CVESeverityChoices.CHOICES),
+    )
+    software = DynamicModelMultipleChoiceField(required=False, queryset=SoftwareLCM.objects.all())
+    device = DynamicModelMultipleChoiceField(required=False, queryset=Device.objects.all())
+    inventory_item = DynamicModelMultipleChoiceField(required=False, queryset=InventoryItem.objects.all())
+    status = DynamicModelMultipleChoiceField(queryset=Status.objects.all(), required=False, to_field_name="slug")
+    exclude_status = DynamicModelMultipleChoiceField(
+        label="Exclude Status",
+        required=False,
+        queryset=Status.objects.all(),
+        query_params={"content_types": model._meta.label_lower},
+        to_field_name="slug",
+    )
+    tag = TagFilterField(model)
+
+    class Meta:
+        """Meta attributes."""
+
+        model = VulnerabilityLCM
+        fields = [
+            "q",
+            *VulnerabilityLCM.csv_headers,
+            "tags",
+        ]

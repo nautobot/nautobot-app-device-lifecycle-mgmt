@@ -8,39 +8,39 @@
     <div class="panel panel-default">
         <div class="panel-heading"><strong>Attributes</strong></div>
         <div class="panel-body">
-            {% render_field form.software %}
+            {% render_field form.software %}            
             {% render_field form.start %}
             {% render_field form.end %}
             {% render_field form.preferred %}
         </div>
     </div>
     <div class="panel panel-default">
-        <div class="panel-heading"><strong>Object Assigned To</strong></div>
+        <div class="panel-heading"><strong>Objects Assigned To</strong></div>
         <div class="panel-body">
-            {% with device_type_tab_active=form.initial.assigned_to_device_type inventory_item_tab_active=form.initial.assigned_to_inventory_item %}
-                <ul class="nav nav-tabs" role="tablist">
-                    <li role="presentation"{% if not device_type_tab_active and not inventory_item_tab_active %} class="active"{% endif %}>
-                        <a href="#assigned_to_device" role="tab" data-toggle="tab">Device</a>
-                    </li>
-                    <li role="presentation"{% if device_type_tab_active %} class="active"{% endif %}>
-                        <a href="#assigned_to_device_type" role="tab" data-toggle="tab">Device Type</a>
-                    </li>
-                    <li role="presentation"{% if inventory_item_tab_active %} class="active"{% endif %}>
-                        <a href="#assigned_to_inventory_item" role="tab" data-toggle="tab">Inventory Item</a>
-                    </li>
-                </ul>
-                <div class="tab-content">
-                    <div class="tab-pane{% if not device_type_tab_active and not inventory_item_tab_active %} active{% endif %}" id="assigned_to_device">
-                        {% render_field form.assigned_to_device %}
-                    </div>
-                    <div class="tab-pane{% if device_type_tab_active %} active{% endif %}" id="assigned_to_device_type">
-                        {% render_field form.assigned_to_device_type %}
-                    </div>
-                    <div class="tab-pane{% if inventory_item_tab_active %} active{% endif %}" id="assigned_to_inventory_item">
-                        {% render_field form.assigned_to_inventory_item %}
-                    </div>
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#assigned_to_devices" role="tab" data-toggle="tab">Devices</a>
+                </li>
+                <li role="presentation">
+                    <a href="#assigned_to_inventory_items" role="tab" data-toggle="tab">Inventory Items</a>
+                </li>
+                <li role="presentation">
+                    <a href="#assigned_to_tags" role="tab" data-toggle="tab">Object Tags</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane active" id="assigned_to_devices">
+                    {% render_field form.devices %}
+                    {% render_field form.device_types %}
+                    {% render_field form.device_roles %}
                 </div>
-            {% endwith %}
+                <div class="tab-pane" id="assigned_to_inventory_items">
+                    {% render_field form.inventory_items %}
+                </div>
+                <div class="tab-pane" id="assigned_to_tags">
+                    {% render_field form.object_tags %}
+                </div>
+            </div>
         </div>
     </div>
     {% include 'inc/extras_features_edit_form_fields.html' %}
