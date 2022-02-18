@@ -273,14 +273,14 @@ class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pyli
             image_file_checksum="441rfabd75b0512r7fde7a7a66faa596",
             default_image=True,
         )
-        si = SoftwareImageLCM.objects.create(
+        softimage = SoftwareImageLCM.objects.create(
             image_file_name="ios4.22.9m.img",
             software=softwares[1],
             download_url="ftp://images.local/cisco/ios4.22.9m.img",
             image_file_checksum="58arfabd75b051fr7fde7a7ac6faa3fv",
             default_image=False,
         )
-        si.device_types.set([device_type])
+        softimage.device_types.set([device_type])
 
         cls.form_data = {
             "image_file_name": "eos_4.21m.swi",

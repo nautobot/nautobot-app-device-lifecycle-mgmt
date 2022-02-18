@@ -18,20 +18,18 @@ class M2MLinkedCountColumn(LinkedCountColumn):
             url = reverse(self.viewname, kwargs=self.view_kwargs)
             if self.url_params:
                 url += "?"
-                for k, v in self.url_params.items():
-                    if isinstance(v, tuple):
-                        values = getattr(record, v[0]).values(v[1])
-                        url += "&".join([f"{k}={val[k]}" for val in values])
+                for key, kval in self.url_params.items():
+                    if isinstance(kval, tuple):
+                        values = getattr(record, kval[0]).values(kval[1])
+                        url += "&".join([f"{key}={val[key]}" for val in values])
                     else:
-                        url += f"&{k}={getattr(record, v)}"
-            return mark_safe(f'<a href="{url}">{value}</a>')
+                        url += f"&{key}={getattr(record, kval)}"
+            return mark_safe(f'<a href="{url}">{value}</a>')  # nosec
         return value
 
 
 def count_related_m2m(model, field):
-    """
-    Return a Subquery suitable for annotating a m2m field count.
-    """
+    """Return a Subquery suitable for annotating a m2m field count."""
     subquery = Subquery(model.objects.filter(**{"pk": OuterRef("pk")}).order_by().annotate(c=Count(field)).values("c"))
 
     return Coalesce(subquery, 0)

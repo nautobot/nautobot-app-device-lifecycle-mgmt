@@ -516,7 +516,7 @@ class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disa
     ]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=too-many-locals
         """Create a superuser and token for API calls."""
         device_platform_cisco, _ = Platform.objects.get_or_create(name="Cisco IOS", slug="cisco_ios")
         device_platform_arista, _ = Platform.objects.get_or_create(name="Arista EOS", slug="arista_eos")

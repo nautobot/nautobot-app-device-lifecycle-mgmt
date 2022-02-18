@@ -7,7 +7,9 @@ from nautobot.dcim.models import Device, InventoryItem
 from nautobot.extras.models import RelationshipAssociation
 
 
-class BaseSoftwareFilter:
+class BaseSoftwareFilter:  # pylint: disable=too-few-public-methods
+    """Base class for SoftwareFilter classes."""
+
     soft_obj_model = None
     soft_relation_name = None
 
@@ -152,8 +154,8 @@ class DeviceSoftwareImageLCMFilter:  # pylint: disable=too-few-public-methods
         device_soft_image_qs = self.softwareimage_qs.filter(device_q)
         if device_soft_image_qs.exists():
             return device_soft_image_qs
-        else:
-            return self.softwareimage_qs.filter(default_image_q)
+
+        return self.softwareimage_qs.filter(default_image_q)
 
 
 class InventoryItemSoftwareImageLCMFilter:  # pylint: disable=too-few-public-methods
@@ -183,5 +185,5 @@ class InventoryItemSoftwareImageLCMFilter:  # pylint: disable=too-few-public-met
         invitem_soft_image_qs = self.softwareimage_qs.filter(inv_item_q)
         if invitem_soft_image_qs.exists():
             return invitem_soft_image_qs
-        else:
-            return self.softwareimage_qs.filter(default_image_q)
+
+        return self.softwareimage_qs.filter(default_image_q)

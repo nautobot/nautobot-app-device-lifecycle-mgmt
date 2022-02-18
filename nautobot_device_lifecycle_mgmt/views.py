@@ -9,9 +9,11 @@ from matplotlib.ticker import MaxNLocator
 import numpy as np
 
 from django.db.models import Q, F, Count, ExpressionWrapper, FloatField
+from django_tables2 import RequestConfig
 
 from nautobot.core.views import generic
 from nautobot.dcim.models import Device
+from nautobot.utilities.paginator import EnhancedPaginator, get_paginate_count
 from nautobot.utilities.views import ContentTypePermissionRequiredMixin
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.models import (
@@ -279,27 +281,14 @@ class SoftwareSoftwareImagesLCMView(generic.ObjectView):
         else:
             softwareimages_table = None
 
-        # Enable if we want to add buttons
-        # if request.user.has_perm("ipam.change_softwareimagelcm") or request.user.has_perm("ipam.delete_softwareimagelcm"):
-        #    prefix_table.columns.show("pk")
-
-        # paginate = {
-        #     "paginator_class": EnhancedPaginator,
-        #     "per_page": get_paginate_count(request),
-        # }
-        # RequestConfig(request, paginate).configure(softwareimages_table)
-
-        # Compile permissions list for rendering the object table
-        # permissions = {
-        #     "add": request.user.has_perm("ipam.add_prefix"),
-        #     "change": request.user.has_perm("ipam.change_prefix"),
-        #     "delete": request.user.has_perm("ipam.delete_prefix"),
-        # }
+        paginate = {
+            "paginator_class": EnhancedPaginator,
+            "per_page": get_paginate_count(request),
+        }
+        RequestConfig(request, paginate).configure(softwareimages_table)
 
         return {
-            # "first_available_prefix": instance.get_first_available_prefix(),
             "softwareimages_table": softwareimages_table,
-            # "permissions": permissions,
             "active_tab": "software-images",
         }
 
@@ -335,12 +324,6 @@ class SoftwareImageLCMEditView(generic.ObjectEditView):
     model_form = SoftwareImageLCMForm
     template_name = "nautobot_device_lifecycle_mgmt/softwareimagelcm_edit.html"
     default_return_url = URL.SoftwareImageLCM.List
-
-    def post(self, request, *args, **kwargs):
-        result = super().post(request, *args, **kwargs)
-        print(type(result))
-        print(vars(result))
-        return result
 
 
 class SoftwareImageLCMDeleteView(generic.ObjectDeleteView):

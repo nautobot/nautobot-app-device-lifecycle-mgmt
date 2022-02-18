@@ -160,7 +160,7 @@ class SoftwareLCMQuerySet(RestrictedQuerySet):
         """Return all `SoftwareLCM` assigned to the given object."""
         if not isinstance(obj, models.Model):
             raise TypeError(f"{obj} is not an instance of Django Model class")
-        elif isinstance(obj, Device):
+        if isinstance(obj, Device):
             qs = DeviceSoftwareFilter(qs=self, item_obj=obj).filter_qs()
         elif isinstance(obj, InventoryItem):
             qs = InventoryItemSoftwareFilter(qs=self, item_obj=obj).filter_qs()
@@ -244,7 +244,7 @@ class SoftwareImageLCMQuerySet(RestrictedQuerySet):
         """Return all `SoftwareImageLCM` assigned to the given object."""
         if not isinstance(obj, models.Model):
             raise TypeError(f"{obj} is not an instance of Django Model class")
-        elif isinstance(obj, Device):
+        if isinstance(obj, Device):
             qs = DeviceSoftwareImageLCMFilter(qs=self, item_obj=obj).filter_qs()
         elif isinstance(obj, InventoryItem):
             qs = InventoryItemSoftwareImageLCMFilter(qs=self, item_obj=obj).filter_qs()

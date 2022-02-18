@@ -1,5 +1,4 @@
 """Test forms."""
-from sys import platform
 from django.test import TestCase
 from django.contrib.contenttypes.models import ContentType
 
