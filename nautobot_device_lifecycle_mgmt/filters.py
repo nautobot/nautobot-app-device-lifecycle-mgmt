@@ -121,9 +121,6 @@ class SoftwareLCMFilterSet(django_filters.FilterSet):
             "version",
             "alias",
             "documentation_url",
-            "download_url",
-            "image_file_name",
-            "image_file_checksum",
             "long_term_support",
             "pre_release",
         ]

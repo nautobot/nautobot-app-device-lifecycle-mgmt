@@ -169,9 +169,6 @@ class SoftwareLCMFilterSetTestCase(TestCase):
                 release_date="2019-01-10",
                 end_of_support="2022-05-15",
                 documentation_url="https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
-                download_url="ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin",
-                image_file_name="asr1001x-universalk9.17.03.03.SPA.bin",
-                image_file_checksum="9cf2e09b59207a4d8ea40886fbbe5b4b68e19e58a8f96b34240e4cea9971f6ae6facab9a1855a34e1ed8755f3ffe4c969cf6e6ef1df95d42a91540a44d4b9e14",
                 long_term_support=False,
                 pre_release=True,
             ),
@@ -182,9 +179,6 @@ class SoftwareLCMFilterSetTestCase(TestCase):
                 release_date="2021-01-10",
                 end_of_support="2026-05-13",
                 documentation_url="https://www.arista.com/softdocs",
-                download_url="ftp://device-images.local.com/arista/arista-4.25m.img",
-                image_file_name="arista-4.25m.img",
-                image_file_checksum="34e61320b5518a2954b2a307b7e6a018",
                 long_term_support=True,
                 pre_release=False,
             ),
@@ -208,21 +202,6 @@ class SoftwareLCMFilterSetTestCase(TestCase):
     def test_documentation_url(self):
         """Test documentation_url filter."""
         params = {"documentation_url": "https://www.arista.com/softdocs"}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-
-    def test_download_url(self):
-        """Test download_url filter."""
-        params = {"download_url": "ftp://device-images.local.com/arista/arista-4.25m.img"}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-
-    def test_image_file_name(self):
-        """Test image_file_name filter."""
-        params = {"image_file_name": "asr1001x-universalk9.17.03.03.SPA.bin"}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-
-    def test_image_file_checksum(self):
-        """Test image_file_checksum filter."""
-        params = {"image_file_checksum": "34e61320b5518a2954b2a307b7e6a018"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_long_term_support(self):

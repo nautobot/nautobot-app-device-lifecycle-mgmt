@@ -235,9 +235,6 @@ class SoftwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
             "end_of_support_before",
             "end_of_support_after",
             "documentation_url",
-            "download_url",
-            "image_file_name",
-            "image_file_checksum",
             "long_term_support",
             "pre_release",
         ]
@@ -379,7 +376,7 @@ class SoftwareImageLCMFilterForm(BootstrapMixin, forms.ModelForm):
     class Meta:
         """Meta attributes."""
 
-        model = SoftwareLCM
+        model = SoftwareImageLCM
         fields = [
             "q",
             "software",

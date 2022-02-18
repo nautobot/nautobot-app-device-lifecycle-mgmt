@@ -166,9 +166,6 @@ class SoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
             "alias": "Amsterdam-17.3.3 MD",
             "end_of_support": "2022-05-15",
             "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
-            "download_url": "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin",
-            "image_file_name": "asr1001x-universalk9.17.03.03.SPA.bin",
-            "image_file_checksum": "9cf2e09b59207a4d8ea40886fbbe5b4b68e19e58a8f96b34240e4cea9971f6ae6facab9a1855a34e1ed8755f3ffe4c969cf6e6ef1df95d42a91540a44d4b9e14",
             "long_term_support": True,
             "pre_release": False,
         }
@@ -186,8 +183,6 @@ class SoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
         data = {
             "end_of_support": "2022-05-15",
             "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
-            "download_url": "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin",
-            "image_file_name": "asr1001x-universalk9.17.03.03.SPA.bin",
         }
         form = self.form_class(data)
         self.assertFalse(form.is_valid())
@@ -215,18 +210,6 @@ class SoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
         self.assertIn("documentation_url", form.errors)
         self.assertIn("Enter a valid URL.", form.errors["documentation_url"])
 
-    def test_validation_error_download_url(self):
-        data = {
-            "device_platform": self.device_platform,
-            "version": "17.3.3 MD",
-            "end_of_support": "2022-05-15",
-            "download_url": "ftppp://images.local.my.org/",
-        }
-        form = self.form_class(data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("download_url", form.errors)
-        self.assertIn("Enter a valid URL.", form.errors["download_url"])
-
 
 class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
     """Test class for ValidatedSoftwareLCMForm forms."""
@@ -243,9 +226,6 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
                 "alias": "Amsterdam-17.3.3 MD",
                 "end_of_support": "2022-05-15",
                 "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
-                "download_url": "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin",
-                "image_file_name": "asr1001x-universalk9.17.03.03.SPA.bin",
-                "image_file_checksum": "9cf2e09b59207a4d8ea40886fbbe5b4b68e19e58a8f96b34240e4cea9971f6ae6facab9a1855a34e1ed8755f3ffe4c969cf6e6ef1df95d42a91540a44d4b9e14",
                 "long_term_support": True,
                 "pre_release": False,
             }
@@ -539,3 +519,16 @@ class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member
             "doesn't match the Software Platform Manufacturer.",
             form.errors["device_types"][0],
         )
+
+    def test_validation_error_download_url(self):
+        data = {
+            "image_file_name": "ios17.3.3md.img",
+            "software": self.software_1,
+            "device_types": [self.devicetype_2],
+            "default_image": False,
+            "download_url": "ftppp://images.local.my.org/",
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("download_url", form.errors)
+        self.assertIn("Enter a valid URL.", form.errors["download_url"])

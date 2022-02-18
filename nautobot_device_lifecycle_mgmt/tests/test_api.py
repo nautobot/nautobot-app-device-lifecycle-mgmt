@@ -261,9 +261,6 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: 
                     "alias": "Amsterdam-17.3.3 MD",
                     "end_of_support": "2022-05-15",
                     "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
-                    "download_url": "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin",
-                    "image_file_name": "asr1001x-universalk9.17.03.03.SPA.bin",
-                    "image_file_checksum": "9cf2e09b59207a4d8ea40886fbbe5b4b68e19e58a8f96b34240e4cea9971f6ae6facab9a1855a34e1ed8755f3ffe4c969cf6e6ef1df95d42a91540a44d4b9e14",
                     "long_term_support": True,
                     "pre_release": False,
                 }
@@ -275,9 +272,6 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: 
                     "alias": "Catalyst-15.5(1)SY",
                     "end_of_support": "2019-02-5",
                     "documentation_url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst6500/ios/15-1SY/config_guide/sup2T/15_1_sy_swcg_2T/cef.html",
-                    "download_url": "ftp://device-images.local.com/cisco/s2t54-ipservicesk9_npe-mz.SPA.155-1.SY1.bin",
-                    "image_file_name": "s2t54-ipservicesk9_npe-mz.SPA.155-1.SY1.bin",
-                    "image_file_checksum": "74e61320f5518a2954b2d307b7e6a038",
                     "long_term_support": False,
                     "pre_release": True,
                 }

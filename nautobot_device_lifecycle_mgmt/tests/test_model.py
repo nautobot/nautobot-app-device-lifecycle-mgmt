@@ -154,9 +154,6 @@ class SoftwareLCMTestCase(TestCase):
             release_date=date(2019, 1, 10),
             end_of_support=date(2022, 5, 15),
             documentation_url="https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
-            download_url="ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin",
-            image_file_name="asr1001x-universalk9.17.03.03.SPA.bin",
-            image_file_checksum="9cf2e09b59207a4d8ea40886fbbe5b4b68e19e58a8f96b34240e4cea9971f6ae6facab9a1855a34e1ed8755f3ffe4c969cf6e6ef1df95d42a91540a44d4b9e14",
             long_term_support=False,
             pre_release=True,
         )
@@ -169,14 +166,6 @@ class SoftwareLCMTestCase(TestCase):
         self.assertEqual(
             softwarelcm_full.documentation_url,
             "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
-        )
-        self.assertEqual(
-            softwarelcm_full.download_url, "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin"
-        )
-        self.assertEqual(softwarelcm_full.image_file_name, "asr1001x-universalk9.17.03.03.SPA.bin")
-        self.assertEqual(
-            softwarelcm_full.image_file_checksum,
-            "9cf2e09b59207a4d8ea40886fbbe5b4b68e19e58a8f96b34240e4cea9971f6ae6facab9a1855a34e1ed8755f3ffe4c969cf6e6ef1df95d42a91540a44d4b9e14",
         )
         self.assertEqual(softwarelcm_full.long_term_support, False)
         self.assertEqual(softwarelcm_full.pre_release, True)

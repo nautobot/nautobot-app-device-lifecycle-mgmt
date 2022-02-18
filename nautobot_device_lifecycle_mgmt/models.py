@@ -189,9 +189,6 @@ class SoftwareLCM(PrimaryModel):
     release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
     end_of_support = models.DateField(null=True, blank=True, verbose_name="End of Software Support")
     documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
-    download_url = models.URLField(blank=True, verbose_name="Download URL")
-    image_file_name = models.CharField(blank=True, max_length=100, verbose_name="Image File Name")
-    image_file_checksum = models.CharField(blank=True, max_length=256, verbose_name="Image File Checksum")
     long_term_support = models.BooleanField(verbose_name="Long Term Support", default=False)
     pre_release = models.BooleanField(verbose_name="Pre-Release", default=False)
 
@@ -202,9 +199,6 @@ class SoftwareLCM(PrimaryModel):
         "release_date",
         "end_of_support",
         "documentation_url",
-        "download_url",
-        "image_file_name",
-        "image_file_checksum",
         "long_term_support",
         "pre_release",
     ]
@@ -236,9 +230,6 @@ class SoftwareLCM(PrimaryModel):
             self.release_date,
             self.end_of_support,
             self.documentation_url,
-            self.download_url,
-            self.image_file_name,
-            self.image_file_checksum,
             self.long_term_support,
             self.pre_release,
         )
