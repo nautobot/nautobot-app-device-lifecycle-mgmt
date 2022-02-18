@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## v0.4.1 - 02-18-2022
+- PR#65: Fixed buttons for non-superuser on many model Detail views
+
 ## v0.4.0 - 02-08-2022
 - PR#47: Added Plugin Upgrade Guide to the README
 - PR#50: Fixed view permissions for Device Notices
