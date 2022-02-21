@@ -18,8 +18,8 @@ from nautobot_device_lifecycle_mgmt.software_filters import (
     InventoryItemValidatedSoftwareFilter,
     DeviceSoftwareFilter,
     InventoryItemSoftwareFilter,
-    DeviceSoftwareImageLCMFilter,
-    InventoryItemSoftwareImageLCMFilter,
+    DeviceSoftwareImageFilter,
+    InventoryItemSoftwareImageFilter,
 )
 
 
@@ -245,9 +245,9 @@ class SoftwareImageLCMQuerySet(RestrictedQuerySet):
         if not isinstance(obj, models.Model):
             raise TypeError(f"{obj} is not an instance of Django Model class")
         if isinstance(obj, Device):
-            qs = DeviceSoftwareImageLCMFilter(qs=self, item_obj=obj).filter_qs()
+            qs = DeviceSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()
         elif isinstance(obj, InventoryItem):
-            qs = InventoryItemSoftwareImageLCMFilter(qs=self, item_obj=obj).filter_qs()
+            qs = InventoryItemSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()
         else:
             qs = self
 

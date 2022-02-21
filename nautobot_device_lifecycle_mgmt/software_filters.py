@@ -127,7 +127,7 @@ class InventoryItemValidatedSoftwareFilter:  # pylint: disable=too-few-public-me
         )
 
 
-class DeviceSoftwareImageLCMFilter:  # pylint: disable=too-few-public-methods
+class DeviceSoftwareImageFilter:  # pylint: disable=too-few-public-methods
     """Filter SoftwareImageLCM objects based on the Device object."""
 
     soft_obj_model = Device
@@ -146,19 +146,22 @@ class DeviceSoftwareImageLCMFilter:  # pylint: disable=too-few-public-methods
             destination_id=self.item_obj.id,
         ).values("source_id")[:1]
 
-        device_q = Q(software=soft_rel_obj, device_types=self.item_obj.device_type) | Q(
-            software=soft_rel_obj, object_tags__in=self.item_obj.tags.all()
-        )
-        default_image_q = Q(software=soft_rel_obj, default_image=True) & ~Q(device_types=self.item_obj.device_type)
+        object_tag_q = Q(software=soft_rel_obj, object_tags__in=self.item_obj.tags.all())
+        device_type_q = Q(software=soft_rel_obj, device_types=self.item_obj.device_type)
+        default_image_q = Q(software=soft_rel_obj, default_image=True)
 
-        device_soft_image_qs = self.softwareimage_qs.filter(device_q)
-        if device_soft_image_qs.exists():
-            return device_soft_image_qs
+        device_soft_image_ot_qs = self.softwareimage_qs.filter(object_tag_q)
+        if device_soft_image_ot_qs.exists():
+            return device_soft_image_ot_qs
+
+        device_soft_image_dt_qs = self.softwareimage_qs.filter(device_type_q)
+        if device_soft_image_dt_qs.exists():
+            return device_soft_image_dt_qs
 
         return self.softwareimage_qs.filter(default_image_q)
 
 
-class InventoryItemSoftwareImageLCMFilter:  # pylint: disable=too-few-public-methods
+class InventoryItemSoftwareImageFilter:  # pylint: disable=too-few-public-methods
     """Filter SoftwareImageLCM objects based on the InventoryItem object."""
 
     soft_obj_model = InventoryItem
@@ -177,13 +180,16 @@ class InventoryItemSoftwareImageLCMFilter:  # pylint: disable=too-few-public-met
             destination_id=self.item_obj.id,
         ).values("source_id")[:1]
 
-        inv_item_q = Q(software=soft_rel_obj, inventory_items=self.item_obj.pk) | Q(
-            software=soft_rel_obj, object_tags__in=self.item_obj.tags.all()
-        )
-        default_image_q = Q(software=soft_rel_obj, default_image=True) & ~Q(inventory_items=self.item_obj.pk)
+        object_tag_q = Q(software=soft_rel_obj, object_tags__in=self.item_obj.tags.all())
+        inv_item_q = Q(software=soft_rel_obj, inventory_items=self.item_obj.pk)
+        default_image_q = Q(software=soft_rel_obj, default_image=True)
 
-        invitem_soft_image_qs = self.softwareimage_qs.filter(inv_item_q)
-        if invitem_soft_image_qs.exists():
-            return invitem_soft_image_qs
+        invitem_soft_image_ot_qs = self.softwareimage_qs.filter(object_tag_q)
+        if invitem_soft_image_ot_qs.exists():
+            return invitem_soft_image_ot_qs
+
+        invitem_soft_image_dt_qs = self.softwareimage_qs.filter(inv_item_q)
+        if invitem_soft_image_dt_qs.exists():
+            return invitem_soft_image_dt_qs
 
         return self.softwareimage_qs.filter(default_image_q)
