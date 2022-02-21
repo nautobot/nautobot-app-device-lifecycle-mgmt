@@ -10,6 +10,7 @@ from nautobot.dcim.api.nested_serializers import (
     NestedInventoryItemSerializer,
 )
 from nautobot.extras.api.customfields import CustomFieldModelSerializer
+from nautobot.extras.api.nested_serializers import NestedTagSerializer
 from nautobot.extras.api.serializers import TaggedObjectSerializer, StatusModelSerializerMixin, StatusSerializerField
 from nautobot.extras.models import Status
 
@@ -173,6 +174,7 @@ class SoftwareImageLCMSerializer(
         view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwareimagelcm-detail"
     )
     software = NestedSoftwareLCMSerializer()
+    object_tags = NestedTagSerializer(many=True)
 
     class Meta:
         """Meta attributes."""
@@ -203,6 +205,7 @@ class ValidatedSoftwareLCMSerializer(
         view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:validatedsoftwarelcm-detail"
     )
     software = NestedSoftwareLCMSerializer()
+    object_tags = NestedTagSerializer(many=True)
 
     class Meta:
         """Meta attributes."""
