@@ -174,7 +174,6 @@ class SoftwareImageLCMSerializer(
         view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwareimagelcm-detail"
     )
     software = NestedSoftwareLCMSerializer()
-    object_tags = NestedTagSerializer(many=True)
 
     class Meta:
         """Meta attributes."""
@@ -205,7 +204,6 @@ class ValidatedSoftwareLCMSerializer(
         view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:validatedsoftwarelcm-detail"
     )
     software = NestedSoftwareLCMSerializer()
-    object_tags = NestedTagSerializer(many=True)
 
     class Meta:
         """Meta attributes."""
