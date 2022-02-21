@@ -687,7 +687,7 @@ class SoftwareImageLCMFilterSetTestCase(TestCase):
             name="Cisco IOS", slug="cisco_ios", manufacturer=manufacturer_cisco
         )
         device_platform_arista, _ = Platform.objects.get_or_create(
-            name="Arista EOS", slug="arista_eos", manufacturer=manufacturer_cisco
+            name="Arista EOS", slug="arista_eos", manufacturer=manufacturer_arista
         )
 
         self.softwares = (
