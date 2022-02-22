@@ -323,6 +323,21 @@ class SoftwareImageLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipMod
                 if software_img_for_dt.exists():
                     msg = f"Device Type {device_type.model} already assigned to another Software Image."
                     self.add_error("device_types", msg)
+                    self.add_error(None, msg)
+
+            for object_tag in object_tags:
+                software_img_for_tag = software_images.filter(object_tags__in=[object_tag])
+                if software_img_for_tag.exists():
+                    msg = f"Object Tag {object_tag.name} already assigned to another Software Image."
+                    self.add_error("object_tags", msg)
+                    self.add_error(None, msg)
+
+            for inventory_item in inventory_items:
+                software_img_for_invitem = software_images.filter(inventory_items__in=[inventory_item])
+                if software_img_for_invitem.exists():
+                    msg = f"Inventory Item {inventory_item.name} already assigned to another Software Image."
+                    self.add_error("inventory_items", msg)
+                    self.add_error(None, msg)
 
 
 class SoftwareImageLCMFilterForm(BootstrapMixin, forms.ModelForm):

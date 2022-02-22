@@ -398,26 +398,42 @@ class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member
                 "pre_release": False,
             }
         )
-        SoftwareImageLCM.objects.create(
-            image_file_name="ios17.3.3Dmd.img",
-            software=self.software_1,
-            default_image=True,
-        )
 
-        status_active, _ = Status.objects.get_or_create(slug="active")
-        site, _ = Site.objects.get_or_create(name="Site 1", slug="site-1")
-        devicerole, _ = DeviceRole.objects.get_or_create(name="Router", slug="router", defaults={"color": "ff0000"})
         self.devicetype_1, _ = DeviceType.objects.get_or_create(
             manufacturer=manufacturer_cisco, model="ASR-1000", slug="asr-1000"
         )
         self.devicetype_2, _ = DeviceType.objects.get_or_create(
             manufacturer=manufacturer_arista, model="7150S", slug="7150s"
         )
+        self.devicetype_3, _ = DeviceType.objects.get_or_create(
+            manufacturer=manufacturer_cisco, model="7124", slug="7124"
+        )
+        self.tag_1, _ = Tag.objects.get_or_create(name="lcm", slug="lcm")
+        self.tag_2, _ = Tag.objects.get_or_create(name="lcm2", slug="lcm2")
+        status_active, _ = Status.objects.get_or_create(slug="active")
+        site, _ = Site.objects.get_or_create(name="Site 1", slug="site-1")
+        devicerole, _ = DeviceRole.objects.get_or_create(name="Router", slug="router", defaults={"color": "ff0000"})
         self.device_1, _ = Device.objects.get_or_create(
             device_type=self.devicetype_1, device_role=devicerole, name="Device 1", site=site, status=status_active
         )
         self.inventoryitem_1, _ = InventoryItem.objects.get_or_create(device=self.device_1, name="SwitchModule1")
-        self.tag, _ = Tag.objects.get_or_create(name="asr", slug="asr")
+        self.inventoryitem_2, _ = InventoryItem.objects.get_or_create(device=self.device_1, name="SwitchModule2")
+
+        SoftwareImageLCM.objects.create(
+            image_file_name="ios17.3.3Dmd.img",
+            software=self.software_1,
+            default_image=True,
+        )
+
+        soft_image = SoftwareImageLCM.objects.create(
+            image_file_name="ios17.3.3dtmd.img",
+            software=self.software_1,
+            default_image=False,
+        )
+        soft_image.device_types.set([self.devicetype_3.pk])
+        soft_image.inventory_items.set([self.inventoryitem_2.pk])
+        soft_image.object_tags.set([self.tag_2.pk])
+        soft_image.save()
 
     def test_specifying_all_fields_w_device_type(self):
         data = {
@@ -449,7 +465,7 @@ class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member
         data = {
             "image_file_name": "ios17.3.3md.img",
             "software": self.software_1,
-            "object_tags": [self.tag],
+            "object_tags": [self.tag_1],
             "download_url": "ftp://images.local/cisco/ios17.3.3md.img",
             "image_file_checksum": "441rfabd75b0512r7fde7a7a66faa596",
             "default_image": False,
@@ -502,6 +518,46 @@ class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member
         self.assertIn(
             "Default image cannot be assigned to any objects.",
             form.errors["default_image"][0],
+        )
+
+    def test_image_assigned_only_one_device_type_per_software(self):
+        data = {
+            "image_file_name": "ios17.3.3dt3md.img",
+            "software": self.software_1,
+            "device_types": [self.devicetype_3],
+            "default_image": False,
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("device_types", form.errors)
+        self.assertRegex(
+            form.errors["device_types"][0], r"Device Type .+? already assigned to another Software Image\."
+        )
+
+    def test_image_assigned_only_one_object_tag_per_software(self):
+        data = {
+            "image_file_name": "ios17.3.3dt3md.img",
+            "software": self.software_1,
+            "object_tags": [self.tag_2],
+            "default_image": False,
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("object_tags", form.errors)
+        self.assertRegex(form.errors["object_tags"][0], r"Object Tag .+? already assigned to another Software Image\.")
+
+    def test_image_assigned_only_one_inventory_item_per_software(self):
+        data = {
+            "image_file_name": "ios17.3.3dt3md.img",
+            "software": self.software_1,
+            "inventory_items": [self.inventoryitem_2],
+            "default_image": False,
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("inventory_items", form.errors)
+        self.assertRegex(
+            form.errors["inventory_items"][0], r"Inventory Item .+? already assigned to another Software Image\."
         )
 
     def test_soft_manuf_must_match_platform_manuf(self):
