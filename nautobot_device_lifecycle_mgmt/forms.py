@@ -281,7 +281,7 @@ class SoftwareImageLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipMod
             "tags",
         )
 
-    def clean(self):
+    def clean(self):  # pylint: disable=too-many-locals,too-many-branches
         """Custom validation of the SoftwareImageLCMForm."""
         super().clean()
         device_types = self.cleaned_data.get("device_types")

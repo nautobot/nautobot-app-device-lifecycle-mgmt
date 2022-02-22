@@ -364,7 +364,7 @@ class CVELCMFormTest(TestCase):
         )
 
 
-class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member
+class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member,too-many-instance-attributes
     """Test class for SoftwareImageLCMForm forms."""
 
     form_class = SoftwareImageLCMForm
