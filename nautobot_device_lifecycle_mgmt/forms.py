@@ -290,8 +290,6 @@ class SoftwareImageLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipMod
         default_image = self.cleaned_data.get("default_image")
         software = self.cleaned_data.get("software")
 
-        assigned_objects_count = sum(obj.count() for obj in (device_types, inventory_items, object_tags))
-
         if software:
             software_images = SoftwareImageLCM.objects.filter(software=software)
             software_default_image = software_images.filter(default_image=True)
@@ -303,17 +301,15 @@ class SoftwareImageLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipMod
             msg = "Only one default Software Image is allowed for each Software."
             self.add_error("default_image", msg)
 
+        assigned_objects_count = sum(obj.count() for obj in (device_types, inventory_items, object_tags))
         if default_image and assigned_objects_count > 0:
             msg = "Default image cannot be assigned to any objects."
             self.add_error("default_image", msg)
             if device_types.count() > 0:
-                msg = "Default image cannot be assigned to any objects."
                 self.add_error("device_types", msg)
             if inventory_items.count() > 0:
-                msg = "Default image cannot be assigned to any objects."
                 self.add_error("inventory_items", msg)
             if object_tags.count() > 0:
-                msg = "Default image cannot be assigned to any objects."
                 self.add_error("object_tags", msg)
 
         if software and assigned_objects_count > 0:
