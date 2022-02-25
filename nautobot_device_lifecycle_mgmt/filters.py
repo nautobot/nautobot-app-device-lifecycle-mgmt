@@ -21,6 +21,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContactLCM,
     CVELCM,
     VulnerabilityLCM,
+    SoftwareImageLCM,
 )
 
 
@@ -120,9 +121,6 @@ class SoftwareLCMFilterSet(django_filters.FilterSet):
             "version",
             "alias",
             "documentation_url",
-            "download_url",
-            "image_file_name",
-            "image_file_checksum",
             "long_term_support",
             "pre_release",
         ]
@@ -139,6 +137,119 @@ class SoftwareLCMFilterSet(django_filters.FilterSet):
             | Q(end_of_support__icontains=value)
         )
         return queryset.filter(qs_filter)
+
+
+class SoftwareImageLCMFilterSet(django_filters.FilterSet):
+    """Filter for SoftwareImageLCM."""
+
+    q = django_filters.CharFilter(method="search", label="Search")
+
+    software = django_filters.ModelMultipleChoiceFilter(
+        queryset=SoftwareLCM.objects.all(),
+        label="Software",
+    )
+    software_version = django_filters.ModelMultipleChoiceFilter(
+        field_name="software__version",
+        queryset=SoftwareLCM.objects.all(),
+        to_field_name="version",
+        label="Software (version)",
+    )
+    device_types_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_types",
+        queryset=DeviceType.objects.all(),
+        label="Device Types",
+    )
+    device_types = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_types__model",
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        label="Device Types (model)",
+    )
+    inventory_items_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_items",
+        queryset=InventoryItem.objects.all(),
+        label="Inventory Items",
+    )
+    inventory_items = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_items__id",
+        queryset=InventoryItem.objects.all(),
+        to_field_name="id",
+        label="Inventory Items (name)",
+    )
+    object_tags_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="object_tags",
+        queryset=Tag.objects.all(),
+        label="Object Tags",
+    )
+    object_tags = django_filters.ModelMultipleChoiceFilter(
+        field_name="object_tags__slug",
+        queryset=Tag.objects.all(),
+        to_field_name="slug",
+        label="Object Tags (slug)",
+    )
+    device_name = django_filters.CharFilter(method="device", label="Device Name")
+    device_id = django_filters.CharFilter(method="device", label="Device ID")
+    inventory_item_id = django_filters.CharFilter(method="inventory_item", label="InventoryItem ID")
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = SoftwareImageLCM
+
+        fields = [
+            "image_file_name",
+            "software",
+            "software_version",
+            "image_file_checksum",
+            "download_url",
+            "device_types",
+            "inventory_items",
+            "object_tags",
+            "default_image",
+        ]
+
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+
+        qs_filter = Q(image_file_name__icontains=value) | Q(software__version__icontains=value)
+        return queryset.filter(qs_filter)
+
+    def device(self, queryset, name, value):  # pylint: disable=no-self-use
+        """Search for software image for a given device."""
+        value = value.strip()
+        if not value:
+            return queryset
+
+        if name == "device_name":
+            devices = Device.objects.filter(name=value)
+        elif name == "device_id":
+            devices = Device.objects.filter(id=value)
+        else:
+            devices = Device.objects.none()
+
+        if devices.count() != 1:
+            return queryset.none()
+
+        device = devices.first()
+
+        return queryset.filter(id__in=SoftwareImageLCM.objects.get_for_object(device).values("id"))
+
+    def inventory_item(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Search for software image for a given inventory item."""
+        value = value.strip()
+        if not value:
+            return queryset
+
+        inventory_items = InventoryItem.objects.filter(id=value)
+
+        if inventory_items.count() != 1:
+            return queryset.none()
+
+        inventory_item = inventory_items.first()
+
+        return queryset.filter(id__in=SoftwareImageLCM.objects.get_for_object(inventory_item).values("id"))
 
 
 class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
@@ -276,7 +387,6 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
         if not value:
             return queryset
 
-        print(value)
         inventory_items = InventoryItem.objects.filter(id=value)
 
         if inventory_items.count() != 1:

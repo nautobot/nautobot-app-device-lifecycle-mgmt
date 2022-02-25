@@ -1,6 +1,8 @@
 """API serializers implementation for the LifeCycle Management plugin."""
 from rest_framework import serializers
 
+from nautobot.core.api import SerializedPKRelatedField
+
 from nautobot.dcim.api.nested_serializers import (
     NestedDeviceSerializer,
     NestedDeviceTypeSerializer,
@@ -13,6 +15,7 @@ from nautobot.extras.models import Status
 
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
+    SoftwareImageLCM,
     SoftwareLCM,
     ContactLCM,
     ValidatedSoftwareLCM,
@@ -23,6 +26,7 @@ from nautobot_device_lifecycle_mgmt.models import (
 )
 
 from .nested_serializers import (
+    NestedSoftwareImageLCMSerializer,
     NestedSoftwareLCMSerializer,
     NestedProviderLCMSerializer,
     NestedContractLCMSerializer,
@@ -132,6 +136,12 @@ class SoftwareLCMSerializer(TaggedObjectSerializer, CustomFieldModelSerializer):
         view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwarelcm-detail"
     )
     device_platform = NestedPlatformSerializer()
+    software_images = SerializedPKRelatedField(
+        queryset=SoftwareImageLCM.objects.all(),
+        serializer=NestedSoftwareImageLCMSerializer,
+        required=False,
+        many=True,
+    )
 
     class Meta:
         """Meta attributes."""
@@ -146,11 +156,39 @@ class SoftwareLCMSerializer(TaggedObjectSerializer, CustomFieldModelSerializer):
             "release_date",
             "end_of_support",
             "documentation_url",
-            "download_url",
-            "image_file_name",
-            "image_file_checksum",
+            "software_images",
             "long_term_support",
             "pre_release",
+            "custom_fields",
+            "tags",
+        ]
+
+
+class SoftwareImageLCMSerializer(
+    CustomFieldModelSerializer, TaggedObjectSerializer
+):  # pylint: disable=too-many-ancestors
+    """REST API serializer for SoftwareImageLCM records."""
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwareimagelcm-detail"
+    )
+    software = NestedSoftwareLCMSerializer()
+
+    class Meta:
+        """Meta attributes."""
+
+        model = SoftwareImageLCM
+        fields = [
+            "id",
+            "url",
+            "image_file_name",
+            "software",
+            "device_types",
+            "inventory_items",
+            "object_tags",
+            "download_url",
+            "image_file_checksum",
+            "default_image",
             "custom_fields",
             "tags",
         ]

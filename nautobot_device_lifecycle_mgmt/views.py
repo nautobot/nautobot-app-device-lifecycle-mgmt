@@ -9,9 +9,11 @@ from matplotlib.ticker import MaxNLocator
 import numpy as np
 
 from django.db.models import Q, F, Count, ExpressionWrapper, FloatField
+from django_tables2 import RequestConfig
 
 from nautobot.core.views import generic
 from nautobot.dcim.models import Device
+from nautobot.utilities.paginator import EnhancedPaginator, get_paginate_count
 from nautobot.utilities.views import ContentTypePermissionRequiredMixin
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.models import (
@@ -25,6 +27,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ProviderLCM,
     CVELCM,
     VulnerabilityLCM,
+    SoftwareImageLCM,
 )
 from nautobot_device_lifecycle_mgmt.tables import (
     HardwareLCMTable,
@@ -37,6 +40,7 @@ from nautobot_device_lifecycle_mgmt.tables import (
     ContactLCMTable,
     CVELCMTable,
     VulnerabilityLCMTable,
+    SoftwareImageLCMTable,
 )
 from nautobot_device_lifecycle_mgmt.forms import (
     HardwareLCMForm,
@@ -70,6 +74,9 @@ from nautobot_device_lifecycle_mgmt.forms import (
     VulnerabilityLCMForm,
     VulnerabilityLCMFilterForm,
     VulnerabilityLCMBulkEditForm,
+    SoftwareImageLCMForm,
+    SoftwareImageLCMFilterForm,
+    SoftwareImageLCMCSVForm,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -82,9 +89,11 @@ from nautobot_device_lifecycle_mgmt.filters import (
     InventoryItemSoftwareValidationResultFilterSet,
     CVELCMFilterSet,
     VulnerabilityLCMFilterSet,
+    SoftwareImageLCMFilterSet,
 )
 
 from nautobot_device_lifecycle_mgmt.const import URL, PLUGIN_CFG
+from nautobot_device_lifecycle_mgmt.utils import count_related_m2m
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 
@@ -202,6 +211,20 @@ class SoftwareLCMView(generic.ObjectView):
 
     queryset = SoftwareLCM.objects.prefetch_related("device_platform")
 
+    def get_extra_context(self, request, instance):
+        """Display SoftwareImageLCM objects associated with the SoftwareLCM object."""
+        softwareimages = instance.software_images.restrict(request.user, "view")
+        if softwareimages.exists():
+            softwareimages_table = SoftwareImageLCMTable(data=softwareimages, user=request.user, orderable=False)
+        else:
+            softwareimages_table = None
+
+        extra_context = {
+            "softwareimages_table": softwareimages_table,
+        }
+
+        return extra_context
+
 
 class SoftwareLCMCreateView(generic.ObjectEditView):
     """SoftwareLCM Create view."""
@@ -237,6 +260,97 @@ class SoftwareLCMBulkImportView(generic.BulkImportView):
     model_form = SoftwareLCMCSVForm
     table = SoftwareLCMTable
     default_return_url = "plugins:nautobot_device_lifecycle_mgmt:softwarelcm_list"
+
+
+class SoftwareSoftwareImagesLCMView(generic.ObjectView):
+    """Software Images tab for Software view."""
+
+    queryset = SoftwareLCM.objects.all()
+    template_name = "nautobot_device_lifecycle_mgmt/softwarelcm_software_images.html"
+
+    def get_extra_context(self, request, instance):
+        """Adds Software Images table."""
+        softwareimages = (
+            instance.software_images.annotate(device_type_count=count_related_m2m(SoftwareImageLCM, "device_types"))
+            .annotate(object_tag_count=count_related_m2m(SoftwareImageLCM, "object_tags"))
+            .restrict(request.user, "view")
+        )
+
+        if softwareimages.exists():
+            softwareimages_table = SoftwareImageLCMTable(data=softwareimages, user=request.user, orderable=False)
+        else:
+            softwareimages_table = None
+
+        paginate = {
+            "paginator_class": EnhancedPaginator,
+            "per_page": get_paginate_count(request),
+        }
+        RequestConfig(request, paginate).configure(softwareimages_table)
+
+        return {
+            "softwareimages_table": softwareimages_table,
+            "active_tab": "software-images",
+        }
+
+
+class SoftwareImageLCMListView(generic.ObjectListView):
+    """SoftwareImageLCM List view."""
+
+    queryset = SoftwareImageLCM.objects.annotate(
+        device_type_count=count_related_m2m(SoftwareImageLCM, "device_types")
+    ).annotate(object_tag_count=count_related_m2m(SoftwareImageLCM, "object_tags"))
+    filterset = SoftwareImageLCMFilterSet
+    filterset_form = SoftwareImageLCMFilterForm
+    table = SoftwareImageLCMTable
+    action_buttons = (
+        "add",
+        "delete",
+        "import",
+        "export",
+    )
+    template_name = "nautobot_device_lifecycle_mgmt/softwareimagelcm_list.html"
+
+
+class SoftwareImageLCMView(generic.ObjectView):
+    """SoftwareImageLCM Detail view."""
+
+    queryset = SoftwareImageLCM.objects.all()
+
+
+class SoftwareImageLCMEditView(generic.ObjectEditView):
+    """SoftwareImageLCM Create/Edit view."""
+
+    queryset = SoftwareImageLCM.objects.all()
+    model_form = SoftwareImageLCMForm
+    template_name = "nautobot_device_lifecycle_mgmt/softwareimagelcm_edit.html"
+    default_return_url = URL.SoftwareImageLCM.List
+
+
+class SoftwareImageLCMDeleteView(generic.ObjectDeleteView):
+    """SoftwareImageLCM Delete view."""
+
+    model = SoftwareImageLCM
+    queryset = SoftwareImageLCM.objects.all()
+    default_return_url = URL.SoftwareImageLCM.List
+    template_name = "nautobot_device_lifecycle_mgmt/softwareimagelcm_delete.html"
+
+
+class SoftwareImageLCMBulkDeleteView(generic.BulkDeleteView):
+    """View for deleting one or more SoftwareImageLCM objects."""
+
+    queryset = SoftwareImageLCM.objects.all()
+    table = SoftwareImageLCMTable
+    bulk_delete_url = "plugins:nautobot_device_lifecycle_mgmt.softwareimagelcm_bulk_delete"
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_list"
+
+
+class SoftwareImageLCMBulkImportView(generic.BulkImportView):
+    """View for bulk import of SoftwareImageLCM."""
+
+    queryset = SoftwareImageLCM.objects.all()
+    model_form = SoftwareImageLCMCSVForm
+    table = SoftwareImageLCMTable
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_list"
 
 
 class ValidatedSoftwareLCMListView(generic.ObjectListView):

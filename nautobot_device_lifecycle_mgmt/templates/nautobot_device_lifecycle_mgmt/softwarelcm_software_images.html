@@ -1,0 +1,11 @@
+{% extends 'nautobot_device_lifecycle_mgmt/softwarelcm.html' %}
+
+{% block title %}{{ block.super }} - Software Images{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-8">
+            {% include 'utilities/obj_table.html' with table=softwareimages_table table_template='panel_table.html' heading='Software Images' %}
+        </div>
+    </div>
+{% endblock %}
