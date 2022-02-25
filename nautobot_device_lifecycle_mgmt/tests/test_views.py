@@ -304,12 +304,3 @@ class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pyli
 
     def test_bulk_edit_objects_without_permission(self):
         pass
-
-    def test_bulk_delete_objects_with_constrained_permission(self):
-        pass
-
-    def test_bulk_delete_objects_with_permission(self):
-        pass
-
-    def test_bulk_delete_objects_without_permission(self):
-        pass

@@ -349,6 +349,10 @@ class SoftwareImageLCMFilterForm(BootstrapMixin, forms.ModelForm):
         help_text="Search for image name or software version.",
     )
     software = DynamicModelMultipleChoiceField(required=False, queryset=SoftwareLCM.objects.all())
+    image_file_name = forms.CharField(
+        required=False,
+        label="Image File name",
+    )
     device_types = DynamicModelMultipleChoiceField(
         queryset=DeviceType.objects.all(),
         to_field_name="model",
@@ -356,31 +360,13 @@ class SoftwareImageLCMFilterForm(BootstrapMixin, forms.ModelForm):
     )
     inventory_items = DynamicModelMultipleChoiceField(
         queryset=InventoryItem.objects.all(),
-        to_field_name="name",
+        to_field_name="id",
         required=False,
     )
     object_tags = DynamicModelMultipleChoiceField(
         queryset=Tag.objects.all(),
         to_field_name="slug",
         required=False,
-    )
-    device_name = DynamicModelMultipleChoiceField(
-        queryset=Device.objects.all(),
-        to_field_name="name",
-        required=False,
-        label="Device",
-    )
-    device_name = DynamicModelMultipleChoiceField(
-        queryset=Device.objects.all(),
-        to_field_name="name",
-        required=False,
-        label="Device",
-    )
-    inventory_item_id = DynamicModelMultipleChoiceField(
-        queryset=InventoryItem.objects.all(),
-        to_field_name="id",
-        required=False,
-        label="Inventory Item",
     )
     default_image = forms.BooleanField(required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES))
 
@@ -397,8 +383,6 @@ class SoftwareImageLCMFilterForm(BootstrapMixin, forms.ModelForm):
             "device_types",
             "inventory_items",
             "object_tags",
-            "device_name",
-            "inventory_item_id",
             "default_image",
         ]
 

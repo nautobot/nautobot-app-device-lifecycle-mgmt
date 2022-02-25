@@ -53,6 +53,7 @@ urlpatterns = [
     path("software-image/", views.SoftwareImageLCMListView.as_view(), name="softwareimagelcm_list"),
     path("software-image/<uuid:pk>/", views.SoftwareImageLCMView.as_view(), name="softwareimagelcm"),
     path("software-image/add/", views.SoftwareImageLCMEditView.as_view(), name="softwareimagelcm_add"),
+    path("software-image/delete/", views.SoftwareImageLCMBulkDeleteView.as_view(), name="softwareimagelcm_bulk_delete"),
     path(
         "software-image/<uuid:pk>/delete/", views.SoftwareImageLCMDeleteView.as_view(), name="softwareimagelcm_delete"
     ),

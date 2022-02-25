@@ -171,9 +171,9 @@ class SoftwareImageLCMFilterSet(django_filters.FilterSet):
         label="Inventory Items",
     )
     inventory_items = django_filters.ModelMultipleChoiceFilter(
-        field_name="inventory_items__name",
+        field_name="inventory_items__id",
         queryset=InventoryItem.objects.all(),
-        to_field_name="name",
+        to_field_name="id",
         label="Inventory Items (name)",
     )
     object_tags_id = django_filters.ModelMultipleChoiceFilter(
@@ -206,8 +206,6 @@ class SoftwareImageLCMFilterSet(django_filters.FilterSet):
             "inventory_items",
             "object_tags",
             "default_image",
-            "device_name",
-            "inventory_item_id",
         ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use

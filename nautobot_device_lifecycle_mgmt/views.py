@@ -335,6 +335,15 @@ class SoftwareImageLCMDeleteView(generic.ObjectDeleteView):
     template_name = "nautobot_device_lifecycle_mgmt/softwareimagelcm_delete.html"
 
 
+class SoftwareImageLCMBulkDeleteView(generic.BulkDeleteView):
+    """View for deleting one or more SoftwareImageLCM objects."""
+
+    queryset = SoftwareImageLCM.objects.all()
+    table = SoftwareImageLCMTable
+    bulk_delete_url = "plugins:nautobot_device_lifecycle_mgmt.softwareimagelcm_bulk_delete"
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_list"
+
+
 class SoftwareImageLCMBulkImportView(generic.BulkImportView):
     """View for bulk import of SoftwareImageLCM."""
 
