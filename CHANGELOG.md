@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## v0.5.0 - 02-28-2022
+- PR#55: Added Software Image model. Removed image related fields from Software model.
+
 ## v0.4.1 - 02-18-2022
 - PR#65: Fixed buttons for non-superuser on many model Detail views
 
