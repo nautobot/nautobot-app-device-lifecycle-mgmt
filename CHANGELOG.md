@@ -1,5 +1,20 @@
 # CHANGELOG
 
+
+## v1.0.0 - 02-28-2022
+
+### Added
+
+- PR#55: Added Software Image model.
+
+### Removed
+
+- PR#55: Removed image related fields from Software model.
+
+**!!! NOTE** This release contains backwards incompatible changes. Software model fields `image_file_name`, `download_url` and `image_file_checksum` have been removed.
+
+As part of the migrations to v1.0.0, a Software Image object, linked to relevant Software object, will be automatically created for each Software that had software image defined.
+
 ## v0.4.1 - 02-18-2022
 - PR#65: Fixed buttons for non-superuser on many model Detail views
 
