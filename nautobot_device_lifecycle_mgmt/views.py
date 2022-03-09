@@ -276,10 +276,7 @@ class SoftwareSoftwareImagesLCMView(generic.ObjectView):
             .restrict(request.user, "view")
         )
 
-        if softwareimages.exists():
-            softwareimages_table = SoftwareImageLCMTable(data=softwareimages, user=request.user, orderable=False)
-        else:
-            softwareimages_table = None
+        softwareimages_table = SoftwareImageLCMTable(data=softwareimages, user=request.user, orderable=False)
 
         paginate = {
             "paginator_class": EnhancedPaginator,
