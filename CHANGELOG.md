@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v1.0.1 - 03-09-2022
+
+### Fixed
+
+- PR#72: Fixes Software Images tab rendering error in the Software details view when Software does not have Software Images linked.
+- PR#73: Fixes occasional post migrate signal failure.
+
 
 ## v1.0.0 - 03-02-2022
 
