@@ -58,18 +58,8 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: d
             "c9200-48, 2023-10-06, 2024-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
         )
 
-    # The following tests are being passed due to import not being implemented at this time
-    # def test_bulk_import_object_with_constrained_permission(self):
-    #     pass
-
-    # def test_bulk_import_objects_with_permission(self):
-    #     pass
-
-    # def test_bulk_import_objects_without_permission(self):
-    #     pass
-
-    # def test_bulk_import_objects_with_constrained_permission(self):
-    #     pass
+    def test_has_advanced_tab(self):
+        pass
 
 
 class ValidatedSoftwareDeviceReportViewTest(
@@ -214,6 +204,9 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disabl
     def test_bulk_import_objects_without_permission(self):
         pass
 
+    def test_has_advanced_tab(self):
+        pass
+
 
 class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
     """Test the VulnerabilityLCM views."""
@@ -252,6 +245,9 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pyli
 
     # Disabling create view as these models are generated via Job.
     def test_create_object_without_permission(self):
+        pass
+
+    def test_has_advanced_tab(self):
         pass
 
 
@@ -303,4 +299,7 @@ class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pyli
         pass
 
     def test_bulk_edit_objects_without_permission(self):
+        pass
+
+    def test_has_advanced_tab(self):
         pass
