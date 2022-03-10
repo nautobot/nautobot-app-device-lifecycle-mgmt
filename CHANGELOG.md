@@ -1,5 +1,13 @@
 # CHANGELOG
 
+
+## v1.0.2 - 03-10-2022
+
+### Fixed
+
+- PR#75: Fixes data migration bug, between Software and Software Image, when upgrading from version < v1.0.0.
+
+
 ## v1.0.1 - 03-09-2022
 
 ### Fixed
