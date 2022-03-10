@@ -14,7 +14,7 @@ def migrate_software_images(apps, schema_editor):
         software_image = SoftwareImageLCM(
             software=software,
             image_file_name=software.image_file_name,
-            image_file_checksum=software.image_file_name,
+            image_file_checksum=software.image_file_checksum,
             download_url=software.download_url,
             default_image=True,
         )
