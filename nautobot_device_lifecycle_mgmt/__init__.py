@@ -29,10 +29,15 @@ class DeviceLifeCycleConfig(PluginConfig):
     author_email = "opensource@networktocode.com"
     description = "Manages device lifecycle of Nautobot Devices and Components."
     base_url = "nautobot-device-lifecycle-mgmt"
-    required_settings = []
+    required_settings = ["barchart_bar_width", "barchart_width", "barchart_height"]
     min_version = "1.0.0"
     max_version = "1.9999"
-    default_settings = {"expired_field": "end_of_support"}
+    default_settings = {
+        "expired_field": "end_of_support",
+        "barchart_bar_width": 0.1,
+        "barchart_width": 12,
+        "barchart_height": 5,
+    }
     caching_config = {}
 
     def ready(self):
