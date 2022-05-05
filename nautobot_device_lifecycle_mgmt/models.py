@@ -392,9 +392,9 @@ class ValidatedSoftwareLCM(PrimaryModel):
         """Return True if software is currently valid, else return False."""
         today = date.today()
         if self.end:
-            return self.end >= today > self.start
+            return self.end >= today >= self.start
 
-        return today > self.start
+        return today >= self.start
 
     def save(self, *args, **kwargs):
         """Override save to assert a full clean."""
