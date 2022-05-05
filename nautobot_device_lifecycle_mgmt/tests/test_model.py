@@ -171,6 +171,7 @@ class SoftwareLCMTestCase(TestCase):
         self.assertEqual(softwarelcm_full.pre_release, True)
         self.assertEqual(str(softwarelcm_full), f"{self.device_platform.name} - {softwarelcm_full.version}")
 
+
 class ValidatedSoftwareLCMTestCase(TestCase):
     """Tests for the ValidatedSoftwareLCM model."""
 
@@ -258,6 +259,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):
         with time_machine.travel(date_start_valid):
             self.assertEqual(validatedsoftwarelcm_start_only.valid, True)
             self.assertEqual(validatedsoftwarelcm_start_end.valid, True)
+
 
 class DeviceSoftwareValidationResultTestCase(TestCase):
     """Tests for the DeviceSoftwareValidationResult model."""
