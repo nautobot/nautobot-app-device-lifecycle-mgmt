@@ -242,6 +242,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):
         date_valid = date(2021, 6, 11)
         date_before_valid_start = date(2018, 9, 26)
         date_after_valid_end = date(2023, 1, 4)
+        date_start_valid = date(2020, 4, 15)
 
         with time_machine.travel(date_valid):
             self.assertEqual(validatedsoftwarelcm_start_only.valid, True)
@@ -254,6 +255,10 @@ class ValidatedSoftwareLCMTestCase(TestCase):
         with time_machine.travel(date_after_valid_end):
             self.assertEqual(validatedsoftwarelcm_start_only.valid, True)
             self.assertEqual(validatedsoftwarelcm_start_end.valid, False)
+
+        with time_machine.travel(date_start_valid):
+            self.assertEqual(validatedsoftwarelcm_start_only.valid, True)
+            self.assertEqual(validatedsoftwarelcm_start_end.valid, True)
 
 
 class DeviceSoftwareValidationResultTestCase(TestCase):
