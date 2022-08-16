@@ -75,8 +75,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.7", "3.8", "3.9"]
-        nautobot-version: ["1.1.6", "stable"]
+        python-version: ["3.8", "3.9"]
+        nautobot-version: ["1.2.11", "1.3.10"]
     env:
       INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_PYTHON_VER: "${{ matrix.python-version }}"
       INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_NAUTOBOT_VER: "${{ matrix.nautobot-version }}"
@@ -118,8 +118,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.7"]
-        nautobot-version: ["1.1.6"]
+        python-version: ["3.8"]
+        nautobot-version: ["1.2.11"]
     env:
       INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_PYTHON_VER: "${{ matrix.python-version }}"
       INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_NAUTOBOT_VER: "${{ matrix.nautobot-version }}"
@@ -146,8 +146,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.7", "3.8", "3.9"]
-        nautobot-version: ["1.1.6", "stable"]
+        python-version: ["3.8", "3.9"]
+        nautobot-version: ["1.2.11", "1.3.10"]
     runs-on: "ubuntu-20.04"
     env:
       INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_PYTHON_VER: "${{ matrix.python-version }}"
