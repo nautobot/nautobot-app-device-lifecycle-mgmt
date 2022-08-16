@@ -17,7 +17,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7"
 pycountry = "^22.3.5"
 matplotlib = "^3.3.4"
 nautobot = "^1.2.0"
@@ -66,8 +66,7 @@ exclude = '''
 
 [tool.pylint.master]
 # Include the pylint_django plugin to avoid spurious warnings about Django patterns
-# Enabling optional "no_self_use" extension as per https://pylint.pycqa.org/en/latest/whatsnew/2/2.14/summary.html#removed-checkers
-load-plugins="pylint_django,pylint.extensions.no_self_use"
+load-plugins="pylint_django"
 ignore=["nautobot_device_lifecycle_mgmt/migrations"]
 
 [tool.pylint.basic]

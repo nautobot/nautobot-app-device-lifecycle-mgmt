@@ -31,7 +31,10 @@ COPY poetry.lock pyproject.toml /tmp/install/
 # to install the correct version based on the NAUTOBOT_VER argument
 # Otherwise Poetry will override the version in this container
 # with the one in the poetry.lock
-RUN poetry add nautobot=${NAUTOBOT_VER}
+RUN if [ "$NAUTOBOT_VER" = "stable" ]; \
+    then poetry add nautobot@latest; \
+    else poetry add nautobot==${NAUTOBOT_VER}; \
+    fi
 
 # --no-root declares not to install the project package since we're wanting to take advantage of caching dependency installation
 # and the project is copied in and installed after this step
