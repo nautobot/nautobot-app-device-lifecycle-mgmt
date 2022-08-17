@@ -135,7 +135,6 @@ class DeviceTypeSoftwareLCMAndValidatedSoftwareLCM(
         """Display table on right side of page."""
         extra_context = {
             "validsoft_table": self.device_type_software.get_validated_software_table(),
-            "obj_soft_valid": self.device_type_software.validate_software(),
         }
 
         return self.render(

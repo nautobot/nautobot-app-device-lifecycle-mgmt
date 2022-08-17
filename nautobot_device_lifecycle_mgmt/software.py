@@ -86,4 +86,3 @@ class DeviceTypeSoftware(ItemSoftware):
     """Computes validated software objects for Device Type objects."""
 
     soft_obj_model = DeviceType
-    soft_relation_name = "device_type_soft"

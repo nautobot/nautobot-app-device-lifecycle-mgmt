@@ -205,9 +205,7 @@ class DeviceTypeValidatedSoftwareFilter:  # pylint: disable=too-few-public-metho
 
     def filter_qs(self):
         """Returns filtered ValidatedSoftwareLCM query set."""
-        self.validated_software_qs = self.validated_software_qs.filter(
-            Q(device_types=self.item_obj) | Q(device_types=None)
-        ).distinct()
+        self.validated_software_qs = self.validated_software_qs.filter(device_types=self.item_obj.pk)
 
         self.validated_software_qs = self._add_weights().order_by("weight", "start")
 
@@ -217,21 +215,8 @@ class DeviceTypeValidatedSoftwareFilter:  # pylint: disable=too-few-public-metho
         """Adds weights to allow ordering of the ValidatedSoftwareLCM assignments."""
         return self.validated_software_qs.annotate(
             weight=Case(
-                When(devices=self.item_obj.pk, preferred=True, then=Value(10)),
-                When(devices=self.item_obj.pk, preferred=False, then=Value(1000)),
-                When(
-                    device_types=self.item_obj,
-                    preferred=True,
-                    then=Value(20),
-                ),
-                When(
-                    device_types=self.item_obj,
-                    preferred=False,
-                    then=Value(1010),
-                ),
-                When(device_types=self.item_obj, preferred=True, then=Value(30)),
-                When(device_types=self.item_obj, preferred=False, then=Value(1030)),
-                When(preferred=True, then=Value(990)),
+                When(preferred=True, then=Value(10)),
+                When(preferred=False, then=Value(1000)),
                 default=Value(1990),
                 output_field=IntegerField(),
             )
