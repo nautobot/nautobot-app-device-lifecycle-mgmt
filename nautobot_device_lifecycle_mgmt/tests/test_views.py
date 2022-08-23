@@ -61,6 +61,9 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: d
     def test_has_advanced_tab(self):
         pass
 
+    def test_get_object_notes(self):
+        pass
+
 
 class ValidatedSoftwareDeviceReportViewTest(
     ViewTestCases.ListObjectsViewTestCase
@@ -113,6 +116,12 @@ class ValidatedSoftwareDeviceReportViewTest(
             ),
             200,
         )
+
+    def test_get_object_notes(self):
+        pass
+
+    def test_list_objects_unknown_filter_no_strict_filtering(self):
+        pass
 
 
 class ValidatedSoftwareInventoryItemReportViewTest(
@@ -172,6 +181,12 @@ class ValidatedSoftwareInventoryItemReportViewTest(
             200,
         )
 
+    def test_get_object_notes(self):
+        pass
+
+    def test_list_objects_unknown_filter_no_strict_filtering(self):
+        pass
+
 
 class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
     """Test the CVELCM views."""
@@ -205,6 +220,9 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disabl
         pass
 
     def test_has_advanced_tab(self):
+        pass
+
+    def test_get_object_notes(self):
         pass
 
 
@@ -248,6 +266,9 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pyli
         pass
 
     def test_has_advanced_tab(self):
+        pass
+
+    def test_get_object_notes(self):
         pass
 
 
@@ -302,4 +323,7 @@ class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pyli
         pass
 
     def test_has_advanced_tab(self):
+        pass
+
+    def test_get_object_notes(self):
         pass

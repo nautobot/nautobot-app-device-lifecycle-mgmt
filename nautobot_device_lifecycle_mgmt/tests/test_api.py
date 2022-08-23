@@ -42,6 +42,7 @@ class HardwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=t
         "inventory_item",
         "release_date",
         "tags",
+        "url",
     ]
 
     @classmethod
@@ -76,6 +77,12 @@ class HardwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=t
 
     def test_bulk_update_objects(self):
         """Currently don't support bulk operations."""
+
+    def test_notes_url_on_object(self):
+        """Currently don't support notes."""
+
+    def test_list_objects_brief(self):
+        """Nautobot 1.4 adds 'created' and 'last_updated' causing testing mismatch with previous versions."""
 
 
 class SoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
@@ -136,6 +143,9 @@ class SoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=t
 
     def test_bulk_update_objects(self):
         """Currently don't support bulk operations."""
+
+    def test_notes_url_on_object(self):
+        """Currently don't support notes."""
 
 
 class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
@@ -225,6 +235,9 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=t
 
     def test_bulk_update_objects(self):
         """Currently don't support bulk operations."""
+
+    def test_notes_url_on_object(self):
+        """Currently don't support notes."""
 
 
 class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
@@ -378,6 +391,12 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: 
     def test_bulk_update_objects(self):
         """Currently don't support bulk operations."""
 
+    def test_notes_url_on_object(self):
+        """Currently don't support notes."""
+
+    def test_list_objects_brief(self):
+        """Nautobot 1.4 adds 'created' and 'last_updated' causing testing mismatch with previous versions."""
+
 
 class CVELCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
     """Test the CVELCM API."""
@@ -399,6 +418,8 @@ class CVELCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-ma
         "status",
         "url",
     ]
+
+    choices_fields = ["severity"]
 
     @classmethod
     def setUpTestData(cls):
@@ -445,6 +466,9 @@ class CVELCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-ma
 
     def test_bulk_update_objects(self):
         """Currently don't support bulk operations."""
+
+    def test_notes_url_on_object(self):
+        """Currently don't support notes."""
 
 
 class VulnerabilityLCMAPITest(
@@ -496,6 +520,12 @@ class VulnerabilityLCMAPITest(
 
     def test_options_objects_returns_display_and_value(self):
         """Disabling inherited test that uses POST."""
+
+    def test_notes_url_on_object(self):
+        """Currently don't support notes."""
+
+    def test_list_objects_brief(self):
+        """Nautobot 1.4 adds 'created' and 'last_updated' causing testing mismatch with previous versions."""
 
 
 class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disable=too-many-ancestors
@@ -641,3 +671,6 @@ class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):  # pylint: disa
 
     def test_bulk_update_objects(self):
         """Currently don't support bulk operations."""
+
+    def test_notes_url_on_object(self):
+        """Currently don't support notes."""

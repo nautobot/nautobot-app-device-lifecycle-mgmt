@@ -32,7 +32,7 @@ from nautobot_device_lifecycle_mgmt.software_filters import (
     "relationships",
     "webhooks",
 )
-class HardwareLCM(PrimaryModel):
+class HardwareLCM(PrimaryModel):  # pylint: disable=too-many-ancestors
     """HardwareLCM model for plugin."""
 
     # Set model columns
@@ -180,7 +180,7 @@ class SoftwareLCMQuerySet(RestrictedQuerySet):
     "statuses",
     "webhooks",
 )
-class SoftwareLCM(PrimaryModel):
+class SoftwareLCM(PrimaryModel):  # pylint: disable=too-many-ancestors
     """Software Life-Cycle Management model."""
 
     device_platform = models.ForeignKey(to="dcim.Platform", on_delete=models.CASCADE, verbose_name="Device Platform")
@@ -264,7 +264,7 @@ class SoftwareImageLCMQuerySet(RestrictedQuerySet):
     "statuses",
     "webhooks",
 )
-class SoftwareImageLCM(PrimaryModel):
+class SoftwareImageLCM(PrimaryModel):  # pylint: disable=too-many-ancestors
     """SoftwareImageLCM model."""
 
     image_file_name = models.CharField(blank=False, max_length=100, verbose_name="Image File Name")
@@ -347,7 +347,7 @@ class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):
     "statuses",
     "webhooks",
 )
-class ValidatedSoftwareLCM(PrimaryModel):
+class ValidatedSoftwareLCM(PrimaryModel):  # pylint: disable=too-many-ancestors
     """ValidatedSoftwareLCM model."""
 
     software = models.ForeignKey(to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Software Version")
@@ -435,7 +435,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
 @extras_features(
     "graphql",
 )
-class DeviceSoftwareValidationResult(PrimaryModel):
+class DeviceSoftwareValidationResult(PrimaryModel):  # pylint: disable=too-many-ancestors
     """Device Software validation details model."""
 
     device = models.OneToOneField(
@@ -466,7 +466,7 @@ class DeviceSoftwareValidationResult(PrimaryModel):
 @extras_features(
     "graphql",
 )
-class InventoryItemSoftwareValidationResult(PrimaryModel):
+class InventoryItemSoftwareValidationResult(PrimaryModel):  # pylint: disable=too-many-ancestors
     """InventoryItem Software validation details model."""
 
     inventory_item = models.OneToOneField(
@@ -502,7 +502,7 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
     "relationships",
     "webhooks",
 )
-class ContractLCM(PrimaryModel):
+class ContractLCM(PrimaryModel):  # pylint: disable=too-many-ancestors
     """ContractLCM model for plugin."""
 
     # Set model columns
@@ -596,7 +596,7 @@ class ContractLCM(PrimaryModel):
     "relationships",
     "webhooks",
 )
-class ProviderLCM(OrganizationalModel):
+class ProviderLCM(OrganizationalModel):  # pylint: disable=too-many-ancestors
     """ProviderLCM model for plugin."""
 
     # Set model columns
@@ -663,7 +663,7 @@ class ProviderLCM(OrganizationalModel):
     "relationships",
     "webhooks",
 )
-class ContactLCM(PrimaryModel):
+class ContactLCM(PrimaryModel):  # pylint: disable=too-many-ancestors
     """ContactLCM is a model representation of a contact used in Contracts."""
 
     name = models.CharField(max_length=80, null=True)
@@ -742,7 +742,7 @@ class ContactLCM(PrimaryModel):
     "webhooks",
     "statuses",
 )
-class CVELCM(PrimaryModel):
+class CVELCM(PrimaryModel):  # pylint: disable=too-many-ancestors
     """CVELCM is a model representation of a cve vulnerability record."""
 
     name = models.CharField(max_length=16, blank=False, unique=True)
@@ -755,7 +755,9 @@ class CVELCM(PrimaryModel):
         to="extras.status",
     )
     description = models.CharField(max_length=255, blank=True, null=True)
-    severity = models.CharField(max_length=50, default=choices.CVESeverityChoices.NONE)
+    severity = models.CharField(
+        max_length=50, choices=choices.CVESeverityChoices, default=choices.CVESeverityChoices.NONE
+    )
     cvss = models.FloatField(blank=True, null=True, verbose_name="CVSS Base Score")
     cvss_v2 = models.FloatField(blank=True, null=True, verbose_name="CVSSv2 Score")
     cvss_v3 = models.FloatField(blank=True, null=True, verbose_name="CVSSv3 Score")
@@ -818,7 +820,7 @@ class CVELCM(PrimaryModel):
     "webhooks",
     "statuses",
 )
-class VulnerabilityLCM(PrimaryModel):
+class VulnerabilityLCM(PrimaryModel):  # pylint: disable=too-many-ancestors
     """VulnerabilityLCM is a model representation of vulnerability that affects a device."""
 
     cve = models.ForeignKey(CVELCM, on_delete=models.CASCADE, blank=True, null=True)

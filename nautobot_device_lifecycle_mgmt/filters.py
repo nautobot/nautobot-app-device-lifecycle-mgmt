@@ -1,31 +1,29 @@
 """Filtering implementation for the Lifecycle Management plugin."""
 import datetime
+
 import django_filters
 from django.db.models import Q
-
-from nautobot.dcim.models import DeviceType, Platform, Device, DeviceRole, InventoryItem, Region, Site
+from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Platform, Region, Site
+from nautobot.extras.filters import CustomFieldModelFilterSet, StatusFilter, StatusModelFilterSetMixin, TagFilter
 from nautobot.extras.models import Tag
-from nautobot.extras.filters import (
-    StatusModelFilterSetMixin,
-    CustomFieldModelFilterSet,
-    TagFilter,
-    StatusFilter,
-)
+from nautobot.utilities.filters import BaseFilterSet
+
 from nautobot_device_lifecycle_mgmt.models import (
+    CVELCM,
+    ContactLCM,
+    ContractLCM,
+    DeviceSoftwareValidationResult,
     HardwareLCM,
+    InventoryItemSoftwareValidationResult,
+    ProviderLCM,
+    SoftwareImageLCM,
     SoftwareLCM,
     ValidatedSoftwareLCM,
-    DeviceSoftwareValidationResult,
-    ContractLCM,
-    ProviderLCM,
-    ContactLCM,
-    CVELCM,
     VulnerabilityLCM,
-    SoftwareImageLCM,
 )
 
 
-class HardwareLCMFilterSet(django_filters.FilterSet):
+class HardwareLCMFilterSet(BaseFilterSet):
     """Filter for HardwareLCM."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -45,6 +43,10 @@ class HardwareLCMFilterSet(django_filters.FilterSet):
         to_field_name="inventory_item",
         field_name="inventory_item",
         label="Inventory Part ID",
+    )
+
+    documentation_url = django_filters.CharFilter(
+        lookup_expr="contains",
     )
 
     end_of_support = django_filters.DateFilter()
@@ -97,7 +99,7 @@ class HardwareLCMFilterSet(django_filters.FilterSet):
         return queryset.filter(qs_filter)
 
 
-class SoftwareLCMFilterSet(django_filters.FilterSet):
+class SoftwareLCMFilterSet(BaseFilterSet):
     """Filter for SoftwareLCM."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -109,6 +111,9 @@ class SoftwareLCMFilterSet(django_filters.FilterSet):
         label="Device Platform (Slug)",
     )
 
+    documentation_url = django_filters.CharFilter(
+        lookup_expr="contains",
+    )
     release_date = django_filters.DateTimeFromToRangeFilter()
     end_of_support = django_filters.DateTimeFromToRangeFilter()
 
@@ -139,7 +144,7 @@ class SoftwareLCMFilterSet(django_filters.FilterSet):
         return queryset.filter(qs_filter)
 
 
-class SoftwareImageLCMFilterSet(django_filters.FilterSet):
+class SoftwareImageLCMFilterSet(BaseFilterSet):
     """Filter for SoftwareImageLCM."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -252,7 +257,7 @@ class SoftwareImageLCMFilterSet(django_filters.FilterSet):
         return queryset.filter(id__in=SoftwareImageLCM.objects.get_for_object(inventory_item).values("id"))
 
 
-class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
+class ValidatedSoftwareLCMFilterSet(BaseFilterSet):
     """Filter for ValidatedSoftwareLCM."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -397,7 +402,7 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
         return ValidatedSoftwareLCM.objects.get_for_object(inventory_item)
 
 
-class DeviceSoftwareValidationResultFilterSet(django_filters.FilterSet):
+class DeviceSoftwareValidationResultFilterSet(BaseFilterSet):
     """Filter for DeviceSoftwareValidationResult."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -498,7 +503,7 @@ class DeviceSoftwareValidationResultFilterSet(django_filters.FilterSet):
         return queryset
 
 
-class InventoryItemSoftwareValidationResultFilterSet(django_filters.FilterSet):
+class InventoryItemSoftwareValidationResultFilterSet(BaseFilterSet):
     """Filter for InventoryItemSoftwareValidationResult."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -576,17 +581,6 @@ class InventoryItemSoftwareValidationResultFilterSet(django_filters.FilterSet):
         to_field_name="slug",
         label="Device Role (slug)",
     )
-    object_tag_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="object_tags",
-        queryset=Tag.objects.all(),
-        label="Object Tag",
-    )
-    object_tag = django_filters.ModelMultipleChoiceFilter(
-        field_name="object_tags__slug",
-        queryset=Tag.objects.all(),
-        to_field_name="slug",
-        label="Object Tag (slug)",
-    )
     exclude_sw_missing = django_filters.BooleanFilter(
         method="_exclude_sw_missing",
         label="Exclude missing software",
@@ -595,7 +589,7 @@ class InventoryItemSoftwareValidationResultFilterSet(django_filters.FilterSet):
     class Meta:
         """Meta attributes for filter."""
 
-        model = DeviceSoftwareValidationResult
+        model = InventoryItemSoftwareValidationResult
 
         fields = [
             "software",
@@ -606,7 +600,6 @@ class InventoryItemSoftwareValidationResultFilterSet(django_filters.FilterSet):
             "device",
             "device_type",
             "device_role",
-            "object_tag",
             "exclude_sw_missing",
         ]
 
@@ -636,15 +629,13 @@ class InventoryItemSoftwareValidationResultFilterSet(django_filters.FilterSet):
         return queryset
 
 
-class ContractLCMFilterSet(django_filters.FilterSet):
+class ContractLCMFilterSet(BaseFilterSet):
     """Filter for ContractLCMFilter."""
 
     q = django_filters.CharFilter(method="search", label="Search")
 
     provider = django_filters.ModelMultipleChoiceFilter(
-        field_name="provider__pk",
         queryset=ProviderLCM.objects.all(),
-        to_field_name="pk",
         label="Provider",
     )
 
@@ -696,7 +687,7 @@ class ContractLCMFilterSet(django_filters.FilterSet):
         return queryset.filter(qs_filter)
 
 
-class ProviderLCMFilterSet(django_filters.FilterSet):
+class ProviderLCMFilterSet(BaseFilterSet):
     """Filter for ProviderLCMFilter."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -723,7 +714,7 @@ class ProviderLCMFilterSet(django_filters.FilterSet):
         return queryset.filter(qs_filter)
 
 
-class ContactLCMFilterSet(django_filters.FilterSet):
+class ContactLCMFilterSet(BaseFilterSet):
     """Filter for ContactLCMFilterSet."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -749,7 +740,7 @@ class ContactLCMFilterSet(django_filters.FilterSet):
         return queryset.filter(qs_filter)
 
 
-class CVELCMFilterSet(StatusModelFilterSetMixin, CustomFieldModelFilterSet):
+class CVELCMFilterSet(BaseFilterSet, StatusModelFilterSetMixin, CustomFieldModelFilterSet):
     """Filter for CVELCMFilterSet."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -787,7 +778,7 @@ class CVELCMFilterSet(StatusModelFilterSetMixin, CustomFieldModelFilterSet):
         return queryset.filter(qs_filter)
 
 
-class VulnerabilityLCMFilterSet(StatusModelFilterSetMixin, CustomFieldModelFilterSet):
+class VulnerabilityLCMFilterSet(BaseFilterSet, StatusModelFilterSetMixin, CustomFieldModelFilterSet):
     """Filter for VulnerabilityLCMFilterSet."""
 
     q = django_filters.CharFilter(method="search", label="Search")

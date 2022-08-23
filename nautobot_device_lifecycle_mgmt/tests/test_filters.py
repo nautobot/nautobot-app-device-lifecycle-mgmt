@@ -8,6 +8,7 @@ import time_machine
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site, Platform
 from nautobot.extras.models import Status
 
+from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
@@ -485,24 +486,24 @@ class CVELCMTestCase(TestCase):
             name="CVE-2021-1391",
             published_date="2021-03-24",
             link="https://www.cvedetails.com/cve/CVE-2021-1391/",
-            cvss=3,
-            cvss_v2=3,
-            cvss_v3=3,
+            cvss=3.0,
+            cvss_v2=3.0,
+            cvss_v3=3.0,
         )
         CVELCM.objects.create(
             name="CVE-2021-44228",
             published_date="2021-12-10",
             link="https://www.cvedetails.com/cve/CVE-2021-44228/",
             status=not_fixed,
-            cvss=5,
-            cvss_v2=5,
-            cvss_v3=5,
+            cvss=5.0,
+            cvss_v2=5.0,
+            cvss_v3=5.0,
         )
         CVELCM.objects.create(
             name="CVE-2020-27134",
             published_date="2020-12-11",
             link="https://www.cvedetails.com/cve/CVE-2020-27134/",
-            severity="Critical",
+            severity=CVESeverityChoices.CRITICAL,
             status=fixed,
             cvss=7,
             cvss_v2=7,
@@ -536,7 +537,7 @@ class CVELCMTestCase(TestCase):
 
     def test_severity(self):
         """Test severity filter."""
-        params = {"severity": "Critical"}
+        params = {"severity": CVESeverityChoices.CRITICAL}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_published_date_before(self):
@@ -551,68 +552,68 @@ class CVELCMTestCase(TestCase):
 
     def test_cvss_gte(self):
         """Test cvss__gte filter."""
-        params = {"cvss__gte": 1}
+        params = {"cvss__gte": "1"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
-        params = {"cvss__gte": 4}
+        params = {"cvss__gte": "4"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-        params = {"cvss__gte": 6}
+        params = {"cvss__gte": "6"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-        params = {"cvss__gte": 9}
+        params = {"cvss__gte": "9"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
 
     def test_cvss_lte(self):
         """Test cvss__lte filter."""
-        params = {"cvss__lte": 1}
+        params = {"cvss__lte": "1"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
-        params = {"cvss__lte": 4}
+        params = {"cvss__lte": "4"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-        params = {"cvss__lte": 6}
+        params = {"cvss__lte": "6"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-        params = {"cvss__lte": 9}
+        params = {"cvss__lte": "9"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_cvss_v2_gte(self):
         """Test cvss_v2__gte filter."""
-        params = {"cvss_v2__gte": 1}
+        params = {"cvss_v2__gte": "1"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
-        params = {"cvss_v2__gte": 4}
+        params = {"cvss_v2__gte": "4"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-        params = {"cvss_v2__gte": 6}
+        params = {"cvss_v2__gte": "6"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-        params = {"cvss_v2__gte": 9}
+        params = {"cvss_v2__gte": "9"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
 
     def test_cvss_v2_lte(self):
         """Test cvss_v2__lte filter."""
-        params = {"cvss_v2__lte": 1}
+        params = {"cvss_v2__lte": "1"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
-        params = {"cvss_v2__lte": 4}
+        params = {"cvss_v2__lte": "4"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-        params = {"cvss_v2__lte": 6}
+        params = {"cvss_v2__lte": "6"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-        params = {"cvss_v2__lte": 9}
+        params = {"cvss_v2__lte": "9"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_cvss_v3_gte(self):
         """Test cvss_v3__gte filter."""
-        params = {"cvss_v3__gte": 1}
+        params = {"cvss_v3__gte": "1"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
-        params = {"cvss_v3__gte": 4}
+        params = {"cvss_v3__gte": "4"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-        params = {"cvss_v3__gte": 6}
+        params = {"cvss_v3__gte": "6"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-        params = {"cvss_v3__gte": 9}
+        params = {"cvss_v3__gte": "9"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
 
     def test_cvss_v3_lte(self):
         """Test cvss_v3__lte filter."""
-        params = {"cvss_v3__lte": 1}
+        params = {"cvss_v3__lte": "1"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
-        params = {"cvss_v3__lte": 4}
+        params = {"cvss_v3__lte": "4"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-        params = {"cvss_v3__lte": 6}
+        params = {"cvss_v3__lte": "6"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-        params = {"cvss_v3__lte": 9}
+        params = {"cvss_v3__lte": "9"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
 
