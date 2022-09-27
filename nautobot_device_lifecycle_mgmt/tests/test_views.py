@@ -23,7 +23,7 @@ from .conftest import create_devices, create_inventory_items, create_cves, creat
 User = get_user_model()
 
 
-class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
+class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the HardwareLCM views."""
 
     model = HardwareLCM
@@ -65,9 +65,7 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: d
         pass
 
 
-class ValidatedSoftwareDeviceReportViewTest(
-    ViewTestCases.ListObjectsViewTestCase
-):  # pylint: disable=too-many-ancestors
+class ValidatedSoftwareDeviceReportViewTest(ViewTestCases.ListObjectsViewTestCase):
     """Test ValidatedSoftwareDeviceReportView"""
 
     model = DeviceSoftwareValidationResult
@@ -124,9 +122,7 @@ class ValidatedSoftwareDeviceReportViewTest(
         pass
 
 
-class ValidatedSoftwareInventoryItemReportViewTest(
-    ViewTestCases.ListObjectsViewTestCase
-):  # pylint: disable=too-many-ancestors
+class ValidatedSoftwareInventoryItemReportViewTest(ViewTestCases.ListObjectsViewTestCase):
     """Test ValidatedSoftwareInventoryItemReportView"""
 
     model = InventoryItemSoftwareValidationResult
@@ -188,7 +184,7 @@ class ValidatedSoftwareInventoryItemReportViewTest(
         pass
 
 
-class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
+class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the CVELCM views."""
 
     model = CVELCM
@@ -226,7 +222,7 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disabl
         pass
 
 
-class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
+class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the VulnerabilityLCM views."""
 
     model = VulnerabilityLCM
@@ -272,7 +268,7 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pyli
         pass
 
 
-class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
+class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the SoftwareImageLCM views."""
 
     model = SoftwareImageLCM

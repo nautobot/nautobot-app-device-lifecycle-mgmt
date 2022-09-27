@@ -4,9 +4,19 @@ import datetime
 import django_filters
 from django.db.models import Q
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Platform, Region, Site
-from nautobot.extras.filters import CustomFieldModelFilterSet, StatusFilter, StatusModelFilterSetMixin, TagFilter
+from nautobot.extras.filters import StatusFilter, StatusModelFilterSetMixin, TagFilter
 from nautobot.extras.models import Tag
-from nautobot.utilities.filters import BaseFilterSet
+
+try:
+    from nautobot.extras.filters import NautobotFilterSet
+except ImportError:
+    # TODO: Remove once plugin no longer supports Nautobot < 1.4.0
+    from nautobot.extras.filters import CustomFieldModelFilterSet
+    from nautobot.utilities.filters import BaseFilterSet
+
+    class NautobotFilterSet(BaseFilterSet, CustomFieldModelFilterSet):
+        """Emulate NautobotFilterSet from Nautobot 1.4.0 ."""
+
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -23,7 +33,7 @@ from nautobot_device_lifecycle_mgmt.models import (
 )
 
 
-class HardwareLCMFilterSet(BaseFilterSet):
+class HardwareLCMFilterSet(NautobotFilterSet):
     """Filter for HardwareLCM."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -99,7 +109,7 @@ class HardwareLCMFilterSet(BaseFilterSet):
         return queryset.filter(qs_filter)
 
 
-class SoftwareLCMFilterSet(BaseFilterSet):
+class SoftwareLCMFilterSet(NautobotFilterSet):
     """Filter for SoftwareLCM."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -144,7 +154,7 @@ class SoftwareLCMFilterSet(BaseFilterSet):
         return queryset.filter(qs_filter)
 
 
-class SoftwareImageLCMFilterSet(BaseFilterSet):
+class SoftwareImageLCMFilterSet(NautobotFilterSet):
     """Filter for SoftwareImageLCM."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -257,7 +267,7 @@ class SoftwareImageLCMFilterSet(BaseFilterSet):
         return queryset.filter(id__in=SoftwareImageLCM.objects.get_for_object(inventory_item).values("id"))
 
 
-class ValidatedSoftwareLCMFilterSet(BaseFilterSet):
+class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
     """Filter for ValidatedSoftwareLCM."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -402,7 +412,7 @@ class ValidatedSoftwareLCMFilterSet(BaseFilterSet):
         return ValidatedSoftwareLCM.objects.get_for_object(inventory_item)
 
 
-class DeviceSoftwareValidationResultFilterSet(BaseFilterSet):
+class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
     """Filter for DeviceSoftwareValidationResult."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -503,7 +513,7 @@ class DeviceSoftwareValidationResultFilterSet(BaseFilterSet):
         return queryset
 
 
-class InventoryItemSoftwareValidationResultFilterSet(BaseFilterSet):
+class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
     """Filter for InventoryItemSoftwareValidationResult."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -629,7 +639,7 @@ class InventoryItemSoftwareValidationResultFilterSet(BaseFilterSet):
         return queryset
 
 
-class ContractLCMFilterSet(BaseFilterSet):
+class ContractLCMFilterSet(NautobotFilterSet):
     """Filter for ContractLCMFilter."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -687,7 +697,7 @@ class ContractLCMFilterSet(BaseFilterSet):
         return queryset.filter(qs_filter)
 
 
-class ProviderLCMFilterSet(BaseFilterSet):
+class ProviderLCMFilterSet(NautobotFilterSet):
     """Filter for ProviderLCMFilter."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -714,7 +724,7 @@ class ProviderLCMFilterSet(BaseFilterSet):
         return queryset.filter(qs_filter)
 
 
-class ContactLCMFilterSet(BaseFilterSet):
+class ContactLCMFilterSet(NautobotFilterSet):
     """Filter for ContactLCMFilterSet."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -740,7 +750,7 @@ class ContactLCMFilterSet(BaseFilterSet):
         return queryset.filter(qs_filter)
 
 
-class CVELCMFilterSet(BaseFilterSet, StatusModelFilterSetMixin, CustomFieldModelFilterSet):
+class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , CustomFieldModelFilterSet):
     """Filter for CVELCMFilterSet."""
 
     q = django_filters.CharFilter(method="search", label="Search")
@@ -778,7 +788,7 @@ class CVELCMFilterSet(BaseFilterSet, StatusModelFilterSetMixin, CustomFieldModel
         return queryset.filter(qs_filter)
 
 
-class VulnerabilityLCMFilterSet(BaseFilterSet, StatusModelFilterSetMixin, CustomFieldModelFilterSet):
+class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , CustomFieldModelFilterSet):
     """Filter for VulnerabilityLCMFilterSet."""
 
     q = django_filters.CharFilter(method="search", label="Search")

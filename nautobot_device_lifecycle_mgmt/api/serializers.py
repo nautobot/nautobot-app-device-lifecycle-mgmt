@@ -163,7 +163,7 @@ class ContactLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,t
         ]
 
 
-class SoftwareLCMSerializer(*serializer_base_classes):  # pylint: disable=too-many-ancestors,too-few-public-methods
+class SoftwareLCMSerializer(*serializer_base_classes):  # pylint: disable=too-few-public-methods
     """REST API serializer for SoftwareLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
@@ -198,7 +198,7 @@ class SoftwareLCMSerializer(*serializer_base_classes):  # pylint: disable=too-ma
         ]
 
 
-class SoftwareImageLCMSerializer(*serializer_base_classes):  # pylint: disable=too-many-ancestors,too-few-public-methods
+class SoftwareImageLCMSerializer(*serializer_base_classes):  # pylint: disable=too-few-public-methods
     """REST API serializer for SoftwareImageLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
@@ -226,9 +226,7 @@ class SoftwareImageLCMSerializer(*serializer_base_classes):  # pylint: disable=t
         ]
 
 
-class ValidatedSoftwareLCMSerializer(
-    *serializer_base_classes
-):  # pylint: disable=too-many-ancestors,too-few-public-methods
+class ValidatedSoftwareLCMSerializer(*serializer_base_classes):  # pylint: disable=too-few-public-methods
     """REST API serializer for ValidatedSoftwareLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
@@ -258,9 +256,7 @@ class ValidatedSoftwareLCMSerializer(
         ]
 
 
-class CVELCMSerializer(
-    *serializer_base_classes, StatusModelSerializerMixin
-):  # pylint: disable=too-many-ancestors,abstract-method
+class CVELCMSerializer(*serializer_base_classes, StatusModelSerializerMixin):  # pylint: disable=abstract-method
     """REST API serializer for CVELCM records."""
 
     url = serializers.HyperlinkedIdentityField(view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:cvelcm-detail")
@@ -292,7 +288,7 @@ class CVELCMSerializer(
 
 class VulnerabilityLCMSerializer(
     *serializer_base_classes, StatusModelSerializerMixin
-):  # pylint: disable=too-many-ancestors,abstract-method
+):  # pylint: disable=abstract-method
     """REST API serializer for VulnerabilityLCM records."""
 
     url = serializers.HyperlinkedIdentityField(

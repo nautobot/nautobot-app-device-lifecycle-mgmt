@@ -81,6 +81,7 @@ disable = """
     bad-continuation,
     duplicate-code,
     too-many-lines,
+    too-many-ancestors,
     """
 
 [tool.pylint.miscellaneous]
