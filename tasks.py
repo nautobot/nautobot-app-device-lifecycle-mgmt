@@ -60,9 +60,9 @@ namespace = Collection("nautobot_device_lifecycle_mgmt")
 namespace.configure(
     {
         "nautobot_device_lifecycle_mgmt": {
-            "nautobot_ver": "1.1.6",
+            "nautobot_ver": "1.2.11",
             "project_name": "nautobot_device_lifecycle_mgmt",
-            "python_ver": "3.7",
+            "python_ver": "3.8",
             "local": False,
             "compose_dir": os.path.join(os.path.dirname(__file__), "development"),
             "compose_files": _compose_files(),

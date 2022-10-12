@@ -755,7 +755,9 @@ class CVELCM(PrimaryModel):
         to="extras.status",
     )
     description = models.CharField(max_length=255, blank=True, null=True)
-    severity = models.CharField(max_length=50, default=choices.CVESeverityChoices.NONE)
+    severity = models.CharField(
+        max_length=50, choices=choices.CVESeverityChoices, default=choices.CVESeverityChoices.NONE
+    )
     cvss = models.FloatField(blank=True, null=True, verbose_name="CVSS Base Score")
     cvss_v2 = models.FloatField(blank=True, null=True, verbose_name="CVSSv2 Score")
     cvss_v3 = models.FloatField(blank=True, null=True, verbose_name="CVSSv3 Score")

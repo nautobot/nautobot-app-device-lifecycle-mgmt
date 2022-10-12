@@ -23,7 +23,7 @@ from .conftest import create_devices, create_inventory_items, create_cves, creat
 User = get_user_model()
 
 
-class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
+class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the HardwareLCM views."""
 
     model = HardwareLCM
@@ -61,10 +61,11 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: d
     def test_has_advanced_tab(self):
         pass
 
+    def test_get_object_notes(self):
+        pass
 
-class ValidatedSoftwareDeviceReportViewTest(
-    ViewTestCases.ListObjectsViewTestCase
-):  # pylint: disable=too-many-ancestors
+
+class ValidatedSoftwareDeviceReportViewTest(ViewTestCases.ListObjectsViewTestCase):
     """Test ValidatedSoftwareDeviceReportView"""
 
     model = DeviceSoftwareValidationResult
@@ -114,10 +115,14 @@ class ValidatedSoftwareDeviceReportViewTest(
             200,
         )
 
+    def test_get_object_notes(self):
+        pass
 
-class ValidatedSoftwareInventoryItemReportViewTest(
-    ViewTestCases.ListObjectsViewTestCase
-):  # pylint: disable=too-many-ancestors
+    def test_list_objects_unknown_filter_no_strict_filtering(self):
+        pass
+
+
+class ValidatedSoftwareInventoryItemReportViewTest(ViewTestCases.ListObjectsViewTestCase):
     """Test ValidatedSoftwareInventoryItemReportView"""
 
     model = InventoryItemSoftwareValidationResult
@@ -172,8 +177,14 @@ class ValidatedSoftwareInventoryItemReportViewTest(
             200,
         )
 
+    def test_get_object_notes(self):
+        pass
 
-class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
+    def test_list_objects_unknown_filter_no_strict_filtering(self):
+        pass
+
+
+class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the CVELCM views."""
 
     model = CVELCM
@@ -207,8 +218,11 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disabl
     def test_has_advanced_tab(self):
         pass
 
+    def test_get_object_notes(self):
+        pass
 
-class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
+
+class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the VulnerabilityLCM views."""
 
     model = VulnerabilityLCM
@@ -250,8 +264,11 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pyli
     def test_has_advanced_tab(self):
         pass
 
+    def test_get_object_notes(self):
+        pass
 
-class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
+
+class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the SoftwareImageLCM views."""
 
     model = SoftwareImageLCM
@@ -302,4 +319,7 @@ class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pyli
         pass
 
     def test_has_advanced_tab(self):
+        pass
+
+    def test_get_object_notes(self):
         pass

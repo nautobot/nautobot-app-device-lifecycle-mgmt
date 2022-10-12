@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v1.1.0 - 23-08-2022
+
+- PR#100: Adds compatibility for Nautobot 1.4. Fixes to pipeline, API serializers, filters and unit tests.
+- PR#90: Fixes Validate Software logic for computing `valid since` attribute.
+- PR#84: Add to defaults, and document, settings needed for report generation.
+
+**!!! NOTE**
+
+  - This release increases minimum supported Nautobot version to 1.2.0.
+  - Support for Python 3.6 has been removed. Minimum supported Python version is 3.7.
 
 ## v1.0.2 - 03-10-2022
 

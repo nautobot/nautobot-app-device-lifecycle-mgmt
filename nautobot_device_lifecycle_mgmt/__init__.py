@@ -7,16 +7,8 @@ except ImportError:
 
 __version__ = metadata.version(__name__)
 
-from packaging import version
-
-from django.conf import settings
-from django.db.models.signals import post_migrate
-
+from nautobot.core.signals import nautobot_database_ready
 from nautobot.extras.plugins import PluginConfig
-
-
-current_nautobot_version = version.parse(settings.VERSION)
-NAUTOBOT_GRAPHQL_FIX = version.parse("1.2.0b1")
 
 
 class DeviceLifeCycleConfig(PluginConfig):
@@ -30,7 +22,7 @@ class DeviceLifeCycleConfig(PluginConfig):
     description = "Manages device lifecycle of Nautobot Devices and Components."
     base_url = "nautobot-device-lifecycle-mgmt"
     required_settings = ["barchart_bar_width", "barchart_width", "barchart_height"]
-    min_version = "1.0.0"
+    min_version = "1.2.0"
     max_version = "1.9999"
     default_settings = {
         "expired_field": "end_of_support",
@@ -42,16 +34,9 @@ class DeviceLifeCycleConfig(PluginConfig):
 
     def ready(self):
         """Register custom signals."""
-        import nautobot_device_lifecycle_mgmt.signals  # pylint: disable=C0415,W0611 # noqa: F401
-        from .signals import (  # pylint: disable=import-outside-toplevel
-            post_migrate_create_relationships,
-        )
+        from .signals import post_migrate_create_relationships  # pylint: disable=import-outside-toplevel
 
-        # Workaround for https://github.com/nautobot/nautobot/issues/567 for Nautobot < 1.2.0b1
-        if current_nautobot_version < NAUTOBOT_GRAPHQL_FIX:
-            import nautobot.extras.graphql.types  # pylint: disable=import-outside-toplevel, unused-import # noqa: F401
-
-        post_migrate.connect(post_migrate_create_relationships, sender=self)
+        nautobot_database_ready.connect(post_migrate_create_relationships, sender=self)
 
         super().ready()
 

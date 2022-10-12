@@ -39,7 +39,7 @@ from .serializers import (
 )
 
 
-class HardwareLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
+class HardwareLCMView(ModelViewSet):
     """CRUD operations set for the Hardware Lifecycle Management view."""
 
     queryset = HardwareLCM.objects.all()
@@ -47,7 +47,7 @@ class HardwareLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
     serializer_class = HardwareLCMSerializer
 
 
-class ContractLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
+class ContractLCMView(ModelViewSet):
     """CRUD operations set for the Contract Lifecycle Management view."""
 
     queryset = ContractLCM.objects.all()
@@ -55,7 +55,7 @@ class ContractLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
     serializer_class = ContractLCMSerializer
 
 
-class ProviderLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
+class ProviderLCMView(ModelViewSet):
     """CRUD operations set for the Contract Provider Lifecycle Management view."""
 
     queryset = ProviderLCM.objects.all()
@@ -63,7 +63,7 @@ class ProviderLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
     serializer_class = ProviderLCMSerializer
 
 
-class ContactLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
+class ContactLCMView(ModelViewSet):
     """CRUD operations set for the Contact Lifecycle Management view."""
 
     queryset = ContactLCM.objects.all()
@@ -71,7 +71,7 @@ class ContactLCMView(ModelViewSet):  # pylint: disable=too-many-ancestors
     serializer_class = ContactLCMSerializer
 
 
-class SoftwareLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-ancestors
+class SoftwareLCMViewSet(CustomFieldModelViewSet):
     """REST API viewset for SoftwareLCM records."""
 
     queryset = SoftwareLCM.objects.prefetch_related("software_images")
@@ -79,7 +79,7 @@ class SoftwareLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-a
     filterset_class = SoftwareLCMFilterSet
 
 
-class SoftwareImageLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-ancestors
+class SoftwareImageLCMViewSet(CustomFieldModelViewSet):
     """REST API viewset for SoftwareImageLCM records."""
 
     queryset = SoftwareImageLCM.objects.prefetch_related("software")
@@ -87,7 +87,7 @@ class SoftwareImageLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-m
     filterset_class = SoftwareImageLCMFilterSet
 
 
-class ValidatedSoftwareLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-ancestors
+class ValidatedSoftwareLCMViewSet(CustomFieldModelViewSet):
     """REST API viewset for ValidatedSoftwareLCM records."""
 
     queryset = ValidatedSoftwareLCM.objects.all()
@@ -95,7 +95,7 @@ class ValidatedSoftwareLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=t
     filterset_class = ValidatedSoftwareLCMFilterSet
 
 
-class CVELCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-ancestors
+class CVELCMViewSet(CustomFieldModelViewSet):
     """REST API viewset for CVELCM records."""
 
     queryset = CVELCM.objects.all()
@@ -103,7 +103,7 @@ class CVELCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-ancest
     filterset_class = CVELCMFilterSet
 
 
-class VulnerabilityLCMViewSet(CustomFieldModelViewSet):  # pylint: disable=too-many-ancestors
+class VulnerabilityLCMViewSet(CustomFieldModelViewSet):
     """REST API viewset for VulnerabilityLCM records."""
 
     queryset = VulnerabilityLCM.objects.all()

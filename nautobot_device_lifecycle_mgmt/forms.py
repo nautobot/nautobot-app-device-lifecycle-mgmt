@@ -979,9 +979,7 @@ class ContactLCMCSVForm(CustomFieldModelCSVForm):
         fields = ContactLCM.csv_headers
 
 
-class CVELCMForm(
-    StatusBulkEditFormMixin, BootstrapMixin, CustomFieldModelForm, RelationshipModelForm
-):  # pylint: disable=too-many-ancestors
+class CVELCMForm(StatusBulkEditFormMixin, BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
     """CVE Lifecycle Management creation/edit form."""
 
     published_date = forms.DateField(widget=DatePicker())
@@ -1087,9 +1085,7 @@ class CVELCMCSVForm(CustomFieldModelCSVForm, StatusModelCSVFormMixin):
         fields = CVELCM.csv_headers
 
 
-class VulnerabilityLCMForm(
-    StatusBulkEditFormMixin, BootstrapMixin, CustomFieldModelForm, RelationshipModelForm
-):  # pylint: disable=too-many-ancestors
+class VulnerabilityLCMForm(StatusBulkEditFormMixin, BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
     """Vulnerability Lifecycle Management creation/edit form."""
 
     model = VulnerabilityLCM
