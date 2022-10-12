@@ -12,9 +12,7 @@ Validated Software objects are used to specify which versions of the Software ar
 
 ## Software objects
 
-Software objects represent software releases that can be assigned to devices and inventory items.
-
-When creating the Software object, the following fields are available. Fields in **bold** are mandatory.
+Software objects represent software releases that can be assigned to devices and inventory items. When creating the Software object, the following fields are available (fields in **bold** are mandatory).
 
 | Field | Description |
 | -- | -- |
@@ -32,7 +30,7 @@ When creating the Software object, the following fields are available. Fields in
 
 Example of a Software object with most fields filled in:
 
-![](images/lcm_software_software_add_example.png)
+![](../images/lcm_software_software_add_example.png)
 
 ## Software Image objects
 
@@ -51,7 +49,7 @@ When creating the Software Image object, the following fields are available. Fie
 
 Example of a Software object with most fields filled in:
 
-![](images/lcm_software_image_add.png)
+![](../images/lcm_software_image_add.png)
 
 ## Software Image assignment rules
 
@@ -78,12 +76,13 @@ When using List view search form, or API, it's possible to pass device name, dev
 To find a software image assigned to an object, that object must have Software assigned, and that Software must have at least Software Image linked to it.
 
 Order of preference:
-  - One of the Object Tags assigned to Software Image matches tag on Device/Inventory Item
-  - One of the Device Types assigned to Software Image matches the device type assigned to the Device
-  - One of the Inventory Items assigned to Software Image matches the inventory item
-  - Software Image marked as the default image
 
-**REST API example**
+- One of the Object Tags assigned to Software Image matches tag on Device/Inventory Item
+- One of the Device Types assigned to Software Image matches the device type assigned to the Device
+- One of the Inventory Items assigned to Software Image matches the inventory item
+- Software Image marked as the default image
+
+### REST API example
 
 Query:
 
@@ -129,7 +128,7 @@ Response:
 
 ```
 
-**GraphQL API example**
+### GraphQL API example
 
 Query:
 
@@ -189,7 +188,7 @@ When creating the validated software the following fields are available. Fields 
 
 Example of a Validated Software object with most fields filled in:
 
-![](images/lcm_software_validated_software_add_example.png)
+![](../images/lcm_software_validated_software_add_example.png)
 
 ## Validated Software assignment rules
 
