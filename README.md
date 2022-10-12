@@ -1,243 +1,67 @@
-# Nautobot Plugin - Device Lifecycle Management
+# Device Lifecycle Management
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/icon-NautobotDeviceLifecycleManagement.png" class="logo" height="200px">
+  <br>
+  <a href="https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/actions"><img src="https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://docs.nautobot.com/projects/device-lifecycle"><img src="https://readthedocs.org/projects/nautobot-plugin-device-lifecycle-mgmt/badge/"></a>
+  <a href="https://pypi.org/project/nautobot-device-lifecycle-mgmt/"><img src="https://img.shields.io/pypi/v/nautobot-device-lifecycle-mgmt"></a>
+  <a href="https://pypi.org/project/nautobot-device-lifecycle-mgmt/"><img src="https://img.shields.io/pypi/dm/nautobot-device-lifecycle-mgmt"></a>
+  <br>
+  An App for <a href="https://github.com/nautobot/nautobot">Nautobot</a>.
+</p>
+
+## Overview
 
 A plugin for [Nautobot](https://github.com/nautobot/nautobot) to manage device lifecycles. This plugin works by making related associations to Devices, Device Types, and Inventory Items to help provide data about the hardware end of life notices, appropriate software versions to be running on the devices, and the maintenance contracts associated with devices. This will help with the various aspects of planning Lifecycle events, and provides quick access to ancillary data about the devices in Nautobot.
 
-## Installation
+### Screenshots
 
-### Installation
+More screenshots can be found in the [Using the App](https://docs.nautobot.com/projects/device-lifecycle/user/app_overview/app_use_cases/) page in the documentation. Here's a quick overview of some of the plugin's added functionality:
 
-The plugin is available as a Python package in pypi and can be installed with pip
-
-```shell
-pip install nautobot-device-lifecycle-mgmt
-```
-
-> The plugin is compatible with Nautobot 1.1.6 and higher
-
-To ensure Nautobot Device Lifecycle Management plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-plugin-device-lifecycle-mgmt` package:
-
-```no-highlight
-# echo nautobot-device-lifecycle-mgmt >> local_requirements.txt
-```
-
-### Installation Continued
-
-Once installed, the plugin needs to be enabled in your `configuration.py`
-
-```python
-# In your configuration.py, if following docs -> /opt/nautobot/nautobot_config.py
-PLUGINS = ["nautobot_device_lifecycle_mgmt"]
-
-PLUGINS_CONFIG = {
-    "nautobot_device_lifecycle_mgmt": {
-        "barchart_bar_width": float(os.environ.get("BARCHART_BAR_WIDTH", 0.1)),
-        "barchart_width": int(os.environ.get("BARCHART_WIDTH", 12)),
-        "barchart_height": int(os.environ.get("BARCHART_HEIGHT", 5)),
-    },
-}
-
-```
-
-### Run Post Upgrade Steps
-
-Once the configuration has been updated, run the post migration script as the Nautobot user
-
-```
-nautobot-server post_upgrade
-```
-
-This should run migrations for the plugin to be ready for use.
-
-### Restart Nautobot Services
-
-As a user account that has privileges to restart services, restart the Nautobot services
-
-```
-sudo systemctl restart nautobot nautobot-worker
-```
-
-If you are on Nautobot >= 1.1.0 and have the RQ worker continuing on, also restart the RQ worker service.
-
-```
-sudo systemctl restart nautobot-rq-worker
-```
-
-## Documentation
-
-- [Plugin Upgrade Guide](./docs/plugin_upgrade.md)
-- [Software lifecycle](./docs/software_lifecycle.md)
-- [CVE Tracking](./docs/cve_tracking.md)
-
-## Usage
-
-### Adding Information into the Plugin
-
-The system currently has manual/API entry of data only. There are currently no connections to any particular vendor APIs that provide this data today. See [adding data docs](docs/add_information.md) for more info.
-
-### Hardware Lifecycle Management
-
-#### API
-
-![](docs/images/lcm_hardware_api_view.png)
-
-##### REST API Example 1
-
-Gather hardware notices that will be end of support by the end of 2021
-
-```shell script
-curl "http://$NBHOST/api/plugins/device-lifecycle/hardware/?end_of_support__lte=2021-12-31" \
--X GET \
--H  "accept: application/json" \
--H  "Authorization: Token $TOKEN" | json_pp
-````
-
-##### REST API Example 2
-
-Gather hardware notices that are currently expired.
-> NOTE: `expired` flag will honor `end_of_support` if the field exist for the record. If the field does not exist, `end_of_sale` will be used as the expired field.
-
-```shell script
-curl "http://$NBHOST/api/plugins/device-lifecycle/hardware/?expired=true" \  
--X GET \
--H  "accept: application/json" \
--H  "Authorization: Token $TOKEN" | json_pp
-```
-
-#### GraphQL Examples
-
-![](docs/images/lcm_hardware_graphql.png)
-
-## Contributing
-
-Pull requests are welcomed and automatically built and tested against multiple version of Python and multiple version of Nautobot through TravisCI.
-
-The project is packaged with a light development environment based on `docker-compose` to help with the local development of the project and to run the tests within TravisCI.
-
-The project is following Network to Code software development guideline and is leveraging:
-
-- Black, Pylint, Bandit and pydocstyle for Python linting and formatting.
-- Django unit test to ensure the plugin is working properly.
-
-### CLI Helper Commands
-
-The project is coming with a CLI helper based on [invoke](http://www.pyinvoke.org/) to help setup the development environment. The commands are listed below in 3 categories `dev environment`, `utility` and `testing`.
-
-Each command can be executed with `invoke <command>`. All commands support the arguments `--nautobot-ver` and `--python-ver` if you want to manually define the version of Python and Nautobot to use. Each command also has its own help `invoke <command> --help`
-
-#### Local dev environment
-
-```no-highlight
-  build            Build all docker images.
-  debug            Start Nautobot and its dependencies in debug mode.
-  destroy          Destroy all containers and volumes.
-  restart          Restart Nautobot and its dependencies.
-  start            Start Nautobot and its dependencies in detached mode.
-  stop             Stop Nautobot and its dependencies.
-```
-
-#### Utility
-
-```no-highlight
-  cli              Launch a bash shell inside the running Nautobot container.
-  create-user      Create a new user in django (default: admin), will prompt for password.
-  makemigrations   Run Make Migration in Django.
-  nbshell          Launch a nbshell session.
-```
-
-#### Testing
-
-```no-highlight
-  bandit           Run bandit to validate basic static code security analysis.
-  black            Run black to check that Python files adhere to its style standards.
-  flake8           This will run flake8 for the specified name and Python version.
-  pydocstyle       Run pydocstyle to validate docstring formatting adheres to NTC defined standards.
-  pylint           Run pylint code analysis.
-  tests            Run all tests for this plugin.
-  unittest         Run Django unit tests for the plugin.
-```
-
-## Screenshots
-
-### Hardware: Device Lifecycle Management List View
+**Device Lifecycle Management List View**
 
 You can view the list of Hardware/Software notices as well as filter the table.
 
-![](docs/images/lcm_hardware_list_view.png)
+![](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/lcm_hardware_list_view.png)
 
-### Hardware: Device Lifecycle Management Detail View
+**Device Lifecycle Management Detail View**
 
 You can also click a Hardware/Software Notice and see the detail view. This view provides links to the devices that are part affected by this EoX notice due to their device type.
 
-![](docs/images/lcm_hardware_detail_view.png)
+![](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/lcm_hardware_detail_view.png)
 
-### Device View
-
-You can also view the associated Hardware notice from the device. If the device is end of life or end of support the notice will be red.
-
-![](docs/images/lcm_hardware_device_view.png)
-
-### Device Type View
-
-This provides the same UI element as the device view, but within the specific device type's view.
-
-![](docs/images/lcm_hardware_device_type_view.png)
-
-### Contracts: Device Lifecycle Management Contract Detail View
-
-You can view the details of a contract along with the primary and escalation contacts. This view will also give you an association to the devices under this contract.
-
-![](docs/images/lcm_contract_detail.png)
-
-### Contracts: Device Lifecycle Management Contract Provider View
-
-You can view the details of a provider, along with a listing of the service contracts associated to the provider. Contracts that are expired will display in red.
-
-![](docs/images/lcm_contract_provider_detail.png)
-
-### Software: Software Lifecycle Management List View
+**Software Lifecycle Management List View**
 
 You can view the list of Software versions as well as filter the table.
 
-![](docs/images/lcm_software_list_view.png)
+![](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/lcm_software_list_view.png)
 
-### Software: Software Lifecycle Detail View
 
-You can also click a Software version and see the detail view. This view provides link to the list of devices and inventory items that are associated with this software object.
+## Try it out!
 
-![](docs/images/lcm_software_detail_view.png)
+This App is installed in the Nautobot Community Sandbox found over at [demo.nautobot.com](https://demo.nautobot.com/)!
 
-### Software: Software Image Lifecycle List View
+> For a full list of all the available always-on sandbox environments, head over to the main page on [networktocode.com](https://www.networktocode.com/nautobot/sandbox-environments/).
 
-You can view the list of Software Images as well as filter the table.
+## Documentation
 
-![](docs/images/lcm_software_image_list_view.png)
+Full web-based HTML documentation for this app can be found over on the [Nautobot Docs](https://docs.nautobot.com) website:
 
-### Software: Software Image Lifecycle Detail View
+- [User Guide](https://docs.nautobot.com/projects/device-lifecycle/user/app_overview/) - Overview, Using the App, Getting Started.
+- [Administrator Guide](https://docs.nautobot.com/projects/device-lifecycle/admin/install/) - How to Install, Configure, Upgrade, or Uninstall the App.
+- [Developer Guide](https://docs.nautobot.com/projects/device-lifecycle/dev/contributing/) - Extending the App, Code Reference, Contribution Guide.
+- [Release Notes / Changelog](https://docs.nautobot.com/projects/device-lifecycle/admin/release_notes/).
+- [Frequently Asked Questions](https://docs.nautobot.com/projects/device-lifecycle/user/faq/).
 
-You can also click a Software Images image name and see the detail view. This view provides view of the device types and inventory item attributes this software image applies to.
+### Contributing to the Docs
 
-![](docs/images/lcm_software_image_detail_view.png)
+You can find all the Markdown source for the App documentation under the [docs](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/tree/develop/docs) folder in this repository. For simple edits, a Markdown capable editor is sufficient - clone the repository and edit away.
 
-### Software: Validated Software Lifecycle Management List View
+If you need to view the fully generated documentation site, you can build it with [mkdocs](https://www.mkdocs.org/). A container hosting the docs will be started using the invoke commands (details in the [Development Environment Guide](https://docs.nautobot.com/projects/device-lifecycle/dev/dev_environment/#docker-development-environment)) on [http://localhost:8001](http://localhost:8001). As your changes are saved, the live docs will be automatically reloaded.
 
-You can view the list of Validated Software versions as well as filter the table.
+Any PRs with fixes or improvements are very welcome!
 
-![](docs/images/lcm_validated_software_list_view.png)
+## Questions
 
-### Software: Validated Software Lifecycle Detail View
-
-You can also click a Validated Software version and see the detail view. This view provides view of the device and inventory item attributes this validated software applies to.
-
-![](docs/images/lcm_validated_software_detail_view.png)
-
-### Software: Device View
-
-You can also view the associated Software and Validated Software versions from the device. If the Software assigned to the device matches Validated Software for this device, the Software will be displayed in green. If it's invalid it will be displayed in red.
-
-**Valid software:**
-
-![](docs/images/lcm_software_device_view_valid.png)
-
-**Invalid software:**
-
-![](docs/images/lcm_software_device_view_invalid.png)
+For any questions or comments, please check the [FAQ](https://docs.nautobot.com/projects/device-lifecycle/user/faq/) first. Feel free to also swing by the [Network to Code Slack](https://networktocode.slack.com/) (channel `#nautobot`), sign up [here](http://slack.networktocode.com/) if you don't have an account.
