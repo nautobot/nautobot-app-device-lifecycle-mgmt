@@ -15,6 +15,7 @@ class TestVersion(unittest.TestCase):
         poetry_version = toml.load(os.path.join(parent_path, "pyproject.toml"))["tool"]["poetry"]["version"]
         self.assertEqual(project_version, poetry_version)
 
+
 class TestDocsPackaging(unittest.TestCase):
     """Test Version in doc requirements is the same pyproject."""
 
