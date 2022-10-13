@@ -29,6 +29,12 @@
     </div>
     <div class="pull-right noprint">
         {% plugin_buttons object %}
+        {% if perms.nautobot_device_lifecycle_mgmt.add_softwareimagelcm and active_tab == 'software-images' %}
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_add' %}?software={{ object.pk }}" class="btn btn-success">
+                <span class="mdi mdi-plus-thick" aria-hidden="true"></span>
+                Add a Software Image
+            </a>
+        {% endif %}
         {% if perms.nautobot_device_lifecycle_mgmt.change_softwarelcm %}
             {% edit_button object %}
         {% endif %}
@@ -45,6 +51,9 @@
         <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
             <a href="{{ object.get_absolute_url }}">Software</a>
         </li>
+        <li role="presentation"{% if active_tab == 'software-images' %} class="active"{% endif %}>
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:software_software_images' pk=object.pk %}">Software Images <span class="badge">{{ object.get_software_images.count }}</span></a>
+        </li>
         <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
             <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwarelcm_changelog' pk=object.id %}">Change Log</a>
         </li>
@@ -53,7 +62,7 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <strong>Software</strong>
@@ -88,36 +97,6 @@
                         <a href="{{ object.documentation_url }}">{{ object.documentation_url }}</a>
                     {% else %}
                      <span class="text-muted">&mdash;</span>
-                    {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td>Download URL</td>
-                    <td>
-                    {% if object.download_url %}
-                        <a href="{{ object.download_url }}">{{ object.download_url }}</a>
-                    {% else %}
-                        <span class="text-muted"></span>&mdash;</span>
-                    {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td>Image File Name</td>
-                    <td>
-                    {% if object.image_file_name %}
-                        {{ object.image_file_name }}
-                    {% else %}
-                       <span class="text-muted"></span>&mdash;</span>
-                    {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td>Image File Checksum</td>
-                    <td>
-                    {% if object.image_file_checksum %}
-                        {{ object.image_file_checksum }}
-                    {% else %}
-                       <span class="text-muted"></span>&mdash;</span>
                     {% endif %}
                     </td>
                 </tr>

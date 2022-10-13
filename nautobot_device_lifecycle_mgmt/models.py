@@ -16,6 +16,10 @@ from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.software_filters import (
     DeviceValidatedSoftwareFilter,
     InventoryItemValidatedSoftwareFilter,
+    DeviceSoftwareFilter,
+    InventoryItemSoftwareFilter,
+    DeviceSoftwareImageFilter,
+    InventoryItemSoftwareImageFilter,
 )
 
 
@@ -149,6 +153,23 @@ class HardwareLCM(PrimaryModel):
         )
 
 
+class SoftwareLCMQuerySet(RestrictedQuerySet):
+    """Queryset for `SoftwareLCM` objects."""
+
+    def get_for_object(self, obj):
+        """Return all `SoftwareLCM` assigned to the given object."""
+        if not isinstance(obj, models.Model):
+            raise TypeError(f"{obj} is not an instance of Django Model class")
+        if isinstance(obj, Device):
+            qs = DeviceSoftwareFilter(qs=self, item_obj=obj).filter_qs()
+        elif isinstance(obj, InventoryItem):
+            qs = InventoryItemSoftwareFilter(qs=self, item_obj=obj).filter_qs()
+        else:
+            qs = self
+
+        return qs
+
+
 @extras_features(
     "custom_fields",
     "custom_links",
@@ -168,9 +189,6 @@ class SoftwareLCM(PrimaryModel):
     release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
     end_of_support = models.DateField(null=True, blank=True, verbose_name="End of Software Support")
     documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
-    download_url = models.URLField(blank=True, verbose_name="Download URL")
-    image_file_name = models.CharField(blank=True, max_length=100, verbose_name="Image File Name")
-    image_file_checksum = models.CharField(blank=True, max_length=256, verbose_name="Image File Checksum")
     long_term_support = models.BooleanField(verbose_name="Long Term Support", default=False)
     pre_release = models.BooleanField(verbose_name="Pre-Release", default=False)
 
@@ -181,9 +199,6 @@ class SoftwareLCM(PrimaryModel):
         "release_date",
         "end_of_support",
         "documentation_url",
-        "download_url",
-        "image_file_name",
-        "image_file_checksum",
         "long_term_support",
         "pre_release",
     ]
@@ -215,12 +230,95 @@ class SoftwareLCM(PrimaryModel):
             self.release_date,
             self.end_of_support,
             self.documentation_url,
-            self.download_url,
-            self.image_file_name,
-            self.image_file_checksum,
             self.long_term_support,
             self.pre_release,
         )
+
+    objects = SoftwareLCMQuerySet.as_manager()
+
+
+class SoftwareImageLCMQuerySet(RestrictedQuerySet):
+    """Queryset for `SoftwareImageLCM` objects."""
+
+    def get_for_object(self, obj):
+        """Return all `SoftwareImageLCM` assigned to the given object."""
+        if not isinstance(obj, models.Model):
+            raise TypeError(f"{obj} is not an instance of Django Model class")
+        if isinstance(obj, Device):
+            qs = DeviceSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()
+        elif isinstance(obj, InventoryItem):
+            qs = InventoryItemSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()
+        else:
+            qs = self
+
+        return qs
+
+
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "graphql",
+    "relationships",
+    "statuses",
+    "webhooks",
+)
+class SoftwareImageLCM(PrimaryModel):
+    """SoftwareImageLCM model."""
+
+    image_file_name = models.CharField(blank=False, max_length=100, verbose_name="Image File Name")
+    software = models.ForeignKey(
+        to="SoftwareLCM", on_delete=models.CASCADE, related_name="software_images", verbose_name="Software Version"
+    )
+    device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
+    inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="+", blank=True)
+    object_tags = models.ManyToManyField(to="extras.Tag", related_name="+", blank=True)
+    download_url = models.URLField(blank=True, verbose_name="Download URL")
+    image_file_checksum = models.CharField(blank=True, max_length=256, verbose_name="Image File Checksum")
+    default_image = models.BooleanField(verbose_name="Default Image", default=False)
+
+    csv_headers = [
+        "image_file_name",
+        "software",
+        "device_types",
+        "inventory_items",
+        "object_tags",
+        "download_url",
+        "image_file_checksum",
+        "default_image",
+    ]
+
+    class Meta:
+        """Meta attributes for SoftwareImageLCM."""
+
+        verbose_name = "Software Image"
+        ordering = ("software", "default_image", "image_file_name")
+        unique_together = ("image_file_name", "software")
+
+    def __str__(self):
+        """String representation of SoftwareImageLCM."""
+        msg = f"{self.image_file_name}"
+        return msg
+
+    def get_absolute_url(self):
+        """Returns the Detail view for SoftwareImageLCM models."""
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm", kwargs={"pk": self.pk})
+
+    def to_csv(self):
+        """Return fields for bulk view."""
+        return (
+            self.image_file_name,
+            self.software.id,
+            f'"{",".join(str(device_type["model"]) for device_type in self.device_types.values())}"',
+            f'"{",".join(str(inventory_item["id"]) for inventory_item in self.inventory_items.values())}"',
+            f'"{",".join(str(object_tag["slug"]) for object_tag in self.object_tags.values())}"',
+            self.download_url,
+            self.image_file_checksum,
+            self.default_image,
+        )
+
+    objects = SoftwareImageLCMQuerySet.as_manager()
 
 
 class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):
@@ -294,9 +392,9 @@ class ValidatedSoftwareLCM(PrimaryModel):
         """Return True if software is currently valid, else return False."""
         today = date.today()
         if self.end:
-            return self.end >= today > self.start
+            return self.end >= today >= self.start
 
-        return today > self.start
+        return today >= self.start
 
     def save(self, *args, **kwargs):
         """Override save to assert a full clean."""
@@ -657,7 +755,9 @@ class CVELCM(PrimaryModel):
         to="extras.status",
     )
     description = models.CharField(max_length=255, blank=True, null=True)
-    severity = models.CharField(max_length=50, default=choices.CVESeverityChoices.NONE)
+    severity = models.CharField(
+        max_length=50, choices=choices.CVESeverityChoices, default=choices.CVESeverityChoices.NONE
+    )
     cvss = models.FloatField(blank=True, null=True, verbose_name="CVSS Base Score")
     cvss_v2 = models.FloatField(blank=True, null=True, verbose_name="CVSSv2 Score")
     cvss_v3 = models.FloatField(blank=True, null=True, verbose_name="CVSSv3 Score")

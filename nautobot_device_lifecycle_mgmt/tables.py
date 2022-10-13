@@ -1,8 +1,17 @@
 """Tables implementation for the Lifecycle Management plugin."""
 
+from django.urls import reverse
+from django.utils.safestring import mark_safe
 import django_tables2 as tables
 from django_tables2.utils import A
-from nautobot.utilities.tables import BaseTable, ButtonsColumn, BooleanColumn, ToggleColumn, TagColumn
+from nautobot.utilities.tables import (
+    BaseTable,
+    ButtonsColumn,
+    BooleanColumn,
+    LinkedCountColumn,
+    TagColumn,
+    ToggleColumn,
+)
 from nautobot.extras.tables import StatusTableMixin
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
@@ -15,7 +24,27 @@ from nautobot_device_lifecycle_mgmt.models import (
     VulnerabilityLCM,
     DeviceSoftwareValidationResult,
     InventoryItemSoftwareValidationResult,
+    SoftwareImageLCM,
 )
+
+
+class M2MLinkedCountColumn(LinkedCountColumn):
+    """Linked count column supporting many-to-many fields."""
+
+    def render(self, record, value):
+        """Render the resulting URL."""
+        if value:
+            url = reverse(self.viewname, kwargs=self.view_kwargs)
+            if self.url_params:
+                url += "?"
+                for key, kval in self.url_params.items():
+                    if isinstance(kval, tuple):
+                        values = getattr(record, kval[0]).values(kval[1])
+                        url += "&".join([f"{key}={val[key]}" for val in values])
+                    else:
+                        url += f"&{key}={getattr(record, kval)}"
+            return mark_safe(f'<a href="{url}">{value}</a>')  # nosec
+        return value
 
 
 class PercentageColumn(tables.Column):
@@ -100,6 +129,41 @@ class SoftwareLCMTable(BaseTable):
             "end_of_support",
             "long_term_support",
             "pre_release",
+            "actions",
+        )
+
+
+class SoftwareImageLCMTable(BaseTable):
+    """Table for SoftwareImageLCM."""
+
+    pk = ToggleColumn()
+    name = tables.LinkColumn(
+        "plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm",
+        text=lambda record: record,
+        args=[A("pk")],
+        orderable=False,
+    )
+    software = tables.LinkColumn(verbose_name="Software")
+    device_type_count = M2MLinkedCountColumn(
+        viewname="dcim:devicetype_list", url_params={"model": ("device_types", "model")}, verbose_name="Device Types"
+    )
+    object_tag_count = M2MLinkedCountColumn(
+        viewname="extras:tag_list", url_params={"slug": ("object_tags", "slug")}, verbose_name="Object Tags"
+    )
+    default_image = BooleanColumn()
+    actions = ButtonsColumn(SoftwareImageLCM, buttons=("edit", "delete"))
+
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = SoftwareImageLCM
+        fields = (
+            "pk",
+            "name",
+            "software",
+            "device_type_count",
+            "object_tag_count",
+            "default_image",
             "actions",
         )
 

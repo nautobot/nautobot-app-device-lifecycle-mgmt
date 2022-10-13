@@ -16,13 +16,14 @@ from nautobot_device_lifecycle_mgmt.models import (
     InventoryItemSoftwareValidationResult,
     CVELCM,
     VulnerabilityLCM,
+    SoftwareImageLCM,
 )
 from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
 
 User = get_user_model()
 
 
-class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
+class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the HardwareLCM views."""
 
     model = HardwareLCM
@@ -57,23 +58,14 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: d
             "c9200-48, 2023-10-06, 2024-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
         )
 
-    # The following tests are being passed due to import not being implemented at this time
-    # def test_bulk_import_object_with_constrained_permission(self):
-    #     pass
+    def test_has_advanced_tab(self):
+        pass
 
-    # def test_bulk_import_objects_with_permission(self):
-    #     pass
-
-    # def test_bulk_import_objects_without_permission(self):
-    #     pass
-
-    # def test_bulk_import_objects_with_constrained_permission(self):
-    #     pass
+    def test_get_object_notes(self):
+        pass
 
 
-class ValidatedSoftwareDeviceReportViewTest(
-    ViewTestCases.ListObjectsViewTestCase
-):  # pylint: disable=too-many-ancestors
+class ValidatedSoftwareDeviceReportViewTest(ViewTestCases.ListObjectsViewTestCase):
     """Test ValidatedSoftwareDeviceReportView"""
 
     model = DeviceSoftwareValidationResult
@@ -123,10 +115,14 @@ class ValidatedSoftwareDeviceReportViewTest(
             200,
         )
 
+    def test_get_object_notes(self):
+        pass
 
-class ValidatedSoftwareInventoryItemReportViewTest(
-    ViewTestCases.ListObjectsViewTestCase
-):  # pylint: disable=too-many-ancestors
+    def test_list_objects_unknown_filter_no_strict_filtering(self):
+        pass
+
+
+class ValidatedSoftwareInventoryItemReportViewTest(ViewTestCases.ListObjectsViewTestCase):
     """Test ValidatedSoftwareInventoryItemReportView"""
 
     model = InventoryItemSoftwareValidationResult
@@ -181,8 +177,14 @@ class ValidatedSoftwareInventoryItemReportViewTest(
             200,
         )
 
+    def test_get_object_notes(self):
+        pass
 
-class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
+    def test_list_objects_unknown_filter_no_strict_filtering(self):
+        pass
+
+
+class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the CVELCM views."""
 
     model = CVELCM
@@ -213,8 +215,14 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disabl
     def test_bulk_import_objects_without_permission(self):
         pass
 
+    def test_has_advanced_tab(self):
+        pass
 
-class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pylint: disable=too-many-ancestors
+    def test_get_object_notes(self):
+        pass
+
+
+class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the VulnerabilityLCM views."""
 
     model = VulnerabilityLCM
@@ -251,4 +259,67 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):  # pyli
 
     # Disabling create view as these models are generated via Job.
     def test_create_object_without_permission(self):
+        pass
+
+    def test_has_advanced_tab(self):
+        pass
+
+    def test_get_object_notes(self):
+        pass
+
+
+class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
+    """Test the SoftwareImageLCM views."""
+
+    model = SoftwareImageLCM
+
+    @classmethod
+    def setUpTestData(cls):
+        softwares = create_softwares()
+        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        device_type = DeviceType.objects.create(manufacturer=manufacturer, model="6509-E", slug="6509-e")
+
+        SoftwareImageLCM.objects.create(
+            image_file_name="ios15.1.2m.img",
+            software=softwares[0],
+            download_url="ftp://images.local/cisco/ios15.1.2m.img",
+            image_file_checksum="441rfabd75b0512r7fde7a7a66faa596",
+            default_image=True,
+        )
+        softimage = SoftwareImageLCM.objects.create(
+            image_file_name="ios4.22.9m.img",
+            software=softwares[1],
+            download_url="ftp://images.local/cisco/ios4.22.9m.img",
+            image_file_checksum="58arfabd75b051fr7fde7a7ac6faa3fv",
+            default_image=False,
+        )
+        softimage.device_types.set([device_type])
+
+        cls.form_data = {
+            "image_file_name": "eos_4.21m.swi",
+            "software": softwares[-1].id,
+            "download_url": "ftp://images.local/arista/eos_4.21m.swi",
+            "image_file_checksum": "78arfabd75b0fa2vzas1e7a7ac6faa3fc",
+            "default_image": True,
+        }
+        cls.csv_data = (
+            "image_file_name,software",
+            f"ios11.7.0m.img,{softwares[0].id}",
+            f"ios16.3.1t.img,{softwares[0].id}",
+            f"eos_4.21m.swi,{softwares[-1].id}",
+        )
+
+    def test_bulk_edit_objects_with_constrained_permission(self):
+        pass
+
+    def test_bulk_edit_objects_with_permission(self):
+        pass
+
+    def test_bulk_edit_objects_without_permission(self):
+        pass
+
+    def test_has_advanced_tab(self):
+        pass
+
+    def test_get_object_notes(self):
         pass

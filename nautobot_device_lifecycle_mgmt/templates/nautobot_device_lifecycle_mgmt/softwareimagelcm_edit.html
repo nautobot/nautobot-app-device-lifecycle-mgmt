@@ -1,0 +1,46 @@
+{% extends 'generic/object_edit.html' %}
+{% load static %}
+{% load form_helpers %}
+{% load helpers %}
+
+{% block form %}
+    {% block pre_form %}{% endblock %}
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>Attributes</strong></div>
+        <div class="panel-body">
+            {% render_field form.image_file_name %}
+            {% render_field form.software %}
+            {% render_field form.download_url %}
+            {% render_field form.image_file_checksum %}
+            {% render_field form.default_image %}
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>Objects Assigned To</strong></div>
+        <div class="panel-body">
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#assigned_to_devices_types" role="tab" data-toggle="tab">Device Types</a>
+                </li>
+                <li role="presentation">
+                    <a href="#assigned_to_inventory_items" role="tab" data-toggle="tab">Inventory Items</a>
+                </li>
+                <li role="presentation">
+                    <a href="#assigned_to_tags" role="tab" data-toggle="tab">Object Tags</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane active" id="assigned_to_devices_types">
+                    {% render_field form.device_types %}
+                </div>
+                <div class="tab-pane" id="assigned_to_inventory_items">
+                    {% render_field form.inventory_items %}
+                </div>
+                <div class="tab-pane" id="assigned_to_tags">
+                    {% render_field form.object_tags %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include 'inc/extras_features_edit_form_fields.html' %}
+{% endblock %}

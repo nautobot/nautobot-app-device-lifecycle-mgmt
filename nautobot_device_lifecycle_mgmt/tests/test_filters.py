@@ -8,6 +8,7 @@ import time_machine
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site, Platform
 from nautobot.extras.models import Status
 
+from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
@@ -16,6 +17,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     InventoryItemSoftwareValidationResult,
     CVELCM,
     VulnerabilityLCM,
+    SoftwareImageLCM,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -25,6 +27,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     InventoryItemSoftwareValidationResultFilterSet,
     CVELCMFilterSet,
     VulnerabilityLCMFilterSet,
+    SoftwareImageLCMFilterSet,
 )
 from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
 
@@ -167,9 +170,6 @@ class SoftwareLCMFilterSetTestCase(TestCase):
                 release_date="2019-01-10",
                 end_of_support="2022-05-15",
                 documentation_url="https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
-                download_url="ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin",
-                image_file_name="asr1001x-universalk9.17.03.03.SPA.bin",
-                image_file_checksum="9cf2e09b59207a4d8ea40886fbbe5b4b68e19e58a8f96b34240e4cea9971f6ae6facab9a1855a34e1ed8755f3ffe4c969cf6e6ef1df95d42a91540a44d4b9e14",
                 long_term_support=False,
                 pre_release=True,
             ),
@@ -180,9 +180,6 @@ class SoftwareLCMFilterSetTestCase(TestCase):
                 release_date="2021-01-10",
                 end_of_support="2026-05-13",
                 documentation_url="https://www.arista.com/softdocs",
-                download_url="ftp://device-images.local.com/arista/arista-4.25m.img",
-                image_file_name="arista-4.25m.img",
-                image_file_checksum="34e61320b5518a2954b2a307b7e6a018",
                 long_term_support=True,
                 pre_release=False,
             ),
@@ -206,21 +203,6 @@ class SoftwareLCMFilterSetTestCase(TestCase):
     def test_documentation_url(self):
         """Test documentation_url filter."""
         params = {"documentation_url": "https://www.arista.com/softdocs"}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-
-    def test_download_url(self):
-        """Test download_url filter."""
-        params = {"download_url": "ftp://device-images.local.com/arista/arista-4.25m.img"}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-
-    def test_image_file_name(self):
-        """Test image_file_name filter."""
-        params = {"image_file_name": "asr1001x-universalk9.17.03.03.SPA.bin"}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-
-    def test_image_file_checksum(self):
-        """Test image_file_checksum filter."""
-        params = {"image_file_checksum": "34e61320b5518a2954b2a307b7e6a018"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_long_term_support(self):
@@ -504,24 +486,24 @@ class CVELCMTestCase(TestCase):
             name="CVE-2021-1391",
             published_date="2021-03-24",
             link="https://www.cvedetails.com/cve/CVE-2021-1391/",
-            cvss=3,
-            cvss_v2=3,
-            cvss_v3=3,
+            cvss=3.0,
+            cvss_v2=3.0,
+            cvss_v3=3.0,
         )
         CVELCM.objects.create(
             name="CVE-2021-44228",
             published_date="2021-12-10",
             link="https://www.cvedetails.com/cve/CVE-2021-44228/",
             status=not_fixed,
-            cvss=5,
-            cvss_v2=5,
-            cvss_v3=5,
+            cvss=5.0,
+            cvss_v2=5.0,
+            cvss_v3=5.0,
         )
         CVELCM.objects.create(
             name="CVE-2020-27134",
             published_date="2020-12-11",
             link="https://www.cvedetails.com/cve/CVE-2020-27134/",
-            severity="Critical",
+            severity=CVESeverityChoices.CRITICAL,
             status=fixed,
             cvss=7,
             cvss_v2=7,
@@ -555,7 +537,7 @@ class CVELCMTestCase(TestCase):
 
     def test_severity(self):
         """Test severity filter."""
-        params = {"severity": "Critical"}
+        params = {"severity": CVESeverityChoices.CRITICAL}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_published_date_before(self):
@@ -570,68 +552,68 @@ class CVELCMTestCase(TestCase):
 
     def test_cvss_gte(self):
         """Test cvss__gte filter."""
-        params = {"cvss__gte": 1}
+        params = {"cvss__gte": "1"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
-        params = {"cvss__gte": 4}
+        params = {"cvss__gte": "4"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-        params = {"cvss__gte": 6}
+        params = {"cvss__gte": "6"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-        params = {"cvss__gte": 9}
+        params = {"cvss__gte": "9"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
 
     def test_cvss_lte(self):
         """Test cvss__lte filter."""
-        params = {"cvss__lte": 1}
+        params = {"cvss__lte": "1"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
-        params = {"cvss__lte": 4}
+        params = {"cvss__lte": "4"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-        params = {"cvss__lte": 6}
+        params = {"cvss__lte": "6"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-        params = {"cvss__lte": 9}
+        params = {"cvss__lte": "9"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_cvss_v2_gte(self):
         """Test cvss_v2__gte filter."""
-        params = {"cvss_v2__gte": 1}
+        params = {"cvss_v2__gte": "1"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
-        params = {"cvss_v2__gte": 4}
+        params = {"cvss_v2__gte": "4"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-        params = {"cvss_v2__gte": 6}
+        params = {"cvss_v2__gte": "6"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-        params = {"cvss_v2__gte": 9}
+        params = {"cvss_v2__gte": "9"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
 
     def test_cvss_v2_lte(self):
         """Test cvss_v2__lte filter."""
-        params = {"cvss_v2__lte": 1}
+        params = {"cvss_v2__lte": "1"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
-        params = {"cvss_v2__lte": 4}
+        params = {"cvss_v2__lte": "4"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-        params = {"cvss_v2__lte": 6}
+        params = {"cvss_v2__lte": "6"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-        params = {"cvss_v2__lte": 9}
+        params = {"cvss_v2__lte": "9"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_cvss_v3_gte(self):
         """Test cvss_v3__gte filter."""
-        params = {"cvss_v3__gte": 1}
+        params = {"cvss_v3__gte": "1"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
-        params = {"cvss_v3__gte": 4}
+        params = {"cvss_v3__gte": "4"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-        params = {"cvss_v3__gte": 6}
+        params = {"cvss_v3__gte": "6"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-        params = {"cvss_v3__gte": 9}
+        params = {"cvss_v3__gte": "9"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
 
     def test_cvss_v3_lte(self):
         """Test cvss_v3__lte filter."""
-        params = {"cvss_v3__lte": 1}
+        params = {"cvss_v3__lte": "1"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
-        params = {"cvss_v3__lte": 4}
+        params = {"cvss_v3__lte": "4"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-        params = {"cvss_v3__lte": 6}
+        params = {"cvss_v3__lte": "6"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-        params = {"cvss_v3__lte": 9}
+        params = {"cvss_v3__lte": "9"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
 
@@ -690,4 +672,89 @@ class VulnerabilityLCMTestCase(TestCase):
     def test_q_software_version(self):
         """Test q filter to find single record based on Software version."""
         params = {"q": "4.22.9M"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+
+class SoftwareImageLCMFilterSetTestCase(TestCase):
+    """Tests for SoftwareImageLCMFilterSet."""
+
+    queryset = SoftwareImageLCM.objects.all()
+    filterset = SoftwareImageLCMFilterSet
+
+    def setUp(self):
+        manufacturer_cisco, _ = Manufacturer.objects.get_or_create(name="Cisco", slug="cisco")
+        manufacturer_arista, _ = Manufacturer.objects.get_or_create(name="Arista", slug="arista")
+        device_platform_cisco, _ = Platform.objects.get_or_create(
+            name="Cisco IOS", slug="cisco_ios", manufacturer=manufacturer_cisco
+        )
+        device_platform_arista, _ = Platform.objects.get_or_create(
+            name="Arista EOS", slug="arista_eos", manufacturer=manufacturer_arista
+        )
+
+        self.softwares = (
+            SoftwareLCM.objects.create(
+                device_platform=device_platform_cisco,
+                version="17.3.3 MD",
+                release_date="2019-01-10",
+            ),
+            SoftwareLCM.objects.create(
+                device_platform=device_platform_arista,
+                version="4.25M",
+                release_date="2021-01-10",
+            ),
+        )
+
+        devicetype_1, _ = DeviceType.objects.get_or_create(
+            manufacturer=manufacturer_cisco, model="ASR-1000", slug="asr-1000"
+        )
+        self.devicetype_2, _ = DeviceType.objects.get_or_create(
+            manufacturer=manufacturer_arista, model="7150S", slug="7150s"
+        )
+
+        soft_image = SoftwareImageLCM(
+            image_file_name="ios17.3.3md.img",
+            software=self.softwares[0],
+            default_image=True,
+        )
+        soft_image.save()
+
+        soft_image = SoftwareImageLCM(
+            image_file_name="ios17.3.3md-ssl.img",
+            software=self.softwares[0],
+            default_image=False,
+        )
+        soft_image.device_types.set([devicetype_1.pk])
+        soft_image.save()
+
+        soft_image = SoftwareImageLCM(
+            image_file_name="eos4.25.m.swi",
+            software=self.softwares[1],
+            default_image=True,
+        )
+        soft_image.device_types.set([self.devicetype_2.pk])
+        soft_image.save()
+
+    def test_q_image_name(self):
+        """Test q filter to find single record based on the image name."""
+        params = {"q": "ios17.3.3"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_q_soft_version(self):
+        """Test q filter to find single record based on the software version."""
+        params = {"q": "4.25M"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_software(self):
+        """Test software filter."""
+        params = {"software": [self.softwares[0].pk]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_default_image(self):
+        """Test default_image filter."""
+        params = {"default_image": True}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_device_types(self):
+        """Test device_types filter."""
+        params = {"device_types": [self.devicetype_2.model]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)

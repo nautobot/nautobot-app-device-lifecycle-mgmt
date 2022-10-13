@@ -1,5 +1,48 @@
 # CHANGELOG
 
+## v1.1.0 - 23-08-2022
+
+- PR#100: Adds compatibility for Nautobot 1.4. Fixes to pipeline, API serializers, filters and unit tests.
+- PR#90: Fixes Validate Software logic for computing `valid since` attribute.
+- PR#84: Add to defaults, and document, settings needed for report generation.
+
+**!!! NOTE**
+
+  - This release increases minimum supported Nautobot version to 1.2.0.
+  - Support for Python 3.6 has been removed. Minimum supported Python version is 3.7.
+
+## v1.0.2 - 03-10-2022
+
+### Fixed
+
+- PR#76: Fixes data migration bug, between Software and Software Image, when upgrading from version < v1.0.0.
+
+
+## v1.0.1 - 03-09-2022
+
+### Fixed
+
+- PR#72: Fixes Software Images tab rendering error in the Software details view when Software does not have Software Images linked.
+- PR#73: Fixes occasional post migrate signal failure.
+
+
+## v1.0.0 - 03-02-2022
+
+### Added
+
+- PR#55: Added Software Image model.
+
+### Removed
+
+- PR#55: Removed image related fields from Software model.
+
+**!!! NOTE** This release contains backwards incompatible changes. Software model fields `image_file_name`, `download_url` and `image_file_checksum` have been removed.
+
+As part of the migrations to v1.0.0, a Software Image object, linked to relevant Software object, will be automatically created for each Software that had software image defined.
+
+## v0.4.1 - 02-18-2022
+- PR#65: Fixed buttons for non-superuser on many model Detail views
+
 ## v0.4.0 - 02-08-2022
 - PR#47: Added Plugin Upgrade Guide to the README
 - PR#50: Fixed view permissions for Device Notices

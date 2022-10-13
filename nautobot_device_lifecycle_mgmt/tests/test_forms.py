@@ -3,10 +3,16 @@ from django.test import TestCase
 from django.contrib.contenttypes.models import ContentType
 
 from nautobot.dcim.models import DeviceType, Manufacturer, Device, DeviceRole, Site, InventoryItem, Platform
-from nautobot.extras.models import Status
+from nautobot.extras.models import Status, Tag
 
-from nautobot_device_lifecycle_mgmt.forms import HardwareLCMForm, SoftwareLCMForm, ValidatedSoftwareLCMForm, CVELCMForm
-from nautobot_device_lifecycle_mgmt.models import SoftwareLCM, CVELCM
+from nautobot_device_lifecycle_mgmt.forms import (
+    HardwareLCMForm,
+    SoftwareLCMForm,
+    ValidatedSoftwareLCMForm,
+    CVELCMForm,
+    SoftwareImageLCMForm,
+)
+from nautobot_device_lifecycle_mgmt.models import SoftwareImageLCM, SoftwareLCM, CVELCM
 
 
 class HardwareLCMFormTest(TestCase):
@@ -159,9 +165,6 @@ class SoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
             "alias": "Amsterdam-17.3.3 MD",
             "end_of_support": "2022-05-15",
             "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
-            "download_url": "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin",
-            "image_file_name": "asr1001x-universalk9.17.03.03.SPA.bin",
-            "image_file_checksum": "9cf2e09b59207a4d8ea40886fbbe5b4b68e19e58a8f96b34240e4cea9971f6ae6facab9a1855a34e1ed8755f3ffe4c969cf6e6ef1df95d42a91540a44d4b9e14",
             "long_term_support": True,
             "pre_release": False,
         }
@@ -179,8 +182,6 @@ class SoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
         data = {
             "end_of_support": "2022-05-15",
             "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
-            "download_url": "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin",
-            "image_file_name": "asr1001x-universalk9.17.03.03.SPA.bin",
         }
         form = self.form_class(data)
         self.assertFalse(form.is_valid())
@@ -208,18 +209,6 @@ class SoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
         self.assertIn("documentation_url", form.errors)
         self.assertIn("Enter a valid URL.", form.errors["documentation_url"])
 
-    def test_validation_error_download_url(self):
-        data = {
-            "device_platform": self.device_platform,
-            "version": "17.3.3 MD",
-            "end_of_support": "2022-05-15",
-            "download_url": "ftppp://images.local.my.org/",
-        }
-        form = self.form_class(data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("download_url", form.errors)
-        self.assertIn("Enter a valid URL.", form.errors["download_url"])
-
 
 class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
     """Test class for ValidatedSoftwareLCMForm forms."""
@@ -236,9 +225,6 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
                 "alias": "Amsterdam-17.3.3 MD",
                 "end_of_support": "2022-05-15",
                 "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
-                "download_url": "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin",
-                "image_file_name": "asr1001x-universalk9.17.03.03.SPA.bin",
-                "image_file_checksum": "9cf2e09b59207a4d8ea40886fbbe5b4b68e19e58a8f96b34240e4cea9971f6ae6facab9a1855a34e1ed8755f3ffe4c969cf6e6ef1df95d42a91540a44d4b9e14",
                 "long_term_support": True,
                 "pre_release": False,
             }
@@ -376,3 +362,228 @@ class CVELCMFormTest(TestCase):
             },
             form.errors,
         )
+
+
+class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member,too-many-instance-attributes
+    """Test class for SoftwareImageLCMForm forms."""
+
+    form_class = SoftwareImageLCMForm
+
+    def setUp(self):
+        """Create necessary objects."""
+        manufacturer_cisco, _ = Manufacturer.objects.get_or_create(name="Cisco", slug="cisco")
+        manufacturer_arista, _ = Manufacturer.objects.get_or_create(name="Arista", slug="arista")
+        device_platform, _ = Platform.objects.get_or_create(
+            name="Cisco IOS", slug="cisco_ios", manufacturer=manufacturer_cisco
+        )
+        self.software_1 = SoftwareLCM.objects.create(
+            **{
+                "device_platform": device_platform,
+                "version": "17.3.5 MD",
+                "alias": "Amsterdam-17.3.5 MD",
+                "end_of_support": "2022-05-15",
+                "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-17.03/series.html",
+                "long_term_support": True,
+                "pre_release": False,
+            }
+        )
+        self.software_2 = SoftwareLCM.objects.create(
+            **{
+                "device_platform": device_platform,
+                "version": "17.3.6 MD",
+                "alias": "Amsterdam-17.3.6 MD",
+                "end_of_support": "2022-05-15",
+                "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-17.03/series.html",
+                "long_term_support": True,
+                "pre_release": False,
+            }
+        )
+
+        self.devicetype_1, _ = DeviceType.objects.get_or_create(
+            manufacturer=manufacturer_cisco, model="ASR-1000", slug="asr-1000"
+        )
+        self.devicetype_2, _ = DeviceType.objects.get_or_create(
+            manufacturer=manufacturer_arista, model="7150S", slug="7150s"
+        )
+        self.devicetype_3, _ = DeviceType.objects.get_or_create(
+            manufacturer=manufacturer_cisco, model="7124", slug="7124"
+        )
+        self.tag_1, _ = Tag.objects.get_or_create(name="lcm", slug="lcm")
+        self.tag_2, _ = Tag.objects.get_or_create(name="lcm2", slug="lcm2")
+        status_active, _ = Status.objects.get_or_create(slug="active")
+        site, _ = Site.objects.get_or_create(name="Site 1", slug="site-1")
+        devicerole, _ = DeviceRole.objects.get_or_create(name="Router", slug="router", defaults={"color": "ff0000"})
+        self.device_1, _ = Device.objects.get_or_create(
+            device_type=self.devicetype_1, device_role=devicerole, name="Device 1", site=site, status=status_active
+        )
+        self.inventoryitem_1, _ = InventoryItem.objects.get_or_create(device=self.device_1, name="SwitchModule1")
+        self.inventoryitem_2, _ = InventoryItem.objects.get_or_create(device=self.device_1, name="SwitchModule2")
+
+        SoftwareImageLCM.objects.create(
+            image_file_name="ios17.3.3Dmd.img",
+            software=self.software_1,
+            default_image=True,
+        )
+
+        soft_image = SoftwareImageLCM.objects.create(
+            image_file_name="ios17.3.3dtmd.img",
+            software=self.software_1,
+            default_image=False,
+        )
+        soft_image.device_types.set([self.devicetype_3.pk])
+        soft_image.inventory_items.set([self.inventoryitem_2.pk])
+        soft_image.object_tags.set([self.tag_2.pk])
+        soft_image.save()
+
+    def test_specifying_all_fields_w_device_type(self):
+        data = {
+            "image_file_name": "ios17.3.3md.img",
+            "software": self.software_1,
+            "device_types": [self.devicetype_1],
+            "download_url": "ftp://images.local/cisco/ios17.3.3md.img",
+            "image_file_checksum": "441rfabd75b0512r7fde7a7a66faa596",
+            "default_image": False,
+        }
+        form = self.form_class(data)
+        self.assertTrue(form.is_valid())
+        self.assertTrue(form.save())
+
+    def test_specifying_all_fields_w_inventory_item(self):
+        data = {
+            "image_file_name": "ios17.3.3md.img",
+            "software": self.software_1,
+            "inventory_items": [self.inventoryitem_1],
+            "download_url": "ftp://images.local/cisco/ios17.3.3md.img",
+            "image_file_checksum": "441rfabd75b0512r7fde7a7a66faa596",
+            "default_image": False,
+        }
+        form = self.form_class(data)
+        self.assertTrue(form.is_valid())
+        self.assertTrue(form.save())
+
+    def test_specifying_all_fields_w_object_tag(self):
+        data = {
+            "image_file_name": "ios17.3.3md.img",
+            "software": self.software_1,
+            "object_tags": [self.tag_1],
+            "download_url": "ftp://images.local/cisco/ios17.3.3md.img",
+            "image_file_checksum": "441rfabd75b0512r7fde7a7a66faa596",
+            "default_image": False,
+        }
+        form = self.form_class(data)
+        self.assertTrue(form.is_valid())
+        self.assertTrue(form.save())
+
+    def test_software_missing(self):
+        data = {
+            "image_file_name": "ios17.3.3md.img",
+        }
+        form = self.form_class(data)
+        form.is_valid()
+        self.assertIn("software", form.errors)
+        self.assertIn(
+            "This field is required.",
+            form.errors["software"],
+        )
+
+    def test_at_most_one_default_image_per_software(self):
+        data = {
+            "image_file_name": "ios17.3.3md.img",
+            "software": self.software_1,
+            "default_image": True,
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("default_image", form.errors)
+        self.assertIn(
+            "Only one default Software Image is allowed for each Software.",
+            form.errors["default_image"],
+        )
+
+    def test_default_image_cannot_have_assignments(self):
+        data = {
+            "image_file_name": "ios17.3.3md.img",
+            "software": self.software_2,
+            "device_types": [self.devicetype_2],
+            "default_image": True,
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("device_types", form.errors)
+        self.assertIn("default_image", form.errors)
+        self.assertIn(
+            "Default image cannot be assigned to any objects.",
+            form.errors["device_types"][0],
+        )
+        self.assertIn(
+            "Default image cannot be assigned to any objects.",
+            form.errors["default_image"][0],
+        )
+
+    def test_image_assigned_only_one_device_type_per_software(self):
+        data = {
+            "image_file_name": "ios17.3.3dt3md.img",
+            "software": self.software_1,
+            "device_types": [self.devicetype_3],
+            "default_image": False,
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("device_types", form.errors)
+        self.assertRegex(
+            form.errors["device_types"][0], r"Device Type .+? already assigned to another Software Image\."
+        )
+
+    def test_image_assigned_only_one_object_tag_per_software(self):
+        data = {
+            "image_file_name": "ios17.3.3dt3md.img",
+            "software": self.software_1,
+            "object_tags": [self.tag_2],
+            "default_image": False,
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("object_tags", form.errors)
+        self.assertRegex(form.errors["object_tags"][0], r"Object Tag .+? already assigned to another Software Image\.")
+
+    def test_image_assigned_only_one_inventory_item_per_software(self):
+        data = {
+            "image_file_name": "ios17.3.3dt3md.img",
+            "software": self.software_1,
+            "inventory_items": [self.inventoryitem_2],
+            "default_image": False,
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("inventory_items", form.errors)
+        self.assertRegex(
+            form.errors["inventory_items"][0], r"Inventory Item .+? already assigned to another Software Image\."
+        )
+
+    def test_soft_manuf_must_match_platform_manuf(self):
+        data = {
+            "image_file_name": "ios17.3.3md.img",
+            "software": self.software_1,
+            "device_types": [self.devicetype_2],
+            "default_image": False,
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("device_types", form.errors)
+        self.assertIn(
+            "doesn't match the Software Platform Manufacturer.",
+            form.errors["device_types"][0],
+        )
+
+    def test_validation_error_download_url(self):
+        data = {
+            "image_file_name": "ios17.3.3md.img",
+            "software": self.software_1,
+            "device_types": [self.devicetype_2],
+            "default_image": False,
+            "download_url": "ftppp://images.local.my.org/",
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("download_url", form.errors)
+        self.assertIn("Enter a valid URL.", form.errors["download_url"])

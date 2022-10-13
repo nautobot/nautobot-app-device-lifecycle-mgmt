@@ -7,10 +7,9 @@
 import os
 import sys
 
-from distutils.util import strtobool
 from django.core.exceptions import ImproperlyConfigured
-from nautobot.core import settings
-from nautobot.core.settings_funcs import parse_redis_connection
+from nautobot.core.settings import *  # noqa: F403
+from nautobot.core.settings_funcs import is_truthy, parse_redis_connection
 
 # Enforce required configuration parameters
 for key in [
@@ -26,23 +25,6 @@ for key in [
     if not os.environ.get(key):
         raise ImproperlyConfigured(f"Required environment variable {key} is missing.")
 
-
-def is_truthy(arg):
-    """Convert "truthy" strings into Booleans.
-
-    Examples:
-        >>> is_truthy('yes')
-        True
-    Args:
-        arg (str): Truthy string (True values are y, yes, t, true, on and 1; false values are n, no,
-        f, false, off and 0. Raises ValueError if val is anything else.
-    """
-    if isinstance(arg, bool):
-        return arg
-    return bool(strtobool(arg))
-
-
-TESTING = len(sys.argv) > 1 and sys.argv[1] == "test"
 
 # This is a list of valid fully-qualified domain names (FQDNs) for the Nautobot server. Nautobot will not permit write
 # access to the server via any other hostnames. The first FQDN in the list will be treated as the preferred name.
@@ -196,7 +178,44 @@ INTERNAL_IPS = ("127.0.0.1", "::1")
 # Enable custom logging. Please see the Django documentation for detailed guidance on configuring custom logs:
 #   https://docs.djangoproject.com/en/stable/topics/logging/
 LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
-LOGGING = {}
+
+TESTING = len(sys.argv) > 1 and sys.argv[1] == "test"
+
+# Verbose logging during normal development operation, but quiet logging during unit test execution
+if not TESTING:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "normal": {
+                "format": "%(asctime)s.%(msecs)03d %(levelname)-7s %(name)s :\n  %(message)s",
+                "datefmt": "%H:%M:%S",
+            },
+            "verbose": {
+                "format": "%(asctime)s.%(msecs)03d %(levelname)-7s %(name)-20s %(filename)-15s %(funcName)30s() :\n  %(message)s",
+                "datefmt": "%H:%M:%S",
+            },
+        },
+        "handlers": {
+            "normal_console": {
+                "level": "INFO",
+                "class": "logging.StreamHandler",
+                "formatter": "normal",
+            },
+            "verbose_console": {
+                "level": "DEBUG",
+                "class": "logging.StreamHandler",
+                "formatter": "verbose",
+            },
+        },
+        "loggers": {
+            "django": {"handlers": ["normal_console"], "level": "INFO"},
+            "nautobot": {
+                "handlers": ["verbose_console" if DEBUG else "normal_console"],
+                "level": LOG_LEVEL,
+            },
+        },
+    }
 
 # Setting this to True will display a "maintenance mode" banner at the top of every page.
 MAINTENANCE_MODE = False
@@ -313,9 +332,9 @@ SHORT_DATETIME_FORMAT = os.environ.get("SHORT_DATETIME_FORMAT", "Y-m-d H:i")
 EXTRA_INSTALLED_APPS = os.environ["EXTRA_INSTALLED_APPS"].split(",") if os.environ.get("EXTRA_INSTALLED_APPS") else []
 
 # Django Debug Toolbar
-DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda _request: DEBUG and not TESTING}
-
-if "debug_toolbar" not in EXTRA_INSTALLED_APPS:
-    EXTRA_INSTALLED_APPS.append("debug_toolbar")
-if "debug_toolbar.middleware.DebugToolbarMiddleware" not in settings.MIDDLEWARE:
-    settings.MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+if DEBUG:
+    DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda _request: DEBUG and not TESTING}
+    if "debug_toolbar" not in INSTALLED_APPS:  # noqa: F405
+        INSTALLED_APPS.append("debug_toolbar")  # noqa: F405
+    if "debug_toolbar.middleware.DebugToolbarMiddleware" not in MIDDLEWARE:  # noqa: F405
+        MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa: F405

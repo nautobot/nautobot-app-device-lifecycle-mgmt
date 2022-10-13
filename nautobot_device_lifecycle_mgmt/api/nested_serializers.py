@@ -22,6 +22,30 @@ class NestedSoftwareLCMSerializer(WritableNestedSerializer):
         read_only_fields = ["device_platform"]
 
 
+class NestedSoftwareImageLCMSerializer(WritableNestedSerializer):
+    """Nested/brief serializer for SoftwareImageLCM."""
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwareimagelcm-detail"
+    )
+
+    class Meta:
+        """Meta attributes."""
+
+        model = models.SoftwareImageLCM
+        fields = [
+            "id",
+            "url",
+            "image_file_name",
+            "device_types",
+            "inventory_items",
+            "object_tags",
+            "download_url",
+            "image_file_checksum",
+            "default_image",
+        ]
+
+
 class NestedProviderLCMSerializer(WritableNestedSerializer):
     """Nested serializer for the provider class."""
 

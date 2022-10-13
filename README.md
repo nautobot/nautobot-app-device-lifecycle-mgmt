@@ -1,6 +1,6 @@
 # Nautobot Plugin - Device Lifecycle Management
 
-A plugin for [Nautobot](https://github.com/nautobot/nautobot) to manage device lifecycles. This plugin works by making related associations to Devices, Device Types, and Inventory Items to help provide data about the hardware end of life notices, appropriate software versions to be running on the devices, and the maintenance contracts associated with devices. This will help with the various aspects of planning life cycle events, and provides quick access to ancillary data about the devices in Nautobot.
+A plugin for [Nautobot](https://github.com/nautobot/nautobot) to manage device lifecycles. This plugin works by making related associations to Devices, Device Types, and Inventory Items to help provide data about the hardware end of life notices, appropriate software versions to be running on the devices, and the maintenance contracts associated with devices. This will help with the various aspects of planning Lifecycle events, and provides quick access to ancillary data about the devices in Nautobot.
 
 ## Installation
 
@@ -14,7 +14,7 @@ pip install nautobot-device-lifecycle-mgmt
 
 > The plugin is compatible with Nautobot 1.1.6 and higher
 
-To ensure Nautobot Device Life Cycle Management plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-plugin-device-lifecycle-mgmt` package:
+To ensure Nautobot Device Lifecycle Management plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-plugin-device-lifecycle-mgmt` package:
 
 ```no-highlight
 # echo nautobot-device-lifecycle-mgmt >> local_requirements.txt
@@ -27,6 +27,15 @@ Once installed, the plugin needs to be enabled in your `configuration.py`
 ```python
 # In your configuration.py, if following docs -> /opt/nautobot/nautobot_config.py
 PLUGINS = ["nautobot_device_lifecycle_mgmt"]
+
+PLUGINS_CONFIG = {
+    "nautobot_device_lifecycle_mgmt": {
+        "barchart_bar_width": float(os.environ.get("BARCHART_BAR_WIDTH", 0.1)),
+        "barchart_width": int(os.environ.get("BARCHART_WIDTH", 12)),
+        "barchart_height": int(os.environ.get("BARCHART_HEIGHT", 5)),
+    },
+}
+
 ```
 
 ### Run Post Upgrade Steps
@@ -54,6 +63,7 @@ sudo systemctl restart nautobot-rq-worker
 ```
 
 ## Documentation
+
 - [Plugin Upgrade Guide](./docs/plugin_upgrade.md)
 - [Software lifecycle](./docs/software_lifecycle.md)
 - [CVE Tracking](./docs/cve_tracking.md)
@@ -63,12 +73,17 @@ sudo systemctl restart nautobot-rq-worker
 ### Adding Information into the Plugin
 
 The system currently has manual/API entry of data only. There are currently no connections to any particular vendor APIs that provide this data today. See [adding data docs](docs/add_information.md) for more info.
+
 ### Hardware Lifecycle Management
+
 #### API
+
 ![](docs/images/lcm_hardware_api_view.png)
 
 ##### REST API Example 1
+
 Gather hardware notices that will be end of support by the end of 2021
+
 ```shell script
 curl "http://$NBHOST/api/plugins/device-lifecycle/hardware/?end_of_support__lte=2021-12-31" \
 -X GET \
@@ -77,8 +92,10 @@ curl "http://$NBHOST/api/plugins/device-lifecycle/hardware/?end_of_support__lte=
 ````
 
 ##### REST API Example 2
-Gather hardware notices that are currently expired. 
+
+Gather hardware notices that are currently expired.
 > NOTE: `expired` flag will honor `end_of_support` if the field exist for the record. If the field does not exist, `end_of_sale` will be used as the expired field.
+
 ```shell script
 curl "http://$NBHOST/api/plugins/device-lifecycle/hardware/?expired=true" \  
 -X GET \
@@ -87,6 +104,7 @@ curl "http://$NBHOST/api/plugins/device-lifecycle/hardware/?expired=true" \
 ```
 
 #### GraphQL Examples
+
 ![](docs/images/lcm_hardware_graphql.png)
 
 ## Contributing
@@ -102,7 +120,7 @@ The project is following Network to Code software development guideline and is l
 
 ### CLI Helper Commands
 
-The project is coming with a CLI helper based on [invoke](http://www.pyinvoke.org/) to help setup the development environment. The commands are listed below in 3 categories `dev environment`, `utility` and `testing`. 
+The project is coming with a CLI helper based on [invoke](http://www.pyinvoke.org/) to help setup the development environment. The commands are listed below in 3 categories `dev environment`, `utility` and `testing`.
 
 Each command can be executed with `invoke <command>`. All commands support the arguments `--nautobot-ver` and `--python-ver` if you want to manually define the version of Python and Nautobot to use. Each command also has its own help `invoke <command> --help`
 
@@ -140,14 +158,13 @@ Each command can be executed with `invoke <command>`. All commands support the a
 
 ## Screenshots
 
-### Hardware: Device Life Cycle Management List View
+### Hardware: Device Lifecycle Management List View
 
 You can view the list of Hardware/Software notices as well as filter the table.
 
 ![](docs/images/lcm_hardware_list_view.png)
 
-
-### Hardware: Device Life Cycle Management Detail View
+### Hardware: Device Lifecycle Management Detail View
 
 You can also click a Hardware/Software Notice and see the detail view. This view provides links to the devices that are part affected by this EoX notice due to their device type.
 
@@ -165,39 +182,49 @@ This provides the same UI element as the device view, but within the specific de
 
 ![](docs/images/lcm_hardware_device_type_view.png)
 
-### Contracts: Device Life Cycle Management Contract Detail View
+### Contracts: Device Lifecycle Management Contract Detail View
 
 You can view the details of a contract along with the primary and escalation contacts. This view will also give you an association to the devices under this contract.
 
 ![](docs/images/lcm_contract_detail.png)
 
-
-### Contracts: Device Life Cycle Management Contract Provider View
+### Contracts: Device Lifecycle Management Contract Provider View
 
 You can view the details of a provider, along with a listing of the service contracts associated to the provider. Contracts that are expired will display in red.
 
 ![](docs/images/lcm_contract_provider_detail.png)
 
-### Software: Software Life Cycle Management List View
+### Software: Software Lifecycle Management List View
 
 You can view the list of Software versions as well as filter the table.
 
 ![](docs/images/lcm_software_list_view.png)
 
-
-### Software: Software Life Cycle Detail View
+### Software: Software Lifecycle Detail View
 
 You can also click a Software version and see the detail view. This view provides link to the list of devices and inventory items that are associated with this software object.
 
 ![](docs/images/lcm_software_detail_view.png)
 
-### Software: Validated Software Life Cycle Management List View
+### Software: Software Image Lifecycle List View
+
+You can view the list of Software Images as well as filter the table.
+
+![](docs/images/lcm_software_image_list_view.png)
+
+### Software: Software Image Lifecycle Detail View
+
+You can also click a Software Images image name and see the detail view. This view provides view of the device types and inventory item attributes this software image applies to.
+
+![](docs/images/lcm_software_image_detail_view.png)
+
+### Software: Validated Software Lifecycle Management List View
 
 You can view the list of Validated Software versions as well as filter the table.
 
 ![](docs/images/lcm_validated_software_list_view.png)
 
-### Software: Validated Software Life Cycle Detail View
+### Software: Validated Software Lifecycle Detail View
 
 You can also click a Validated Software version and see the detail view. This view provides view of the device and inventory item attributes this validated software applies to.
 

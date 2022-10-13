@@ -15,15 +15,11 @@
         </div>
     </div>
     <div class="pull-right noprint">
-        {% if perms.change %}
-            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:providerlcm_edit' pk=object.id %}" class="btn btn-warning">
-                <span class="mdi mdi-pencil" aria-hidden="true"></span> Edit
-            </a>
+        {% if perms.nautobot_device_lifecycle_mgmt.change_providerlcm %}
+            {% edit_button object %}
         {% endif %}
-        {% if perms.delete %}
-            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:providerlcm_delete' pk=object.id %}" class="btn btn-danger">
-                <span class="mdi mdi-trash-can-outline" aria-hidden="true"></span> Delete
-            </a>
+        {% if perms.nautobot_device_lifecycle_mgmt.delete_providerlcm %}
+            {% delete_button object %}
         {% endif %}
     </div>
     <h2>Provider: {{ object }}</h2>

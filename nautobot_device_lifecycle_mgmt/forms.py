@@ -1,6 +1,7 @@
 """Forms implementation for the Lifecycle Management plugin."""
 import logging
 from django import forms
+from django.db.models import Q
 
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Platform, Region, Site
 from nautobot.extras.forms import (
@@ -44,9 +45,22 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContactLCM,
     CVELCM,
     VulnerabilityLCM,
+    SoftwareImageLCM,
 )
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
+
+
+class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):
+    """Reference a list of PKs."""
+
+    def prepare_value(self, value):
+        """Parse a comma-separated string of PKs into a list of PKs."""
+        pk_list = []
+        if isinstance(value, str):
+            pk_list = [val.strip() for val in value.split(",") if val]
+
+        return super().prepare_value(pk_list)
 
 
 class HardwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
@@ -221,9 +235,6 @@ class SoftwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
             "end_of_support_before",
             "end_of_support_after",
             "documentation_url",
-            "download_url",
-            "image_file_name",
-            "image_file_checksum",
             "long_term_support",
             "pre_release",
         ]
@@ -249,6 +260,161 @@ class SoftwareLCMCSVForm(CustomFieldModelCSVForm):
 
         model = SoftwareLCM
         fields = SoftwareLCM.csv_headers
+
+
+class SoftwareImageLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+    """SoftwareImageLCM creation/edit form."""
+
+    software = DynamicModelChoiceField(queryset=SoftwareLCM.objects.all(), required=True)
+    device_types = DynamicModelMultipleChoiceField(queryset=DeviceType.objects.all(), required=False)
+    inventory_items = DynamicModelMultipleChoiceField(queryset=InventoryItem.objects.all(), required=False)
+    object_tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+
+    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+
+    class Meta:
+        """Meta attributes."""
+
+        model = SoftwareImageLCM
+        fields = (
+            *SoftwareImageLCM.csv_headers,
+            "tags",
+        )
+
+    def clean(self):  # pylint: disable=too-many-locals,too-many-branches
+        """Custom validation of the SoftwareImageLCMForm."""
+        super().clean()
+        device_types = self.cleaned_data.get("device_types")
+        inventory_items = self.cleaned_data.get("inventory_items")
+        object_tags = self.cleaned_data.get("object_tags")
+        default_image = self.cleaned_data.get("default_image")
+        software = self.cleaned_data.get("software")
+
+        if software:
+            software_images = SoftwareImageLCM.objects.filter(software=software)
+            software_default_image = software_images.filter(default_image=True)
+            if self.instance is not None and self.instance.pk is not None:
+                software_images = software_images.filter(~Q(pk=self.instance.pk))
+                software_default_image = software_default_image.filter(~Q(pk=self.instance.pk))
+
+        if software and default_image and software_default_image.exists():
+            msg = "Only one default Software Image is allowed for each Software."
+            self.add_error("default_image", msg)
+
+        assigned_objects_count = sum(obj.count() for obj in (device_types, inventory_items, object_tags))
+        if default_image and assigned_objects_count > 0:
+            msg = "Default image cannot be assigned to any objects."
+            self.add_error("default_image", msg)
+            if device_types.count() > 0:
+                self.add_error("device_types", msg)
+            if inventory_items.count() > 0:
+                self.add_error("inventory_items", msg)
+            if object_tags.count() > 0:
+                self.add_error("object_tags", msg)
+
+        if software and assigned_objects_count > 0:
+            software_manufacturer = software.device_platform.manufacturer
+            for device_type in device_types:
+                if device_type.manufacturer != software_manufacturer:
+                    msg = f"Manufacturer for {device_type.model} doesn't match the Software Platform Manufacturer."
+                    self.add_error("device_types", msg)
+
+                software_img_for_dt = software_images.filter(device_types__in=[device_type])
+                if software_img_for_dt.exists():
+                    msg = f"Device Type {device_type.model} already assigned to another Software Image."
+                    self.add_error("device_types", msg)
+                    self.add_error(None, msg)
+
+            for object_tag in object_tags:
+                software_img_for_tag = software_images.filter(object_tags__in=[object_tag])
+                if software_img_for_tag.exists():
+                    msg = f"Object Tag {object_tag.name} already assigned to another Software Image."
+                    self.add_error("object_tags", msg)
+                    self.add_error(None, msg)
+
+            for inventory_item in inventory_items:
+                software_img_for_invitem = software_images.filter(inventory_items__in=[inventory_item])
+                if software_img_for_invitem.exists():
+                    msg = f"Inventory Item {inventory_item.name} already assigned to another Software Image."
+                    self.add_error("inventory_items", msg)
+                    self.add_error(None, msg)
+
+
+class SoftwareImageLCMFilterForm(BootstrapMixin, forms.ModelForm):
+    """Filter form to filter searches for SoftwareImageLCM."""
+
+    q = forms.CharField(
+        required=False,
+        label="Search",
+        help_text="Search for image name or software version.",
+    )
+    software = DynamicModelMultipleChoiceField(required=False, queryset=SoftwareLCM.objects.all())
+    image_file_name = forms.CharField(
+        required=False,
+        label="Image File name",
+    )
+    device_types = DynamicModelMultipleChoiceField(
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        required=False,
+    )
+    inventory_items = DynamicModelMultipleChoiceField(
+        queryset=InventoryItem.objects.all(),
+        to_field_name="id",
+        required=False,
+    )
+    object_tags = DynamicModelMultipleChoiceField(
+        queryset=Tag.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    default_image = forms.BooleanField(required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES))
+
+    class Meta:
+        """Meta attributes."""
+
+        model = SoftwareImageLCM
+        fields = [
+            "q",
+            "software",
+            "image_file_name",
+            "image_file_checksum",
+            "download_url",
+            "device_types",
+            "inventory_items",
+            "object_tags",
+            "default_image",
+        ]
+
+        widgets = {
+            "default_image": StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        }
+
+
+class SoftwareImageLCMCSVForm(CustomFieldModelCSVForm):
+    """Form for bulk creating SoftwareImageLCM objects."""
+
+    device_types = CSVMultipleModelChoiceField(
+        queryset=DeviceType.objects.all(),
+        required=False,
+        to_field_name="model",
+        help_text="Comma-separated list of DeviceType Models",
+    )
+    inventory_items = CSVMultipleModelChoiceField(
+        queryset=InventoryItem.objects.all(),
+        required=False,
+        to_field_name="id",
+        help_text="Comma-separated list of InventoryItem IDs",
+    )
+    object_tags = CSVMultipleModelChoiceField(
+        queryset=Tag.objects.all(), required=False, to_field_name="slug", help_text="Comma-separated list of Tag Slugs"
+    )
+
+    class Meta:
+        """Meta attributes for the SoftwareImageLCMCSVForm class."""
+
+        model = SoftwareImageLCM
+        fields = SoftwareImageLCM.csv_headers
 
 
 class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
@@ -478,18 +644,6 @@ class InventoryItemSoftwareValidationResultFilterForm(BootstrapMixin, CustomFiel
             "device_role",
             "exclude_sw_missing",
         ]
-
-
-class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):
-    """Reference a list of PKs."""
-
-    def prepare_value(self, value):
-        """Parse a comma-separated string of PKs into a list of PKs."""
-        pk_list = []
-        if isinstance(value, str):
-            pk_list = [val.strip() for val in value.split(",") if val]
-
-        return super().prepare_value(pk_list)
 
 
 class ValidatedSoftwareLCMCSVForm(CustomFieldModelCSVForm):
@@ -825,9 +979,7 @@ class ContactLCMCSVForm(CustomFieldModelCSVForm):
         fields = ContactLCM.csv_headers
 
 
-class CVELCMForm(
-    StatusBulkEditFormMixin, BootstrapMixin, CustomFieldModelForm, RelationshipModelForm
-):  # pylint: disable=too-many-ancestors
+class CVELCMForm(StatusBulkEditFormMixin, BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
     """CVE Lifecycle Management creation/edit form."""
 
     published_date = forms.DateField(widget=DatePicker())
@@ -933,9 +1085,7 @@ class CVELCMCSVForm(CustomFieldModelCSVForm, StatusModelCSVFormMixin):
         fields = CVELCM.csv_headers
 
 
-class VulnerabilityLCMForm(
-    StatusBulkEditFormMixin, BootstrapMixin, CustomFieldModelForm, RelationshipModelForm
-):  # pylint: disable=too-many-ancestors
+class VulnerabilityLCMForm(StatusBulkEditFormMixin, BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
     """Vulnerability Lifecycle Management creation/edit form."""
 
     model = VulnerabilityLCM
