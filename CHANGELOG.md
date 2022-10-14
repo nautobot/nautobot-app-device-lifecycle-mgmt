@@ -1,7 +1,8 @@
 # CHANGELOG
 
-## v1.1.0 - 23-08-2022
+## v1.1.0 - 14-10-2022
 
+- PR#108: Fixes missing view GUI errors for some of the list views.
 - PR#100: Adds compatibility for Nautobot 1.4. Fixes to pipeline, API serializers, filters and unit tests.
 - PR#90: Fixes Validate Software logic for computing `valid since` attribute.
 - PR#84: Add to defaults, and document, settings needed for report generation.

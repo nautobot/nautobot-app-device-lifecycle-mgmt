@@ -199,7 +199,6 @@ class SoftwareLCMListView(generic.ObjectListView):
     table = SoftwareLCMTable
     action_buttons = (
         "add",
-        "delete",
         "import",
         "export",
     )
@@ -301,7 +300,6 @@ class SoftwareImageLCMListView(generic.ObjectListView):
     table = SoftwareImageLCMTable
     action_buttons = (
         "add",
-        "delete",
         "import",
         "export",
     )
@@ -359,7 +357,6 @@ class ValidatedSoftwareLCMListView(generic.ObjectListView):
     table = ValidatedSoftwareLCMTable
     action_buttons = (
         "add",
-        "delete",
         "import",
         "export",
     )
@@ -546,7 +543,7 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
         )
         .order_by("-valid_percent")
     )
-
+    action_buttons = ("export",)
     # extra content dict to be returned by self.extra_context() method
     extra_content = {}
 
@@ -678,7 +675,7 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
         )
         .order_by("-valid_percent")
     )
-
+    action_buttons = ("export",)
     # extra content dict to be returned by self.extra_context() method
     extra_content = {}
 
