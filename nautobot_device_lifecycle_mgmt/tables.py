@@ -60,7 +60,10 @@ class HardwareLCMTable(BaseTable):
 
     pk = ToggleColumn()
     name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:hardwarelcm", text=lambda record: record, args=[A("pk")]
+        "plugins:nautobot_device_lifecycle_mgmt:hardwarelcm",
+        text=lambda record: record,
+        args=[A("pk")],
+        orderable=False,
     )
     reference_item = tables.TemplateColumn(
         template_code="""{% if record.device_type %}
@@ -69,6 +72,7 @@ class HardwareLCMTable(BaseTable):
                     {{ record.inventory_item }}
                     {% endif %}""",
         verbose_name="Reference",
+        orderable=False,
     )
     documentation_url = tables.TemplateColumn(
         template_code="""{% if record.documentation_url %}
