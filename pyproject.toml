@@ -5,8 +5,8 @@ description = "Manages device lifecycles for platforms and software."
 authors = ["Network to Code, LLC <opensource@networktocode.com>"]
 license = "Apache-2.0"
 readme = "README.md"
-homepage = "https://github.com/networktocode-llc/nautobot-plugin-device-lifecycle-mgmt"
-repository = "https://github.com/networktocode-llc/nautobot-plugin-device-lifecycle-mgmt"
+homepage = "https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt"
+repository = "https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt"
 keywords = ["nautobot", "nautobot-plugin"]
 include = [
     "LICENSE",
