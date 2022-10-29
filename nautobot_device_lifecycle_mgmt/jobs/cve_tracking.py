@@ -102,7 +102,7 @@ class NistCveSyncSoftware(Job):
             version = str(software.version)
 
             cpe_software_search_url = self.create_cpe_software_search_url(manufacturer, platform, version)
-            self.log_info(message=cpe_software_search_url)
+            self.log_info(message=f"Getting CVE information for {str(software.device_platform.name)} {version}")
             software_cve_info = self.get_cve_info(cpe_software_search_url, software.id)
 
             cve_counter += len(software_cve_info)
@@ -126,10 +126,7 @@ class NistCveSyncSoftware(Job):
         platform = Platform.objects.get(id=software.device_platform_id)
 
         try:
-            RelationshipAssociation.objects.get(source_id=software_id, destination_id=cve_id)
-            return self.log_info(
-                message=f"""Association from {cve.name} to {platform.name} - {software.version} already exists."""
-            )
+            return RelationshipAssociation.objects.get(source_id=software_id, destination_id=cve_id)
 
         except RelationshipAssociation.DoesNotExist:
             r_type = Relationship.objects.get(slug="soft_cve")
@@ -187,9 +184,12 @@ class NistCveSyncSoftware(Job):
     def get_cve_info(self, cpe_software_search_url: str, software_id=None) -> dict:
         """Search NIST for software and related CVEs."""
         try:
-            cpe_info = requests.get(cpe_software_search_url).json()
-        except ValueError:
-            return self.log_info(message="Getting CPE Info Failed.")
+            result = requests.get(cpe_software_search_url)
+            result.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            self.log_warning(message=f"WARNING: {err}.")
+
+        cpe_info = result.json()
 
         all_cve_info = {}
         if len(cpe_info["result"]["cpes"]) > 0:
@@ -215,31 +215,31 @@ class NistCveSyncSoftware(Job):
         cve_name = url.split("/")[-1]
         cve_search_url = f"{url}?apiKey={self.nist_api_key}"
         try:
-            status = requests.get(cve_search_url)
-            status.raise_for_status()
+            result = requests.get(cve_search_url)
+            result.raise_for_status()
         except requests.exceptions.HTTPError as err:
             retry_sleep_timer = 3
             self.log_warning(message=f"WARNING: {err}. Will retry in {str(retry_sleep_timer)} seconds.")
             sleep(retry_sleep_timer)
             try:
-                status = requests.get(cve_search_url)
-                status.raise_for_status()
+                result = requests.get(cve_search_url)
+                result.raise_for_status()
             except requests.exceptions.HTTPError as retry_err:
                 return self.log_warning(message=f"ERROR: {retry_err}. No data.")
-        result = status.json()
+        cve = result.json()
 
-        if result.get("message"):
+        if cve.get("message"):
             return AttributeError
 
-        cve_base = result["result"]["CVE_Items"][0]
+        cve_base = cve["result"]["CVE_Items"][0]
         cve_description = cve_base["cve"]["description"]["description_data"][0]["value"]
         cve_published_date = cve_base.get("publishedDate")
         cve_modified_date = cve_base.get("lastModifiedDate")
         cve_impact = cve_base.get("impact")
 
         # Determine URL
-        if len(result["result"]["CVE_Items"][0]["cve"]["references"]["reference_data"]) > 0:
-            cve_url = result["result"]["CVE_Items"][0]["cve"]["references"]["reference_data"][0].get(
+        if len(cve["result"]["CVE_Items"][0]["cve"]["references"]["reference_data"]) > 0:
+            cve_url = cve["result"]["CVE_Items"][0]["cve"]["references"]["reference_data"][0].get(
                 "url", f"https://www.cvedetails.com/cve/{cve_name}/"
             )
         else:
