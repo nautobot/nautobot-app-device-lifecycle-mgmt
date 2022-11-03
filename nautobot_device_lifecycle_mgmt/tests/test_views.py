@@ -318,6 +318,9 @@ class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     def test_bulk_edit_objects_without_permission(self):
         pass
 
+    def test_bulk_edit_form_contains_all_pks(self):
+        pass
+
     def test_has_advanced_tab(self):
         pass
 
