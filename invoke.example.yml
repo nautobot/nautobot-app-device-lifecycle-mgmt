@@ -1,0 +1,11 @@
+---
+nautobot_plugin_device_lifecycle_mgmt:
+  project_name: "nautobot-plugin-device-lifecycle-mgmt"
+  nautobot_ver: "1.3.5"
+  local: false
+  python_ver: "3.8"
+  compose_dir: "development"
+  compose_files:
+    - "docker-compose.requirements.yml"
+    - "docker-compose.base.yml"
+    - "docker-compose.dev.yml"
