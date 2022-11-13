@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## v1.1.1 - 11-13-2022
+- issue#118 - remove requirements for `["barchart_bar_width", "barchart_width", "barchart_height"]` to be in `nautobot_config.py` (honoringi sane defaults from PR#83)
+
 ## v1.1.0 - 11-04-2022
 
 - PR#111: Fixes project reference URLs displayed on PyPi package page.
