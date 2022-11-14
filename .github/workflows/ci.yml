@@ -1,6 +1,6 @@
 ---
 name: "CI"
-on:  # yamllint disable-line rule:truthy
+on: # yamllint disable-line rule:truthy
   - "push"
   - "pull_request"
 
@@ -76,7 +76,7 @@ jobs:
       fail-fast: true
       matrix:
         python-version: ["3.7", "3.8", "3.9"]
-        nautobot-version: ["1.2.11", "stable"]
+        nautobot-version: ["1.3.6", "stable"]
     env:
       INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_PYTHON_VER: "${{ matrix.python-version }}"
       INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_NAUTOBOT_VER: "${{ matrix.nautobot-version }}"
@@ -119,7 +119,7 @@ jobs:
       fail-fast: true
       matrix:
         python-version: ["3.7"]
-        nautobot-version: ["1.2.11"]
+        nautobot-version: ["1.3.6"]
     env:
       INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_PYTHON_VER: "${{ matrix.python-version }}"
       INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_NAUTOBOT_VER: "${{ matrix.nautobot-version }}"
@@ -147,7 +147,7 @@ jobs:
       fail-fast: true
       matrix:
         python-version: ["3.7", "3.8", "3.9"]
-        nautobot-version: ["1.2.11", "stable"]
+        nautobot-version: ["1.3.6", "stable"]
     runs-on: "ubuntu-20.04"
     env:
       INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_PYTHON_VER: "${{ matrix.python-version }}"
