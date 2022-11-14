@@ -215,6 +215,9 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     def test_bulk_import_objects_without_permission(self):
         pass
 
+    def test_bulk_import_objects_with_permission_csv_file(self):
+        pass
+
     def test_has_advanced_tab(self):
         pass
 
