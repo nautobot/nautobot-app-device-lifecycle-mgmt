@@ -270,6 +270,9 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     def test_get_object_notes(self):
         pass
 
+    def test_bulk_import_objects_with_permission_csv_file(self):
+        pass
+
 
 class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the SoftwareImageLCM views."""
@@ -328,4 +331,7 @@ class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
         pass
 
     def test_get_object_notes(self):
+        pass
+
+    def test_bulk_import_objects_with_permission_csv_file(self):
         pass
