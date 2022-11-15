@@ -33,7 +33,7 @@ Additionally, you can run jobs allowing you to:
 
 ## Authors and Maintainers
 
-### Extras
+## Extras
 
 The following custom relationships are automatically created by the plugin:
 
