@@ -14,7 +14,6 @@ limitations under the License.
 
 from distutils.util import strtobool
 from invoke import Collection, task as invoke_task
-from dotenv import dotenv_values
 import os
 
 
@@ -33,26 +32,6 @@ def is_truthy(arg):
     return bool(strtobool(arg))
 
 
-def _compose_files():
-    """Helper function to dynamically determine if we need to use mysql or postgres as a DB backend.
-
-    Returns:
-        list: List of docker-compose files.
-    """
-    files = [
-        "docker-compose.redis.yml",
-        "docker-compose.base.yml",
-        "docker-compose.dev.yml",
-    ]
-    env_vars = dotenv_values(os.path.join(os.path.dirname(__file__), "development/dev.env"))
-    if env_vars.get("NAUTOBOT_DB_ENGINE", "") == "django.db.backends.mysql":
-        print("Using MySQL as a database backend!")
-        files.append("docker-compose.mysql.yml")
-    else:
-        files.append("docker-compose.postgres.yml")
-    return files
-
-
 # Use pyinvoke configuration for default values, see http://docs.pyinvoke.org/en/stable/concepts/configuration.html
 # Variables may be overwritten in invoke.yml or by the environment variables
 # INVOKE_nautobot_device_lifecycle_mgmt_xxx
@@ -65,7 +44,13 @@ namespace.configure(
             "python_ver": "3.8",
             "local": False,
             "compose_dir": os.path.join(os.path.dirname(__file__), "development"),
-            "compose_files": _compose_files(),
+            "compose_files": [
+                "docker-compose.base.yml",
+                "docker-compose.redis.yml",
+                "docker-compose.postgres.yml",
+                "docker-compose.dev.yml",
+            ],
+            "compose_http_timeout": "86400",
         }
     }
 )
@@ -99,13 +84,13 @@ def docker_compose(context, command, **kwargs):
         **kwargs: Passed through to the context.run() call.
     """
     build_env = {
+        # Note: 'docker-compose logs' will stop following after 60 seconds by default,
+        # so we are overriding that by setting this environment variable.
+        "COMPOSE_HTTP_TIMEOUT": context.nautobot_device_lifecycle_mgmt.compose_http_timeout,
         "NAUTOBOT_VER": context.nautobot_device_lifecycle_mgmt.nautobot_ver,
         "PYTHON_VER": context.nautobot_device_lifecycle_mgmt.python_ver,
     }
-    compose_command = (
-        f"docker-compose --project-name {context.nautobot_device_lifecycle_mgmt.project_name}"
-        f' --project-directory "{context.nautobot_device_lifecycle_mgmt.compose_dir}"'
-    )
+    compose_command = f'docker-compose --project-name {context.nautobot_device_lifecycle_mgmt.project_name} --project-directory "{context.nautobot_device_lifecycle_mgmt.compose_dir}"'
     for compose_file in context.nautobot_device_lifecycle_mgmt.compose_files:
         compose_file_path = os.path.join(context.nautobot_device_lifecycle_mgmt.compose_dir, compose_file)
         compose_command += f' -f "{compose_file_path}"'
@@ -119,7 +104,7 @@ def run_command(context, command, **kwargs):
     if is_truthy(context.nautobot_device_lifecycle_mgmt.local):
         context.run(command, **kwargs)
     else:
-        # Check if netbox is running, no need to start another netbox container to run a command
+        # Check if nautobot is running, no need to start another nautobot container to run a command
         docker_compose_status = "ps --services --filter status=running"
         results = docker_compose(context, docker_compose_status, hide="out")
         if "nautobot" in results.stdout:
@@ -237,7 +222,7 @@ def nbshell(context):
 
 @task
 def shell_plus(context):
-    """Launch an interactive nbshell session."""
+    """Launch an interactive shell_plus session."""
     command = "nautobot-server shell_plus"
     run_command(context, command)
 
