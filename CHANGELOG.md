@@ -1,10 +1,13 @@
 # CHANGELOG
 
-## v1.1.1 - 11-21-2022
+## v1.1.1 - 11-22-2022
+
 ### Fixed
-- PR#119 - remove requirements for `["barchart_bar_width", "barchart_width", "barchart_height"]` to be in `nautobot_config.py` (honoring sane defaults from PR#83)
+
+- PR#119 - remove requirement for `["barchart_bar_width", "barchart_width", "barchart_height"]` settings to be in `nautobot_config.py` (honoring sane defaults from PR#83)
 
 **!!! NOTE**
+
 - This version also addresses some CI issues with the latest version of Nautobot Core around tests for bulk CSV.
 
 ## v1.1.0 - 11-04-2022
