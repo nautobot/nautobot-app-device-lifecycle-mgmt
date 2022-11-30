@@ -7,7 +7,7 @@ from nautobot.dcim.api.nested_serializers import (
     NestedPlatformSerializer,
 )
 from nautobot.extras.api.serializers import (
-    CustomFieldModelSerializerMixin,
+    CustomFieldModelSerializer,
     StatusModelSerializerMixin,
     StatusSerializerField,
     TaggedObjectSerializer,
@@ -22,10 +22,10 @@ try:
     serializer_base_classes = [
         RelationshipModelSerializerMixin,
         TaggedObjectSerializer,
-        CustomFieldModelSerializerMixin,
+        CustomFieldModelSerializer,
     ]  # pylint: disable=invalid-name
 except ImportError:
-    serializer_base_classes = [TaggedObjectSerializer, CustomFieldModelSerializerMixin]  # pylint: disable=invalid-name
+    serializer_base_classes = [TaggedObjectSerializer, CustomFieldModelSerializer]  # pylint: disable=invalid-name
 
 from nautobot.extras.models import Status
 
