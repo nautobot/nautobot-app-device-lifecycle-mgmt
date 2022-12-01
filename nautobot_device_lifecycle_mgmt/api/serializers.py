@@ -8,7 +8,6 @@ from nautobot.dcim.api.nested_serializers import (
 )
 from nautobot.extras.api.customfields import CustomFieldModelSerializer
 from nautobot.extras.api.serializers import (
-    CustomFieldModelSerializerMixin,
     StatusModelSerializerMixin,
     StatusSerializerField,
     TaggedObjectSerializer,
