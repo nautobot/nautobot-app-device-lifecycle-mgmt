@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v1.1.2 - 12-5-2022
+
+### Fixed
+
+- #123: Fixed CustomFieldModelFilterSet import source
+- #124: Remove testing of permissions on plugin
+
 ## v1.1.1 - 11-22-2022
 
 ### Fixed
@@ -21,8 +28,8 @@
 
 **!!! NOTE**
 
-  - This release increases minimum supported Nautobot version to 1.2.0.
-  - Support for Python 3.6 has been removed. Minimum supported Python version is 3.7.
+- This release increases minimum supported Nautobot version to 1.2.0.
+- Support for Python 3.6 has been removed. Minimum supported Python version is 3.7.
 
 ## v1.0.2 - 03-10-2022
 
@@ -30,14 +37,12 @@
 
 - PR#76: Fixes data migration bug, between Software and Software Image, when upgrading from version < v1.0.0.
 
-
 ## v1.0.1 - 03-09-2022
 
 ### Fixed
 
 - PR#72: Fixes Software Images tab rendering error in the Software details view when Software does not have Software Images linked.
 - PR#73: Fixes occasional post migrate signal failure.
-
 
 ## v1.0.0 - 03-02-2022
 
@@ -54,9 +59,11 @@
 As part of the migrations to v1.0.0, a Software Image object, linked to relevant Software object, will be automatically created for each Software that had software image defined.
 
 ## v0.4.1 - 02-18-2022
+
 - PR#65: Fixed buttons for non-superuser on many model Detail views
 
 ## v0.4.0 - 02-08-2022
+
 - PR#47: Added Plugin Upgrade Guide to the README
 - PR#50: Fixed view permissions for Device Notices
 - PR#57: Added CVE Tracking model and Vulnerability model
@@ -70,25 +77,29 @@ As part of the migrations to v1.0.0, a Software Image object, linked to relevant
 - PR#32: Refactors ValidatedSoftwareLCM model to support assignment to multiple objects.
 
 ## v0.2.2 - 10-07-2021
+
 - PR#30: Documentation updates for initial release.
 - PR#29: Updates case on LifeCycle to be Lifecycle.
 - PR#29: Changes visual representation of Providers to be Vendors.
 - PR#29: Updates documentation image for Hardware Notices.
 
 ## v0.2.1 - 10-24-2021
+
 - PR#26: Sets view permissions on all models in the navigation menu.
 - PR#26: Fixes navigation menu for Contract Imports.
 - PR#25: Add documentation for use-cases and plugin info to repo.
-- PR#20: Adds `valid` property to the validated software serializers. 
+- PR#20: Adds `valid` property to the validated software serializers.
 - PR#18: Adds CSV export option to software and validated software models.
 
 ## v0.2.0 - 09-22-2021
+
 - **Adds Maintenance/Service Contracts to the Lifecycle Plugin.**
 - **Adds Software and Validated Software tracking to the Lifecycle Plugin.**
 
 ## v0.1.0 - 08-05-2021
+
 - Initial fork and rename of project from [Nautobot EoX Notices](https://github.com/FragmentedPacket/nautobot-eox-notices)
-- Rename model and related references to the Device Lifecycle Management naming scheme. 
+- Rename model and related references to the Device Lifecycle Management naming scheme.
 - Add comments and documentation URL to the hardware model.
 - Remove devices relationship to the hardware model.
 - Add `expired` as a filter on to the REST API.
@@ -98,5 +109,4 @@ As part of the migrations to v1.0.0, a Software Image object, linked to relevant
 - Handles table not existing prior to migrations.
 - Add GraphQL endpoint for the Device Lifecycle Hardware model.
 - Add `InventoryItem.part_id` field to the Hardware model association options.
-- Add shell_plus and ipython to dev dependencies. 
-
+- Add shell_plus and ipython to dev dependencies.
