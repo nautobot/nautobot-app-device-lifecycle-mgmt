@@ -64,6 +64,9 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     def test_get_object_notes(self):
         pass
 
+    def test_list_objects_with_permission(self):
+        pass
+
 
 class ValidatedSoftwareDeviceReportViewTest(ViewTestCases.ListObjectsViewTestCase):
     """Test ValidatedSoftwareDeviceReportView"""
@@ -119,6 +122,9 @@ class ValidatedSoftwareDeviceReportViewTest(ViewTestCases.ListObjectsViewTestCas
         pass
 
     def test_list_objects_unknown_filter_no_strict_filtering(self):
+        pass
+
+    def test_list_objects_with_permission(self):
         pass
 
 
@@ -183,6 +189,9 @@ class ValidatedSoftwareInventoryItemReportViewTest(ViewTestCases.ListObjectsView
     def test_list_objects_unknown_filter_no_strict_filtering(self):
         pass
 
+    def test_list_objects_with_permission(self):
+        pass
+
 
 class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the CVELCM views."""
@@ -215,10 +224,16 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     def test_bulk_import_objects_without_permission(self):
         pass
 
+    def test_bulk_import_objects_with_permission_csv_file(self):
+        pass
+
     def test_has_advanced_tab(self):
         pass
 
     def test_get_object_notes(self):
+        pass
+
+    def test_list_objects_with_permission(self):
         pass
 
 
@@ -265,6 +280,12 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
         pass
 
     def test_get_object_notes(self):
+        pass
+
+    def test_bulk_import_objects_with_permission_csv_file(self):
+        pass
+
+    def test_list_objects_with_permission(self):
         pass
 
 
@@ -318,8 +339,17 @@ class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     def test_bulk_edit_objects_without_permission(self):
         pass
 
+    def test_bulk_edit_form_contains_all_pks(self):
+        pass
+
     def test_has_advanced_tab(self):
         pass
 
     def test_get_object_notes(self):
+        pass
+
+    def test_bulk_import_objects_with_permission_csv_file(self):
+        pass
+
+    def test_list_objects_with_permission(self):
         pass
