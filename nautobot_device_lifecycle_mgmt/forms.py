@@ -194,6 +194,7 @@ class SoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelFor
 class SoftwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
     """Filter form to filter searches for SoftwareLCM."""
 
+    model = SoftwareLCM
     q = forms.CharField(
         required=False,
         label="Search",
@@ -207,6 +208,7 @@ class SoftwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
     release_date_after = forms.DateField(label="Release Date After", required=False, widget=DatePicker())
     end_of_support_before = forms.DateField(label="End of Software Support Before", required=False, widget=DatePicker())
     end_of_support_after = forms.DateField(label="End of Software Support After", required=False, widget=DatePicker())
+    tag = TagFilterField(model)
 
     class Meta:
         """Meta attributes."""
@@ -226,6 +228,7 @@ class SoftwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
             "image_file_checksum",
             "long_term_support",
             "pre_release",
+            "tag",
         ]
 
         widgets = {
@@ -303,6 +306,7 @@ class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, Relationshi
 class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
     """Filter form to filter searches for SoftwareLCM."""
 
+    model = ValidatedSoftwareLCM
     q = forms.CharField(
         required=False,
         label="Search",
@@ -340,6 +344,7 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
     valid = forms.BooleanField(
         label="Valid Now", required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES)
     )
+    tag = TagFilterField(model)
 
     class Meta:
         """Meta attributes."""
@@ -357,6 +362,7 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
             "valid",
             "start_before",
             "start_after",
+            "tag",
         ]
 
 

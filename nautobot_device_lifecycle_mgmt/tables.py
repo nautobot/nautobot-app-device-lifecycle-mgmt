@@ -84,6 +84,7 @@ class SoftwareLCMTable(BaseTable):
     device_platform = tables.TemplateColumn("{{ record.device_platform }}")
     long_term_support = BooleanColumn()
     pre_release = BooleanColumn()
+    tags = TagColumn()
     actions = ButtonsColumn(SoftwareLCM, buttons=("edit", "delete"))
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
@@ -100,9 +101,21 @@ class SoftwareLCMTable(BaseTable):
             "end_of_support",
             "long_term_support",
             "pre_release",
+            "tags",
             "actions",
         )
-
+        default_columns = (
+            "pk",
+            "name",
+            "version",
+            "alias",
+            "device_platform",
+            "release_date",
+            "end_of_support",
+            "long_term_support",
+            "pre_release",
+            "actions",
+        )
 
 class ValidatedSoftwareLCMTable(BaseTable):
     """Table for ValidatedSoftwareLCMListView."""
@@ -118,8 +131,9 @@ class ValidatedSoftwareLCMTable(BaseTable):
     )
     valid = BooleanColumn(verbose_name="Valid Now", orderable=False)
     software = tables.LinkColumn(verbose_name="Software")
-    actions = ButtonsColumn(ValidatedSoftwareLCM, buttons=("edit", "delete"))
     preferred = BooleanColumn()
+    tags = TagColumn()
+    actions = ButtonsColumn(ValidatedSoftwareLCM, buttons=("edit", "delete"))
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
         """Meta attributes."""
@@ -133,9 +147,19 @@ class ValidatedSoftwareLCMTable(BaseTable):
             "end",
             "valid",
             "preferred",
+            "tags",
             "actions",
         )
-
+        default_columns = (
+            "pk",
+            "name",
+            "software",
+            "start",
+            "end",
+            "valid",
+            "preferred",
+            "actions",
+        )
 
 class DeviceSoftwareValidationResultTable(BaseTable):
     """Table for device software validation report."""

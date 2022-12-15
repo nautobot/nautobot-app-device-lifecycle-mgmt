@@ -110,6 +110,7 @@ class SoftwareLCMFilterSet(django_filters.FilterSet):
 
     release_date = django_filters.DateTimeFromToRangeFilter()
     end_of_support = django_filters.DateTimeFromToRangeFilter()
+    tag = TagFilter()
 
     class Meta:
         """Meta attributes for filter."""
@@ -211,6 +212,7 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
     start = django_filters.DateTimeFromToRangeFilter()
     end = django_filters.DateTimeFromToRangeFilter()
     valid = django_filters.BooleanFilter(method="valid_search", label="Currently valid")
+    tag = TagFilter()
 
     class Meta:
         """Meta attributes for filter."""
