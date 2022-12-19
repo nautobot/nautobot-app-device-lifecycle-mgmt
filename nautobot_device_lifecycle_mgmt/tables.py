@@ -117,6 +117,7 @@ class SoftwareLCMTable(BaseTable):
             "actions",
         )
 
+
 class ValidatedSoftwareLCMTable(BaseTable):
     """Table for ValidatedSoftwareLCMListView."""
 
@@ -160,6 +161,7 @@ class ValidatedSoftwareLCMTable(BaseTable):
             "preferred",
             "actions",
         )
+
 
 class DeviceSoftwareValidationResultTable(BaseTable):
     """Table for device software validation report."""
