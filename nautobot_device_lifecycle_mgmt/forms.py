@@ -312,7 +312,7 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
         label="Search",
         help_text="Search for start or end date of validity.",
     )
-    software = DynamicModelChoiceField(required=False, queryset=SoftwareLCM.objects.all())
+    software = DynamicModelMultipleChoiceField(required=False, queryset=SoftwareLCM.objects.all())
     devices = DynamicModelMultipleChoiceField(
         queryset=Device.objects.all(),
         to_field_name="name",

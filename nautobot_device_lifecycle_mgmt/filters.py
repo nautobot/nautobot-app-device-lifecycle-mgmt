@@ -278,7 +278,6 @@ class ValidatedSoftwareLCMFilterSet(django_filters.FilterSet):
         if not value:
             return queryset
 
-        print(value)
         inventory_items = InventoryItem.objects.filter(id=value)
 
         if inventory_items.count() != 1:
