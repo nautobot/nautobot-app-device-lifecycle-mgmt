@@ -1,35 +1,24 @@
-# v1.0 Release Notes
+# v0.1 Release Notes
 
-!!! warning "Developer Note - Remove Me!"
-    Guiding Principles:
-
-    - Changelogs are for humans, not machines.
-    - There should be an entry for every single version.
-    - The same types of changes should be grouped.
-    - Versions and sections should be linkable.
-    - The latest version comes first.
-    - The release date of each version is displayed.
-    - Mention whether you follow Semantic Versioning.
-
-    Types of changes:
-
-    - `Added` for new features.
-    - `Changed` for changes in existing functionality.
-    - `Deprecated` for soon-to-be removed features.
-    - `Removed` for now removed features.
-    - `Fixed` for any bug fixes.
-    - `Security` in case of vulnerabilities.
-
-
-This document describes all new features and changes in the release `1.0`. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+This document describes all new features and changes in the release `0.1.X`. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Release Overview
 
-- Major features or milestones
-- Achieved in this `x.y` release
-- Changes to compatibility with Nautobot and/or other plugins, libraries etc.
+- Initial fork and rename of project from [Nautobot EoX Notices](https://github.com/FragmentedPacket/nautobot-eox-notices)
+- Rename model and related references to the Device Lifecycle Management naming scheme.
+- Add comments and documentation URL to the hardware model.
+- Remove devices relationship to the hardware model.
+- Add `expired` as a filter on to the REST API.
+- Add travis.yml and associated pipeline.
+- Set bulk import device_type to use the model instead of the slug.
+- Adds dynamic menu depending on the version of nautobot running.
+- Handles table not existing prior to migrations.
+- Add GraphQL endpoint for the Device Lifecycle Hardware model.
+- Add `InventoryItem.part_id` field to the Hardware model association options.
+- Add shell_plus and ipython to dev dependencies.
 
-## [v1.0.1] - 2021-09-08
+## [v0.1.0] - 2021-08-05
+Initial release
 
 ### Added
 
@@ -37,12 +26,3 @@ This document describes all new features and changes in the release `1.0`. The f
 
 ### Fixed
 
-- [#123](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/issues/123) Fixed Tag filtering not working in job launch form
-
-## [v1.0.0] - 2021-08-03
-
-### Added
-
-### Changed
-
-### Fixed
