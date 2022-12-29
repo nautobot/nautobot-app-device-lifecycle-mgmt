@@ -37,7 +37,8 @@ This release includes some of the following highlights:
 
 
 ## [v1.1.0] - 2022-12-07
-
+!!! warning "Note: - This release increases minimum supported Nautobot version to 1.2.0."
+    - Support for Python 3.6 has been removed. Minimum supported Python version is 3.7.
 ### Added
 - [#84](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/issues/84) Add to defaults, and document, settings needed for report generation.
 - [#100](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/issues/100) Adds compatibility for Nautobot 1.4. Fixes to pipeline, API serializers, filters and unit tests.
