@@ -37,9 +37,3 @@ sudo systemctl restart nautobot-rq-worker
 
 !!! note
     If you have multiple workers defined, you will need to restart each worker process. For example `systemctl restart nautobot nautobot-worker@1 nautobot-worker@2` etc.
-
-## Upgrading to version v0.5
-
-Version `v0.5` adds Software Image model and removes software image related fields from the Software model.
-
-Existing Software objects will have the software image related data automatically migrated to the dedicated Software Image objects.
