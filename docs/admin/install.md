@@ -13,8 +13,7 @@
 
 ### Access Requirements
 
-!!! warning "Developer Note - Remove Me!"
-    What external systems (if any) it needs access to in order to work.
+This plugin can be run with no additional access requirements, however there are extended services such as CVSS / NIST integration which depends on integration to the NIST public api service.  Other examples would include access to the Cisco EoX api service which can be used to enrich data based on devices under contract coverage.  Please leverage the documentation pages for the specific plugin integrations for details.
 
 ## Install Guide
 
@@ -42,6 +41,7 @@ Once installed, the plugin needs to be enabled in your Nautobot configuration. T
 # In your nautobot_config.py
 PLUGINS = ["nautobot_device_lifecycle_mgmt"]
 
+# Optionally you can override default settings for config items in the device lifecylce plugin (as seen in this example)
 PLUGINS_CONFIG = {
     "nautobot_device_lifecycle_mgmt": {
         "barchart_bar_width": float(os.environ.get("BARCHART_BAR_WIDTH", 0.1)),
