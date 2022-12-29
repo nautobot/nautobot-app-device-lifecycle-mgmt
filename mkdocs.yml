@@ -120,6 +120,7 @@ nav:
       - Extending the App: "dev/extending.md"
       - Contributing to the App: "dev/contributing.md"
       - Development Environment: "dev/dev_environment.md"
+      - Arch Decision: "dev/arch_decision.md"
       - Code Reference:
           - "dev/code_reference/index.md"
           - Models: "dev/code_reference/models.md"
