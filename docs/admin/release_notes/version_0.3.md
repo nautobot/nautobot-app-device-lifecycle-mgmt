@@ -10,7 +10,7 @@ This release includes some of the following highlights:
 - Updates Hardware LCM to support MySQL Compliant Queries.
 - Refactors ValidatedSoftwareLCM model to support assignment to multiple objects.
 
-## [v0.3.0] - 2022-12-14
+## [v0.3.0] - 2021-12-14
 
 ### Added
 - [#39](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/issues/39) Adds feature-rich reporting functionality for Software Validation.
