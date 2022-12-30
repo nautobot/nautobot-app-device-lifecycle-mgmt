@@ -33,6 +33,8 @@ Additionally, you can run jobs allowing you to:
 
 ## Authors and Maintainers
 
+Nautobot Device Lifecycle plugin is maintained by Network to Code and members of the Nautobot community.  Anyone is welcome to contribute code, issues, feature requests, etc...  
+
 ## Extras
 
 The following custom relationships are automatically created by the plugin:
