@@ -1,9 +1,5 @@
 # External Interactions
 
-!!! warning "Developer Note - Remove Me!"
-    Optional page, remove if not applicable.
-    What (if any) interactions exist between this Nautobot App and the outside world (i.e. systems that are not part of Nautobot).
-
 ## External System Integrations
 
 ### From the App to Other Systems
@@ -11,9 +7,6 @@
 ### From Other Systems to the App
 
 ## Nautobot REST API endpoints
-
-!!! warning "Developer Note - Remove Me!"
-    API documentation in this doc - including python request examples, curl examples, postman collections referred etc.
 
 ### Hardware Lifecycle Management API Examples
 
