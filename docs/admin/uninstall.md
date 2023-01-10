@@ -2,9 +2,6 @@
 
 ## Uninstall Guide
 
-!!! warning "Developer Note - Remove Me!"
-    Detailed instructions on how to remove the app from Nautobot.
-
 Remove any related configuration you added in `nautobot_config.py` from `PLUGINS` & `PLUGINS_CONFIG`.
 
 ## Database Cleanup
