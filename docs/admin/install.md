@@ -1,8 +1,5 @@
 # Installing the App in Nautobot
 
-!!! warning "Developer Note - Remove Me!"
-    Detailed instructions on installing the App. You will need to update this section based on any additional dependencies or prerequisites.
-
 ## Prerequisites
 
 - The plugin is compatible with Nautobot 1.1.6 and higher.
@@ -72,9 +69,6 @@ sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
 
 
 ## App Configuration
-
-!!! warning "Developer Note - Remove Me!"
-    Any configuration required to get the App set up. Edit the table below as per the examples provided.
 
 The plugin behavior can be controlled with the following list of settings.
 
