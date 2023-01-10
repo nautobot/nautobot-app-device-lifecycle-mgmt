@@ -2,7 +2,8 @@
 There are various integrations that you may want to incorporate into the Device Lifecycle plug-in.  This page will rpvide references to officially supported external integrations.  This is not meant to limit what is supported, but rather is meant as a place to go for integration needs for external systems (such as NIST for example...).
 
 ## External System Integrations
-* NIST API Developer documentation can be found [here](https://nvd.nist.gov/developers/start-here#:~:text=Request%20an%20API%20Key%201%20On%20the%20API,above%20for%20an%20email%20from%20nvd-noreply%40nist.gov.%20More%20items)
+* [NIST API Developer Documentation](https://nvd.nist.gov/developers/start-here#:~:text=Request%20an%20API%20Key%201%20On%20the%20API,above%20for%20an%20email%20from%20nvd-noreply%40nist.gov.%20More%20items)
+* [NIST Request an API key](https://nvd.nist.gov/developers/request-an-api-key)
 ### From the App to Other Systems
 
 ### From Other Systems to the App
