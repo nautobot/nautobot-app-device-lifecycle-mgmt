@@ -13,10 +13,10 @@ Once you have the app installed a great first step would be to read the blog pos
 
 If you've already consumed the part I of the blog article mentioned above.  
     
-1. Go ahead and check out [nautobot-and-device-lifecycle-part-2](https://blog.networktocode.com/post/nautobot-and-device-lifecycle-part-2/).  
+1. Go ahead and check out [nautobot-and-device-lifecycle-part-2](https://blog.networktocode.com/post/nautobot-and-device-lifecycle-part-2/).<br>
     This article dives into details around software lifecycle and what you can do with all the information you now have populated.   
     
-2. Review [nautobot-and-device-lifecycle-part-3](https://blog.networktocode.com/post/nautobot-and-device-lifecycle-part-3/).
+2. Review [nautobot-and-device-lifecycle-part-3](https://blog.networktocode.com/post/nautobot-and-device-lifecycle-part-3/).<br>
     This article covers what's new in version 1.0.2 of Device Lifecycle Management and what is possible to achieve by taking advantage of all the features.
 
 Most importantly, Device Lifecycle doesn't need to be a boring chore - have fun!  You now have a programmatic way to manage all of your assets and create powerful multi-vendor reports to help your day job. 
