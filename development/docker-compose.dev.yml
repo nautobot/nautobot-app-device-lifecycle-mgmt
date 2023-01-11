@@ -18,3 +18,13 @@ services:
     volumes:
       - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
       - "../:/source"
+  docs:
+    entrypoint: "mkdocs serve -v -a 0.0.0.0:8080"
+    ports:
+      - "8001:8080"
+    volumes:
+      - "../:/source"
+    image: "nautobot-device-lifecycle-mgmt/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
+    healthcheck:
+      disable: true
+    tty: true
