@@ -1,189 +1,136 @@
 {% extends 'generic/object_detail.html' %}
-{% load plugins %}
-{% load buttons %}
-{% load custom_links %}
-{% load helpers %}
 
-{% block title %}{{ object }}{% endblock %}
+{% block masthead %}
+    <h2>{% block title %}{{ object }}{% endblock %}</h2>
+{% endblock masthead %}
 
-{% block header %}
-    <div class="row noprint">
-        <div class="col-sm-8 col-md-9">
-            <ol class="breadcrumb">
-                <li><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_list' %}">Software Image</a></li>
-                <li><a>{{ object }}</a></li>
-            </ol>
+{% block content_left_page %}
+    <style>
+        p.break-word {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+    </style>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Software Image</strong>
         </div>
-        <div class="col-sm-4 col-md-3">
-            <form action="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_list' %}" method="get">
-                <div class="input-group">
-                    <input type="text" name="q" class="form-control" />
-                    <span class="input-group-btn">
-                        <button type="submit" class="btn btn-primary">
-                            <span class="mdi mdi-magnify" aria-hidden="true"></span> Search
-                        </button>
-                    </span>
-                </div>
-            </form>
-        </div>
+        <table class="table table-hover panel-body attr-table">
+            <tr>
+                <td>Software Version</td>
+                <td>
+                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwarelcm' pk=object.software.pk %}">{{ object.software }}</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Image File Name</td>
+                <td>
+                    {{ object.image_file_name }}
+                </td>
+            </tr>
+            <tr>
+                <td>Download URL</td>
+                <td>
+                {% if object.download_url %}
+                    <a href="{{ object.download_url }}">{{ object.download_url }}</a>
+                {% else %}
+                    <span class="text-muted"></span>&mdash;</span>
+                {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Image File Checksum</td>
+                <td>
+                {% if object.image_file_checksum %}
+                    <p class="break-word">{{ object.image_file_checksum }}</p>
+                {% else %}
+                    <span class="text-muted"></span>&mdash;</span>
+                {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Default Image</td>
+                <td>
+                {% if object.default_image is True %}
+                    <span class="text-success"><i class="mdi mdi-check-bold"></i></span>
+                {% else %}
+                    <span class="text-danger"><i class="mdi mdi-close"></i></span>
+                {% endif %}
+                </td>
+            </tr>
+        </table>
     </div>
-    <div class="pull-right noprint">
-        {% plugin_buttons object %}
-        {% if perms.nautobot_device_lifecycle_mgmt.change_softwareimagelcm %}
-            {% edit_button object %}
-        {% endif %}
-        {% if perms.nautobot_device_lifecycle_mgmt.delete_softwareimagelcm %}
-            {% delete_button object %}
-        {% endif %}
-    </div>
-    <h2>{{ object }}</h2>
-        {% include 'inc/created_updated.html' with obj=object %}
-    <div class="pull-right noprint">
-        {% custom_links object %}
-    </div>
-    <ul class="nav nav-tabs">
-        <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
-            <a href="{{ object.get_absolute_url }}">Software</a>
-        </li>
-        <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
-            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_changelog' pk=object.id %}">Change Log</a>
-        </li>
-    </ul>
 {% endblock %}
 
-{% block content %}
-<style>
-    p.break-word {
-        overflow-wrap: break-word;
-        word-wrap: break-word;
-        word-break: break-word;
-    }
-</style>
-<div class="row">
-    <div class="col-md-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <strong>Software Image</strong>
-            </div>
-            <table class="table table-hover panel-body attr-table">
-                <tr>
-                    <td>Software Version</td>
-                    <td>
-                        <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwarelcm' pk=object.software.pk %}">{{ object.software }}</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Image File Name</td>
-                    <td>
-                        {{ object.image_file_name }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>Download URL</td>
-                    <td>
-                    {% if object.download_url %}
-                        <a href="{{ object.download_url }}">{{ object.download_url }}</a>
-                    {% else %}
-                        <span class="text-muted"></span>&mdash;</span>
-                    {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td>Image File Checksum</td>
-                    <td>
-                    {% if object.image_file_checksum %}
-                        <p class="break-word">{{ object.image_file_checksum }}</p>
-                    {% else %}
-                       <span class="text-muted"></span>&mdash;</span>
-                    {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td>Default Image</td>
-                    <td>
-                    {% if object.default_image is True %}
-                        <span class="text-success"><i class="mdi mdi-check-bold"></i></span>
-                    {% else %}
-                        <span class="text-danger"><i class="mdi mdi-close"></i></span>
-                    {% endif %}
-                    </td>
-                </tr>
-            </table>
+{% block content_right_page %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Device assignments</strong>
         </div>
-        {% include 'inc/custom_fields_panel.html' %}
-        {% include 'inc/relationships_panel.html' %}
-        {% include 'extras/inc/tags_panel.html' with tags=object.tags.all %}
+        <table class="table table-hover panel-body attr-table">
+            <tr>
+                <td>
+                    Device Types
+                </td>
+                <td>
+                    {% if object.device_types.all %}
+                    <ul>
+                        {% for device_type in object.device_types.all %}
+                            <li><a href="{{ device_type.get_absolute_url }}">{{ device_type }}</a></li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                        <span class="text-muted">None</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
     </div>
-    <div class="col-md-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <strong>Device assignments</strong>
-            </div>
-            <table class="table table-hover panel-body attr-table">
-                <tr>
-                    <td>
-                        Device Types
-                    </td>
-                    <td>
-                        {% if object.device_types.all %}
-                        <ul>
-                            {% for device_type in object.device_types.all %}
-                                <li><a href="{{ device_type.get_absolute_url }}">{{ device_type }}</a></li>
-                            {% endfor %}
-                        </ul>
-                        {% else %}
-                            <span class="text-muted">None</span>
-                        {% endif %}
-                    </td>
-                </tr>
-            </table>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Inventory Items assignments</strong>
         </div>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <strong>Inventory Items assignments</strong>
-            </div>
-            <table class="table table-hover panel-body attr-table">
-                <tr>
-                    <td>
-                        Inventory Items
-                    </td>
-                    <td>
-                        {% if object.inventory_items.all %}
-                        <ul>
-                            {% for inventory_item in object.inventory_items.all %}
-                                <li><a href="{{ inventory_item.get_absolute_url }}">{{ inventory_item }}</a></li>
-                            {% endfor %}
-                        </ul>
-                        {% else %}
-                            <span class="text-muted">None</span>
-                        {% endif %}
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <strong>Object Tags assignments</strong>
-            </div>
-            <table class="table table-hover panel-body attr-table">
-                <tr>
-                    <td>
-                        Object Tags
-                    </td>
-                    <td>
-                        {% if object.object_tags.all %}
-                        <ul>
-                            {% for object_tag in object.object_tags.all %}
-                                <li><a href="{{ object_tag.get_absolute_url }}">{{ object_tag }}</a></li>
-                            {% endfor %}
-                        </ul>
-                        {% else %}
-                            <span class="text-muted">None</span>
-                        {% endif %}
-                    </td>
-                </tr>
-            </table>
-        </div>
+        <table class="table table-hover panel-body attr-table">
+            <tr>
+                <td>
+                    Inventory Items
+                </td>
+                <td>
+                    {% if object.inventory_items.all %}
+                    <ul>
+                        {% for inventory_item in object.inventory_items.all %}
+                            <li><a href="{{ inventory_item.get_absolute_url }}">{{ inventory_item }}</a></li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                        <span class="text-muted">None</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
     </div>
-</div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Object Tags assignments</strong>
+        </div>
+        <table class="table table-hover panel-body attr-table">
+            <tr>
+                <td>
+                    Object Tags
+                </td>
+                <td>
+                    {% if object.object_tags.all %}
+                    <ul>
+                        {% for object_tag in object.object_tags.all %}
+                            <li><a href="{{ object_tag.get_absolute_url }}">{{ object_tag }}</a></li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                        <span class="text-muted">None</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
 {% endblock %}

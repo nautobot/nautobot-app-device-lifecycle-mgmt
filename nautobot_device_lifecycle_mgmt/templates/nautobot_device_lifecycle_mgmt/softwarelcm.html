@@ -1,130 +1,73 @@
 {% extends 'generic/object_detail.html' %}
-{% load plugins %}
-{% load buttons %}
-{% load custom_links %}
-{% load helpers %}
 
-{% block title %}{{ object }}{% endblock %}
+{% block masthead %}
+    <h2>{% block title %}{{ object }}{% endblock %}</h2>
+{% endblock masthead %}
 
-{% block header %}
-    <div class="row noprint">
-        <div class="col-sm-8 col-md-9">
-            <ol class="breadcrumb">
-                <li><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwarelcm_list' %}">Software</a></li>
-                <li><a>{{ object }}</a></li>
-            </ol>
-        </div>
-        <div class="col-sm-4 col-md-3">
-            <form action="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwarelcm_list' %}" method="get">
-                <div class="input-group">
-                    <input type="text" name="q" class="form-control" />
-                    <span class="input-group-btn">
-                        <button type="submit" class="btn btn-primary">
-                            <span class="mdi mdi-magnify" aria-hidden="true"></span> Search
-                        </button>
-                    </span>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div class="pull-right noprint">
-        {% plugin_buttons object %}
-        {% if perms.nautobot_device_lifecycle_mgmt.add_softwareimagelcm and active_tab == 'software-images' %}
-            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_add' %}?software={{ object.pk }}" class="btn btn-success">
-                <span class="mdi mdi-plus-thick" aria-hidden="true"></span>
-                Add a Software Image
-            </a>
-        {% endif %}
-        {% if perms.nautobot_device_lifecycle_mgmt.change_softwarelcm %}
-            {% edit_button object %}
-        {% endif %}
-        {% if perms.nautobot_device_lifecycle_mgmt.delete_softwarelcm %}
-            {% delete_button object %}
-        {% endif %}
-    </div>
-    <h2>{{ object }}</h2>
-        {% include 'inc/created_updated.html' with obj=object %}
-    <div class="pull-right noprint">
-        {% custom_links object %}
-    </div>
-    <ul class="nav nav-tabs">
-        <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
-            <a href="{{ object.get_absolute_url }}">Software</a>
-        </li>
-        <li role="presentation"{% if active_tab == 'software-images' %} class="active"{% endif %}>
-            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:software_software_images' pk=object.pk %}">Software Images <span class="badge">{{ object.get_software_images.count }}</span></a>
-        </li>
-        <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
-            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwarelcm_changelog' pk=object.id %}">Change Log</a>
-        </li>
-    </ul>
+{% block extra_nav_tabs %}
+    <li role="presentation"{% if active_tab == 'software-images' %} class="active"{% endif %}>
+        <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:software_software_images' pk=object.pk %}">Software Images <span class="badge">{{ object.get_software_images.count }}</span></a>
+    </li>
 {% endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <strong>Software</strong>
-            </div>
-            <table class="table table-hover panel-body attr-table">
-                <tr>
-                    <td>Device Platform</td>
-                    <td>
-                        {% if object.device_platform %}
-                            <a href="{% url 'dcim:platform' slug=object.device_platform.slug %}">{{ object.device_platform }}</a>
-                        {% else %}
-                            &mdash;
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td>Software Version</td>
-                    <td>{{ object.version }}</td>
-                </tr>
-                <tr>
-                    <td>Release Date</td>
-                    <td>{{ object.release_date }}</td>
-                </tr>
-                <tr>
-                    <td>End of Support</td>
-                    <td>{{ object.end_of_support }}</td>
-                </tr>
-                <tr>
-                    <td>Documentation URL</td>
-                    <td>
-                    {% if object.documentation_url %}
-                        <a href="{{ object.documentation_url }}">{{ object.documentation_url }}</a>
-                    {% else %}
-                     <span class="text-muted">&mdash;</span>
-                    {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td>Long Term Support</td>
-                    <td>
-                    {% if object.long_term_support is True %}
-                        <span class="text-success"><i class="mdi mdi-check-bold"></i></span>
-                    {% else %}
-                        <span class="text-danger"><i class="mdi mdi-close"></i></span>
-                    {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td>Pre Release</td>
-                    <td>
-                    {% if object.pre_release is True %}
-                        <span class="text-success"><i class="mdi mdi-check-bold"></i></span>
-                    {% else %}
-                        <span class="text-danger"><i class="mdi mdi-close"></i></span>
-                    {% endif %}
-                    </td>
-                </tr>
-            </table>
+{% block content_left_page %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Software</strong>
         </div>
-        {% include 'inc/custom_fields_panel.html' %}
-        {% include 'inc/relationships_panel.html' %}
-        {% include 'extras/inc/tags_panel.html' with tags=object.tags.all %}
+        <table class="table table-hover panel-body attr-table">
+            <tr>
+                <td>Device Platform</td>
+                <td>
+                    {% if object.device_platform %}
+                        <a href="{% url 'dcim:platform' slug=object.device_platform.slug %}">{{ object.device_platform }}</a>
+                    {% else %}
+                        &mdash;
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Software Version</td>
+                <td>{{ object.version }}</td>
+            </tr>
+            <tr>
+                <td>Release Date</td>
+                <td>{{ object.release_date }}</td>
+            </tr>
+            <tr>
+                <td>End of Support</td>
+                <td>{{ object.end_of_support }}</td>
+            </tr>
+            <tr>
+                <td>Documentation URL</td>
+                <td>
+                {% if object.documentation_url %}
+                    <a href="{{ object.documentation_url }}">{{ object.documentation_url }}</a>
+                {% else %}
+                    <span class="text-muted">&mdash;</span>
+                {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Long Term Support</td>
+                <td>
+                {% if object.long_term_support is True %}
+                    <span class="text-success"><i class="mdi mdi-check-bold"></i></span>
+                {% else %}
+                    <span class="text-danger"><i class="mdi mdi-close"></i></span>
+                {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Pre Release</td>
+                <td>
+                {% if object.pre_release is True %}
+                    <span class="text-success"><i class="mdi mdi-check-bold"></i></span>
+                {% else %}
+                    <span class="text-danger"><i class="mdi mdi-close"></i></span>
+                {% endif %}
+                </td>
+            </tr>
+        </table>
     </div>
-</div>
 {% endblock %}
