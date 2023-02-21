@@ -242,13 +242,22 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
         devices = create_devices()
         softwares = create_softwares()
         cves = create_cves()
-        for i, cve in enumerate(cves):
-            VulnerabilityLCM.objects.create(cve=cve, software=softwares[i], device=devices[i])
 
         vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
-        status = Status.objects.create(name="Exempt", slug="exempt", color="4caf50", description="This unit is exempt.")
-        status.content_types.set([vuln_ct])
-        cls.bulk_edit_data = {"status": status.id}
+
+        exempt_status = Status.objects.create(
+            name="Exempt", slug="exempt", color="4caf50", description="This unit is exempt."
+        )
+        exempt_status.content_types.set([vuln_ct])
+        cls.bulk_edit_data = {"status": exempt_status.id}
+
+        forced_status = Status.objects.create(
+            name="Forced", slug="forced", color="4caf50", description="This unit is forced."
+        )
+        forced_status.content_types.set([vuln_ct])
+
+        for i, cve in enumerate(cves):
+            VulnerabilityLCM.objects.create(cve=cve, software=softwares[i], device=devices[i], status=forced_status)
 
     def test_bulk_import_objects_with_constrained_permission(self):
         pass
