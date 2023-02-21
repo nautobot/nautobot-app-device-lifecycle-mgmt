@@ -117,12 +117,6 @@ BANNER_BOTTOM = os.environ.get("BANNER_BOTTOM", "")
 # Text to include on the login page above the login form. HTML is allowed.
 BANNER_LOGIN = os.environ.get("BANNER_LOGIN", "")
 
-# Cache timeout in seconds. Cannot be 0. Defaults to 900 (15 minutes). To disable caching, set CACHEOPS_ENABLED to False
-CACHEOPS_DEFAULTS = {"timeout": 900}
-
-# Set to False to disable caching with cacheops. (Default: True)
-CACHEOPS_ENABLED = True
-
 # Maximum number of days to retain logged changes. Set to 0 to retain changes indefinitely. (Default: 90)
 CHANGELOG_RETENTION = int(os.environ.get("CHANGELOG_RETENTION", 90))
 
