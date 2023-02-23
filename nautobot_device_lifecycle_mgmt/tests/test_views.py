@@ -303,23 +303,24 @@ class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     def setUpTestData(cls):
         softwares = create_softwares()
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
-        device_type = DeviceType.objects.create(manufacturer=manufacturer, model="6509-E", slug="6509-e")
+        device_type1 = DeviceType.objects.create(manufacturer=manufacturer, model="6509", slug="6509")
+        device_type2 = DeviceType.objects.create(manufacturer=manufacturer, model="6509-E", slug="6509-e")
 
-        SoftwareImageLCM.objects.create(
+        softimage = SoftwareImageLCM.objects.create(
             image_file_name="ios15.1.2m.img",
             software=softwares[0],
             download_url="ftp://images.local/cisco/ios15.1.2m.img",
             image_file_checksum="441rfabd75b0512r7fde7a7a66faa596",
             default_image=True,
         )
-        softimage = SoftwareImageLCM.objects.create(
+        softimage.device_types.set([device_type1, device_type2])
+        SoftwareImageLCM.objects.create(
             image_file_name="ios4.22.9m.img",
             software=softwares[1],
             download_url="ftp://images.local/cisco/ios4.22.9m.img",
             image_file_checksum="58arfabd75b051fr7fde7a7ac6faa3fv",
             default_image=False,
         )
-        softimage.device_types.set([device_type])
 
         cls.form_data = {
             "image_file_name": "eos_4.21m.swi",
