@@ -40,20 +40,21 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
         device_types = tuple(
             DeviceType.objects.create(model=model, slug=model, manufacturer=manufacturer)
-            for model in ["c9300-24", "c9300-48", "c9500-24", "c9200-24", "c9200-48"]
+            for model in ["c9300-24", "c9300-48", "c9500-24", "c9500-48", "c9200-24", "c9200-48"]
         )
 
         HardwareLCM.objects.create(device_type=device_types[0], end_of_sale=datetime.date(2021, 4, 1))
         HardwareLCM.objects.create(device_type=device_types[1], end_of_sale=datetime.date(2021, 4, 1))
+        HardwareLCM.objects.create(device_type=device_types[2], end_of_sale=datetime.date(2021, 4, 1))
 
         cls.form_data = {
-            "device_type": device_types[2].id,
+            "device_type": device_types[3].id,
             "end_of_sale": datetime.date(2021, 4, 1),
             "end_of_support": datetime.date(2024, 4, 1),
         }
         cls.csv_data = (
             "device_type,end_of_sale,end_of_support,end_of_sw_releases,end_of_security_patches,documentation_url",
-            "c9500-24, 2021-10-06, 2022-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
+            "c9500-48, 2021-10-06, 2022-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
             "c9200-24, 2022-10-06, 2023-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
             "c9200-48, 2023-10-06, 2024-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
         )
