@@ -37,10 +37,7 @@ RUN curl -sSL https://install.python-poetry.org | python3 - && \
 # -------------------------------------------------------------------------------------
 # --> Start safe to modify section
 
-# FIXME: The following packages were installed in the original Dockerfile, however
-#  seems as not necessary any more
-
-# # Uncomment the lines below if you are apt-installing any package.
+# Uncomment the lines below if you are apt-installing any package.
 # RUN apt-get -y update && apt-get -y install \
 #     libldap2-dev \
 #     && rm -rf /var/lib/apt/lists/*
