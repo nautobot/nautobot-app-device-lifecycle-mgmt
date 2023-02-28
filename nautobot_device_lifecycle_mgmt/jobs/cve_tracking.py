@@ -40,6 +40,7 @@ class GenerateVulnerabilities(Job):
         count_before = VulnerabilityLCM.objects.count()
 
         for cve in cves:
+            self.log_info(obj=cve, message="Generating vulnerabilities for CVE {cve}")
             software_rels = RelationshipAssociation.objects.filter(relationship__slug="soft_cve", destination_id=cve.id)
             for soft_rel in software_rels:
 
