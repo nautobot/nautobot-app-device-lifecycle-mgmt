@@ -40,20 +40,21 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
         device_types = tuple(
             DeviceType.objects.create(model=model, slug=model, manufacturer=manufacturer)
-            for model in ["c9300-24", "c9300-48", "c9500-24", "c9200-24", "c9200-48"]
+            for model in ["c9300-24", "c9300-48", "c9500-24", "c9500-48", "c9200-24", "c9200-48"]
         )
 
         HardwareLCM.objects.create(device_type=device_types[0], end_of_sale=datetime.date(2021, 4, 1))
         HardwareLCM.objects.create(device_type=device_types[1], end_of_sale=datetime.date(2021, 4, 1))
+        HardwareLCM.objects.create(device_type=device_types[2], end_of_sale=datetime.date(2021, 4, 1))
 
         cls.form_data = {
-            "device_type": device_types[2].id,
+            "device_type": device_types[3].id,
             "end_of_sale": datetime.date(2021, 4, 1),
             "end_of_support": datetime.date(2024, 4, 1),
         }
         cls.csv_data = (
             "device_type,end_of_sale,end_of_support,end_of_sw_releases,end_of_security_patches,documentation_url",
-            "c9500-24, 2021-10-06, 2022-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
+            "c9500-48, 2021-10-06, 2022-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
             "c9200-24, 2022-10-06, 2023-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
             "c9200-48, 2023-10-06, 2024-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
         )
@@ -208,12 +209,7 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        CVELCM.objects.create(
-            name="CVE-2021-1391", published_date="2021-03-24", link="https://www.cvedetails.com/cve/CVE-2021-1391/"
-        )
-        CVELCM.objects.create(
-            name="CVE-2021-34699", published_date="2021-09-23", link="https://www.cvedetails.com/cve/CVE-2021-34699/"
-        )
+        create_cves()
 
     def test_bulk_import_objects_with_constrained_permission(self):
         pass
@@ -247,13 +243,22 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
         devices = create_devices()
         softwares = create_softwares()
         cves = create_cves()
-        for i, cve in enumerate(cves):
-            VulnerabilityLCM.objects.create(cve=cve, software=softwares[i], device=devices[i])
 
         vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
-        status = Status.objects.create(name="Exempt", slug="exempt", color="4caf50", description="This unit is exempt.")
-        status.content_types.set([vuln_ct])
-        cls.bulk_edit_data = {"status": status.id}
+
+        exempt_status = Status.objects.create(
+            name="Exempt", slug="exempt", color="4caf50", description="This unit is exempt."
+        )
+        exempt_status.content_types.set([vuln_ct])
+        cls.bulk_edit_data = {"status": exempt_status.id}
+
+        forced_status = Status.objects.create(
+            name="Forced", slug="forced", color="4caf50", description="This unit is forced."
+        )
+        forced_status.content_types.set([vuln_ct])
+
+        for i, cve in enumerate(cves):
+            VulnerabilityLCM.objects.create(cve=cve, software=softwares[i], device=devices[i], status=forced_status)
 
     def test_bulk_import_objects_with_constrained_permission(self):
         pass
@@ -298,23 +303,24 @@ class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     def setUpTestData(cls):
         softwares = create_softwares()
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
-        device_type = DeviceType.objects.create(manufacturer=manufacturer, model="6509-E", slug="6509-e")
+        device_type1 = DeviceType.objects.create(manufacturer=manufacturer, model="6509", slug="6509")
+        device_type2 = DeviceType.objects.create(manufacturer=manufacturer, model="6509-E", slug="6509-e")
 
-        SoftwareImageLCM.objects.create(
+        softimage = SoftwareImageLCM.objects.create(
             image_file_name="ios15.1.2m.img",
             software=softwares[0],
             download_url="ftp://images.local/cisco/ios15.1.2m.img",
             image_file_checksum="441rfabd75b0512r7fde7a7a66faa596",
             default_image=True,
         )
-        softimage = SoftwareImageLCM.objects.create(
+        softimage.device_types.set([device_type1, device_type2])
+        SoftwareImageLCM.objects.create(
             image_file_name="ios4.22.9m.img",
             software=softwares[1],
             download_url="ftp://images.local/cisco/ios4.22.9m.img",
             image_file_checksum="58arfabd75b051fr7fde7a7ac6faa3fv",
             default_image=False,
         )
-        softimage.device_types.set([device_type])
 
         cls.form_data = {
             "image_file_name": "eos_4.21m.swi",

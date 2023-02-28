@@ -34,7 +34,7 @@ def is_truthy(arg):
 
 # Use pyinvoke configuration for default values, see http://docs.pyinvoke.org/en/stable/concepts/configuration.html
 # Variables may be overwritten in invoke.yml or by the environment variables
-# INVOKE_nautobot_device_lifecycle_mgmt_xxx
+# INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_XXX
 namespace = Collection("nautobot_device_lifecycle_mgmt")
 namespace.configure(
     {
