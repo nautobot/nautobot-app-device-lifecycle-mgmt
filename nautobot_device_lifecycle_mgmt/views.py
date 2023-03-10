@@ -206,6 +206,7 @@ class SoftwareLCMListView(generic.ObjectListView):
     template_name = "nautobot_device_lifecycle_mgmt/softwarelcm_list.html"
 
     def extra_context(self):
+        """Changes "Softwares" => "Software"."""
         return {
             **super().extra_context(),
             "search_form": SearchForm(data=self.request.GET, q_placeholder="Search Software"),
@@ -374,6 +375,7 @@ class ValidatedSoftwareLCMListView(generic.ObjectListView):
     template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_list.html"
 
     def extra_context(self):
+        """Changes "Softwares" => "Software"."""
         return {
             **super().extra_context(),
             "search_form": SearchForm(data=self.request.GET, q_placeholder="Search Validated Software"),
@@ -388,6 +390,7 @@ class ValidatedSoftwareLCMView(generic.ObjectView):
     queryset = ValidatedSoftwareLCM.objects.all()
 
     def get_extra_context(self, *args, **kwargs):
+        """Changes "Softwares" => "Software"."""
         return {
             **super().get_extra_context(*args, **kwargs),
             "title": "Validated Software",
