@@ -1,21 +1,31 @@
 """Nautobot Lifecycle Management plugin application level metrics ."""
-# from prometheus_client import Gauge
-# from prometheus_client.core import GaugeMetricFamily
+from prometheus_client.core import GaugeMetricFamily
+
+from nautobot_device_lifecycle_mgmt import DeviceSoftwareValidationResult
 
 
-# def metric_example():
-#     """Calculate number of MODEL objects.
+def metric_():
+    """Calculate number of devices with valid software by device_type.
 
-#     Yields:
-#         GaugeMetricFamily: Prometheus Metrics
-#     """
-#     features = MODEL.objects.all()
+    Yields:
+        GaugeMetricFamily: Prometheus Metrics
+    """
+    models = DeviceSoftwareValidationResult.objects.values("device__device_type__model").distinct()
 
-#     example_gauge = GaugeMetricFamily("name", "description", labels=[""])
+    valid_software_gauge = GaugeMetricFamily(
+        "nautobot_device_lifecycle_compliant_by_device_type_total",
+        "Number of devices that have valid software by device_type",
+        labels=["device_type"],
+    )
 
-#     if True:
-#         example_gauge.add_metric(labels=[""], value=MODEL.objects.filter().count())
-#     else:
-#         example_gauge.add_metric(labels=[""], value=0)
+    for model in models:
+        valid_software_gauge.add_metric(
+            labels=[model],
+            value=(
+                DeviceSoftwareValidationResult.objects.filter(
+                    device__device_type__model=model, is_validated=True
+                ).count()
+            ),
+        )
 
-#     yield example_gauge
+    yield valid_software_gauge
