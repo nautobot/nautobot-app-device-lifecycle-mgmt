@@ -46,7 +46,7 @@ def metrics_lcm_validation_report_device_type():
     yield valid_device_software_gauge
     yield invalid_device_software_gauge
 
-def metrics_lcm_validation_report_iventory_item():
+def metrics_lcm_validation_report_inventory_item():
     """Calculate number of inventory items with valid/invalid software.
 
     Yields:
@@ -123,4 +123,4 @@ def metrics_lcm_validation_report_totals():
     yield total_device_software_gauge
     yield total_inventory_item_software_gauge
 
-metrics = [metrics_lcm_validation_report_device_type, metrics_lcm_validation_report_iventory_item, metrics_lcm_validation_report_totals]
+metrics = [metrics_lcm_validation_report_device_type, metrics_lcm_validation_report_inventory_item, metrics_lcm_validation_report_totals]
