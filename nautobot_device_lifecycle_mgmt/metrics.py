@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.db.models import Count, Q
-from nautobot.dcim.models import Device, Platform
+from nautobot.dcim.models import Device, Platform, Site
 from prometheus_client import Gauge
 from prometheus_client.core import GaugeMetricFamily
 
@@ -30,7 +30,7 @@ def nautobot_metric_dlcm_eos_by_part_number():
         GaugeMetricFamily: Prometheus Metrics
     """
     current_dt = datetime.now()
-    hw_eos_list = HardwareLCM.objects.filter(end_of_support__lte=current_time)
+    hw_eos = HardwareLCM.objects.filter(end_of_support__lte=current_dt)
 
     part_number_gauge = GaugeMetricFamily(
             "nautobot_lcm_devices_eos_per_part_number", "Nautobot LCM Devices EOS per Part Number", labels=["part_number"]
@@ -40,10 +40,14 @@ def nautobot_metric_dlcm_eos_by_part_number():
         hw_parts_eos = DeviceType.objects.filter(part_number=hw_part)
         if hw_parts_eos:
             part-number_gauge.add_metric(
-                labels=[hw_part], value=hw_parts_eos.count()
+                labels=[hw_part],
+                value=(hw_parts_eos.count()),
             )
         else:
-            part_number_gauge.add_metric(labels=[hw_part], value=0)
+            part_number_gauge.add_metric(
+                labels=[hw_part],
+                value=0,
+            )
 
     yield part_number_gauge
 
@@ -53,7 +57,7 @@ def nautobot_metric_dlcm_eos_by_site():
         GaugeMetricFamily: Prometheus Metrics
     """
     current_dt = datetime.now()
-    hw_eos = list(HardwareLCM.objects.filter(end_of_support__lte=current_time))
+    hw_eos = list(HardwareLCM.objects.filter(end_of_support__lte=current_dt))
 
     devices_gauge = GaugeMetricFamily(
             "nautobot_lcm_devices_eos_per_site", "Nautobot LCM Devices EOS per Site", labels=["Devices"]
@@ -62,11 +66,15 @@ def nautobot_metric_dlcm_eos_by_site():
     for site in Site.objects.all():
         if site.devices.count():
             devices_gauge.add_metric(
-                labels=[devices_eos, site.id], value=Devices.objects.filter(id=site.id,part_number__in=hw_eos).count()
+                labels=[f'devices_eos in {site.id}'],
+                value=(Devices.objects.filter(id=site.id,part_number__in=hw_eos).count())
             )
         else:
-            devices_gauge.add_metric(labels=[devices_eos], value=0)
+            devices_gauge.add_metric(
+                labels=[f'devices_eos in {site.id}'],
+                value=0,
+            )
 
     yield devices_gauge
 
-metrics=['nautobot_metric_dlcm_eos_by_part_number', 'nautobot_metric_dlcm_eos_by_site']
+metrics=[nautobot_metric_dlcm_eos_by_part_number, nautobot_metric_dlcm_eos_by_site]
