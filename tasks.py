@@ -15,7 +15,7 @@ limitations under the License.
 from distutils.util import strtobool
 from invoke import Collection, task as invoke_task
 import os
-
+from time import sleep
 
 def is_truthy(arg):
     """Convert "truthy" strings into Booleans.
@@ -286,6 +286,22 @@ def post_upgrade(context):
 
     run_command(context, command)
 
+@task
+def db_import(context):
+    """Install the backup of Nautobot db into development environment."""
+    print("Importing Database into Development...\n")
+
+    print("Starting Postgres for DB import...\n")
+    docker_compose(context, "up -d db")
+    sleep(2)
+
+    print("Copying DB Dump to DB container...\n")
+    copy_cmd = f"docker cp development/nautobot.sql {context.nautobot_device_lifecycle_mgmt.project_name}-db-1:/tmp/nautobot.sql"
+    context.run(copy_cmd)
+    sleep(5)
+    print("Importing DB...\n")
+    import_cmd = "docker exec -t {context.nautobot_device_lifecycle_mgmt.project_name}-db-1 'psql -h localhost -U \${NAUTOBOT_DB_USER} < /tmp/nautobot.sql'"  # noqa: W605 pylint: disable=anomalous-backslash-in-string
+    docker_compose(context, import_cmd, pty=True)
 
 # ------------------------------------------------------------------------------
 # DOCS

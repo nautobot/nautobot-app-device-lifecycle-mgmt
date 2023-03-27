@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.db.models import Count, Q
-from nautobot.dcim.models import Device, Platform, Site
+from nautobot.dcim.models import Device, Platform, Site, DeviceType
 from prometheus_client import Gauge
 from prometheus_client.core import GaugeMetricFamily
 
@@ -33,13 +33,13 @@ def nautobot_metric_dlcm_eos_by_part_number():
     hw_eos = HardwareLCM.objects.filter(end_of_support__lte=current_dt)
 
     part_number_gauge = GaugeMetricFamily(
-            "nautobot_lcm_devices_eos_per_part_number", "Nautobot LCM Devices EOS per Part Number", labels=["part_number"]
+            "nautobot_lcm_devices_eos_per_part_number", "Nautobot LCM Devices EOS per Part Number", labels=["hw_part"]
         )
 
     for hw_part in hw_eos:
         hw_parts_eos = DeviceType.objects.filter(part_number=hw_part)
         if hw_parts_eos:
-            part-number_gauge.add_metric(
+            part_number_gauge.add_metric(
                 labels=[hw_part],
                 value=(hw_parts_eos.count()),
             )
@@ -67,7 +67,7 @@ def nautobot_metric_dlcm_eos_by_site():
         if site.devices.count():
             devices_gauge.add_metric(
                 labels=[f'devices_eos in {site.id}'],
-                value=(Devices.objects.filter(id=site.id,part_number__in=hw_eos).count())
+                value=(Device.objects.filter(id=site.id,part_number__in=hw_eos).count())
             )
         else:
             devices_gauge.add_metric(
