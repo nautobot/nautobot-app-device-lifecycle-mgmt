@@ -69,4 +69,4 @@ def nautobot_metric_dlcm_eos_by_site():
 
     yield devices_gauge
 
-
+metrics=['nautobot_metric_dlcm_eos_by_part_number', 'nautobot_metric_dlcm_eos_by_site']
