@@ -2,7 +2,7 @@
 from datetime import datetime
 
 from django.conf import settings
-from nautobot.dcim.models import Device, Site
+from nautobot.dcim.models import Device, Site, InventoryItem
 from prometheus_client.core import GaugeMetricFamily
 
 from nautobot_device_lifecycle_mgmt.models import HardwareLCM
@@ -33,7 +33,7 @@ def nautobot_metrics_dlcm_eos():
             metric_value = eos_devices.count()
         elif notice.inventory_item:
             part_number = notice.inventory_item
-            eos_devices = Device.objects.filter(device_type__part_number=notice.inventory_item)
+            eos_devices = InventoryItem.objects.filter(part_id=notice.inventory_item)
             metric_value = eos_devices.count()
         else:
             part_number = 'UNKNOWN'
