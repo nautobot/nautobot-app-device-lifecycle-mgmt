@@ -300,7 +300,7 @@ def db_import(context):
     context.run(copy_cmd)
     sleep(5)
     print("Importing DB...\n")
-    import_cmd = "docker exec -t {context.nautobot_device_lifecycle_mgmt.project_name}-db-1 'psql -h localhost -U \${NAUTOBOT_DB_USER} < /tmp/nautobot.sql'"  # noqa: W605 pylint: disable=anomalous-backslash-in-string
+    import_cmd = 'exec db sh -c "psql -h localhost -U \${NAUTOBOT_DB_USER} < /tmp/nautobot.sql"'  # noqa: W605 pylint: disable=anomalous-backslash-in-string
     docker_compose(context, import_cmd, pty=True)
 
 # ------------------------------------------------------------------------------
