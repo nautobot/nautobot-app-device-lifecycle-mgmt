@@ -47,6 +47,7 @@ def metrics_lcm_validation_report_device_type():
         )
 
     yield valid_device_software_gauge
+
     yield invalid_device_software_gauge
 
 
