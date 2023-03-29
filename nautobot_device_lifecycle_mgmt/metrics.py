@@ -69,7 +69,7 @@ def metrics_lcm_validation_report_inventory_item():
 
     invalid_item_software_gauge = GaugeMetricFamily(
         "nautobot_lcm_invalid_by_inventory_item_total",
-        "Number of devices that have valid software by inventory item",
+        "Number of devices that have invalid software by inventory item",
         labels=["inventory_item"],
     )
 
@@ -93,6 +93,7 @@ def metrics_lcm_validation_report_inventory_item():
         )
 
     yield valid_item_software_gauge
+
     yield invalid_item_software_gauge
 
 
@@ -107,23 +108,24 @@ def metrics_lcm_validation_report_totals():
         labels=["devices"],
     )
 
+    total_device_software_gauge.add_metric(
+        labels=["Total LCM Validated Device Count"],
+        value=(DeviceSoftwareValidationResult.objects.all().count()),
+    )
+
+    yield total_device_software_gauge
+
     total_inventory_item_software_gauge = GaugeMetricFamily(
         "nautobot_lcm_inventory_result_total",
         "Number of inventory items that are in lifecycle management report",
         labels=["inventory_items"],
     )
 
-    # If there is available data a metric gauge will be created if not no gauge will be created.
-    total_device_software_gauge.add_metric(
-        labels=["Total LCM Validated Device Count"],
-        value=(DeviceSoftwareValidationResult.objects.all().count()),
-    )
-    total_device_software_gauge.add_metric(
+    total_inventory_item_software_gauge.add_metric(
         labels=["Total LCM Validated Inventory Item Count"],
         value=(InventoryItemSoftwareValidationResult.objects.all().count()),
     )
 
-    yield total_device_software_gauge
     yield total_inventory_item_software_gauge
 
 
