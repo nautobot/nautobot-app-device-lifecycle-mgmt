@@ -12,8 +12,10 @@ PLUGIN_SETTINGS = settings.PLUGINS_CONFIG.get("nautobot_device_lifecycle_mgmt", 
 
 def nautobot_metrics_dlcm_eos():
     """Calculate number of EOS devices per Device Type and per Site.
+
     Yields:
         GaugeMetricFamily: Prometheus Metrics
+
     """
     current_dt = datetime.now()
     hw_eos_notices = HardwareLCM.objects.filter(end_of_support__lte=current_dt)
