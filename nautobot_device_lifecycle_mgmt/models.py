@@ -359,6 +359,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
     start = models.DateField(verbose_name="Valid Since")
     end = models.DateField(verbose_name="Valid Until", blank=True, null=True)
     preferred = models.BooleanField(verbose_name="Preferred Version", default=False)
+    alias = models.CharField(max_length=50, blank=True, null=True)
 
     csv_headers = [
         "software",
@@ -370,6 +371,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
         "start",
         "end",
         "preferred",
+        "alias",
     ]
 
     class Meta:
@@ -417,6 +419,11 @@ class ValidatedSoftwareLCM(PrimaryModel):
 
     def to_csv(self):
         """Return fields for bulk view."""
+        for attr in dir(self.software):
+            try:
+                print(f"{attr}: {getattr(self.software, attr)}")
+            except:
+                pass
         return (
             self.software.id,
             ",".join(str(device["name"]) for device in self.devices.values()),
@@ -427,6 +434,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
             self.start,
             self.end,
             self.preferred,
+            self.software.alias,
         )
 
     objects = ValidatedSoftwareLCMQuerySet.as_manager()
