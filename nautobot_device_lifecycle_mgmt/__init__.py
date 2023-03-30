@@ -1,4 +1,6 @@
 """Plugin declaration for the Device LifeCycle Management."""
+from nautobot.core.signals import nautobot_database_ready
+from nautobot.extras.plugins import PluginConfig
 try:
     from importlib import metadata
 except ImportError:
@@ -6,9 +8,6 @@ except ImportError:
     import importlib_metadata as metadata
 
 __version__ = metadata.version(__name__)
-
-from nautobot.core.signals import nautobot_database_ready
-from nautobot.extras.plugins import PluginConfig
 
 
 class DeviceLifeCycleConfig(PluginConfig):
@@ -36,7 +35,8 @@ class DeviceLifeCycleConfig(PluginConfig):
         """Register custom signals."""
         from .signals import post_migrate_create_relationships  # pylint: disable=import-outside-toplevel
 
-        nautobot_database_ready.connect(post_migrate_create_relationships, sender=self)
+        nautobot_database_ready.connect(
+            post_migrate_create_relationships, sender=self)
 
         super().ready()
 

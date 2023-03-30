@@ -25,7 +25,9 @@ try:
         CustomFieldModelSerializer,
     ]  # pylint: disable=invalid-name
 except ImportError:
-    serializer_base_classes = [TaggedObjectSerializer, CustomFieldModelSerializer]  # pylint: disable=invalid-name
+    serializer_base_classes = [
+        TaggedObjectSerializer,
+        CustomFieldModelSerializer]  # pylint: disable=invalid-name
 
 from nautobot.extras.models import Status
 
@@ -51,16 +53,22 @@ from .nested_serializers import (
 )
 
 
-class HardwareLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,too-few-public-methods
+class HardwareLCMSerializer(
+        *serializer_base_classes):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
     url = serializers.HyperlinkedIdentityField(
-        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:hardwarelcm-detail"
-    )
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:hardwarelcm-detail")
     device_type = NestedDeviceTypeSerializer(
-        many=False, read_only=False, required=True, help_text="Device Type to attach the Hardware LCM to"
-    )
-    devices = NestedDeviceSerializer(many=True, read_only=True, required=False, help_text="Devices tied to Device Type")
+        many=False,
+        read_only=False,
+        required=True,
+        help_text="Device Type to attach the Hardware LCM to")
+    devices = NestedDeviceSerializer(
+        many=True,
+        read_only=True,
+        required=False,
+        help_text="Devices tied to Device Type")
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
@@ -84,12 +92,12 @@ class HardwareLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,
         ]
 
 
-class ProviderLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,too-few-public-methods
+class ProviderLCMSerializer(
+        *serializer_base_classes):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
     url = serializers.HyperlinkedIdentityField(
-        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:providerlcm-detail"
-    )
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:providerlcm-detail")
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
@@ -109,13 +117,14 @@ class ProviderLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,
         ]
 
 
-class ContractLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,too-few-public-methods
+class ContractLCMSerializer(
+        *serializer_base_classes):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
     url = serializers.HyperlinkedIdentityField(
-        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:contractlcm-detail"
-    )
-    provider = NestedProviderLCMSerializer(many=False, read_only=False, required=True, help_text="Vendor")
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:contractlcm-detail")
+    provider = NestedProviderLCMSerializer(
+        many=False, read_only=False, required=True, help_text="Vendor")
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
@@ -137,13 +146,17 @@ class ContractLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,
         ]
 
 
-class ContactLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,too-few-public-methods
+class ContactLCMSerializer(
+        *serializer_base_classes):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
     url = serializers.HyperlinkedIdentityField(
-        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:contactlcm-detail"
-    )
-    contract = NestedContractLCMSerializer(many=False, read_only=False, required=True, help_text="Associated Contract")
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:contactlcm-detail")
+    contract = NestedContractLCMSerializer(
+        many=False,
+        read_only=False,
+        required=True,
+        help_text="Associated Contract")
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
@@ -163,12 +176,12 @@ class ContactLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,t
         ]
 
 
-class SoftwareLCMSerializer(*serializer_base_classes):  # pylint: disable=too-few-public-methods
+class SoftwareLCMSerializer(
+        *serializer_base_classes):  # pylint: disable=too-few-public-methods
     """REST API serializer for SoftwareLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
-        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwarelcm-detail"
-    )
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwarelcm-detail")
     device_platform = NestedPlatformSerializer()
     software_images = SerializedPKRelatedField(
         queryset=SoftwareImageLCM.objects.all(),
@@ -198,12 +211,12 @@ class SoftwareLCMSerializer(*serializer_base_classes):  # pylint: disable=too-fe
         ]
 
 
-class SoftwareImageLCMSerializer(*serializer_base_classes):  # pylint: disable=too-few-public-methods
+class SoftwareImageLCMSerializer(
+        *serializer_base_classes):  # pylint: disable=too-few-public-methods
     """REST API serializer for SoftwareImageLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
-        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwareimagelcm-detail"
-    )
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwareimagelcm-detail")
     software = NestedSoftwareLCMSerializer()
 
     class Meta:  # pylint: disable=too-few-public-methods
@@ -226,12 +239,12 @@ class SoftwareImageLCMSerializer(*serializer_base_classes):  # pylint: disable=t
         ]
 
 
-class ValidatedSoftwareLCMSerializer(*serializer_base_classes):  # pylint: disable=too-few-public-methods
+class ValidatedSoftwareLCMSerializer(
+        *serializer_base_classes):  # pylint: disable=too-few-public-methods
     """REST API serializer for ValidatedSoftwareLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
-        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:validatedsoftwarelcm-detail"
-    )
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:validatedsoftwarelcm-detail")
     software = NestedSoftwareLCMSerializer()
 
     class Meta:  # pylint: disable=too-few-public-methods
@@ -256,11 +269,15 @@ class ValidatedSoftwareLCMSerializer(*serializer_base_classes):  # pylint: disab
         ]
 
 
-class CVELCMSerializer(*serializer_base_classes, StatusModelSerializerMixin):  # pylint: disable=abstract-method
+class CVELCMSerializer(
+    *serializer_base_classes,
+        StatusModelSerializerMixin):  # pylint: disable=abstract-method
     """REST API serializer for CVELCM records."""
 
-    url = serializers.HyperlinkedIdentityField(view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:cvelcm-detail")
-    status = StatusSerializerField(required=False, queryset=Status.objects.all())
+    url = serializers.HyperlinkedIdentityField(
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:cvelcm-detail")
+    status = StatusSerializerField(
+        required=False, queryset=Status.objects.all())
     severity = ChoiceField(choices=choices.CVESeverityChoices, required=False)
 
     class Meta:
@@ -292,8 +309,7 @@ class VulnerabilityLCMSerializer(
     """REST API serializer for VulnerabilityLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
-        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:vulnerabilitylcm-detail"
-    )
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:vulnerabilitylcm-detail")
     cve = NestedCVELCMSerializer(read_only=True)
     software = NestedSoftwareLCMSerializer(read_only=True)
     device = NestedDeviceSerializer(read_only=True)

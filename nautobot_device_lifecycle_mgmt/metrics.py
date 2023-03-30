@@ -7,7 +7,8 @@ from prometheus_client.core import GaugeMetricFamily
 
 from nautobot_device_lifecycle_mgmt.models import HardwareLCM
 
-PLUGIN_SETTINGS = settings.PLUGINS_CONFIG.get("nautobot_device_lifecycle_mgmt", {})
+PLUGIN_SETTINGS = settings.PLUGINS_CONFIG.get(
+    "nautobot_device_lifecycle_mgmt", {})
 
 
 def nautobot_metrics_dlcm_eos():
@@ -20,14 +21,17 @@ def nautobot_metrics_dlcm_eos():
     current_dt = datetime.now()
     hw_eos_notices = HardwareLCM.objects.filter(end_of_support__lte=current_dt)
     hw_eos_device_types = [notice.device_type for notice in hw_eos_notices]
-    hw_eos_inventoryitems = [notice.inventory_item for notice in hw_eos_notices]
+    hw_eos_inventoryitems = [
+        notice.inventory_item for notice in hw_eos_notices]
 
     part_number_gauge = GaugeMetricFamily(
-        "nautobot_lcm_devices_eos_per_part_number", "Nautobot LCM Devices EOS per Part Number", labels=["part_number"]
-    )
+        "nautobot_lcm_devices_eos_per_part_number",
+        "Nautobot LCM Devices EOS per Part Number",
+        labels=["part_number"])
     devices_gauge = GaugeMetricFamily(
-        "nautobot_lcm_devices_eos_per_site", "Nautobot LCM Devices EOS per Site", labels=["site"]
-    )
+        "nautobot_lcm_devices_eos_per_site",
+        "Nautobot LCM Devices EOS per Site",
+        labels=["site"])
 
     for notice in hw_eos_notices:
         if notice.device_type:
@@ -36,7 +40,8 @@ def nautobot_metrics_dlcm_eos():
             metric_value = eos_devices.count()
         elif notice.inventory_item:
             part_number = notice.inventory_item
-            eos_devices = InventoryItem.objects.filter(part_id=notice.inventory_item)
+            eos_devices = InventoryItem.objects.filter(
+                part_id=notice.inventory_item)
             metric_value = eos_devices.count()
         else:
             continue
@@ -46,7 +51,8 @@ def nautobot_metrics_dlcm_eos():
     yield part_number_gauge
 
     for site in Site.objects.all():
-        eos_devices_in_site = Device.objects.filter(site=site, device_type__in=hw_eos_device_types).count()
+        eos_devices_in_site = Device.objects.filter(
+            site=site, device_type__in=hw_eos_device_types).count()
         eos_inventoryitems_in_site = InventoryItem.objects.filter(
             part_id__in=hw_eos_inventoryitems, device__site=site.id
         ).count()

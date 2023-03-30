@@ -23,7 +23,8 @@ for key in [
     "SECRET_KEY",
 ]:
     if not os.environ.get(key):
-        raise ImproperlyConfigured(f"Required environment variable {key} is missing.")
+        raise ImproperlyConfigured(
+            f"Required environment variable {key} is missing.")
 
 
 # This is a list of valid fully-qualified domain names (FQDNs) for the Nautobot server. Nautobot will not permit write
@@ -110,23 +111,27 @@ ALLOWED_URL_SCHEMES = (
 )
 
 # Optionally display a persistent banner at the top and/or bottom of every page. HTML is allowed. To display the same
-# content in both banners, define BANNER_TOP and set BANNER_BOTTOM = BANNER_TOP.
+# content in both banners, define BANNER_TOP and set BANNER_BOTTOM =
+# BANNER_TOP.
 BANNER_TOP = os.environ.get("BANNER_TOP", "")
 BANNER_BOTTOM = os.environ.get("BANNER_BOTTOM", "")
 
 # Text to include on the login page above the login form. HTML is allowed.
 BANNER_LOGIN = os.environ.get("BANNER_LOGIN", "")
 
-# Maximum number of days to retain logged changes. Set to 0 to retain changes indefinitely. (Default: 90)
+# Maximum number of days to retain logged changes. Set to 0 to retain
+# changes indefinitely. (Default: 90)
 CHANGELOG_RETENTION = int(os.environ.get("CHANGELOG_RETENTION", 90))
 
 # If True, all origins will be allowed. Other settings restricting allowed origins will be ignored.
 # Defaults to False. Setting this to True can be dangerous, as it allows any website to make
 # cross-origin requests to yours. Generally you'll want to restrict the list of allowed origins with
 # CORS_ALLOWED_ORIGINS or CORS_ALLOWED_ORIGIN_REGEXES.
-CORS_ORIGIN_ALLOW_ALL = is_truthy(os.environ.get("CORS_ORIGIN_ALLOW_ALL", False))
+CORS_ORIGIN_ALLOW_ALL = is_truthy(
+    os.environ.get("CORS_ORIGIN_ALLOW_ALL", False))
 
-# A list of origins that are authorized to make cross-site HTTP requests. Defaults to [].
+# A list of origins that are authorized to make cross-site HTTP requests.
+# Defaults to [].
 CORS_ALLOWED_ORIGINS = [
     # 'https://hostname.example.com',
 ]
@@ -149,10 +154,12 @@ DEBUG = is_truthy(os.environ.get("DEBUG", False))
 # Enforcement of unique IP space can be toggled on a per-VRF basis. To enforce unique IP space
 # within the global table (all prefixes and IP addresses not assigned to a VRF), set
 # ENFORCE_GLOBAL_UNIQUE to True.
-ENFORCE_GLOBAL_UNIQUE = is_truthy(os.environ.get("ENFORCE_GLOBAL_UNIQUE", False))
+ENFORCE_GLOBAL_UNIQUE = is_truthy(
+    os.environ.get("ENFORCE_GLOBAL_UNIQUE", False))
 
 # Exempt certain models from the enforcement of view permissions. Models listed here will be viewable by all users and
-# by anonymous users. List models in the form `<app>.<model>`. Add '*' to this list to exempt all models.
+# by anonymous users. List models in the form `<app>.<model>`. Add '*' to
+# this list to exempt all models.
 EXEMPT_VIEW_PERMISSIONS = [
     # 'dcim.site',
     # 'dcim.region',
@@ -175,7 +182,8 @@ LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
 
 TESTING = len(sys.argv) > 1 and sys.argv[1] == "test"
 
-# Verbose logging during normal development operation, but quiet logging during unit test execution
+# Verbose logging during normal development operation, but quiet logging
+# during unit test execution
 if not TESTING:
     LOGGING = {
         "version": 1,
@@ -203,15 +211,19 @@ if not TESTING:
             },
         },
         "loggers": {
-            "django": {"handlers": ["normal_console"], "level": "INFO"},
+            "django": {
+                "handlers": ["normal_console"],
+                "level": "INFO"},
             "nautobot": {
-                "handlers": ["verbose_console" if DEBUG else "normal_console"],
+                "handlers": [
+                    "verbose_console" if DEBUG else "normal_console"],
                 "level": LOG_LEVEL,
             },
         },
     }
 
-# Setting this to True will display a "maintenance mode" banner at the top of every page.
+# Setting this to True will display a "maintenance mode" banner at the top
+# of every page.
 MAINTENANCE_MODE = False
 
 # An API consumer can request an arbitrary number of objects =by appending the "limit" parameter to the URL (e.g.
@@ -236,7 +248,8 @@ MAX_PAGE_SIZE = int(os.environ.get("MAX_PAGE_SIZE", 1000))
 # Expose Prometheus monitoring metrics at the HTTP endpoint '/metrics'
 METRICS_ENABLED = True
 
-# Credentials that Nautobot will uses to authenticate to devices when connecting via NAPALM.
+# Credentials that Nautobot will uses to authenticate to devices when
+# connecting via NAPALM.
 NAPALM_USERNAME = os.environ.get("NAPALM_USERNAME", "")
 NAPALM_PASSWORD = os.environ.get("NAPALM_PASSWORD", "")
 
@@ -256,7 +269,8 @@ PLUGINS = [
 ]
 
 # Plugins configuration settings. These settings are used by various plugins that the user may have installed.
-# Each key in the dictionary is the name of an installed plugin and its value is a dictionary of settings.
+# Each key in the dictionary is the name of an installed plugin and its
+# value is a dictionary of settings.
 PLUGINS_CONFIG = {
     "nautobot_device_lifecycle_mgmt": {
         "barchart_bar_width": float(os.environ.get("BARCHART_BAR_WIDTH", 0.1)),
@@ -269,7 +283,8 @@ PLUGINS_CONFIG = {
 # prefer IPv4 instead.
 PREFER_IPV4 = is_truthy(os.environ.get("PREFER_IPV4", False))
 
-# Rack elevation size defaults, in pixels. For best results, the ratio of width to height should be roughly 10:1.
+# Rack elevation size defaults, in pixels. For best results, the ratio of
+# width to height should be roughly 10:1.
 RACK_ELEVATION_DEFAULT_UNIT_HEIGHT = 22
 RACK_ELEVATION_DEFAULT_UNIT_WIDTH = 220
 
@@ -281,11 +296,13 @@ REMOTE_AUTH_AUTO_CREATE_USER = True
 REMOTE_AUTH_DEFAULT_GROUPS = []
 REMOTE_AUTH_DEFAULT_PERMISSIONS = {}
 
-# This determines how often the GitHub API is called to check the latest release of Nautobot. Must be at least 1 hour.
+# This determines how often the GitHub API is called to check the latest
+# release of Nautobot. Must be at least 1 hour.
 RELEASE_CHECK_TIMEOUT = 24 * 3600
 
 # This repository is used to check whether there is a new release of Nautobot available. Set to None to disable the
-# version check or use the URL below to check for release in the official Nautobot repository.
+# version check or use the URL below to check for release in the official
+# Nautobot repository.
 RELEASE_CHECK_URL = None
 # RELEASE_CHECK_URL = 'https://api.github.com/repos/nautobot/nautobot/releases'
 
@@ -299,13 +316,15 @@ SESSION_COOKIE_AGE = 1209600  # 2 weeks, in seconds
 
 # By default, Nautobot will store session data in the database. Alternatively, a file path can be specified here to use
 # local file storage instead. (This can be useful for enabling authentication on a standby instance with read-only
-# database access.) Note that the user as which Nautobot runs must have read and write permissions to this path.
+# database access.) Note that the user as which Nautobot runs must have
+# read and write permissions to this path.
 SESSION_FILE_PATH = None
 
 # Always use IPython for shell_plus
 SHELL_PLUS = "ipython"
 
-# Configure SSO, for more information see docs/configuration/authentication/sso.md
+# Configure SSO, for more information see
+# docs/configuration/authentication/sso.md
 SOCIAL_AUTH_ENABLED = False
 
 # Time zone (default: UTC)
@@ -323,11 +342,13 @@ SHORT_DATETIME_FORMAT = os.environ.get("SHORT_DATETIME_FORMAT", "Y-m-d H:i")
 # A list of strings designating all applications that are enabled in this Django installation. Each string should be
 # a dotted Python path to an application configuration class (preferred), or a package containing an application.
 # https://nautobot.readthedocs.io/en/latest/configuration/optional-settings/#extra-applications
-EXTRA_INSTALLED_APPS = os.environ["EXTRA_INSTALLED_APPS"].split(",") if os.environ.get("EXTRA_INSTALLED_APPS") else []
+EXTRA_INSTALLED_APPS = os.environ["EXTRA_INSTALLED_APPS"].split(
+    ",") if os.environ.get("EXTRA_INSTALLED_APPS") else []
 
 # Django Debug Toolbar
 if DEBUG:
-    DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda _request: DEBUG and not TESTING}
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": lambda _request: DEBUG and not TESTING}
     if "debug_toolbar" not in INSTALLED_APPS:  # noqa: F405
         INSTALLED_APPS.append("debug_toolbar")  # noqa: F405
     if "debug_toolbar.middleware.DebugToolbarMiddleware" not in MIDDLEWARE:  # noqa: F405

@@ -8,4 +8,5 @@ from nautobot_device_lifecycle_mgmt.models import HardwareLCM
 class HardwareLCMAdmin(admin.ModelAdmin):
     """Admin form/display."""
 
-    list_display = ("device_type", "end_of_sale", "end_of_support", "documentation_url")
+    list_display = ("device_type", "end_of_sale",
+                    "end_of_support", "documentation_url")

@@ -64,7 +64,8 @@ menu_items = (
                                 title="Import",
                                 icon_class="mdi mdi-database-import-outline",
                                 button_class=ButtonColorChoices.BLUE,
-                                permissions=["nautobot_device_lifecycle_mgmt.add_softwarelcm"],
+                                permissions=[
+                                    "nautobot_device_lifecycle_mgmt.add_softwarelcm"],
                             ),
                         ),
                         permissions=[
@@ -89,7 +90,8 @@ menu_items = (
                                 title="Import",
                                 icon_class="mdi mdi-database-import-outline",
                                 button_class=ButtonColorChoices.BLUE,
-                                permissions=["nautobot_device_lifecycle_mgmt.add_softwareimagelcm"],
+                                permissions=[
+                                    "nautobot_device_lifecycle_mgmt.add_softwareimagelcm"],
                             ),
                         ),
                         permissions=[
@@ -114,7 +116,8 @@ menu_items = (
                                 title="Import",
                                 icon_class="mdi mdi-database-import-outline",
                                 button_class=ButtonColorChoices.BLUE,
-                                permissions=["nautobot_device_lifecycle_mgmt.add_validatedsoftwarelcm"],
+                                permissions=[
+                                    "nautobot_device_lifecycle_mgmt.add_validatedsoftwarelcm"],
                             ),
                         ),
                         permissions=[
@@ -139,7 +142,8 @@ menu_items = (
                                 title="Import",
                                 icon_class="mdi mdi-database-import-outline",
                                 button_class=ButtonColorChoices.BLUE,
-                                permissions=["nautobot_device_lifecycle_mgmt.add_cvelcm"],
+                                permissions=[
+                                    "nautobot_device_lifecycle_mgmt.add_cvelcm"],
                             ),
                         ),
                         permissions=[

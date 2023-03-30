@@ -84,7 +84,8 @@ class HardwareLCMTable(BaseTable):
                     {% endif %}""",
         verbose_name="Documentation",
     )
-    actions = ButtonsColumn(HardwareLCM, buttons=("changelog", "edit", "delete"))
+    actions = ButtonsColumn(HardwareLCM, buttons=(
+        "changelog", "edit", "delete"))
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
         """Meta attributes."""
@@ -149,11 +150,19 @@ class SoftwareImageLCMTable(BaseTable):
     )
     software = tables.LinkColumn(verbose_name="Software")
     device_type_count = M2MLinkedCountColumn(
-        viewname="dcim:devicetype_list", url_params={"model": ("device_types", "model")}, verbose_name="Device Types"
-    )
+        viewname="dcim:devicetype_list",
+        url_params={
+            "model": (
+                "device_types",
+                "model")},
+        verbose_name="Device Types")
     object_tag_count = M2MLinkedCountColumn(
-        viewname="extras:tag_list", url_params={"slug": ("object_tags", "slug")}, verbose_name="Object Tags"
-    )
+        viewname="extras:tag_list",
+        url_params={
+            "slug": (
+                "object_tags",
+                "slug")},
+        verbose_name="Object Tags")
     default_image = BooleanColumn()
     actions = ButtonsColumn(SoftwareImageLCM, buttons=("edit", "delete"))
 
@@ -208,18 +217,22 @@ class ValidatedSoftwareLCMTable(BaseTable):
 class DeviceSoftwareValidationResultTable(BaseTable):
     """Table for device software validation report."""
 
-    name = tables.Column(accessor="device__device_type__model", verbose_name="Device Type")
+    name = tables.Column(
+        accessor="device__device_type__model", verbose_name="Device Type")
     total = tables.Column(accessor="total", verbose_name="Total")
     valid = tables.Column(accessor="valid", verbose_name="Valid")
     invalid = tables.Column(accessor="invalid", verbose_name="Invalid")
-    no_software = tables.Column(accessor="no_software", verbose_name="No Software")
-    valid_percent = PercentageColumn(accessor="valid_percent", verbose_name="Compliance (%)")
+    no_software = tables.Column(
+        accessor="no_software", verbose_name="No Software")
+    valid_percent = PercentageColumn(
+        accessor="valid_percent", verbose_name="Compliance (%)")
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
         """Metaclass attributes of DeviceSoftwareValidationResultTable."""
 
         model = DeviceSoftwareValidationResult
-        fields = ["name", "total", "valid", "invalid", "no_software", "valid_percent"]
+        fields = ["name", "total", "valid",
+                  "invalid", "no_software", "valid_percent"]
         default_columns = [
             "name",
             "total",
@@ -233,18 +246,22 @@ class DeviceSoftwareValidationResultTable(BaseTable):
 class InventoryItemSoftwareValidationResultTable(BaseTable):
     """Table for inventory item software validation report."""
 
-    part_id = tables.Column(accessor="inventory_item__part_id", verbose_name="Part ID")
+    part_id = tables.Column(
+        accessor="inventory_item__part_id", verbose_name="Part ID")
     total = tables.Column(accessor="total", verbose_name="Total")
     valid = tables.Column(accessor="valid", verbose_name="Valid")
     invalid = tables.Column(accessor="invalid", verbose_name="Invalid")
-    no_software = tables.Column(accessor="no_software", verbose_name="No Software")
-    valid_percent = PercentageColumn(accessor="valid_percent", verbose_name="Compliance (%)")
+    no_software = tables.Column(
+        accessor="no_software", verbose_name="No Software")
+    valid_percent = PercentageColumn(
+        accessor="valid_percent", verbose_name="Compliance (%)")
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
         """Metaclass attributes of InventoryItemSoftwareValidationResultTable."""
 
         model = InventoryItemSoftwareValidationResult
-        fields = ["part_id", "total", "valid", "invalid", "no_software", "valid_percent"]
+        fields = ["part_id", "total", "valid",
+                  "invalid", "no_software", "valid_percent"]
         default_columns = [
             "part_id",
             "total",
@@ -260,17 +277,19 @@ class ContractLCMTable(BaseTable):
 
     pk = ToggleColumn()
     name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:contractlcm", text=lambda record: record, args=[A("pk")]
-    )
+        "plugins:nautobot_device_lifecycle_mgmt:contractlcm",
+        text=lambda record: record,
+        args=[
+            A("pk")])
     provider = tables.LinkColumn(
         "plugins:nautobot_device_lifecycle_mgmt:providerlcm",
         text=lambda record: record.provider,
         args=[A("provider.pk")],
     )
     cost = tables.TemplateColumn(
-        template_code="""{{ record.cost }}{% if record.currency %} {{ record.currency }}{% endif %}"""
-    )
-    actions = ButtonsColumn(ContractLCM, buttons=("changelog", "edit", "delete"))
+        template_code="""{{ record.cost }}{% if record.currency %} {{ record.currency }}{% endif %}""")
+    actions = ButtonsColumn(ContractLCM, buttons=(
+        "changelog", "edit", "delete"))
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
         """Meta attributes."""
@@ -294,8 +313,10 @@ class ProviderLCMTable(BaseTable):
 
     pk = ToggleColumn()
     name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:providerlcm", text=lambda record: record, args=[A("pk")]
-    )
+        "plugins:nautobot_device_lifecycle_mgmt:providerlcm",
+        text=lambda record: record,
+        args=[
+            A("pk")])
     portal_url = tables.TemplateColumn(
         template_code="""{% if record.portal_url %}
                     <a href="{{ record.portal_url }}" target="_blank" data-toggle="tooltip" data-placement="left" title="{{ record.portal_url }}">
@@ -303,7 +324,8 @@ class ProviderLCMTable(BaseTable):
                     </a>{% else %} — {% endif %}""",
         verbose_name="URL",
     )
-    actions = ButtonsColumn(ProviderLCM, buttons=("changelog", "edit", "delete"))
+    actions = ButtonsColumn(ProviderLCM, buttons=(
+        "changelog", "edit", "delete"))
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
         """Meta attributes."""
@@ -325,9 +347,12 @@ class ContactLCMTable(BaseTable):
 
     pk = ToggleColumn()
     name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:contactlcm", text=lambda record: record, args=[A("pk")]
-    )
-    actions = ButtonsColumn(ContactLCM, buttons=("changelog", "edit", "delete"))
+        "plugins:nautobot_device_lifecycle_mgmt:contactlcm",
+        text=lambda record: record,
+        args=[
+            A("pk")])
+    actions = ButtonsColumn(ContactLCM, buttons=(
+        "changelog", "edit", "delete"))
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
         """Meta attributes."""
@@ -352,8 +377,10 @@ class CVELCMTable(StatusTableMixin, BaseTable):
     model = CVELCM
     pk = ToggleColumn()
     name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:cvelcm", text=lambda record: record, args=[A("pk")]
-    )
+        "plugins:nautobot_device_lifecycle_mgmt:cvelcm",
+        text=lambda record: record,
+        args=[
+            A("pk")])
     link = tables.TemplateColumn(
         template_code="""{% if record.link %}
                     <a href="{{ record.link }}" target="_blank" data-toggle="tooltip" data-placement="left" title="{{ record.link }}">
@@ -404,14 +431,17 @@ class VulnerabilityLCMTable(StatusTableMixin, BaseTable):
     model = VulnerabilityLCM
     pk = ToggleColumn()
     name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm", text=lambda record: record, args=[A("pk")]
-    )
+        "plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm",
+        text=lambda record: record,
+        args=[
+            A("pk")])
     cve = tables.LinkColumn(verbose_name="CVE")
     software = tables.LinkColumn()
     device = tables.LinkColumn()
     inventory_item = tables.LinkColumn(verbose_name="Inventory Item")
     tags = TagColumn()
-    actions = ButtonsColumn(VulnerabilityLCM, buttons=("changelog", "edit", "delete"))
+    actions = ButtonsColumn(VulnerabilityLCM, buttons=(
+        "changelog", "edit", "delete"))
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
         """Meta attributes."""
