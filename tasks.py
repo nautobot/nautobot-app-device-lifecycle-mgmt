@@ -17,6 +17,7 @@ from invoke import Collection, task as invoke_task
 import os
 from time import sleep
 
+
 def is_truthy(arg):
     """Convert "truthy" strings into Booleans.
 
@@ -286,6 +287,7 @@ def post_upgrade(context):
 
     run_command(context, command)
 
+
 @task
 def db_import(context):
     """Install the backup of Nautobot db into development environment."""
@@ -302,6 +304,7 @@ def db_import(context):
     print("Importing DB...\n")
     import_cmd = 'exec db sh -c "psql -h localhost -U \${NAUTOBOT_DB_USER} < /tmp/nautobot.sql"'  # noqa: W605 pylint: disable=anomalous-backslash-in-string
     docker_compose(context, import_cmd, pty=True)
+
 
 # ------------------------------------------------------------------------------
 # DOCS

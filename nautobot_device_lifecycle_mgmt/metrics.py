@@ -40,15 +40,17 @@ def nautobot_metrics_dlcm_eos():
             continue
 
         part_number_gauge.add_metric(labels=[part_number], value=metric_value)
-   
+
     yield part_number_gauge
 
     for site in Site.objects.all():
         eos_devices_in_site = Device.objects.filter(site=site, device_type__in=hw_eos_device_types).count()
-        eos_inventoryitems_in_site = InventoryItem.objects.filter(part_id__in=hw_eos_inventoryitems, device__site=site.id).count()
+        eos_inventoryitems_in_site = InventoryItem.objects.filter(
+            part_id__in=hw_eos_inventoryitems, device__site=site.id
+        ).count()
         metric_value = eos_devices_in_site + eos_inventoryitems_in_site
         devices_gauge.add_metric(labels=[site.slug], value=metric_value)
-    
+
     yield devices_gauge
 
 
