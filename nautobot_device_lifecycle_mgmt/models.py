@@ -419,11 +419,6 @@ class ValidatedSoftwareLCM(PrimaryModel):
 
     def to_csv(self):
         """Return fields for bulk view."""
-        for attr in dir(self.software):
-            try:
-                print(f"{attr}: {getattr(self.software, attr)}")
-            except:
-                pass
         return (
             self.software.id,
             ",".join(str(device["name"]) for device in self.devices.values()),
