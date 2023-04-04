@@ -20,8 +20,7 @@ packages = [
 python = "^3.7"
 pycountry = "^22.3.5"
 matplotlib = "^3.3.4"
-nautobot = "^1.5.13"
-nautobot-capacity-metrics = "2.0.0"
+nautobot = "^1.4.0"
 
 [tool.poetry.dev-dependencies]
 invoke = "*"
