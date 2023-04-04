@@ -22,6 +22,7 @@ def migrate_software_images(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("nautobot_device_lifecycle_mgmt", "0007_softwareimagelcm"),
     ]

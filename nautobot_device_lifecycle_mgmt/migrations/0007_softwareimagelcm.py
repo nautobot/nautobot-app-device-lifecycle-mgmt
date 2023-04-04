@@ -8,6 +8,7 @@ import uuid
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("dcim", "0005_device_local_context_schema"),
         ("extras", "0013_default_fallback_value_computedfield"),

@@ -100,6 +100,7 @@ class SoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
 
     @classmethod
     def setUpTestData(cls):
+
         device_platforms = (
             Platform.objects.create(name="Cisco IOS", slug="cisco_ios"),
             Platform.objects.create(name="Arista EOS", slug="arista_eos"),
@@ -422,6 +423,7 @@ class CVELCMAPITest(APIViewTestCases.APIViewTestCase):
 
     @classmethod
     def setUpTestData(cls):
+
         cls.create_data = [
             {
                 "name": "CVE-2021-40128",
