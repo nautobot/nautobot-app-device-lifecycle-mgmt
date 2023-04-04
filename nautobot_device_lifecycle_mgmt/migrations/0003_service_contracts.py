@@ -8,7 +8,6 @@ import uuid
 
 
 class Migration(migrations.Migration):
-    
     dependencies = [
         ("nautobot_device_lifecycle_mgmt", "0002_softwarelcm"),
     ]
