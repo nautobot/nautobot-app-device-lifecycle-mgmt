@@ -125,13 +125,13 @@ class HardwareLCMView(generic.ObjectView):
         instance: The object being viewed
         """
         if instance.device_type:
-            return {"devices": Device.objects.restrict(
-                request.user, "view").filter(device_type=instance.device_type)}
+            return {"devices": Device.objects.restrict(request.user, "view").filter(device_type=instance.device_type)}
         if instance.inventory_item:
             return {
-                "devices": Device.objects.restrict(
-                    request.user, "view").filter(
-                    inventoryitems__part_id=instance.inventory_item)}
+                "devices": Device.objects.restrict(request.user, "view").filter(
+                    inventoryitems__part_id=instance.inventory_item
+                )
+            }
         return {"devices": []}
 
 
@@ -222,11 +222,9 @@ class SoftwareLCMView(generic.ObjectView):
 
     def get_extra_context(self, request, instance):
         """Display SoftwareImageLCM objects associated with the SoftwareLCM object."""
-        softwareimages = instance.software_images.restrict(
-            request.user, "view")
+        softwareimages = instance.software_images.restrict(request.user, "view")
         if softwareimages.exists():
-            softwareimages_table = SoftwareImageLCMTable(
-                data=softwareimages, user=request.user, orderable=False)
+            softwareimages_table = SoftwareImageLCMTable(data=softwareimages, user=request.user, orderable=False)
         else:
             softwareimages_table = None
 
@@ -284,18 +282,12 @@ class SoftwareSoftwareImagesLCMView(generic.ObjectView):
     def get_extra_context(self, request, instance):
         """Adds Software Images table."""
         softwareimages = (
-            instance.software_images.annotate(
-                device_type_count=count_related_m2m(
-                    SoftwareImageLCM,
-                    "device_types")) .annotate(
-                object_tag_count=count_related_m2m(
-                    SoftwareImageLCM,
-                    "object_tags")) .restrict(
-                        request.user,
-                "view"))
+            instance.software_images.annotate(device_type_count=count_related_m2m(SoftwareImageLCM, "device_types"))
+            .annotate(object_tag_count=count_related_m2m(SoftwareImageLCM, "object_tags"))
+            .restrict(request.user, "view")
+        )
 
-        softwareimages_table = SoftwareImageLCMTable(
-            data=softwareimages, user=request.user, orderable=False)
+        softwareimages_table = SoftwareImageLCMTable(data=softwareimages, user=request.user, orderable=False)
 
         paginate = {
             "paginator_class": EnhancedPaginator,
@@ -313,10 +305,8 @@ class SoftwareImageLCMListView(generic.ObjectListView):
     """SoftwareImageLCM List view."""
 
     queryset = SoftwareImageLCM.objects.annotate(
-        device_type_count=count_related_m2m(
-            SoftwareImageLCM, "device_types")).annotate(
-        object_tag_count=count_related_m2m(
-            SoftwareImageLCM, "object_tags"))
+        device_type_count=count_related_m2m(SoftwareImageLCM, "device_types")
+    ).annotate(object_tag_count=count_related_m2m(SoftwareImageLCM, "object_tags"))
     filterset = SoftwareImageLCMFilterSet
     filterset_form = SoftwareImageLCMFilterForm
     table = SoftwareImageLCMTable
@@ -464,7 +454,8 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
         pie_chart_labels = []
         pie_chart_colors = []
         for aggr_label, chart_label, color in zip(
-                pie_chart_attrs["aggr_labels"], pie_chart_attrs["chart_labels"], colors):
+            pie_chart_attrs["aggr_labels"], pie_chart_attrs["chart_labels"], colors
+        ):
             if aggr[aggr_label] == 0:
                 continue
             sizes.append(aggr[aggr_label])
@@ -484,8 +475,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
             startangle=90,
             normalize=True,
         )
-        # Equal aspect ratio ensures that pie is drawn as a circle.
-        ax1.axis("equal")
+        ax1.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
         plt.title(aggr["name"], y=-0.1)
         fig = plt.gcf()
 
@@ -557,8 +547,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
                 - valid_percent
         """
         try:
-            aggr["valid_percent"] = round(
-                aggr["valid"] / aggr["total"] * 100, 2)
+            aggr["valid_percent"] = round(aggr["valid"] / aggr["total"] * 100, 2)
         except ZeroDivisionError:
             aggr["valid_percent"] = 0
         return aggr
@@ -572,19 +561,14 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
     table = DeviceSoftwareValidationResultTable
     template_name = "nautobot_device_lifecycle_mgmt/validatedsoftware_device_report.html"
     queryset = (
-        DeviceSoftwareValidationResult.objects.values(
-            "device__device_type__model")
+        DeviceSoftwareValidationResult.objects.values("device__device_type__model")
         .distinct()
         .annotate(
             total=Count("device__device_type__model"),
-            valid=Count("device__device_type__model",
-                        filter=Q(is_validated=True)),
-            invalid=Count("device__device_type__model", filter=Q(
-                is_validated=False) & ~Q(software=None)),
-            no_software=Count("device__device_type__model",
-                              filter=Q(software=None)),
-            valid_percent=ExpressionWrapper(
-                100 * F("valid") / (F("total")), output_field=FloatField()),
+            valid=Count("device__device_type__model", filter=Q(is_validated=True)),
+            invalid=Count("device__device_type__model", filter=Q(is_validated=False) & ~Q(software=None)),
+            no_software=Count("device__device_type__model", filter=Q(software=None)),
+            valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
         )
         .order_by("-valid_percent")
     )
@@ -597,8 +581,7 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
         super().setup(request, *args, **kwargs)  #
         try:
             report_last_run = (
-                DeviceSoftwareValidationResult.objects.filter(
-                    run_type=choices.ReportRunTypeChoices.REPORT_FULL_RUN)
+                DeviceSoftwareValidationResult.objects.filter(run_type=choices.ReportRunTypeChoices.REPORT_FULL_RUN)
                 .latest("last_updated")
                 .last_run
             )
@@ -607,17 +590,13 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
 
         device_aggr = self.get_global_aggr(request)
         _platform_qs = (
-            DeviceSoftwareValidationResult.objects.values(
-                "device__platform__name")
+            DeviceSoftwareValidationResult.objects.values("device__platform__name")
             .distinct()
             .annotate(
                 total=Count("device__platform__name"),
-                valid=Count("device__platform__name",
-                            filter=Q(is_validated=True)),
-                invalid=Count("device__platform__name", filter=Q(
-                    is_validated=False) & ~Q(software=None)),
-                no_software=Count("device__platform__name",
-                                  filter=Q(software=None)),
+                valid=Count("device__platform__name", filter=Q(is_validated=True)),
+                invalid=Count("device__platform__name", filter=Q(is_validated=False) & ~Q(software=None)),
+                no_software=Count("device__platform__name", filter=Q(software=None)),
             )
             .order_by("-total")
         )
@@ -637,13 +616,9 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
             ],
         }
         self.extra_content = {
-            "bar_chart": ReportOverviewHelper.plot_barchart_visual(
-                platform_qs,
-                bar_chart_attrs),
+            "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
             "device_aggr": device_aggr,
-            "device_visual": ReportOverviewHelper.plot_piechart_visual(
-                device_aggr,
-                pie_chart_attrs),
+            "device_visual": ReportOverviewHelper.plot_piechart_visual(device_aggr, pie_chart_attrs),
             "report_last_run": report_last_run,
         }
 
@@ -660,8 +635,7 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
             device_aggr = self.filterset(request.GET, device_qs).qs.aggregate(
                 total=Count("device"),
                 valid=Count("device", filter=Q(is_validated=True)),
-                invalid=Count("device", filter=Q(
-                    is_validated=False) & ~Q(software=None)),
+                invalid=Count("device", filter=Q(is_validated=False) & ~Q(software=None)),
                 no_software=Count("device", filter=Q(software=None)),
             )
 
@@ -679,8 +653,7 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
         """Export queryset of objects as comma-separated value (CSV)."""
         csv_data = []
 
-        csv_data.append(
-            ",".join(["Type", "Total", "Valid", "Invalid", "No Software", "Compliance"]))
+        csv_data.append(",".join(["Type", "Total", "Valid", "Invalid", "No Software", "Compliance"]))
         csv_data.append(
             ",".join(
                 ["Devices"]
@@ -694,25 +667,19 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
         csv_data.append(",".join([]))
 
         qs = self.queryset.values(
-            "device__device_type__model",
-            "total",
-            "valid",
-            "invalid",
-            "no_software",
-            "valid_percent")
+            "device__device_type__model", "total", "valid", "invalid", "no_software", "valid_percent"
+        )
         csv_data.append(
             ",".join(
                 [
-                    "Device Model" if item == "device__device_type__model" else item.replace(
-                        "_", " ").title()
+                    "Device Model" if item == "device__device_type__model" else item.replace("_", " ").title()
                     for item in qs[0].keys()
                 ]
             )
         )
         for obj in qs:
             csv_data.append(
-                ",".join([f"{str(val)} %" if key == "valid_percent" else str(
-                    val) for key, val in obj.items()])
+                ",".join([f"{str(val)} %" if key == "valid_percent" else str(val) for key, val in obj.items()])
             )
 
         return "\n".join(csv_data)
@@ -726,19 +693,14 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
     table = InventoryItemSoftwareValidationResultTable
     template_name = "nautobot_device_lifecycle_mgmt/validatedsoftware_inventoryitem_report.html"
     queryset = (
-        InventoryItemSoftwareValidationResult.objects.values(
-            "inventory_item__part_id")
+        InventoryItemSoftwareValidationResult.objects.values("inventory_item__part_id")
         .distinct()
         .annotate(
             total=Count("inventory_item__part_id"),
-            valid=Count("inventory_item__part_id",
-                        filter=Q(is_validated=True)),
-            invalid=Count("inventory_item__part_id", filter=Q(
-                is_validated=False) & ~Q(software=None)),
-            no_software=Count("inventory_item__part_id",
-                              filter=Q(software=None)),
-            valid_percent=ExpressionWrapper(
-                100 * F("valid") / (F("total")), output_field=FloatField()),
+            valid=Count("inventory_item__part_id", filter=Q(is_validated=True)),
+            invalid=Count("inventory_item__part_id", filter=Q(is_validated=False) & ~Q(software=None)),
+            no_software=Count("inventory_item__part_id", filter=Q(software=None)),
+            valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
         )
         .order_by("-valid_percent")
     )
@@ -762,17 +724,13 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
 
         inventory_aggr = self.get_global_aggr(request)
         _platform_qs = (
-            InventoryItemSoftwareValidationResult.objects.values(
-                "inventory_item__manufacturer__name")
+            InventoryItemSoftwareValidationResult.objects.values("inventory_item__manufacturer__name")
             .distinct()
             .annotate(
                 total=Count("inventory_item__manufacturer__name"),
-                valid=Count("inventory_item__manufacturer__name",
-                            filter=Q(is_validated=True)),
-                invalid=Count("inventory_item__manufacturer__name", filter=Q(
-                    is_validated=False) & ~Q(software=None)),
-                no_software=Count(
-                    "inventory_item__manufacturer__name", filter=Q(software=None)),
+                valid=Count("inventory_item__manufacturer__name", filter=Q(is_validated=True)),
+                invalid=Count("inventory_item__manufacturer__name", filter=Q(is_validated=False) & ~Q(software=None)),
+                no_software=Count("inventory_item__manufacturer__name", filter=Q(software=None)),
             )
             .order_by("-total")
         )
@@ -794,13 +752,9 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
         }
 
         self.extra_content = {
-            "bar_chart": ReportOverviewHelper.plot_barchart_visual(
-                platform_qs,
-                bar_chart_attrs),
+            "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
             "inventory_aggr": inventory_aggr,
-            "inventory_visual": ReportOverviewHelper.plot_piechart_visual(
-                inventory_aggr,
-                pie_chart_attrs),
+            "inventory_visual": ReportOverviewHelper.plot_piechart_visual(inventory_aggr, pie_chart_attrs),
             "report_last_run": report_last_run,
         }
 
@@ -814,23 +768,11 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
 
         inventory_aggr = {}
         if self.filterset is not None:
-            inventory_aggr = self.filterset(
-                request.GET,
-                inventory_item_qs).qs.aggregate(
+            inventory_aggr = self.filterset(request.GET, inventory_item_qs).qs.aggregate(
                 total=Count("inventory_item"),
-                valid=Count(
-                    "inventory_item",
-                    filter=Q(
-                        is_validated=True)),
-                invalid=Count(
-                    "inventory_item",
-                    filter=Q(
-                        is_validated=False) & ~Q(
-                            software=None)),
-                no_software=Count(
-                    "inventory_item",
-                    filter=Q(
-                        software=None)),
+                valid=Count("inventory_item", filter=Q(is_validated=True)),
+                invalid=Count("inventory_item", filter=Q(is_validated=False) & ~Q(software=None)),
+                no_software=Count("inventory_item", filter=Q(software=None)),
             )
             inventory_aggr["name"] = "Inventory Items"
 
@@ -846,8 +788,7 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
         """Export queryset of objects as comma-separated value (CSV)."""
         csv_data = []
 
-        csv_data.append(
-            ",".join(["Type", "Total", "Valid", "Invalid", "No Software", "Compliance"]))
+        csv_data.append(",".join(["Type", "Total", "Valid", "Invalid", "No Software", "Compliance"]))
         csv_data.append(
             ",".join(
                 ["Inventory Items"]
@@ -861,25 +802,19 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
         csv_data.append(",".join([]))
 
         qs = self.queryset.values(
-            "inventory_item__part_id",
-            "total",
-            "valid",
-            "invalid",
-            "no_software",
-            "valid_percent")
+            "inventory_item__part_id", "total", "valid", "invalid", "no_software", "valid_percent"
+        )
         csv_data.append(
             ",".join(
                 [
-                    "Part ID" if item == "inventory_item__part_id" else item.replace(
-                        "_", " ").title()
+                    "Part ID" if item == "inventory_item__part_id" else item.replace("_", " ").title()
                     for item in qs[0].keys()
                 ]
             )
         )
         for obj in qs:
             csv_data.append(
-                ",".join([f"{str(val)} %" if key == "valid_percent" else str(
-                    val) for key, val in obj.items()])
+                ",".join([f"{str(val)} %" if key == "valid_percent" else str(val) for key, val in obj.items()])
             )
 
         return "\n".join(csv_data)
@@ -1000,8 +935,7 @@ class ProviderLCMView(generic.ObjectView):
         request: The current request
         instance: The object being viewed
         """
-        return {"contracts": ContractLCM.objects.restrict(
-            request.user, "view").filter(provider=instance)}
+        return {"contracts": ContractLCM.objects.restrict(request.user, "view").filter(provider=instance)}
 
 
 class ProviderLCMCreateView(generic.ObjectEditView):

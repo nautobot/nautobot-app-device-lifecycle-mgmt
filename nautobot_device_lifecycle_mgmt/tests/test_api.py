@@ -50,35 +50,23 @@ class HardwareLCMAPITest(APIViewTestCases.APIViewTestCase):
         """Create a superuser and token for API calls."""
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
         device_types = (
-            DeviceType.objects.create(
-                model="c9300-24", slug="c9300-24", manufacturer=manufacturer),
-            DeviceType.objects.create(
-                model="c9300-48", slug="c9300-48", manufacturer=manufacturer),
-            DeviceType.objects.create(
-                model="c9500-24", slug="c9500-24", manufacturer=manufacturer),
-            DeviceType.objects.create(
-                model="c9500-48", slug="c9500-48", manufacturer=manufacturer),
-            DeviceType.objects.create(
-                model="c9407", slug="c9407", manufacturer=manufacturer),
-            DeviceType.objects.create(
-                model="c9410", slug="c9410", manufacturer=manufacturer),
+            DeviceType.objects.create(model="c9300-24", slug="c9300-24", manufacturer=manufacturer),
+            DeviceType.objects.create(model="c9300-48", slug="c9300-48", manufacturer=manufacturer),
+            DeviceType.objects.create(model="c9500-24", slug="c9500-24", manufacturer=manufacturer),
+            DeviceType.objects.create(model="c9500-48", slug="c9500-48", manufacturer=manufacturer),
+            DeviceType.objects.create(model="c9407", slug="c9407", manufacturer=manufacturer),
+            DeviceType.objects.create(model="c9410", slug="c9410", manufacturer=manufacturer),
         )
 
-        HardwareLCM.objects.create(
-            device_type=device_types[3], end_of_sale=datetime.date(2021, 4, 1))
-        HardwareLCM.objects.create(
-            device_type=device_types[4], end_of_sale=datetime.date(2021, 4, 1))
-        HardwareLCM.objects.create(
-            device_type=device_types[5], end_of_sale=datetime.date(2021, 4, 1))
+        HardwareLCM.objects.create(device_type=device_types[3], end_of_sale=datetime.date(2021, 4, 1))
+        HardwareLCM.objects.create(device_type=device_types[4], end_of_sale=datetime.date(2021, 4, 1))
+        HardwareLCM.objects.create(device_type=device_types[5], end_of_sale=datetime.date(2021, 4, 1))
 
         cls.create_data = [
             # Setting end_of_sale as datetime.date for proper comparison
-            {"device_type": device_types[0].id,
-                "end_of_sale": datetime.date(2021, 4, 1)},
-            {"device_type": device_types[1].id,
-                "end_of_sale": datetime.date(2021, 4, 1)},
-            {"device_type": device_types[2].id,
-                "end_of_sale": datetime.date(2021, 4, 1)},
+            {"device_type": device_types[0].id, "end_of_sale": datetime.date(2021, 4, 1)},
+            {"device_type": device_types[1].id, "end_of_sale": datetime.date(2021, 4, 1)},
+            {"device_type": device_types[2].id, "end_of_sale": datetime.date(2021, 4, 1)},
         ]
 
     def test_bulk_create_objects(self):
@@ -112,11 +100,11 @@ class SoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
 
     @classmethod
     def setUpTestData(cls):
+
         device_platforms = (
             Platform.objects.create(name="Cisco IOS", slug="cisco_ios"),
             Platform.objects.create(name="Arista EOS", slug="arista_eos"),
-            Platform.objects.create(
-                name="Juniper Junos", slug="juniper_junos"),
+            Platform.objects.create(name="Juniper Junos", slug="juniper_junos"),
         )
 
         cls.create_data = [
@@ -138,26 +126,14 @@ class SoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
         ]
 
         SoftwareLCM.objects.create(
-            device_platform=device_platforms[0],
-            version="15.1(2)M",
-            end_of_support=datetime.date(
-                2023,
-                5,
-                8))
+            device_platform=device_platforms[0], version="15.1(2)M", end_of_support=datetime.date(2023, 5, 8)
+        )
         SoftwareLCM.objects.create(
-            device_platform=device_platforms[1],
-            version="4.22.9M",
-            end_of_support=datetime.date(
-                2022,
-                4,
-                11))
+            device_platform=device_platforms[1], version="4.22.9M", end_of_support=datetime.date(2022, 4, 11)
+        )
         SoftwareLCM.objects.create(
-            device_platform=device_platforms[2],
-            version="21.4R3",
-            end_of_support=datetime.date(
-                2024,
-                5,
-                19))
+            device_platform=device_platforms[2], version="21.4R3", end_of_support=datetime.date(2024, 5, 19)
+        )
 
     def test_bulk_create_objects(self):
         """Currently don't support bulk operations."""
@@ -289,64 +265,54 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
     @classmethod
     def setUpTestData(cls):
         """Create a superuser and token for API calls."""
-        device_platform = Platform.objects.create(
-            name="Cisco IOS", slug="cisco_ios")
-        softwares = (SoftwareLCM.objects.create(**{"device_platform": device_platform,
-                                                   "version": "17.3.3 MD",
-                                                   "alias": "Amsterdam-17.3.3 MD",
-                                                   "end_of_support": "2022-05-15",
-                                                   "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
-                                                   "long_term_support": True,
-                                                   "pre_release": False,
-                                                   }),
-                     SoftwareLCM.objects.create(**{"device_platform": device_platform,
-                                                   "version": "15.5(1)SY",
-                                                   "alias": "Catalyst-15.5(1)SY",
-                                                   "end_of_support": "2019-02-5",
-                                                   "documentation_url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst6500/ios/15-1SY/config_guide/sup2T/15_1_sy_swcg_2T/cef.html",
-                                                   "long_term_support": False,
-                                                   "pre_release": True,
-                                                   }),
-                     )
+        device_platform = Platform.objects.create(name="Cisco IOS", slug="cisco_ios")
+        softwares = (
+            SoftwareLCM.objects.create(
+                **{
+                    "device_platform": device_platform,
+                    "version": "17.3.3 MD",
+                    "alias": "Amsterdam-17.3.3 MD",
+                    "end_of_support": "2022-05-15",
+                    "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
+                    "long_term_support": True,
+                    "pre_release": False,
+                }
+            ),
+            SoftwareLCM.objects.create(
+                **{
+                    "device_platform": device_platform,
+                    "version": "15.5(1)SY",
+                    "alias": "Catalyst-15.5(1)SY",
+                    "end_of_support": "2019-02-5",
+                    "documentation_url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst6500/ios/15-1SY/config_guide/sup2T/15_1_sy_swcg_2T/cef.html",
+                    "long_term_support": False,
+                    "pre_release": True,
+                }
+            ),
+        )
 
         status_active = Status.objects.get(slug="active")
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
         site = Site.objects.create(name="Site 1", slug="site-1")
         deviceroles = (
-            DeviceRole.objects.create(
-                name="Router", slug="router", color="ff0000"),
-            DeviceRole.objects.create(
-                name="Switch", slug="switch", color="ffff00"),
+            DeviceRole.objects.create(name="Router", slug="router", color="ff0000"),
+            DeviceRole.objects.create(name="Switch", slug="switch", color="ffff00"),
         )
         devicetypes = (
-            DeviceType.objects.create(
-                manufacturer=manufacturer,
-                model="ASR-1000",
-                slug="asr-1000"),
-            DeviceType.objects.create(
-                manufacturer=manufacturer,
-                model="Catalyst 6500",
-                slug="catalyst-6500"),
+            DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000"),
+            DeviceType.objects.create(manufacturer=manufacturer, model="Catalyst 6500", slug="catalyst-6500"),
         )
         devices = (
             Device.objects.create(
-                device_type=devicetypes[0],
-                device_role=deviceroles[0],
-                name="Device 1",
-                site=site,
-                status=status_active),
+                device_type=devicetypes[0], device_role=deviceroles[0], name="Device 1", site=site, status=status_active
+            ),
             Device.objects.create(
-                device_type=devicetypes[1],
-                device_role=deviceroles[1],
-                name="Device 2",
-                site=site,
-                status=status_active),
+                device_type=devicetypes[1], device_role=deviceroles[1], name="Device 2", site=site, status=status_active
+            ),
         )
         inventoryitems = (
-            InventoryItem.objects.create(
-                device=devices[0], name="SwitchModule1"),
-            InventoryItem.objects.create(
-                device=devices[1], name="Supervisor Engine 720"),
+            InventoryItem.objects.create(device=devices[0], name="SwitchModule1"),
+            InventoryItem.objects.create(device=devices[1], name="Supervisor Engine 720"),
         )
 
         cls.create_data = [
@@ -395,8 +361,7 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             end=datetime.date(2019, 6, 12),
             preferred=False,
         )
-        validated_software.device_types.set(
-            [devicetype.pk for devicetype in devicetypes])
+        validated_software.device_types.set([devicetype.pk for devicetype in devicetypes])
         validated_software.save()
 
         validated_software = ValidatedSoftwareLCM(
@@ -405,8 +370,7 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             end=datetime.date(2030, 7, 30),
             preferred=False,
         )
-        validated_software.device_roles.set(
-            [devicerole.pk for devicerole in deviceroles])
+        validated_software.device_roles.set([devicerole.pk for devicerole in deviceroles])
         validated_software.save()
 
         ValidatedSoftwareLCM(
@@ -415,8 +379,7 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             end=datetime.date(2025, 1, 16),
             preferred=False,
         )
-        validated_software.inventory_items.set(
-            [inventoryitem.pk for inventoryitem in inventoryitems])
+        validated_software.inventory_items.set([inventoryitem.pk for inventoryitem in inventoryitems])
         validated_software.save()
 
     def test_bulk_create_objects(self):
@@ -460,6 +423,7 @@ class CVELCMAPITest(APIViewTestCases.APIViewTestCase):
 
     @classmethod
     def setUpTestData(cls):
+
         cls.create_data = [
             {
                 "name": "CVE-2021-40128",
@@ -538,15 +502,10 @@ class VulnerabilityLCMAPITest(
         softwares = create_softwares()
 
         for i, cve in enumerate(cves):
-            VulnerabilityLCM.objects.create(
-                cve=cve, device=devices[i], software=softwares[i])
+            VulnerabilityLCM.objects.create(cve=cve, device=devices[i], software=softwares[i])
 
         vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
-        status = Status.objects.create(
-            name="Exempt",
-            slug="exempt",
-            color="4caf50",
-            description="This unit is exempt.")
+        status = Status.objects.create(name="Exempt", slug="exempt", color="4caf50", description="This unit is exempt.")
         status.content_types.set([vuln_ct])
         cls.create_data = [{"status": "exempt"}]
 
@@ -589,10 +548,8 @@ class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
     @classmethod
     def setUpTestData(cls):  # pylint: disable=too-many-locals
         """Create a superuser and token for API calls."""
-        device_platform_cisco, _ = Platform.objects.get_or_create(
-            name="Cisco IOS", slug="cisco_ios")
-        device_platform_arista, _ = Platform.objects.get_or_create(
-            name="Arista EOS", slug="arista_eos")
+        device_platform_cisco, _ = Platform.objects.get_or_create(name="Cisco IOS", slug="cisco_ios")
+        device_platform_arista, _ = Platform.objects.get_or_create(name="Arista EOS", slug="arista_eos")
         softwares_cisco = (
             SoftwareLCM.objects.get_or_create(
                 **{
@@ -623,77 +580,61 @@ class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
         )
 
         status_active = Status.objects.get(slug="active")
-        manufacturer_cisco = Manufacturer.objects.create(
-            name="Cisco", slug="cisco")
-        manufacturer_arista = Manufacturer.objects.create(
-            name="Arista", slug="arista")
+        manufacturer_cisco = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        manufacturer_arista = Manufacturer.objects.create(name="Arista", slug="arista")
         site = Site.objects.create(name="Site 1", slug="site-1")
-        devicerole = DeviceRole.objects.create(
-            name="Router", slug="router", color="ff0000")
+        devicerole = DeviceRole.objects.create(name="Router", slug="router", color="ff0000")
         devicetypes_cisco = (
-            DeviceType.objects.create(
-                manufacturer=manufacturer_cisco,
-                model="ASR-1000",
-                slug="asr-1000"),
-            DeviceType.objects.create(
-                manufacturer=manufacturer_cisco,
-                model="Catalyst 6500",
-                slug="catalyst-6500"),
+            DeviceType.objects.create(manufacturer=manufacturer_cisco, model="ASR-1000", slug="asr-1000"),
+            DeviceType.objects.create(manufacturer=manufacturer_cisco, model="Catalyst 6500", slug="catalyst-6500"),
         )
         devicetypes_arista = (
-            DeviceType.objects.create(
-                manufacturer=manufacturer_arista, model="7150S", slug="7150s"),
-            DeviceType.objects.create(
-                manufacturer=manufacturer_arista, model="7508R", slug="7508r"),
+            DeviceType.objects.create(manufacturer=manufacturer_arista, model="7150S", slug="7150s"),
+            DeviceType.objects.create(manufacturer=manufacturer_arista, model="7508R", slug="7508r"),
         )
         device_cisco = Device.objects.create(
-            device_type=devicetypes_cisco[0],
-            device_role=devicerole,
-            name="Device 1",
-            site=site,
-            status=status_active)
+            device_type=devicetypes_cisco[0], device_role=devicerole, name="Device 1", site=site, status=status_active
+        )
         device_arista = Device.objects.create(
-            device_type=devicetypes_arista[0],
-            device_role=devicerole,
-            name="Device 2",
-            site=site,
-            status=status_active)
+            device_type=devicetypes_arista[0], device_role=devicerole, name="Device 2", site=site, status=status_active
+        )
         inventoryitems_cisco = (
-            InventoryItem.objects.create(
-                device=device_cisco, name="SwitchModule1"),
-            InventoryItem.objects.create(
-                device=device_cisco, name="Supervisor Engine 720"),
+            InventoryItem.objects.create(device=device_cisco, name="SwitchModule1"),
+            InventoryItem.objects.create(device=device_cisco, name="Supervisor Engine 720"),
         )
         inventoryitems_arista = (
             InventoryItem.objects.create(device=device_arista, name="SFP1"),
             InventoryItem.objects.create(device=device_arista, name="QSFP1"),
         )
 
-        tags = (Tag.objects.create(name="asr", slug="asr"),
-                Tag.objects.create(name="edge", slug="edge"))
+        tags = (Tag.objects.create(name="asr", slug="asr"), Tag.objects.create(name="edge", slug="edge"))
 
-        cls.create_data = [{"image_file_name": "asr1001x-universalk9.17.03.03.SPA.bin",
-                            "software": softwares_cisco[0].id,
-                            "device_types": [devicetype.pk for devicetype in devicetypes_cisco],
-                            "download_url": "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin",
-                            "image_file_checksum": "9cf2e09b59207a4d8ea408ea9971f6ae6facab9a1855a34e1ed8755f3ffe4b9e14",
-                            "default_image": True,
-                            },
-                           {"image_file_name": "asr1001x-universalk9.17.03.03.ssl.SPA.bin",
-                            "software": softwares_cisco[0].id,
-                            "inventory_items": [inventoryitem.pk for inventoryitem in inventoryitems_cisco],
-                            "download_url": "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.ssl.SPA.bin",
-                            "image_file_checksum": "7f2e09b59207a4d8ea40fa132va71f6ae6facab9a1851a34e1ed8755f3ffe4b9e14",
-                            "default_image": False,
-                            },
-                           {"image_file_name": "s2t54-ipservicesk9_npe-mz.SPA.155-1.SY1.bin",
-                            "software": softwares_cisco[1].id,
-                            "object_tags": [tag.pk for tag in tags],
-                            "download_url": "ftp://device-images.local.com/cisco/s2t54-ipservicesk9_npe-mz.SPA.155-1.SY1.bin",
-                            "image_file_checksum": "74e61320f5518a2954b2d307b7e6a038",
-                            "default_image": True,
-                            },
-                           ]
+        cls.create_data = [
+            {
+                "image_file_name": "asr1001x-universalk9.17.03.03.SPA.bin",
+                "software": softwares_cisco[0].id,
+                "device_types": [devicetype.pk for devicetype in devicetypes_cisco],
+                "download_url": "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin",
+                "image_file_checksum": "9cf2e09b59207a4d8ea408ea9971f6ae6facab9a1855a34e1ed8755f3ffe4b9e14",
+                "default_image": True,
+            },
+            {
+                "image_file_name": "asr1001x-universalk9.17.03.03.ssl.SPA.bin",
+                "software": softwares_cisco[0].id,
+                "inventory_items": [inventoryitem.pk for inventoryitem in inventoryitems_cisco],
+                "download_url": "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.ssl.SPA.bin",
+                "image_file_checksum": "7f2e09b59207a4d8ea40fa132va71f6ae6facab9a1851a34e1ed8755f3ffe4b9e14",
+                "default_image": False,
+            },
+            {
+                "image_file_name": "s2t54-ipservicesk9_npe-mz.SPA.155-1.SY1.bin",
+                "software": softwares_cisco[1].id,
+                "object_tags": [tag.pk for tag in tags],
+                "download_url": "ftp://device-images.local.com/cisco/s2t54-ipservicesk9_npe-mz.SPA.155-1.SY1.bin",
+                "image_file_checksum": "74e61320f5518a2954b2d307b7e6a038",
+                "default_image": True,
+            },
+        ]
         software_image = SoftwareImageLCM(
             image_file_name="eos2gb_4.21.6m.swi",
             software=softwares_arista[0],
@@ -709,8 +650,7 @@ class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
             image_file_checksum="78arfabd75b0fa2vzas1e7a7ac6faa3fc",
             default_image=True,
         )
-        software_image.inventory_items.set(
-            [inventoryitem.pk for inventoryitem in inventoryitems_arista])
+        software_image.inventory_items.set([inventoryitem.pk for inventoryitem in inventoryitems_arista])
         software_image.save()
 
         software_image = SoftwareImageLCM(
@@ -720,8 +660,7 @@ class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
             image_file_checksum="78arfabd75b0fa2vfas1e7a7ac6faa3fc",
             default_image=True,
         )
-        software_image.device_types.set(
-            [devicetype.pk for devicetype in devicetypes_arista])
+        software_image.device_types.set([devicetype.pk for devicetype in devicetypes_arista])
         software_image.save()
 
     def test_bulk_create_objects(self):

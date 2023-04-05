@@ -4,6 +4,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("dcim", "0005_device_local_context_schema"),
         ("extras", "0013_default_fallback_value_computedfield"),
@@ -14,11 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterModelOptions(
             name="softwarelcm",
             options={
-                "ordering": (
-                    "device_platform",
-                    "version",
-                    "end_of_support",
-                    "release_date"),
+                "ordering": ("device_platform", "version", "end_of_support", "release_date"),
                 "verbose_name": "Software",
             },
         ),
@@ -26,41 +23,34 @@ class Migration(migrations.Migration):
             model_name="validatedsoftwarelcm",
             name="device_roles",
             field=models.ManyToManyField(
-                blank=True,
-                related_name="_validatedsoftwarelcm_device_roles_+",
-                to="dcim.DeviceRole"),
+                blank=True, related_name="_validatedsoftwarelcm_device_roles_+", to="dcim.DeviceRole"
+            ),
         ),
         migrations.AddField(
             model_name="validatedsoftwarelcm",
             name="device_types",
             field=models.ManyToManyField(
-                blank=True,
-                related_name="_validatedsoftwarelcm_device_types_+",
-                to="dcim.DeviceType"),
+                blank=True, related_name="_validatedsoftwarelcm_device_types_+", to="dcim.DeviceType"
+            ),
         ),
         migrations.AddField(
             model_name="validatedsoftwarelcm",
             name="devices",
-            field=models.ManyToManyField(
-                blank=True,
-                related_name="_validatedsoftwarelcm_devices_+",
-                to="dcim.Device"),
+            field=models.ManyToManyField(blank=True, related_name="_validatedsoftwarelcm_devices_+", to="dcim.Device"),
         ),
         migrations.AddField(
             model_name="validatedsoftwarelcm",
             name="inventory_items",
             field=models.ManyToManyField(
-                blank=True,
-                related_name="_validatedsoftwarelcm_inventory_items_+",
-                to="dcim.InventoryItem"),
+                blank=True, related_name="_validatedsoftwarelcm_inventory_items_+", to="dcim.InventoryItem"
+            ),
         ),
         migrations.AddField(
             model_name="validatedsoftwarelcm",
             name="object_tags",
             field=models.ManyToManyField(
-                blank=True,
-                related_name="_validatedsoftwarelcm_object_tags_+",
-                to="extras.Tag"),
+                blank=True, related_name="_validatedsoftwarelcm_object_tags_+", to="extras.Tag"
+            ),
         ),
         migrations.AlterUniqueTogether(
             name="validatedsoftwarelcm",

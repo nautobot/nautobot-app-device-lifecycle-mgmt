@@ -15,7 +15,6 @@ limitations under the License.
 from distutils.util import strtobool
 from invoke import Collection, task as invoke_task
 import os
-from time import sleep
 
 
 def is_truthy(arg):
@@ -40,13 +39,11 @@ namespace = Collection("nautobot_device_lifecycle_mgmt")
 namespace.configure(
     {
         "nautobot_device_lifecycle_mgmt": {
-            "nautobot_ver": "1.5.14",
+            "nautobot_ver": "1.5.4",
             "project_name": "nautobot_device_lifecycle_mgmt",
             "python_ver": "3.8",
             "local": False,
-            "compose_dir": os.path.join(
-                os.path.dirname(__file__),
-                "development"),
+            "compose_dir": os.path.join(os.path.dirname(__file__), "development"),
             "compose_files": [
                 "docker-compose.base.yml",
                 "docker-compose.redis.yml",
@@ -54,7 +51,9 @@ namespace.configure(
                 "docker-compose.dev.yml",
             ],
             "compose_http_timeout": "86400",
-        }})
+        }
+    }
+)
 
 
 def task(function=None, *args, **kwargs):
@@ -93,8 +92,7 @@ def docker_compose(context, command, **kwargs):
     }
     compose_command = f'docker-compose --project-name {context.nautobot_device_lifecycle_mgmt.project_name} --project-directory "{context.nautobot_device_lifecycle_mgmt.compose_dir}"'
     for compose_file in context.nautobot_device_lifecycle_mgmt.compose_files:
-        compose_file_path = os.path.join(
-            context.nautobot_device_lifecycle_mgmt.compose_dir, compose_file)
+        compose_file_path = os.path.join(context.nautobot_device_lifecycle_mgmt.compose_dir, compose_file)
         compose_command += f' -f "{compose_file_path}"'
     compose_command += f" {command}"
     print(f'Running docker-compose command "{command}"')
@@ -106,8 +104,7 @@ def run_command(context, command, **kwargs):
     if is_truthy(context.nautobot_device_lifecycle_mgmt.local):
         context.run(command, **kwargs)
     else:
-        # Check if nautobot is running, no need to start another nautobot
-        # container to run a command
+        # Check if nautobot is running, no need to start another nautobot container to run a command
         docker_compose_status = "ps --services --filter status=running"
         results = docker_compose(context, docker_compose_status, hide="out")
         if "nautobot" in results.stdout:
@@ -136,8 +133,7 @@ def build(context, force_rm=False, cache=True):
     if force_rm:
         command += " --force-rm"
 
-    print(
-        f"Building Nautobot with Python {context.nautobot_device_lifecycle_mgmt.python_ver}...")
+    print(f"Building Nautobot with Python {context.nautobot_device_lifecycle_mgmt.python_ver}...")
     docker_compose(context, command)
 
 
@@ -291,24 +287,6 @@ def post_upgrade(context):
     run_command(context, command)
 
 
-@task
-def db_import(context):
-    """Install the backup of Nautobot db into development environment."""
-    print("Importing Database into Development...\n")
-
-    print("Starting Postgres for DB import...\n")
-    docker_compose(context, "up -d db")
-    sleep(2)
-
-    print("Copying DB Dump to DB container...\n")
-    copy_cmd = f"docker cp development/nautobot.sql {context.nautobot_device_lifecycle_mgmt.project_name}-db-1:/tmp/nautobot.sql"
-    context.run(copy_cmd)
-    sleep(5)
-    print("Importing DB...\n")
-    import_cmd = 'exec db sh -c "psql -h localhost -U \${NAUTOBOT_DB_USER} < /tmp/nautobot.sql"'  # noqa: W605 pylint: disable=anomalous-backslash-in-string
-    docker_compose(context, import_cmd, pty=True)
-
-
 # ------------------------------------------------------------------------------
 # DOCS
 # ------------------------------------------------------------------------------
@@ -347,7 +325,7 @@ def black(context, autoformat=False):
 @task
 def flake8(context):
     """Check for PEP8 compliance and other style issues."""
-    command = "flake8 . --config=.flake8"
+    command = "flake8 ."
     run_command(context, command)
 
 
@@ -407,13 +385,9 @@ def check_migrations(context):
         "label": "specify a directory or module to test instead of running all Nautobot tests",
         "failfast": "fail as soon as a single test fails don't run the entire test suite",
         "buffer": "Discard output from passing tests",
-    })
-def unittest(
-        context,
-        keepdb=False,
-        label="nautobot_device_lifecycle_mgmt",
-        failfast=False,
-        buffer=True):
+    }
+)
+def unittest(context, keepdb=False, label="nautobot_device_lifecycle_mgmt", failfast=False, buffer=True):
     """Run Nautobot unit tests."""
     command = f"coverage run --module nautobot.core.cli test {label}"
 
@@ -441,8 +415,7 @@ def unittest_coverage(context):
 )
 def tests(context, failfast=False):
     """Run all tests for this plugin."""
-    # If we are not running locally, start the docker containers so we don't
-    # have to for each test
+    # If we are not running locally, start the docker containers so we don't have to for each test
     if not is_truthy(context.nautobot_device_lifecycle_mgmt.local):
         print("Starting Docker Containers...")
         start(context)

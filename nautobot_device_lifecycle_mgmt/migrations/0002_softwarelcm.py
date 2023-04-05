@@ -8,6 +8,7 @@ import uuid
 
 
 class Migration(migrations.Migration):
+
     initial = True
 
     dependencies = [
@@ -28,8 +29,7 @@ class Migration(migrations.Migration):
                 ("last_updated", models.DateTimeField(auto_now=True, null=True)),
                 (
                     "_custom_field_data",
-                    models.JSONField(
-                        blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
+                    models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
                 ),
                 ("version", models.CharField(max_length=50)),
                 ("alias", models.CharField(blank=True, max_length=50, null=True)),
@@ -38,14 +38,11 @@ class Migration(migrations.Migration):
                 ("documentation_url", models.URLField(blank=True)),
                 ("download_url", models.URLField(blank=True)),
                 ("image_file_name", models.CharField(blank=True, max_length=100)),
-                ("image_file_checksum", models.CharField(
-                    blank=True, max_length=256)),
+                ("image_file_checksum", models.CharField(blank=True, max_length=256)),
                 ("long_term_support", models.BooleanField(default=False)),
                 ("pre_release", models.BooleanField(default=False)),
-                ("device_platform", models.ForeignKey(
-                    on_delete=django.db.models.deletion.CASCADE, to="dcim.platform")),
-                ("tags", taggit.managers.TaggableManager(
-                    through="extras.TaggedItem", to="extras.Tag")),
+                ("device_platform", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="dcim.platform")),
+                ("tags", taggit.managers.TaggableManager(through="extras.TaggedItem", to="extras.Tag")),
             ],
             options={
                 "verbose_name": "Software",
@@ -66,8 +63,7 @@ class Migration(migrations.Migration):
                 ("last_updated", models.DateTimeField(auto_now=True, null=True)),
                 (
                     "_custom_field_data",
-                    models.JSONField(
-                        blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
+                    models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
                 ),
                 ("assigned_to_object_id", models.UUIDField()),
                 ("start", models.DateField()),
@@ -77,8 +73,7 @@ class Migration(migrations.Migration):
                     "assigned_to_content_type",
                     models.ForeignKey(
                         limit_choices_to=models.Q(
-                            ("app_label", "dcim"), ("model__in",
-                                                    ("device", "devicetype", "inventoryitem"))
+                            ("app_label", "dcim"), ("model__in", ("device", "devicetype", "inventoryitem"))
                         ),
                         on_delete=django.db.models.deletion.PROTECT,
                         related_name="+",
@@ -91,8 +86,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE, to="nautobot_device_lifecycle_mgmt.softwarelcm"
                     ),
                 ),
-                ("tags", taggit.managers.TaggableManager(
-                    through="extras.TaggedItem", to="extras.Tag")),
+                ("tags", taggit.managers.TaggableManager(through="extras.TaggedItem", to="extras.Tag")),
             ],
             options={
                 "verbose_name": "Validated Software",

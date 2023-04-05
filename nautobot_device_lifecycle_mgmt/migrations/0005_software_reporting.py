@@ -8,6 +8,7 @@ import uuid
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("dcim", "0005_device_local_context_schema"),
         ("extras", "0013_default_fallback_value_computedfield"),
@@ -32,8 +33,7 @@ class Migration(migrations.Migration):
                 ("last_updated", models.DateTimeField(auto_now=True, null=True)),
                 (
                     "_custom_field_data",
-                    models.JSONField(
-                        blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
+                    models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
                 ),
                 ("is_validated", models.BooleanField(blank=True, null=True)),
                 ("last_run", models.DateTimeField(blank=True, null=True)),
@@ -55,8 +55,7 @@ class Migration(migrations.Migration):
                         to="nautobot_device_lifecycle_mgmt.softwarelcm",
                     ),
                 ),
-                ("tags", taggit.managers.TaggableManager(
-                    through="extras.TaggedItem", to="extras.Tag")),
+                ("tags", taggit.managers.TaggableManager(through="extras.TaggedItem", to="extras.Tag")),
             ],
             options={
                 "verbose_name": "Inventory Item Software Validation Report",
@@ -76,8 +75,7 @@ class Migration(migrations.Migration):
                 ("last_updated", models.DateTimeField(auto_now=True, null=True)),
                 (
                     "_custom_field_data",
-                    models.JSONField(
-                        blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
+                    models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
                 ),
                 ("is_validated", models.BooleanField(blank=True, null=True)),
                 ("last_run", models.DateTimeField(blank=True, null=True)),
@@ -100,8 +98,7 @@ class Migration(migrations.Migration):
                         to="nautobot_device_lifecycle_mgmt.softwarelcm",
                     ),
                 ),
-                ("tags", taggit.managers.TaggableManager(
-                    through="extras.TaggedItem", to="extras.Tag")),
+                ("tags", taggit.managers.TaggableManager(through="extras.TaggedItem", to="extras.Tag")),
             ],
             options={
                 "verbose_name": "Device Software Validation Report",

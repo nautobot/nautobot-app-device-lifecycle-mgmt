@@ -8,6 +8,7 @@ import uuid
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("dcim", "0005_device_local_context_schema"),
         ("extras", "0013_default_fallback_value_computedfield"),
@@ -28,13 +29,11 @@ class Migration(migrations.Migration):
                 ("last_updated", models.DateTimeField(auto_now=True, null=True)),
                 (
                     "_custom_field_data",
-                    models.JSONField(
-                        blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
+                    models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
                 ),
                 ("image_file_name", models.CharField(max_length=100)),
                 ("download_url", models.URLField(blank=True)),
-                ("image_file_checksum", models.CharField(
-                    blank=True, max_length=256)),
+                ("image_file_checksum", models.CharField(blank=True, max_length=256)),
                 ("default_image", models.BooleanField(default=False)),
                 (
                     "device_types",
@@ -68,8 +67,7 @@ class Migration(migrations.Migration):
                         to="nautobot_device_lifecycle_mgmt.softwarelcm",
                     ),
                 ),
-                ("tags", taggit.managers.TaggableManager(
-                    through="extras.TaggedItem", to="extras.Tag")),
+                ("tags", taggit.managers.TaggableManager(through="extras.TaggedItem", to="extras.Tag")),
             ],
             options={
                 "verbose_name": "Software Image",

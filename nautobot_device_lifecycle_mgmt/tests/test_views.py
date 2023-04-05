@@ -39,23 +39,13 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
         """Create a superuser and token for API calls."""
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
         device_types = tuple(
-            DeviceType.objects.create(
-                model=model,
-                slug=model,
-                manufacturer=manufacturer) for model in [
-                "c9300-24",
-                "c9300-48",
-                "c9500-24",
-                "c9500-48",
-                "c9200-24",
-                "c9200-48"])
+            DeviceType.objects.create(model=model, slug=model, manufacturer=manufacturer)
+            for model in ["c9300-24", "c9300-48", "c9500-24", "c9500-48", "c9200-24", "c9200-48"]
+        )
 
-        HardwareLCM.objects.create(
-            device_type=device_types[0], end_of_sale=datetime.date(2021, 4, 1))
-        HardwareLCM.objects.create(
-            device_type=device_types[1], end_of_sale=datetime.date(2021, 4, 1))
-        HardwareLCM.objects.create(
-            device_type=device_types[2], end_of_sale=datetime.date(2021, 4, 1))
+        HardwareLCM.objects.create(device_type=device_types[0], end_of_sale=datetime.date(2021, 4, 1))
+        HardwareLCM.objects.create(device_type=device_types[1], end_of_sale=datetime.date(2021, 4, 1))
+        HardwareLCM.objects.create(device_type=device_types[2], end_of_sale=datetime.date(2021, 4, 1))
 
         cls.form_data = {
             "device_type": device_types[3].id,
@@ -79,8 +69,7 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
         pass
 
 
-class ValidatedSoftwareDeviceReportViewTest(
-        ViewTestCases.ListObjectsViewTestCase):
+class ValidatedSoftwareDeviceReportViewTest(ViewTestCases.ListObjectsViewTestCase):
     """Test ValidatedSoftwareDeviceReportView"""
 
     model = DeviceSoftwareValidationResult
@@ -110,7 +99,8 @@ class ValidatedSoftwareDeviceReportViewTest(
             self.client.get(
                 reverse(
                     "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
-                )),
+                )
+            ),
             403,
         )
 
@@ -119,13 +109,13 @@ class ValidatedSoftwareDeviceReportViewTest(
         obj_perm = ObjectPermission(name="Test permission", actions=["view"])
         obj_perm.save()
         obj_perm.users.add(self.user)
-        obj_perm.object_types.add(
-            ContentType.objects.get_for_model(self.model))
+        obj_perm.object_types.add(ContentType.objects.get_for_model(self.model))
         self.assertHttpStatus(
             self.client.get(
                 reverse(
                     "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
-                )),
+                )
+            ),
             200,
         )
 
@@ -139,8 +129,7 @@ class ValidatedSoftwareDeviceReportViewTest(
         pass
 
 
-class ValidatedSoftwareInventoryItemReportViewTest(
-        ViewTestCases.ListObjectsViewTestCase):
+class ValidatedSoftwareInventoryItemReportViewTest(ViewTestCases.ListObjectsViewTestCase):
     """Test ValidatedSoftwareInventoryItemReportView"""
 
     model = InventoryItemSoftwareValidationResult
@@ -175,7 +164,8 @@ class ValidatedSoftwareInventoryItemReportViewTest(
             self.client.get(
                 reverse(
                     "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
-                )),
+                )
+            ),
             403,
         )
 
@@ -184,13 +174,13 @@ class ValidatedSoftwareInventoryItemReportViewTest(
         obj_perm = ObjectPermission(name="Test permission", actions=["view"])
         obj_perm.save()
         obj_perm.users.add(self.user)
-        obj_perm.object_types.add(
-            ContentType.objects.get_for_model(self.model))
+        obj_perm.object_types.add(ContentType.objects.get_for_model(self.model))
         self.assertHttpStatus(
             self.client.get(
                 reverse(
                     "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
-                )),
+                )
+            ),
             200,
         )
 
@@ -257,26 +247,18 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
         vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
 
         exempt_status = Status.objects.create(
-            name="Exempt",
-            slug="exempt",
-            color="4caf50",
-            description="This unit is exempt.")
+            name="Exempt", slug="exempt", color="4caf50", description="This unit is exempt."
+        )
         exempt_status.content_types.set([vuln_ct])
         cls.bulk_edit_data = {"status": exempt_status.id}
 
         forced_status = Status.objects.create(
-            name="Forced",
-            slug="forced",
-            color="4caf50",
-            description="This unit is forced.")
+            name="Forced", slug="forced", color="4caf50", description="This unit is forced."
+        )
         forced_status.content_types.set([vuln_ct])
 
         for i, cve in enumerate(cves):
-            VulnerabilityLCM.objects.create(
-                cve=cve,
-                software=softwares[i],
-                device=devices[i],
-                status=forced_status)
+            VulnerabilityLCM.objects.create(cve=cve, software=softwares[i], device=devices[i], status=forced_status)
 
     def test_bulk_import_objects_with_constrained_permission(self):
         pass
@@ -321,10 +303,8 @@ class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     def setUpTestData(cls):
         softwares = create_softwares()
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
-        device_type1 = DeviceType.objects.create(
-            manufacturer=manufacturer, model="6509", slug="6509")
-        device_type2 = DeviceType.objects.create(
-            manufacturer=manufacturer, model="6509-E", slug="6509-e")
+        device_type1 = DeviceType.objects.create(manufacturer=manufacturer, model="6509", slug="6509")
+        device_type2 = DeviceType.objects.create(manufacturer=manufacturer, model="6509-E", slug="6509-e")
 
         softimage = SoftwareImageLCM.objects.create(
             image_file_name="ios15.1.2m.img",

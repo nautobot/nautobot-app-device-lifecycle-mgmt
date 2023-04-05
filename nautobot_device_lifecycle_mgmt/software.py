@@ -18,8 +18,7 @@ class ItemSoftware:
     def __init__(self, item_obj):
         """Initalize ItemSoftware object."""
         self.item_obj = item_obj
-        self.validated_software_qs = ValidatedSoftwareLCM.objects.get_for_object(
-            self.item_obj)
+        self.validated_software_qs = ValidatedSoftwareLCM.objects.get_for_object(self.item_obj)
 
         if self.soft_relation_name:
             self.software = self.get_software()
@@ -31,8 +30,7 @@ class ItemSoftware:
         try:
             obj_soft_relation = RelationshipAssociation.objects.get(
                 relationship__slug=self.soft_relation_name,
-                destination_type=ContentType.objects.get_for_model(
-                    self.soft_obj_model),
+                destination_type=ContentType.objects.get_for_model(self.soft_obj_model),
                 destination_id=self.item_obj.id,
             )
             obj_soft = SoftwareLCM.objects.get(id=obj_soft_relation.source_id)
@@ -62,12 +60,10 @@ class ItemSoftware:
             return False
 
         validated_software_versions = ValidatedSoftwareLCMFilterSet(
-            {"valid": True}, self.validated_software_qs.filter(
-                software=self.software)
+            {"valid": True}, self.validated_software_qs.filter(software=self.software)
         ).qs
         if preferred_only:
-            validated_software_versions = validated_software_versions.filter(
-                preferred_only=True)
+            validated_software_versions = validated_software_versions.filter(preferred_only=True)
 
         return validated_software_versions.count() > 0
 

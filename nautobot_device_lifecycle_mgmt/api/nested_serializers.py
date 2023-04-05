@@ -11,7 +11,8 @@ class NestedSoftwareLCMSerializer(WritableNestedSerializer):
     """Nested/brief serializer for SoftwareLCM."""
 
     url = serializers.HyperlinkedIdentityField(
-        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwarelcm-detail")
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwarelcm-detail"
+    )
 
     class Meta:
         """Meta attributes."""
@@ -25,7 +26,8 @@ class NestedSoftwareImageLCMSerializer(WritableNestedSerializer):
     """Nested/brief serializer for SoftwareImageLCM."""
 
     url = serializers.HyperlinkedIdentityField(
-        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwareimagelcm-detail")
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwareimagelcm-detail"
+    )
 
     class Meta:
         """Meta attributes."""
@@ -65,11 +67,7 @@ class NestedProviderLCMSerializer(WritableNestedSerializer):
 class NestedContractLCMSerializer(WritableNestedSerializer):
     """API serializer."""
 
-    provider = NestedProviderLCMSerializer(
-        many=False,
-        read_only=False,
-        required=True,
-        help_text="Contract Provider")
+    provider = NestedProviderLCMSerializer(many=False, read_only=False, required=True, help_text="Contract Provider")
 
     class Meta:
         """Meta attributes."""
@@ -91,8 +89,7 @@ class NestedContractLCMSerializer(WritableNestedSerializer):
 class NestedCVELCMSerializer(WritableNestedSerializer):
     """Nested serializer for the CVE class."""
 
-    url = serializers.HyperlinkedIdentityField(
-        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:cvelcm-detail")
+    url = serializers.HyperlinkedIdentityField(view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:cvelcm-detail")
 
     class Meta:
         """Meta magic method for the CVE nested serializer."""

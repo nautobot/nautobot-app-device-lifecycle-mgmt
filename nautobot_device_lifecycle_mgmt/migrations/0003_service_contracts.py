@@ -8,6 +8,7 @@ import uuid
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("nautobot_device_lifecycle_mgmt", "0002_softwarelcm"),
     ]
@@ -26,8 +27,7 @@ class Migration(migrations.Migration):
                 ("last_updated", models.DateTimeField(auto_now=True, null=True)),
                 (
                     "_custom_field_data",
-                    models.JSONField(
-                        blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
+                    models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
                 ),
                 ("name", models.CharField(max_length=100, unique=True)),
                 ("description", models.CharField(blank=True, max_length=200)),
@@ -56,20 +56,16 @@ class Migration(migrations.Migration):
                 ("last_updated", models.DateTimeField(auto_now=True, null=True)),
                 (
                     "_custom_field_data",
-                    models.JSONField(
-                        blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
+                    models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
                 ),
                 ("name", models.CharField(max_length=100, unique=True)),
                 ("number", models.CharField(blank=True, max_length=100, null=True)),
                 ("start", models.DateField(blank=True, null=True)),
                 ("end", models.DateField(blank=True, null=True)),
-                ("cost", models.DecimalField(blank=True,
-                 decimal_places=2, max_digits=15, null=True)),
-                ("support_level", models.CharField(
-                    blank=True, max_length=64, null=True)),
+                ("cost", models.DecimalField(blank=True, decimal_places=2, max_digits=15, null=True)),
+                ("support_level", models.CharField(blank=True, max_length=64, null=True)),
                 ("currency", models.CharField(blank=True, max_length=4, null=True)),
-                ("contract_type", models.CharField(
-                    blank=True, max_length=32, null=True)),
+                ("contract_type", models.CharField(blank=True, max_length=32, null=True)),
                 ("comments", models.TextField(blank=True)),
                 (
                     "provider",
@@ -80,8 +76,7 @@ class Migration(migrations.Migration):
                         to="nautobot_device_lifecycle_mgmt.providerlcm",
                     ),
                 ),
-                ("tags", taggit.managers.TaggableManager(
-                    through="extras.TaggedItem", to="extras.Tag")),
+                ("tags", taggit.managers.TaggableManager(through="extras.TaggedItem", to="extras.Tag")),
             ],
             options={
                 "verbose_name": "Contract",
@@ -101,8 +96,7 @@ class Migration(migrations.Migration):
                 ("last_updated", models.DateTimeField(auto_now=True, null=True)),
                 (
                     "_custom_field_data",
-                    models.JSONField(
-                        blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
+                    models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
                 ),
                 ("name", models.CharField(max_length=80, null=True)),
                 ("address", models.CharField(blank=True, max_length=200)),
@@ -119,8 +113,7 @@ class Migration(migrations.Migration):
                         to="nautobot_device_lifecycle_mgmt.contractlcm",
                     ),
                 ),
-                ("tags", taggit.managers.TaggableManager(
-                    through="extras.TaggedItem", to="extras.Tag")),
+                ("tags", taggit.managers.TaggableManager(through="extras.TaggedItem", to="extras.Tag")),
             ],
             options={
                 "verbose_name": "Contract POC",

@@ -20,12 +20,9 @@ class HardwareLCMFormTest(TestCase):
 
     def setUp(self):
         """Create necessary objects."""
-        self.manufacturer = Manufacturer.objects.create(
-            name="Cisco", slug="cisco")
-        self.device_type = DeviceType.objects.create(
-            model="c9300-24", slug="c9300-24", manufacturer=self.manufacturer)
-        self.device_role = DeviceRole.objects.create(
-            name="Backbone Switch", slug="backbone-switch")
+        self.manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        self.device_type = DeviceType.objects.create(model="c9300-24", slug="c9300-24", manufacturer=self.manufacturer)
+        self.device_role = DeviceRole.objects.create(name="Backbone Switch", slug="backbone-switch")
         self.site = Site.objects.create(name="Test 1", slug="test-1")
         self.device = Device.objects.create(
             name="Test-9300-Switch",
@@ -55,18 +52,12 @@ class HardwareLCMFormTest(TestCase):
         self.assertTrue(form.save())
 
     def test_one_of_eo_sale(self):
-        form = HardwareLCMForm(
-            data={
-                "device_type": self.device_type,
-                "end_of_sale": "2021-04-01"})
+        form = HardwareLCMForm(data={"device_type": self.device_type, "end_of_sale": "2021-04-01"})
         self.assertTrue(form.is_valid())
         self.assertTrue(form.save())
 
     def test_one_of_eo_support(self):
-        form = HardwareLCMForm(
-            data={
-                "device_type": self.device_type,
-                "end_of_support": "2021-04-01"})
+        form = HardwareLCMForm(data={"device_type": self.device_type, "end_of_support": "2021-04-01"})
         self.assertTrue(form.is_valid())
         self.assertTrue(form.save())
 
@@ -92,34 +83,25 @@ class HardwareLCMFormTest(TestCase):
     def test_eo_sale_support_fields_missing(self):
         form = HardwareLCMForm(data={"device_type": self.device_type})
         self.assertFalse(form.is_valid())
-        self.assertIn("End of Sale or End of Support must be specified.",
-                      form.errors["end_of_sale"][0])
+        self.assertIn("End of Sale or End of Support must be specified.", form.errors["end_of_sale"][0])
 
     def test_device_type_and_inventory_item_error(self):
-        form = HardwareLCMForm(
-            data={
-                "device_type": self.device_type,
-                "inventory_item": "VS-S2T-10G"})
+        form = HardwareLCMForm(data={"device_type": self.device_type, "inventory_item": "VS-S2T-10G"})
         self.assertFalse(form.is_valid())
         self.assertIn(
-            "One and only one of `Inventory Item` OR `Device Type` must be specified.",
-            form.errors["inventory_item"][0])
+            "One and only one of `Inventory Item` OR `Device Type` must be specified.", form.errors["inventory_item"][0]
+        )
 
     def test_validation_error_end_of_sale(self):
-        form = HardwareLCMForm(
-            data={
-                "device_type": self.device_type,
-                "end_of_sale": "April 1st, 2021"})
+        form = HardwareLCMForm(data={"device_type": self.device_type, "end_of_sale": "April 1st, 2021"})
         self.assertFalse(form.is_valid())
         self.assertIn("end_of_sale", form.errors)
         self.assertIn("Enter a valid date.", form.errors["end_of_sale"])
 
     def test_validation_error_end_of_support(self):
         form = HardwareLCMForm(
-            data={
-                "device_type": self.device_type,
-                "end_of_sale": "2021-04-01",
-                "end_of_support": "April 1st, 2022"})
+            data={"device_type": self.device_type, "end_of_sale": "2021-04-01", "end_of_support": "April 1st, 2022"}
+        )
         self.assertFalse(form.is_valid())
         self.assertIn("end_of_support", form.errors)
         self.assertIn("Enter a valid date.", form.errors["end_of_support"])
@@ -149,8 +131,7 @@ class HardwareLCMFormTest(TestCase):
         )
         self.assertFalse(form.is_valid())
         self.assertIn("end_of_security_patches", form.errors)
-        self.assertIn("Enter a valid date.",
-                      form.errors["end_of_security_patches"])
+        self.assertIn("Enter a valid date.", form.errors["end_of_security_patches"])
 
     def test_validation_error_documentation_url(self):
         form = HardwareLCMForm(
@@ -175,8 +156,7 @@ class SoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
 
     def setUp(self):
         """Create necessary objects."""
-        self.device_platform = Platform.objects.create(
-            name="Cisco IOS", slug="cisco_ios")
+        self.device_platform = Platform.objects.create(name="Cisco IOS", slug="cisco_ios")
 
     def test_specifying_all_fields(self):
         data = {
@@ -193,8 +173,7 @@ class SoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
         self.assertTrue(form.save())
 
     def test_one_of_eo_support(self):
-        data = {"device_platform": self.device_platform,
-                "version": "17.3.3 MD", "end_of_support": "2022-05-15"}
+        data = {"device_platform": self.device_platform, "version": "17.3.3 MD", "end_of_support": "2022-05-15"}
         form = self.form_class(data)
         self.assertTrue(form.is_valid())
         self.assertTrue(form.save())
@@ -207,14 +186,12 @@ class SoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
         form = self.form_class(data)
         self.assertFalse(form.is_valid())
         self.assertDictEqual(
-            {"device_platform": ["This field is required."],
-                "version": ["This field is required."]},
+            {"device_platform": ["This field is required."], "version": ["This field is required."]},
             form.errors,
         )
 
     def test_validation_error_end_of_support(self):
-        data = {"device_platform": self.device_platform,
-                "version": "17.3.3 MD", "end_of_support": "2022 May 5th"}
+        data = {"device_platform": self.device_platform, "version": "17.3.3 MD", "end_of_support": "2022 May 5th"}
         form = self.form_class(data)
         self.assertFalse(form.is_valid())
         self.assertIn("end_of_support", form.errors)
@@ -240,8 +217,7 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
 
     def setUp(self):
         """Create necessary objects."""
-        device_platform = Platform.objects.create(
-            name="Cisco IOS", slug="cisco_ios")
+        device_platform = Platform.objects.create(name="Cisco IOS", slug="cisco_ios")
         self.software = SoftwareLCM.objects.create(
             **{
                 "device_platform": device_platform,
@@ -251,23 +227,18 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
                 "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
                 "long_term_support": True,
                 "pre_release": False,
-            })
+            }
+        )
 
         status_active = Status.objects.get(slug="active")
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
         site = Site.objects.create(name="Site 1", slug="site-1")
-        devicerole = DeviceRole.objects.create(
-            name="Router", slug="router", color="ff0000")
-        self.devicetype_1 = DeviceType.objects.create(
-            manufacturer=manufacturer, model="ASR-1000", slug="asr-1000")
+        devicerole = DeviceRole.objects.create(name="Router", slug="router", color="ff0000")
+        self.devicetype_1 = DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000")
         self.device_1 = Device.objects.create(
-            device_type=self.devicetype_1,
-            device_role=devicerole,
-            name="Device 1",
-            site=site,
-            status=status_active)
-        self.inventoryitem_1 = InventoryItem.objects.create(
-            device=self.device_1, name="SwitchModule1")
+            device_type=self.devicetype_1, device_role=devicerole, name="Device 1", site=site, status=status_active
+        )
+        self.inventoryitem_1 = InventoryItem.objects.create(device=self.device_1, name="SwitchModule1")
 
     def test_specifying_all_fields_w_devices(self):
         data = {
@@ -358,10 +329,8 @@ class CVELCMFormTest(TestCase):
         """Create necessary objects."""
         self.cve_ct = ContentType.objects.get_for_model(CVELCM)
         self.status = Status.objects.create(
-            name="Fixed",
-            slug="fixed",
-            color="4caf50",
-            description="Unit has been fixed")
+            name="Fixed", slug="fixed", color="4caf50", description="Unit has been fixed"
+        )
         self.status.content_types.set([self.cve_ct])
 
     def test_specifying_all_fields(self):
@@ -395,18 +364,15 @@ class CVELCMFormTest(TestCase):
         )
 
 
-class SoftwareImageLCMFormTest(
-        TestCase):  # pylint: disable=no-member,too-many-instance-attributes
+class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member,too-many-instance-attributes
     """Test class for SoftwareImageLCMForm forms."""
 
     form_class = SoftwareImageLCMForm
 
     def setUp(self):
         """Create necessary objects."""
-        manufacturer_cisco, _ = Manufacturer.objects.get_or_create(
-            name="Cisco", slug="cisco")
-        manufacturer_arista, _ = Manufacturer.objects.get_or_create(
-            name="Arista", slug="arista")
+        manufacturer_cisco, _ = Manufacturer.objects.get_or_create(name="Cisco", slug="cisco")
+        manufacturer_arista, _ = Manufacturer.objects.get_or_create(name="Arista", slug="arista")
         device_platform, _ = Platform.objects.get_or_create(
             name="Cisco IOS", slug="cisco_ios", manufacturer=manufacturer_cisco
         )
@@ -419,7 +385,8 @@ class SoftwareImageLCMFormTest(
                 "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-17.03/series.html",
                 "long_term_support": True,
                 "pre_release": False,
-            })
+            }
+        )
         self.software_2 = SoftwareLCM.objects.create(
             **{
                 "device_platform": device_platform,
@@ -429,7 +396,8 @@ class SoftwareImageLCMFormTest(
                 "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-17.03/series.html",
                 "long_term_support": True,
                 "pre_release": False,
-            })
+            }
+        )
 
         self.devicetype_1, _ = DeviceType.objects.get_or_create(
             manufacturer=manufacturer_cisco, model="ASR-1000", slug="asr-1000"
@@ -444,14 +412,12 @@ class SoftwareImageLCMFormTest(
         self.tag_2, _ = Tag.objects.get_or_create(name="lcm2", slug="lcm2")
         status_active, _ = Status.objects.get_or_create(slug="active")
         site, _ = Site.objects.get_or_create(name="Site 1", slug="site-1")
-        devicerole, _ = DeviceRole.objects.get_or_create(
-            name="Router", slug="router", defaults={"color": "ff0000"})
+        devicerole, _ = DeviceRole.objects.get_or_create(name="Router", slug="router", defaults={"color": "ff0000"})
         self.device_1, _ = Device.objects.get_or_create(
-            device_type=self.devicetype_1, device_role=devicerole, name="Device 1", site=site, status=status_active)
-        self.inventoryitem_1, _ = InventoryItem.objects.get_or_create(
-            device=self.device_1, name="SwitchModule1")
-        self.inventoryitem_2, _ = InventoryItem.objects.get_or_create(
-            device=self.device_1, name="SwitchModule2")
+            device_type=self.devicetype_1, device_role=devicerole, name="Device 1", site=site, status=status_active
+        )
+        self.inventoryitem_1, _ = InventoryItem.objects.get_or_create(device=self.device_1, name="SwitchModule1")
+        self.inventoryitem_2, _ = InventoryItem.objects.get_or_create(device=self.device_1, name="SwitchModule2")
 
         SoftwareImageLCM.objects.create(
             image_file_name="ios17.3.3Dmd.img",
@@ -565,8 +531,8 @@ class SoftwareImageLCMFormTest(
         self.assertFalse(form.is_valid())
         self.assertIn("device_types", form.errors)
         self.assertRegex(
-            form.errors["device_types"][0],
-            r"Device Type .+? already assigned to another Software Image\.")
+            form.errors["device_types"][0], r"Device Type .+? already assigned to another Software Image\."
+        )
 
     def test_image_assigned_only_one_object_tag_per_software(self):
         data = {
@@ -578,9 +544,7 @@ class SoftwareImageLCMFormTest(
         form = self.form_class(data)
         self.assertFalse(form.is_valid())
         self.assertIn("object_tags", form.errors)
-        self.assertRegex(
-            form.errors["object_tags"][0],
-            r"Object Tag .+? already assigned to another Software Image\.")
+        self.assertRegex(form.errors["object_tags"][0], r"Object Tag .+? already assigned to another Software Image\.")
 
     def test_image_assigned_only_one_inventory_item_per_software(self):
         data = {
@@ -593,8 +557,8 @@ class SoftwareImageLCMFormTest(
         self.assertFalse(form.is_valid())
         self.assertIn("inventory_items", form.errors)
         self.assertRegex(
-            form.errors["inventory_items"][0],
-            r"Inventory Item .+? already assigned to another Software Image\.")
+            form.errors["inventory_items"][0], r"Inventory Item .+? already assigned to another Software Image\."
+        )
 
     def test_soft_manuf_must_match_platform_manuf(self):
         data = {

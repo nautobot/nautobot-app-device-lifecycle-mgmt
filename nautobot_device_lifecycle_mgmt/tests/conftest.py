@@ -7,13 +7,10 @@ from nautobot_device_lifecycle_mgmt.models import CVELCM, SoftwareLCM
 
 def create_devices():
     """Create devices for tests."""
-    device_platform, _ = Platform.objects.get_or_create(
-        name="Cisco IOS", slug="cisco_ios")
+    device_platform, _ = Platform.objects.get_or_create(name="Cisco IOS", slug="cisco_ios")
     manufacturer, _ = Manufacturer.objects.get_or_create(slug="cisco")
-    device_type = DeviceType.objects.create(
-        manufacturer=manufacturer, model="6509-E", slug="6509-e")
-    device_role = DeviceRole.objects.create(
-        name="Core Switch", slug="core-switch")
+    device_type = DeviceType.objects.create(manufacturer=manufacturer, model="6509-E", slug="6509-e")
+    device_role = DeviceRole.objects.create(name="Core Switch", slug="core-switch")
     site = Site.objects.create(name="Test 1", slug="test-1")
     status_active = Status.objects.get(slug="active")
 
@@ -99,20 +96,13 @@ def create_cves():
 
 def create_softwares():
     """Create SoftwareLCM items for tests."""
-    device_platform_ios, _ = Platform.objects.get_or_create(
-        name="Cisco IOS", slug="cisco_ios")
-    device_platform_eos, _ = Platform.objects.get_or_create(
-        name="Arista EOS", slug="arista_eos")
+    device_platform_ios, _ = Platform.objects.get_or_create(name="Cisco IOS", slug="cisco_ios")
+    device_platform_eos, _ = Platform.objects.get_or_create(name="Arista EOS", slug="arista_eos")
     softwares = (
-        SoftwareLCM.objects.create(
-            device_platform=device_platform_ios, version="15.1(2)M"),
-        SoftwareLCM.objects.create(
-            device_platform=device_platform_ios, version="4.22.9M"),
-        SoftwareLCM.objects.create(
-            device_platform=device_platform_ios, version="21.4R3"),
-        SoftwareLCM.objects.create(
-            device_platform=device_platform_eos, version="4.17.1M"),
-        SoftwareLCM.objects.create(
-            device_platform=device_platform_eos, version="4.25.1F"),
+        SoftwareLCM.objects.create(device_platform=device_platform_ios, version="15.1(2)M"),
+        SoftwareLCM.objects.create(device_platform=device_platform_ios, version="4.22.9M"),
+        SoftwareLCM.objects.create(device_platform=device_platform_ios, version="21.4R3"),
+        SoftwareLCM.objects.create(device_platform=device_platform_eos, version="4.17.1M"),
+        SoftwareLCM.objects.create(device_platform=device_platform_eos, version="4.25.1F"),
     )
     return softwares

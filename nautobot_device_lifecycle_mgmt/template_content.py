@@ -23,8 +23,7 @@ class DeviceTypeHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
 
         return self.render(
             "nautobot_device_lifecycle_mgmt/inc/general_notice.html",
-            extra_context={"hw_notices": HardwareLCM.objects.filter(
-                device_type=devtype_obj.pk)},
+            extra_context={"hw_notices": HardwareLCM.objects.filter(device_type=devtype_obj.pk)},
         )
 
 
@@ -41,11 +40,14 @@ class DeviceHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
             "nautobot_device_lifecycle_mgmt/inc/device_notice.html",
             extra_context={
                 "hw_notices": HardwareLCM.objects.filter(
-                    Q(
-                        device_type=dev_obj.device_type) | Q(
+                    Q(device_type=dev_obj.device_type)
+                    | Q(
                         inventory_item__in=[
-                            i.part_id for i in InventoryItem.objects.filter(
-                                device__pk=dev_obj.pk) if i.part_id]))},
+                            i.part_id for i in InventoryItem.objects.filter(device__pk=dev_obj.pk) if i.part_id
+                        ]
+                    )
+                )
+            },
         )
 
 
@@ -60,8 +62,7 @@ class InventoryItemHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
 
         return self.render(
             "nautobot_device_lifecycle_mgmt/inc/general_notice.html",
-            extra_context={"hw_notices": HardwareLCM.objects.filter(
-                inventory_item=inv_item_obj.part_id)},
+            extra_context={"hw_notices": HardwareLCM.objects.filter(inventory_item=inv_item_obj.part_id)},
         )
 
 
@@ -101,8 +102,7 @@ class InventoryItemSoftwareLCMAndValidatedSoftwareLCM(
     def __init__(self, context):
         """Init setting up the InventoryItemSoftwareLCMAndValidatedSoftwareLCM object."""
         super().__init__(context)
-        self.inventory_item_software = InventoryItemSoftware(
-            item_obj=self.context["object"])
+        self.inventory_item_software = InventoryItemSoftware(item_obj=self.context["object"])
 
     def right_page(self):
         """Display table on right side of page."""

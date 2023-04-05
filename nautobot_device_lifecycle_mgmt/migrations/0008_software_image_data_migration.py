@@ -1,5 +1,4 @@
-# Migrates software image data from the SoftwareLCM objects to their own
-# SoftwareImageLCM objects
+# Migrates software image data from the SoftwareLCM objects to their own SoftwareImageLCM objects
 from django.db import migrations
 from django.db.models import Q
 
@@ -8,10 +7,8 @@ def migrate_software_images(apps, schema_editor):
     """
     Migrate software image data from SoftwareLCM objects to SoftwareImageLCM objects.
     """
-    SoftwareLCM = apps.get_model(
-        "nautobot_device_lifecycle_mgmt", "SoftwareLCM")
-    SoftwareImageLCM = apps.get_model(
-        "nautobot_device_lifecycle_mgmt", "SoftwareImageLCM")
+    SoftwareLCM = apps.get_model("nautobot_device_lifecycle_mgmt", "SoftwareLCM")
+    SoftwareImageLCM = apps.get_model("nautobot_device_lifecycle_mgmt", "SoftwareImageLCM")
     image_name_q = Q(image_file_name="")
     for software in SoftwareLCM.objects.filter(~image_name_q):
         software_image = SoftwareImageLCM(
@@ -25,6 +22,7 @@ def migrate_software_images(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("nautobot_device_lifecycle_mgmt", "0007_softwareimagelcm"),
     ]

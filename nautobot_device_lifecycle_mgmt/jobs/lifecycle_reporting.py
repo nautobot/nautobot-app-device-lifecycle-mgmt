@@ -35,15 +35,13 @@ class DeviceSoftwareValidationFullReport(Job):
         for device in devices:
             device_software = DeviceSoftware(device)
 
-            validate_obj, _ = DeviceSoftwareValidationResult.objects.get_or_create(
-                device=device)
+            validate_obj, _ = DeviceSoftwareValidationResult.objects.get_or_create(device=device)
             validate_obj.is_validated = device_software.validate_software()
             validate_obj.software = device_software.software
             validate_obj.last_run = job_run_time
             validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
             validate_obj.validated_save()
-        self.log_success(
-            message=f"Performed validation on: {devices.count()} devices.")
+        self.log_success(message=f"Performed validation on: {devices.count()} devices.")
 
 
 class InventoryItemSoftwareValidationFullReport(Job):
@@ -66,13 +64,11 @@ class InventoryItemSoftwareValidationFullReport(Job):
         for inventoryitem in inventory_items:
             inventoryitem_software = InventoryItemSoftware(inventoryitem)
 
-            validate_obj, _ = InventoryItemSoftwareValidationResult.objects.get_or_create(
-                inventory_item=inventoryitem)
+            validate_obj, _ = InventoryItemSoftwareValidationResult.objects.get_or_create(inventory_item=inventoryitem)
             validate_obj.is_validated = inventoryitem_software.validate_software()
             validate_obj.software = inventoryitem_software.software
             validate_obj.last_run = job_run_time
             validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
             validate_obj.validated_save()
 
-        self.log_success(
-            message=f"Performed validation on: {inventory_items.count()} inventory items.")
+        self.log_success(message=f"Performed validation on: {inventory_items.count()} inventory items.")
