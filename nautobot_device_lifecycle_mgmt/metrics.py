@@ -59,7 +59,7 @@ def metrics_lcm_validation_report_inventory_item():
     item_software_compliance_gauge = GaugeMetricFamily(
         "nautobot_lcm_valid_by_inventory_item_total",
         "Number of devices that have valid/invalid software by inventory item",
-        labels=["inventory_item"],
+        labels=["inventory_item", "is_valid"],
     )
 
     # If there is available data a metric gauge will be created if not no gauge will be created.
