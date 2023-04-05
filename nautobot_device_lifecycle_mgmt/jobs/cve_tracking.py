@@ -70,4 +70,3 @@ class GenerateVulnerabilities(Job):
 
         diff = VulnerabilityLCM.objects.count() - count_before
         self.log_success(message=f"Processed {cves.count()} CVEs and generated {diff} Vulnerabilities.")
-
