@@ -50,6 +50,7 @@
                         <th><a>No Software</a></th>
                         <th><a>Compliance (%)</a></th>
                         <th><a>Summary</a></th>
+                        <th><a>Export Data</a></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -80,8 +81,15 @@
                             </a>
                         </td>
                         <td>{% if device_aggr.valid_percent is not None %} {{ device_aggr.valid_percent }} % {% else %} -- {% endif %}</td>
-                        <td><a target="_blank" href="data:image/png;base64,{{ device_visual|safe }}" title="Devices Pie Chart">
+                        <td>
+                            <a target="_blank" href="data:image/png;base64,{{ device_visual|safe }}" title="Devices Pie Chart">
                             <img style="width:150px;" src="data:image/png;base64,{{ device_visual|safe }}" alt="Devices Pie Chart">
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/?export" 
+                                class="btn btn-default btn-xs" title="Export data for all device types" aria-hidden="true"> 
+                                <i class="mdi mdi-download"></i>
                             </a>
                         </td>
                     </tr>

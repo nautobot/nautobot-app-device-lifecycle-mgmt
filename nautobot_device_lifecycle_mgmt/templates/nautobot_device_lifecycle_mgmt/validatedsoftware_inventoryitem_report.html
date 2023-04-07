@@ -51,6 +51,7 @@
                         <th><a>No Software</a></th>
                         <th><a>Validation (%)</a></th>
                         <th><a>Summary</a></th>
+                        <th><a>Export Data</a></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -83,6 +84,12 @@
                         <td>{% if inventory_aggr.valid_percent is not None %} {{ inventory_aggr.valid_percent }} % {% else %} -- {% endif %}</td>
                         <td><a target="_blank" href="data:image/png;base64,{{ inventory_visual|safe }}" title="Inventory Pie Chart">
                             <img style="width:150px;" src="data:image/png;base64,{{ inventory_visual|safe }}" alt="Inventory Pie Chart">
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/?export" 
+                                class="btn btn-default btn-xs" title="Export data for all inventory items" aria-hidden="true"> 
+                                <i class="mdi mdi-download"></i>
                             </a>
                         </td>
                     </tr>
