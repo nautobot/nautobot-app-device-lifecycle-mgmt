@@ -267,7 +267,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):
             self.assertEqual(validatedsoftwarelcm_start_end.valid, True)
 
 
-class DeviceSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-many-locals
+class DeviceSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
     """Tests for the DeviceSoftwareValidationResult model."""
 
     def setUp(self):
@@ -318,7 +318,7 @@ class DeviceSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-m
         self.assertEqual(validation_result.valid_software.values()[1]["software_id"], self.software_two.id)
 
 
-class InventoryItemSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-many-locals
+class InventoryItemSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
     """Tests for the DeviceSoftwareValidationResult model."""
 
     def setUp(self):

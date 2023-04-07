@@ -411,6 +411,30 @@ class DeviceSoftwareValidationResultListViewTest(ViewTestCases.ListObjectsViewTe
             200,
         )
 
+    def test_bulk_edit_objects_with_constrained_permission(self):
+        pass
+
+    def test_bulk_edit_objects_with_permission(self):
+        pass
+
+    def test_bulk_edit_objects_without_permission(self):
+        pass
+
+    def test_bulk_edit_form_contains_all_pks(self):
+        pass
+
+    def test_has_advanced_tab(self):
+        pass
+
+    def test_get_object_notes(self):
+        pass
+
+    def test_bulk_import_objects_with_permission_csv_file(self):
+        pass
+
+    def test_list_objects_with_permission(self):
+        pass
+
 
 class InventoryItemSoftwareValidationResultListViewTest(ViewTestCases.ListObjectsViewTestCase):
     """Test InventoryItemSoftwareValidationResultListView"""
@@ -466,3 +490,27 @@ class InventoryItemSoftwareValidationResultListViewTest(ViewTestCases.ListObject
             ),
             200,
         )
+
+    def test_bulk_edit_objects_with_constrained_permission(self):
+        pass
+
+    def test_bulk_edit_objects_with_permission(self):
+        pass
+
+    def test_bulk_edit_objects_without_permission(self):
+        pass
+
+    def test_bulk_edit_form_contains_all_pks(self):
+        pass
+
+    def test_has_advanced_tab(self):
+        pass
+
+    def test_get_object_notes(self):
+        pass
+
+    def test_bulk_import_objects_with_permission_csv_file(self):
+        pass
+
+    def test_list_objects_with_permission(self):
+        pass
