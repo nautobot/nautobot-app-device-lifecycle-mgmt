@@ -550,6 +550,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
 
         for rect in rects:
             autolabel(rect)
+
         return ReportOverviewHelper.url_encode_figure(fig)
 
     @staticmethod
