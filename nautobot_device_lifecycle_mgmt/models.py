@@ -446,11 +446,21 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         related_name="device_software_validation",
     )
     software = models.ForeignKey(
-        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Device software", null=True, blank=True, related_name="+"
+        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Device software", null=True, blank=True
     )
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
     run_type = models.CharField(max_length=50, choices=choices.ReportRunTypeChoices)
+    valid_software = models.ManyToManyField(to="ValidatedSoftwareLCM", related_name="+")
+
+    csv_headers = [
+        "device",
+        "software",
+        "valid",
+        "last_run",
+        "run_type",
+        "approved_software",
+    ]
 
     class Meta:
         """Meta attributes for DeviceSoftwareValidationResult."""
@@ -460,7 +470,18 @@ class DeviceSoftwareValidationResult(PrimaryModel):
 
     def to_csv(self):
         """Indicates model fields to return as csv."""
-        return (self.device.name, self.software.version, self.is_validated, self.last_run, self.run_type)
+        valid_softwares = ""
+        for validated_software_id in self.valid_software.values_list("id", flat=True):
+            sofware_string = ValidatedSoftwareLCM.objects.get(id=validated_software_id).software
+            valid_softwares += f"{str(sofware_string)}\n"
+        return (
+            self.device.name,
+            self.software if self.software else "None",
+            str(self.is_validated),
+            self.last_run,
+            self.run_type,
+            valid_softwares,
+        )
 
 
 @extras_features(
@@ -481,6 +502,16 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
     run_type = models.CharField(max_length=50, choices=choices.ReportRunTypeChoices)
+    valid_software = models.ManyToManyField(to="ValidatedSoftwareLCM", related_name="+")
+
+    csv_headers = [
+        "inventory_item",
+        "software",
+        "valid",
+        "last_run",
+        "run_type",
+        "approved_software",
+    ]
 
     class Meta:
         """Meta attributes for InventoryItemSoftwareValidationResult."""
@@ -490,7 +521,18 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
 
     def to_csv(self):
         """Indicates model fields to return as csv."""
-        return (self.inventory_item.name, self.software.version, self.is_validated, self.last_run, self.run_type)
+        valid_softwares = ""
+        for validated_software_id in self.valid_software.values_list("id", flat=True):
+            sofware_string = ValidatedSoftwareLCM.objects.get(id=validated_software_id).software
+            valid_softwares += f"{str(sofware_string)}\n"
+        return (
+            self.inventory_item.part_id,
+            self.software if self.software else "None",
+            str(self.is_validated),
+            self.last_run,
+            self.run_type,
+            valid_softwares,
+        )
 
 
 @extras_features(

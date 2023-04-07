@@ -1,0 +1,12 @@
+{% extends 'generic/object_list.html' %}
+{% block header %}
+    <div class="row noprint">
+        <div class="col-sm-12 col-md-12">
+            <ol class="breadcrumb">
+                <li><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report' %}">Inventory Software Validation Reports</a></li>
+                <li><a>{{ object }}</a></li>
+            </ol>
+        </div>
+    </div>
+{% endblock %}
+{% block title %}Inventory Software Validation List{% endblock %}

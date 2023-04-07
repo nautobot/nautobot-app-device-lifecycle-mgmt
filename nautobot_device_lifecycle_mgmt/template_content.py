@@ -83,7 +83,7 @@ class DeviceSoftwareLCMAndValidatedSoftwareLCM(
         extra_context = {
             "validsoft_table": self.device_software.get_validated_software_table(),
             "obj_soft": self.device_software.software,
-            "obj_soft_valid": self.device_software.validate_software(),
+            "obj_soft_valid": self.device_software.validate_software()[0],
         }
 
         return self.render(
@@ -109,7 +109,7 @@ class InventoryItemSoftwareLCMAndValidatedSoftwareLCM(
         extra_context = {
             "validsoft_table": self.inventory_item_software.get_validated_software_table,
             "obj_soft": self.inventory_item_software.software,
-            "obj_soft_valid": self.inventory_item_software.validate_software(),
+            "obj_soft_valid": self.inventory_item_software.validate_software()[0],
         }
 
         return self.render(

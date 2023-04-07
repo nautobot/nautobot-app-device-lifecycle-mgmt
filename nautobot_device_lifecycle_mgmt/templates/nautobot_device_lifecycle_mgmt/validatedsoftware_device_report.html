@@ -54,11 +54,31 @@
                 </thead>
                 <tbody>
                     <tr class="even">
-                        <td>Devices</td>
-                        <td>{% if device_aggr.total is not None %} {{ device_aggr.total }} {% else %} -- {% endif %}</td>
-                        <td>{% if device_aggr.valid is not None %} {{ device_aggr.valid }} {% else %} -- {% endif %}</td>
-                        <td>{% if device_aggr.invalid is not None %} {{ device_aggr.invalid }} {% else %} -- {% endif %}</td>
-                        <td>{% if device_aggr.no_software is not None %} {{ device_aggr.no_software }} {% else %} -- {% endif %}</td>
+                        <td>
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/">
+                                Devices
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/">
+                                {% if device_aggr.total is not None %} {{ device_aggr.total }} {% else %} -- {% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/?&valid=True">
+                                {% if device_aggr.valid is not None %} {{ device_aggr.valid }} {% else %} -- {% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/?&valid=False">
+                                {% if device_aggr.invalid is not None %} {{ device_aggr.invalid }} {% else %} -- {% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/?&sw_missing_only=True">
+                                {% if device_aggr.no_software is not None %} {{ device_aggr.no_software }} {% else %} -- {% endif %}
+                            </a>
+                        </td>
                         <td>{% if device_aggr.valid_percent is not None %} {{ device_aggr.valid_percent }} % {% else %} -- {% endif %}</td>
                         <td><a target="_blank" href="data:image/png;base64,{{ device_visual|safe }}" title="Devices Pie Chart">
                             <img style="width:150px;" src="data:image/png;base64,{{ device_visual|safe }}" alt="Devices Pie Chart">
