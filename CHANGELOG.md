@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.1.3
+
+### Updates
+
+- This changes development use of `docker-compose` as standalone to `docker compose`.
+
 ## v1.1.2 - 12-07-2022
 
 ### Fixed
