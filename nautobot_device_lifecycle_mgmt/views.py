@@ -711,12 +711,6 @@ class DeviceSoftwareValidationResultListView(generic.ObjectListView):
     template_name = "nautobot_device_lifecycle_mgmt/devicesoftwarevalidationresult_list.html"
 
 
-class DeviceSoftwareValidationResultView(generic.ObjectView):
-    """DeviceSoftawareValidationResult Detail view."""
-
-    queryset = DeviceSoftwareValidationResult.objects.all()
-
-
 class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
     """View for executive report on inventory item software validation."""
 
@@ -861,12 +855,6 @@ class InventoryItemSoftwareValidationResultListView(generic.ObjectListView):
     table = InventoryItemSoftwareValidationResultListTable
     action_buttons = ("export",)
     template_name = "nautobot_device_lifecycle_mgmt/inventoryitemsoftwarevalidationresult_list.html"
-
-
-class InventoryItemSoftwareValidationResultView(generic.ObjectView):
-    """DeviceSoftawareValidationResult Detail view."""
-
-    queryset = InventoryItemSoftwareValidationResult.objects.all()
 
 
 # ---------------------------------------------------------------------------------
