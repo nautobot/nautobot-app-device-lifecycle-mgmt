@@ -135,6 +135,18 @@ class SoftwareLCMTable(BaseTable):
             "pre_release",
             "actions",
         )
+        default_columns = (
+            "pk",
+            "name",
+            "version",
+            "alias",
+            "device_platform",
+            "release_date",
+            "end_of_support",
+            "long_term_support",
+            "pre_release",
+            "actions",
+        )
 
 
 class SoftwareImageLCMTable(BaseTable):
