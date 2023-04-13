@@ -347,6 +347,7 @@ class DeviceSoftwareValidationResultSerializer(*serializer_base_classes):  # pyl
             "is_validated",
             "last_run",
             "run_type",
+            "valid_software",
             "url",
         ]
 
@@ -372,5 +373,6 @@ class InventoryItemSoftwareValidationResultSerializer(
             "is_validated",
             "last_run",
             "run_type",
+            "valid_software",
             "url",
         ]
