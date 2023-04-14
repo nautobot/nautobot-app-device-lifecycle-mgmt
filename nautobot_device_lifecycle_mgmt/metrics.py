@@ -29,7 +29,7 @@ def nautobot_metrics_dlcm_eos():
 
     for notice in hw_eos_notices:
         if notice.device_type:
-            part_number = notice.device_type.part_number
+            part_number = notice.device_type.part_number if notice.device_type.part_number else notice.device_type.slug
             eos_devices = Device.objects.filter(device_type=notice.device_type)
             metric_value = eos_devices.count()
         elif notice.inventory_item:
