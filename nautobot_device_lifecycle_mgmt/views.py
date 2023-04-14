@@ -1,5 +1,6 @@
 """Views implementation for the Lifecycle Management plugin."""
 import base64
+import inspect
 import io
 import logging
 import urllib
@@ -207,9 +208,15 @@ class SoftwareLCMListView(generic.ObjectListView):
 
     def extra_context(self):
         """Changes "Softwares" => "Software"."""
+        # TODO: Remove the dynamic check for 'q_placeholder' once we dropped the support for Nautobot < 1.5.0
+        if "q_placeholder" in inspect.signature(SearchForm.__init__).parameters:
+            search_form = SearchForm(data=self.request.GET, q_placeholder="Search Software")
+        else:
+            search_form = SearchForm(data=self.request.GET)
+
         return {
             **super().extra_context(),
-            "search_form": SearchForm(data=self.request.GET, q_placeholder="Search Software"),
+            "search_form": search_form,
             "title": "Software",
             "verbose_name_plural": "Software",
         }
@@ -376,9 +383,15 @@ class ValidatedSoftwareLCMListView(generic.ObjectListView):
 
     def extra_context(self):
         """Changes "Softwares" => "Software"."""
+        # TODO: Remove the dynamic check for 'q_placeholder' once we dropped the support for Nautobot < 1.5.0
+        if "q_placeholder" in inspect.signature(SearchForm.__init__).parameters:
+            search_form = SearchForm(data=self.request.GET, q_placeholder="Search Validated Software")
+        else:
+            search_form = SearchForm(data=self.request.GET)
+
         return {
             **super().extra_context(),
-            "search_form": SearchForm(data=self.request.GET, q_placeholder="Search Validated Software"),
+            "search_form": search_form,
             "title": "Validated Software",
             "verbose_name_plural": "Validated Software",
         }
