@@ -11,7 +11,7 @@ PLUGIN_SETTINGS = settings.PLUGINS_CONFIG.get("nautobot_device_lifecycle_mgmt", 
 
 
 def nautobot_metrics_dlcm_eos():
-    """Calculate number of EOS devices per Device Type and per Site.
+    """Calculate number of End-of-Support (EOS) devices per Device Type and per Site.
     Yields:
         GaugeMetricFamily: Prometheus Metrics
     """
