@@ -1,13 +1,21 @@
 <div class="row">
     <div class="col-md-12">
-        {% if obj_soft_valid %}
-        <div class="panel panel-success">
-        {% else %}
-        <div class="panel panel-danger">
-        {% endif %}
-            <div class="panel-heading">
-                <strong>Software is {% if obj_soft_valid %}valid{% else %}invalid{% endif %}</strong>
-            </div>
+        {% if obj_soft %}
+            {% if object.device_software_validation.is_validated or object.inventoryitem_software_validation.is_validated %}
+                <div class="panel panel-success">
+                    <div class="panel-heading">
+                        <strong>Software is valid </strong>
+                    </div>
+            {% else %}
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        {% if object.device_software_validation.is_validated is False or object.inventoryitem_software_validation.is_validated is False %}
+                            <strong>Software is not valid</strong>
+                        {% else %}
+                            <strong>Unable to determine if software is valid/invalid please run Software Validation Job</strong>
+                        {% endif %}
+                    </div>
+            {% endif %}
             <table class="table table-hover panel-body attr-table">
                 <tr>
                     <td>Name</td>
@@ -28,6 +36,7 @@
                     </td>
                 </tr>
             </table>
+        {% endif %}
         </div>
     </div>
 </div>

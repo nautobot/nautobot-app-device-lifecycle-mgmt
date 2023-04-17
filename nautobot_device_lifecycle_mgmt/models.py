@@ -446,7 +446,7 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         related_name="device_software_validation",
     )
     software = models.ForeignKey(
-        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Device software", null=True, blank=True
+        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Device software", null=True, blank=True, related_name="+"
     )
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
