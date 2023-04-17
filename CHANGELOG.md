@@ -1,10 +1,27 @@
 # CHANGELOG
 
-## v1.1.3
+## v1.2.1
 
 ### Updates
 
 - This changes development use of `docker-compose` as standalone to `docker compose`.
+
+## v1.2.0 - 17-04-2023
+
+### Added
+
+- #137: Add testing against the upstream version of Nautobot.
+- #140: Add progress info log messages to the Generate Vulnerabilities job.
+
+### Changed
+
+- #130: Change plural for Software and Validated Software models. Use generic template as the base for details templates.
+- #131: Update documentation.
+- #160: Define default columns for the Software list view.
+
+**!!! NOTE**
+
+- This release increases minimum supported Nautobot version to 1.4.0.
 
 ## v1.1.2 - 12-07-2022
 
