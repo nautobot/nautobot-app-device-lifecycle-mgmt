@@ -674,3 +674,100 @@ class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
 
     def test_notes_url_on_object(self):
         """Currently don't support notes."""
+
+class ProviderLCMAPITest(APIViewTestCases.APIViewTestCase):
+    """Test the ProviderLCMLCM API."""
+
+    model = ProviderLCM
+    brief_fields = [
+        "name",
+        "description",
+        "physical_address",
+        "phone",
+        "email",
+        "portal_url",
+        "comments",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        """Create a Provider for API calls."""
+
+        cls.create_data = [
+            {
+                "name": "Arista",
+                "description": "Arista Support",
+                "physical_address": "123 Arista Way, San Jose, CA",
+                "country": "USA",
+                "phone": "(123) 456-7890",
+                "email": "email@Arista.com",
+                "portal_url": "https://www.Arista.com/",
+                "comments": "Test Comment",
+            },
+            {
+                "name": "Erricson",
+                "description": "Erricson Support",
+                "physical_address": "123 Erricson Way, San Jose, CA",
+                "country": "USA",
+                "phone": "(123) 456-7890",
+                "email": "email@Erricson.com",
+                "portal_url": "https://www.Erricson.com/",
+                "comments": "Test Comment",
+            },
+            {
+                "name": "Linksys",
+                "description": "Linksys Support",
+                "physical_address": "123 Linksys Way, San Jose, CA",
+                "country": "USA",
+                "phone": "(123) 456-7890",
+                "email": "email@Linksys.com",
+                "portal_url": "https://www.Linksys.com/",
+                "comments": "Test Comment",
+            },
+        ]
+
+        ProviderLCM.objects.create(
+            name="Cisco",
+            description="Cisco Support",
+            physical_address="123 Cisco Way, San Jose, CA",
+            country="USA",
+            phone="(123) 456-7890",
+            email="email@cisco.com",
+            portal_url="https://www.cisco.com/",
+            comments="Test Comment",
+        )
+        ProviderLCM.objects.create(
+            name="HP",
+            description="HP Support",
+            physical_address="123 HP Way, San Jose, CA",
+            country="USA",
+            phone="(123) 456-0000",
+            email="email@HP.com",
+            portal_url="https://www.HP.com/",
+            comments="Test Comment",
+        )
+        ProviderLCM.objects.create(
+            name="Juniper",
+            description="Juniper Support",
+            physical_address="123 Juniper Way, San Jose, CA",
+            country="USA",
+            phone="(123) 456-5890",
+            email="email@Juniper.com",
+            portal_url="https://www.Juniper.com/",
+            comments="Test Comment",
+        )
+
+    def test_bulk_create_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_bulk_delete_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_bulk_update_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_notes_url_on_object(self):
+        """Currently don't support notes."""
+
+    def test_list_objects_brief(self):
+        """Nautobot 1.4 adds 'created' and 'last_updated' causing testing mismatch with previous versions."""
