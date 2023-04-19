@@ -537,7 +537,7 @@ class ProviderLCMTestCase(TestCase):
         self.assertEqual(provider.comments, "Test Comment")
 
     def test_provider_assignment(self):
-        provider = ProviderLCM.objects.create(
+        ProviderLCM.objects.create(
             name="Cisco",
             description="Cisco Support",
             physical_address="123 Cisco Way, San Jose, CA",
@@ -557,7 +557,7 @@ class ProviderLCMTestCase(TestCase):
             support_level="Tier 1",
             currency="USD",
             contract_type="Hardware",
-            comments="Cisco gave us discount"
+            comments="Cisco gave us discount",
         )
         self.assertEqual(cisco_contract.provider, ProviderLCM.objects.get(name="Cisco"))
         self.assertEqual(cisco_contract.name, "Cisco Contract")

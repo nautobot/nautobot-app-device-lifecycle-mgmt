@@ -675,6 +675,7 @@ class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
     def test_notes_url_on_object(self):
         """Currently don't support notes."""
 
+
 class ProviderLCMAPITest(APIViewTestCases.APIViewTestCase):
     """Test the ProviderLCMLCM API."""
 
