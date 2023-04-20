@@ -172,7 +172,7 @@ class SoftwareImageLCMTable(BaseTable):
                     <a href="{{ record.download_url }}" target="_blank" data-toggle="tooltip" data-placement="left" title="{{ record.download_url }}">
                         <span class="mdi mdi-open-in-new"></span>
                     </a>{% else %} — {% endif %}""",
-        verbose_name="URL",
+        verbose_name="Download URL",
     )
     actions = ButtonsColumn(SoftwareImageLCM, buttons=("edit", "delete"))
 
