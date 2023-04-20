@@ -374,7 +374,6 @@ class SoftwareImageLCMFilterForm(BootstrapMixin, forms.ModelForm):
         label="Hash Algorithm",
     )
 
-
     class Meta:
         """Meta attributes."""
 
