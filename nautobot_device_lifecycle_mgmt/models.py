@@ -276,6 +276,7 @@ class SoftwareImageLCM(PrimaryModel):
     object_tags = models.ManyToManyField(to="extras.Tag", related_name="+", blank=True)
     download_url = models.URLField(blank=True, verbose_name="Download URL")
     image_file_checksum = models.CharField(blank=True, max_length=256, verbose_name="Image File Checksum")
+    hash_algorithm = models.CharField(default="", blank=True, max_length=15, verbose_name="Hash Algorithm")
     default_image = models.BooleanField(verbose_name="Default Image", default=False)
 
     csv_headers = [
@@ -286,6 +287,7 @@ class SoftwareImageLCM(PrimaryModel):
         "object_tags",
         "download_url",
         "image_file_checksum",
+        "hash_algorithm",
         "default_image",
     ]
 
@@ -315,6 +317,7 @@ class SoftwareImageLCM(PrimaryModel):
             ",".join(str(object_tag["slug"]) for object_tag in self.object_tags.values()),
             self.download_url,
             self.image_file_checksum,
+            self.hash_algorithm,
             self.default_image,
         )
 
