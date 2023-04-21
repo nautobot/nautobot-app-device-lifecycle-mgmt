@@ -470,17 +470,13 @@ class DeviceSoftwareValidationResult(PrimaryModel):
 
     def to_csv(self):
         """Indicates model fields to return as csv."""
-        valid_softwares = ""
-        for validated_software_id in self.valid_software.values_list("id", flat=True):
-            sofware_string = ValidatedSoftwareLCM.objects.get(id=validated_software_id).software
-            valid_softwares += f"{str(sofware_string)}\n"
         return (
             self.device.name,
             self.software if self.software else "None",
             str(self.is_validated),
-            self.last_run,
+            self.last_run.strftime("%Y-%m-%d %H:%M:%S"),
             self.run_type,
-            valid_softwares,
+            ",".join(str(valid.software) for valid in ValidatedSoftwareLCM.objects.get_for_object(self.device)),
         )
 
 
@@ -521,17 +517,13 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
 
     def to_csv(self):
         """Indicates model fields to return as csv."""
-        valid_softwares = ""
-        for validated_software_id in self.valid_software.values_list("id", flat=True):
-            sofware_string = ValidatedSoftwareLCM.objects.get(id=validated_software_id).software
-            valid_softwares += f"{str(sofware_string)}\n"
         return (
             self.inventory_item.part_id,
             self.software if self.software else "None",
             str(self.is_validated),
-            self.last_run,
+            self.last_run.strftime("%Y-%m-%d %H:%M:%S"),
             self.run_type,
-            valid_softwares,
+            ",".join(str(valid.software) for valid in ValidatedSoftwareLCM.objects.get_for_object(self.inventory_item)),
         )
 
 
