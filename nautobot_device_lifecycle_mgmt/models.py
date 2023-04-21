@@ -474,7 +474,7 @@ class DeviceSoftwareValidationResult(PrimaryModel):
             self.device.name,
             self.software if self.software else "None",
             str(self.is_validated),
-            self.last_run.strftime("%Y-%m-%d %H:%M:%S"),
+            self.last_run.strftime("%Y-%m-%d %H:%M:%S") if self.last_run else "-",
             self.run_type,
             ",".join(str(valid.software) for valid in ValidatedSoftwareLCM.objects.get_for_object(self.device)),
         )
@@ -521,7 +521,7 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
             self.inventory_item.part_id,
             self.software if self.software else "None",
             str(self.is_validated),
-            self.last_run.strftime("%Y-%m-%d %H:%M:%S"),
+            self.last_run.strftime("%Y-%m-%d %H:%M:%S") if self.last_run else "-",
             self.run_type,
             ",".join(str(valid.software) for valid in ValidatedSoftwareLCM.objects.get_for_object(self.inventory_item)),
         )
