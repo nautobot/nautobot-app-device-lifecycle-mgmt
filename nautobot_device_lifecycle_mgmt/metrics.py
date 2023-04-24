@@ -30,16 +30,14 @@ def nautobot_metrics_dlcm_eos():
     for notice in hw_eos_notices:
         if notice.device_type:
             part_number = notice.device_type.part_number if notice.device_type.part_number else notice.device_type.slug
-            eos_devices = Device.objects.filter(device_type=notice.device_type)
-            metric_value = eos_devices.count()
+            eos_devices_count = Device.objects.filter(device_type=notice.device_type).count()
         elif notice.inventory_item:
             part_number = notice.inventory_item
-            eos_devices = InventoryItem.objects.filter(part_id=notice.inventory_item)
-            metric_value = eos_devices.count()
+            eos_devices_count = InventoryItem.objects.filter(part_id=notice.inventory_item).count()
         else:
             continue
 
-        part_number_gauge.add_metric(labels=[part_number], value=metric_value)
+        part_number_gauge.add_metric(labels=[part_number], value=eos_devices_count)
 
     yield part_number_gauge
 
