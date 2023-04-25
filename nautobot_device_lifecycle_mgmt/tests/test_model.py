@@ -20,6 +20,8 @@ from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     VulnerabilityLCM,
     SoftwareImageLCM,
+    ProviderLCM,
+    ContractLCM,
 )
 from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
 
@@ -509,3 +511,61 @@ class SoftwareImageLCMTestCase(TestCase):
         )
         validatedsoftwarelcm_start_only.device_types.set([self.device_type_1])
         validatedsoftwarelcm_start_only.save()
+
+
+class ProviderLCMTestCase(TestCase):
+    """Tests for the HardwareLCM models."""
+
+    def test_provider_creation(self):
+        provider = ProviderLCM.objects.create(
+            name="Cisco",
+            description="Cisco Support",
+            physical_address="123 Cisco Way, San Jose, CA",
+            country="USA",
+            phone="(123) 456-7890",
+            email="email@cisco.com",
+            portal_url="https://www.cisco.com/",
+            comments="Test Comment",
+        )
+        self.assertEqual(provider.name, "Cisco")
+        self.assertEqual(provider.description, "Cisco Support")
+        self.assertEqual(provider.physical_address, "123 Cisco Way, San Jose, CA")
+        self.assertEqual(provider.country, "USA")
+        self.assertEqual(provider.phone, "(123) 456-7890")
+        self.assertEqual(provider.email, "email@cisco.com")
+        self.assertEqual(provider.portal_url, "https://www.cisco.com/")
+        self.assertEqual(provider.comments, "Test Comment")
+
+    def test_provider_assignment(self):
+        ProviderLCM.objects.create(
+            name="Cisco",
+            description="Cisco Support",
+            physical_address="123 Cisco Way, San Jose, CA",
+            country="USA",
+            phone="(123) 456-7890",
+            email="email@cisco.com",
+            portal_url="https://www.cisco.com/",
+            comments="Test Comment",
+        )
+        cisco_contract = ContractLCM.objects.create(
+            provider=ProviderLCM.objects.get(name="Cisco"),
+            name="Cisco Contract",
+            number="888-8888",
+            start=date(2020, 4, 1),
+            end=date(2025, 4, 15),
+            cost=10.00,
+            support_level="Tier 1",
+            currency="USD",
+            contract_type="Hardware",
+            comments="Cisco gave us discount",
+        )
+        self.assertEqual(cisco_contract.provider, ProviderLCM.objects.get(name="Cisco"))
+        self.assertEqual(cisco_contract.name, "Cisco Contract")
+        self.assertEqual(cisco_contract.number, "888-8888")
+        self.assertEqual(str(cisco_contract.start), "2020-04-01")
+        self.assertEqual(str(cisco_contract.end), "2025-04-15")
+        self.assertEqual(cisco_contract.cost, 10.00)
+        self.assertEqual(cisco_contract.support_level, "Tier 1")
+        self.assertEqual(cisco_contract.currency, "USD")
+        self.assertEqual(cisco_contract.contract_type, "Hardware")
+        self.assertEqual(cisco_contract.comments, "Cisco gave us discount")
