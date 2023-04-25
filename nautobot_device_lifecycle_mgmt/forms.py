@@ -369,9 +369,9 @@ class SoftwareImageLCMFilterForm(BootstrapMixin, forms.ModelForm):
         required=False,
     )
     default_image = forms.BooleanField(required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES))
-    hash_algorithm = forms.CharField(
+    hashing_algorithm = forms.CharField(
         required=False,
-        label="Hash Algorithm",
+        label="Hashing Algorithm",
     )
 
     class Meta:
@@ -383,7 +383,7 @@ class SoftwareImageLCMFilterForm(BootstrapMixin, forms.ModelForm):
             "software",
             "image_file_name",
             "image_file_checksum",
-            "hash_algorithm",
+            "hashing_algorithm",
             "download_url",
             "device_types",
             "inventory_items",

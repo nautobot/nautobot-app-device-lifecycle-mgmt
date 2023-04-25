@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="softwareimagelcm",
-            name="hash_algorithm",
-            field=models.CharField(blank=True, default="", max_length=15),
+            name="hashing_algorithm",
+            field=models.CharField(blank=True, default="", max_length=32),
         ),
     ]

@@ -216,7 +216,7 @@ class SoftwareImageLCMFilterSet(NautobotFilterSet):
             "software",
             "software_version",
             "image_file_checksum",
-            "hash_algorithm",
+            "hashing_algorithm",
             "download_url",
             "device_types",
             "inventory_items",

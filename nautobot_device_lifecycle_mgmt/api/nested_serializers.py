@@ -42,7 +42,7 @@ class NestedSoftwareImageLCMSerializer(WritableNestedSerializer):
             "object_tags",
             "download_url",
             "image_file_checksum",
-            "hash_algorithm",
+            "hashing_algorithm",
             "default_image",
         ]
 

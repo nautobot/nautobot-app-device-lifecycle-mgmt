@@ -222,7 +222,7 @@ class SoftwareImageLCMSerializer(*serializer_base_classes):  # pylint: disable=t
             "object_tags",
             "download_url",
             "image_file_checksum",
-            "hash_algorithm",
+            "hashing_algorithm",
             "default_image",
             "custom_fields",
             "tags",

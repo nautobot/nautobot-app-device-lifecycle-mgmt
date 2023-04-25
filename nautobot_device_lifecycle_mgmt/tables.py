@@ -167,13 +167,6 @@ class SoftwareImageLCMTable(BaseTable):
         viewname="extras:tag_list", url_params={"slug": ("object_tags", "slug")}, verbose_name="Object Tags"
     )
     default_image = BooleanColumn()
-    download_url = tables.TemplateColumn(
-        template_code="""{% if record.download_url %}
-                    <a href="{{ record.download_url }}" target="_blank" data-toggle="tooltip" data-placement="left" title="{{ record.download_url }}">
-                        <span class="mdi mdi-open-in-new"></span>
-                    </a>{% else %} — {% endif %}""",
-        verbose_name="Download URL",
-    )
     actions = ButtonsColumn(SoftwareImageLCM, buttons=("edit", "delete"))
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
@@ -187,7 +180,6 @@ class SoftwareImageLCMTable(BaseTable):
             "device_type_count",
             "object_tag_count",
             "default_image",
-            "download_url",
             "actions",
         )
 
