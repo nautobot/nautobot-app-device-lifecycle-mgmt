@@ -1,108 +1,68 @@
-{% extends 'base.html' %}
-{% load buttons %}
-{% load custom_links %}
-{% load helpers %}
+{% extends 'generic/object_detail.html' %}
 
-{% block title %}{{ object }}{% endblock %}
+{% block masthead %}
+    <h2>Hardware Notice: {% block title %}{{ object }}{% endblock %}</h2>
+{% endblock masthead %}
 
-{% block header %}
-    <div class="row noprint">
-        <div class="col-sm-12 col-md-12">
-            <ol class="breadcrumb">
-                <li><a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list' %}">Hardware Lifecycle Notice</a></li>
-                <li><a>{{ object }}</a></li>
-            </ol>
+{% block content_left_page %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Hardware Notice</strong>
         </div>
+        <table class="table table-hover panel-body attr-table">
+            <tr>
+                <td>Devices</td>
+                <td>
+                    {% for device in devices %}
+                    <a href="{% url 'dcim:device' pk=device.pk %}">{{ device }}</a>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+            <tr>
+                {% if object.device_type %}
+                <td>Device Type</td>
+                <td><a href="{% url 'dcim:devicetype' pk=object.device_type.pk %}">{{ object.device_type }}</a></td>
+                {% elif object.inventory_item %}
+                <td>Inventory Item</td>
+                <td>{{ object.inventory_item }}</td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td>End of Sale</td>
+                <td>{% if object.end_of_sale %} {{ object.end_of_sale }} {% else %} &mdash; {% endif %}</td>
+            </tr>
+            <tr>
+                <td>End of Support</td>
+                <td>{% if object.end_of_support %} {{ object.end_of_support }} {% else %} &mdash; {% endif %}</td>
+            </tr>
+            <tr>
+                <td>End of Software Releases</td>
+                <td>{% if object.end_of_sw_releases %} {{ object.end_of_sw_releases }} {% else %} &mdash; {% endif %}</td>
+            </tr>
+            <tr>
+                <td>End of Security Patches</td>
+                <td>
+                    {% if object.end_of_security_patches %} {{ object.end_of_security_patches }} {% else %} &mdash; {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Documentation URL</td>
+                <td>
+                {% if object.documentation_url %}
+                    <a href="{{ object.documentation_url }}" target="_blank">{{ object.documentation_url }}</a>
+                {% else %}
+                    &mdash;
+                {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Comments</td>
+                <td>
+                    {% if object.comments %}
+                    <pre>{{ object.comments }}</pre>
+                    {% else %} &mdash; {% endif %}
+                </td>
+            </tr>
+        </table>
     </div>
-    <div class="pull-right noprint">
-        {% if perms.nautobot_device_lifecycle_mgmt.change_hardwarelcm %}
-            {% edit_button object %}
-        {% endif %}
-        {% if perms.nautobot_device_lifecycle_mgmt.delete_hardwarelcm %}
-            {% delete_button object %}
-        {% endif %}
-    </div>
-    <h2>Hardware Notice: {{ object }}</h2>
-        {% include 'inc/created_updated.html' with obj=object %}
-    <div class="pull-right noprint">
-        {% custom_links object %}
-    </div>
-    <ul class="nav nav-tabs">
-        <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
-            <a href="{{ object.get_absolute_url }}">Hardware Notice</a>
-        </li>
-        <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
-            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_changelog' pk=object.id %}">Change Log</a>
-        </li>
-    </ul>
-{% endblock %}
-
-{% block content %}
-<div class="row">
-    <div class="col-md-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <strong>Hardware Notice</strong>
-            </div>
-            <table class="table table-hover panel-body attr-table">
-                <tr>
-                    <td>Devices</td>
-                    <td>
-                        {% for device in devices %}
-                        <a href="{% url 'dcim:device' pk=device.pk %}">{{ device }}</a>{% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    </td>
-                </tr>
-                <tr>
-                    {% if object.device_type %}
-                    <td>Device Type</td>
-                    <td><a href="{% url 'dcim:devicetype' pk=object.device_type.pk %}">{{ object.device_type }}</a></td>
-                    {% elif object.inventory_item %}
-                    <td>Inventory Item</td>
-                    <td>{{ object.inventory_item }}</td>
-                    {% endif %}
-                </tr>
-                <tr>
-                    <td>End of Sale</td>
-                    <td>{% if object.end_of_sale %} {{ object.end_of_sale }} {% else %} &mdash; {% endif %}</td>
-                </tr>
-                <tr>
-                    <td>End of Support</td>
-                    <td>{% if object.end_of_support %} {{ object.end_of_support }} {% else %} &mdash; {% endif %}</td>
-                </tr>
-                <tr>
-                    <td>End of Software Releases</td>
-                    <td>{% if object.end_of_sw_releases %} {{ object.end_of_sw_releases }} {% else %} &mdash; {% endif %}</td>
-                </tr>
-                <tr>
-                    <td>End of Security Patches</td>
-                    <td>
-                        {% if object.end_of_security_patches %} {{ object.end_of_security_patches }} {% else %} &mdash; {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td>Documentation URL</td>
-                    <td>
-                    {% if object.documentation_url %}
-                        <a href="{{ object.documentation_url }}" target="_blank">{{ object.documentation_url }}</a>
-                    {% else %}
-                        &mdash;
-                    {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td>Comments</td>
-                    <td>
-                        {% if object.comments %}
-                        <pre>{{ object.comments }}</pre>
-                        {% else %} &mdash; {% endif %}
-                    </td>
-                </tr>
-            </table>
-        </div>
-        {% include 'inc/custom_fields_panel.html' %}
-        {% include 'inc/relationships_panel.html' %}
-        {% include 'extras/inc/tags_panel.html' with tags=object.tags.all %}
-    </div>
-</div>
 {% endblock %}

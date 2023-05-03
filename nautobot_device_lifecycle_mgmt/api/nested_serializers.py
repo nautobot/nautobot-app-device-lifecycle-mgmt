@@ -58,8 +58,10 @@ class NestedProviderLCMSerializer(WritableNestedSerializer):
             "name",
             "description",
             "physical_address",
+            "country",
             "phone",
             "email",
+            "portal_url",
             "comments",
         ]
 
