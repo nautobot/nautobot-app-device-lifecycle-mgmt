@@ -537,6 +537,7 @@ class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
         "device_types",
         "display",
         "download_url",
+        "hashing_algorithm",
         "id",
         "image_file_checksum",
         "image_file_name",

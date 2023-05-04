@@ -50,6 +50,16 @@
                 </td>
             </tr>
             <tr>
+                <td>Hashing Algorithm</td>
+                <td>
+                {% if object.hashing_algorithm %}
+                    <p class="break-word">{{ object.hashing_algorithm }}</p>
+                {% else %}
+                    <span class="text-muted"></span>&mdash;</span>
+                {% endif %}
+                </td>
+            </tr>
+            <tr>
                 <td>Default Image</td>
                 <td>
                 {% if object.default_image is True %}
