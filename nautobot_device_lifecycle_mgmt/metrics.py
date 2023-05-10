@@ -1,69 +1,123 @@
-"""Nautobot Device LCM  plugin application level metrics ."""
+"""Nautobot Device LCM plugin application level metrics ."""
 from datetime import datetime
 
-from django.conf import settings
-from nautobot.dcim.models import Device, Site, InventoryItem, DeviceType
+from django.db.models import Case, Count, F, IntegerField, Q, When, Value, OuterRef, Subquery
+from django.db.models.functions import Coalesce
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, Site
 from prometheus_client.core import GaugeMetricFamily
 
 from nautobot_device_lifecycle_mgmt.models import HardwareLCM
 
-PLUGIN_SETTINGS = settings.PLUGINS_CONFIG.get("nautobot_device_lifecycle_mgmt", {})
 
-
-def nautobot_metrics_dlcm_eos():
-    """Calculate number of End-of-Support (EOS) devices per Device Type and per Site.
+def metrics_lcm_hw_end_of_support():
+    """Calculate number of End of Support devices and inventory items per Part Number and per Site.
 
     Yields:
         GaugeMetricFamily: Prometheus Metrics
     """
-    current_dt = datetime.now()
-    hw_eos_notices = HardwareLCM.objects.filter(end_of_support__lte=current_dt)
-    hw_eos_device_types = [notice.device_type for notice in hw_eos_notices]
-    hw_eos_inventoryitems = [notice.inventory_item for notice in hw_eos_notices]
-
-    part_number_gauge = GaugeMetricFamily(
-        "nautobot_lcm_devices_eos_per_part_number", "Nautobot LCM Devices EOS per Part Number", labels=["part_number"]
+    hw_end_of_support_part_number_gauge = GaugeMetricFamily(
+        "nautobot_lcm_hw_end_of_support_per_part_number",
+        "Nautobot LCM Hardware End of Support per Part Number",
+        labels=["part_number"],
     )
-    devices_gauge = GaugeMetricFamily(
-        "nautobot_lcm_devices_eos_per_site", "Nautobot LCM Devices EOS per Site", labels=["site"]
+    hw_end_of_support_site_gauge = GaugeMetricFamily(
+        "nautobot_lcm_devices_eos_per_site", "Nautobot LCM Hardware End of Support per Site", labels=["site"]
     )
-    device_type_filter, inventory_item_filter = [], []
-    for notice in hw_eos_notices:
-        if notice.device_type:
-            part_number = notice.device_type.part_number if notice.device_type.part_number else notice.device_type.slug
-            metric_value = Device.objects.filter(device_type=notice.device_type).count()
-            device_type_filter.append(notice.device_type.slug)
-        elif notice.inventory_item:
-            part_number = notice.inventory_item
-            metric_value = InventoryItem.objects.filter(part_id=notice.inventory_item).count()
-            inventory_item_filter.append(notice.inventory_item)
 
-        part_number_gauge.add_metric(labels=[part_number], value=metric_value)
+    today = datetime.today().date()
+    hw_end_of_support = HardwareLCM.objects.filter(end_of_support__lt=today)
+    hw_end_of_support_device_types = hw_end_of_support.exclude(device_type__isnull=True).values_list(
+        "device_type", flat=True
+    )
+    hw_end_of_support_invitems = hw_end_of_support.exclude(inventory_item__isnull=True).values_list(
+        "inventory_item", flat=True
+    )
 
-    device_types = DeviceType.objects.all().exclude(slug__in=device_type_filter)
-    inventory_items = InventoryItem.objects.all().exclude(part_id__in=inventory_item_filter)
+    # Generate metrics with counts for out of support devices per device type
+    for part_number, model, device_count in (
+        DeviceType.objects.order_by()
+        .annotate(
+            num_devices=Case(
+                When(id__in=hw_end_of_support_device_types, then=Count("instances")),
+                default=0,
+                output_field=IntegerField(),
+            )
+        )
+        .values_list("part_number", "model", "num_devices")
+    ):
+        hw_end_of_support_part_number_gauge.add_metric(
+            labels=[part_number if part_number else model], value=device_count
+        )
 
-    for device_type in device_types:
-        metric_value = 0
-        part_number = device_type.part_number if device_type.part_number else device_type.slug
-        part_number_gauge.add_metric(labels=[part_number], value=metric_value)
+    # Generate metrics with counts for out of support inventory items per part id
+    for part_id, inv_item_count in (
+        InventoryItem.objects.order_by()
+        .filter(part_id__in=hw_end_of_support_invitems)
+        .values("part_id")
+        .annotate(inv_item_count=Count("id"))
+        .values_list("part_id", "inv_item_count")
+    ):
+        hw_end_of_support_part_number_gauge.add_metric(labels=[part_id], value=inv_item_count)
 
-    for inventory_item in inventory_items:
-        metric_value = 0
-        part_number = inventory_item.part_id if inventory_item.part_id else inventory_item.slug
-        part_number_gauge.add_metric(labels=[part_number], value=metric_value)
+    # Set metric value to 0 for inventory items that don't have corresponding HW notice
+    # Case for inventory items that have non-empty part_id attribute
+    for inv_item_part_id in (
+        InventoryItem.objects.order_by()
+        .filter(~Q(part_id__in=hw_end_of_support_invitems) & ~Q(part_id=""))
+        .values_list("part_id", flat=True)
+        .distinct()
+    ):
+        hw_end_of_support_part_number_gauge.add_metric(labels=[inv_item_part_id], value=0)
 
-    yield part_number_gauge
+    # Set metric value to 0 for inventory items that don't have corresponding HW notice
+    # Case for inventory items that have empty part_id attribute
+    for inv_item_name in (
+        InventoryItem.objects.order_by()
+        .filter(~Q(part_id__in=hw_end_of_support_invitems) & Q(part_id=""))
+        .values_list("name", flat=True)
+        .distinct()
+    ):
+        hw_end_of_support_part_number_gauge.add_metric(labels=[inv_item_name], value=0)
 
-    for site in Site.objects.all():
-        eos_devices_in_site = Device.objects.filter(site=site, device_type__in=hw_eos_device_types).count()
-        eos_inventoryitems_in_site = InventoryItem.objects.filter(
-            part_id__in=hw_eos_inventoryitems, device__site=site.id
-        ).count()
-        metric_value = eos_devices_in_site + eos_inventoryitems_in_site
-        devices_gauge.add_metric(labels=[site.slug], value=metric_value)
+    yield hw_end_of_support_part_number_gauge
 
-    yield devices_gauge
+    # Initialize per site count to 0 for all sites
+    init_site_counts = Site.objects.values(site_slug=F("slug")).annotate(
+        site_count=Value(0, output_field=IntegerField())
+    )
+    # Get count of out of hw support devices per site
+    hw_end_of_support_per_site_devices = (
+        Device.objects.order_by()
+        .filter(device_type_id__in=hw_end_of_support_device_types)
+        .values(site_slug=F("site__slug"))
+        .annotate(site_count=Count("id"))
+    )
+    # Get count of out of hw support inventory items per site
+    hw_end_of_support_per_site_invitems = (
+        InventoryItem.objects.order_by()
+        .filter(part_id__in=hw_end_of_support_invitems)
+        .values(site_slug=F("device__site__slug"))
+        .annotate(site_count=Count("id"))
+    )
+
+    # Build subqueries used in the final query offloading count sum to the DB
+    hw_end_of_support_per_site_devices_sq = Subquery(
+        hw_end_of_support_per_site_devices.filter(site_slug=OuterRef("site_slug")).values_list("site_count")
+    )
+    hw_end_of_support_per_site_invitems_sq = Subquery(
+        hw_end_of_support_per_site_invitems.filter(site_slug=OuterRef("site_slug")).values_list("site_count")
+    )
+    # Build query summing counts per site and generate corresponding metrics
+    for site_slug, total_count in init_site_counts.annotate(
+        total_count=F("site_count")
+        + Coalesce(hw_end_of_support_per_site_devices_sq, 0)
+        + Coalesce(hw_end_of_support_per_site_invitems_sq, 0)
+    ).values_list("site_slug", "total_count"):
+        hw_end_of_support_site_gauge.add_metric(labels=[site_slug], value=total_count)
+
+    yield hw_end_of_support_site_gauge
 
 
-metrics = [nautobot_metrics_dlcm_eos]
+metrics = [
+    metrics_lcm_hw_end_of_support,
+]
