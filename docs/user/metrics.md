@@ -14,7 +14,7 @@ nautobot_lcm_devices_eos_per_part_number{part_number="DCS-7150S-24"} 0.0
 nautobot_lcm_devices_eos_per_part_number{part_number="DCS-7280CR2-60"} 0.0
 nautobot_lcm_devices_eos_per_part_number{part_number="veos"} 0.0
 nautobot_lcm_devices_eos_per_part_number{part_number="CSR1000V"} 0.0
-# HELP Nautobot LCM Hardware End of Support per SiteSite
+# HELP Nautobot LCM Hardware End of Support per Site
 # TYPE nautobot_lcm_devices_eos_per_site gauge
 nautobot_lcm_devices_eos_per_site{site="ams01"} 1.0
 nautobot_lcm_devices_eos_per_site{site="ang01"} 1.0
