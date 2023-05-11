@@ -9,7 +9,7 @@ from prometheus_client.core import GaugeMetricFamily
 from nautobot_device_lifecycle_mgmt.models import HardwareLCM
 
 
-def metrics_lcm_hw_end_of_support():
+def metrics_lcm_hw_end_of_support():  # pylint: disable=too-many-locals
     """Calculate number of End of Support devices and inventory items per Part Number and per Site.
 
     Yields:
