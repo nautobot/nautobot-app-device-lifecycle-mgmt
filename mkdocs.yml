@@ -102,6 +102,7 @@ nav:
       - Software Lifecycle: "user/software_lifecycle.md"
       - Frequently Asked Questions: "user/faq.md"
       - External Interactions: "user/external_interactions.md"
+      - Metrics: "user/metrics.md"
   - Administrator Guide:
       - Install and Configure: "admin/install.md"
       - Upgrade: "admin/upgrade.md"

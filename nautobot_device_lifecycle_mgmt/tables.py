@@ -135,6 +135,18 @@ class SoftwareLCMTable(BaseTable):
             "pre_release",
             "actions",
         )
+        default_columns = (
+            "pk",
+            "name",
+            "version",
+            "alias",
+            "device_platform",
+            "release_date",
+            "end_of_support",
+            "long_term_support",
+            "pre_release",
+            "actions",
+        )
 
 
 class SoftwareImageLCMTable(BaseTable):
@@ -156,6 +168,13 @@ class SoftwareImageLCMTable(BaseTable):
     )
     default_image = BooleanColumn()
     actions = ButtonsColumn(SoftwareImageLCM, buttons=("edit", "delete"))
+    download_url = tables.TemplateColumn(
+        template_code="""{% if record.download_url %}
+                    <a href="{{ record.download_url }}" target="_blank" data-toggle="tooltip" data-placement="left" title="{{ record.download_url }}">
+                        <span class="mdi mdi-open-in-new"></span>
+                    </a>{% else %} — {% endif %}""",
+        verbose_name="Download URL",
+    )
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
         """Meta attributes."""
@@ -168,6 +187,7 @@ class SoftwareImageLCMTable(BaseTable):
             "device_type_count",
             "object_tag_count",
             "default_image",
+            "download_url",
             "actions",
         )
 
