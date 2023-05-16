@@ -21,7 +21,7 @@ def metrics_lcm_hw_end_of_support():  # pylint: disable=too-many-locals
         labels=["part_number"],
     )
     hw_end_of_support_site_gauge = GaugeMetricFamily(
-        "nautobot_lcm_devices_eos_per_site", "Nautobot LCM Hardware End of Support per Site", labels=["site"]
+        "nautobot_lcm_hw_end_of_support_per_site", "Nautobot LCM Hardware End of Support per Site", labels=["site"]
     )
 
     today = datetime.today().date()
