@@ -144,7 +144,7 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 # Set to True to enable server debugging. WARNING: Debugging introduces a substantial performance penalty and may reveal
 # sensitive information about your installation. Only enable debugging while performing testing. Never enable debugging
 # on a production system.
-DEBUG = is_truthy(os.environ.get("DEBUG", False))
+DEBUG = is_truthy(os.environ.get("NAUTOBOT_DEBUG", False))
 
 # Enforcement of unique IP space can be toggled on a per-VRF basis. To enforce unique IP space
 # within the global table (all prefixes and IP addresses not assigned to a VRF), set

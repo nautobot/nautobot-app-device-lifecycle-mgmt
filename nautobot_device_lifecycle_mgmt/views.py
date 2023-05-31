@@ -1,5 +1,6 @@
 """Views implementation for the Lifecycle Management plugin."""
 import base64
+import inspect
 import io
 import logging
 import urllib
@@ -11,6 +12,7 @@ import numpy as np
 from django.db.models import Q, F, Count, ExpressionWrapper, FloatField
 from django_tables2 import RequestConfig
 
+from nautobot.core.forms import SearchForm
 from nautobot.core.views import generic
 from nautobot.dcim.models import Device
 from nautobot.utilities.paginator import EnhancedPaginator, get_paginate_count
@@ -204,6 +206,21 @@ class SoftwareLCMListView(generic.ObjectListView):
     )
     template_name = "nautobot_device_lifecycle_mgmt/softwarelcm_list.html"
 
+    def extra_context(self):
+        """Changes "Softwares" => "Software"."""
+        # TODO: Remove the dynamic check for 'q_placeholder' once we dropped the support for Nautobot < 1.5.0
+        if "q_placeholder" in inspect.signature(SearchForm.__init__).parameters:
+            search_form = SearchForm(data=self.request.GET, q_placeholder="Search Software")
+        else:
+            search_form = SearchForm(data=self.request.GET)
+
+        return {
+            **super().extra_context(),
+            "search_form": search_form,
+            "title": "Software",
+            "verbose_name_plural": "Software",
+        }
+
 
 class SoftwareLCMView(generic.ObjectView):
     """SoftwareLCM Detail view."""
@@ -220,6 +237,8 @@ class SoftwareLCMView(generic.ObjectView):
 
         extra_context = {
             "softwareimages_table": softwareimages_table,
+            "title": "Software",
+            "verbose_name_plural": "Software",
         }
 
         return extra_context
@@ -362,11 +381,34 @@ class ValidatedSoftwareLCMListView(generic.ObjectListView):
     )
     template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_list.html"
 
+    def extra_context(self):
+        """Changes "Softwares" => "Software"."""
+        # TODO: Remove the dynamic check for 'q_placeholder' once we dropped the support for Nautobot < 1.5.0
+        if "q_placeholder" in inspect.signature(SearchForm.__init__).parameters:
+            search_form = SearchForm(data=self.request.GET, q_placeholder="Search Validated Software")
+        else:
+            search_form = SearchForm(data=self.request.GET)
+
+        return {
+            **super().extra_context(),
+            "search_form": search_form,
+            "title": "Validated Software",
+            "verbose_name_plural": "Validated Software",
+        }
+
 
 class ValidatedSoftwareLCMView(generic.ObjectView):
     """ValidatedSoftware Detail view."""
 
     queryset = ValidatedSoftwareLCM.objects.all()
+
+    def get_extra_context(self, *args, **kwargs):
+        """Changes "Softwares" => "Software"."""
+        return {
+            **super().get_extra_context(*args, **kwargs),
+            "title": "Validated Software",
+            "verbose_name_plural": "Validated Software",
+        }
 
 
 class ValidatedSoftwareLCMEditView(generic.ObjectEditView):

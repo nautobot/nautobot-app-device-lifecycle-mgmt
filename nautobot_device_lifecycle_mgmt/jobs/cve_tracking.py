@@ -1,7 +1,7 @@
 """Jobs for the CVE Tracking portion of the Device Lifecycle plugin."""
 from datetime import datetime
 
-from nautobot.extras.jobs import Job, StringVar
+from nautobot.extras.jobs import Job, StringVar, BooleanVar
 from nautobot.extras.models import Relationship, RelationshipAssociation
 
 from nautobot_device_lifecycle_mgmt.models import (
@@ -31,6 +31,9 @@ class GenerateVulnerabilities(Job):
         """Meta class for the job."""
 
         commit_default = True
+        field_order = ["published_after", "_task_queue", "debug", "_commit"]
+
+    debug = BooleanVar(description="Enable for more verbose logging.")
 
     def run(self, data, commit):  # pylint: disable=too-many-locals
         """Check if software assigned to each device is valid. If no software is assigned return warning message."""
@@ -40,6 +43,8 @@ class GenerateVulnerabilities(Job):
         count_before = VulnerabilityLCM.objects.count()
 
         for cve in cves:
+            if data["debug"]:
+                self.log_info(obj=cve, message="Generating vulnerabilities for CVE {cve}")
             software_rels = RelationshipAssociation.objects.filter(relationship__slug="soft_cve", destination_id=cve.id)
             for soft_rel in software_rels:
 
