@@ -3,7 +3,7 @@
 !!! warning
     Metrics will only work with Nautobot Version 1.5.13 and newer.
 
-The Device Lifecycle application has the following metrics included.
+The Device Lifecycle application has the following metrics included:
 
 ```
 # HELP nautobot_lcm_compliance_by_device_type_total Number of devices that have valid/invalid software by device_type
