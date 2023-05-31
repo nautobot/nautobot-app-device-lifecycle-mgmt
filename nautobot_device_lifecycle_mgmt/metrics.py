@@ -15,6 +15,7 @@ from nautobot_device_lifecycle_mgmt.models import (
 
 def metrics_lcm_validation_report_device_type():
     """Calculate number of devices with valid/invalid software by device_type.
+
     Yields:
         GaugeMetricFamily: Prometheus Metrics
     """
