@@ -104,27 +104,17 @@ urlpatterns = [
         views.ValidatedSoftwareInventoryItemReportView.as_view(),
         name="validatedsoftware_inventoryitem_report",
     ),
-    # DeviceValidatedSoftware
+    # DeviceValidatedSoftwareResult
     path(
         "device-validated-software-result/",
         views.DeviceSoftwareValidationResultListView.as_view(),
         name="devicesoftwarevalidationresult_list",
     ),
-    path(
-        "device-validated-software-result/<uuid:pk>/",
-        views.DeviceSoftwareValidationResultListView.as_view(),
-        name="devicesoftwarevalidationresult",
-    ),
-    # DeviceValidatedSoftware
+    # InventoryItemValidatedSoftwareResult
     path(
         "inventory-item-validated-software-result/",
         views.InventoryItemSoftwareValidationResultListView.as_view(),
         name="inventoryitemsoftwarevalidationresult_list",
-    ),
-    path(
-        "inventory-item-validated-software-result/<uuid:pk>/",
-        views.InventoryItemSoftwareValidationResultListView.as_view(),
-        name="inventoryitemsoftwarevalidationresult",
     ),
     # Contract Lifecycle Management URLs
     path("contract/", views.ContractLCMListView.as_view(), name="contractlcm_list"),

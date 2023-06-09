@@ -221,7 +221,8 @@ class DeviceSoftwareValidationResultTable(BaseTable):
     """Table for device software validation report."""
 
     name = tables.TemplateColumn(
-        template_code='<a href="/dcim/devices/?device_type_id={{ record.device__device_type__pk }}">{{ record.device__device_type__model }}</a>'
+        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/'
+        '?&device_type={{ record.device__device_type__model }}">{{ record.device__device_type__model }}</a>'
     )
     total = tables.TemplateColumn(
         template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/'
@@ -292,6 +293,7 @@ class DeviceSoftwareValidationResultListTable(BaseTable):
             "valid",
             "last_run",
             "run_type",
+            "valid_software",
         ]
 
 
@@ -300,7 +302,7 @@ class InventoryItemSoftwareValidationResultTable(BaseTable):
 
     part_id = tables.TemplateColumn(
         template_code="""{% if record.inventory_item__part_id  %}
-        <a href="/dcim/inventory-items/{{ record.inventory_item__pk }}/?tab=main">{{ record.inventory_item__part_id }}</a>
+        <a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/?&part_id={{ record.inventory_item__part_id }}">{{ record.inventory_item__part_id }}</a>
         {% else %}
         Please assign Part ID value to Inventory Item
         {% endif %}"""
@@ -378,6 +380,7 @@ class InventoryItemSoftwareValidationResultListTable(BaseTable):
             "valid",
             "last_run",
             "run_type",
+            "valid_software",
         ]
 
 

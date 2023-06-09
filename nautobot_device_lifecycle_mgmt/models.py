@@ -468,6 +468,14 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         verbose_name = "Device Software Validation Report"
         ordering = ("device",)
 
+    def __str__(self):
+        """String representation of DeviceSoftwareValidationResult."""
+        if self.is_validated:
+            msg = f"Device: {self.device} - Valid"
+        else:
+            msg = f"Device: {self.device} - Not Valid"
+        return msg
+
     def to_csv(self):
         """Indicates model fields to return as csv."""
         return (
