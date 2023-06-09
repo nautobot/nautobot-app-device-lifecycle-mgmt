@@ -44,6 +44,10 @@
                 <td>{{ object.country|placeholder }}</td>
             </tr>
             <tr>
+                <td>Portal URL</td>
+                <td><a href="{{ object.portal_url }}">{{ object.portal_url }}</a></td>
+            </tr>
+            <tr>
                 <td>Comments</td>
                 <td>
                     {% if object.comments %}
