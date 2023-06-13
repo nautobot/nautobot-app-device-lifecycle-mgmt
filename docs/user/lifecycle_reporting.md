@@ -15,7 +15,7 @@ You can run these reports two ways:
 
 ![](../images/lcm_software_validation_report_run_jobs.png)
 
-!!! warning "Note - If play button grayed out."
+!!! warning "If play button is grayed out."
     You will need to enable the job by clicking on edit button in the row and navigate to "Job" portion and click on "Enable"
 
 ## Device Software Validation Reports
@@ -26,7 +26,7 @@ Once the jobs are ran you can nagivate to the Device Software Validation Reports
 
 ![](../images/lcm_software_validation_report_run_graph.png)
 
-!!! warning "Note - If graph has too many platforms it will not render very well. You can filter it down to only a few with the right side search form. This is being currenlty being worked on."
+!!! warning "If graph has too many platforms it will not render very well. You can filter it down to only a few with the right side search form. This issue is currenlty being worked on."
 
 - ** Executive Summary ** - Quick summary of all objects found with the report run.
 
@@ -57,6 +57,14 @@ The validation list page will give you all the information needed in regards to 
 | **Run Type** | Type of software validation job that was ran. |
 | **Approved Software** | This is Validated Software object that is associated. This can be a list of softwares. |
 
+!!! warning "Hardcoded filter warning."
+    If you navigated from the summary page by clicking on the links in the **Valid** or **Invalid** columns there will be a hardcoded filter set.
+
+    **Example:** http://prod.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/?&device_type=ASR-9903&valid=False&**exclude_sw_missing=True**
+
+    This is added so that list of device/inventory items validation results that have missing software will be omited from view. 
+    You can remove the filter from clicking on the "x" by the **exclude_sw_missing** filter.
+
 ## Exporting Validation Job Results
 
 There are various ways that you can export the validation result data to a CSV file.
@@ -79,7 +87,7 @@ If you are only looking for **individual results** per platform/inventory item y
 
 The export button ![](../images/lcm_software_validation_export_button_green.png) on the right pane of the page.
 
-!!! warning "Note - This will export data that is populated on the screen so if there are any filters applied to the list it will only export those filtered items"
+!!! warning "This will export data that is populated on the screen so if there are any filters applied to the list it will only export those filtered items"
 
 ## Validated Software Results List - API
 
