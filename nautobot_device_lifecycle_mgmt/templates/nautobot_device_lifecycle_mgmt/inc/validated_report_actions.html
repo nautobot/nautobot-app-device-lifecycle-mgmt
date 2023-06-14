@@ -1,0 +1,13 @@
+{% if record %}
+    {% if record.device__device_type__model %}
+        <a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/?device_type={{ record.device__device_type__model }}&export" 
+        class="btn btn-default btn-xs" title="Export data for device type" aria-hidden="true"> 
+        <i class="mdi mdi-download"></i>
+        </a>
+    {% elif record.inventory_item__part_id %}
+        <a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/?&part_id={{ record.inventory_item__part_id }}&export" 
+        class="btn btn-default btn-xs" title="Export data for device type" aria-hidden="true"> 
+        <i class="mdi mdi-download"></i>
+        </a>    
+    {% endif %}
+{% endif %}

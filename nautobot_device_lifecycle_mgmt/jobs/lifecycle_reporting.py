@@ -8,6 +8,7 @@ from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.models import (
     DeviceSoftwareValidationResult,
     InventoryItemSoftwareValidationResult,
+    ValidatedSoftwareLCM,
 )
 from nautobot_device_lifecycle_mgmt.software import DeviceSoftware, InventoryItemSoftware
 
@@ -37,6 +38,7 @@ class DeviceSoftwareValidationFullReport(Job):
 
             validate_obj, _ = DeviceSoftwareValidationResult.objects.get_or_create(device=device)
             validate_obj.is_validated = device_software.validate_software()
+            validate_obj.valid_software.set(ValidatedSoftwareLCM.objects.get_for_object(device))
             validate_obj.software = device_software.software
             validate_obj.last_run = job_run_time
             validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
@@ -66,6 +68,7 @@ class InventoryItemSoftwareValidationFullReport(Job):
 
             validate_obj, _ = InventoryItemSoftwareValidationResult.objects.get_or_create(inventory_item=inventoryitem)
             validate_obj.is_validated = inventoryitem_software.validate_software()
+            validate_obj.valid_software.set(ValidatedSoftwareLCM.objects.get_for_object(inventoryitem))
             validate_obj.software = inventoryitem_software.software
             validate_obj.last_run = job_run_time
             validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN

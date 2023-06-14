@@ -11,6 +11,8 @@ from nautobot_device_lifecycle_mgmt.api.views import (
     ValidatedSoftwareLCMViewSet,
     CVELCMViewSet,
     VulnerabilityLCMViewSet,
+    DeviceSoftwareValidationResultListViewSet,
+    InventoryItemSoftwareValidationResultListViewSet,
 )
 
 router = routers.DefaultRouter()
@@ -24,6 +26,8 @@ router.register(r"software-image", SoftwareImageLCMViewSet)
 router.register(r"validated-software", ValidatedSoftwareLCMViewSet)
 router.register(r"cve", CVELCMViewSet)
 router.register(r"vulnerability", VulnerabilityLCMViewSet)
+router.register(r"device-validated-software-result", DeviceSoftwareValidationResultListViewSet)
+router.register(r"inventory-item-validated-software-result", InventoryItemSoftwareValidationResultListViewSet)
 
 app_name = "nautobot_device_lifecycle_mgmt"
 

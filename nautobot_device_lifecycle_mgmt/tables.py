@@ -228,12 +228,32 @@ class ValidatedSoftwareLCMTable(BaseTable):
 class DeviceSoftwareValidationResultTable(BaseTable):
     """Table for device software validation report."""
 
-    name = tables.Column(accessor="device__device_type__model", verbose_name="Device Type")
-    total = tables.Column(accessor="total", verbose_name="Total")
-    valid = tables.Column(accessor="valid", verbose_name="Valid")
-    invalid = tables.Column(accessor="invalid", verbose_name="Invalid")
-    no_software = tables.Column(accessor="no_software", verbose_name="No Software")
+    name = tables.TemplateColumn(
+        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/'
+        '?&device_type={{ record.device__device_type__model }}">{{ record.device__device_type__model }}</a>'
+    )
+    total = tables.TemplateColumn(
+        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/'
+        '?&device_type={{ record.device__device_type__model }}">{{ record.total }}</a>'
+    )
+    valid = tables.TemplateColumn(
+        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/'
+        '?&device_type={{ record.device__device_type__model }}&valid=True&exclude_sw_missing=True">{{ record.valid }}</a>'
+    )
+    invalid = tables.TemplateColumn(
+        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/'
+        '?&device_type={{ record.device__device_type__model }}&valid=False&exclude_sw_missing=True">{{ record.invalid }}</a>'
+    )
+    no_software = tables.TemplateColumn(
+        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/'
+        '?&device_type={{ record.device__device_type__model }}&sw_missing_only=True">{{ record.no_software }}</a>'
+    )
     valid_percent = PercentageColumn(accessor="valid_percent", verbose_name="Compliance (%)")
+    actions = tables.TemplateColumn(
+        template_name="nautobot_device_lifecycle_mgmt/inc/validated_report_actions.html",
+        orderable=False,
+        verbose_name="Export Data",
+    )
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
         """Metaclass attributes of DeviceSoftwareValidationResultTable."""
@@ -247,18 +267,76 @@ class DeviceSoftwareValidationResultTable(BaseTable):
             "invalid",
             "no_software",
             "valid_percent",
+            "actions",
+        ]
+
+
+class DeviceSoftwareValidationResultListTable(BaseTable):
+    """Table for a list of device to software validation report."""
+
+    device = tables.Column(accessor="device", verbose_name="Device", linkify=True)
+    software = tables.Column(accessor="software", verbose_name="Current Software", linkify=True)
+    valid = tables.Column(accessor="is_validated", verbose_name="Valid")
+    last_run = tables.Column(accessor="last_run", verbose_name="Last Run")
+    run_type = tables.Column(accessor="run_type", verbose_name="Run Type")
+    valid_software = tables.TemplateColumn(
+        template_code="""{% for valid_software in record.valid_software.all %}
+                    <a href="/plugins/nautobot-device-lifecycle-mgmt/validated-software/{{ valid_software.id }}"
+                         %}">{{ valid_software }}
+                    </a>
+                    <br>
+                    {% endfor %}""",
+        verbose_name="Approved Software",
+        orderable=True,
+    )
+
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+        """Metaclass attributes of DeviceSoftwareValidationResultTable."""
+
+        model = DeviceSoftwareValidationResult
+        fields = ["device", "software", "valid", "last_run", "run_type", "valid_software"]
+        default_columns = [
+            "device",
+            "software",
+            "valid",
+            "last_run",
+            "run_type",
+            "valid_software",
         ]
 
 
 class InventoryItemSoftwareValidationResultTable(BaseTable):
-    """Table for inventory item software validation report."""
+    """Table for InventoryItemSoftwareValidationResultTable."""
 
-    part_id = tables.Column(accessor="inventory_item__part_id", verbose_name="Part ID")
-    total = tables.Column(accessor="total", verbose_name="Total")
-    valid = tables.Column(accessor="valid", verbose_name="Valid")
-    invalid = tables.Column(accessor="invalid", verbose_name="Invalid")
-    no_software = tables.Column(accessor="no_software", verbose_name="No Software")
+    part_id = tables.TemplateColumn(
+        template_code="""{% if record.inventory_item__part_id  %}
+        <a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/?&part_id={{ record.inventory_item__part_id }}">{{ record.inventory_item__part_id }}</a>
+        {% else %}
+        Please assign Part ID value to Inventory Item
+        {% endif %}"""
+    )
+    total = tables.TemplateColumn(
+        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/'
+        '?&part_id={{ record.inventory_item__part_id }}">{{ record.total }}</a>'
+    )
+    valid = tables.TemplateColumn(
+        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/'
+        '?&part_id=={{ record.inventory_item__part_id }}&valid=True&exclude_sw_missing=True">{{ record.valid }}</a>'
+    )
+    invalid = tables.TemplateColumn(
+        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/'
+        '?&part_id={{ record.inventory_item__part_id }}&valid=False&exclude_sw_missing=True">{{ record.invalid }}</a>'
+    )
+    no_software = tables.TemplateColumn(
+        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/'
+        '?&part_id={{ record.inventory_item__part_id }}&sw_missing_only=True">{{ record.no_software }}</a>'
+    )
     valid_percent = PercentageColumn(accessor="valid_percent", verbose_name="Compliance (%)")
+    actions = tables.TemplateColumn(
+        template_name="nautobot_device_lifecycle_mgmt/inc/validated_report_actions.html",
+        orderable=False,
+        verbose_name="Export Data",
+    )
 
     class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
         """Metaclass attributes of InventoryItemSoftwareValidationResultTable."""
@@ -272,6 +350,45 @@ class InventoryItemSoftwareValidationResultTable(BaseTable):
             "invalid",
             "no_software",
             "valid_percent",
+            "actions",
+        ]
+
+
+class InventoryItemSoftwareValidationResultListTable(BaseTable):
+    """Table for a list of intenotry items to software validation report."""
+
+    part_id = tables.Column(
+        accessor="inventory_item__part_id",
+        verbose_name="Part ID",
+        default="Please assign Part ID value to Inventory Item",
+    )
+    software = tables.Column(accessor="software", verbose_name="Current Software", linkify=True)
+    valid = tables.Column(accessor="is_validated", verbose_name="Valid")
+    last_run = tables.Column(accessor="last_run", verbose_name="Last Run")
+    run_type = tables.Column(accessor="run_type", verbose_name="Run Type")
+    valid_software = tables.TemplateColumn(
+        template_code="""{% for valid_software in record.valid_software.all %}
+                    <a href="/plugins/nautobot-device-lifecycle-mgmt/validated-software/{{ valid_software.id }}"
+                         %}">{{ valid_software }}
+                    </a>
+                    <br>
+                    {% endfor %}""",
+        verbose_name="Approved Software",
+        orderable=True,
+    )
+
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+        """Metaclass attributes of InventoryItemSoftwareValidationResultTable."""
+
+        model = InventoryItemSoftwareValidationResult
+        fields = ["part_id", "software", "valid", "last_run", "run_type", "valid_software"]
+        default_columns = [
+            "part_id",
+            "software",
+            "valid",
+            "last_run",
+            "run_type",
+            "valid_software",
         ]
 
 

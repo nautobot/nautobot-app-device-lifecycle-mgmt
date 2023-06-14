@@ -3,7 +3,7 @@ import logging
 from django import forms
 from django.db.models import Q
 
-from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Platform, Region, Site
+from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Platform, Region, Site, Manufacturer
 from nautobot.extras.forms import (
     CustomFieldModelCSVForm,
     CustomFieldModelForm,
@@ -543,6 +543,16 @@ class DeviceSoftwareValidationResultFilterForm(BootstrapMixin, CustomFieldModelF
         to_field_name="version",
         required=False,
     )
+    platform = DynamicModelMultipleChoiceField(
+        queryset=Platform.objects.all(),
+        label="Platform",
+        required=False,
+    )
+    valid = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Valid",
+    )
     site = DynamicModelMultipleChoiceField(
         queryset=Site.objects.all(),
         to_field_name="slug",
@@ -573,12 +583,29 @@ class DeviceSoftwareValidationResultFilterForm(BootstrapMixin, CustomFieldModelF
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
         label="Exclude missing software",
     )
+    sw_missing_only = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Show only missing software",
+    )
 
     class Meta:
         """Meta attributes."""
 
         model = DeviceSoftwareValidationResult
-        fields = ["q", "software", "site", "region", "device", "device_type", "device_role", "exclude_sw_missing"]
+        fields = [
+            "q",
+            "software",
+            "valid",
+            "platform",
+            "site",
+            "region",
+            "device",
+            "device_type",
+            "device_role",
+            "exclude_sw_missing",
+            "sw_missing_only",
+        ]
 
 
 class InventoryItemSoftwareValidationResultFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
@@ -591,6 +618,16 @@ class InventoryItemSoftwareValidationResultFilterForm(BootstrapMixin, CustomFiel
     software = DynamicModelMultipleChoiceField(
         queryset=SoftwareLCM.objects.all(),
         to_field_name="version",
+        required=False,
+    )
+    valid = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Valid",
+    )
+    manufacturer = DynamicModelMultipleChoiceField(
+        queryset=Manufacturer.objects.all(),
+        label="Manufacturer",
         required=False,
     )
     site = DynamicModelMultipleChoiceField(
@@ -632,6 +669,11 @@ class InventoryItemSoftwareValidationResultFilterForm(BootstrapMixin, CustomFiel
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
         label="Exclude missing software",
     )
+    sw_missing_only = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Show only missing software",
+    )
 
     class Meta:
         """Meta attributes."""
@@ -640,6 +682,8 @@ class InventoryItemSoftwareValidationResultFilterForm(BootstrapMixin, CustomFiel
         fields = [
             "q",
             "software",
+            "valid",
+            "manufacturer",
             "site",
             "region",
             "inventory_item",
@@ -648,6 +692,7 @@ class InventoryItemSoftwareValidationResultFilterForm(BootstrapMixin, CustomFiel
             "device_type",
             "device_role",
             "exclude_sw_missing",
+            "sw_missing_only",
         ]
 
 

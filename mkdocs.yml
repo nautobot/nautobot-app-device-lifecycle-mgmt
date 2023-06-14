@@ -100,6 +100,7 @@ nav:
       - Getting Started: "user/app_getting_started.md"
       - CVE Tracking: "user/cve_tracking.md"
       - Software Lifecycle: "user/software_lifecycle.md"
+      - Lifecycle Reporting: "user/lifecycle_reporting.md"
       - Frequently Asked Questions: "user/faq.md"
       - External Interactions: "user/external_interactions.md"
       - Metrics: "user/metrics.md"
