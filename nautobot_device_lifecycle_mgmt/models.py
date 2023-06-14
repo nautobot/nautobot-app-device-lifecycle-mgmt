@@ -454,7 +454,9 @@ class DeviceSoftwareValidationResult(PrimaryModel):
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
     run_type = models.CharField(max_length=50, choices=choices.ReportRunTypeChoices)
-    valid_software = models.ManyToManyField(to="ValidatedSoftwareLCM", related_name="device_software_validation_results")
+    valid_software = models.ManyToManyField(
+        to="ValidatedSoftwareLCM", related_name="device_software_validation_results"
+    )
 
     csv_headers = [
         "device",
@@ -509,7 +511,9 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
     run_type = models.CharField(max_length=50, choices=choices.ReportRunTypeChoices)
-    valid_software = models.ManyToManyField(to="ValidatedSoftwareLCM", related_name="inventory_item_software_validation_results")
+    valid_software = models.ManyToManyField(
+        to="ValidatedSoftwareLCM", related_name="inventory_item_software_validation_results"
+    )
 
     csv_headers = [
         "inventory_item",
