@@ -37,6 +37,23 @@ You can view the list of Software versions as well as filter the table.
 
 ![](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/lcm_software_list_view.png)
 
+**Software Lifecycle Reporting**
+
+Reports can be created from the Nautobot's software validation jobs **Device Software Validation - Report** or **Inventory Item Software Validation - Report**.
+
+![](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/lcm_software_validation_report_run_graph.png)
+
+Individual CSV files can be exported per platform or inventory item.
+
+![](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/lcm_software_validation_report_run_detailed_summary.png)
+
+Sample CSV.
+
+![](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/lcm_software_validation_report_csv_small.png)
+
+You can also view validation results as a list from the Nautobot GUI.
+
+![](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/lcm_software_validation_report_run_results_list.png)
 
 ## Try it out!
 
