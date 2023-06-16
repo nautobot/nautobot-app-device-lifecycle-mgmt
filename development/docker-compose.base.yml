@@ -45,7 +45,7 @@ services:
           "bash",
           "-c",
           "nautobot-server celery inspect ping --destination celery@$$HOSTNAME"
-        ]         
+        ]
     <<: *nautobot-base
   celery_beat:
     entrypoint:

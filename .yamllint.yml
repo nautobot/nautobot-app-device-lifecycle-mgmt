@@ -8,3 +8,5 @@ rules:
   line-length: "disable"
   quoted-strings:
     quote-type: "double"
+  brackets:
+    max-spaces-inside: 1
