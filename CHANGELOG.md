@@ -1,5 +1,28 @@
 # CHANGELOG
 
+
+## [v1.3.0] - 2023-06-17
+
+### Added
+- [#165](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/165) Add Portal URL to API and Template.
+- [#170](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/170) Add download url column to SoftwareImage table.
+- [#166](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/166) Add Hashing Algorithm to Image Model.
+- [#151](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/151) Hacky friday DLCM metrics.
+- [#176](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/176) Rewrite software validation metric generation using queries with annotations.
+- [#148](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/148) Prometheus Metrics.
+- [#175](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/175) Add Notes urls to all models.
+- [#156](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/156) Add functionality summary page.
+
+### Removed
+- [#168](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/168) Delete unused admin interface.
+
+### Changed
+- [#161](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/161) Update the debug env variable name to NAUTOBOT_DEBUG.
+- [#178](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/178) Make HW End Of Support metric names consistent.
+
+### Fixed
+- [#184](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/184) address docker compose development environment.
+
 ## v1.2.0 - 18-04-2023
 
 ### Added
