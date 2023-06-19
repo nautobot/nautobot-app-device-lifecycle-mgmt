@@ -40,6 +40,8 @@ from nautobot_device_lifecycle_mgmt.models import (
     SoftwareLCM,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
+    DeviceSoftwareValidationResult,
+    InventoryItemSoftwareValidationResult,
 )
 
 from .nested_serializers import (
@@ -101,8 +103,10 @@ class ProviderLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,
             "name",
             "description",
             "physical_address",
+            "country",
             "phone",
             "email",
+            "portal_url",
             "comments",
             "custom_fields",
             "tags",
@@ -220,6 +224,7 @@ class SoftwareImageLCMSerializer(*serializer_base_classes):  # pylint: disable=t
             "object_tags",
             "download_url",
             "image_file_checksum",
+            "hashing_algorithm",
             "default_image",
             "custom_fields",
             "tags",
@@ -323,4 +328,54 @@ class VulnerabilityLCMSerializer(
             "software",
             "device",
             "inventory_item",
+        ]
+
+
+class DeviceSoftwareValidationResultSerializer(*serializer_base_classes):  # pylint: disable=too-few-public-methods
+    """REST API serializer for DeviceSoftwareValidationResult records."""
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:devicesoftwarevalidationresult-detail"
+    )
+    device = NestedDeviceSerializer(read_only=True)
+    software = NestedSoftwareLCMSerializer(read_only=True)
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = DeviceSoftwareValidationResult
+        fields = [
+            "device",
+            "software",
+            "is_validated",
+            "last_run",
+            "run_type",
+            "valid_software",
+            "url",
+        ]
+
+
+class InventoryItemSoftwareValidationResultSerializer(
+    *serializer_base_classes
+):  # pylint: disable=too-few-public-methods
+    """REST API serializer for InventoryItemSoftwareValidationResult records."""
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:inventoryitemsoftwarevalidationresult-detail"
+    )
+    inventory_item = NestedDeviceSerializer(read_only=True)
+    software = NestedSoftwareLCMSerializer(read_only=True)
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = InventoryItemSoftwareValidationResult
+        fields = [
+            "inventory_item",
+            "software",
+            "is_validated",
+            "last_run",
+            "run_type",
+            "valid_software",
+            "url",
         ]

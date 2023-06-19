@@ -276,6 +276,7 @@ class SoftwareImageLCM(PrimaryModel):
     object_tags = models.ManyToManyField(to="extras.Tag", related_name="+", blank=True)
     download_url = models.URLField(blank=True, verbose_name="Download URL")
     image_file_checksum = models.CharField(blank=True, max_length=256, verbose_name="Image File Checksum")
+    hashing_algorithm = models.CharField(default="", blank=True, max_length=32, verbose_name="Hashing Algorithm")
     default_image = models.BooleanField(verbose_name="Default Image", default=False)
 
     csv_headers = [
@@ -286,6 +287,7 @@ class SoftwareImageLCM(PrimaryModel):
         "object_tags",
         "download_url",
         "image_file_checksum",
+        "hashing_algorithm",
         "default_image",
     ]
 
@@ -310,11 +312,12 @@ class SoftwareImageLCM(PrimaryModel):
         return (
             self.image_file_name,
             self.software.id,
-            f'"{",".join(str(device_type["model"]) for device_type in self.device_types.values())}"',
-            f'"{",".join(str(inventory_item["id"]) for inventory_item in self.inventory_items.values())}"',
-            f'"{",".join(str(object_tag["slug"]) for object_tag in self.object_tags.values())}"',
+            ",".join(str(device_type["model"]) for device_type in self.device_types.values()),
+            ",".join(str(inventory_item["id"]) for inventory_item in self.inventory_items.values()),
+            ",".join(str(object_tag["slug"]) for object_tag in self.object_tags.values()),
             self.download_url,
             self.image_file_checksum,
+            self.hashing_algorithm,
             self.default_image,
         )
 
@@ -419,11 +422,11 @@ class ValidatedSoftwareLCM(PrimaryModel):
         """Return fields for bulk view."""
         return (
             self.software.id,
-            f'"{",".join(str(device["name"]) for device in self.devices.values())}"',
-            f'"{",".join(str(device_type["model"]) for device_type in self.device_types.values())}"',
-            f'"{",".join(str(device_role["slug"]) for device_role in self.device_roles.values())}"',
-            f'"{",".join(str(inventory_item["id"]) for inventory_item in self.inventory_items.values())}"',
-            f'"{",".join(str(object_tag["slug"]) for object_tag in self.object_tags.values())}"',
+            ",".join(str(device["name"]) for device in self.devices.values()),
+            ",".join(str(device_type["model"]) for device_type in self.device_types.values()),
+            ",".join(str(device_role["slug"]) for device_role in self.device_roles.values()),
+            ",".join(str(inventory_item["id"]) for inventory_item in self.inventory_items.values()),
+            ",".join(str(object_tag["slug"]) for object_tag in self.object_tags.values()),
             self.start,
             self.end,
             self.preferred,
@@ -451,6 +454,18 @@ class DeviceSoftwareValidationResult(PrimaryModel):
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
     run_type = models.CharField(max_length=50, choices=choices.ReportRunTypeChoices)
+    valid_software = models.ManyToManyField(
+        to="ValidatedSoftwareLCM", related_name="device_software_validation_results"
+    )
+
+    csv_headers = [
+        "device",
+        "software",
+        "valid",
+        "last_run",
+        "run_type",
+        "approved_software",
+    ]
 
     class Meta:
         """Meta attributes for DeviceSoftwareValidationResult."""
@@ -458,9 +473,24 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         verbose_name = "Device Software Validation Report"
         ordering = ("device",)
 
+    def __str__(self):
+        """String representation of DeviceSoftwareValidationResult."""
+        if self.is_validated:
+            msg = f"Device: {self.device} - Valid"
+        else:
+            msg = f"Device: {self.device} - Not Valid"
+        return msg
+
     def to_csv(self):
         """Indicates model fields to return as csv."""
-        return (self.device.name, self.software.version, self.is_validated, self.last_run, self.run_type)
+        return (
+            self.device.name,
+            self.software if self.software else "None",
+            str(self.is_validated),
+            self.last_run.strftime("%Y-%m-%d %H:%M:%S") if self.last_run else "-",
+            self.run_type,
+            ",".join(str(valid.software) for valid in ValidatedSoftwareLCM.objects.get_for_object(self.device)),
+        )
 
 
 @extras_features(
@@ -481,6 +511,18 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
     run_type = models.CharField(max_length=50, choices=choices.ReportRunTypeChoices)
+    valid_software = models.ManyToManyField(
+        to="ValidatedSoftwareLCM", related_name="inventory_item_software_validation_results"
+    )
+
+    csv_headers = [
+        "inventory_item",
+        "software",
+        "valid",
+        "last_run",
+        "run_type",
+        "approved_software",
+    ]
 
     class Meta:
         """Meta attributes for InventoryItemSoftwareValidationResult."""
@@ -490,7 +532,14 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
 
     def to_csv(self):
         """Indicates model fields to return as csv."""
-        return (self.inventory_item.name, self.software.version, self.is_validated, self.last_run, self.run_type)
+        return (
+            self.inventory_item.part_id,
+            self.software if self.software else "None",
+            str(self.is_validated),
+            self.last_run.strftime("%Y-%m-%d %H:%M:%S") if self.last_run else "-",
+            self.run_type,
+            ",".join(str(valid.software) for valid in ValidatedSoftwareLCM.objects.get_for_object(self.inventory_item)),
+        )
 
 
 @extras_features(

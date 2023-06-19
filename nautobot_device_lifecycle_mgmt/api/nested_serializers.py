@@ -42,6 +42,7 @@ class NestedSoftwareImageLCMSerializer(WritableNestedSerializer):
             "object_tags",
             "download_url",
             "image_file_checksum",
+            "hashing_algorithm",
             "default_image",
         ]
 
@@ -58,8 +59,10 @@ class NestedProviderLCMSerializer(WritableNestedSerializer):
             "name",
             "description",
             "physical_address",
+            "country",
             "phone",
             "email",
+            "portal_url",
             "comments",
         ]
 

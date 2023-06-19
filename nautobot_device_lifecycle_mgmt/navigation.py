@@ -248,16 +248,30 @@ menu_items = (
                 items=(
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
-                        name="Device Software Validation",
+                        name="Device Software Validation - Report",
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
                         ],
                     ),
                     NavMenuItem(
+                        link="plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list",
+                        name="Device Software Validation - List",
+                        permissions=[
+                            "nautobot_device_lifecycle_mgmt.view_devicesoftwarevalidationresult",
+                        ],
+                    ),
+                    NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
-                        name="Inventory Item Software Validation",
+                        name="Inventory Item Software Validation - Report",
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
+                        ],
+                    ),
+                    NavMenuItem(
+                        link="plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list",
+                        name="Inventory Item Software Validation - List",
+                        permissions=[
+                            "nautobot_device_lifecycle_mgmt.view_inventoryitemsoftwarevalidationresult",
                         ],
                     ),
                 ),

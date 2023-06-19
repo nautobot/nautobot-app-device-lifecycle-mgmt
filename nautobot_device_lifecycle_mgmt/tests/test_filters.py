@@ -386,6 +386,16 @@ class DeviceSoftwareValidationResultFilterSetTestCase(TestCase):
         params = {"exclude_sw_missing": True}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
+    def test_platform(self):
+        """Test software version filter."""
+        params = {"platform": [self.platform]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_sw_missing_only(self):
+        """Test sw_missing filter."""
+        params = {"sw_missing_only": True}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
 
 class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
     """Tests for the DeviceSoftwareValidationResult model."""
@@ -465,6 +475,16 @@ class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
         """Test sw_missing filter."""
         params = {"exclude_sw_missing": True}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_platform(self):
+        """Test software version filter."""
+        params = {"platform": [self.platform]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+
+    def test_sw_missing_only(self):
+        """Test sw_missing filter."""
+        params = {"sw_missing_only": True}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
 
 class CVELCMTestCase(TestCase):

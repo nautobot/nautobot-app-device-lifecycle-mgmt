@@ -117,12 +117,6 @@ BANNER_BOTTOM = os.environ.get("BANNER_BOTTOM", "")
 # Text to include on the login page above the login form. HTML is allowed.
 BANNER_LOGIN = os.environ.get("BANNER_LOGIN", "")
 
-# Cache timeout in seconds. Cannot be 0. Defaults to 900 (15 minutes). To disable caching, set CACHEOPS_ENABLED to False
-CACHEOPS_DEFAULTS = {"timeout": 900}
-
-# Set to False to disable caching with cacheops. (Default: True)
-CACHEOPS_ENABLED = True
-
 # Maximum number of days to retain logged changes. Set to 0 to retain changes indefinitely. (Default: 90)
 CHANGELOG_RETENTION = int(os.environ.get("CHANGELOG_RETENTION", 90))
 
@@ -150,7 +144,7 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 # Set to True to enable server debugging. WARNING: Debugging introduces a substantial performance penalty and may reveal
 # sensitive information about your installation. Only enable debugging while performing testing. Never enable debugging
 # on a production system.
-DEBUG = is_truthy(os.environ.get("DEBUG", False))
+DEBUG = is_truthy(os.environ.get("NAUTOBOT_DEBUG", False))
 
 # Enforcement of unique IP space can be toggled on a per-VRF basis. To enforce unique IP space
 # within the global table (all prefixes and IP addresses not assigned to a VRF), set

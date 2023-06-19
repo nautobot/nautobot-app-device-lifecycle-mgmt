@@ -1,5 +1,6 @@
 """Views implementation for the Lifecycle Management plugin."""
 import base64
+import inspect
 import io
 import logging
 import urllib
@@ -11,6 +12,7 @@ import numpy as np
 from django.db.models import Q, F, Count, ExpressionWrapper, FloatField
 from django_tables2 import RequestConfig
 
+from nautobot.core.forms import SearchForm
 from nautobot.core.views import generic
 from nautobot.dcim.models import Device
 from nautobot.utilities.paginator import EnhancedPaginator, get_paginate_count
@@ -34,7 +36,9 @@ from nautobot_device_lifecycle_mgmt.tables import (
     SoftwareLCMTable,
     ValidatedSoftwareLCMTable,
     DeviceSoftwareValidationResultTable,
+    DeviceSoftwareValidationResultListTable,
     InventoryItemSoftwareValidationResultTable,
+    InventoryItemSoftwareValidationResultListTable,
     ContractLCMTable,
     ProviderLCMTable,
     ContactLCMTable,
@@ -204,6 +208,21 @@ class SoftwareLCMListView(generic.ObjectListView):
     )
     template_name = "nautobot_device_lifecycle_mgmt/softwarelcm_list.html"
 
+    def extra_context(self):
+        """Changes "Softwares" => "Software"."""
+        # TODO: Remove the dynamic check for 'q_placeholder' once we dropped the support for Nautobot < 1.5.0
+        if "q_placeholder" in inspect.signature(SearchForm.__init__).parameters:
+            search_form = SearchForm(data=self.request.GET, q_placeholder="Search Software")
+        else:
+            search_form = SearchForm(data=self.request.GET)
+
+        return {
+            **super().extra_context(),
+            "search_form": search_form,
+            "title": "Software",
+            "verbose_name_plural": "Software",
+        }
+
 
 class SoftwareLCMView(generic.ObjectView):
     """SoftwareLCM Detail view."""
@@ -220,6 +239,8 @@ class SoftwareLCMView(generic.ObjectView):
 
         extra_context = {
             "softwareimages_table": softwareimages_table,
+            "title": "Software",
+            "verbose_name_plural": "Software",
         }
 
         return extra_context
@@ -362,11 +383,34 @@ class ValidatedSoftwareLCMListView(generic.ObjectListView):
     )
     template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_list.html"
 
+    def extra_context(self):
+        """Changes "Softwares" => "Software"."""
+        # TODO: Remove the dynamic check for 'q_placeholder' once we dropped the support for Nautobot < 1.5.0
+        if "q_placeholder" in inspect.signature(SearchForm.__init__).parameters:
+            search_form = SearchForm(data=self.request.GET, q_placeholder="Search Validated Software")
+        else:
+            search_form = SearchForm(data=self.request.GET)
+
+        return {
+            **super().extra_context(),
+            "search_form": search_form,
+            "title": "Validated Software",
+            "verbose_name_plural": "Validated Software",
+        }
+
 
 class ValidatedSoftwareLCMView(generic.ObjectView):
     """ValidatedSoftware Detail view."""
 
     queryset = ValidatedSoftwareLCM.objects.all()
+
+    def get_extra_context(self, *args, **kwargs):
+        """Changes "Softwares" => "Software"."""
+        return {
+            **super().get_extra_context(*args, **kwargs),
+            "title": "Validated Software",
+            "verbose_name_plural": "Validated Software",
+        }
 
 
 class ValidatedSoftwareLCMEditView(generic.ObjectEditView):
@@ -532,7 +576,7 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
     table = DeviceSoftwareValidationResultTable
     template_name = "nautobot_device_lifecycle_mgmt/validatedsoftware_device_report.html"
     queryset = (
-        DeviceSoftwareValidationResult.objects.values("device__device_type__model")
+        DeviceSoftwareValidationResult.objects.values("device__device_type__model", "device__device_type__pk")
         .distinct()
         .annotate(
             total=Count("device__device_type__model"),
@@ -656,6 +700,17 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
         return "\n".join(csv_data)
 
 
+class DeviceSoftwareValidationResultListView(generic.ObjectListView):
+    """DeviceSoftawareValidationResult List view."""
+
+    queryset = DeviceSoftwareValidationResult.objects.all()
+    filterset = DeviceSoftwareValidationResultFilterSet
+    filterset_form = DeviceSoftwareValidationResultFilterForm
+    table = DeviceSoftwareValidationResultListTable
+    action_buttons = ("export",)
+    template_name = "nautobot_device_lifecycle_mgmt/devicesoftwarevalidationresult_list.html"
+
+
 class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
     """View for executive report on inventory item software validation."""
 
@@ -664,7 +719,7 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
     table = InventoryItemSoftwareValidationResultTable
     template_name = "nautobot_device_lifecycle_mgmt/validatedsoftware_inventoryitem_report.html"
     queryset = (
-        InventoryItemSoftwareValidationResult.objects.values("inventory_item__part_id")
+        InventoryItemSoftwareValidationResult.objects.values("inventory_item__part_id", "inventory_item__pk")
         .distinct()
         .annotate(
             total=Count("inventory_item__part_id"),
@@ -789,6 +844,17 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
             )
 
         return "\n".join(csv_data)
+
+
+class InventoryItemSoftwareValidationResultListView(generic.ObjectListView):
+    """DeviceSoftawareValidationResult List view."""
+
+    queryset = InventoryItemSoftwareValidationResult.objects.all()
+    filterset = InventoryItemSoftwareValidationResultFilterSet
+    filterset_form = InventoryItemSoftwareValidationResultFilterForm
+    table = InventoryItemSoftwareValidationResultListTable
+    action_buttons = ("export",)
+    template_name = "nautobot_device_lifecycle_mgmt/inventoryitemsoftwarevalidationresult_list.html"
 
 
 # ---------------------------------------------------------------------------------
