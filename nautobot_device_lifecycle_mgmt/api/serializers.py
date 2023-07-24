@@ -261,14 +261,16 @@ class ValidatedSoftwareLCMSerializer(*serializer_base_classes):  # pylint: disab
         ]
 
 
-class CVELCMSerializer(*serializer_base_classes, StatusModelSerializerMixin):  # pylint: disable=abstract-method
+class CVELCMSerializer(
+    *serializer_base_classes, StatusModelSerializerMixin
+):  # pylint: disable=abstract-method,too-few-public-methods
     """REST API serializer for CVELCM records."""
 
     url = serializers.HyperlinkedIdentityField(view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:cvelcm-detail")
     status = StatusSerializerField(required=False, queryset=Status.objects.all())
     severity = ChoiceField(choices=choices.CVESeverityChoices, required=False)
 
-    class Meta:
+    class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
 
         model = CVELCM
@@ -293,7 +295,7 @@ class CVELCMSerializer(*serializer_base_classes, StatusModelSerializerMixin):  #
 
 class VulnerabilityLCMSerializer(
     *serializer_base_classes, StatusModelSerializerMixin
-):  # pylint: disable=abstract-method
+):  # pylint: disable=abstract-method,too-few-public-methods
     """REST API serializer for VulnerabilityLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
@@ -304,7 +306,7 @@ class VulnerabilityLCMSerializer(
     device = NestedDeviceSerializer(read_only=True)
     inventory_item = NestedInventoryItemSerializer(read_only=True)
 
-    class Meta:
+    class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
 
         model = VulnerabilityLCM

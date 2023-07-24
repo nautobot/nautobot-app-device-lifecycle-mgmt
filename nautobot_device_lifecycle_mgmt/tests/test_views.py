@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 
-from nautobot.utilities.testing import ViewTestCases
+from nautobot.apps.testing import ViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer
 from nautobot.users.models import ObjectPermission
 from nautobot.extras.models import Status
@@ -35,7 +35,7 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
         )
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
         """Create a superuser and token for API calls."""
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
         device_types = tuple(
@@ -78,7 +78,7 @@ class ValidatedSoftwareDeviceReportViewTest(ViewTestCases.ListObjectsViewTestCas
         return "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report"
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
         """Set up test objects."""
         device_1, device_2, _ = create_devices()
         DeviceSoftwareValidationResult.objects.create(
@@ -142,7 +142,7 @@ class ValidatedSoftwareInventoryItemReportViewTest(ViewTestCases.ListObjectsView
         return "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report"
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
         """Set up test objects."""
         inventory_items = create_inventory_items()
         InventoryItemSoftwareValidationResult.objects.create(
@@ -216,7 +216,8 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     }
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
+        """Set up test objects."""
         create_cves()
 
     def test_bulk_import_objects_with_constrained_permission(self):
@@ -247,7 +248,8 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     model = VulnerabilityLCM
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
+        """Set up test objects."""
         devices = create_devices()
         softwares = create_softwares()
         cves = create_cves()
@@ -308,7 +310,8 @@ class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     model = SoftwareImageLCM
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
+        """Set up test objects."""
         softwares = create_softwares()
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
         device_type1 = DeviceType.objects.create(manufacturer=manufacturer, model="6509", slug="6509")
@@ -378,7 +381,7 @@ class DeviceSoftwareValidationResultListViewTest(ViewTestCases.ListObjectsViewTe
         return "plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list"
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
         """Set up test objects."""
         device_1, device_2, _ = create_devices()
         DeviceSoftwareValidationResult.objects.create(
@@ -453,7 +456,7 @@ class InventoryItemSoftwareValidationResultListViewTest(ViewTestCases.ListObject
         return "plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list"
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
         """Set up test objects."""
         inventory_items = create_inventory_items()
         InventoryItemSoftwareValidationResult.objects.create(

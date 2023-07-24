@@ -3,19 +3,11 @@ import datetime
 
 import django_filters
 from django.db.models import Q
-from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Platform, Region, Site, Manufacturer
-from nautobot.extras.filters import StatusFilter, StatusModelFilterSetMixin, TagFilter
-from nautobot.extras.models import Tag
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, Platform, Manufacturer, Location
+from nautobot.apps.filters import StatusModelFilterSetMixin
+from nautobot.extras.models import Tag, Role
 
-try:
-    from nautobot.extras.filters import NautobotFilterSet
-except ImportError:
-    # TODO: Remove once plugin no longer supports Nautobot < 1.4.0
-    from nautobot.extras.filters import CustomFieldModelFilterSet
-    from nautobot.utilities.filters import BaseFilterSet
-
-    class NautobotFilterSet(BaseFilterSet, CustomFieldModelFilterSet):
-        """Emulate NautobotFilterSet from Nautobot 1.4.0 ."""
+from nautobot.apps.filters import NautobotFilterSet, StatusModelFilterSetMixin
 
 
 from nautobot_device_lifecycle_mgmt.models import (
@@ -299,17 +291,6 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         to_field_name="model",
         label="Device Types (model)",
     )
-    device_roles_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="device_roles",
-        queryset=DeviceRole.objects.all(),
-        label="Device Roles",
-    )
-    device_roles = django_filters.ModelMultipleChoiceFilter(
-        field_name="device_roles__slug",
-        queryset=DeviceRole.objects.all(),
-        to_field_name="slug",
-        label="Device Roles (slug)",
-    )
     inventory_items_id = django_filters.ModelMultipleChoiceFilter(
         field_name="inventory_items",
         queryset=InventoryItem.objects.all(),
@@ -348,7 +329,7 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
             "software",
             "devices",
             "device_types",
-            "device_roles",
+            # "device_roles",
             "inventory_items",
             "object_tags",
             "device_name",
@@ -433,28 +414,6 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         queryset=Platform.objects.all(),
         label="Platform",
     )
-    site_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="device__site",
-        queryset=Site.objects.all(),
-        label="Site",
-    )
-    site = django_filters.ModelMultipleChoiceFilter(
-        field_name="device__site__slug",
-        queryset=Site.objects.all(),
-        to_field_name="slug",
-        label="Site (slug)",
-    )
-    region_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="device__site__region",
-        queryset=Region.objects.all(),
-        label="Region",
-    )
-    region = django_filters.ModelMultipleChoiceFilter(
-        field_name="device__site__region__slug",
-        queryset=Region.objects.all(),
-        to_field_name="slug",
-        label="Region (slug)",
-    )
     device_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device",
         queryset=Device.objects.all(),
@@ -477,17 +436,6 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         to_field_name="model",
         label="Device Type (model)",
     )
-    device_role_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="device__device_role_id",
-        queryset=DeviceRole.objects.all(),
-        label="Device Role",
-    )
-    device_role = django_filters.ModelMultipleChoiceFilter(
-        field_name="device__device_role__slug",
-        queryset=DeviceRole.objects.all(),
-        to_field_name="slug",
-        label="Device Role (slug)",
-    )
     exclude_sw_missing = django_filters.BooleanFilter(
         method="_exclude_sw_missing",
         label="Exclude missing software",
@@ -505,11 +453,10 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         fields = [
             "software",
             "platform",
-            "site",
-            "region",
+            # "location",
             "device",
             "device_type",
-            "device_role",
+            # "device_role",
             "exclude_sw_missing",
             "sw_missing_only",
         ]
@@ -556,28 +503,6 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         queryset=Manufacturer.objects.all(),
         label="Manufacturer",
     )
-    site_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="inventory_item__device__site",
-        queryset=Site.objects.all(),
-        label="Site",
-    )
-    site = django_filters.ModelMultipleChoiceFilter(
-        field_name="inventory_item__device__site__slug",
-        queryset=Site.objects.all(),
-        to_field_name="slug",
-        label="Site (slug)",
-    )
-    region_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="inventory_item__device__site__region",
-        queryset=Region.objects.all(),
-        label="Region",
-    )
-    region = django_filters.ModelMultipleChoiceFilter(
-        field_name="inventory_item__device__site__region__slug",
-        queryset=Region.objects.all(),
-        to_field_name="slug",
-        label="Region (slug)",
-    )
     inventory_item_id = django_filters.ModelMultipleChoiceFilter(
         field_name="inventory_item",
         queryset=InventoryItem.objects.all(),
@@ -612,17 +537,6 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         to_field_name="model",
         label="Device Type (model)",
     )
-    device_role_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="inventory_item__device__device_role_id",
-        queryset=DeviceRole.objects.all(),
-        label="Device Role",
-    )
-    device_role = django_filters.ModelMultipleChoiceFilter(
-        field_name="inventory_item__device__device_role__slug",
-        queryset=DeviceRole.objects.all(),
-        to_field_name="slug",
-        label="Device Role (slug)",
-    )
     exclude_sw_missing = django_filters.BooleanFilter(
         method="_exclude_sw_missing",
         label="Exclude missing software",
@@ -640,13 +554,12 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         fields = [
             "software",
             "manufacturer",
-            "site",
-            "region",
+            # "location",
             "inventory_item",
             "part_id",
             "device",
             "device_type",
-            "device_role",
+            # "device_role",
             "exclude_sw_missing",
             "sw_missing_only",
         ]
@@ -813,10 +726,6 @@ class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , Custom
     cvss_v3__gte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="gte")
     cvss_v3__lte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="lte")
 
-    status = StatusFilter()
-    exclude_status = StatusFilter(field_name="status", exclude=True)
-    tag = TagFilter()
-
     class Meta:
         """Meta attributes for filter."""
 
@@ -841,10 +750,6 @@ class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  
     cve__published_date = django_filters.DateTimeFromToRangeFilter()
     cve__published_date__gte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="gte")
     cve__published_date__lte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="lte")
-
-    status = StatusFilter()
-    exclude_status = StatusFilter(field_name="status", exclude=True)
-    tag = TagFilter()
 
     class Meta:
         """Meta attributes for filter."""

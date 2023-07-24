@@ -10,7 +10,7 @@ from nautobot.extras.utils import extras_features
 from nautobot.extras.models.statuses import StatusField
 from nautobot.core.models.generics import PrimaryModel, OrganizationalModel
 from nautobot.dcim.models import Device, InventoryItem
-from nautobot.utilities.querysets import RestrictedQuerySet
+from nautobot.core.models.querysets import RestrictedQuerySet
 
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.software_filters import (
@@ -94,9 +94,9 @@ class HardwareLCM(PrimaryModel):
             msg = f"{name} - End of sale: {self.end_of_sale}"
         return msg
 
-    def get_absolute_url(self):
-        """Returns the Detail view for HardwareLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:hardwarelcm", kwargs={"pk": self.pk})
+    # def get_absolute_url(self):
+    #     """Returns the Detail view for HardwareLCM models."""
+    #     return reverse("plugins:nautobot_device_lifecycle_mgmt:hardwarelcm", kwargs={"pk": self.pk})
 
     @property
     def expired(self):
@@ -217,9 +217,9 @@ class SoftwareLCM(PrimaryModel):
         """String representation of SoftwareLCM."""
         return f"{self.device_platform} - {self.version}"
 
-    def get_absolute_url(self):
-        """Returns the Detail view for SoftwareLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:softwarelcm", kwargs={"pk": self.pk})
+    # def get_absolute_url(self):
+    #     """Returns the Detail view for SoftwareLCM models."""
+    #     return reverse("plugins:nautobot_device_lifecycle_mgmt:softwarelcm", kwargs={"pk": self.pk})
 
     def to_csv(self):
         """Return fields for bulk view."""
@@ -303,9 +303,9 @@ class SoftwareImageLCM(PrimaryModel):
         msg = f"{self.image_file_name}"
         return msg
 
-    def get_absolute_url(self):
-        """Returns the Detail view for SoftwareImageLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm", kwargs={"pk": self.pk})
+    # def get_absolute_url(self):
+    #     """Returns the Detail view for SoftwareImageLCM models."""
+    #     return reverse("plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm", kwargs={"pk": self.pk})
 
     def to_csv(self):
         """Return fields for bulk view."""
@@ -367,7 +367,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
         "software",
         "devices",
         "device_types",
-        "device_roles",
+        # "device_roles",
         "inventory_items",
         "object_tags",
         "start",
@@ -386,9 +386,9 @@ class ValidatedSoftwareLCM(PrimaryModel):
         msg = f"{self.software} - Valid since: {self.start}"
         return msg
 
-    def get_absolute_url(self):
-        """Returns the Detail view for ValidatedSoftwareLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm", kwargs={"pk": self.pk})
+    # def get_absolute_url(self):
+    #     """Returns the Detail view for ValidatedSoftwareLCM models."""
+    #     return reverse("plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm", kwargs={"pk": self.pk})
 
     @property
     def valid(self):
@@ -595,9 +595,9 @@ class ContractLCM(PrimaryModel):
         """String representation of ContractLCM."""
         return self.name
 
-    def get_absolute_url(self):
-        """Returns the Detail view for ContractLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:contractlcm", kwargs={"pk": self.pk})
+    # def get_absolute_url(self):
+    #     """Returns the Detail view for ContractLCM models."""
+    #     return reverse("plugins:nautobot_device_lifecycle_mgmt:contractlcm", kwargs={"pk": self.pk})
 
     @property
     def expired(self):
@@ -679,9 +679,9 @@ class ProviderLCM(OrganizationalModel):
         """String representation of ProviderLCM."""
         return self.name
 
-    def get_absolute_url(self):
-        """Returns the Detail view for ProviderLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:providerlcm", kwargs={"pk": self.pk})
+    # def get_absolute_url(self):
+    #     """Returns the Detail view for ProviderLCM models."""
+    #     return reverse("plugins:nautobot_device_lifecycle_mgmt:providerlcm", kwargs={"pk": self.pk})
 
     def save(self, *args, **kwargs):
         """Override save to assert a full clean."""
@@ -746,9 +746,9 @@ class ContactLCM(PrimaryModel):
 
         ordering = ("contract", "priority", "name")
 
-    def get_absolute_url(self):
-        """Returns the Detail view for ContactLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:contactlcm", kwargs={"pk": self.pk})
+    # def get_absolute_url(self):
+    #     """Returns the Detail view for ContactLCM models."""
+    #     return reverse("plugins:nautobot_device_lifecycle_mgmt:contactlcm", kwargs={"pk": self.pk})
 
     def clean(self):
         """Override clean to do custom validation."""
@@ -834,9 +834,9 @@ class CVELCM(PrimaryModel):
 
         ordering = ("severity", "name")
 
-    def get_absolute_url(self):
-        """Returns the Detail view for CVELCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:cvelcm", kwargs={"pk": self.pk})
+    # def get_absolute_url(self):
+    #     """Returns the Detail view for CVELCM models."""
+    #     return reverse("plugins:nautobot_device_lifecycle_mgmt:cvelcm", kwargs={"pk": self.pk})
 
     def __str__(self):
         """String representation of the model."""
@@ -897,9 +897,9 @@ class VulnerabilityLCM(PrimaryModel):
         verbose_name = "Vulnerability"
         verbose_name_plural = "Vulnerabilities"
 
-    def get_absolute_url(self):
-        """Returns the Detail view for VulnerabilityLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm", kwargs={"pk": self.pk})
+    # def get_absolute_url(self):
+    #     """Returns the Detail view for VulnerabilityLCM models."""
+    #     return reverse("plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm", kwargs={"pk": self.pk})
 
     def __str__(self):
         """String representation of the model."""

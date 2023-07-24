@@ -4,15 +4,9 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 import django_tables2 as tables
 from django_tables2.utils import A
-from nautobot.utilities.tables import (
-    BaseTable,
-    ButtonsColumn,
-    BooleanColumn,
-    LinkedCountColumn,
-    TagColumn,
-    ToggleColumn,
-)
-from nautobot.extras.tables import StatusTableMixin
+from nautobot.apps.tables import BaseTable, ButtonsColumn, BooleanColumn, TagColumn, ToggleColumn, StatusTableMixin
+from nautobot.core.tables import LinkedCountColumn
+
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,

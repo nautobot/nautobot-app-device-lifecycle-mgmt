@@ -3,7 +3,7 @@ import datetime
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 
-from nautobot.utilities.testing import APIViewTestCases
+from nautobot.apps.testing import APIViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer, Platform, Device, DeviceRole, InventoryItem, Site
 from nautobot.extras.models import Status, Tag
 
@@ -46,7 +46,7 @@ class HardwareLCMAPITest(APIViewTestCases.APIViewTestCase):
     ]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
         """Create a superuser and token for API calls."""
         manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
         device_types = (
@@ -99,8 +99,8 @@ class SoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
     ]
 
     @classmethod
-    def setUpTestData(cls):
-
+    def setUpTestData(cls):  # pylint: disable=invalid-name
+        """Set up test objects."""
         device_platforms = (
             Platform.objects.create(name="Cisco IOS", slug="cisco_ios"),
             Platform.objects.create(name="Arista EOS", slug="arista_eos"),
@@ -167,7 +167,7 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):
     ]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
         """Create a superuser and token for API calls."""
         provider = ProviderLCM.objects.create(
             name="Cisco",
@@ -263,7 +263,7 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
     ]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
         """Create a superuser and token for API calls."""
         device_platform = Platform.objects.create(name="Cisco IOS", slug="cisco_ios")
         softwares = (
@@ -422,8 +422,8 @@ class CVELCMAPITest(APIViewTestCases.APIViewTestCase):
     choices_fields = ["severity"]
 
     @classmethod
-    def setUpTestData(cls):
-
+    def setUpTestData(cls):  # pylint: disable=invalid-name
+        """Set up test objects."""
         cls.create_data = [
             {
                 "name": "CVE-2021-40128",
@@ -496,7 +496,8 @@ class VulnerabilityLCMAPITest(
     validation_excluded_fields = ["status"]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
+        """Set up test objects."""
         devices = create_devices()
         cves = create_cves()
         softwares = create_softwares()
@@ -547,7 +548,7 @@ class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
     ]
 
     @classmethod
-    def setUpTestData(cls):  # pylint: disable=too-many-locals
+    def setUpTestData(cls):  # pylint: disable=too-many-locals,invalid-name
         """Create a superuser and token for API calls."""
         device_platform_cisco, _ = Platform.objects.get_or_create(name="Cisco IOS", slug="cisco_ios")
         device_platform_arista, _ = Platform.objects.get_or_create(name="Arista EOS", slug="arista_eos")
@@ -692,7 +693,7 @@ class ProviderLCMAPITest(APIViewTestCases.APIViewTestCase):
     ]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
         """Create a Provider for API calls."""
 
         cls.create_data = [

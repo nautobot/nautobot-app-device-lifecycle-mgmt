@@ -15,8 +15,8 @@ from django_tables2 import RequestConfig
 from nautobot.core.forms import SearchForm
 from nautobot.core.views import generic
 from nautobot.dcim.models import Device
-from nautobot.utilities.paginator import EnhancedPaginator, get_paginate_count
-from nautobot.utilities.views import ContentTypePermissionRequiredMixin
+from nautobot.core.views.paginator import EnhancedPaginator, get_paginate_count
+from nautobot.core.views.mixins import ContentTypePermissionRequiredMixin
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,

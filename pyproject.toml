@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-lifecycle-mgmt"
-version = "1.3.0"
+version = "2.0.0a0"
 description = "Manages device lifecycles for platforms and software."
 authors = ["Network to Code, LLC <opensource@networktocode.com>"]
 license = "Apache-2.0"
@@ -17,10 +17,10 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">=3.8,<3.11"
 pycountry = "^22.3.5"
 matplotlib = "^3.3.4"
-nautobot = "^1.4.0"
+nautobot = "2.0.0b2"
 
 [tool.poetry.dev-dependencies]
 invoke = "*"
@@ -49,6 +49,7 @@ mkdocs-version-annotations = "1.0.0"
 # Automatic documentation from sources, for MkDocs
 mkdocstrings = "0.19"
 mkdocstrings-python = "0.7.1"
+pylint-nautobot = "^0.1.0"
 
 [tool.black]
 line-length = 120
@@ -75,7 +76,7 @@ exclude = '''
 
 [tool.pylint.master]
 # Include the pylint_django plugin to avoid spurious warnings about Django patterns
-load-plugins="pylint_django"
+load-plugins=["pylint_django", "pylint_nautobot"]
 ignore=["nautobot_device_lifecycle_mgmt/migrations"]
 
 [tool.pylint.basic]
@@ -99,6 +100,10 @@ notes = """,
     FIXME,
     XXX,
     """
+[tool.pylint-nautobot]
+supported_nautobot_versions = [
+    "2"
+]
 
 [build-system]
 requires = ["poetry_core>=1.0.0"]
