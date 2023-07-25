@@ -180,7 +180,7 @@ class SoftwareLCMTestCase(TestCase):
         self.assertEqual(str(softwarelcm_full), f"{self.device_platform.name} - {softwarelcm_full.version}")
 
 
-class ValidatedSoftwareLCMTestCase(TestCase):
+class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
     """Tests for the ValidatedSoftwareLCM model."""
 
     def setUp(self):
@@ -195,6 +195,8 @@ class ValidatedSoftwareLCMTestCase(TestCase):
         self.device_type_1 = DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000")
         self.device_type_2 = DeviceType.objects.create(manufacturer=manufacturer, model="CAT-3750", slug="cat-3750")
         self.content_type_devicetype = ContentType.objects.get(app_label="dcim", model="devicetype")
+        self.device_1, self.device_2 = create_devices()[:2]
+        self.inventoryitem_1, self.inventoryitem_2 = create_inventory_items()[:2]
 
     def test_create_validatedsoftwarelcm_required_only(self):
         """Successfully create ValidatedSoftwareLCM with required fields only."""
@@ -267,6 +269,63 @@ class ValidatedSoftwareLCMTestCase(TestCase):
         with time_machine.travel(date_start_valid):
             self.assertEqual(validatedsoftwarelcm_start_only.valid, True)
             self.assertEqual(validatedsoftwarelcm_start_end.valid, True)
+
+    def test_get_for_object_device(self):
+        validatedsoftwarelcm_1 = ValidatedSoftwareLCM(
+            software=self.software,
+            start=date(2019, 1, 10),
+        )
+        validatedsoftwarelcm_1.devices.set([self.device_1])
+        validatedsoftwarelcm_1.save()
+
+        validatedsoftwarelcm_2 = ValidatedSoftwareLCM(
+            software=self.software,
+            start=date(2018, 1, 10),
+        )
+        validatedsoftwarelcm_2.devices.set([self.device_2])
+        validatedsoftwarelcm_2.save()
+
+        validated_software_for_device = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
+        self.assertEqual(validated_software_for_device.count(), 1)
+        self.assertTrue(self.device_1 in validated_software_for_device.first().devices.all())
+
+    def test_get_for_object_devicetype(self):
+        validatedsoftwarelcm_1 = ValidatedSoftwareLCM(
+            software=self.software,
+            start=date(2019, 1, 10),
+        )
+        validatedsoftwarelcm_1.device_types.set([self.device_type_1])
+        validatedsoftwarelcm_1.save()
+
+        validatedsoftwarelcm_2 = ValidatedSoftwareLCM(
+            software=self.software,
+            start=date(2018, 1, 10),
+        )
+        validatedsoftwarelcm_2.device_types.set([self.device_type_2])
+        validatedsoftwarelcm_2.save()
+
+        validated_software_for_device_type = ValidatedSoftwareLCM.objects.get_for_object(self.device_type_1)
+        self.assertEqual(validated_software_for_device_type.count(), 1)
+        self.assertTrue(self.device_type_1 in validated_software_for_device_type.first().device_types.all())
+
+    def test_get_for_object_inventoryitem(self):
+        validatedsoftwarelcm_1 = ValidatedSoftwareLCM(
+            software=self.software,
+            start=date(2019, 1, 10),
+        )
+        validatedsoftwarelcm_1.inventory_items.set([self.inventoryitem_1])
+        validatedsoftwarelcm_1.save()
+
+        validatedsoftwarelcm_2 = ValidatedSoftwareLCM(
+            software=self.software,
+            start=date(2018, 1, 10),
+        )
+        validatedsoftwarelcm_2.inventory_items.set([self.inventoryitem_2])
+        validatedsoftwarelcm_2.save()
+
+        validated_software_for_inventoryitem = ValidatedSoftwareLCM.objects.get_for_object(self.inventoryitem_1)
+        self.assertEqual(validated_software_for_inventoryitem.count(), 1)
+        self.assertTrue(self.inventoryitem_1 in validated_software_for_inventoryitem.first().inventory_items.all())
 
 
 class DeviceSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
