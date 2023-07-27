@@ -5,11 +5,12 @@ from django.db.models import Q
 
 from nautobot.extras.plugins import PluginTemplateExtension
 from nautobot.dcim.models import InventoryItem
-from .models import HardwareLCM
+from .models import HardwareLCM, ValidatedSoftwareLCM
 from .software import (
     DeviceSoftware,
     InventoryItemSoftware,
 )
+from .tables import ValidatedSoftwareLCMTable
 
 
 class DeviceTypeHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
@@ -24,6 +25,39 @@ class DeviceTypeHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
         return self.render(
             "nautobot_device_lifecycle_mgmt/inc/general_notice.html",
             extra_context={"hw_notices": HardwareLCM.objects.filter(device_type=devtype_obj.pk)},
+        )
+
+
+class DeviceTypeValidatedSoftwareLCM(
+    PluginTemplateExtension,
+):  # pylint: disable=abstract-method
+    """Class to add table for ValidatedSoftwareLCM related to device type."""
+
+    model = "dcim.devicetype"
+
+    def __init__(self, context):
+        """Init setting up the DeviceTypeValidatedSoftwareLCM object."""
+        super().__init__(context)
+        self.device_type_validated_software = ValidatedSoftwareLCM.objects.get_for_object(self.context["object"])
+        self.validated_software_table = ValidatedSoftwareLCMTable(
+            list(self.device_type_validated_software),
+            orderable=False,
+            exclude=(
+                "software",
+                "start",
+                "actions",
+            ),
+        )
+
+    def right_page(self):
+        """Display table on right side of page."""
+        extra_context = {
+            "validsoft_table": self.validated_software_table,
+        }
+
+        return self.render(
+            "nautobot_device_lifecycle_mgmt/inc/software_and_validatedsoftware_info.html",
+            extra_context=extra_context,
         )
 
 
@@ -120,6 +154,7 @@ class InventoryItemSoftwareLCMAndValidatedSoftwareLCM(
 
 template_extensions = [
     DeviceTypeHWLCM,
+    DeviceTypeValidatedSoftwareLCM,
     DeviceHWLCM,
     InventoryItemHWLCM,
     DeviceSoftwareLCMAndValidatedSoftwareLCM,
