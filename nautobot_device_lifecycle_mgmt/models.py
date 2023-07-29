@@ -271,7 +271,7 @@ class SoftwareImageLCM(PrimaryModel):
     software = models.ForeignKey(
         to="SoftwareLCM", on_delete=models.CASCADE, related_name="software_images", verbose_name="Software Version"
     )
-    device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
+    device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="software_images", blank=True)
     inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="+", blank=True)
     object_tags = models.ManyToManyField(to="extras.Tag", related_name="+", blank=True)
     download_url = models.URLField(blank=True, verbose_name="Download URL")

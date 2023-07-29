@@ -618,15 +618,19 @@ class SoftwareImageLCMTestCase(TestCase):
         self.assertEqual(list(softwareimage.object_tags.all()), [self.tag])
         self.assertEqual(str(softwareimage), f"{softwareimage.image_file_name}")
 
-    def test_validatedsoftwarelcm_valid_property(self):
-        """Test behavior of the 'valid' property."""
-        validatedsoftwarelcm_start_only = ValidatedSoftwareLCM(
+    def test_get_software_images_for_device_type(self):
+        """Test related reverse relationship from device type to software image"""
+        softwareimage = SoftwareImageLCM(
+            image_file_name="ios17.3.3md.img",
             software=self.software,
-            start=date(2020, 4, 15),
-            preferred=False,
+            download_url="ftp://images.local/cisco/ios17.3.3md.img",
+            image_file_checksum="441rfabd75b0512r7fde7a7a66faa596",
+            default_image=False,
         )
-        validatedsoftwarelcm_start_only.device_types.set([self.device_type_1])
-        validatedsoftwarelcm_start_only.save()
+        softwareimage.device_types.set([self.device_type_1])
+        softwareimage.save()
+
+        self.assertEqual(list(self.device_type_1.software_images.all()), [softwareimage])
 
 
 class ProviderLCMTestCase(TestCase):
