@@ -356,7 +356,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
     software = models.ForeignKey(to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Software Version")
     devices = models.ManyToManyField(to="dcim.Device", related_name="+", blank=True)
     device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
-    device_roles = models.ManyToManyField(to="dcim.DeviceRole", related_name="+", blank=True)
+    roles = models.ManyToManyField(to="extras.Role", related_name="+", blank=True)
     inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="+", blank=True)
     object_tags = models.ManyToManyField(to="extras.Tag", related_name="+", blank=True)
     start = models.DateField(verbose_name="Valid Since")
@@ -367,7 +367,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
         "software",
         "devices",
         "device_types",
-        # "device_roles",
+        "roles",
         "inventory_items",
         "object_tags",
         "start",
