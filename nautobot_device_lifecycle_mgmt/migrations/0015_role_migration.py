@@ -35,7 +35,7 @@ def reverse_role_data_migrate(apps, schema):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("nautobot_device_lifecycle_mgmt", "0013_pre_nautobot_v2_migrations"),
+        ("nautobot_device_lifecycle_mgmt", "0014_pre_nautobot_v2_migrations"),
     ]
 
     operations = [

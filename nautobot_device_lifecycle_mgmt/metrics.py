@@ -140,7 +140,7 @@ def metrics_lcm_hw_end_of_support():  # pylint: disable=too-many-locals
         DeviceType.objects.order_by()
         .annotate(
             num_devices=Case(
-                When(id__in=hw_end_of_support_device_types, then=Count("instances")),
+                When(id__in=hw_end_of_support_device_types, then=Count("devices")),
                 default=0,
                 output_field=IntegerField(),
             )

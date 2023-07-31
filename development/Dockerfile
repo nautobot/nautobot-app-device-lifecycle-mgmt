@@ -10,13 +10,13 @@
 ARG NAUTOBOT_VER="2.0.0b2"
 
 # Accepts a desired Python version as build argument, default to 3.8
-ARG PYTHON_VER="3.8"
+ARG PYTHON_VER="3.10"
 
 # Retrieve published development image of Nautobot base which should include most CI dependencies
 # FROM ghcr.io/nautobot/nautobot-dev:${NAUTOBOT_VER}-py${PYTHON_VER}
 
 # This needs to be reverted once we release
-FROM ghcr.io/nautobot/nautobot-dev:latest-py${PYTHON_VER}
+FROM ghcr.io/nautobot/nautobot-dev:2.0.0-beta.2-py${PYTHON_VER}
 
 # Runtime argument and environment setup
 ARG NAUTOBOT_ROOT=/opt/nautobot

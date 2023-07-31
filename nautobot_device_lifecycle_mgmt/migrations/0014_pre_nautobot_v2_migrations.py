@@ -5,7 +5,7 @@ import nautobot.core.models.fields
 class Migration(migrations.Migration):
     dependencies = [
         ("extras", "0062_collect_roles_from_related_apps_roles"),
-        ("nautobot_device_lifecycle_mgmt", "0012_add_related_name_to_results_model"),
+        ("nautobot_device_lifecycle_mgmt", "0013_alter_softwareimagelcm_device_types"),
     ]
 
     operations = [

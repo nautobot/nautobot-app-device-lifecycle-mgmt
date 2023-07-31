@@ -10,6 +10,17 @@ This release includes some of the following highlights:
  - Nautobot "Notes" feature added to all models
  - Removed unused admin interface
  - Updates to development env standards
+ - Adds table for matching ValidatedSoftware objects
+ - Removes compatibility code for Nautobot versions <1.4
+
+## [v1.3.1] - 2023-07-29
+
+### Added
+- [#196](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/196) Adds reverse relationship from device type to software image.
+- [#194](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/194) Adds table with matching ValidatedSoftware objects to the DeviceType detailed view in GUI.
+
+### Removed
+- [#197](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/197) Removes compatibility code for Nautobot versions < 1.4
 
 ## [v1.3.0] - 2023-06-17
 

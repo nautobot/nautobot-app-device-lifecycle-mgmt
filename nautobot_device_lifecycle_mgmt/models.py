@@ -9,8 +9,8 @@ from django.conf import settings
 from nautobot.extras.utils import extras_features
 from nautobot.extras.models.statuses import StatusField
 from nautobot.core.models.generics import PrimaryModel, OrganizationalModel
-from nautobot.dcim.models import Device, InventoryItem
 from nautobot.core.models.querysets import RestrictedQuerySet
+from nautobot.dcim.models import Device, DeviceType, InventoryItem
 
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.software_filters import (
@@ -271,7 +271,7 @@ class SoftwareImageLCM(PrimaryModel):
     software = models.ForeignKey(
         to="SoftwareLCM", on_delete=models.CASCADE, related_name="software_images", verbose_name="Software Version"
     )
-    device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
+    device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="software_images", blank=True)
     inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="+", blank=True)
     object_tags = models.ManyToManyField(to="extras.Tag", related_name="+", blank=True)
     download_url = models.URLField(blank=True, verbose_name="Download URL")
@@ -335,6 +335,8 @@ class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):
             qs = DeviceValidatedSoftwareFilter(qs=self, item_obj=obj).filter_qs()
         elif isinstance(obj, InventoryItem):
             qs = InventoryItemValidatedSoftwareFilter(qs=self, item_obj=obj).filter_qs()
+        elif isinstance(obj, DeviceType):
+            qs = ValidatedSoftwareLCM.objects.filter(device_types=obj)
         else:
             qs = self
 
