@@ -17,7 +17,7 @@ from nautobot.extras.forms import (
     StatusModelFilterFormMixin,
     CustomFieldModelFilterFormMixin,
 )
-from nautobot.extras.models import Tag, Status  # , Role
+from nautobot.extras.models import Tag, Status, Role
 from nautobot.apps.forms import (
     DatePicker,
     DynamicModelChoiceField,
@@ -213,6 +213,7 @@ class SoftwareLCMForm(NautobotModelForm, CustomFieldModelFormMixin, Relationship
 class SoftwareLCMFilterForm(NautobotFilterForm):
     """Filter form to filter searches for SoftwareLCM."""
 
+    model = SoftwareLCM
     q = forms.CharField(
         required=False,
         label="Search",
@@ -230,7 +231,6 @@ class SoftwareLCMFilterForm(NautobotFilterForm):
     class Meta:
         """Meta attributes."""
 
-        model = SoftwareLCM
         fields = [
             "q",
             "version",
@@ -348,6 +348,7 @@ class SoftwareImageLCMForm(NautobotModelForm, CustomFieldModelFormMixin, Relatio
 class SoftwareImageLCMFilterForm(NautobotFilterForm):
     """Filter form to filter searches for SoftwareImageLCM."""
 
+    model = SoftwareImageLCM
     q = forms.CharField(
         required=False,
         label="Search",
@@ -382,7 +383,6 @@ class SoftwareImageLCMFilterForm(NautobotFilterForm):
     class Meta:
         """Meta attributes."""
 
-        model = SoftwareImageLCM
         fields = [
             "q",
             "software",
@@ -480,6 +480,7 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
 
     """Filter form to filter searches for SoftwareLCM."""
 
+    model = ValidatedSoftwareLCM
     q = forms.CharField(
         required=False,
         label="Search",
@@ -488,7 +489,6 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
     software = DynamicModelChoiceField(required=False, queryset=SoftwareLCM.objects.all())
     devices = DynamicModelMultipleChoiceField(
         queryset=Device.objects.all(),
-        to_field_name="name",
         required=False,
     )
     device_types = DynamicModelMultipleChoiceField(
@@ -496,19 +496,16 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
         to_field_name="model",
         required=False,
     )
-    # device_roles = DynamicModelMultipleChoiceField(
-    #     queryset=DeviceRole.objects.all(),
-    #     to_field_name="slug",
-    #     required=False,
-    # )
+    roles = DynamicModelMultipleChoiceField(
+        queryset=Role.objects.all(),
+        required=False,
+    )
     inventory_items = DynamicModelMultipleChoiceField(
         queryset=InventoryItem.objects.all(),
-        to_field_name="name",
         required=False,
     )
     object_tags = DynamicModelMultipleChoiceField(
         queryset=Tag.objects.all(),
-        to_field_name="slug",
         required=False,
     )
     start_before = forms.DateField(label="Valid Since Date Before", required=False, widget=DatePicker())
@@ -521,7 +518,6 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
     class Meta:
         """Meta attributes."""
 
-        model = ValidatedSoftwareLCM
         fields = [
             "q",
             "software",
@@ -1066,7 +1062,7 @@ class CVELCMForm(NautobotBulkEditForm, CustomFieldModelFormMixin, RelationshipMo
 class CVELCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):
     """CVE Lifecycle Management bulk edit form."""
 
-    model = CVELCM
+    # model = CVELCM
     pk = forms.ModelMultipleChoiceField(queryset=CVELCM.objects.all(), widget=forms.MultipleHiddenInput)
     description = forms.CharField(required=False)
     comments = forms.CharField(required=False)
@@ -1110,13 +1106,13 @@ class CVELCMFilterForm(NautobotFilterForm, StatusModelFilterFormMixin, CustomFie
     cvss_v3__gte = forms.FloatField(label="CVSSv3 Score Above", required=False)
     cvss_v3__lte = forms.FloatField(label="CVSSv3 Score Below", required=False)
 
-    status = DynamicModelMultipleChoiceField(queryset=Status.objects.all(), required=False, to_field_name="slug")
+    status = DynamicModelMultipleChoiceField(queryset=Status.objects.all(), required=False, to_field_name="name")
     exclude_status = DynamicModelMultipleChoiceField(
         label="Exclude Status",
         required=False,
         queryset=Status.objects.all(),
         query_params={"content_types": model._meta.label_lower},
-        to_field_name="slug",
+        to_field_name="name",
     )
     tag = TagFilterField(model)
 

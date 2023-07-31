@@ -10,7 +10,7 @@ from nautobot.extras.models import Relationship, RelationshipAssociation
 
 def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # pylint: disable=unused-argument
     """Callback function for post_migrate() -- create Relationship records."""
-    return
+    # return
     # pylint: disable=invalid-name
     SoftwareLCM = sender.get_model("SoftwareLCM")
     ContentType = apps.get_model("contenttypes", "ContentType")
@@ -23,8 +23,8 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
 
     for relationship_dict in [
         {
-            "name": "Software on Device",
-            "slug": "device_soft",
+            "label": "Software on Device",
+            "key": "device_soft",
             "type": RelationshipTypeChoices.TYPE_ONE_TO_MANY,
             "source_type": ContentType.objects.get_for_model(SoftwareLCM),
             "source_label": "Running on Devices",
@@ -32,8 +32,8 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
             "destination_label": "Software Version",
         },
         {
-            "name": "Software on InventoryItem",
-            "slug": "inventory_item_soft",
+            "label": "Software on InventoryItem",
+            "key": "inventory_item_soft",
             "type": RelationshipTypeChoices.TYPE_ONE_TO_MANY,
             "source_type": ContentType.objects.get_for_model(SoftwareLCM),
             "source_label": "Running on Inventory Items",
@@ -41,8 +41,8 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
             "destination_label": "Software Version",
         },
         {
-            "name": "Contract to dcim.Device",
-            "slug": "contractlcm-to-device",
+            "label": "Contract to dcim.Device",
+            "key": "contractlcm-to-device",
             "type": RelationshipTypeChoices.TYPE_MANY_TO_MANY,
             "source_type": ContentType.objects.get_for_model(contract_lcm),
             "source_label": "Devices",
@@ -50,8 +50,8 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
             "destination_label": "Contracts",
         },
         {
-            "name": "Contract to dcim.InventoryItem",
-            "slug": "contractlcm-to-inventoryitem",
+            "label": "Contract to dcim.InventoryItem",
+            "key": "contractlcm-to-inventoryitem",
             "type": RelationshipTypeChoices.TYPE_ONE_TO_MANY,
             "source_type": ContentType.objects.get_for_model(contract_lcm),
             "source_label": "Inventory Items",
@@ -59,8 +59,8 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
             "destination_label": "Contract",
         },
         {
-            "name": "Software to CVE",
-            "slug": "soft_cve",
+            "label": "Software to CVE",
+            "key": "soft_cve",
             "type": RelationshipTypeChoices.TYPE_MANY_TO_MANY,
             "source_type": ContentType.objects.get_for_model(SoftwareLCM),
             "source_label": "Corresponding CVEs",
@@ -68,7 +68,7 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
             "destination_label": "Affected Softwares",
         },
     ]:
-        _Relationship.objects.get_or_create(name=relationship_dict["name"], defaults=relationship_dict)
+        _Relationship.objects.get_or_create(label=relationship_dict["label"], defaults=relationship_dict)
 
 
 @receiver(pre_delete, sender="nautobot_device_lifecycle_mgmt.SoftwareLCM")

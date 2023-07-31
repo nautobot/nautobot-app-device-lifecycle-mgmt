@@ -1,10 +1,6 @@
 """API serializers implementation for the LifeCycle Management plugin."""
-from nautobot.core.api import ChoiceField, SerializedPKRelatedField
 from nautobot.apps.api import NautobotModelSerializer
-from nautobot.extras.models import Status
-from rest_framework import serializers
 
-from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContactLCM,
@@ -23,10 +19,6 @@ from nautobot_device_lifecycle_mgmt.models import (
 class HardwareLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:hardwarelcm-detail"
-    # )
-
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
 
@@ -36,10 +28,6 @@ class HardwareLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,t
 
 class ProviderLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
-
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:providerlcm-detail"
-    # )
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
@@ -51,10 +39,6 @@ class ProviderLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,t
 class ContractLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:contractlcm-detail"
-    # )
-
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
 
@@ -64,10 +48,6 @@ class ContractLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,t
 
 class ContactLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
-
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:contactlcm-detail"
-    # )
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
@@ -79,10 +59,6 @@ class ContactLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,to
 class SoftwareLCMSerializer(NautobotModelSerializer):  # pylint: disable=too-few-public-methods
     """REST API serializer for SoftwareLCM records."""
 
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwarelcm-detail"
-    # )
-
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
 
@@ -92,10 +68,6 @@ class SoftwareLCMSerializer(NautobotModelSerializer):  # pylint: disable=too-few
 
 class SoftwareImageLCMSerializer(NautobotModelSerializer):  # pylint: disable=too-few-public-methods
     """REST API serializer for SoftwareImageLCM records."""
-
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:softwareimagelcm-detail"
-    # )
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
@@ -107,10 +79,6 @@ class SoftwareImageLCMSerializer(NautobotModelSerializer):  # pylint: disable=to
 class ValidatedSoftwareLCMSerializer(NautobotModelSerializer):  # pylint: disable=too-few-public-methods
     """REST API serializer for ValidatedSoftwareLCM records."""
 
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:validatedsoftwarelcm-detail"
-    # )
-
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
 
@@ -121,8 +89,6 @@ class ValidatedSoftwareLCMSerializer(NautobotModelSerializer):  # pylint: disabl
 class CVELCMSerializer(NautobotModelSerializer):  # pylint: disable=abstract-method,too-few-public-methods
     """REST API serializer for CVELCM records."""
 
-    # url = serializers.HyperlinkedIdentityField(view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:cvelcm-detail")
-
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
 
@@ -132,10 +98,6 @@ class CVELCMSerializer(NautobotModelSerializer):  # pylint: disable=abstract-met
 
 class VulnerabilityLCMSerializer(NautobotModelSerializer):  # pylint: disable=abstract-method,too-few-public-methods
     """REST API serializer for VulnerabilityLCM records."""
-
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:vulnerabilitylcm-detail"
-    # )
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
@@ -156,10 +118,6 @@ class VulnerabilityLCMSerializer(NautobotModelSerializer):  # pylint: disable=ab
 class DeviceSoftwareValidationResultSerializer(NautobotModelSerializer):  # pylint: disable=too-few-public-methods
     """REST API serializer for DeviceSoftwareValidationResult records."""
 
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:devicesoftwarevalidationresult-detail"
-    # )
-
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
 
@@ -171,10 +129,6 @@ class InventoryItemSoftwareValidationResultSerializer(
     NautobotModelSerializer
 ):  # pylint: disable=too-few-public-methods
     """REST API serializer for InventoryItemSoftwareValidationResult records."""
-
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:inventoryitemsoftwarevalidationresult-detail"
-    # )
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta attributes."""
