@@ -519,6 +519,8 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
 
     csv_headers = [
         "inventory_item",
+        "item_name",
+        "device",
         "software",
         "valid",
         "last_run",
@@ -536,12 +538,25 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
         """Indicates model fields to return as csv."""
         return (
             self.inventory_item.part_id,
+            self.inventory_item.name,
+            self.inventory_item.device.name,
             self.software if self.software else "None",
             str(self.is_validated),
             self.last_run.strftime("%Y-%m-%d %H:%M:%S") if self.last_run else "-",
             self.run_type,
             ",".join(str(valid.software) for valid in ValidatedSoftwareLCM.objects.get_for_object(self.inventory_item)),
         )
+
+    def __str__(self):
+        """String representation of InventoryItemSoftwareValidationResult."""
+        if self.is_validated:
+            msg = f"Inventory Item: {self.inventory_item.name} - " f"Device: {self.inventory_item.device.name} - Valid"
+        else:
+            msg = (
+                f"Inventory Item: {self.inventory_item.name} - "
+                f"Device: {self.inventory_item.device.name} - Not Valid"
+            )
+        return msg
 
 
 @extras_features(
