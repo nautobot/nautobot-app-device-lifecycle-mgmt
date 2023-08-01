@@ -230,7 +230,9 @@ class DeviceSoftwareValidationResultTable(BaseTable):
 
     name = tables.TemplateColumn(
         template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/'
-        '?&device_type={{ record.device__device_type__model }}">{{ record.device__device_type__model }}</a>'
+        '?&device_type={{ record.device__device_type__model }}">{{ record.device__device_type__model }}</a>',
+        orderable=True,
+        accessor="device__device_type__model",
     )
     total = tables.TemplateColumn(
         template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/'
@@ -313,7 +315,19 @@ class InventoryItemSoftwareValidationResultTable(BaseTable):
         <a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/?&part_id={{ record.inventory_item__part_id }}">{{ record.inventory_item__part_id }}</a>
         {% else %}
         Please assign Part ID value to Inventory Item
-        {% endif %}"""
+        {% endif %}""",
+        orderable=True,
+        accessor="inventory_item__part_id",
+    )
+    part_name = tables.TemplateColumn(
+        template_code="{{ record.inventory_item__name }}",
+        orderable=True,
+        accessor="inventory_item__name",
+    )
+    device = tables.TemplateColumn(
+        template_code="{{ record.inventory_item__device__name }}",
+        orderable=True,
+        accessor="inventory_item__device__name",
     )
     total = tables.TemplateColumn(
         template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/'
@@ -342,9 +356,11 @@ class InventoryItemSoftwareValidationResultTable(BaseTable):
         """Metaclass attributes of InventoryItemSoftwareValidationResultTable."""
 
         model = InventoryItemSoftwareValidationResult
-        fields = ["part_id", "total", "valid", "invalid", "no_software", "valid_percent"]
+        fields = ["part_id", "part_name", "device", "total", "valid", "invalid", "no_software", "valid_percent"]
         default_columns = [
             "part_id",
+            "part_name",
+            "device",
             "total",
             "valid",
             "invalid",
@@ -362,6 +378,13 @@ class InventoryItemSoftwareValidationResultListTable(BaseTable):
         verbose_name="Part ID",
         default="Please assign Part ID value to Inventory Item",
     )
+    part_name = tables.TemplateColumn(
+        template_code="""<a href='/dcim/inventory-items/{{ record.inventory_item.pk }}'>
+                        {{ record.inventory_item.name }}</a>""",
+        verbose_name="Part Name",
+        accessor="inventory_item__name",
+    )
+    device_name = tables.Column(accessor="inventory_item__device__name", verbose_name="Device")
     software = tables.Column(accessor="software", verbose_name="Current Software", linkify=True)
     valid = tables.Column(accessor="is_validated", verbose_name="Valid")
     last_run = tables.Column(accessor="last_run", verbose_name="Last Run")
@@ -381,9 +404,11 @@ class InventoryItemSoftwareValidationResultListTable(BaseTable):
         """Metaclass attributes of InventoryItemSoftwareValidationResultTable."""
 
         model = InventoryItemSoftwareValidationResult
-        fields = ["part_id", "software", "valid", "last_run", "run_type", "valid_software"]
+        fields = ["part_id", "part_name", "device_name", "software", "valid", "last_run", "run_type", "valid_software"]
         default_columns = [
             "part_id",
+            "part_name",
+            "device_name",
             "software",
             "valid",
             "last_run",
