@@ -1,8 +1,8 @@
 # CHANGELOG
 
 ## [v1.3.2] - 2023-08-02
-### Removed
-- [#197](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/197) Removes compatibility code for Nautobot versions < 1.4
+### Changed
+- [#200](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/200) Provides more clarity by adding in device and inventory item name to help identify. Fix API name and making columns sortable.
 
 ## [v1.3.1] - 2023-07-29
 
