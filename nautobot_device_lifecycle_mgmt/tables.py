@@ -329,7 +329,7 @@ class InventoryItemSoftwareValidationResultTable(BaseTable):
         template_code="{{ record.inventory_item__device__name }}",
         orderable=True,
         accessor="inventory_item__device__name",
-        verbose_name= "Device",
+        verbose_name="Device",
     )
     total = tables.TemplateColumn(
         template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/'
