@@ -319,15 +319,17 @@ class InventoryItemSoftwareValidationResultTable(BaseTable):
         orderable=True,
         accessor="inventory_item__part_id",
     )
-    part_name = tables.TemplateColumn(
-        template_code="{{ record.inventory_item__name }}",
-        orderable=True,
+    item_name = tables.TemplateColumn(
+        template_code="""<a href='/dcim/inventory-items/{{ record.inventory_item__pk }}'>{{ record.inventory_item__name }}</a>""",
+        verbose_name="Item Name",
         accessor="inventory_item__name",
+        orderable=True,
     )
     device = tables.TemplateColumn(
         template_code="{{ record.inventory_item__device__name }}",
         orderable=True,
         accessor="inventory_item__device__name",
+        verbose_name= "Device",
     )
     total = tables.TemplateColumn(
         template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/'
@@ -356,10 +358,10 @@ class InventoryItemSoftwareValidationResultTable(BaseTable):
         """Metaclass attributes of InventoryItemSoftwareValidationResultTable."""
 
         model = InventoryItemSoftwareValidationResult
-        fields = ["part_id", "part_name", "device", "total", "valid", "invalid", "no_software", "valid_percent"]
+        fields = ["part_id", "item_name", "device", "total", "valid", "invalid", "no_software", "valid_percent"]
         default_columns = [
             "part_id",
-            "part_name",
+            "item_name",
             "device",
             "total",
             "valid",
@@ -378,11 +380,12 @@ class InventoryItemSoftwareValidationResultListTable(BaseTable):
         verbose_name="Part ID",
         default="Please assign Part ID value to Inventory Item",
     )
-    part_name = tables.TemplateColumn(
+    item_name = tables.TemplateColumn(
         template_code="""<a href='/dcim/inventory-items/{{ record.inventory_item.pk }}'>
                         {{ record.inventory_item.name }}</a>""",
-        verbose_name="Part Name",
+        verbose_name="Item Name",
         accessor="inventory_item__name",
+        orderable=True,
     )
     device_name = tables.Column(accessor="inventory_item__device__name", verbose_name="Device")
     software = tables.Column(accessor="software", verbose_name="Current Software", linkify=True)
@@ -404,10 +407,10 @@ class InventoryItemSoftwareValidationResultListTable(BaseTable):
         """Metaclass attributes of InventoryItemSoftwareValidationResultTable."""
 
         model = InventoryItemSoftwareValidationResult
-        fields = ["part_id", "part_name", "device_name", "software", "valid", "last_run", "run_type", "valid_software"]
+        fields = ["part_id", "item_name", "device_name", "software", "valid", "last_run", "run_type", "valid_software"]
         default_columns = [
             "part_id",
-            "part_name",
+            "item_name",
             "device_name",
             "software",
             "valid",
