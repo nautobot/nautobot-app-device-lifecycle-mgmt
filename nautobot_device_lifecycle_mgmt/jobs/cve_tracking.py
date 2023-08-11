@@ -26,25 +26,28 @@ class GenerateVulnerabilities(Job):
         default="1970-01-01",
         required=False,
     )
+    debug = BooleanVar(description="Enable for more verbose logging.")
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta class for the job."""
 
         commit_default = True
-        field_order = ["published_after", "_task_queue", "debug", "_commit"]
+        field_order = [
+            "published_after",
+            "_task_queue",
+            "debug",
+        ]
 
-    debug = BooleanVar(description="Enable for more verbose logging.")
-
-    def run(self, data, commit):  # pylint: disable=too-many-locals
+    def run(self, published_after, debug=False):  # pylint: disable=too-many-locals
         """Check if software assigned to each device is valid. If no software is assigned return warning message."""
         # Although the default is set on the class attribute for the UI, it doesn't default for the API
-        published_after = data.get("published_after", "1970-01-01")
+        published_after = published_after if published_after is not None else "1970-01-01"
         cves = CVELCM.objects.filter(published_date__gte=datetime.fromisoformat(published_after))
         count_before = VulnerabilityLCM.objects.count()
 
         for cve in cves:
-            if data["debug"]:
-                self.log_info(obj=cve, message="Generating vulnerabilities for CVE {cve}")
+            if debug:
+                self.logger.info(message="Generating vulnerabilities for CVE {cve}", extra={"object": cve})
             software_rels = RelationshipAssociation.objects.filter(relationship__slug="soft_cve", destination_id=cve.id)
             for soft_rel in software_rels:
                 # Loop through any device relationships
@@ -68,4 +71,4 @@ class GenerateVulnerabilities(Job):
                     vuln_obj.validated_save()
 
         diff = VulnerabilityLCM.objects.count() - count_before
-        self.log_success(message=f"Processed {cves.count()} CVEs and generated {diff} Vulnerabilities.")
+        self.logger.info(f"Processed {cves.count()} CVEs and generated {diff} Vulnerabilities.")
