@@ -19,7 +19,7 @@ router = routers.DefaultRouter()
 
 router.register("hardware", HardwareLCMView)
 router.register("contract", ContractLCMView)
-router.register("provide", ProviderLCMView)
+router.register("provider", ProviderLCMView)
 router.register("contact", ContactLCMView)
 router.register("software", SoftwareLCMViewSet)
 router.register("software-image", SoftwareImageLCMViewSet)
