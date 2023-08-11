@@ -224,7 +224,7 @@ class SoftwareLCM(PrimaryModel):
     def to_csv(self):
         """Return fields for bulk view."""
         return (
-            self.device_platform.slug,
+            self.device_platform.name,
             self.version,
             self.alias,
             self.release_date,
@@ -273,6 +273,7 @@ class SoftwareImageLCM(PrimaryModel):
     )
     device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="software_images", blank=True)
     inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="+", blank=True)
+    object_tags = models.ManyToManyField(to="extras.Tag", related_name="+", blank=True)
     download_url = models.URLField(blank=True, verbose_name="Download URL")
     image_file_checksum = models.CharField(blank=True, max_length=256, verbose_name="Image File Checksum")
     hashing_algorithm = models.CharField(default="", blank=True, max_length=32, verbose_name="Hashing Algorithm")
@@ -283,6 +284,7 @@ class SoftwareImageLCM(PrimaryModel):
         "software",
         "device_types",
         "inventory_items",
+        "object_tags",
         "download_url",
         "image_file_checksum",
         "hashing_algorithm",
@@ -312,6 +314,7 @@ class SoftwareImageLCM(PrimaryModel):
             self.software.id,
             ",".join(str(device_type["model"]) for device_type in self.device_types.values()),
             ",".join(str(inventory_item["id"]) for inventory_item in self.inventory_items.values()),
+            ",".join(str(object_tag["name"]) for object_tag in self.object_tags.values()),
             self.download_url,
             self.image_file_checksum,
             self.hashing_algorithm,
@@ -357,6 +360,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
     device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
     roles = models.ManyToManyField(to="extras.Role", related_name="+", blank=True)
     inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="+", blank=True)
+    object_tags = models.ManyToManyField(to="extras.Tag", related_name="+", blank=True)
     start = models.DateField(verbose_name="Valid Since")
     end = models.DateField(verbose_name="Valid Until", blank=True, null=True)
     preferred = models.BooleanField(verbose_name="Preferred Version", default=False)
@@ -367,6 +371,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
         "device_types",
         "roles",
         "inventory_items",
+        "object_tags",
         "start",
         "end",
         "preferred",
@@ -423,6 +428,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
             ",".join(str(device_type["model"]) for device_type in self.device_types.values()),
             ",".join(str(device_role["name"]) for device_role in self.roles.values()),
             ",".join(str(inventory_item["id"]) for inventory_item in self.inventory_items.values()),
+            ",".join(str(object_tag["name"]) for object_tag in self.object_tags.values()),
             self.start,
             self.end,
             self.preferred,
