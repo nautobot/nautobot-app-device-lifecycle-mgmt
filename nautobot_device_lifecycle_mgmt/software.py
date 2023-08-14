@@ -29,7 +29,7 @@ class ItemSoftware:
         """Get software assigned to the object."""
         try:
             obj_soft_relation = RelationshipAssociation.objects.get(
-                relationship__slug=self.soft_relation_name,
+                relationship__key=self.soft_relation_name,
                 destination_type=ContentType.objects.get_for_model(self.soft_obj_model),
                 destination_id=self.item_obj.id,
             )

@@ -21,7 +21,7 @@ class BaseSoftwareFilter:  # pylint: disable=too-few-public-methods
     def filter_qs(self):
         """Returns filtered SoftwareLCM query set."""
         soft_rel_sq = RelationshipAssociation.objects.filter(
-            relationship__slug=self.soft_relation_name,
+            relationship__key=self.soft_relation_name,
             destination_type=ContentType.objects.get_for_model(self.soft_obj_model),
             destination_id=self.item_obj.id,
         ).values("source_id")[:1]
@@ -141,7 +141,7 @@ class DeviceSoftwareImageFilter:  # pylint: disable=too-few-public-methods
     def filter_qs(self):
         """Returns filtered SoftwareImageLCM query set."""
         soft_rel_obj = RelationshipAssociation.objects.filter(
-            relationship__slug=self.soft_relation_name,
+            relationship__key=self.soft_relation_name,
             destination_type=ContentType.objects.get_for_model(self.soft_obj_model),
             destination_id=self.item_obj.id,
         ).values("source_id")[:1]
@@ -175,7 +175,7 @@ class InventoryItemSoftwareImageFilter:  # pylint: disable=too-few-public-method
     def filter_qs(self):
         """Returns filtered SoftwareImageLCM query set."""
         soft_rel_obj = RelationshipAssociation.objects.filter(
-            relationship__slug=self.soft_relation_name,
+            relationship__key=self.soft_relation_name,
             destination_type=ContentType.objects.get_for_model(self.soft_obj_model),
             destination_id=self.item_obj.id,
         ).values("source_id")[:1]
