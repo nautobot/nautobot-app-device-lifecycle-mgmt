@@ -31,10 +31,10 @@ class HardwareLCMFilterSet(NautobotFilterSet):
     q = django_filters.CharFilter(method="search", label="Search")
 
     device_type = django_filters.ModelMultipleChoiceFilter(
-        field_name="device_type__slug",
+        field_name="device_type__model",
         queryset=DeviceType.objects.all(),
-        to_field_name="slug",
-        label="Device Type (Slug)",
+        to_field_name="model",
+        label="Device Type (Model)",
     )
     device_type_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device_type", queryset=DeviceType.objects.all(), label="Device Type"
@@ -107,10 +107,10 @@ class SoftwareLCMFilterSet(NautobotFilterSet):
     q = django_filters.CharFilter(method="search", label="Search")
 
     device_platform = django_filters.ModelMultipleChoiceFilter(
-        field_name="device_platform__slug",
+        field_name="device_platform__model",
         queryset=Platform.objects.all(),
-        to_field_name="slug",
-        label="Device Platform (Slug)",
+        to_field_name="model",
+        label="Device Platform (Model)",
     )
 
     documentation_url = django_filters.CharFilter(
@@ -189,10 +189,10 @@ class SoftwareImageLCMFilterSet(NautobotFilterSet):
         label="Object Tags",
     )
     object_tags = django_filters.ModelMultipleChoiceFilter(
-        field_name="object_tags__slug",
+        field_name="object_tags__name",
         queryset=Tag.objects.all(),
-        to_field_name="slug",
-        label="Object Tags (slug)",
+        to_field_name="name",
+        label="Object Tags (name)",
     )
     device_name = django_filters.CharFilter(method="device", label="Device Name")
     device_id = django_filters.CharFilter(method="device", label="Device ID")
@@ -308,10 +308,10 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         label="Object Tags",
     )
     object_tags = django_filters.ModelMultipleChoiceFilter(
-        field_name="object_tags__slug",
+        field_name="object_tags__name",
         queryset=Tag.objects.all(),
-        to_field_name="slug",
-        label="Object Tags (slug)",
+        to_field_name="name",
+        label="Object Tags (name)",
     )
     device_name = django_filters.CharFilter(method="device", label="Device Name")
     device_id = django_filters.CharFilter(method="device", label="Device ID")
