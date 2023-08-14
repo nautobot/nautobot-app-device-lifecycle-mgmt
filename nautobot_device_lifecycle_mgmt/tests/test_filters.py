@@ -1,35 +1,35 @@
 """Test filters for lifecycle management."""
 from datetime import date
 
-from django.test import TestCase
-from django.contrib.contenttypes.models import ContentType
 import time_machine
-
-from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site, Platform
-from nautobot.extras.models import Status
+from django.contrib.contenttypes.models import ContentType
+from django.test import TestCase
+from nautobot.dcim.models import Device, DeviceType, Location, LocationType, Manufacturer, Platform
+from nautobot.extras.models import Role, Status
 
 from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
-from nautobot_device_lifecycle_mgmt.models import (
-    HardwareLCM,
-    SoftwareLCM,
-    ValidatedSoftwareLCM,
-    DeviceSoftwareValidationResult,
-    InventoryItemSoftwareValidationResult,
-    CVELCM,
-    VulnerabilityLCM,
-    SoftwareImageLCM,
-)
 from nautobot_device_lifecycle_mgmt.filters import (
+    CVELCMFilterSet,
+    DeviceSoftwareValidationResultFilterSet,
     HardwareLCMFilterSet,
+    InventoryItemSoftwareValidationResultFilterSet,
+    SoftwareImageLCMFilterSet,
     SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
-    DeviceSoftwareValidationResultFilterSet,
-    InventoryItemSoftwareValidationResultFilterSet,
-    CVELCMFilterSet,
     VulnerabilityLCMFilterSet,
-    SoftwareImageLCMFilterSet,
 )
-from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
+from nautobot_device_lifecycle_mgmt.models import (
+    CVELCM,
+    DeviceSoftwareValidationResult,
+    HardwareLCM,
+    InventoryItemSoftwareValidationResult,
+    SoftwareImageLCM,
+    SoftwareLCM,
+    ValidatedSoftwareLCM,
+    VulnerabilityLCM,
+)
+
+from .conftest import create_cves, create_devices, create_inventory_items, create_softwares
 
 
 class HardwareLCMTestCase(TestCase):
@@ -39,25 +39,32 @@ class HardwareLCMTestCase(TestCase):
     filterset = HardwareLCMFilterSet
 
     def setUp(self):
-        self.manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        self.manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
         self.device_types = (
-            DeviceType.objects.create(model="c9300-24", slug="c9300-24", manufacturer=self.manufacturer),
-            DeviceType.objects.create(model="c9300-48", slug="c9300-48", manufacturer=self.manufacturer),
+            DeviceType.objects.get_or_create(model="c9300-24", manufacturer=self.manufacturer)[0],
+            DeviceType.objects.get_or_create(model="c9300-48", manufacturer=self.manufacturer)[0],
         )
-        self.device_role = DeviceRole.objects.create(name="Core Switch", slug="core-switch")
-        self.site = Site.objects.create(name="Test 1", slug="test-1")
+        devicerole, _ = Role.objects.get_or_create(name="switch", color="ff0000")
+        location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
+        location_type_location_a.content_types.add(
+            ContentType.objects.get_for_model(Device),
+        )
+        location_status = Status.objects.get_for_model(Location).first()
+        location1, _ = Location.objects.get_or_create(
+            name="Location1", location_type=location_type_location_a, status=location_status
+        )
         self.devices = (
             Device.objects.create(
                 name="r1",
                 device_type=self.device_types[0],
-                device_role=self.device_role,
-                site=self.site,
+                role=self.devicerole,
+                location=self.location1,
             ),
             Device.objects.create(
                 name="r2",
                 device_type=self.device_types[1],
-                device_role=self.device_role,
-                site=self.site,
+                role=self.devicerole,
+                location=self.location1,
             ),
         )
         self.notices = (
@@ -119,12 +126,12 @@ class HardwareLCMTestCase(TestCase):
         params = {"documentation_url": "https://cisco.com/c9300-48"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
-    def test_device_type_slug_single(self):
+    def test_device_type_name_single(self):
         """Test device_type filter."""
         params = {"device_type": ["c9300-24"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
-    def test_device_types_slug_all(self):
+    def test_device_types_name_all(self):
         """Test device_type filter."""
         params = {"device_type": ["c9300-24", "c9300-48"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
@@ -158,8 +165,8 @@ class SoftwareLCMFilterSetTestCase(TestCase):
 
     def setUp(self):
         device_platforms = (
-            Platform.objects.create(name="Cisco IOS", slug="cisco_ios"),
-            Platform.objects.create(name="Arista EOS", slug="arista_eos"),
+            Platform.objects.get_or_create(name="cisco_ios")[0],
+            Platform.objects.get_or_create(name="arista_eos")[0],
         )
 
         self.softwares = (
@@ -224,8 +231,8 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
 
     def setUp(self):
         device_platforms = (
-            Platform.objects.create(name="Cisco IOS", slug="cisco_ios"),
-            Platform.objects.create(name="Arista EOS", slug="arista_eos"),
+            Platform.objects.get_or_create(name="cisco_ios")[0],
+            Platform.objects.get_or_create(name="arista_eos")[0],
         )
 
         self.softwares = (
@@ -241,8 +248,8 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
             ),
         )
 
-        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
-        device_type = DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000")
+        manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+        device_type, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="ASR-1000")
 
         validated_software = ValidatedSoftwareLCM(
             software=self.softwares[0],
@@ -349,12 +356,12 @@ class DeviceSoftwareValidationResultFilterSetTestCase(TestCase):
         params = {"device": ["sw1", "sw2", "sw3"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
-    def test_device_type_slug(self):
+    def test_device_type_name(self):
         """Test device_type filter."""
         params = {"device_type": ["6509-E"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
-    def test_device_roles_slug(self):
+    def test_device_roles_name(self):
         """Test device_roles filter."""
         params = {"device_role": ["core-switch"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
@@ -367,7 +374,7 @@ class DeviceSoftwareValidationResultFilterSetTestCase(TestCase):
 
     def test_device_role_id(self):
         """Test device_role_id filter."""
-        device_role = DeviceRole.objects.get(slug="core-switch")
+        device_role = Role.objects.get(name="core-switch")
         params = {"device_role_id": [device_role.id]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
@@ -439,12 +446,12 @@ class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
         params = {"inventory_item": ["SUP2T Card", "100GBASE-SR4 QSFP Transceiver", "48x RJ-45 Line Card"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
-    def test_inventory_items_device_type_slug(self):
+    def test_inventory_items_device_type_name(self):
         """Test device_type filter."""
         params = {"device_type": ["6509-E"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
-    def test_inventory_items_device_roles_slug(self):
+    def test_inventory_items_device_roles_name(self):
         """Test device_roles filter."""
         params = {"device_role": ["core-switch"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
@@ -457,7 +464,7 @@ class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
 
     def test_inventory_items_device_role_id(self):
         """Test device_role_id filter."""
-        device_role = DeviceRole.objects.get(slug="core-switch")
+        device_role = Role.objects.get(name="core-switch")
         params = {"device_role_id": [device_role.id]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
@@ -495,11 +502,9 @@ class CVELCMTestCase(TestCase):
 
     def setUp(self):
         cve_ct = ContentType.objects.get_for_model(CVELCM)
-        fixed = Status.objects.create(name="Fixed", slug="fixed", color="4caf50", description="Unit has been fixed")
+        fixed = Status.objects.create(name="Fixed", color="4caf50", description="Unit has been fixed")
         fixed.content_types.set([cve_ct])
-        not_fixed = Status.objects.create(
-            name="Not Fixed", slug="not-fixed", color="f44336", description="Unit is not fixed"
-        )
+        not_fixed = Status.objects.create(name="Not Fixed", color="f44336", description="Unit is not fixed")
         not_fixed.content_types.set([cve_ct])
 
         CVELCM.objects.create(
@@ -648,7 +653,7 @@ class VulnerabilityLCMTestCase(TestCase):
         cves = create_cves()
         softwares = create_softwares()
         vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
-        fix_me = Status.objects.create(name="Fix Me", slug="fix_me", color="4caf50", description="Please fix me.")
+        fix_me = Status.objects.create(name="Fix Me", color="4caf50", description="Please fix me.")
         fix_me.content_types.set([vuln_ct])
 
         VulnerabilityLCM.objects.create(
@@ -686,7 +691,7 @@ class VulnerabilityLCMTestCase(TestCase):
 
     def test_q_software_device_platform(self):
         """Test q filter to find single record based on Software Device Platform name."""
-        params = {"q": "Cisco IOS"}
+        params = {"q": "cisco_ios"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_q_software_version(self):
@@ -702,14 +707,12 @@ class SoftwareImageLCMFilterSetTestCase(TestCase):
     filterset = SoftwareImageLCMFilterSet
 
     def setUp(self):
-        manufacturer_cisco, _ = Manufacturer.objects.get_or_create(name="Cisco", slug="cisco")
-        manufacturer_arista, _ = Manufacturer.objects.get_or_create(name="Arista", slug="arista")
-        device_platform_cisco, _ = Platform.objects.get_or_create(
-            name="Cisco IOS", slug="cisco_ios", manufacturer=manufacturer_cisco
+        manufacturer_cisco, _ = Manufacturer.objects.get_or_create(
+            name="Cisco",
         )
-        device_platform_arista, _ = Platform.objects.get_or_create(
-            name="Arista EOS", slug="arista_eos", manufacturer=manufacturer_arista
-        )
+        manufacturer_arista, _ = Manufacturer.objects.get_or_create(name="Arista")
+        device_platform_cisco, _ = Platform.objects.get_or_create(name="cisco_ios", manufacturer=manufacturer_cisco)
+        device_platform_arista, _ = Platform.objects.get_or_create(name="arista_eos", manufacturer=manufacturer_arista)
 
         self.softwares = (
             SoftwareLCM.objects.create(
@@ -724,12 +727,8 @@ class SoftwareImageLCMFilterSetTestCase(TestCase):
             ),
         )
 
-        devicetype_1, _ = DeviceType.objects.get_or_create(
-            manufacturer=manufacturer_cisco, model="ASR-1000", slug="asr-1000"
-        )
-        self.devicetype_2, _ = DeviceType.objects.get_or_create(
-            manufacturer=manufacturer_arista, model="7150S", slug="7150s"
-        )
+        devicetype_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_cisco, model="ASR-1000")
+        self.devicetype_2, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_arista, model="7150S")
 
         soft_image = SoftwareImageLCM(
             image_file_name="ios17.3.3md.img",

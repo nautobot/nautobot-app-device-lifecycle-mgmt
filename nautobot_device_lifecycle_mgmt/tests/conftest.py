@@ -1,44 +1,54 @@
 """Params for testing."""
 from datetime import date
-from nautobot.dcim.models import DeviceType, Manufacturer, Platform, Site, Device, DeviceRole, InventoryItem
-from nautobot.extras.models import Status
+
+from django.contrib.contenttypes.models import ContentType
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, LocationType, Manufacturer, Platform
+from nautobot.extras.models import Role, Status
 
 from nautobot_device_lifecycle_mgmt.models import CVELCM, SoftwareLCM, ValidatedSoftwareLCM
 
 
 def create_devices():
     """Create devices for tests."""
-    device_platform, _ = Platform.objects.get_or_create(name="Cisco IOS", slug="cisco_ios")
-    manufacturer, _ = Manufacturer.objects.get_or_create(slug="cisco")
-    device_type, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="6509-E", slug="6509-e")
-    device_role, _ = DeviceRole.objects.get_or_create(name="Core Switch", slug="core-switch")
-    site, _ = Site.objects.get_or_create(name="Test 1", slug="test-1")
-    status_active = Status.objects.get(slug="active")
+    device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
+    manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+    device_type, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="6509-E")
+    device_role, _ = Role.objects.get_or_create(name="core-switch")
+    device_role.content_types.add(ContentType.objects.get_for_model(Device))
+    location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
+    location_type_location_a.content_types.add(
+        ContentType.objects.get_for_model(Device),
+    )
+    location_status = Status.objects.get_for_model(Location).first()
+    location1, _ = Location.objects.get_or_create(
+        name="Location1", location_type=location_type_location_a, status=location_status
+    )
+    device_status = Status.objects.get_for_model(Device).first()
 
     return (
         Device.objects.create(
             name="sw1",
             platform=device_platform,
             device_type=device_type,
-            device_role=device_role,
-            site=site,
-            status=status_active,
+            role=device_role,
+            location=location1,
+            status=device_status,
         ),
         Device.objects.create(
             name="sw2",
             platform=device_platform,
             device_type=device_type,
-            device_role=device_role,
-            site=site,
-            status=status_active,
+            role=device_role,
+            location=location1,
+            status=device_status,
         ),
         Device.objects.create(
             name="sw3",
             platform=device_platform,
             device_type=device_type,
-            device_role=device_role,
-            site=site,
-            status=status_active,
+            role=device_role,
+            location=location1,
+            status=device_status,
         ),
     )
 
@@ -46,7 +56,7 @@ def create_devices():
 def create_inventory_items():
     """Create inventory items for tests."""
     devices = create_devices()
-    manufacturer, _ = Manufacturer.objects.get_or_create(slug="cisco")
+    manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
 
     return (
         InventoryItem.objects.create(
@@ -97,8 +107,8 @@ def create_cves():
 
 def create_softwares():
     """Create SoftwareLCM items for tests."""
-    device_platform_ios, _ = Platform.objects.get_or_create(name="Cisco IOS", slug="cisco_ios")
-    device_platform_eos, _ = Platform.objects.get_or_create(name="Arista EOS", slug="arista_eos")
+    device_platform_ios, _ = Platform.objects.get_or_create(name="cisco_ios")
+    device_platform_eos, _ = Platform.objects.get_or_create(name="arista_eos")
     softwares = (
         SoftwareLCM.objects.create(device_platform=device_platform_ios, version="15.1(2)M"),
         SoftwareLCM.objects.create(device_platform=device_platform_ios, version="4.22.9M"),
@@ -111,9 +121,9 @@ def create_softwares():
 
 def create_validated_softwares():
     """Create ValidatedSoftwareLCM"""
-    manufacturer, _ = Manufacturer.objects.get_or_create(slug="cisco")
-    device_platform_ios, _ = Platform.objects.get_or_create(name="Cisco IOS", slug="cisco_ios")
-    device_type = DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000")
+    manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+    device_platform_ios, _ = Platform.objects.get_or_create(name="cisco_ios")
+    device_type, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="ASR-1000")
     software_one = SoftwareLCM.objects.create(
         device_platform=device_platform_ios,
         version="17.3.3 MD",

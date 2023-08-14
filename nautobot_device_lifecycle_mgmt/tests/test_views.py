@@ -4,21 +4,21 @@ import datetime
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
-
 from nautobot.apps.testing import ViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer
-from nautobot.users.models import ObjectPermission
 from nautobot.extras.models import Status
+from nautobot.users.models import ObjectPermission
 
 from nautobot_device_lifecycle_mgmt.models import (
-    HardwareLCM,
-    DeviceSoftwareValidationResult,
-    InventoryItemSoftwareValidationResult,
     CVELCM,
-    VulnerabilityLCM,
+    DeviceSoftwareValidationResult,
+    HardwareLCM,
+    InventoryItemSoftwareValidationResult,
     SoftwareImageLCM,
+    VulnerabilityLCM,
 )
-from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
+
+from .conftest import create_cves, create_devices, create_inventory_items, create_softwares
 
 User = get_user_model()
 
@@ -37,9 +37,9 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     @classmethod
     def setUpTestData(cls):  # pylint: disable=invalid-name
         """Create a superuser and token for API calls."""
-        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
         device_types = tuple(
-            DeviceType.objects.create(model=model, slug=model, manufacturer=manufacturer)
+            DeviceType.objects.get_or_create(model=model, manufacturer=manufacturer)[0]
             for model in ["c9300-24", "c9300-48", "c9500-24", "c9500-48", "c9200-24", "c9200-48"]
         )
 
@@ -66,6 +66,9 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
         pass
 
     def test_list_objects_with_permission(self):
+        pass
+
+    def test_bulk_import_objects_with_permission_csv_file(self):
         pass
 
 
@@ -191,10 +194,19 @@ class ValidatedSoftwareInventoryItemReportViewTest(ViewTestCases.ListObjectsView
     def test_get_object_notes(self):
         pass
 
+    def test_list_objects_filtered(self):
+        pass
+
+    def test_list_objects_unknown_filter_strict_filtering(self):
+        pass
+
     def test_list_objects_unknown_filter_no_strict_filtering(self):
         pass
 
     def test_list_objects_with_permission(self):
+        pass
+
+    def test_list_objects_with_constrained_permission(self):
         pass
 
     # Disable Temp until we get headers fixed for csv
@@ -210,7 +222,6 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
 
     form_data = {
         "name": "Test 1",
-        "slug": "test-1",
         "published_date": datetime.date(2022, 1, 1),
         "link": "https://www.cvedetails.com/cve/CVE-2022-0001/",
     }
@@ -256,15 +267,11 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
 
         vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
 
-        exempt_status = Status.objects.create(
-            name="Exempt", slug="exempt", color="4caf50", description="This unit is exempt."
-        )
+        exempt_status = Status.objects.create(name="Exempt", color="4caf50", description="This unit is exempt.")
         exempt_status.content_types.set([vuln_ct])
         cls.bulk_edit_data = {"status": exempt_status.id}
 
-        forced_status = Status.objects.create(
-            name="Forced", slug="forced", color="4caf50", description="This unit is forced."
-        )
+        forced_status = Status.objects.create(name="Forced", color="4caf50", description="This unit is forced.")
         forced_status.content_types.set([vuln_ct])
 
         for i, cve in enumerate(cves):
@@ -303,6 +310,8 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     def test_list_objects_with_permission(self):
         pass
 
+    def test_bulk_edit_objects_with_constrained_permission(self):
+        pass
 
 class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the SoftwareImageLCM views."""
@@ -313,9 +322,9 @@ class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     def setUpTestData(cls):  # pylint: disable=invalid-name
         """Set up test objects."""
         softwares = create_softwares()
-        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
-        device_type1 = DeviceType.objects.create(manufacturer=manufacturer, model="6509", slug="6509")
-        device_type2 = DeviceType.objects.create(manufacturer=manufacturer, model="6509-E", slug="6509-e")
+        manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+        device_type1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="6509")
+        device_type2, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="6509-E")
 
         softimage = SoftwareImageLCM.objects.create(
             image_file_name="ios15.1.2m.img",

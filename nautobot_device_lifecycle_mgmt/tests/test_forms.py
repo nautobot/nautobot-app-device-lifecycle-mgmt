@@ -1,18 +1,17 @@
 """Test forms."""
-from django.test import TestCase
 from django.contrib.contenttypes.models import ContentType
-
-from nautobot.dcim.models import DeviceType, Manufacturer, Device, DeviceRole, Site, InventoryItem, Platform
-from nautobot.extras.models import Status, Tag
+from django.test import TestCase
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, LocationType, Manufacturer, Platform
+from nautobot.extras.models import Role, Status, Tag
 
 from nautobot_device_lifecycle_mgmt.forms import (
+    CVELCMForm,
     HardwareLCMForm,
+    SoftwareImageLCMForm,
     SoftwareLCMForm,
     ValidatedSoftwareLCMForm,
-    CVELCMForm,
-    SoftwareImageLCMForm,
 )
-from nautobot_device_lifecycle_mgmt.models import SoftwareImageLCM, SoftwareLCM, CVELCM
+from nautobot_device_lifecycle_mgmt.models import CVELCM, SoftwareImageLCM, SoftwareLCM
 
 
 class HardwareLCMFormTest(TestCase):
@@ -20,15 +19,22 @@ class HardwareLCMFormTest(TestCase):
 
     def setUp(self):
         """Create necessary objects."""
-        self.manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
-        self.device_type = DeviceType.objects.create(model="c9300-24", slug="c9300-24", manufacturer=self.manufacturer)
-        self.device_role = DeviceRole.objects.create(name="Backbone Switch", slug="backbone-switch")
-        self.site = Site.objects.create(name="Test 1", slug="test-1")
+        self.manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+        self.device_type, _ = DeviceType.objects.get_or_create(model="c9300-24", manufacturer=self.manufacturer)
+        self.devicerole, _ = Role.objects.get_or_create(name="backbone-switch")
+        location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
+        location_type_location_a.content_types.add(
+            ContentType.objects.get_for_model(Device),
+        )
+        location_status = Status.objects.get_for_model(Location).first()
+        self.location1, _ = Location.objects.get_or_create(
+            name="Location1", location_type=location_type_location_a, status=location_status
+        )
         self.device = Device.objects.create(
             name="Test-9300-Switch",
             device_type=self.device_type,
-            device_role=self.device_role,
-            site=self.site,
+            role=self.devicerole,
+            location=self.location1,
         )
         self.inventory_item = InventoryItem.objects.create(
             device=self.device,
@@ -156,7 +162,7 @@ class SoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
 
     def setUp(self):
         """Create necessary objects."""
-        self.device_platform = Platform.objects.create(name="Cisco IOS", slug="cisco_ios")
+        self.device_platform = Platform.objects.create(name="cisco_ios")
 
     def test_specifying_all_fields(self):
         data = {
@@ -217,7 +223,7 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
 
     def setUp(self):
         """Create necessary objects."""
-        device_platform = Platform.objects.create(name="Cisco IOS", slug="cisco_ios")
+        device_platform = Platform.objects.create(name="cisco_ios")
         self.software = SoftwareLCM.objects.create(
             **{
                 "device_platform": device_platform,
@@ -230,13 +236,20 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
             }
         )
 
-        status_active = Status.objects.get(slug="active")
-        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
-        site = Site.objects.create(name="Site 1", slug="site-1")
-        devicerole = DeviceRole.objects.create(name="Router", slug="router", color="ff0000")
-        self.devicetype_1 = DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000")
+        device_status = Status.objects.get_for_model(Device).first()
+        manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+        location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
+        location_type_location_a.content_types.add(
+            ContentType.objects.get_for_model(Device),
+        )
+        location_status = Status.objects.get_for_model(Location).first()
+        location1, _ = Location.objects.get_or_create(
+            name="Location1", location_type=location_type_location_a, status=location_status
+        )
+        devicerole, _ = Role.objects.get_or_create(name="router")
+        self.devicetype_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="ASR-1000")
         self.device_1 = Device.objects.create(
-            device_type=self.devicetype_1, device_role=devicerole, name="Device 1", site=site, status=status_active
+            device_type=self.devicetype_1, role=devicerole, name="Device 1", location=location1, status=device_status
         )
         self.inventoryitem_1 = InventoryItem.objects.create(device=self.device_1, name="SwitchModule1")
 
@@ -328,9 +341,7 @@ class CVELCMFormTest(TestCase):
     def setUp(self):
         """Create necessary objects."""
         self.cve_ct = ContentType.objects.get_for_model(CVELCM)
-        self.status = Status.objects.create(
-            name="Fixed", slug="fixed", color="4caf50", description="Unit has been fixed"
-        )
+        self.status = Status.objects.create(name="Fixed", color="4caf50", description="Unit has been fixed")
         self.status.content_types.set([self.cve_ct])
 
     def test_specifying_all_fields(self):
@@ -371,11 +382,9 @@ class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member,too-many-
 
     def setUp(self):
         """Create necessary objects."""
-        manufacturer_cisco, _ = Manufacturer.objects.get_or_create(name="Cisco", slug="cisco")
-        manufacturer_arista, _ = Manufacturer.objects.get_or_create(name="Arista", slug="arista")
-        device_platform, _ = Platform.objects.get_or_create(
-            name="Cisco IOS", slug="cisco_ios", manufacturer=manufacturer_cisco
-        )
+        manufacturer_cisco, _ = Manufacturer.objects.get_or_create(name="Cisco")
+        manufacturer_arista, _ = Manufacturer.objects.get_or_create(name="Arista")
+        device_platform, _ = Platform.objects.get_or_create(name="cisco_ios", manufacturer=manufacturer_cisco)
         self.software_1 = SoftwareLCM.objects.create(
             **{
                 "device_platform": device_platform,
@@ -399,22 +408,23 @@ class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member,too-many-
             }
         )
 
-        self.devicetype_1, _ = DeviceType.objects.get_or_create(
-            manufacturer=manufacturer_cisco, model="ASR-1000", slug="asr-1000"
+        self.devicetype_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_cisco, model="ASR-1000")
+        self.devicetype_2, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_arista, model="7150S")
+        self.devicetype_3, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_cisco, model="7124")
+        self.tag_1, _ = Tag.objects.get_or_create(name="lcm")
+        self.tag_2, _ = Tag.objects.get_or_create(name="lcm2")
+        device_status = Status.objects.get_for_model(Device).first()
+        location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
+        location_type_location_a.content_types.add(
+            ContentType.objects.get_for_model(Device),
         )
-        self.devicetype_2, _ = DeviceType.objects.get_or_create(
-            manufacturer=manufacturer_arista, model="7150S", slug="7150s"
+        location_status = Status.objects.get_for_model(Location).first()
+        location1, _ = Location.objects.get_or_create(
+            name="Location1", location_type=location_type_location_a, status=location_status
         )
-        self.devicetype_3, _ = DeviceType.objects.get_or_create(
-            manufacturer=manufacturer_cisco, model="7124", slug="7124"
-        )
-        self.tag_1, _ = Tag.objects.get_or_create(name="lcm", slug="lcm")
-        self.tag_2, _ = Tag.objects.get_or_create(name="lcm2", slug="lcm2")
-        status_active, _ = Status.objects.get_or_create(slug="active")
-        site, _ = Site.objects.get_or_create(name="Site 1", slug="site-1")
-        devicerole, _ = DeviceRole.objects.get_or_create(name="Router", slug="router", defaults={"color": "ff0000"})
+        devicerole, _ = Role.objects.get_or_create(name="router", defaults={"color": "ff0000"})
         self.device_1, _ = Device.objects.get_or_create(
-            device_type=self.devicetype_1, device_role=devicerole, name="Device 1", site=site, status=status_active
+            device_type=self.devicetype_1, role=devicerole, name="Device 1", location=location1, status=device_status
         )
         self.inventoryitem_1, _ = InventoryItem.objects.get_or_create(device=self.device_1, name="SwitchModule1")
         self.inventoryitem_2, _ = InventoryItem.objects.get_or_create(device=self.device_1, name="SwitchModule2")

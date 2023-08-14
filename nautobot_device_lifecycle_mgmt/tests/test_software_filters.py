@@ -1,14 +1,10 @@
 """nautobot_device_lifecycle_mgmt test class for software queryset filters."""
+from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, LocationType, Manufacturer, Platform
+from nautobot.extras.models import Relationship, RelationshipAssociation, Role, Status, Tag
 
-from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Manufacturer, Platform, Site
-from nautobot.extras.models import Relationship, RelationshipAssociation, Tag
-
-from nautobot_device_lifecycle_mgmt.models import (
-    SoftwareLCM,
-    SoftwareImageLCM,
-)
-
+from nautobot_device_lifecycle_mgmt.models import SoftwareImageLCM, SoftwareLCM
 from nautobot_device_lifecycle_mgmt.software_filters import DeviceSoftwareImageFilter, InventoryItemSoftwareImageFilter
 
 
@@ -16,10 +12,8 @@ class DeviceSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too-many-i
     """Tests for DeviceSoftwareImageFilter."""
 
     def setUp(self):
-        manufacturer_arista, _ = Manufacturer.objects.get_or_create(name="Arista", slug="arista")
-        device_platform_arista, _ = Platform.objects.get_or_create(
-            name="Arista EOS", slug="arista_eos", manufacturer=manufacturer_arista
-        )
+        manufacturer_arista, _ = Manufacturer.objects.get_or_create(name="Arista")
+        device_platform_arista, _ = Platform.objects.get_or_create(name="arista_eos", manufacturer=manufacturer_arista)
 
         self.software = SoftwareLCM.objects.create(
             device_platform=device_platform_arista,
@@ -27,26 +21,27 @@ class DeviceSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too-many-i
             release_date="2021-01-10",
         )
 
-        self.devicetype_1, _ = DeviceType.objects.get_or_create(
-            manufacturer=manufacturer_arista, model="7124", slug="7124"
+        self.devicetype_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_arista, model="7124")
+        self.devicetype_2, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_arista, model="7150S")
+        self.devicetype_3, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_arista, model="7500")
+        devicerole, _ = Role.objects.get_or_create(name="switch", color="ff0000")
+        location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
+        location_type_location_a.content_types.add(
+            ContentType.objects.get_for_model(Device),
         )
-        self.devicetype_2, _ = DeviceType.objects.get_or_create(
-            manufacturer=manufacturer_arista, model="7150S", slug="7150s"
+        location_status = Status.objects.get_for_model(Location).first()
+        location1, _ = Location.objects.get_or_create(
+            name="Location1", location_type=location_type_location_a, status=location_status
         )
-        self.devicetype_3, _ = DeviceType.objects.get_or_create(
-            manufacturer=manufacturer_arista, model="7500", slug="7500"
-        )
-        devicerole = DeviceRole.objects.create(name="Switch", slug="switch", color="ff0000")
-        site = Site.objects.create(name="Site1", slug="site1")
-        self.tag_1, _ = Tag.objects.get_or_create(name="lcm", slug="lcm")
-        self.tag_2, _ = Tag.objects.get_or_create(name="lcm2", slug="lcm2")
-        device_soft_rel = Relationship.objects.get(slug="device_soft")
+        self.tag_1, _ = Tag.objects.get_or_create(name="lcm")
+        self.tag_2, _ = Tag.objects.get_or_create(name="lcm2")
+        device_soft_rel = Relationship.objects.get(key="device_soft")
 
         self.device_1 = Device(
             name="Device1",
             device_type=self.devicetype_1,
-            device_role=devicerole,
-            site=site,
+            role=devicerole,
+            location=location1,
         )
         self.device_1.tags.add(self.tag_1)
         self.device_1.save()
@@ -59,8 +54,8 @@ class DeviceSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too-many-i
         self.device_2 = Device(
             name="Device2",
             device_type=self.devicetype_2,
-            device_role=devicerole,
-            site=site,
+            role=devicerole,
+            location=location1,
         )
         self.device_2.save()
         RelationshipAssociation.objects.create(
@@ -72,8 +67,8 @@ class DeviceSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too-many-i
         self.device_3 = Device(
             name="Device3",
             device_type=self.devicetype_1,
-            device_role=devicerole,
-            site=site,
+            role=devicerole,
+            location=location1,
         )
         self.device_3.save()
         RelationshipAssociation.objects.create(
@@ -85,8 +80,8 @@ class DeviceSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too-many-i
         self.device_4 = Device(
             name="Device4",
             device_type=self.devicetype_3,
-            device_role=devicerole,
-            site=site,
+            role=devicerole,
+            location=location1,
         )
         self.device_4.tags.add(self.tag_2)
         self.device_4.save()
@@ -168,10 +163,8 @@ class InventoryItemSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too
     """Tests for InventoryItemSoftwareImageFilter."""
 
     def setUp(self):
-        manufacturer_arista, _ = Manufacturer.objects.get_or_create(name="Arista", slug="arista")
-        device_platform_arista, _ = Platform.objects.get_or_create(
-            name="Arista EOS", slug="arista_eos", manufacturer=manufacturer_arista
-        )
+        manufacturer_arista, _ = Manufacturer.objects.get_or_create(name="Arista")
+        device_platform_arista, _ = Platform.objects.get_or_create(name="arista_eos", manufacturer=manufacturer_arista)
 
         self.software = SoftwareLCM.objects.create(
             device_platform=device_platform_arista,
@@ -179,20 +172,25 @@ class InventoryItemSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too
             release_date="2021-01-10",
         )
 
-        self.devicetype_1, _ = DeviceType.objects.get_or_create(
-            manufacturer=manufacturer_arista, model="7124", slug="7124"
+        self.devicetype_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_arista, model="7124")
+        devicerole, _ = Role.objects.get_or_create(name="switch", color="ff0000")
+        location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
+        location_type_location_a.content_types.add(
+            ContentType.objects.get_for_model(Device),
         )
-        devicerole = DeviceRole.objects.create(name="Switch", slug="switch", color="ff0000")
-        site = Site.objects.create(name="Site1", slug="site1")
-        self.tag_1, _ = Tag.objects.get_or_create(name="lcm", slug="lcm")
-        self.tag_2, _ = Tag.objects.get_or_create(name="lcm2", slug="lcm2")
-        invitem_soft_rel = Relationship.objects.get(slug="inventory_item_soft")
+        location_status = Status.objects.get_for_model(Location).first()
+        location1, _ = Location.objects.get_or_create(
+            name="Location1", location_type=location_type_location_a, status=location_status
+        )
+        self.tag_1, _ = Tag.objects.get_or_create(name="lcm")
+        self.tag_2, _ = Tag.objects.get_or_create(name="lcm2")
+        invitem_soft_rel = Relationship.objects.get(key="inventory_item_soft")
 
         self.device_1 = Device.objects.create(
             name="Device1",
             device_type=self.devicetype_1,
-            device_role=devicerole,
-            site=site,
+            role=devicerole,
+            location=location1,
         )
 
         self.inventoryitem_1 = InventoryItem.objects.create(device=self.device_1, name="SwitchModule1")
