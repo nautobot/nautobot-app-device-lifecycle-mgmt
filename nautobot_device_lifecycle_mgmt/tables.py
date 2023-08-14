@@ -1,5 +1,6 @@
 """Tables implementation for the Lifecycle Management plugin."""
 
+from django.db.models import Case, F, When
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 import django_tables2 as tables
@@ -25,6 +26,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     DeviceSoftwareValidationResult,
     InventoryItemSoftwareValidationResult,
     SoftwareImageLCM,
+    HardwareReplacementLCM,
 )
 
 
@@ -598,5 +600,57 @@ class VulnerabilityLCMTable(StatusTableMixin, BaseTable):
             "device",
             "inventory_item",
             "status",
+            "actions",
+        )
+
+
+class HardwareReplacementLCMTable(BaseTable):
+    """Table for list view."""
+
+    pk = ToggleColumn()
+    name = tables.LinkColumn(
+        "plugins:nautobot_device_lifecycle_mgmt:hardwarereplacementlcm",
+        text=lambda record: record,
+        args=[
+            A("pk"),
+        ],
+        orderable=False,
+    )
+    actions = ButtonsColumn(HardwareReplacementLCM, buttons=("changelog", "edit", "delete"))
+
+    def order_current_product(self, queryset, is_descending):  # pylint: disable=no-self-use
+        """Order the table based on current product."""
+        queryset = queryset.annotate(
+            current_product_anno=Case(
+                When(current_inventory_item=None, then=F("current_device_type")),
+                When(current_device_type=None, then=F("current_inventory_item")),
+            )
+        ).order_by(("-" if is_descending else "") + "current_product_anno")
+        return (queryset, True)
+
+    def order_replacement_product(self, queryset, is_descending):  # pylint: disable=no-self-use
+        """Order the table based on replacement product."""
+        queryset = queryset.annotate(
+            replacement_product_anno=Case(
+                When(replacement_inventory_item=None, then=F("replacement_device_type")),
+                When(replacement_device_type=None, then=F("replacement_inventory_item")),
+            )
+        ).order_by(("-" if is_descending else "") + "replacement_product_anno")
+        return (queryset, True)
+
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = HardwareReplacementLCM
+        fields = (
+            "pk",
+            "name",
+            "current_product",
+            "replacement_product",
+            "device_roles",
+            "object_tags",
+            "valid_since",
+            "valid_until",
+            "use_case",
             "actions",
         )

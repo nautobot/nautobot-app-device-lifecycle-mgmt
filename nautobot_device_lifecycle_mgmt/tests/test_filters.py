@@ -6,7 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 import time_machine
 
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site, Platform
-from nautobot.extras.models import Status
+from nautobot.extras.models import Status, Tag
 
 from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.models import (
@@ -18,6 +18,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     VulnerabilityLCM,
     SoftwareImageLCM,
+    HardwareReplacementLCM,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -28,6 +29,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     CVELCMFilterSet,
     VulnerabilityLCMFilterSet,
     SoftwareImageLCMFilterSet,
+    HardwareReplacementLCMFilterSet,
 )
 from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
 
@@ -777,4 +779,59 @@ class SoftwareImageLCMFilterSetTestCase(TestCase):
     def test_device_types(self):
         """Test device_types filter."""
         params = {"device_types": [self.devicetype_2.model]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+
+class HardwareReplacementLCMFilterSetTestCase(TestCase):
+    """Tests for SoftwareImageLCMFilterSet."""
+
+    queryset = HardwareReplacementLCM.objects.all()
+    filterset = HardwareReplacementLCMFilterSet
+
+    def setUp(self):
+        manufacturer = Manufacturer.objects.get_or_create(name="Cisco", slug="cisco")[0]
+        self.device_types = tuple(
+            DeviceType.objects.create(model=model, slug=model, manufacturer=manufacturer)
+            for model in ["c9300-24", "c9300-48", "c9500-24", "c9500-48", "c9200-24", "c9200-48", "ws-3560", "ws-3650"]
+        )
+        self.device_role = DeviceRole.objects.get_or_create(name="Test Role")[0]
+        self.tag = Tag.objects.get_or_create(name="Test Tag", slug="test-tag")[0]
+        self.inventory_items = create_inventory_items()
+        hw_replace = HardwareReplacementLCM(
+            current_device_type=self.device_types[-1],
+            replacement_device_type=self.device_types[1],
+            valid_since=date(2023, 8, 1),
+            valid_until=date(2023, 12, 31),
+        )
+        hw_replace.device_roles.set([self.device_role])
+        hw_replace.save()
+        hw_replace = HardwareReplacementLCM(
+            current_device_type=self.device_types[-2],
+            replacement_device_type=self.device_types[2],
+            valid_since=date(2023, 1, 1),
+            valid_until=date(2023, 12, 31),
+        )
+        hw_replace.object_tags.set([self.tag])
+        hw_replace.save()
+
+    def test_current_device_type(self):
+        params = {"current_device_type": [self.device_types[-1]]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_replacement_device_type(self):
+        params = {"replacement_device_type": [self.device_types[2]]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_device_roles(self):
+        params = {"device_roles": [self.device_role]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_object_tags(self):
+        params = {"object_tags": [self.tag]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_valid_since(self):
+        params = {"valid_since_before": "2023-06-30"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+        params = {"valid_since_after": "2023-07-30"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)

@@ -30,6 +30,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     VulnerabilityLCM,
     SoftwareImageLCM,
+    HardwareReplacementLCM,
 )
 from nautobot_device_lifecycle_mgmt.tables import (
     HardwareLCMTable,
@@ -45,6 +46,7 @@ from nautobot_device_lifecycle_mgmt.tables import (
     CVELCMTable,
     VulnerabilityLCMTable,
     SoftwareImageLCMTable,
+    HardwareReplacementLCMTable,
 )
 from nautobot_device_lifecycle_mgmt.forms import (
     HardwareLCMForm,
@@ -81,6 +83,9 @@ from nautobot_device_lifecycle_mgmt.forms import (
     SoftwareImageLCMForm,
     SoftwareImageLCMFilterForm,
     SoftwareImageLCMCSVForm,
+    HardwareReplacementLCMFilterForm,
+    HardwareReplacementLCMForm,
+    HardwareReplacementLCMCSVForm,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -94,6 +99,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     CVELCMFilterSet,
     VulnerabilityLCMFilterSet,
     SoftwareImageLCMFilterSet,
+    HardwareReplacementLCMFilterSet,
 )
 
 from nautobot_device_lifecycle_mgmt.const import URL, PLUGIN_CFG
@@ -1242,3 +1248,45 @@ class VulnerabilityLCMBulkEditView(generic.BulkEditView):
     table = VulnerabilityLCMTable
     form = VulnerabilityLCMBulkEditForm
     bulk_edit_url = "plugins:nautobot_device_lifecycle_mgmt.vulnerabilitylcm_bulk_edit"
+
+
+class HardwareReplacementLCMListView(generic.ObjectListView):
+    """List view."""
+
+    queryset = HardwareReplacementLCM.objects.all()
+    filterset = HardwareReplacementLCMFilterSet
+    filterset_form = HardwareReplacementLCMFilterForm
+    table = HardwareReplacementLCMTable
+
+
+class HardwareReplacementLCMView(generic.ObjectView):
+    """Detail view."""
+
+    queryset = HardwareReplacementLCM.objects.all()
+
+
+class HardwareReplacementLCMEditView(generic.ObjectEditView):
+    """Create view."""
+
+    model = HardwareReplacementLCM
+    queryset = HardwareReplacementLCM.objects.all()
+    model_form = HardwareReplacementLCMForm
+    template_name = "nautobot_device_lifecycle_mgmt/hardwarereplacementlcm_edit.html"
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:hardwarereplacementlcm_list"
+
+
+class HardwareReplacementLCMDeleteView(generic.ObjectDeleteView):
+    """Delete view."""
+
+    model = HardwareReplacementLCM
+    queryset = HardwareReplacementLCM.objects.all()
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:hardwarereplacementlcm_list"
+
+
+class HardwareReplacementLCMBulkImportView(generic.BulkImportView):
+    """View for bulk import of HardwareReplacementLCM."""
+
+    queryset = HardwareReplacementLCM.objects.all()
+    model_form = HardwareReplacementLCMCSVForm
+    table = HardwareReplacementLCMTable
+    default_return_url = "plugins:nautobot_device_lifecycle_mgmt:hardwarereplacementlcm_list"

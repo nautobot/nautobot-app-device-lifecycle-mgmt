@@ -5,7 +5,7 @@ from django.db.models import Q
 
 from nautobot.extras.plugins import PluginTemplateExtension
 from nautobot.dcim.models import InventoryItem
-from .models import HardwareLCM, ValidatedSoftwareLCM
+from .models import HardwareLCM, ValidatedSoftwareLCM, HardwareReplacementLCM
 from .software import (
     DeviceSoftware,
     InventoryItemSoftware,
@@ -80,7 +80,13 @@ class DeviceHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
                             i.part_id for i in InventoryItem.objects.filter(device__pk=dev_obj.pk) if i.part_id
                         ]
                     )
-                )
+                ),
+                "replacements": HardwareReplacementLCM.objects.filter(current_device_type=dev_obj.device_type).filter(
+                    Q(object_tags=None, device_roles=None)
+                    | Q(object_tags=None, device_roles=dev_obj.device_role.pk)
+                    | Q(object_tags__in=dev_obj.tags.all(), device_roles=None)
+                    | Q(object_tags__in=dev_obj.tags.all(), device_roles=dev_obj.device_role.pk)
+                ),
             },
         )
 

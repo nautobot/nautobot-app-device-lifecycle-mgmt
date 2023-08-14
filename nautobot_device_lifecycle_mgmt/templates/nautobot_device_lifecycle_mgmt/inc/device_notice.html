@@ -26,6 +26,13 @@
 
             </li>
             {% endif %}
+            {% if replacements %}
+            <li role="presentation">
+                <a href="#replacements" aria-controls="hardware" role="tab" data-toggle="tab">
+                    Replacement Options <span class="badge badge-pill badge-primary">{{ replacements.count }}</span>
+                </a>
+            </li>
+            {% endif %}
             {% if sw_notices %}
             <li role="presentation"><a href="#software" aria-controls="software" role="tab" data-toggle="tab">Software Lifecycle Notices</a></li>
             {% endif %}
@@ -93,6 +100,26 @@
                     </div>
                     {% endif %}
                     {% endfor %}
+                </div>
+            </div>
+
+            <!-- Defines all hardware notice logic within this tab-panel. -->
+            <div role="tabpanel" class="tab-pane" id="replacements">
+                <div class="panel-group" id="hwAccordion" role="tablist" aria-multiselectable="true">
+                    <div class="list-group">
+                        <table class="table">
+                            <tr>
+                                <th>Replacement Device</th>
+                                <th>Use Case</th>
+                            </tr>
+                            {% for replacement in replacements %}
+                            <tr>
+                                <td>{{ replacement.replacement_device_type }}</td>
+                                <td>{{ replacement.use_case }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
                 </div>
             </div>
 

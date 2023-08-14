@@ -19,6 +19,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContractLCM,
     DeviceSoftwareValidationResult,
     HardwareLCM,
+    HardwareReplacementLCM,
     InventoryItemSoftwareValidationResult,
     ProviderLCM,
     SoftwareImageLCM,
@@ -367,4 +368,41 @@ class InventoryItemSoftwareValidationResultSerializer(
             "run_type",
             "valid_software",
             "url",
+        ]
+
+
+class HardwareReplacementLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,too-few-public-methods
+    """API serializer."""
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:hardwarereplacementlcm-detail"
+    )
+    current_device_type = NestedDeviceTypeSerializer(
+        many=False, read_only=False, required=False, help_text="Current Device Type for Hardware Replacement"
+    )
+    replacement_device_type = NestedDeviceTypeSerializer(
+        many=False, read_only=False, required=False, help_text="Replacement Device Type for Hardware Replacement"
+    )
+    current_inventory_item = NestedInventoryItemSerializer(
+        many=False, read_only=False, required=False, help_text="Current Inventory Item for Hardware Replacement"
+    )
+    replacement_inventory_item = NestedInventoryItemSerializer(
+        many=False, read_only=False, required=False, help_text="Replacement Inventory Item for Hardware Replacement"
+    )
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = HardwareReplacementLCM
+        fields = [
+            "url",
+            "current_device_type",
+            "current_inventory_item",
+            "replacement_device_type",
+            "replacement_inventory_item",
+            "device_roles",
+            "object_tags",
+            "valid_since",
+            "valid_until",
+            "use_case",
         ]

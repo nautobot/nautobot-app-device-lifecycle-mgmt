@@ -936,3 +936,130 @@ class VulnerabilityLCM(PrimaryModel):
             self.inventory_item,
             self.status,
         )
+
+
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "graphql",
+    "relationships",
+    "statuses",
+    "webhooks",
+)
+class HardwareReplacementLCM(PrimaryModel):
+    """HardwareReplacementLCM is a model representation of the replacement of product types within an environment."""
+
+    current_device_type = models.ForeignKey(
+        to="dcim.DeviceType",
+        on_delete=models.CASCADE,
+        verbose_name="Current Device Type",
+        blank=True,
+        null=True,
+        related_name="current_device_type",
+    )
+    current_inventory_item = models.ForeignKey(
+        to="dcim.InventoryItem",
+        on_delete=models.CASCADE,
+        verbose_name="Current Inventory Item",
+        blank=True,
+        null=True,
+        related_name="current_inventory_item",
+    )
+    replacement_device_type = models.ForeignKey(
+        to="dcim.DeviceType",
+        on_delete=models.CASCADE,
+        verbose_name="Replacement Device Type",
+        blank=True,
+        null=True,
+        related_name="replacement_device_type",
+    )
+    replacement_inventory_item = models.ForeignKey(
+        to="dcim.InventoryItem",
+        on_delete=models.CASCADE,
+        verbose_name="Replacement Inventory Item",
+        blank=True,
+        null=True,
+        related_name="replacement_inventory_item",
+    )
+    device_roles = models.ManyToManyField(to="dcim.DeviceRole", related_name="+", blank=True)
+    object_tags = models.ManyToManyField(to="extras.Tag", related_name="+", blank=True)
+    use_case = models.TextField(verbose_name="Use Case", blank=True, null=True)
+    valid_since = models.DateField(verbose_name="Valid Since")
+    valid_until = models.DateField(verbose_name="Valid Until", blank=True, null=True)
+
+    csv_headers = [
+        "current_device_type",
+        "current_inventory_item",
+        "replacement_device_type",
+        "replacement_inventory_item",
+        "device_roles",
+        "object_tags",
+        "valid_since",
+        "valid_until",
+        "use_case",
+    ]
+
+    def __str__(self):
+        """Returns a string representation of HardwareReplacementLCM objects."""
+        return f"{self.replacement_product} Replacing {self.current_product}"
+
+    def get_absolute_url(self):
+        """Returns the Detail view for HardwareReplacementLCM models."""
+        return reverse("plugins:nautobot_device_lifecycle_mgmt:hardwarereplacementlcm", kwargs={"pk": self.pk})
+
+    class Meta:
+        """Meta attributes for HardwareRepalcementLCM."""
+
+        verbose_name = "Hardware Replacement"
+        constraints = [
+            models.CheckConstraint(
+                check=(
+                    models.Q(current_inventory_item__isnull=True, current_device_type__isnull=False)
+                    | models.Q(current_inventory_item__isnull=False, current_device_type__isnull=True)
+                ),
+                name="At least one Current item must be selected for Hardware Replacement",
+            ),
+            models.CheckConstraint(
+                check=(
+                    models.Q(replacement_inventory_item__isnull=True, replacement_device_type__isnull=False)
+                    | models.Q(replacement_inventory_item__isnull=False, replacement_device_type__isnull=True)
+                ),
+                name="At least one Replacement item must be selected for Hardware Replacement",
+            ),
+            models.CheckConstraint(
+                check=(
+                    models.Q(current_device_type__isnull=False, replacement_device_type__isnull=False)
+                    | models.Q(current_inventory_item__isnull=False, replacement_inventory_item__isnull=False)
+                ),
+                name="Current and Replacement products should be of the same type for Hardware Replacement",
+            ),
+        ]
+
+    @property
+    def valid(self):
+        """Return True if software is currently valid, else return False."""
+        today = date.today()
+        if self.valid_until:
+            return self.valid_until >= today >= self.valid_since
+
+        return today >= self.valid_since
+
+    @property
+    def current_product(self):
+        """Return the current product type that is represented in this object."""
+        if self.current_device_type:
+            return self.current_device_type
+        if self.current_inventory_item:
+            return self.current_inventory_item
+        return None
+
+    @property
+    def replacement_product(self):
+        """Return the replacement product type that is represented in this object."""
+        if self.replacement_device_type:
+            return self.replacement_device_type
+        if self.replacement_inventory_item:
+            return self.replacement_inventory_item
+        return None

@@ -41,6 +41,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContractLCM,
     DeviceSoftwareValidationResult,
     HardwareLCM,
+    HardwareReplacementLCM,
     InventoryItemSoftwareValidationResult,
     ProviderLCM,
     SoftwareImageLCM,
@@ -1213,3 +1214,173 @@ class VulnerabilityLCMFilterForm(BootstrapMixin, StatusModelFilterFormMixin, Cus
             *VulnerabilityLCM.csv_headers,
             "tags",
         ]
+
+
+class HardwareReplacementLCMFilterForm(BootstrapMixin, forms.ModelForm):
+    """Filter form to filter searches."""
+
+    current_device_type = DynamicModelMultipleChoiceField(
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        required=False,
+    )
+    current_inventory_item = DynamicModelMultipleChoiceField(
+        queryset=InventoryItem.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
+    replacement_device_type = DynamicModelMultipleChoiceField(
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        required=False,
+    )
+    replacement_inventory_item = DynamicModelMultipleChoiceField(
+        queryset=InventoryItem.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
+    device_roles = DynamicModelMultipleChoiceField(
+        queryset=DeviceRole.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    object_tags = DynamicModelMultipleChoiceField(
+        queryset=Tag.objects.all(),
+        to_field_name="slug",
+        required=False,
+    )
+    valid_since_before = forms.DateField(label="Valid Since Date Before", required=False, widget=DatePicker())
+    valid_since_after = forms.DateField(label="Valid Since Date After", required=False, widget=DatePicker())
+    valid_until_before = forms.DateField(label="Valid Until Date Before", required=False, widget=DatePicker())
+    valid_until_after = forms.DateField(label="Valid Until Date After", required=False, widget=DatePicker())
+    valid = forms.BooleanField(
+        label="Valid Now", required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES)
+    )
+
+    class Meta:
+        """Meta attributes for the HardwareLCMFilterForm class."""
+
+        model = HardwareReplacementLCM
+        # Define the fields above for ordering and widget purposes
+        fields = [
+            "current_device_type",
+            "current_inventory_item",
+            "replacement_device_type",
+            "replacement_inventory_item",
+            "device_roles",
+            "object_tags",
+            "valid_since_before",
+            "valid_since_after",
+            "valid",
+        ]
+
+
+class HardwareReplacementLCMForm(BootstrapMixin, CustomFieldModelFormMixin, RelationshipModelFormMixin):
+    """Hardware Device Lifecycle creation/edit form."""
+
+    current_device_type = DynamicModelChoiceField(
+        queryset=DeviceType.objects.all(), required=False, help_text="The device type that needs to be replaced"
+    )
+    current_inventory_item = DynamicModelChoiceField(
+        queryset=InventoryItem.objects.all(), required=False, help_text="The inventory item that needs to be replaced"
+    )
+    replacement_device_type = DynamicModelChoiceField(
+        queryset=DeviceType.objects.all(), required=False, help_text="The device type that will be the replacement"
+    )
+    replacement_inventory_item = DynamicModelChoiceField(
+        queryset=InventoryItem.objects.all(),
+        required=False,
+        help_text="The inventory item that will be the replacement",
+    )
+    device_roles = DynamicModelMultipleChoiceField(
+        queryset=DeviceRole.objects.all(),
+        required=False,
+        help_text="Apply this replacement only to products with any of the following device role(s)",
+    )
+    object_tags = DynamicModelMultipleChoiceField(
+        queryset=Tag.objects.all(),
+        required=False,
+        help_text="Apply this replacement only to products with any of the following object tag(s)",
+    )
+
+    def clean(self):
+        """Validate the form ensuring that at least one current and replacement product was chosen and that the valid dates make sense."""
+        super().clean()
+        cleaned_data = self.cleaned_data
+        if cleaned_data.get("current_device_type"):
+            if not cleaned_data.get("replacement_device_type"):
+                self.add_error("replacement_device_type", "A replacement device type must be chosen.")
+            if cleaned_data.get("replacement_inventory_item"):
+                self.add_error(
+                    "replacement_inventory_item",
+                    "Inventory item cannot be selected as a replacement for a device type.",
+                )
+        elif cleaned_data.get("current_inventory_item"):
+            if not cleaned_data.get("replacement_inventory_item"):
+                self.add_error("replacement_inventory_item", "A replacement inventory item must be chosen.")
+            if cleaned_data.get("replacement_device_type"):
+                self.add_error(
+                    "replacement_device_type", "Device Type cannot be selected as a replacement for an inventory item."
+                )
+        else:
+            msg = "One of the product types must be chosen for current product"
+            self.add_error("current_device_type", msg)
+            self.add_error("current_inventory_item", msg)
+        if cleaned_data.get("valid_until") and cleaned_data.get("valid_until") < cleaned_data.get("valid_since"):
+            self.add_error("valid_until", "Valid Until date must be after the Valid Since date.")
+
+    class Meta:
+        """Meta attributes for the HardwareLCMForm class."""
+
+        model = HardwareReplacementLCM
+        fields = [
+            "current_device_type",
+            "current_inventory_item",
+            "device_roles",
+            "object_tags",
+            "replacement_device_type",
+            "replacement_inventory_item",
+            "use_case",
+            "valid_since",
+            "valid_until",
+        ]
+
+        widgets = {
+            "valid_since": DatePicker(),
+            "valid_until": DatePicker(),
+        }
+
+
+class HardwareReplacementLCMCSVForm(CustomFieldModelCSVForm):
+    """Form for bulk creating HardwareReplacementLCM objects."""
+
+    current_device_type = CSVModelChoiceField(
+        queryset=DeviceType.objects.all(), required=False, to_field_name="slug", help_text="Current Device Type"
+    )
+    current_inventory_item = CSVModelChoiceField(
+        queryset=InventoryItem.objects.all(), required=False, to_field_name="slug", help_text="Current Inventory Item"
+    )
+    replacement_device_type = CSVModelChoiceField(
+        queryset=DeviceType.objects.all(), required=False, to_field_name="slug", help_text="Replacement Device Type"
+    )
+    replacement_inventory_item = CSVModelChoiceField(
+        queryset=InventoryItem.objects.all(),
+        required=False,
+        to_field_name="slug",
+        help_text="Replacement Inventory Item",
+    )
+    device_roles = CSVMultipleModelChoiceField(
+        queryset=DeviceRole.objects.all(),
+        required=False,
+        to_field_name="model",
+        help_text="Comma-separated list of DeviceRole Models",
+    )
+    object_tags = CSVMultipleModelChoiceField(
+        queryset=Tag.objects.all(), required=False, to_field_name="slug", help_text="Comma-separated list of Tag Slugs"
+    )
+
+    class Meta:
+        """Meta attributes for the HardwareReplacementLCMCSVForm class."""
+
+        model = HardwareReplacementLCM
+        fields = HardwareReplacementLCM.csv_headers

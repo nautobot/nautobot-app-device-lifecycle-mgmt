@@ -40,6 +40,33 @@ menu_items = (
                             "nautobot_device_lifecycle_mgmt.view_hardwarelcm",
                         ],
                     ),
+                    NavMenuItem(
+                        link="plugins:nautobot_device_lifecycle_mgmt:hardwarereplacementlcm_list",
+                        name="Hardware Replacement",
+                        buttons=(
+                            NavMenuButton(
+                                link="plugins:nautobot_device_lifecycle_mgmt:hardwarereplacementlcm_add",
+                                title="Add",
+                                icon_class="mdi mdi-plus-thick",
+                                button_class=ButtonColorChoices.GREEN,
+                                permissions=[
+                                    "nautobot_device_lifecycle_mgmt.add_hardwarelcm",
+                                ],
+                            ),
+                            NavMenuButton(
+                                link="plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_import",
+                                title="Import",
+                                icon_class="mdi mdi-database-import-outline",
+                                button_class=ButtonColorChoices.BLUE,
+                                permissions=[
+                                    "nautobot_device_lifecycle_mgmt.add_hardwarelcm",
+                                ],
+                            ),
+                        ),
+                        permissions=[
+                            "nautobot_device_lifecycle_mgmt.view_hardwarelcm",
+                        ],
+                    ),
                 ),
             ),
             NavMenuGroup(

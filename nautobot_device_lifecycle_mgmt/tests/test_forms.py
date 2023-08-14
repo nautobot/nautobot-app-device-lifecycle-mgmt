@@ -11,8 +11,11 @@ from nautobot_device_lifecycle_mgmt.forms import (
     ValidatedSoftwareLCMForm,
     CVELCMForm,
     SoftwareImageLCMForm,
+    HardwareReplacementLCMForm,
 )
 from nautobot_device_lifecycle_mgmt.models import SoftwareImageLCM, SoftwareLCM, CVELCM
+
+from .conftest import create_inventory_items
 
 
 class HardwareLCMFormTest(TestCase):
@@ -587,3 +590,124 @@ class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member,too-many-
         self.assertFalse(form.is_valid())
         self.assertIn("download_url", form.errors)
         self.assertIn("Enter a valid URL.", form.errors["download_url"])
+
+
+class HardwareReplacementLCMFormTest(TestCase):  # pylint: disable=no-member,too-many-instance-attributes
+    """Test class for HardwareReplacementLCM forms."""
+
+    form_class = HardwareReplacementLCMForm
+
+    def setUp(self):
+        """Create necessary objects."""
+        manufacturer = Manufacturer.objects.get_or_create(name="Cisco", slug="cisco")[0]
+        self.device_types = tuple(
+            DeviceType.objects.create(model=model, slug=model, manufacturer=manufacturer)
+            for model in ["c9300-24", "c9300-48", "c9500-24", "c9500-48", "c9200-24", "c9200-48", "ws-3560", "ws-3650"]
+        )
+        self.device_role = DeviceRole.objects.get_or_create(name="Test Role")[0]
+        self.tag = Tag.objects.get_or_create(name="Test Tag", slug="test-tag")[0]
+        self.inventory_items = create_inventory_items()
+
+    def test_specifying_all_fields_w_device_type(self):
+        data = {
+            "current_device_type": self.device_types[-1],
+            "replacement_device_type": self.device_types[1],
+            "device_roles": [self.device_role],
+            "object_tags": [self.tag],
+            "valid_since": "2023-08-01",
+            "valid_until": "2023-12-31",
+            "use_case": "Testing",
+        }
+        form = self.form_class(data)
+        self.assertTrue(form.is_valid())
+        self.assertTrue(form.save())
+
+    def test_specifying_all_fields_w_inventory_item(self):
+        data = {
+            "current_inventory_item": self.inventory_items[0],
+            "replacement_inventory_item": self.inventory_items[1],
+            "device_roles": [self.device_role],
+            "object_tags": [self.tag],
+            "valid_since": "2023-08-01",
+            "valid_until": "2023-12-31",
+            "use_case": "Testing",
+        }
+        form = self.form_class(data)
+        self.assertTrue(form.is_valid())
+        self.assertTrue(form.save())
+
+    def test_invalid_dates_for_valid_until(self):
+        data = {
+            "current_device_type": self.device_types[-1],
+            "replacement_device_type": self.device_types[1],
+            "device_roles": [self.device_role],
+            "object_tags": [self.tag],
+            "valid_since": "2023-08-01",
+            "valid_until": "2022-12-31",
+            "use_case": "Testing",
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("valid_until", form.errors)
+        self.assertIn("Valid Until date must be after the Valid Since date.", form.errors["valid_until"])
+
+    def test_error_when_current_device_type_and_replacement_inventory_item(self):
+        data = {
+            "current_device_type": self.device_types[-1],
+            "replacement_inventory_item": self.inventory_items[1],
+            "valid_since": "2023-08-01",
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("replacement_inventory_item", form.errors)
+        self.assertIn(
+            "Inventory item cannot be selected as a replacement for a device type.",
+            form.errors["replacement_inventory_item"],
+        )
+
+    def test_error_when_current_inventory_item_and_replacement_device_type(self):
+        data = {
+            "replacement_device_type": self.device_types[-1],
+            "current_inventory_item": self.inventory_items[1],
+            "valid_since": "2023-08-01",
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("replacement_device_type", form.errors)
+        self.assertIn(
+            "Device Type cannot be selected as a replacement for an inventory item.",
+            form.errors["replacement_device_type"],
+        )
+
+    def test_error_when_no_replacement_device_type_selected(self):
+        data = {
+            "current_device_type": self.device_types[-1],
+            "valid_since": "2023-08-01",
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("replacement_device_type", form.errors)
+        self.assertIn("A replacement device type must be chosen.", form.errors["replacement_device_type"])
+
+    def test_error_when_no_replacement_inventory_item_selected(self):
+        data = {
+            "current_inventory_item": self.inventory_items[1],
+            "valid_since": "2023-08-01",
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("replacement_inventory_item", form.errors)
+        self.assertIn("A replacement inventory item must be chosen.", form.errors["replacement_inventory_item"])
+
+    def test_error_when_no_current_selected(self):
+        data = {
+            "valid_since": "2023-08-01",
+        }
+        form = self.form_class(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("current_device_type", form.errors)
+        self.assertIn("One of the product types must be chosen for current product", form.errors["current_device_type"])
+        self.assertIn("current_inventory_item", form.errors)
+        self.assertIn(
+            "One of the product types must be chosen for current product", form.errors["current_inventory_item"]
+        )

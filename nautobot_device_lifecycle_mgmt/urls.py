@@ -12,6 +12,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContactLCM,
     CVELCM,
     VulnerabilityLCM,
+    HardwareReplacementLCM,
 )
 
 
@@ -242,5 +243,37 @@ urlpatterns = [
         ObjectNotesView.as_view(),
         name="vulnerabilitylcm_notes",
         kwargs={"model": VulnerabilityLCM},
+    ),
+    path("hardware-replacement/", views.HardwareReplacementLCMListView.as_view(), name="hardwarereplacementlcm_list"),
+    path(
+        "hardware-replacement/add/", views.HardwareReplacementLCMEditView.as_view(), name="hardwarereplacementlcm_add"
+    ),
+    path("hardware-replacement/<uuid:pk>/", views.HardwareReplacementLCMView.as_view(), name="hardwarereplacementlcm"),
+    path(
+        "hardware-replacement/<uuid:pk>/edit/",
+        views.HardwareReplacementLCMEditView.as_view(),
+        name="hardwarereplacementlcm_edit",
+    ),
+    path(
+        "hardware-replacement/<uuid:pk>/delete/",
+        views.HardwareReplacementLCMDeleteView.as_view(),
+        name="hardwarereplacementlcm_delete",
+    ),
+    path(
+        "hardware-replacement/<uuid:pk>/changelog/",
+        ObjectChangeLogView.as_view(),
+        name="hardwarereplacementlcm_changelog",
+        kwargs={"model": HardwareReplacementLCM},
+    ),
+    path(
+        "hardware-replacement/<uuid:pk>/notes/",
+        ObjectNotesView.as_view(),
+        name="hardwarereplacementlcm_notes",
+        kwargs={"model": HardwareReplacementLCM},
+    ),
+    path(
+        "hardware-replacement/import/",
+        views.HardwareReplacementLCMBulkImportView.as_view(),
+        name="hardwarereplacementlcm_import",
     ),
 ]

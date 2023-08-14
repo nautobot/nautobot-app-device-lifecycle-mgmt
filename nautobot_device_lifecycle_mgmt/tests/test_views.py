@@ -17,6 +17,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     VulnerabilityLCM,
     SoftwareImageLCM,
+    HardwareReplacementLCM,
 )
 from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
 
@@ -519,6 +520,82 @@ class InventoryItemSoftwareValidationResultListViewTest(ViewTestCases.ListObject
 
     def test_bulk_import_objects_with_permission_csv_file(self):
         pass
+
+    def test_list_objects_with_permission(self):
+        pass
+
+
+class HardwareReplacementLCMListViewTest(ViewTestCases.ListObjectsViewTestCase):
+    """Test HardwareReplacementLCMListView"""
+
+    model = HardwareReplacementLCM
+
+    def _get_base_url(self):
+        return "plugins:nautobot_device_lifecycle_mgmt:hardwarereplacementlcm_list"
+
+    @classmethod
+    def setUpTestData(cls):
+        """Set up test objects."""
+        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        device_types = tuple(
+            DeviceType.objects.create(model=model, slug=model, manufacturer=manufacturer)
+            for model in ["c9300-24", "c9300-48", "c9500-24", "c9500-48", "c9200-24", "c9200-48", "ws-3560", "ws-3650"]
+        )
+
+        HardwareReplacementLCM.objects.create(
+            current_device_type=device_types[-2],
+            replacement_device_type=device_types[4],
+            valid_since=datetime.date(2023, 8, 1),
+        )
+        HardwareReplacementLCM.objects.create(
+            current_device_type=device_types[-1],
+            replacement_device_type=device_types[5],
+            valid_since=datetime.date(2023, 8, 1),
+        )
+        HardwareReplacementLCM.objects.create(
+            current_device_type=device_types[-2],
+            replacement_device_type=device_types[3],
+            valid_since=datetime.date(2023, 8, 1),
+        )
+
+        cls.form_data = {
+            "current_device_type": device_types[-1].id,
+            "replacement_device_type": device_types[1].id,
+            "valid_since": datetime.date(2023, 8, 1),
+        }
+        cls.csv_data = (
+            "current_device_type,replacement_device_type,valid_since,use_case",
+            "ws-3560, c9300-24, 2021-10-06",
+            "ws-3560, c9300-48, 2022-10-06",
+            "ws-3650, c9500-48, 2023-10-06",
+        )
+
+    def test_hardware_replacement_list_view_without_permission(self):
+        """Test the Hardware Replacement list view."""
+
+        self.assertHttpStatus(
+            self.client.get(
+                reverse(
+                    "plugins:nautobot_device_lifecycle_mgmt:hardwarereplacementlcm_list",
+                )
+            ),
+            403,
+        )
+
+    def test_hardware_replacement_list_view_with_permission(self):
+        """Test the Hardware Replacement list view."""
+        obj_perm = ObjectPermission(name="Test permission", actions=["view"])
+        obj_perm.save()
+        obj_perm.users.add(self.user)
+        obj_perm.object_types.add(ContentType.objects.get_for_model(self.model))
+        self.assertHttpStatus(
+            self.client.get(
+                reverse(
+                    "plugins:nautobot_device_lifecycle_mgmt:hardwarereplacementlcm_list",
+                )
+            ),
+            200,
+        )
 
     def test_list_objects_with_permission(self):
         pass

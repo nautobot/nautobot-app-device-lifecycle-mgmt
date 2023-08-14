@@ -16,6 +16,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     VulnerabilityLCM,
     SoftwareImageLCM,
+    HardwareReplacementLCM,
 )
 from nautobot_device_lifecycle_mgmt.tests.conftest import create_devices, create_cves, create_softwares
 
@@ -758,6 +759,85 @@ class ProviderLCMAPITest(APIViewTestCases.APIViewTestCase):
             portal_url="https://www.Juniper.com/",
             comments="Test Comment",
         )
+
+    def test_bulk_create_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_bulk_delete_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_bulk_update_objects(self):
+        """Currently don't support bulk operations."""
+
+    def test_notes_url_on_object(self):
+        """Currently don't support notes."""
+
+    def test_list_objects_brief(self):
+        """Nautobot 1.4 adds 'created' and 'last_updated' causing testing mismatch with previous versions."""
+
+
+class HardwareReplacementLCMAPITest(APIViewTestCases.APIViewTestCase):
+    """Test the HardwareReplacementLCM API."""
+
+    model = HardwareReplacementLCM
+    brief_fields = [
+        "url",
+        "current_device_type",
+        "current_inventory_item",
+        "replacement_device_type",
+        "replacement_inventory_item",
+        "device_roles",
+        "object_tags",
+        "valid_since",
+        "valid_until",
+        "use_case",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        """Create a superuser and token for API calls."""
+        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        device_types = tuple(
+            DeviceType.objects.create(model=model, slug=model, manufacturer=manufacturer)
+            for model in ["c9300-24", "c9300-48", "c9500-24", "c9500-48", "c9200-24", "c9200-48", "ws-3560", "ws-3650"]
+        )
+
+        HardwareReplacementLCM.objects.create(
+            current_device_type=device_types[-2],
+            replacement_device_type=device_types[4],
+            valid_since=datetime.date(2023, 8, 1),
+        )
+        HardwareReplacementLCM.objects.create(
+            current_device_type=device_types[-1],
+            replacement_device_type=device_types[5],
+            valid_since=datetime.date(2023, 8, 1),
+        )
+        HardwareReplacementLCM.objects.create(
+            current_device_type=device_types[-2],
+            replacement_device_type=device_types[3],
+            valid_since=datetime.date(2023, 8, 1),
+        )
+
+        cls.create_data = [
+            {
+                "current_device_type": device_types[-2].id,
+                "replacement_device_type": device_types[0].id,
+                "valid_since": datetime.date(2020, 1, 14),
+                "valid_until": datetime.date(2024, 10, 18),
+            },
+            {
+                "current_device_type": device_types[-3].id,
+                "replacement_device_type": device_types[0].id,
+                "valid_since": datetime.date(2020, 1, 14),
+                "valid_until": datetime.date(2024, 10, 18),
+            },
+            {
+                "current_device_type": device_types[-4].id,
+                "replacement_device_type": device_types[0].id,
+                "valid_since": datetime.date(2020, 1, 14),
+                "valid_until": datetime.date(2024, 10, 18),
+            },
+        ]
 
     def test_bulk_create_objects(self):
         """Currently don't support bulk operations."""

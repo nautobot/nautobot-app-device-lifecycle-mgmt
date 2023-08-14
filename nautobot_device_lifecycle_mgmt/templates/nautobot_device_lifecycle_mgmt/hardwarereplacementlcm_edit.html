@@ -1,0 +1,61 @@
+{% extends 'generic/object_edit.html' %}
+{% load static %}
+{% load form_helpers %}
+{% load helpers %}
+
+{% block form %}
+    {% block pre_form %}{% endblock %}
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>Current Product</strong></div>
+        <div class="panel-body">
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#device_type" role="tab" data-toggle="tab">Device Type</a>
+                </li>
+                <li role="presentation">
+                    <a href="#inventory_item" role="tab" data-toggle="tab">Inventory Item</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane active" id="device_type">
+                    {% render_field form.current_device_type %}
+                </div>
+                <div class="tab-pane" id="inventory_item">
+                    {% render_field form.current_inventory_item %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>Replacement Product</strong></div>
+        <div class="panel-body">
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#replacement_device_type" role="tab" data-toggle="tab">Device Type</a>
+                </li>
+                <li role="presentation">
+                    <a href="#replacement_inventory_item" role="tab" data-toggle="tab">Inventory Item</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane active" id="replacement_device_type">
+                    {% render_field form.replacement_device_type %}
+                </div>
+                <div class="tab-pane" id="replacement_inventory_item">
+                    {% render_field form.replacement_inventory_item %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>Replacement Information</strong></div>
+        <div class="panel-body">
+        {% render_field form.valid_since %}
+        {% render_field form.valid_until %}
+        {% render_field form.device_roles %}
+        {% render_field form.object_tags %}
+        {% render_field form.use_case %}
+        {% include 'inc/extras_features_edit_form_fields.html' %}
+    </div>
+</div>
+{% endblock %}

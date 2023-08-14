@@ -4,10 +4,11 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.db.utils import IntegrityError
 
 import time_machine
 
-from nautobot.dcim.models import DeviceType, Manufacturer, Platform
+from nautobot.dcim.models import DeviceType, Manufacturer, Platform, DeviceRole
 from nautobot.extras.choices import RelationshipTypeChoices
 from nautobot.extras.models import Relationship, RelationshipAssociation, Status, Tag
 
@@ -22,6 +23,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     SoftwareImageLCM,
     ProviderLCM,
     ContractLCM,
+    HardwareReplacementLCM,
 )
 from .conftest import (
     create_devices,
@@ -689,3 +691,84 @@ class ProviderLCMTestCase(TestCase):
         self.assertEqual(cisco_contract.currency, "USD")
         self.assertEqual(cisco_contract.contract_type, "Hardware")
         self.assertEqual(cisco_contract.comments, "Cisco gave us discount")
+
+
+class HardwareReplacementLCMTestCase(TestCase):
+    """Tests for the HardwareReplacementLCM model."""
+
+    def setUp(self):
+        """Set up for the test case."""
+        manufacturer = Manufacturer.objects.get_or_create(name="Cisco", slug="cisco")[0]
+        self.device_types = tuple(
+            DeviceType.objects.create(model=model, slug=model, manufacturer=manufacturer)
+            for model in ["c9300-24", "c9300-48", "c9500-24", "c9500-48", "c9200-24", "c9200-48", "ws-3560", "ws-3650"]
+        )
+        self.device_role = DeviceRole.objects.get_or_create(name="Test Role")[0]
+        self.tag = Tag.objects.get_or_create(name="Test Tag", slug="test-tag")[0]
+        self.inventory_items = create_inventory_items()
+
+    def test_hardware_replacement_create_device_type_minimum(self):
+        """Test creating a HardwareReplacementLCM object with the minimum amount of attributes passed in."""
+        hw_replace = HardwareReplacementLCM.objects.create(
+            current_device_type=self.device_types[-2],
+            replacement_device_type=self.device_types[0],
+            valid_since=date(2023, 8, 1),
+        )
+        self.assertEqual(hw_replace.current_product, self.device_types[-2])
+        self.assertEqual(hw_replace.replacement_product, self.device_types[0])
+        self.assertEqual(hw_replace.valid_since, date(2023, 8, 1))
+        self.assertEqual(hw_replace.valid_until, None)
+
+    def test_hardware_replacement_create_inventory_item_minimum(self):
+        """Test creating a HardwareReplacementLCM object with the minimum amount of attributes passed in."""
+        hw_replace = HardwareReplacementLCM.objects.create(
+            current_inventory_item=self.inventory_items[0],
+            replacement_inventory_item=self.inventory_items[1],
+            valid_since=date(2023, 8, 1),
+        )
+        self.assertEqual(hw_replace.current_product, self.inventory_items[0])
+        self.assertEqual(hw_replace.replacement_product, self.inventory_items[1])
+        self.assertEqual(hw_replace.valid_since, date(2023, 8, 1))
+        self.assertEqual(hw_replace.valid_until, None)
+
+    def test_hardware_replacement_create_maximum(self):
+        """Test creating a HardwareReplacementLCM object with the maximum amount of attributes passed in."""
+        hw_replace = HardwareReplacementLCM(
+            current_device_type=self.device_types[-2],
+            replacement_device_type=self.device_types[0],
+            valid_since=date(2023, 8, 1),
+            valid_until=date(2023, 9, 1),
+            use_case="Testing Use Case",
+        )
+        hw_replace.device_roles.set([self.device_role])
+        hw_replace.object_tags.set([self.tag.id])
+        hw_replace.save()
+        self.assertEqual(hw_replace.current_product, self.device_types[-2])
+        self.assertEqual(hw_replace.replacement_product, self.device_types[0])
+        self.assertEqual(list(hw_replace.device_roles.all()), [self.device_role])
+        self.assertEqual(list(hw_replace.object_tags.all()), [self.tag])
+        self.assertEqual(hw_replace.valid_since, date(2023, 8, 1))
+        self.assertEqual(hw_replace.valid_until, date(2023, 9, 1))
+        self.assertEqual(hw_replace.use_case, "Testing Use Case")
+
+    def test_hardware_replacement_errors_when_no_current_set(self):
+        """Test raising an IntegrityError when no current attribute is set."""
+        hw_replace = HardwareReplacementLCM(valid_since=date(2023, 8, 1))
+        with self.assertRaises(IntegrityError):
+            hw_replace.save()
+
+    def test_hardware_replacement_errors_when_no_replacement_set(self):
+        """Test raising an IntegrityError when no replacement attribute is set."""
+        hw_replace = HardwareReplacementLCM(current_device_type=self.device_types[-2], valid_since=date(2023, 8, 1))
+        with self.assertRaises(IntegrityError):
+            hw_replace.save()
+
+    def test_hardware_replacement_errors_when_different_products_set(self):
+        """Test raising an IntegrityError when different current and replacement attributes are set."""
+        hw_replace = HardwareReplacementLCM(
+            current_device_type=self.device_types[-2],
+            replacement_inventory_item=self.inventory_items[0],
+            valid_since=date(2023, 8, 1),
+        )
+        with self.assertRaises(IntegrityError):
+            hw_replace.save()

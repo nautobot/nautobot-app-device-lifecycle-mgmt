@@ -15,6 +15,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     VulnerabilityLCM,
     DeviceSoftwareValidationResult,
     InventoryItemSoftwareValidationResult,
+    HardwareReplacementLCM,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -28,6 +29,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     VulnerabilityLCMFilterSet,
     DeviceSoftwareValidationResultFilterSet,
     InventoryItemSoftwareValidationResultFilterSet,
+    HardwareReplacementLCMFilterSet,
 )
 
 from .serializers import (
@@ -42,6 +44,7 @@ from .serializers import (
     VulnerabilityLCMSerializer,
     DeviceSoftwareValidationResultSerializer,
     InventoryItemSoftwareValidationResultSerializer,
+    HardwareReplacementLCMSerializer,
 )
 
 
@@ -140,3 +143,11 @@ class InventoryItemSoftwareValidationResultListViewSet(CustomFieldModelViewSet):
 
     # Disabling POST as these should only be created via Job.
     http_method_names = ["get", "head", "options"]
+
+
+class HardwareReplacementLCMListViewSet(CustomFieldModelViewSet):
+    """REST API viewset for HardwareReplacementLCM records."""
+
+    queryset = HardwareReplacementLCM.objects.all()
+    serializer_class = HardwareReplacementLCMSerializer
+    filterset_class = HardwareReplacementLCMFilterSet

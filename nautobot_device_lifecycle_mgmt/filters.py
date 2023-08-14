@@ -13,6 +13,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContractLCM,
     DeviceSoftwareValidationResult,
     HardwareLCM,
+    HardwareReplacementLCM,
     InventoryItemSoftwareValidationResult,
     ProviderLCM,
     SoftwareImageLCM,
@@ -855,4 +856,66 @@ class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  
             | Q(device__name__icontains=value)
             | Q(inventory_item__name__icontains=value)
         )
+        return queryset.filter(qs_filter)
+
+
+class HardwareReplacementLCMFilterSet(NautobotFilterSet):
+    """Filter for HardwareReplacementLCM."""
+
+    current_device_type = django_filters.ModelMultipleChoiceFilter(
+        queryset=DeviceType.objects.all(),
+        label="Current Device Type",
+    )
+    replacement_device_type = django_filters.ModelMultipleChoiceFilter(
+        queryset=DeviceType.objects.all(),
+        label="Replacement Device Type",
+    )
+    current_inventory_item = django_filters.ModelMultipleChoiceFilter(
+        queryset=InventoryItem.objects.all(),
+        label="Current Inventory Item",
+    )
+    replacement_inventory_item = django_filters.ModelMultipleChoiceFilter(
+        queryset=InventoryItem.objects.all(),
+        label="Replacement Inventory Item",
+    )
+    device_roles = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_roles__slug",
+        queryset=DeviceRole.objects.all(),
+        to_field_name="slug",
+        label="Device Roles (slug)",
+    )
+    object_tags = django_filters.ModelMultipleChoiceFilter(
+        field_name="object_tags__slug",
+        queryset=Tag.objects.all(),
+        to_field_name="slug",
+        label="Object Tags (slug)",
+    )
+    valid_since = django_filters.DateTimeFromToRangeFilter()
+    valid_until = django_filters.DateTimeFromToRangeFilter()
+    valid = django_filters.BooleanFilter(method="valid_search", label="Currently valid")
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = HardwareReplacementLCM
+
+        fields = [
+            "current_device_type",
+            "replacement_device_type",
+            "current_inventory_item",
+            "replacement_inventory_item",
+            "device_roles",
+            "object_tags",
+            "valid_since",
+            "valid_until",
+            "valid",
+        ]
+
+    def valid_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the valid_search search."""
+        today = datetime.date.today()
+        if value is True:
+            qs_filter = Q(valid_since__lte=today, valid_until=None) | Q(valid_since__lte=today, valid_until__gte=today)
+        else:
+            qs_filter = Q(valid_since__gt=today) | Q(valid_until__lt=today)
         return queryset.filter(qs_filter)
