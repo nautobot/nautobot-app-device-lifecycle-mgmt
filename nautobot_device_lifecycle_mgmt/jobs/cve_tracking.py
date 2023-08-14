@@ -31,7 +31,7 @@ class GenerateVulnerabilities(Job):
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta class for the job."""
 
-        commit_default = True
+        has_sensitive_variables = False
         field_order = [
             "published_after",
             "_task_queue",
@@ -47,12 +47,12 @@ class GenerateVulnerabilities(Job):
 
         for cve in cves:
             if debug:
-                self.logger.info(message="Generating vulnerabilities for CVE {cve}", extra={"object": cve})
-            software_rels = RelationshipAssociation.objects.filter(relationship__slug="soft_cve", destination_id=cve.id)
+                self.logger.info(f"Generating vulnerabilities for CVE {cve}", extra={"object": cve})
+            software_rels = RelationshipAssociation.objects.filter(relationship__key="soft_cve", destination_id=cve.id)
             for soft_rel in software_rels:
                 # Loop through any device relationships
                 device_rels = soft_rel.source.get_relationships()["source"][
-                    Relationship.objects.get(slug="device_soft")
+                    Relationship.objects.get(key="device_soft")
                 ]
                 for dev_rel in device_rels:
                     vuln_obj, _ = VulnerabilityLCM.objects.get_or_create(
@@ -62,7 +62,7 @@ class GenerateVulnerabilities(Job):
 
                 # Loop through any inventory tem relationships
                 item_rels = soft_rel.source.get_relationships()["source"][
-                    Relationship.objects.get(slug="inventory_item_soft")
+                    Relationship.objects.get(key="inventory_item_soft")
                 ]
                 for item_rel in item_rels:
                     vuln_obj, _ = VulnerabilityLCM.objects.get_or_create(

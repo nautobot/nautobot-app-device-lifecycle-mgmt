@@ -26,9 +26,7 @@ class DeviceSoftwareValidationFullReport(Job):
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta class for the job."""
 
-        commit_default = True
-
-    def test_device_software_validity(self) -> None:
+    def run(self) -> None:
         """Check if software assigned to each device is valid. If no software is assigned return warning message."""
         devices = Device.objects.all()
         job_run_time = datetime.now()
@@ -43,7 +41,7 @@ class DeviceSoftwareValidationFullReport(Job):
             validate_obj.last_run = job_run_time
             validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
             validate_obj.validated_save()
-        self.log_success(message=f"Performed validation on: {devices.count()} devices.")
+        self.logger.info(f"Performed validation on: {devices.count()} devices.")
 
 
 class InventoryItemSoftwareValidationFullReport(Job):
@@ -56,9 +54,7 @@ class InventoryItemSoftwareValidationFullReport(Job):
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta class for the job."""
 
-        commit_default = True
-
-    def test_inventory_item_software_validity(self):
+    def run(self):
         """Check if software assigned to each inventory item is valid. If no software is assigned return warning message."""
         inventory_items = InventoryItem.objects.all()
         job_run_time = datetime.now()
@@ -74,4 +70,4 @@ class InventoryItemSoftwareValidationFullReport(Job):
             validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
             validate_obj.validated_save()
 
-        self.log_success(message=f"Performed validation on: {inventory_items.count()} inventory items.")
+        self.logger.info(f"Performed validation on: {inventory_items.count()} inventory items.")
