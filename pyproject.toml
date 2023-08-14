@@ -52,6 +52,9 @@ mkdocstrings = "0.19"
 mkdocstrings-python = "0.7.1"
 pylint-nautobot = "^0.1.0"
 
+[tool.poetry.group.dev.dependencies]
+toml = "^0.10.2"
+
 [tool.black]
 line-length = 120
 target-version = ['py38']
