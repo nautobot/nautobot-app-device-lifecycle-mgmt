@@ -864,18 +864,26 @@ class HardwareReplacementLCMFilterSet(NautobotFilterSet):
 
     current_device_type = django_filters.ModelMultipleChoiceFilter(
         queryset=DeviceType.objects.all(),
+        field_name="current_device_type__model",
+        to_field_name="model",
         label="Current Device Type",
     )
     replacement_device_type = django_filters.ModelMultipleChoiceFilter(
         queryset=DeviceType.objects.all(),
+        field_name="replacement_device_type__model",
+        to_field_name="model",
         label="Replacement Device Type",
     )
     current_inventory_item = django_filters.ModelMultipleChoiceFilter(
         queryset=InventoryItem.objects.all(),
+        field_name="current_inventory_type__slug",
+        to_field_name="slug",
         label="Current Inventory Item",
     )
     replacement_inventory_item = django_filters.ModelMultipleChoiceFilter(
         queryset=InventoryItem.objects.all(),
+        field_name="replacement_inventory_type__slug",
+        to_field_name="slug",
         label="Replacement Inventory Item",
     )
     device_roles = django_filters.ModelMultipleChoiceFilter(
