@@ -4,12 +4,12 @@ import datetime
 import django_filters
 from django.db.models import Q
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Platform, Manufacturer, Location
-from nautobot.apps.filters import StatusModelFilterSetMixin
-from nautobot.extras.models import Tag, Role
-
 from nautobot.apps.filters import NautobotFilterSet, StatusModelFilterSetMixin
+from nautobot.extras.models import Tag, Role
+from nautobot.extras.filters.mixins import StatusFilter
 
 
+from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContactLCM,
@@ -725,6 +725,7 @@ class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , Custom
 
     cvss_v3__gte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="gte")
     cvss_v3__lte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="lte")
+    exclude_status = StatusFilter(field_name="status", exclude=True)
 
     class Meta:
         """Meta attributes for filter."""
