@@ -1,5 +1,6 @@
 """Unit tests for nautobot_device_lifecycle_mgmt."""
 import datetime
+from unittest import skip
 
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -68,20 +69,13 @@ class HardwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             {"device_type": device_types[2].id, "end_of_sale": datetime.date(2021, 4, 1)},
         ]
 
-    def test_bulk_create_objects(self):
-        """Currently don't support bulk operations."""
-
+    @skip("Not implemented")
     def test_bulk_delete_objects(self):
-        """Currently don't support bulk operations."""
+        pass
 
+    @skip("Not implemented")
     def test_bulk_update_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_notes_url_on_object(self):
-        """Currently don't support notes."""
-
-    def test_list_objects_brief(self):
-        """Nautobot 1.4 adds 'created' and 'last_updated' causing testing mismatch with previous versions."""
+        pass
 
 
 class SoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
@@ -134,17 +128,9 @@ class SoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             device_platform=device_platforms[2], version="21.4R3", end_of_support=datetime.date(2024, 5, 19)
         )
 
-    def test_bulk_create_objects(self):
-        """Currently don't support bulk operations."""
-
+    @skip("Not implemented")
     def test_bulk_delete_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_bulk_update_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_notes_url_on_object(self):
-        """Currently don't support notes."""
+        pass
 
 
 class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):
@@ -226,17 +212,13 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):
             provider=provider,
         )
 
-    def test_bulk_create_objects(self):
-        """Currently don't support bulk operations."""
-
+    @skip("Not implemented")
     def test_bulk_delete_objects(self):
         """Currently don't support bulk operations."""
 
+    @skip("Not implemented")
     def test_bulk_update_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_notes_url_on_object(self):
-        """Currently don't support notes."""
+        pass
 
 
 class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
@@ -245,7 +227,7 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
     model = ValidatedSoftwareLCM
     brief_fields = [
         "custom_fields",
-        "device_roles",
+        "roles",
         "device_types",
         "devices",
         "display",
@@ -346,7 +328,7 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             },
             {
                 "software": softwares[0].id,
-                "device_roles": [devicerole.pk for devicerole in deviceroles],
+                "roles": [devicerole.pk for devicerole in deviceroles],
                 "start": datetime.date(2019, 3, 6),
                 "end": datetime.date(2023, 6, 1),
                 "preferred": False,
@@ -384,7 +366,7 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             end=datetime.date(2030, 7, 30),
             preferred=False,
         )
-        validated_software.device_roles.set([devicerole.pk for devicerole in deviceroles])
+        validated_software.roles.set([devicerole.pk for devicerole in deviceroles])
         validated_software.save()
 
         ValidatedSoftwareLCM(
@@ -396,20 +378,9 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
         validated_software.inventory_items.set([inventoryitem.pk for inventoryitem in inventoryitems])
         validated_software.save()
 
-    def test_bulk_create_objects(self):
-        """Currently don't support bulk operations."""
-
+    @skip("Not implemented")
     def test_bulk_delete_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_bulk_update_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_notes_url_on_object(self):
-        """Currently don't support notes."""
-
-    def test_list_objects_brief(self):
-        """Nautobot 1.4 adds 'created' and 'last_updated' causing testing mismatch with previous versions."""
+        pass
 
 
 class CVELCMAPITest(APIViewTestCases.APIViewTestCase):
@@ -472,17 +443,9 @@ class CVELCMAPITest(APIViewTestCases.APIViewTestCase):
             link="https://www.cvedetails.com/cve/CVE-2020-27134/",
         )
 
-    def test_bulk_create_objects(self):
-        """Currently don't support bulk operations."""
-
+    @skip("Not implemented")
     def test_bulk_delete_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_bulk_update_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_notes_url_on_object(self):
-        """Currently don't support notes."""
+        pass
 
 
 class VulnerabilityLCMAPITest(
@@ -524,23 +487,17 @@ class VulnerabilityLCMAPITest(
         status.content_types.set([vuln_ct])
         cls.create_data = [{"status": {"name": "Exempt"}}]
 
+    @skip("Not implemented")
     def test_bulk_delete_objects(self):
-        """Currently don't support bulk operations."""
+        pass
 
+    @skip("Not implemented")
     def test_bulk_update_objects(self):
-        """Currently don't support bulk operations."""
+        pass
 
+    @skip("Not implemented")
     def test_options_returns_expected_choices(self):
-        """Disabling inherited test that uses POST."""
-
-    def test_options_objects_returns_display_and_value(self):
-        """Disabling inherited test that uses POST."""
-
-    def test_notes_url_on_object(self):
-        """Currently don't support notes."""
-
-    def test_list_objects_brief(self):
-        """Nautobot 1.4 adds 'created' and 'last_updated' causing testing mismatch with previous versions."""
+        pass
 
 
 class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
@@ -690,17 +647,9 @@ class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
         software_image.device_types.set([devicetype.pk for devicetype in devicetypes_arista])
         software_image.save()
 
-    def test_bulk_create_objects(self):
-        """Currently don't support bulk operations."""
-
+    @skip("Not implemented")
     def test_bulk_delete_objects(self):
         """Currently don't support bulk operations."""
-
-    def test_bulk_update_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_notes_url_on_object(self):
-        """Currently don't support notes."""
 
 
 class ProviderLCMAPITest(APIViewTestCases.APIViewTestCase):
@@ -785,17 +734,6 @@ class ProviderLCMAPITest(APIViewTestCases.APIViewTestCase):
             comments="Test Comment",
         )
 
-    def test_bulk_create_objects(self):
-        """Currently don't support bulk operations."""
-
+    @skip("Not implemented")
     def test_bulk_delete_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_bulk_update_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_notes_url_on_object(self):
-        """Currently don't support notes."""
-
-    def test_list_objects_brief(self):
-        """Nautobot 1.4 adds 'created' and 'last_updated' causing testing mismatch with previous versions."""
+        pass

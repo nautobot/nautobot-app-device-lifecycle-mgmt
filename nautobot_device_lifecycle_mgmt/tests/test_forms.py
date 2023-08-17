@@ -30,11 +30,13 @@ class HardwareLCMFormTest(TestCase):
         self.location1, _ = Location.objects.get_or_create(
             name="Location1", location_type=location_type_location_a, status=location_status
         )
+        device_status = Status.objects.get_for_model(Device).first()
         self.device = Device.objects.create(
             name="Test-9300-Switch",
             device_type=self.device_type,
             role=self.devicerole,
             location=self.location1,
+            status=device_status,
         )
         self.inventory_item = InventoryItem.objects.create(
             device=self.device,

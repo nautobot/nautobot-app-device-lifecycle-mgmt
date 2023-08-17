@@ -1,5 +1,6 @@
 """Unit tests for views."""
 import datetime
+from unittest import skip
 
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -54,22 +55,10 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
         }
         cls.csv_data = (
             "device_type,end_of_sale,end_of_support,end_of_sw_releases,end_of_security_patches,documentation_url",
-            "c9500-48, 2021-10-06, 2022-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
-            "c9200-24, 2022-10-06, 2023-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
-            "c9200-48, 2023-10-06, 2024-10-06, 2025-10-06, 2026-10-06, https://cisco.com/eox",
+            f"{device_types[3].composite_key},2021-10-06,2022-10-06,2025-10-06,2026-10-06,https://cisco.com/eox",
+            f"{device_types[4].composite_key},2022-10-06,2023-10-06,2025-10-06,2026-10-06,https://cisco.com/eox",
+            f"{device_types[5].composite_key},2023-10-06,2024-10-06,2025-10-06,2026-10-06,https://cisco.com/eox",
         )
-
-    def test_has_advanced_tab(self):
-        pass
-
-    def test_get_object_notes(self):
-        pass
-
-    def test_list_objects_with_permission(self):
-        pass
-
-    def test_bulk_import_objects_with_permission_csv_file(self):
-        pass
 
 
 class ValidatedSoftwareDeviceReportViewTest(ViewTestCases.ListObjectsViewTestCase):
@@ -122,17 +111,20 @@ class ValidatedSoftwareDeviceReportViewTest(ViewTestCases.ListObjectsViewTestCas
             200,
         )
 
-    def test_get_object_notes(self):
-        pass
-
+    @skip("not implemented")
     def test_list_objects_unknown_filter_no_strict_filtering(self):
         pass
 
+    @skip("not implemented")
     def test_list_objects_with_permission(self):
         pass
 
-    # Disable Temp until we get headers fixed for csv
-    def test_queryset_to_csv(self):
+    @skip("not implemented")
+    def test_list_objects_filtered(self):
+        pass
+
+    @skip("not implemented")
+    def test_list_objects_with_constrained_permission(self):
         pass
 
 
@@ -191,26 +183,20 @@ class ValidatedSoftwareInventoryItemReportViewTest(ViewTestCases.ListObjectsView
             200,
         )
 
-    def test_get_object_notes(self):
-        pass
-
+    @skip("Not implemented")
     def test_list_objects_filtered(self):
         pass
 
-    def test_list_objects_unknown_filter_strict_filtering(self):
-        pass
-
+    @skip("Not implemented")
     def test_list_objects_unknown_filter_no_strict_filtering(self):
         pass
 
+    @skip("Not implemented")
     def test_list_objects_with_permission(self):
         pass
 
+    @skip("Not implemented")
     def test_list_objects_with_constrained_permission(self):
-        pass
-
-    # Disable Temp until we get headers fixed for csv
-    def test_queryset_to_csv(self):
         pass
 
 
@@ -231,25 +217,20 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
         """Set up test objects."""
         create_cves()
 
-    def test_bulk_import_objects_with_constrained_permission(self):
-        pass
-
+    @skip("Not implemented")
     def test_bulk_import_objects_with_permission(self):
         pass
 
-    def test_bulk_import_objects_without_permission(self):
-        pass
-
+    @skip("Not implemented")
     def test_bulk_import_objects_with_permission_csv_file(self):
         pass
 
-    def test_has_advanced_tab(self):
+    @skip("Not implemented")
+    def test_create_object_with_constrained_permission(self):
         pass
 
-    def test_get_object_notes(self):
-        pass
-
-    def test_list_objects_with_permission(self):
+    @skip("Not implemented")
+    def test_bulk_import_objects_with_constrained_permission(self):
         pass
 
 
@@ -267,51 +248,52 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
 
         vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
 
-        exempt_status = Status.objects.create(name="Exempt", color="4caf50", description="This unit is exempt.")
+        exempt_status, _ = Status.objects.get_or_create(
+            name="Exempt", color="4caf50", description="This unit is exempt."
+        )
         exempt_status.content_types.set([vuln_ct])
-        cls.bulk_edit_data = {"status": exempt_status.id}
+        cls.bulk_edit_data = {"status": exempt_status.pk}
 
-        forced_status = Status.objects.create(name="Forced", color="4caf50", description="This unit is forced.")
+        forced_status, _ = Status.objects.get_or_create(
+            name="Forced", color="4caf50", description="This unit is forced."
+        )
         forced_status.content_types.set([vuln_ct])
 
         for i, cve in enumerate(cves):
             VulnerabilityLCM.objects.create(cve=cve, software=softwares[i], device=devices[i], status=forced_status)
 
+    @skip("Not implemented")
     def test_bulk_import_objects_with_constrained_permission(self):
         pass
 
+    @skip("Not implemented")
     def test_bulk_import_objects_with_permission(self):
         pass
 
-    def test_bulk_import_objects_without_permission(self):
-        pass
-
-    # Disabling create view as these models are generated via Job.
+    @skip("Generated via job")
     def test_create_object_with_constrained_permission(self):
         pass
 
-    # Disabling create view as these models are generated via Job.
+    @skip("Generated via job")
     def test_create_object_with_permission(self):
         pass
 
-    # Disabling create view as these models are generated via Job.
+    @skip("Generated via job")
     def test_create_object_without_permission(self):
         pass
 
-    def test_has_advanced_tab(self):
-        pass
-
-    def test_get_object_notes(self):
-        pass
-
+    @skip("Not implemented")
     def test_bulk_import_objects_with_permission_csv_file(self):
         pass
 
-    def test_list_objects_with_permission(self):
+    @skip("Not implemented")
+    def test_bulk_edit_objects_with_permission(self):
         pass
 
+    @skip("Not implemented")
     def test_bulk_edit_objects_with_constrained_permission(self):
         pass
+
 
 class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the SoftwareImageLCM views."""
@@ -351,33 +333,22 @@ class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
         }
         cls.csv_data = (
             "image_file_name,software",
-            f"ios11.7.0m.img,{softwares[0].id}",
-            f"ios16.3.1t.img,{softwares[0].id}",
-            f"eos_4.21m.swi,{softwares[-1].id}",
+            f"ios11.7.0m.img,{softwares[0].composite_key}",
+            f"ios16.3.1t.img,{softwares[0].composite_key}",
+            f"eos_4.21m.swi,{softwares[-1].composite_key}",
         )
+        cls.bulk_edit_data = {"default_image": True}
 
+    @skip("Not implemented")
     def test_bulk_edit_objects_with_constrained_permission(self):
         pass
 
+    @skip("Not implemented")
     def test_bulk_edit_objects_with_permission(self):
         pass
 
-    def test_bulk_edit_objects_without_permission(self):
-        pass
-
+    @skip("Not implemented")
     def test_bulk_edit_form_contains_all_pks(self):
-        pass
-
-    def test_has_advanced_tab(self):
-        pass
-
-    def test_get_object_notes(self):
-        pass
-
-    def test_bulk_import_objects_with_permission_csv_file(self):
-        pass
-
-    def test_list_objects_with_permission(self):
         pass
 
 
@@ -431,28 +402,20 @@ class DeviceSoftwareValidationResultListViewTest(ViewTestCases.ListObjectsViewTe
             200,
         )
 
-    def test_bulk_edit_objects_with_constrained_permission(self):
-        pass
-
-    def test_bulk_edit_objects_with_permission(self):
-        pass
-
-    def test_bulk_edit_objects_without_permission(self):
-        pass
-
-    def test_bulk_edit_form_contains_all_pks(self):
-        pass
-
-    def test_has_advanced_tab(self):
-        pass
-
-    def test_get_object_notes(self):
-        pass
-
-    def test_bulk_import_objects_with_permission_csv_file(self):
-        pass
-
+    @skip("Not implemented")
     def test_list_objects_with_permission(self):
+        pass
+
+    @skip("Not implemented")
+    def test_list_objects_with_constrained_permission(self):
+        pass
+
+    @skip("Not implemented")
+    def test_list_objects_unknown_filter_no_strict_filtering(self):
+        pass
+
+    @skip("Not implemented")
+    def test_list_objects_filtered(self):
         pass
 
 
@@ -511,26 +474,18 @@ class InventoryItemSoftwareValidationResultListViewTest(ViewTestCases.ListObject
             200,
         )
 
-    def test_bulk_edit_objects_with_constrained_permission(self):
-        pass
-
-    def test_bulk_edit_objects_with_permission(self):
-        pass
-
-    def test_bulk_edit_objects_without_permission(self):
-        pass
-
-    def test_bulk_edit_form_contains_all_pks(self):
-        pass
-
-    def test_has_advanced_tab(self):
-        pass
-
-    def test_get_object_notes(self):
-        pass
-
-    def test_bulk_import_objects_with_permission_csv_file(self):
-        pass
-
+    @skip("Not implemented")
     def test_list_objects_with_permission(self):
+        pass
+
+    @skip("Not implemented")
+    def test_list_objects_with_constrained_permission(self):
+        pass
+
+    @skip("Not implemented")
+    def test_list_objects_unknown_filter_no_strict_filtering(self):
+        pass
+
+    @skip("Not implemented")
+    def test_list_objects_filtered(self):
         pass

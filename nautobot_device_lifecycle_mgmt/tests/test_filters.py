@@ -44,27 +44,30 @@ class HardwareLCMTestCase(TestCase):
             DeviceType.objects.get_or_create(model="c9300-24", manufacturer=self.manufacturer)[0],
             DeviceType.objects.get_or_create(model="c9300-48", manufacturer=self.manufacturer)[0],
         )
-        devicerole, _ = Role.objects.get_or_create(name="switch", color="ff0000")
+        self.devicerole, _ = Role.objects.get_or_create(name="switch", color="ff0000")
         location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
         location_type_location_a.content_types.add(
             ContentType.objects.get_for_model(Device),
         )
         location_status = Status.objects.get_for_model(Location).first()
-        location1, _ = Location.objects.get_or_create(
+        self.location1, _ = Location.objects.get_or_create(
             name="Location1", location_type=location_type_location_a, status=location_status
         )
+        device_status = Status.objects.get_for_model(Device).first()
         self.devices = (
             Device.objects.create(
                 name="r1",
                 device_type=self.device_types[0],
                 role=self.devicerole,
                 location=self.location1,
+                status=device_status,
             ),
             Device.objects.create(
                 name="r2",
                 device_type=self.device_types[1],
                 role=self.devicerole,
                 location=self.location1,
+                status=device_status,
             ),
         )
         self.notices = (
@@ -552,17 +555,17 @@ class CVELCMTestCase(TestCase):
 
     def test_status(self):
         """Test status filter."""
-        params = {"status": ["fixed"]}
+        params = {"status": ["Fixed"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_exclude_status(self):
         """Test exclude_status filter."""
-        params = {"exclude_status": ["fixed"]}
+        params = {"exclude_status": ["Fixed"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
     def test_severity(self):
         """Test severity filter."""
-        params = {"severity": CVESeverityChoices.CRITICAL}
+        params = {"severity": [CVESeverityChoices.CRITICAL]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_published_date_before(self):
