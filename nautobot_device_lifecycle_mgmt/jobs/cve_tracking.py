@@ -51,9 +51,7 @@ class GenerateVulnerabilities(Job):
             software_rels = RelationshipAssociation.objects.filter(relationship__key="soft_cve", destination_id=cve.id)
             for soft_rel in software_rels:
                 # Loop through any device relationships
-                device_rels = soft_rel.source.get_relationships()["source"][
-                    Relationship.objects.get(key="device_soft")
-                ]
+                device_rels = soft_rel.source.get_relationships()["source"][Relationship.objects.get(key="device_soft")]
                 for dev_rel in device_rels:
                     vuln_obj, _ = VulnerabilityLCM.objects.get_or_create(
                         cve=cve, software=dev_rel.source, device=dev_rel.destination
