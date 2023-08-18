@@ -410,7 +410,6 @@ class ValidatedSoftwareLCMForm(NautobotModelForm, CustomFieldModelFormMixin, Rel
 
 
 class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
-
     """Filter form to filter searches for SoftwareLCM."""
 
     model = ValidatedSoftwareLCM
