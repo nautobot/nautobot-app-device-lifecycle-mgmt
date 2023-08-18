@@ -125,13 +125,14 @@ class HardwareLCMBulkEditForm(NautobotBulkEditForm):
 class HardwareLCMFilterForm(NautobotModelForm):
     """Filter form to filter searches."""
 
+    model = HardwareLCM
     q = forms.CharField(
         required=False,
         label="Search",
         help_text="Select a date that will be used to search end_of_support and end_of_sale",
     )
     device_type = forms.ModelMultipleChoiceField(
-        required=False, queryset=DeviceType.objects.all(), to_field_name="slug"
+        required=False, queryset=DeviceType.objects.all(), to_field_name="model"
     )
 
     inventory_item = forms.ModelMultipleChoiceField(
@@ -145,8 +146,8 @@ class HardwareLCMFilterForm(NautobotModelForm):
     class Meta:
         """Meta attributes for the HardwareLCMFilterForm class."""
 
-        model = HardwareLCM
         # Define the fields above for ordering and widget purposes
+        model = HardwareLCM
         fields = [
             "q",
             "device_type",
@@ -166,28 +167,28 @@ class HardwareLCMFilterForm(NautobotModelForm):
         }
 
 
-class HardwareLCMCSVForm(CustomFieldModelCSVForm):
-    """Form for creating bulk Hardware Device Lifecycle notices."""
-
-    device_type = forms.ModelChoiceField(
-        required=False, queryset=DeviceType.objects.all(), to_field_name="model", label="Device type"
-    )
-
-    inventory_item = forms.ModelChoiceField(
-        required=False,
-        queryset=InventoryItem.objects.exclude(part_id__exact="")
-        .distinct()
-        .order_by("part_id")
-        .values_list("part_id", flat=True),
-        to_field_name="part_id",
-        label="Inventory Item",
-    )
-
-    class Meta:
-        """Meta attributes for the HardwareLCMCSVForm class."""
-
-        model = HardwareLCM
-        fields = HardwareLCM.csv_headers
+# class HardwareLCMCSVForm(CustomFieldModelCSVForm):
+#    """Form for creating bulk Hardware Device Lifecycle notices."""
+#
+#    device_type = forms.ModelChoiceField(
+#        required=False, queryset=DeviceType.objects.all(), to_field_name="model", label="Device type"
+#    )
+#
+#    inventory_item = forms.ModelChoiceField(
+#        required=False,
+#        queryset=InventoryItem.objects.exclude(part_id__exact="")
+#        .distinct()
+#        .order_by("part_id")
+#        .values_list("part_id", flat=True),
+#        to_field_name="part_id",
+#        label="Inventory Item",
+#    )
+#
+#    class Meta:
+#        """Meta attributes for the HardwareLCMCSVForm class."""
+#
+#        model = HardwareLCM
+#        fields = HardwareLCM.csv_headers
 
 
 class SoftwareLCMForm(NautobotModelForm, CustomFieldModelFormMixin, RelationshipModelFormMixin):
@@ -221,7 +222,7 @@ class SoftwareLCMFilterForm(NautobotFilterForm):
     )
     version = forms.CharField(required=False)
     device_platform = forms.ModelMultipleChoiceField(
-        required=False, queryset=Platform.objects.all(), to_field_name="slug"
+        required=False, queryset=Platform.objects.all(), to_field_name="name"
     )
     release_date_before = forms.DateField(label="Release Date Before", required=False, widget=DatePicker())
     release_date_after = forms.DateField(label="Release Date After", required=False, widget=DatePicker())
@@ -231,6 +232,7 @@ class SoftwareLCMFilterForm(NautobotFilterForm):
     class Meta:
         """Meta attributes."""
 
+        model = SoftwareLCM
         fields = [
             "q",
             "version",
@@ -250,21 +252,21 @@ class SoftwareLCMFilterForm(NautobotFilterForm):
         # }
 
 
-class SoftwareLCMCSVForm(CustomFieldModelCSVForm):
-    """Form for bulk creating SoftwareLCM objects."""
-
-    device_platform = CSVModelChoiceField(
-        queryset=Platform.objects.all(),
-        required=True,
-        to_field_name="slug",
-        help_text="Device platform",
-    )
-
-    class Meta:
-        """Meta attributes for the SoftwareLCMCSVForm class."""
-
-        model = SoftwareLCM
-        fields = SoftwareLCM.csv_headers
+# class SoftwareLCMCSVForm(CustomFieldModelCSVForm):
+#    """Form for bulk creating SoftwareLCM objects."""
+#
+#    device_platform = CSVModelChoiceField(
+#        queryset=Platform.objects.all(),
+#        required=True,
+#        to_field_name="slug",
+#        help_text="Device platform",
+#    )
+#
+#    class Meta:
+#        """Meta attributes for the SoftwareLCMCSVForm class."""
+#
+#        model = SoftwareLCM
+#        fields = SoftwareLCM.csv_headers
 
 
 class SoftwareImageLCMForm(NautobotModelForm, CustomFieldModelFormMixin, RelationshipModelFormMixin):
@@ -371,7 +373,7 @@ class SoftwareImageLCMFilterForm(NautobotFilterForm):
     )
     object_tags = DynamicModelMultipleChoiceField(
         queryset=Tag.objects.all(),
-        to_field_name="slug",
+        to_field_name="name",
         required=False,
     )
     # default_image = forms.BooleanField(required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES))
@@ -383,6 +385,7 @@ class SoftwareImageLCMFilterForm(NautobotFilterForm):
     class Meta:
         """Meta attributes."""
 
+        model = SoftwareImageLCM
         fields = [
             "q",
             "software",
@@ -401,30 +404,30 @@ class SoftwareImageLCMFilterForm(NautobotFilterForm):
         # }
 
 
-class SoftwareImageLCMCSVForm(CustomFieldModelCSVForm):
-    """Form for bulk creating SoftwareImageLCM objects."""
-
-    device_types = CSVMultipleModelChoiceField(
-        queryset=DeviceType.objects.all(),
-        required=False,
-        to_field_name="model",
-        help_text="Comma-separated list of DeviceType Models",
-    )
-    inventory_items = CSVMultipleModelChoiceField(
-        queryset=InventoryItem.objects.all(),
-        required=False,
-        to_field_name="id",
-        help_text="Comma-separated list of InventoryItem IDs",
-    )
-    object_tags = CSVMultipleModelChoiceField(
-        queryset=Tag.objects.all(), required=False, to_field_name="slug", help_text="Comma-separated list of Tag Slugs"
-    )
-
-    class Meta:
-        """Meta attributes for the SoftwareImageLCMCSVForm class."""
-
-        model = SoftwareImageLCM
-        fields = SoftwareImageLCM.csv_headers
+# class SoftwareImageLCMCSVForm(CustomFieldModelCSVForm):
+#    """Form for bulk creating SoftwareImageLCM objects."""
+#
+#    device_types = CSVMultipleModelChoiceField(
+#        queryset=DeviceType.objects.all(),
+#        required=False,
+#        to_field_name="model",
+#        help_text="Comma-separated list of DeviceType Models",
+#    )
+#    inventory_items = CSVMultipleModelChoiceField(
+#        queryset=InventoryItem.objects.all(),
+#        required=False,
+#        to_field_name="id",
+#        help_text="Comma-separated list of InventoryItem IDs",
+#    )
+#    object_tags = CSVMultipleModelChoiceField(
+#        queryset=Tag.objects.all(), required=False, to_field_name="slug", help_text="Comma-separated list of Tag Slugs"
+#    )
+#
+#    class Meta:
+#        """Meta attributes for the SoftwareImageLCMCSVForm class."""
+#
+#        model = SoftwareImageLCM
+#        fields = SoftwareImageLCM.csv_headers
 
 
 class ValidatedSoftwareLCMForm(NautobotModelForm, CustomFieldModelFormMixin, RelationshipModelFormMixin):
@@ -518,6 +521,7 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
     class Meta:
         """Meta attributes."""
 
+        model = ValidatedSoftwareLCM
         fields = [
             "q",
             "software",
@@ -538,6 +542,7 @@ class DeviceSoftwareValidationResultFilterForm(
 ):
     """Filter form to filter searches for DeviceSoftwareValidationResult."""
 
+    model = DeviceSoftwareValidationResult
     q = forms.CharField(
         required=False,
         label="Search",
@@ -617,6 +622,7 @@ class InventoryItemSoftwareValidationResultFilterForm(
 ):
     """Filter form to filter searches for InventoryItemSoftwareValidationResult."""
 
+    model = InventoryItemSoftwareValidationResult
     q = forms.CharField(
         required=False,
         label="Search",
@@ -702,48 +708,48 @@ class InventoryItemSoftwareValidationResultFilterForm(
         ]
 
 
-class ValidatedSoftwareLCMCSVForm(CustomFieldModelCSVForm):
-    """Form for bulk creating ValidatedSoftwareLCM objects."""
-
-    devices = CSVMultipleModelChoiceField(
-        queryset=Device.objects.all(),
-        required=False,
-        to_field_name="name",
-        help_text="Comma-separated list of Device Names",
-    )
-    devices = CSVMultipleModelChoiceField(
-        queryset=Device.objects.all(),
-        required=False,
-        to_field_name="name",
-        help_text="Comma-separated list of Device Names",
-    )
-    device_types = CSVMultipleModelChoiceField(
-        queryset=DeviceType.objects.all(),
-        required=False,
-        to_field_name="model",
-        help_text="Comma-separated list of DeviceType Models",
-    )
-    # device_roles = CSVMultipleModelChoiceField(
-    #     queryset=DeviceRole.objects.all(),
-    #     required=False,
-    #     to_field_name="slug",
-    #     help_text="Comma-separated list of DeviceRole Slugs",
-    # )
-    inventory_items = CSVMultipleModelChoiceField(
-        queryset=InventoryItem.objects.all(),
-        required=False,
-        to_field_name="name",
-        help_text="Comma-separated list of InventoryItem Names",
-    )
-    object_tags = CSVMultipleModelChoiceField(
-        queryset=Tag.objects.all(), required=False, to_field_name="slug", help_text="Comma-separated list of Tag Slugs"
-    )
-
-    class Meta:
-        """Meta attributes for the ValidatedSoftwareLCM class."""
-
-        model = ValidatedSoftwareLCM
-        fields = ValidatedSoftwareLCM.csv_headers
+# class ValidatedSoftwareLCMCSVForm(CustomFieldModelCSVForm):
+#    """Form for bulk creating ValidatedSoftwareLCM objects."""
+#
+#    devices = CSVMultipleModelChoiceField(
+#        queryset=Device.objects.all(),
+#        required=False,
+#        to_field_name="name",
+#        help_text="Comma-separated list of Device Names",
+#    )
+#    devices = CSVMultipleModelChoiceField(
+#        queryset=Device.objects.all(),
+#        required=False,
+#        to_field_name="name",
+#        help_text="Comma-separated list of Device Names",
+#    )
+#    device_types = CSVMultipleModelChoiceField(
+#        queryset=DeviceType.objects.all(),
+#        required=False,
+#        to_field_name="model",
+#        help_text="Comma-separated list of DeviceType Models",
+#    )
+#    # device_roles = CSVMultipleModelChoiceField(
+#    #     queryset=DeviceRole.objects.all(),
+#    #     required=False,
+#    #     to_field_name="slug",
+#    #     help_text="Comma-separated list of DeviceRole Slugs",
+#    # )
+#    inventory_items = CSVMultipleModelChoiceField(
+#        queryset=InventoryItem.objects.all(),
+#        required=False,
+#        to_field_name="name",
+#        help_text="Comma-separated list of InventoryItem Names",
+#    )
+#    object_tags = CSVMultipleModelChoiceField(
+#        queryset=Tag.objects.all(), required=False, to_field_name="slug", help_text="Comma-separated list of Tag Slugs"
+#    )
+#
+#    class Meta:
+#        """Meta attributes for the ValidatedSoftwareLCM class."""
+#
+#        model = ValidatedSoftwareLCM
+#        fields = ValidatedSoftwareLCM.csv_headers
 
 
 class ContractLCMForm(NautobotModelForm, CustomFieldModelFormMixin, RelationshipModelFormMixin):
@@ -817,6 +823,7 @@ class ContractLCMBulkEditForm(NautobotBulkEditForm):
 class ContractLCMFilterForm(NautobotFilterForm):
     """Filter form to filter searches."""
 
+    model = ContractLCM
     q = forms.CharField(required=False, label="Search")
     provider = forms.ModelMultipleChoiceField(required=False, queryset=ProviderLCM.objects.all(), to_field_name="pk")
     # currency = forms.ChoiceField(required=False, widget=StaticSelect2, choices=CurrencyChoices.CHOICES)
@@ -845,18 +852,18 @@ class ContractLCMFilterForm(NautobotFilterForm):
         }
 
 
-class ContractLCMCSVForm(CustomFieldModelCSVForm):
-    """Form for creating bulk Device Lifecycle contracts."""
-
-    provider = forms.ModelChoiceField(
-        required=True, queryset=ProviderLCM.objects.all(), to_field_name="name", label="Contract Provider"
-    )
-
-    class Meta:
-        """Meta attributes for the ContractLCMCSVForm class."""
-
-        model = ContractLCM
-        fields = ContractLCM.csv_headers
+# class ContractLCMCSVForm(CustomFieldModelCSVForm):
+#    """Form for creating bulk Device Lifecycle contracts."""
+#
+#    provider = forms.ModelChoiceField(
+#        required=True, queryset=ProviderLCM.objects.all(), to_field_name="name", label="Contract Provider"
+#    )
+#
+#    class Meta:
+#        """Meta attributes for the ContractLCMCSVForm class."""
+#
+#        model = ContractLCM
+#        fields = ContractLCM.csv_headers
 
 
 class ProviderLCMForm(NautobotModelForm, CustomFieldModelFormMixin, RelationshipModelFormMixin):
@@ -914,6 +921,7 @@ class ProviderLCMBulkEditForm(NautobotBulkEditForm):
 class ProviderLCMFilterForm(NautobotFilterForm):
     """Filter form to filter searches."""
 
+    model = ProviderLCM
     q = forms.CharField(required=False, label="Search")
     name = forms.CharField(required=False)
     # country = forms.ChoiceField(
@@ -939,14 +947,14 @@ class ProviderLCMFilterForm(NautobotFilterForm):
         ]
 
 
-class ProviderLCMCSVForm(CustomFieldModelCSVForm):
-    """Form for creating bulk Device Lifecycle providers."""
-
-    class Meta:
-        """Meta attributes for the ProviderLCMCSVForm class."""
-
-        model = ProviderLCM
-        fields = ProviderLCM.csv_headers
+# class ProviderLCMCSVForm(CustomFieldModelCSVForm):
+#    """Form for creating bulk Device Lifecycle providers."""
+#
+#    class Meta:
+#        """Meta attributes for the ProviderLCMCSVForm class."""
+#
+#        model = ProviderLCM
+#        fields = ProviderLCM.csv_headers
 
 
 class ContactLCMForm(NautobotModelForm, CustomFieldModelFormMixin, RelationshipModelFormMixin):
@@ -999,6 +1007,7 @@ class ContactLCMBulkEditForm(NautobotBulkEditForm):
 class ContactLCMFilterForm(NautobotFilterForm):
     """Filter form to filter searches."""
 
+    model = ContactLCM
     q = forms.CharField(required=False, label="Search")
     name = forms.CharField(required=False)
     contract = forms.ModelChoiceField(queryset=ContractLCM.objects.all(), required=False)
@@ -1020,29 +1029,27 @@ class ContactLCMFilterForm(NautobotFilterForm):
         ]
 
 
-class ContactLCMCSVForm(CustomFieldModelCSVForm):
-    """Form for creating bulk Device Lifecycle resources/contacts."""
+# class ContactLCMCSVForm(CustomFieldModelCSVForm):
+#    """Form for creating bulk Device Lifecycle resources/contacts."""
+#
+#    contract = forms.ModelChoiceField(
+#        required=True, queryset=ContractLCM.objects.all(), to_field_name="name", label="Contract Name"
+#    )
+#    type = forms.ChoiceField(choices=PoCTypeChoices.CHOICES, label="PoC Type")
+#
+#    class Meta:
+#        """Meta attributes for the ContactLCMCSVForm class."""
+#
+#        model = ContactLCM
+#        fields = ContactLCM.csv_headers
 
-    contract = forms.ModelChoiceField(
-        required=True, queryset=ContractLCM.objects.all(), to_field_name="name", label="Contract Name"
-    )
-    type = forms.ChoiceField(choices=PoCTypeChoices.CHOICES, label="PoC Type")
 
-    class Meta:
-        """Meta attributes for the ContactLCMCSVForm class."""
-
-        model = ContactLCM
-        fields = ContactLCM.csv_headers
-
-
-class CVELCMForm(NautobotBulkEditForm, CustomFieldModelFormMixin, RelationshipModelFormMixin):
+class CVELCMForm(CustomFieldModelFormMixin, RelationshipModelFormMixin):
     """CVE Lifecycle Management creation/edit form."""
 
     published_date = forms.DateField(widget=DatePicker())
     severity = forms.ChoiceField(choices=CVESeverityChoices.CHOICES, label="Severity", required=False)
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
-
-    model = CVELCM
 
     class Meta:
         """Meta attributes for the CVELCMForm class."""
@@ -1062,7 +1069,7 @@ class CVELCMForm(NautobotBulkEditForm, CustomFieldModelFormMixin, RelationshipMo
 class CVELCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):
     """CVE Lifecycle Management bulk edit form."""
 
-    # model = CVELCM
+    model = CVELCM
     pk = forms.ModelMultipleChoiceField(queryset=CVELCM.objects.all(), widget=forms.MultipleHiddenInput)
     description = forms.CharField(required=False)
     comments = forms.CharField(required=False)
@@ -1088,11 +1095,11 @@ class CVELCMFilterForm(NautobotFilterForm, StatusModelFilterFormMixin, CustomFie
         label="Search",
         help_text="Search for name or link.",
     )
-    # severity = forms.ChoiceField(
-    #     widget=StaticSelect2,
-    #     required=False,
-    #     choices=add_blank_choice(CVESeverityChoices.CHOICES),
-    # )
+    severity = forms.ChoiceField(
+        # widget=StaticSelect2,
+        required=False,
+        choices=add_blank_choice(CVESeverityChoices.CHOICES),
+    )
 
     published_date_before = forms.DateField(label="Published Date Before", required=False, widget=DatePicker())
     published_date_after = forms.DateField(label="Published Date After", required=False, widget=DatePicker())
@@ -1129,22 +1136,21 @@ class CVELCMFilterForm(NautobotFilterForm, StatusModelFilterFormMixin, CustomFie
         ]
 
 
-class CVELCMCSVForm(CustomFieldModelCSVForm):
-    """Form for creating bulk CVEs."""
-
-    severity = forms.ChoiceField(choices=CVESeverityChoices.CHOICES, label="CVE Severity")
-
-    class Meta:
-        """Meta attributes for the CVELCMCSVForm class."""
-
-        model = CVELCM
-        fields = CVELCM.csv_headers
+# class CVELCMCSVForm(CustomFieldModelCSVForm):
+#    """Form for creating bulk CVEs."""
+#
+#    severity = forms.ChoiceField(choices=CVESeverityChoices.CHOICES, label="CVE Severity")
+#
+#    class Meta:
+#        """Meta attributes for the CVELCMCSVForm class."""
+#
+#        model = CVELCM
+#        fields = CVELCM.csv_headers
 
 
 class VulnerabilityLCMForm(NautobotModelForm, CustomFieldModelFormMixin, RelationshipModelFormMixin):
     """Vulnerability Lifecycle Management creation/edit form."""
 
-    model = VulnerabilityLCM
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
     class Meta:
@@ -1161,13 +1167,13 @@ class VulnerabilityLCMForm(NautobotModelForm, CustomFieldModelFormMixin, Relatio
 class VulnerabilityLCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):
     """Vulnerability Lifecycle Management bulk edit form."""
 
-    model = VulnerabilityLCM
     pk = forms.ModelMultipleChoiceField(queryset=VulnerabilityLCM.objects.all(), widget=forms.MultipleHiddenInput)
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
     class Meta:
         """Meta attributes for the VulnerabilityLCMBulkEditForm class."""
 
+        model = VulnerabilityLCM
         nullable_fields = [
             "status",
             "tags",
@@ -1195,13 +1201,13 @@ class VulnerabilityLCMFilterForm(NautobotFilterForm, StatusModelFilterFormMixin,
     software = DynamicModelMultipleChoiceField(required=False, queryset=SoftwareLCM.objects.all())
     device = DynamicModelMultipleChoiceField(required=False, queryset=Device.objects.all())
     inventory_item = DynamicModelMultipleChoiceField(required=False, queryset=InventoryItem.objects.all())
-    status = DynamicModelMultipleChoiceField(queryset=Status.objects.all(), required=False, to_field_name="slug")
+    status = DynamicModelMultipleChoiceField(queryset=Status.objects.all(), required=False, to_field_name="name")
     exclude_status = DynamicModelMultipleChoiceField(
         label="Exclude Status",
         required=False,
         queryset=Status.objects.all(),
         query_params={"content_types": model._meta.label_lower},
-        to_field_name="slug",
+        to_field_name="name",
     )
     tag = TagFilterField(model)
 
