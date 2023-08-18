@@ -56,9 +56,9 @@ class DeviceValidatedSoftwareFilter:  # pylint: disable=too-few-public-methods
         """Returns filtered ValidatedSoftwareLCM query set."""
         self.validated_software_qs = self.validated_software_qs.filter(
             Q(devices=self.item_obj.pk)
-            | Q(device_types=self.item_obj.device_type.pk, device_roles=self.item_obj.device_role.pk)
-            | Q(device_types=self.item_obj.device_type.pk, device_roles=None)
-            | Q(device_types=None, device_roles=self.item_obj.device_role.pk)
+            | Q(device_types=self.item_obj.device_type.pk, roles=self.item_obj.role.pk)
+            | Q(device_types=self.item_obj.device_type.pk, roles=None)
+            | Q(device_types=None, roles=self.item_obj.role.pk)
             | Q(object_tags__in=self.item_obj.tags.all())
         ).distinct()
 
@@ -74,20 +74,20 @@ class DeviceValidatedSoftwareFilter:  # pylint: disable=too-few-public-methods
                 When(devices=self.item_obj.pk, preferred=False, then=Value(1000)),
                 When(
                     device_types=self.item_obj.device_type.pk,
-                    device_roles=self.item_obj.device_role.pk,
+                    roles=self.item_obj.role.pk,
                     preferred=True,
                     then=Value(20),
                 ),
                 When(
                     device_types=self.item_obj.device_type.pk,
-                    device_roles=self.item_obj.device_role.pk,
+                    roles=self.item_obj.role.pk,
                     preferred=False,
                     then=Value(1010),
                 ),
-                When(device_types=self.item_obj.device_type.pk, device_roles=None, preferred=True, then=Value(30)),
-                When(device_types=self.item_obj.device_type.pk, device_roles=None, preferred=False, then=Value(1030)),
-                When(device_roles=self.item_obj.device_role.pk, preferred=True, then=Value(40)),
-                When(device_roles=self.item_obj.device_role.pk, preferred=False, then=Value(1040)),
+                When(device_types=self.item_obj.device_type.pk, roles=None, preferred=True, then=Value(30)),
+                When(device_types=self.item_obj.device_type.pk, roles=None, preferred=False, then=Value(1030)),
+                When(roles=self.item_obj.role.pk, preferred=True, then=Value(40)),
+                When(roles=self.item_obj.role.pk, preferred=False, then=Value(1040)),
                 When(preferred=True, then=Value(990)),
                 default=Value(1990),
                 output_field=IntegerField(),
