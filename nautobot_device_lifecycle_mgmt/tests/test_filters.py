@@ -1,3 +1,4 @@
+# pylint: disable=no-member
 """Test filters for lifecycle management."""
 from datetime import date
 

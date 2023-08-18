@@ -1,3 +1,4 @@
+# pylint: disable=no-member
 """Unit tests for nautobot_device_lifecycle_mgmt."""
 import datetime
 from unittest import skip
