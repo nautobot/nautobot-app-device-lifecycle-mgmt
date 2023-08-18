@@ -3,7 +3,8 @@
 from datetime import datetime, date
 
 from django.db import models
-from django.urls import reverse
+
+# from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from nautobot.extras.utils import extras_features
@@ -161,11 +162,11 @@ class SoftwareLCMQuerySet(RestrictedQuerySet):
         if not isinstance(obj, models.Model):
             raise TypeError(f"{obj} is not an instance of Django Model class")
         if isinstance(obj, Device):
-            qs = DeviceSoftwareFilter(qs=self, item_obj=obj).filter_qs()
+            qs = DeviceSoftwareFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
         elif isinstance(obj, InventoryItem):
-            qs = InventoryItemSoftwareFilter(qs=self, item_obj=obj).filter_qs()
+            qs = InventoryItemSoftwareFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
         else:
-            qs = self
+            qs = self  # pylint: disable=invalid-name
 
         return qs
 
@@ -245,11 +246,11 @@ class SoftwareImageLCMQuerySet(RestrictedQuerySet):
         if not isinstance(obj, models.Model):
             raise TypeError(f"{obj} is not an instance of Django Model class")
         if isinstance(obj, Device):
-            qs = DeviceSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()
+            qs = DeviceSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
         elif isinstance(obj, InventoryItem):
-            qs = InventoryItemSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()
+            qs = InventoryItemSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
         else:
-            qs = self
+            qs = self  # pylint: disable=invalid-name
 
         return qs
 
@@ -332,13 +333,13 @@ class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):
         if not isinstance(obj, models.Model):
             raise TypeError(f"{obj} is not an instance of Django Model class")
         if isinstance(obj, Device):
-            qs = DeviceValidatedSoftwareFilter(qs=self, item_obj=obj).filter_qs()
+            qs = DeviceValidatedSoftwareFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
         elif isinstance(obj, InventoryItem):
-            qs = InventoryItemValidatedSoftwareFilter(qs=self, item_obj=obj).filter_qs()
+            qs = InventoryItemValidatedSoftwareFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
         elif isinstance(obj, DeviceType):
-            qs = ValidatedSoftwareLCM.objects.filter(device_types=obj)
+            qs = ValidatedSoftwareLCM.objects.filter(device_types=obj)  # pylint: disable=invalid-name
         else:
-            qs = self
+            qs = self  # pylint: disable=invalid-name
 
         return qs
 
@@ -595,7 +596,7 @@ class ContractLCM(PrimaryModel):
 
     def __str__(self):
         """String representation of ContractLCM."""
-        return self.name
+        return f"{self.name}"
 
     # def get_absolute_url(self):
     #     """Returns the Detail view for ContractLCM models."""
@@ -679,7 +680,7 @@ class ProviderLCM(OrganizationalModel):
 
     def __str__(self):
         """String representation of ProviderLCM."""
-        return self.name
+        return f"{self.name}"
 
     # def get_absolute_url(self):
     #     """Returns the Detail view for ProviderLCM models."""

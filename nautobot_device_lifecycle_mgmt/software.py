@@ -34,7 +34,7 @@ class ItemSoftware:
                 destination_id=self.item_obj.id,
             )
             obj_soft = SoftwareLCM.objects.get(id=obj_soft_relation.source_id)
-        except (RelationshipAssociation.DoesNotExist, SoftwareLCM.DoesNotExist):
+        except (RelationshipAssociation.DoesNotExist, SoftwareLCM.DoesNotExist):  # pylint: disable=no-member
             obj_soft = None
 
         return obj_soft

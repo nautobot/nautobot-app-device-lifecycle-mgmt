@@ -32,8 +32,8 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     bulk_edit_data = {"documentation_url": "https://cisco.com/eox"}
 
     def _get_base_url(self):
-        return "plugins:{}:{}_{{}}".format(  # pylint: disable=consider-using-f-string, protected-access, no-member
-            self.model._meta.app_label, self.model._meta.model_name
+        return "plugins:{}:{}_{{}}".format(  # pylint: disable=consider-using-f-string
+            self.model._meta.app_label, self.model._meta.model_name  # pylint: disable=protected-access
         )
 
     @classmethod

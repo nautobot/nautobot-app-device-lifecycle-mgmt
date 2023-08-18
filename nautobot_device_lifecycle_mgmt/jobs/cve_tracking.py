@@ -1,3 +1,4 @@
+# pylint: disable=logging-not-lazy, consider-using-f-string
 """Jobs for the CVE Tracking portion of the Device Lifecycle plugin."""
 from datetime import datetime
 
@@ -28,7 +29,7 @@ class GenerateVulnerabilities(Job):
     )
     debug = BooleanVar(description="Enable for more verbose logging.")
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta class for the job."""
 
         has_sensitive_variables = False
@@ -38,7 +39,7 @@ class GenerateVulnerabilities(Job):
             "debug",
         ]
 
-    def run(self, published_after, debug=False):  # pylint: disable=too-many-locals
+    def run(self, published_after, debug=False):  # pylint: disable=too-many-locals, arguments-differ
         """Check if software assigned to each device is valid. If no software is assigned return warning message."""
         # Although the default is set on the class attribute for the UI, it doesn't default for the API
         published_after = published_after if published_after is not None else "1970-01-01"
@@ -47,7 +48,10 @@ class GenerateVulnerabilities(Job):
 
         for cve in cves:
             if debug:
-                self.logger.info(f"Generating vulnerabilities for CVE {cve}", extra={"object": cve})
+                self.logger.info(
+                    "Generating vulnerabilities for CVE %s" % cve,
+                    extra={"object": cve},
+                )
             software_rels = RelationshipAssociation.objects.filter(relationship__key="soft_cve", destination_id=cve.id)
             for soft_rel in software_rels:
                 # Loop through any device relationships
@@ -69,4 +73,4 @@ class GenerateVulnerabilities(Job):
                     vuln_obj.validated_save()
 
         diff = VulnerabilityLCM.objects.count() - count_before
-        self.logger.info(f"Processed {cves.count()} CVEs and generated {diff} Vulnerabilities.")
+        self.logger.info("Processed %d CVEs and generated %d Vulnerabilities." % (cves.count(), diff))

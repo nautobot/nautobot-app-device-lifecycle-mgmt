@@ -297,7 +297,7 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
             "preferred": False,
         }
         form = self.form_class(data)
-        with self.assertRaises(SoftwareLCM.DoesNotExist):
+        with self.assertRaises(SoftwareLCM.DoesNotExist):  # pylint: disable=no-member
             form.is_valid()
 
     def test_validation_error_start(self):

@@ -1,15 +1,11 @@
 """Nautobot UI Viewsets."""
 
-from django_tables2 import RequestConfig
-
 from nautobot.apps.views import NautobotUIViewSet
-from nautobot.core.forms import SearchForm
-from nautobot.core.views.paginator import EnhancedPaginator, get_paginate_count
+from nautobot.core.forms.search import SearchForm
 from nautobot.dcim.models import Device
 
 from nautobot_device_lifecycle_mgmt import forms, models, filters, tables
 from nautobot_device_lifecycle_mgmt.api import serializers
-from nautobot_device_lifecycle_mgmt.utils import count_related_m2m
 
 
 class HardwareLCMUIViewSet(NautobotUIViewSet):
@@ -23,7 +19,7 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.HardwareLCMSerializer
     table_class = tables.HardwareLCMTable
 
-    def get_extra_context(self, request, instance):
+    def get_extra_context(self, request, instance):  # pylint: disable=signature-differs
         """Return any additional context data for the template.
 
         request: The current request
@@ -54,7 +50,7 @@ class SoftwareLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.SoftwareLCMSerializer
     table_class = tables.SoftwareLCMTable
 
-    def get_extra_context(self, request, instance):
+    def get_extra_context(self, request, instance):  # pylint: disable=signature-differs
         """Changes "Softwares" => "Software"."""
         search_form = SearchForm(data=self.request.GET)
 
@@ -102,7 +98,7 @@ class ContractLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.ContractLCMSerializer
     table_class = tables.ContractLCMTable
 
-    def get_extra_context(self, request, instance):
+    def get_extra_context(self, request, instance):  # pylint: disable=signature-differs
         """Return any additional context data for the template.
 
         request: The current request
@@ -130,7 +126,7 @@ class ProviderLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.ProviderLCMSerializer
     table_class = tables.ProviderLCMTable
 
-    def get_extra_context(self, request, instance):
+    def get_extra_context(self, request, instance):  # pylint: disable=signature-differs
         """Return any additional context data for the template.
 
         request: The current request

@@ -3,13 +3,12 @@ import datetime
 
 import django_filters
 from django.db.models import Q
-from nautobot.dcim.models import Device, DeviceType, InventoryItem, Platform, Manufacturer, Location
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, Platform, Manufacturer
 from nautobot.apps.filters import NautobotFilterSet, StatusModelFilterSetMixin
-from nautobot.extras.models import Tag, Role
+from nautobot.extras.models import Tag
 from nautobot.extras.filters.mixins import StatusFilter
 
 
-from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContactLCM,

@@ -3,7 +3,7 @@ from datetime import datetime
 
 from django.db.models import Case, Count, F, IntegerField, OuterRef, Q, Subquery, Value, When
 from django.db.models.functions import Coalesce
-from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location
+from nautobot.dcim.models import DeviceType, InventoryItem  # Device, Location
 from prometheus_client.core import GaugeMetricFamily
 
 from nautobot_device_lifecycle_mgmt.models import (

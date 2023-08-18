@@ -7,13 +7,13 @@ from nautobot.dcim.models import Device, InventoryItem
 from nautobot.extras.models import RelationshipAssociation
 
 
-class BaseSoftwareFilter:  # pylint: disable=too-few-public-methods
+class BaseSoftwareFilter:
     """Base class for SoftwareFilter classes."""
 
     soft_obj_model = None
     soft_relation_name = None
 
-    def __init__(self, qs, item_obj):
+    def __init__(self, qs, item_obj):  # pylint: disable=invalid-name
         """Initalize BaseSoftwareFilter."""
         self.software_qs = qs
         self.item_obj = item_obj
@@ -30,24 +30,24 @@ class BaseSoftwareFilter:  # pylint: disable=too-few-public-methods
         return self.software_qs
 
 
-class DeviceSoftwareFilter(BaseSoftwareFilter):  # pylint: disable=too-few-public-methods
+class DeviceSoftwareFilter(BaseSoftwareFilter):
     """Filter SoftwareLCM objects based on the Device object."""
 
     soft_obj_model = Device
     soft_relation_name = "device_soft"
 
 
-class InventoryItemSoftwareFilter(BaseSoftwareFilter):  # pylint: disable=too-few-public-methods
+class InventoryItemSoftwareFilter(BaseSoftwareFilter):
     """Filter SoftwareLCM objects based on the Device object."""
 
     soft_obj_model = InventoryItem
     soft_relation_name = "inventory_item_soft"
 
 
-class DeviceValidatedSoftwareFilter:  # pylint: disable=too-few-public-methods
+class DeviceValidatedSoftwareFilter:
     """Filter ValidatedSoftwareLCM objects based on the Device object."""
 
-    def __init__(self, qs, item_obj):
+    def __init__(self, qs, item_obj):  # pylint: disable=invalid-name
         """Initalize DeviceValidatedSoftwareFilter."""
         self.validated_software_qs = qs
         self.item_obj = item_obj
@@ -95,10 +95,10 @@ class DeviceValidatedSoftwareFilter:  # pylint: disable=too-few-public-methods
         )
 
 
-class InventoryItemValidatedSoftwareFilter:  # pylint: disable=too-few-public-methods
+class InventoryItemValidatedSoftwareFilter:
     """Filter ValidatedSoftwareLCM objects based on the InventoryItem object."""
 
-    def __init__(self, qs, item_obj):
+    def __init__(self, qs, item_obj):  # pylint: disable=invalid-name
         """Initalize InventoryItemValidatedSoftwareFilter."""
         self.validated_software_qs = qs
         self.item_obj = item_obj
@@ -127,13 +127,13 @@ class InventoryItemValidatedSoftwareFilter:  # pylint: disable=too-few-public-me
         )
 
 
-class DeviceSoftwareImageFilter:  # pylint: disable=too-few-public-methods
+class DeviceSoftwareImageFilter:
     """Filter SoftwareImageLCM objects based on the Device object."""
 
     soft_obj_model = Device
     soft_relation_name = "device_soft"
 
-    def __init__(self, qs, item_obj):
+    def __init__(self, qs, item_obj):  # pylint: disable=invalid-name
         """Initalize DeviceSoftwareImageLCMFilter."""
         self.softwareimage_qs = qs
         self.item_obj = item_obj
@@ -161,13 +161,13 @@ class DeviceSoftwareImageFilter:  # pylint: disable=too-few-public-methods
         return self.softwareimage_qs.filter(default_image_q)
 
 
-class InventoryItemSoftwareImageFilter:  # pylint: disable=too-few-public-methods
+class InventoryItemSoftwareImageFilter:
     """Filter SoftwareImageLCM objects based on the InventoryItem object."""
 
     soft_obj_model = InventoryItem
     soft_relation_name = "inventory_item_soft"
 
-    def __init__(self, qs, item_obj):
+    def __init__(self, qs, item_obj):  # pylint: disable=invalid-name
         """Initalize InventoryItemSoftwareImageLCMFilter."""
         self.softwareimage_qs = qs
         self.item_obj = item_obj
