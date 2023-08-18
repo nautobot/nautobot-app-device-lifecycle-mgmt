@@ -158,7 +158,7 @@ class SoftwareImageLCMTable(BaseTable):
         viewname="dcim:devicetype_list", url_params={"model": ("device_types", "model")}, verbose_name="Device Types"
     )
     object_tag_count = M2MLinkedCountColumn(
-        viewname="extras:tag_list", url_params={"slug": ("object_tags", "slug")}, verbose_name="Object Tags"
+        viewname="extras:tag_list", url_params={"name": ("object_tags", "name")}, verbose_name="Object Tags"
     )
     default_image = BooleanColumn()
     actions = ButtonsColumn(SoftwareImageLCM, buttons=("edit", "delete"))
