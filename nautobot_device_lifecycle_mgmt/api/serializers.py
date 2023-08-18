@@ -19,7 +19,7 @@ from nautobot_device_lifecycle_mgmt.models import (
 class HardwareLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta attributes."""
 
         model = HardwareLCM
@@ -29,7 +29,7 @@ class HardwareLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,t
 class ProviderLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta attributes."""
 
         model = ProviderLCM
@@ -39,7 +39,7 @@ class ProviderLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,t
 class ContractLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta attributes."""
 
         model = ContractLCM
@@ -49,37 +49,37 @@ class ContractLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,t
 class ContactLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta attributes."""
 
         model = ContactLCM
         fields = "__all__"
 
 
-class SoftwareLCMSerializer(NautobotModelSerializer):  # pylint: disable=too-few-public-methods
+class SoftwareLCMSerializer(NautobotModelSerializer):
     """REST API serializer for SoftwareLCM records."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta attributes."""
 
         model = SoftwareLCM
         fields = "__all__"
 
 
-class SoftwareImageLCMSerializer(NautobotModelSerializer):  # pylint: disable=too-few-public-methods
+class SoftwareImageLCMSerializer(NautobotModelSerializer):
     """REST API serializer for SoftwareImageLCM records."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta attributes."""
 
         model = SoftwareImageLCM
         fields = "__all__"
 
 
-class ValidatedSoftwareLCMSerializer(NautobotModelSerializer):  # pylint: disable=too-few-public-methods
+class ValidatedSoftwareLCMSerializer(NautobotModelSerializer):
     """REST API serializer for ValidatedSoftwareLCM records."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta attributes."""
 
         model = ValidatedSoftwareLCM
@@ -89,7 +89,7 @@ class ValidatedSoftwareLCMSerializer(NautobotModelSerializer):  # pylint: disabl
 class CVELCMSerializer(NautobotModelSerializer):  # pylint: disable=abstract-method,too-few-public-methods
     """REST API serializer for CVELCM records."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta attributes."""
 
         model = CVELCM
@@ -99,7 +99,7 @@ class CVELCMSerializer(NautobotModelSerializer):  # pylint: disable=abstract-met
 class VulnerabilityLCMSerializer(NautobotModelSerializer):  # pylint: disable=abstract-method,too-few-public-methods
     """REST API serializer for VulnerabilityLCM records."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta attributes."""
 
         model = VulnerabilityLCM
@@ -115,22 +115,20 @@ class VulnerabilityLCMSerializer(NautobotModelSerializer):  # pylint: disable=ab
         ]
 
 
-class DeviceSoftwareValidationResultSerializer(NautobotModelSerializer):  # pylint: disable=too-few-public-methods
+class DeviceSoftwareValidationResultSerializer(NautobotModelSerializer):
     """REST API serializer for DeviceSoftwareValidationResult records."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta attributes."""
 
         model = DeviceSoftwareValidationResult
         fields = "__all__"
 
 
-class InventoryItemSoftwareValidationResultSerializer(
-    NautobotModelSerializer
-):  # pylint: disable=too-few-public-methods
+class InventoryItemSoftwareValidationResultSerializer(NautobotModelSerializer):
     """REST API serializer for InventoryItemSoftwareValidationResult records."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta attributes."""
 
         model = InventoryItemSoftwareValidationResult

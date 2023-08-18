@@ -29,6 +29,6 @@ router.register("vulnerability", VulnerabilityLCMViewSet)
 router.register("device-validated-software-result", DeviceSoftwareValidationResultListViewSet)
 router.register("inventory-item-validated-software-result", InventoryItemSoftwareValidationResultListViewSet)
 
-app_name = "nautobot_device_lifecycle_mgmt"
+app_name = "nautobot_device_lifecycle_mgmt"  # pylint: disable=invalid-name
 
 urlpatterns = router.urls
