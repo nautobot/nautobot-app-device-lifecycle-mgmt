@@ -57,20 +57,8 @@ class SoftwareLCMUIViewSet(NautobotUIViewSet):
     def get_extra_context(self, request, instance):
         """Changes "Softwares" => "Software"."""
         search_form = SearchForm(data=self.request.GET)
-        if not instance:
-            return {
-                "search_form": search_form,
-                "title": "Software",
-                "verbose_name_plural": "Software",
-            }
-        softwareimages = instance.software_images.restrict(request.user, "view")
-        if softwareimages.exists():
-            softwareimages_table = tables.SoftwareImageLCMTable(data=softwareimages, user=request.user, orderable=False)
-        else:
-            softwareimages_table = None
 
         return {
-            "softwareimages_table": softwareimages_table,
             "search_form": search_form,
             "title": "Software",
             "verbose_name_plural": "Software",
@@ -88,31 +76,6 @@ class SoftwareImageLCMUIViewSet(NautobotUIViewSet):
     queryset = models.SoftwareImageLCM.objects.all()
     serializer_class = serializers.SoftwareImageLCMSerializer
     table_class = tables.SoftwareImageLCMTable
-
-    def get_extra_context(self, request, instance):
-        """Adds Software Images table."""
-        if not instance:
-            return {}
-        softwareimages = (
-            instance.software_images.annotate(
-                device_type_count=count_related_m2m(models.SoftwareImageLCM, "device_types")
-            )
-            .annotate(object_tag_count=count_related_m2m(models.SoftwareImageLCM, "object_tags"))
-            .restrict(request.user, "view")
-        )
-
-        softwareimages_table = tables.SoftwareImageLCMTable(data=softwareimages, user=request.user, orderable=False)
-
-        paginate = {
-            "paginator_class": EnhancedPaginator,
-            "per_page": get_paginate_count(request),
-        }
-        RequestConfig(request, paginate).configure(softwareimages_table)
-
-        return {
-            "softwareimages_table": softwareimages_table,
-            "active_tab": "software-images",
-        }
 
 
 class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
