@@ -6,7 +6,7 @@ class Migration(migrations.Migration):
         ("nautobot_device_lifecycle_mgmt", "0015_role_migration"),
     ]
 
-    run_before = [("dcim", "0027_remove_device_role_and_rack_role")]
+    run_before = [("dcim", "0031_remove_device_role_and_rack_role")]
 
     operations = [
         migrations.RemoveField(
