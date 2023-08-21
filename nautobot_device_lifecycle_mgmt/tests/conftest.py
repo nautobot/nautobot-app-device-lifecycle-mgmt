@@ -23,6 +23,9 @@ def create_devices():
     location1, _ = Location.objects.get_or_create(
         name="Location1", location_type=location_type_location_a, status=location_status
     )
+    location2, _ = Location.objects.get_or_create(
+        name="Location2", location_type=location_type_location_a, status=location_status
+    )
     device_status = Status.objects.get_for_model(Device).first()
 
     return (
@@ -47,7 +50,7 @@ def create_devices():
             platform=device_platform,
             device_type=device_type,
             role=device_role,
-            location=location1,
+            location=location2,
             status=device_status,
         ),
     )

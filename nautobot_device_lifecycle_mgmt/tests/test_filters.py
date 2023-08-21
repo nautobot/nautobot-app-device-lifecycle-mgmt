@@ -327,6 +327,7 @@ class DeviceSoftwareValidationResultFilterSetTestCase(TestCase):
     def setUp(self):
         """Set up test objects."""
         self.device_1, self.device_2, self.device_3 = create_devices()
+        self.location = self.device_1.location
         self.platform = Platform.objects.all().first()
         self.software = SoftwareLCM.objects.create(
             device_platform=self.platform,
@@ -407,6 +408,11 @@ class DeviceSoftwareValidationResultFilterSetTestCase(TestCase):
         params = {"sw_missing_only": True}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
+    def test_location(self):
+        """Test location filter."""
+        params = {"location": [self.location.name]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
 
 class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
     """Tests for the DeviceSoftwareValidationResult model."""
@@ -417,6 +423,7 @@ class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
     def setUp(self):
         """Set up test objects."""
         self.inventory_items = create_inventory_items()
+        self.location = self.inventory_items[0].device.location
         self.platform = Platform.objects.all().first()
         self.software = SoftwareLCM.objects.create(
             device_platform=self.platform,
@@ -496,6 +503,11 @@ class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
         """Test sw_missing filter."""
         params = {"sw_missing_only": True}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_location(self):
+        """Test location filter."""
+        params = {"location": [self.location.name]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
 
 class CVELCMTestCase(TestCase):

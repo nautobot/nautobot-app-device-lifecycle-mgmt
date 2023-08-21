@@ -3,11 +3,10 @@ import datetime
 
 import django_filters
 from django.db.models import Q
-from nautobot.dcim.models import Device, DeviceType, InventoryItem, Platform, Manufacturer
 from nautobot.apps.filters import NautobotFilterSet, StatusModelFilterSetMixin
-from nautobot.extras.models import Tag
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform
 from nautobot.extras.filters.mixins import StatusFilter
-
+from nautobot.extras.models import Tag
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -413,6 +412,17 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         queryset=Platform.objects.all(),
         label="Platform",
     )
+    location_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__location",
+        queryset=Location.objects.all(),
+        label="Location",
+    )
+    location = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__location__name",
+        queryset=Location.objects.all(),
+        to_field_name="name",
+        label="Location (name)",
+    )
     device_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device",
         queryset=Device.objects.all(),
@@ -452,7 +462,6 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         fields = [
             "software",
             "platform",
-            # "location",
             "device",
             "device_type",
             # "device_role",
@@ -501,6 +510,17 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         field_name="inventory_item__manufacturer",
         queryset=Manufacturer.objects.all(),
         label="Manufacturer",
+    )
+    location_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item__device__location",
+        queryset=Location.objects.all(),
+        label="Location",
+    )
+    location = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item__device__location__name",
+        queryset=Location.objects.all(),
+        to_field_name="name",
+        label="Location (name)",
     )
     inventory_item_id = django_filters.ModelMultipleChoiceFilter(
         field_name="inventory_item",
@@ -553,7 +573,6 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         fields = [
             "software",
             "manufacturer",
-            # "location",
             "inventory_item",
             "part_id",
             "device",

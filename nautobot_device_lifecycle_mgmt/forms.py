@@ -4,7 +4,7 @@ import logging
 from django import forms
 from django.db.models import Q
 
-from nautobot.dcim.models import Device, DeviceType, InventoryItem, Platform, Manufacturer  # , Location
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Platform, Manufacturer
 from nautobot.extras.forms import (
     CustomFieldModelBulkEditFormMixin,
     # CustomFieldModelForm,
@@ -491,16 +491,11 @@ class DeviceSoftwareValidationResultFilterForm(
     #     widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
     #     label="Valid",
     # )
-    # site = DynamicModelMultipleChoiceField(
-    #     queryset=Site.objects.all(),
-    #     to_field_name="slug",
-    #     required=False,
-    # )
-    # region = DynamicModelMultipleChoiceField(
-    #     queryset=Region.objects.all(),
-    #     to_field_name="slug",
-    #     required=False,
-    # )
+    location = DynamicModelMultipleChoiceField(
+        queryset=Location.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
     device = DynamicModelMultipleChoiceField(
         queryset=Device.objects.all(),
         to_field_name="name",
@@ -536,8 +531,7 @@ class DeviceSoftwareValidationResultFilterForm(
             "software",
             # "valid",
             "platform",
-            # "site",
-            # "region",
+            "location",
             "device",
             "device_type",
             # "device_role",
@@ -571,16 +565,11 @@ class InventoryItemSoftwareValidationResultFilterForm(
         label="Manufacturer",
         required=False,
     )
-    # site = DynamicModelMultipleChoiceField(
-    #     queryset=Site.objects.all(),
-    #     to_field_name="slug",
-    #     required=False,
-    # )
-    # region = DynamicModelMultipleChoiceField(
-    #     queryset=Region.objects.all(),
-    #     to_field_name="slug",
-    #     required=False,
-    # )
+    location = DynamicModelMultipleChoiceField(
+        queryset=Location.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
     inventory_item = DynamicModelMultipleChoiceField(
         queryset=InventoryItem.objects.all(),
         to_field_name="name",
@@ -625,8 +614,7 @@ class InventoryItemSoftwareValidationResultFilterForm(
             "software",
             # "valid",
             "manufacturer",
-            # "site",
-            # "region",
+            "location",
             "inventory_item",
             "part_id",
             "device",
