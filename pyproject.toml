@@ -80,7 +80,7 @@ exclude = '''
 
 [tool.pylint.master]
 # Include the pylint_django plugin to avoid spurious warnings about Django patterns
-load-plugins=["pylint_django", "pylint_nautobot"]
+load-plugins=["pylint_django", "pylint_nautobot", "pylint.extensions.no_self_use"]
 ignore=["nautobot_device_lifecycle_mgmt/migrations"]
 
 [tool.pylint.basic]
@@ -92,8 +92,8 @@ no-docstring-rgx="^(_|test_|Meta$)"
 # Pylint and Black disagree about how to format multi-line arrays; Black wins.
 disable = """
     line-too-long,
-    bad-continuation,
     duplicate-code,
+    too-few-public-methods,
     too-many-lines,
     too-many-ancestors,
     """
