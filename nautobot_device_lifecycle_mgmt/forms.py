@@ -13,8 +13,8 @@ from nautobot.extras.forms import (
     # RelationshipModelForm,
     # StatusFilterFormMixin,
     NautobotFilterForm,
-    StatusModelFilterFormMixin,
-    CustomFieldModelFilterFormMixin,
+    # StatusModelFilterFormMixin,
+    # CustomFieldModelFilterFormMixin,
 )
 from nautobot.extras.models import Tag, Status, Role
 from nautobot.apps.forms import (
@@ -65,7 +65,7 @@ class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):
         return super().prepare_value(pk_list)
 
 
-class HardwareLCMForm(NautobotModelForm, CustomFieldModelFormMixin, RelationshipModelFormMixin):
+class HardwareLCMForm(NautobotModelForm):
     """Hardware Device Lifecycle creation/edit form."""
 
     inventory_item = forms.ModelChoiceField(
@@ -119,7 +119,7 @@ class HardwareLCMBulkEditForm(NautobotBulkEditForm):
         ]
 
 
-class HardwareLCMFilterForm(NautobotModelForm):
+class HardwareLCMFilterForm(NautobotFilterForm):
     """Filter form to filter searches."""
 
     model = HardwareLCM
@@ -164,7 +164,7 @@ class HardwareLCMFilterForm(NautobotModelForm):
         }
 
 
-class SoftwareLCMForm(NautobotModelForm, CustomFieldModelFormMixin, RelationshipModelFormMixin):
+class SoftwareLCMForm(NautobotModelForm):
     """SoftwareLCM creation/edit form."""
 
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
@@ -225,7 +225,7 @@ class SoftwareLCMFilterForm(NautobotFilterForm):
         # }
 
 
-class SoftwareImageLCMForm(NautobotModelForm, CustomFieldModelFormMixin, RelationshipModelFormMixin):
+class SoftwareImageLCMForm(NautobotModelForm):
     """SoftwareImageLCM creation/edit form."""
 
     software = DynamicModelChoiceField(queryset=SoftwareLCM.objects.all(), required=True)
@@ -360,7 +360,7 @@ class SoftwareImageLCMFilterForm(NautobotFilterForm):
         # }
 
 
-class ValidatedSoftwareLCMForm(NautobotModelForm, CustomFieldModelFormMixin, RelationshipModelFormMixin):
+class ValidatedSoftwareLCMForm(NautobotModelForm):
     """ValidatedSoftwareLCM creation/edit form."""
 
     software = DynamicModelChoiceField(queryset=SoftwareLCM.objects.all(), required=True)
@@ -466,9 +466,7 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
         ]
 
 
-class DeviceSoftwareValidationResultFilterForm(
-    NautobotFilterForm, CustomFieldModelFormMixin, RelationshipModelFormMixin
-):
+class DeviceSoftwareValidationResultFilterForm(NautobotFilterForm):
     """Filter form to filter searches for DeviceSoftwareValidationResult."""
 
     model = DeviceSoftwareValidationResult
@@ -540,9 +538,7 @@ class DeviceSoftwareValidationResultFilterForm(
         ]
 
 
-class InventoryItemSoftwareValidationResultFilterForm(
-    NautobotFilterForm, CustomFieldModelFormMixin, RelationshipModelFormMixin
-):
+class InventoryItemSoftwareValidationResultFilterForm(NautobotFilterForm):
     """Filter form to filter searches for InventoryItemSoftwareValidationResult."""
 
     model = InventoryItemSoftwareValidationResult
@@ -625,7 +621,7 @@ class InventoryItemSoftwareValidationResultFilterForm(
         ]
 
 
-class ContractLCMForm(NautobotModelForm, CustomFieldModelFormMixin, RelationshipModelFormMixin):
+class ContractLCMForm(NautobotModelForm):
     """Device Lifecycle Contracts creation/edit form."""
 
     provider = forms.ModelChoiceField(
@@ -725,7 +721,7 @@ class ContractLCMFilterForm(NautobotFilterForm):
         }
 
 
-class ProviderLCMForm(NautobotModelForm, CustomFieldModelFormMixin, RelationshipModelFormMixin):
+class ProviderLCMForm(NautobotModelForm):
     """Device Lifecycle Contract Providers creation/edit form."""
 
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
@@ -806,7 +802,7 @@ class ProviderLCMFilterForm(NautobotFilterForm):
         ]
 
 
-class ContactLCMForm(NautobotModelForm, CustomFieldModelFormMixin, RelationshipModelFormMixin):
+class ContactLCMForm(NautobotModelForm):
     """Device Lifecycle Contract Resources creation/edit form."""
 
     type = forms.ChoiceField(choices=PoCTypeChoices.CHOICES, required=False)
@@ -920,7 +916,7 @@ class CVELCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin
         ]
 
 
-class CVELCMFilterForm(NautobotFilterForm, StatusModelFilterFormMixin, CustomFieldModelFilterFormMixin):
+class CVELCMFilterForm(NautobotFilterForm):
     """Filter form to filter searches for CVELCM."""
 
     model = CVELCM
@@ -970,7 +966,7 @@ class CVELCMFilterForm(NautobotFilterForm, StatusModelFilterFormMixin, CustomFie
         ]
 
 
-class VulnerabilityLCMForm(NautobotModelForm, CustomFieldModelFormMixin, RelationshipModelFormMixin):
+class VulnerabilityLCMForm(NautobotModelForm):
     """Vulnerability Lifecycle Management creation/edit form."""
 
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
@@ -1002,7 +998,7 @@ class VulnerabilityLCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEdi
         ]
 
 
-class VulnerabilityLCMFilterForm(NautobotFilterForm, StatusModelFilterFormMixin, CustomFieldModelFilterFormMixin):
+class VulnerabilityLCMFilterForm(NautobotFilterForm):
     """Filter form to filter searches for VulnerabilityLCM."""
 
     model = VulnerabilityLCM
