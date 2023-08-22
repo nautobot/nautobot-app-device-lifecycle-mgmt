@@ -899,10 +899,10 @@ class VulnerabilityLCM(PrimaryModel):
 
         verbose_name = "Vulnerability"
         verbose_name_plural = "Vulnerabilities"
-
-    # def get_absolute_url(self):
-    #     """Returns the Detail view for VulnerabilityLCM models."""
-    #     return reverse("plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm", kwargs={"pk": self.pk})
+        unique_together = (
+            ("cve", "software", "device"),
+            ("cve", "software", "inventory_item"),
+        )
 
     def __str__(self):
         """String representation of the model."""
