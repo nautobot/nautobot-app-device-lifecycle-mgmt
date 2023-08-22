@@ -82,3 +82,11 @@ RUN poetry install
 
 COPY development/nautobot_config.py ${NAUTOBOT_ROOT}/nautobot_config.py
 # !!! USE CAUTION WHEN MODIFYING LINES ABOVE
+
+# Coverage is unable to write to /source which is a locally mounted volume
+USER root
+
+RUN mkdir /cov && \
+    chown -R nautobot:nautobot /cov
+
+USER nautobot
