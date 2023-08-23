@@ -389,7 +389,7 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
         """Meta attributes."""
 
         model = ValidatedSoftwareLCM
-        fields = (
+        fields = [
             "software",
             "devices",
             "device_types",
