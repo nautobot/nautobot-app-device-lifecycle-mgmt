@@ -3,28 +3,11 @@ import logging
 
 from django import forms
 from django.db.models import Q
-
-from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Platform, Manufacturer
-from nautobot.extras.forms import (
-    CustomFieldModelBulkEditFormMixin,
-    # CustomFieldModelForm,
-    # CustomFieldFilterForm,
-    # CustomFieldBulkEditForm,
-    # RelationshipModelForm,
-    # StatusFilterFormMixin,
-    NautobotFilterForm,
-    # StatusModelFilterFormMixin,
-    # CustomFieldModelFilterFormMixin,
-)
-from nautobot.extras.models import Tag, Status, Role
 from nautobot.apps.forms import (
     CustomFieldModelFormMixin,
     DatePicker,
     DynamicModelChoiceField,
     DynamicModelMultipleChoiceField,
-    add_blank_choice,
-    TagFilterField,
-    NautobotModelForm,
     NautobotBulkEditForm,
     NautobotModelForm,
     RelationshipModelFormMixin,
@@ -41,8 +24,6 @@ from nautobot.extras.models import Role, Status, Tag
 from nautobot_device_lifecycle_mgmt.choices import (  # CountryCodes,
     ContractTypeChoices,
     CurrencyChoices,
-    PoCTypeChoices,
-    # CountryCodes,
     CVESeverityChoices,
     PoCTypeChoices,
 )
