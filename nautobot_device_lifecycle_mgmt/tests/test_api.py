@@ -228,7 +228,7 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
     model = ValidatedSoftwareLCM
     brief_fields = [
         "custom_fields",
-        "roles",
+        "device_roles",
         "device_types",
         "devices",
         "display",
@@ -329,7 +329,7 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             },
             {
                 "software": softwares[0].id,
-                "roles": [devicerole.pk for devicerole in deviceroles],
+                "device_roles": [devicerole.pk for devicerole in deviceroles],
                 "start": datetime.date(2019, 3, 6),
                 "end": datetime.date(2023, 6, 1),
                 "preferred": False,
@@ -367,7 +367,7 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             end=datetime.date(2030, 7, 30),
             preferred=False,
         )
-        validated_software.roles.set([devicerole.pk for devicerole in deviceroles])
+        validated_software.device_roles.set([devicerole.pk for devicerole in deviceroles])
         validated_software.save()
 
         ValidatedSoftwareLCM(

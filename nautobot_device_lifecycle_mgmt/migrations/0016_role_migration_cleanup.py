@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.RenameField(
             model_name="validatedsoftwarelcm",
             old_name="new_roles",
-            new_name="roles",
+            new_name="device_roles",
         ),
     ]

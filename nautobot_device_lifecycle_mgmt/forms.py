@@ -18,6 +18,7 @@ from nautobot.extras.forms import (
 )
 from nautobot.extras.models import Tag, Status, Role
 from nautobot.apps.forms import (
+    CustomFieldModelFormMixin,
     DatePicker,
     DynamicModelChoiceField,
     DynamicModelMultipleChoiceField,
@@ -25,16 +26,25 @@ from nautobot.apps.forms import (
     TagFilterField,
     NautobotModelForm,
     NautobotBulkEditForm,
-    CustomFieldModelFormMixin,
+    NautobotModelForm,
     RelationshipModelFormMixin,
+    TagFilterField,
+    add_blank_choice,
 )
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform
+from nautobot.extras.forms import (  # CustomFieldModelForm,; CustomFieldFilterForm,; CustomFieldBulkEditForm,; RelationshipModelForm,; StatusFilterFormMixin,; StatusModelFilterFormMixin,; CustomFieldModelFilterFormMixin,
+    CustomFieldModelBulkEditFormMixin,
+    NautobotFilterForm,
+)
+from nautobot.extras.models import Role, Status, Tag
 
-from nautobot_device_lifecycle_mgmt.choices import (
+from nautobot_device_lifecycle_mgmt.choices import (  # CountryCodes,
     ContractTypeChoices,
     CurrencyChoices,
     PoCTypeChoices,
     # CountryCodes,
     CVESeverityChoices,
+    PoCTypeChoices,
 )
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -366,7 +376,10 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
     software = DynamicModelChoiceField(queryset=SoftwareLCM.objects.all(), required=True)
     devices = DynamicModelMultipleChoiceField(queryset=Device.objects.all(), required=False)
     device_types = DynamicModelMultipleChoiceField(queryset=DeviceType.objects.all(), required=False)
-    # device_roles = DynamicModelMultipleChoiceField(queryset=DeviceRole.objects.all(), required=False)
+    device_roles = DynamicModelMultipleChoiceField(
+        queryset=Role.objects.all(), query_params={"content_types": "dcim.device"}, required=False
+    )
+
     inventory_items = DynamicModelMultipleChoiceField(queryset=InventoryItem.objects.all(), required=False)
     object_tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
@@ -380,14 +393,14 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
             "software",
             "devices",
             "device_types",
-            # "device_roles",
+            "device_roles",
             "inventory_items",
             "object_tags",
             "start",
             "end",
             "preferred",
             "tags",
-        )
+        ]
 
         widgets = {
             "start": DatePicker(),
@@ -400,11 +413,11 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
 
         devices = self.cleaned_data.get("devices")
         device_types = self.cleaned_data.get("device_types")
-        # device_roles = self.cleaned_data.get("device_roles")
+        device_roles = self.cleaned_data.get("device_roles")
         inventory_items = self.cleaned_data.get("inventory_items")
         object_tags = self.cleaned_data.get("object_tags")
 
-        if sum(obj.count() for obj in (devices, device_types, inventory_items, object_tags)) == 0:
+        if sum(obj.count() for obj in (devices, device_types, device_roles, inventory_items, object_tags)) == 0:
             msg = "You need to assign to at least one object."
             self.add_error(None, msg)
 
@@ -428,8 +441,10 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
         to_field_name="model",
         required=False,
     )
-    roles = DynamicModelMultipleChoiceField(
+    device_roles = DynamicModelMultipleChoiceField(
         queryset=Role.objects.all(),
+        query_params={"content_types": "dcim.device"},
+        to_field_name="name",
         required=False,
     )
     inventory_items = DynamicModelMultipleChoiceField(
@@ -456,7 +471,7 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
             "software",
             "devices",
             "device_types",
-            # "device_roles",
+            "device_roles",
             "inventory_items",
             "object_tags",
             "preferred",
@@ -504,11 +519,9 @@ class DeviceSoftwareValidationResultFilterForm(NautobotFilterForm):
         to_field_name="model",
         required=False,
     )
-    # device_role = DynamicModelMultipleChoiceField(
-    #     queryset=DeviceRole.objects.all(),
-    #     to_field_name="slug",
-    #     required=False,
-    # )
+    device_role = DynamicModelMultipleChoiceField(
+        queryset=Role.objects.all(), query_params={"content_types": "dcim.device"}, to_field_name="name", required=False
+    )
     # exclude_sw_missing = forms.BooleanField(
     #     required=False,
     #     widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
@@ -532,7 +545,7 @@ class DeviceSoftwareValidationResultFilterForm(NautobotFilterForm):
             "location",
             "device",
             "device_type",
-            # "device_role",
+            "device_role",
             # "exclude_sw_missing",
             # "sw_missing_only",
         ]
@@ -585,11 +598,10 @@ class InventoryItemSoftwareValidationResultFilterForm(NautobotFilterForm):
         to_field_name="model",
         required=False,
     )
-    # device_role = DynamicModelMultipleChoiceField(
-    #     queryset=DeviceRole.objects.all(),
-    #     to_field_name="slug",
-    #     required=False,
-    # )
+    device_role = DynamicModelMultipleChoiceField(
+        queryset=Role.objects.all(), query_params={"content_types": "dcim.device"}, to_field_name="name", required=False
+    )
+
     # exclude_sw_missing = forms.BooleanField(
     #     required=False,
     #     widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
@@ -615,7 +627,7 @@ class InventoryItemSoftwareValidationResultFilterForm(NautobotFilterForm):
             "part_id",
             "device",
             "device_type",
-            # "device_role",
+            "device_role",
             # "exclude_sw_missing",
             # "sw_missing_only",
         ]

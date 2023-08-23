@@ -37,12 +37,12 @@ urlpatterns += [
         name="software_software_images",
     ),
     path(
-        "validated-software/device-report/",
+        "validated-software-device-report/",
         views.ValidatedSoftwareDeviceReportView.as_view(),
         name="validatedsoftware_device_report",
     ),
     path(
-        "validated-software/inventoryitem-report/",
+        "validated-software-inventoryitem-report/",
         views.ValidatedSoftwareInventoryItemReportView.as_view(),
         name="validatedsoftware_inventoryitem_report",
     ),

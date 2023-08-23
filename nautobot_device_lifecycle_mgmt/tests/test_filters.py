@@ -234,6 +234,8 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
     filterset = ValidatedSoftwareLCMFilterSet
 
     def setUp(self):
+        device_role_router, _ = Role.objects.get_or_create(name="router")
+        device_role_router.content_types.add(ContentType.objects.get_for_model(Device))
         device_platforms = (
             Platform.objects.get_or_create(name="cisco_ios")[0],
             Platform.objects.get_or_create(name="arista_eos")[0],
@@ -273,6 +275,15 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
         validated_software.device_types.set([device_type.pk])
         validated_software.save()
 
+        validated_software = ValidatedSoftwareLCM(
+            software=self.softwares[1],
+            start="2020-01-15",
+            end="2025-11-01",
+            preferred=False,
+        )
+        validated_software.device_roles.set([device_role_router.pk])
+        validated_software.save()
+
     def test_q_one_start(self):
         """Test q filter to find single record based on start date."""
         params = {"q": "2019"}
@@ -281,6 +292,11 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
     def test_q_one_end(self):
         """Test q filter to find single record based on end date."""
         params = {"q": "2022"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_device_roles_name(self):
+        """Test device_roles filter."""
+        params = {"device_roles": ["router"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_software(self):
@@ -296,24 +312,24 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
     def test_valid(self):
         """Test valid filter."""
         date_valid_and_invalid = date(2019, 6, 11)
-        date_two_valid = date(2021, 1, 4)
+        date_three_valid = date(2021, 1, 4)
         date_two_invalid = date(2024, 1, 4)
 
         with time_machine.travel(date_valid_and_invalid):
             params = {"valid": True}
             self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
             params = {"valid": False}
-            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-
-        with time_machine.travel(date_two_valid):
-            params = {"valid": True}
             self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+        with time_machine.travel(date_three_valid):
+            params = {"valid": True}
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
             params = {"valid": False}
             self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
 
         with time_machine.travel(date_two_invalid):
             params = {"valid": True}
-            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+            self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
             params = {"valid": False}
             self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
@@ -366,10 +382,10 @@ class DeviceSoftwareValidationResultFilterSetTestCase(TestCase):
         params = {"device_type": ["6509-E"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
-    def test_device_roles_name(self):
-        """Test device_roles filter."""
-        params = {"device_role": ["core-switch"]}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+    def test_device_role_name(self):
+        """Test device_role filter."""
+        params = {"device_role": ["router"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_device_type_id(self):
         """Test device_type_id filter."""
@@ -381,7 +397,7 @@ class DeviceSoftwareValidationResultFilterSetTestCase(TestCase):
         """Test device_role_id filter."""
         device_role = Role.objects.get(name="core-switch")
         params = {"device_role_id": [device_role.id]}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
     def test_device_id_all(self):
         """Test device_id filter."""
@@ -462,10 +478,10 @@ class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
         params = {"device_type": ["6509-E"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
-    def test_inventory_items_device_roles_name(self):
-        """Test device_roles filter."""
+    def test_inventory_items_device_role_name(self):
+        """Test device_role filter."""
         params = {"device_role": ["core-switch"]}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
     def test_inventory_items_device_type_id(self):
         """Test device_type_id filter."""
@@ -477,7 +493,7 @@ class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
         """Test device_role_id filter."""
         device_role = Role.objects.get(name="core-switch")
         params = {"device_role_id": [device_role.id]}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
     def test_inventory_items_part_id(self):
         """Test device_type filter."""
