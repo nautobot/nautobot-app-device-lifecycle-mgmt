@@ -716,7 +716,16 @@ class ProviderLCMFilterSet(NautobotFilterSet):
 
         model = ProviderLCM
 
-        fields = ProviderLCM.csv_headers
+        fields = [
+            "name",
+            "description",
+            "physical_address",
+            "country",
+            "phone",
+            "email",
+            "portal_url",
+            "comments",
+        ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""
@@ -743,7 +752,16 @@ class ContactLCMFilterSet(NautobotFilterSet):
 
         model = ContactLCM
 
-        fields = ContactLCM.csv_headers
+        fields = [
+            "contract",
+            "name",
+            "address",
+            "phone",
+            "email",
+            "comments",
+            "type",
+            "priority",
+        ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""
@@ -783,7 +801,19 @@ class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , Custom
 
         model = CVELCM
 
-        fields = CVELCM.csv_headers
+        fields = [
+            "name",
+            "published_date",
+            "link",
+            "status",
+            "description",
+            "severity",
+            "cvss",
+            "cvss_v2",
+            "cvss_v3",
+            "fix",
+            "comments",
+        ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""
@@ -808,7 +838,13 @@ class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  
 
         model = VulnerabilityLCM
 
-        fields = VulnerabilityLCM.csv_headers
+        fields = [
+            "cve",
+            "software",
+            "device",
+            "inventory_item",
+            "status",
+        ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""

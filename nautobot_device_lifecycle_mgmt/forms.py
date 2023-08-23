@@ -73,7 +73,17 @@ class HardwareLCMForm(NautobotModelForm):
         """Meta attributes for the HardwareLCMForm class."""
 
         model = HardwareLCM
-        fields = HardwareLCM.csv_headers
+        fields = [
+            "device_type",
+            "inventory_item",
+            "release_date",
+            "end_of_sale",
+            "end_of_support",
+            "end_of_sw_releases",
+            "end_of_security_patches",
+            "documentation_url",
+            "comments",
+        ]
 
         widgets = {
             "release_date": DatePicker(),
@@ -164,10 +174,17 @@ class SoftwareLCMForm(NautobotModelForm):
         """Meta attributes."""
 
         model = SoftwareLCM
-        fields = (
-            *SoftwareLCM.csv_headers,
+        fields = [
+            "device_platform",
+            "version",
+            "alias",
+            "release_date",
+            "end_of_support",
+            "documentation_url",
+            "long_term_support",
+            "pre_release",
             "tags",
-        )
+        ]
 
         widgets = {
             "release_date": DatePicker(),
@@ -230,10 +247,18 @@ class SoftwareImageLCMForm(NautobotModelForm):
         """Meta attributes."""
 
         model = SoftwareImageLCM
-        fields = (
-            *SoftwareImageLCM.csv_headers,
+        fields = [
+            "image_file_name",
+            "software",
+            "device_types",
+            "inventory_items",
+            "object_tags",
+            "download_url",
+            "image_file_checksum",
+            "hashing_algorithm",
+            "default_image",
             "tags",
-        )
+        ]
 
     def clean(self):  # pylint: disable=too-many-locals,too-many-branches
         """Custom validation of the SoftwareImageLCMForm."""
@@ -880,7 +905,17 @@ class CVELCMForm(CustomFieldModelFormMixin, RelationshipModelFormMixin):
         model = CVELCM
 
         fields = [
-            *CVELCM.csv_headers,
+            "name",
+            "published_date",
+            "link",
+            "status",
+            "description",
+            "severity",
+            "cvss",
+            "cvss_v2",
+            "cvss_v3",
+            "fix",
+            "comments",
             "tags",
         ]
 
@@ -1028,6 +1063,10 @@ class VulnerabilityLCMFilterForm(NautobotFilterForm):
         model = VulnerabilityLCM
         fields = [
             "q",
-            *VulnerabilityLCM.csv_headers,
+            "cve",
+            "software",
+            "device",
+            "inventory_item",
+            "status",
             "tags",
         ]
