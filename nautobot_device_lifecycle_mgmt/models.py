@@ -44,14 +44,14 @@ class HardwareLCM(PrimaryModel):
         blank=True,
         null=True,
     )
-    inventory_item = models.CharField(verbose_name="Inventory Item Part", max_length=255, blank=True, null=True)
+    inventory_item = models.CharField(verbose_name="Inventory Item Part", max_length=255, blank=True, default="")
     release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
     end_of_sale = models.DateField(null=True, blank=True, verbose_name="End of Sale")
     end_of_support = models.DateField(null=True, blank=True, verbose_name="End of Support")
     end_of_sw_releases = models.DateField(null=True, blank=True, verbose_name="End of Software Releases")
     end_of_security_patches = models.DateField(null=True, blank=True, verbose_name="End of Security Patches")
     documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
-    comments = models.TextField(null=True, blank=True, verbose_name="Comments")
+    comments = models.TextField(blank=True, default="", verbose_name="Comments")
 
     class Meta:
         """Meta attributes for the HardwareLCM class."""
@@ -63,8 +63,8 @@ class HardwareLCM(PrimaryModel):
             models.UniqueConstraint(fields=["inventory_item"], name="unique_inventory_item_part"),
             models.CheckConstraint(
                 check=(
-                    models.Q(inventory_item__isnull=True, device_type__isnull=False)
-                    | models.Q(inventory_item__isnull=False, device_type__isnull=True)
+                    models.Q(inventory_item="", device_type__isnull=False)
+                    | (~models.Q(inventory_item="") & models.Q(device_type__isnull=True))
                 ),
                 name="At least one of InventoryItem or DeviceType specified.",
             ),
@@ -156,7 +156,7 @@ class SoftwareLCM(PrimaryModel):
 
     device_platform = models.ForeignKey(to="dcim.Platform", on_delete=models.CASCADE, verbose_name="Device Platform")
     version = models.CharField(max_length=50)
-    alias = models.CharField(max_length=50, blank=True, null=True)
+    alias = models.CharField(max_length=50, blank=True, default="")
     release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
     end_of_support = models.DateField(null=True, blank=True, verbose_name="End of Software Support")
     documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
@@ -283,6 +283,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
 
         verbose_name = "Validated Software"
         ordering = ("software", "preferred", "start")
+        unique_together = ("software", "start", "end")
 
     def __str__(self):
         """String representation of ValidatedSoftwareLCM."""
@@ -417,13 +418,13 @@ class ContractLCM(PrimaryModel):
         null=True,
     )
     name = models.CharField(max_length=100, unique=True)
-    number = models.CharField(max_length=100, null=True, blank=True)
+    number = models.CharField(max_length=100, blank=True, default="")
     start = models.DateField(null=True, blank=True, verbose_name="Contract Start Date")
     end = models.DateField(null=True, blank=True, verbose_name="Contract End Date")
     cost = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=15, verbose_name="Contract Cost")
-    support_level = models.CharField(verbose_name="Support Level", max_length=64, blank=True, null=True)
-    currency = models.CharField(verbose_name="Currency", max_length=4, blank=True, null=True)
-    contract_type = models.CharField(null=True, blank=True, max_length=32, verbose_name="Contract Type")
+    support_level = models.CharField(verbose_name="Support Level", max_length=64, blank=True, default="")
+    currency = models.CharField(verbose_name="Currency", max_length=4, blank=True, default="")
+    contract_type = models.CharField(verbose_name="Contract Type", max_length=32, blank=True, default="")
     comments = models.TextField(blank=True)
 
     class Meta:
@@ -569,14 +570,14 @@ class CVELCM(PrimaryModel):
         on_delete=models.PROTECT,
         to="extras.status",
     )
-    description = models.CharField(max_length=255, blank=True, null=True)
+    description = models.CharField(max_length=255, blank=True, default="")
     severity = models.CharField(
         max_length=50, choices=choices.CVESeverityChoices, default=choices.CVESeverityChoices.NONE
     )
     cvss = models.FloatField(blank=True, null=True, verbose_name="CVSS Base Score")
     cvss_v2 = models.FloatField(blank=True, null=True, verbose_name="CVSSv2 Score")
     cvss_v3 = models.FloatField(blank=True, null=True, verbose_name="CVSSv3 Score")
-    fix = models.CharField(max_length=255, blank=True, null=True)
+    fix = models.CharField(max_length=255, blank=True, default="")
     comments = models.TextField(blank=True)
 
     class Meta:
