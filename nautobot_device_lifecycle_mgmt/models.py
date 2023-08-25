@@ -44,7 +44,9 @@ class HardwareLCM(PrimaryModel):
         blank=True,
         null=True,
     )
-    inventory_item = models.CharField(verbose_name="Inventory Item Part", max_length=255, blank=True, default="")
+    inventory_item = models.CharField(  # pylint: disable=nb-string-field-blank-null
+        verbose_name="Inventory Item Part", max_length=255, blank=True, null=True
+    )
     release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
     end_of_sale = models.DateField(null=True, blank=True, verbose_name="End of Sale")
     end_of_support = models.DateField(null=True, blank=True, verbose_name="End of Support")
@@ -63,8 +65,8 @@ class HardwareLCM(PrimaryModel):
             models.UniqueConstraint(fields=["inventory_item"], name="unique_inventory_item_part"),
             models.CheckConstraint(
                 check=(
-                    models.Q(inventory_item="", device_type__isnull=False)
-                    | (~models.Q(inventory_item="") & models.Q(device_type__isnull=True))
+                    models.Q(inventory_item__isnull=True, device_type__isnull=False)
+                    | models.Q(inventory_item__isnull=False, device_type__isnull=True)
                 ),
                 name="At least one of InventoryItem or DeviceType specified.",
             ),

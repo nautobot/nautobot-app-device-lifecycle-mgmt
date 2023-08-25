@@ -7,7 +7,7 @@
 # !!! USE CAUTION WHEN MODIFYING LINES BELOW
 
 # Accepts a desired Nautobot version as build argument, default to 1.4
-ARG NAUTOBOT_VER="2.0.0-rc.1"
+ARG NAUTOBOT_VER="2.0.0-rc.2"
 
 # Accepts a desired Python version as build argument, default to 3.8
 ARG PYTHON_VER="3.10"
@@ -16,7 +16,7 @@ ARG PYTHON_VER="3.10"
 # FROM ghcr.io/nautobot/nautobot-dev:${NAUTOBOT_VER}-py${PYTHON_VER}
 
 # This needs to be reverted once we release
-FROM ghcr.io/nautobot/nautobot-dev:2.0.0-rc.1-py${PYTHON_VER}
+FROM ghcr.io/nautobot/nautobot-dev:2.0.0-rc.2-py${PYTHON_VER}
 
 # Runtime argument and environment setup
 ARG NAUTOBOT_ROOT=/opt/nautobot
@@ -83,10 +83,5 @@ RUN poetry install
 COPY development/nautobot_config.py ${NAUTOBOT_ROOT}/nautobot_config.py
 # !!! USE CAUTION WHEN MODIFYING LINES ABOVE
 
-# Coverage is unable to write to /source which is a locally mounted volume
+# With USER nautobot Coverage is unable to write to /source which is a locally mounted volume
 USER root
-
-RUN mkdir /cov && \
-    chown -R nautobot:nautobot /cov
-
-USER nautobot

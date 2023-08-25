@@ -2118,14 +2118,14 @@ files = [
 
 [[package]]
 name = "nautobot"
-version = "2.0.0rc1"
+version = "2.0.0rc2"
 description = "Source of truth and network automation platform."
 category = "main"
 optional = false
 python-versions = ">=3.8,<3.12"
 files = [
-    {file = "nautobot-2.0.0rc1-py3-none-any.whl", hash = "sha256:7244bc038754caace200ec3d0b3232cf9a3e782ee855cad6a06f7e837c9fcc4d"},
-    {file = "nautobot-2.0.0rc1.tar.gz", hash = "sha256:faed32af67b54c25c4f51f5a3bc2cbf7f3729f83c42b06f415ddd4832d759080"},
+    {file = "nautobot-2.0.0rc2-py3-none-any.whl", hash = "sha256:0012663d52d4c12ae1327f8e8fef150654f67483ccc3c9c4fc7e3b039a05afb9"},
+    {file = "nautobot-2.0.0rc2.tar.gz", hash = "sha256:404a14977ba8e1097c3f6aaf34d21880ea66770e26ac2dc794a5310d8174a552"},
 ]
 
 [package.dependencies]
@@ -3747,4 +3747,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.11"
-content-hash = "f6274ca69f72ff5f814cb3cc91d9d569626fbe7cb3cac0b909aa98e30d73f364"
+content-hash = "99e03c19690490f678d15daf82a2c958b83ec466b7d08d9b9114a8968870cb2a"

@@ -21,7 +21,7 @@ python = ">=3.8,<3.11"
 pycountry = "^22.3.5"
 matplotlib = "^3.3.4"
 #nautobot = "2.0.0b2"
-nautobot = "2.0.0-rc1"
+nautobot = "2.0.0-rc2"
 drf-spectacular = "0.26.3"
 
 [tool.poetry.dev-dependencies]
