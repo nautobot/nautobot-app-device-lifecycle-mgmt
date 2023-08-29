@@ -8,6 +8,7 @@ from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Ma
 from nautobot.extras.filters.mixins import StatusFilter
 from nautobot.extras.models import Role, Tag
 
+from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContactLCM,
@@ -682,6 +683,7 @@ class ContractLCMFilterSet(NautobotFilterSet):
             "support_level",
             "contract_type",
             "expired",
+            "currency",
         ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
@@ -832,6 +834,7 @@ class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  
     cve__published_date = django_filters.DateTimeFromToRangeFilter()
     cve__published_date__gte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="gte")
     cve__published_date__lte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="lte")
+    cve__severity = django_filters.ChoiceFilter(field_name="cve__severity", choices=CVESeverityChoices)
 
     class Meta:
         """Meta attributes for filter."""

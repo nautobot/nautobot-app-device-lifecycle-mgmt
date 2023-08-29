@@ -14,15 +14,18 @@ from nautobot.apps.forms import (
     TagFilterField,
     add_blank_choice,
 )
+from nautobot.core.forms import StaticSelect2
+from nautobot.core.forms.constants import BOOLEAN_WITH_BLANK_CHOICES
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform
-from nautobot.extras.forms import (  # CustomFieldModelForm,; CustomFieldFilterForm,; CustomFieldBulkEditForm,; RelationshipModelForm,; StatusFilterFormMixin,; StatusModelFilterFormMixin,; CustomFieldModelFilterFormMixin,
+from nautobot.extras.forms import (
     CustomFieldModelBulkEditFormMixin,
     NautobotFilterForm,
 )
 from nautobot.extras.models import Role, Status, Tag
 
-from nautobot_device_lifecycle_mgmt.choices import (  # CountryCodes,
+from nautobot_device_lifecycle_mgmt.choices import (
     ContractTypeChoices,
+    CountryCodes,
     CurrencyChoices,
     CVESeverityChoices,
     PoCTypeChoices,
@@ -227,11 +230,6 @@ class SoftwareLCMFilterForm(NautobotFilterForm):
             "pre_release",
         ]
 
-        # widgets = {
-        #     "long_term_support": StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
-        #     "pre_release": StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
-        # }
-
 
 class SoftwareImageLCMForm(NautobotModelForm):
     """SoftwareImageLCM creation/edit form."""
@@ -348,7 +346,6 @@ class SoftwareImageLCMFilterForm(NautobotFilterForm):
         to_field_name="name",
         required=False,
     )
-    # default_image = forms.BooleanField(required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES))
     hashing_algorithm = forms.CharField(
         required=False,
         label="Hashing Algorithm",
@@ -370,10 +367,6 @@ class SoftwareImageLCMFilterForm(NautobotFilterForm):
             "object_tags",
             "default_image",
         ]
-
-        # widgets = {
-        #     "default_image": StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
-        # }
 
 
 class ValidatedSoftwareLCMForm(NautobotModelForm):
@@ -463,10 +456,6 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
     )
     start_before = forms.DateField(label="Valid Since Date Before", required=False, widget=DatePicker())
     start_after = forms.DateField(label="Valid Since Date After", required=False, widget=DatePicker())
-    # preferred = forms.BooleanField(required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES))
-    # valid = forms.BooleanField(
-    #     label="Valid Now", required=False, widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES)
-    # )
 
     class Meta:
         """Meta attributes."""
@@ -505,11 +494,11 @@ class DeviceSoftwareValidationResultFilterForm(NautobotFilterForm):
         label="Platform",
         required=False,
     )
-    # valid = forms.BooleanField(
-    #     required=False,
-    #     widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
-    #     label="Valid",
-    # )
+    valid = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Valid",
+    )
     location = DynamicModelMultipleChoiceField(
         queryset=Location.objects.all(),
         to_field_name="name",
@@ -528,16 +517,16 @@ class DeviceSoftwareValidationResultFilterForm(NautobotFilterForm):
     device_role = DynamicModelMultipleChoiceField(
         queryset=Role.objects.all(), query_params={"content_types": "dcim.device"}, to_field_name="name", required=False
     )
-    # exclude_sw_missing = forms.BooleanField(
-    #     required=False,
-    #     widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
-    #     label="Exclude missing software",
-    # )
-    # sw_missing_only = forms.BooleanField(
-    #     required=False,
-    #     widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
-    #     label="Show only missing software",
-    # )
+    exclude_sw_missing = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Exclude missing software",
+    )
+    sw_missing_only = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Show only missing software",
+    )
 
     class Meta:
         """Meta attributes."""
@@ -546,14 +535,14 @@ class DeviceSoftwareValidationResultFilterForm(NautobotFilterForm):
         fields = [
             "q",
             "software",
-            # "valid",
+            "valid",
             "platform",
             "location",
             "device",
             "device_type",
             "device_role",
-            # "exclude_sw_missing",
-            # "sw_missing_only",
+            "exclude_sw_missing",
+            "sw_missing_only",
         ]
 
 
@@ -570,11 +559,11 @@ class InventoryItemSoftwareValidationResultFilterForm(NautobotFilterForm):
         to_field_name="version",
         required=False,
     )
-    # valid = forms.BooleanField(
-    #     required=False,
-    #     widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
-    #     label="Valid",
-    # )
+    valid = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Valid",
+    )
     manufacturer = DynamicModelMultipleChoiceField(
         queryset=Manufacturer.objects.all(),
         label="Manufacturer",
@@ -607,17 +596,16 @@ class InventoryItemSoftwareValidationResultFilterForm(NautobotFilterForm):
     device_role = DynamicModelMultipleChoiceField(
         queryset=Role.objects.all(), query_params={"content_types": "dcim.device"}, to_field_name="name", required=False
     )
-
-    # exclude_sw_missing = forms.BooleanField(
-    #     required=False,
-    #     widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
-    #     label="Exclude missing software",
-    # )
-    # sw_missing_only = forms.BooleanField(
-    #     required=False,
-    #     widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
-    #     label="Show only missing software",
-    # )
+    exclude_sw_missing = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Exclude missing software",
+    )
+    sw_missing_only = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Show only missing software",
+    )
 
     class Meta:
         """Meta attributes."""
@@ -626,7 +614,7 @@ class InventoryItemSoftwareValidationResultFilterForm(NautobotFilterForm):
         fields = [
             "q",
             "software",
-            # "valid",
+            "valid",
             "manufacturer",
             "location",
             "inventory_item",
@@ -634,8 +622,8 @@ class InventoryItemSoftwareValidationResultFilterForm(NautobotFilterForm):
             "device",
             "device_type",
             "device_role",
-            # "exclude_sw_missing",
-            # "sw_missing_only",
+            "exclude_sw_missing",
+            "sw_missing_only",
         ]
 
 
@@ -649,9 +637,7 @@ class ContractLCMForm(NautobotModelForm):
         required=True,
     )
     contract_type = forms.ChoiceField(choices=add_blank_choice(ContractTypeChoices.CHOICES), label="Contract Type")
-    # currency = forms.ChoiceField(
-    #     required=False, widget=StaticSelect2, choices=add_blank_choice(CurrencyChoices.CHOICES)
-    # )
+    currency = forms.ChoiceField(required=False, choices=add_blank_choice(CurrencyChoices.CHOICES))
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
     class Meta:
@@ -713,7 +699,7 @@ class ContractLCMFilterForm(NautobotFilterForm):
     model = ContractLCM
     q = forms.CharField(required=False, label="Search")
     provider = forms.ModelMultipleChoiceField(required=False, queryset=ProviderLCM.objects.all(), to_field_name="pk")
-    # currency = forms.ChoiceField(required=False, widget=StaticSelect2, choices=CurrencyChoices.CHOICES)
+    currency = forms.ChoiceField(required=False, choices=CurrencyChoices.CHOICES)
     name = forms.CharField(required=False)
 
     class Meta:
@@ -743,11 +729,10 @@ class ProviderLCMForm(NautobotModelForm):
     """Device Lifecycle Contract Providers creation/edit form."""
 
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
-    # country = forms.ChoiceField(
-    #     widget=StaticSelect2,
-    #     required=False,
-    #     choices=add_blank_choice(CountryCodes.CHOICES),
-    # )
+    country = forms.ChoiceField(
+        required=False,
+        choices=add_blank_choice(CountryCodes.CHOICES),
+    )
 
     class Meta:
         """Meta attributes for the ProviderLCMForm class."""
@@ -797,11 +782,10 @@ class ProviderLCMFilterForm(NautobotFilterForm):
     model = ProviderLCM
     q = forms.CharField(required=False, label="Search")
     name = forms.CharField(required=False)
-    # country = forms.ChoiceField(
-    #     widget=StaticSelect2,
-    #     required=False,
-    #     choices=add_blank_choice(CountryCodes.CHOICES),
-    # )
+    country = forms.ChoiceField(
+        required=False,
+        choices=add_blank_choice(CountryCodes.CHOICES),
+    )
 
     class Meta:
         """Meta attributes for the ProviderLCMFilterForm class."""
@@ -954,7 +938,6 @@ class CVELCMFilterForm(NautobotFilterForm):
         help_text="Search for name or link.",
     )
     severity = forms.ChoiceField(
-        # widget=StaticSelect2,
         required=False,
         choices=add_blank_choice(CVESeverityChoices.CHOICES),
     )
@@ -1038,12 +1021,11 @@ class VulnerabilityLCMFilterForm(NautobotFilterForm):
     cve = DynamicModelMultipleChoiceField(required=False, queryset=CVELCM.objects.all(), label="CVE")
     cve__published_date__lte = forms.DateField(label="CVE Published Date Before", required=False, widget=DatePicker())
     cve__published_date__gte = forms.DateField(label="CVE Published Date After", required=False, widget=DatePicker())
-    # cve__severity = forms.ChoiceField(
-    #     label="CVE Severity",
-    #     widget=StaticSelect2,
-    #     required=False,
-    #     choices=add_blank_choice(CVESeverityChoices.CHOICES),
-    # )
+    cve__severity = forms.ChoiceField(
+        label="CVE Severity",
+        required=False,
+        choices=add_blank_choice(CVESeverityChoices.CHOICES),
+    )
     software = DynamicModelMultipleChoiceField(required=False, queryset=SoftwareLCM.objects.all())
     device = DynamicModelMultipleChoiceField(required=False, queryset=Device.objects.all())
     inventory_item = DynamicModelMultipleChoiceField(required=False, queryset=InventoryItem.objects.all())
