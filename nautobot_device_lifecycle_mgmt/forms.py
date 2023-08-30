@@ -26,6 +26,7 @@ from nautobot.utilities.forms import (
     StaticSelect2,
     TagFilterField,
     add_blank_choice,
+    StaticSelect2Multiple,
 )
 
 from nautobot_device_lifecycle_mgmt.choices import (
@@ -816,7 +817,8 @@ class ContractLCMFilterForm(BootstrapMixin, forms.ModelForm):
 
     q = forms.CharField(required=False, label="Search")
     provider = forms.ModelMultipleChoiceField(required=False, queryset=ProviderLCM.objects.all(), to_field_name="pk")
-    currency = forms.ChoiceField(required=False, widget=StaticSelect2, choices=CurrencyChoices.CHOICES)
+    currency = forms.MultipleChoiceField(required=False, choices=CurrencyChoices.CHOICES, widget=StaticSelect2Multiple())
+    contract_type = forms.ChoiceField(required=False, widget=StaticSelect2, choices=add_blank_choice(ContractTypeChoices.CHOICES))
     name = forms.CharField(required=False)
 
     class Meta:
@@ -913,11 +915,12 @@ class ProviderLCMFilterForm(BootstrapMixin, forms.ModelForm):
 
     q = forms.CharField(required=False, label="Search")
     name = forms.CharField(required=False)
-    country = forms.ChoiceField(
-        widget=StaticSelect2,
-        required=False,
-        choices=add_blank_choice(CountryCodes.CHOICES),
-    )
+    # country = forms.ChoiceField(
+    #     widget=StaticSelect2,
+    #     required=False,
+    #     choices=add_blank_choice(CountryCodes.CHOICES),
+    # )
+    country = forms.MultipleChoiceField(required=False, choices=CountryCodes.CHOICES, widget=StaticSelect2Multiple())
 
     class Meta:
         """Meta attributes for the ProviderLCMFilterForm class."""

@@ -1,5 +1,6 @@
 """Filtering implementation for the Lifecycle Management plugin."""
 import datetime
+from locale import currency
 
 import django_filters
 from django.db.models import Q
@@ -693,6 +694,8 @@ class ContractLCMFilterSet(NautobotFilterSet):
     end__gte = django_filters.DateFilter(field_name="end", lookup_expr="gte")
     end__lte = django_filters.DateFilter(field_name="end", lookup_expr="lte")
 
+    contract_type = django_filters.CharFilter(field_name="contract_type", label="Contract Type")
+
     class Meta:
         """Meta attributes for filter."""
 
@@ -707,6 +710,7 @@ class ContractLCMFilterSet(NautobotFilterSet):
             "support_level",
             "contract_type",
             "expired",
+            "currency",
         ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
