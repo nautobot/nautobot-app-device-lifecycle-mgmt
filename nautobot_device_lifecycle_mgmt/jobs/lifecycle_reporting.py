@@ -13,7 +13,6 @@ from nautobot_device_lifecycle_mgmt.models import (
 )
 from nautobot_device_lifecycle_mgmt.software import DeviceSoftware, InventoryItemSoftware
 
-
 name = "Device/Software Lifecycle Reporting"  # pylint: disable=invalid-name
 
 

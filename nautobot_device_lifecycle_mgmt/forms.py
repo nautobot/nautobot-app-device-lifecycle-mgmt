@@ -17,10 +17,7 @@ from nautobot.apps.forms import (
 from nautobot.core.forms import StaticSelect2
 from nautobot.core.forms.constants import BOOLEAN_WITH_BLANK_CHOICES
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform
-from nautobot.extras.forms import (
-    CustomFieldModelBulkEditFormMixin,
-    NautobotFilterForm,
-)
+from nautobot.extras.forms import CustomFieldModelBulkEditFormMixin, NautobotFilterForm
 from nautobot.extras.models import Role, Status, Tag
 
 from nautobot_device_lifecycle_mgmt.choices import (

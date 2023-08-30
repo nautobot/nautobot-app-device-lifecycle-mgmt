@@ -1,24 +1,24 @@
 """Tables implementation for the Lifecycle Management plugin."""
 
+import django_tables2 as tables
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-import django_tables2 as tables
 from django_tables2.utils import A
-from nautobot.apps.tables import BaseTable, ButtonsColumn, BooleanColumn, TagColumn, ToggleColumn, StatusTableMixin
+from nautobot.apps.tables import BaseTable, BooleanColumn, ButtonsColumn, StatusTableMixin, TagColumn, ToggleColumn
 from nautobot.core.tables import LinkedCountColumn
 
 from nautobot_device_lifecycle_mgmt.models import (
+    CVELCM,
+    ContactLCM,
+    ContractLCM,
+    DeviceSoftwareValidationResult,
     HardwareLCM,
+    InventoryItemSoftwareValidationResult,
+    ProviderLCM,
+    SoftwareImageLCM,
     SoftwareLCM,
     ValidatedSoftwareLCM,
-    ContractLCM,
-    ProviderLCM,
-    ContactLCM,
-    CVELCM,
     VulnerabilityLCM,
-    DeviceSoftwareValidationResult,
-    InventoryItemSoftwareValidationResult,
-    SoftwareImageLCM,
 )
 
 

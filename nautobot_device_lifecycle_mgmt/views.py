@@ -5,39 +5,37 @@ import logging
 import urllib
 
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
 import numpy as np
-
 from django.conf import settings
-from django.db.models import Q, F, Count, ExpressionWrapper, FloatField
+from django.db.models import Count, ExpressionWrapper, F, FloatField, Q
 from django_tables2 import RequestConfig
-
+from matplotlib.ticker import MaxNLocator
 from nautobot.core.views import generic
-from nautobot.core.views.paginator import EnhancedPaginator, get_paginate_count
 from nautobot.core.views.mixins import ContentTypePermissionRequiredMixin
+from nautobot.core.views.paginator import EnhancedPaginator, get_paginate_count
+
 from nautobot_device_lifecycle_mgmt import choices
-from nautobot_device_lifecycle_mgmt.models import (
-    SoftwareLCM,
-    DeviceSoftwareValidationResult,
-    InventoryItemSoftwareValidationResult,
-    SoftwareImageLCM,
-)
-from nautobot_device_lifecycle_mgmt.tables import (
-    DeviceSoftwareValidationResultTable,
-    DeviceSoftwareValidationResultListTable,
-    InventoryItemSoftwareValidationResultTable,
-    InventoryItemSoftwareValidationResultListTable,
-    SoftwareImageLCMTable,
+from nautobot_device_lifecycle_mgmt.filters import (
+    DeviceSoftwareValidationResultFilterSet,
+    InventoryItemSoftwareValidationResultFilterSet,
 )
 from nautobot_device_lifecycle_mgmt.forms import (
     DeviceSoftwareValidationResultFilterForm,
     InventoryItemSoftwareValidationResultFilterForm,
 )
-from nautobot_device_lifecycle_mgmt.filters import (
-    DeviceSoftwareValidationResultFilterSet,
-    InventoryItemSoftwareValidationResultFilterSet,
+from nautobot_device_lifecycle_mgmt.models import (
+    DeviceSoftwareValidationResult,
+    InventoryItemSoftwareValidationResult,
+    SoftwareImageLCM,
+    SoftwareLCM,
 )
-
+from nautobot_device_lifecycle_mgmt.tables import (
+    DeviceSoftwareValidationResultListTable,
+    DeviceSoftwareValidationResultTable,
+    InventoryItemSoftwareValidationResultListTable,
+    InventoryItemSoftwareValidationResultTable,
+    SoftwareImageLCMTable,
+)
 from nautobot_device_lifecycle_mgmt.utils import count_related_m2m
 
 PLUGIN_CFG = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]

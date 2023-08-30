@@ -1,18 +1,19 @@
 """API URLs for the Lifecycle Management plugin."""
 
 from rest_framework import routers
+
 from nautobot_device_lifecycle_mgmt.api.views import (
-    HardwareLCMView,
-    ContractLCMView,
-    ProviderLCMView,
     ContactLCMView,
-    SoftwareLCMViewSet,
-    SoftwareImageLCMViewSet,
-    ValidatedSoftwareLCMViewSet,
+    ContractLCMView,
     CVELCMViewSet,
-    VulnerabilityLCMViewSet,
     DeviceSoftwareValidationResultListViewSet,
+    HardwareLCMView,
     InventoryItemSoftwareValidationResultListViewSet,
+    ProviderLCMView,
+    SoftwareImageLCMViewSet,
+    SoftwareLCMViewSet,
+    ValidatedSoftwareLCMViewSet,
+    VulnerabilityLCMViewSet,
 )
 
 router = routers.DefaultRouter()

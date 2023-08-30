@@ -1,26 +1,26 @@
 """Django models for the Lifecycle Management plugin."""
 
-from datetime import datetime, date
+from datetime import date, datetime
 
-from django.db import models
+from django.conf import settings
 
 # from django.urls import reverse
 from django.core.exceptions import ValidationError
-from django.conf import settings
-from nautobot.extras.utils import extras_features
-from nautobot.extras.models.statuses import StatusField
-from nautobot.core.models.generics import PrimaryModel, OrganizationalModel
+from django.db import models
+from nautobot.core.models.generics import OrganizationalModel, PrimaryModel
 from nautobot.core.models.querysets import RestrictedQuerySet
 from nautobot.dcim.models import Device, DeviceType, InventoryItem
+from nautobot.extras.models.statuses import StatusField
+from nautobot.extras.utils import extras_features
 
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.software_filters import (
-    DeviceValidatedSoftwareFilter,
-    InventoryItemValidatedSoftwareFilter,
     DeviceSoftwareFilter,
-    InventoryItemSoftwareFilter,
     DeviceSoftwareImageFilter,
+    DeviceValidatedSoftwareFilter,
+    InventoryItemSoftwareFilter,
     InventoryItemSoftwareImageFilter,
+    InventoryItemValidatedSoftwareFilter,
 )
 
 

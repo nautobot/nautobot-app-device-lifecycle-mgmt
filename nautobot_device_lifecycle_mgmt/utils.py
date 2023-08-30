@@ -1,5 +1,5 @@
 """Utility functions and classes used by the plugin."""
-from django.db.models import Count, Subquery, OuterRef
+from django.db.models import Count, OuterRef, Subquery
 from django.db.models.functions import Coalesce
 
 

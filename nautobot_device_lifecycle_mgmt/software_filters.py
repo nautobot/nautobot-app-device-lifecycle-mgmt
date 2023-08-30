@@ -1,8 +1,7 @@
 """Filters for Software Lifecycle QuerySets."""
 
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Case, IntegerField, Q, Value, When, Subquery
-
+from django.db.models import Case, IntegerField, Q, Subquery, Value, When
 from nautobot.dcim.models import Device, InventoryItem
 from nautobot.extras.models import RelationshipAssociation
 

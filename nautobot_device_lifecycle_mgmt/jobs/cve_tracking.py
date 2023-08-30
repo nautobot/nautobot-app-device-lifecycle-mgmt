@@ -2,14 +2,10 @@
 """Jobs for the CVE Tracking portion of the Device Lifecycle plugin."""
 from datetime import datetime
 
-from nautobot.extras.jobs import Job, StringVar, BooleanVar
+from nautobot.extras.jobs import BooleanVar, Job, StringVar
 from nautobot.extras.models import Relationship, RelationshipAssociation
 
-from nautobot_device_lifecycle_mgmt.models import (
-    CVELCM,
-    VulnerabilityLCM,
-)
-
+from nautobot_device_lifecycle_mgmt.models import CVELCM, VulnerabilityLCM
 
 name = "CVE Tracking"  # pylint: disable=invalid-name
 

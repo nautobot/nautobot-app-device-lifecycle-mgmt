@@ -2,20 +2,7 @@
 from django.urls import path
 from nautobot.apps.urls import NautobotUIViewSetRouter
 
-# from nautobot.extras.views import ObjectChangeLogView, ObjectNotesView
 from nautobot_device_lifecycle_mgmt import views, viewsets
-
-# from nautobot_device_lifecycle_mgmt.models import (
-#    HardwareLCM,
-#    SoftwareImageLCM,
-#    SoftwareLCM,
-#    ValidatedSoftwareLCM,
-#    ContractLCM,
-#    ProviderLCM,
-#    ContactLCM,
-#    CVELCM,
-#    VulnerabilityLCM,
-# )
 
 router = NautobotUIViewSetRouter()
 router.register("hardware", viewset=viewsets.HardwareLCMUIViewSet)

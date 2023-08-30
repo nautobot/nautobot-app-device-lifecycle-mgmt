@@ -4,7 +4,7 @@ from nautobot.apps.views import NautobotUIViewSet
 from nautobot.core.forms.search import SearchForm
 from nautobot.dcim.models import Device
 
-from nautobot_device_lifecycle_mgmt import forms, models, filters, tables
+from nautobot_device_lifecycle_mgmt import filters, forms, models, tables
 from nautobot_device_lifecycle_mgmt.api import serializers
 
 

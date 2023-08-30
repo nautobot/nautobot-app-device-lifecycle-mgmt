@@ -5,7 +5,7 @@ from nautobot.dcim.models import Device, InventoryItem
 from nautobot.extras.models import RelationshipAssociation
 
 from nautobot_device_lifecycle_mgmt.filters import ValidatedSoftwareLCMFilterSet
-from nautobot_device_lifecycle_mgmt.models import ValidatedSoftwareLCM, SoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import SoftwareLCM, ValidatedSoftwareLCM
 from nautobot_device_lifecycle_mgmt.tables import ValidatedSoftwareLCMTable
 
 

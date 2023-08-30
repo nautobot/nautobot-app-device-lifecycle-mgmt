@@ -3,14 +3,12 @@
 from django.apps import apps as global_apps
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
-
 from nautobot.extras.choices import RelationshipTypeChoices
 from nautobot.extras.models import Relationship, RelationshipAssociation
 
 
 def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # pylint: disable=unused-argument
     """Callback function for post_migrate() -- create Relationship records."""
-    # return
     # pylint: disable=invalid-name
     SoftwareLCM = sender.get_model("SoftwareLCM")
     ContentType = apps.get_model("contenttypes", "ContentType")
