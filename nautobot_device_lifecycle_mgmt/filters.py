@@ -693,8 +693,6 @@ class ContractLCMFilterSet(NautobotFilterSet):
     end__gte = django_filters.DateFilter(field_name="end", lookup_expr="gte")
     end__lte = django_filters.DateFilter(field_name="end", lookup_expr="lte")
 
-    contract_type = django_filters.CharFilter(field_name="contract_type", label="Contract Type")
-
     class Meta:
         """Meta attributes for filter."""
 
