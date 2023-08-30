@@ -1,6 +1,5 @@
 """Filtering implementation for the Lifecycle Management plugin."""
 import datetime
-from locale import currency
 
 import django_filters
 from django.db.models import Q

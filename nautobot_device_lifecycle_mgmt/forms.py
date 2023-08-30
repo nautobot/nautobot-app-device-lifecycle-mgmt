@@ -915,11 +915,6 @@ class ProviderLCMFilterForm(BootstrapMixin, forms.ModelForm):
 
     q = forms.CharField(required=False, label="Search")
     name = forms.CharField(required=False)
-    # country = forms.ChoiceField(
-    #     widget=StaticSelect2,
-    #     required=False,
-    #     choices=add_blank_choice(CountryCodes.CHOICES),
-    # )
     country = forms.MultipleChoiceField(required=False, choices=CountryCodes.CHOICES, widget=StaticSelect2Multiple())
 
     class Meta:
