@@ -14,7 +14,7 @@ from nautobot.apps.forms import (
     TagFilterField,
     add_blank_choice,
 )
-from nautobot.core.forms import StaticSelect2
+from nautobot.core.forms import StaticSelect2, StaticSelect2Multiple
 from nautobot.core.forms.constants import BOOLEAN_WITH_BLANK_CHOICES
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform
 from nautobot.extras.forms import CustomFieldModelBulkEditFormMixin, NautobotFilterForm
@@ -696,7 +696,9 @@ class ContractLCMFilterForm(NautobotFilterForm):
     model = ContractLCM
     q = forms.CharField(required=False, label="Search")
     provider = forms.ModelMultipleChoiceField(required=False, queryset=ProviderLCM.objects.all(), to_field_name="pk")
-    currency = forms.ChoiceField(required=False, choices=CurrencyChoices.CHOICES)
+    currency = forms.MultipleChoiceField(
+        required=False, choices=CurrencyChoices.CHOICES, widget=StaticSelect2Multiple()
+    )
     name = forms.CharField(required=False)
 
     class Meta:
