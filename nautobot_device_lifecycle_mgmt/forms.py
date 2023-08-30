@@ -781,10 +781,7 @@ class ProviderLCMFilterForm(NautobotFilterForm):
     model = ProviderLCM
     q = forms.CharField(required=False, label="Search")
     name = forms.CharField(required=False)
-    country = forms.ChoiceField(
-        required=False,
-        choices=add_blank_choice(CountryCodes.CHOICES),
-    )
+    country = forms.MultipleChoiceField(required=False, choices=CountryCodes.CHOICES, widget=StaticSelect2Multiple())
 
     class Meta:
         """Meta attributes for the ProviderLCMFilterForm class."""
