@@ -801,7 +801,7 @@ class ProviderLCMFilterForm(NautobotFilterForm):
 
 
 class ContactLCMForm(NautobotModelForm):
-    """Device Lifecycle Contract Resources creation/edit form."""
+    """Device Lifecycle Contact Resources creation/edit form."""
 
     type = forms.ChoiceField(choices=PoCTypeChoices.CHOICES, required=False)
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
@@ -831,7 +831,7 @@ class ContactLCMForm(NautobotModelForm):
 
 
 class ContactLCMBulkEditForm(NautobotBulkEditForm):
-    """Device Lifecycle Contract Resources bulk edit form."""
+    """Device Lifecycle Contact Resources bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=ContractLCM.objects.all(), widget=forms.MultipleHiddenInput)
     address = forms.CharField(required=False)
