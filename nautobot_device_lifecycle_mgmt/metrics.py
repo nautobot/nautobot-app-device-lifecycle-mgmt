@@ -1,9 +1,10 @@
 """Nautobot Device LCM plugin application level metrics ."""
 from datetime import datetime
 
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Case, Count, F, IntegerField, OuterRef, Q, Subquery, Value, When
 from django.db.models.functions import Coalesce
-from nautobot.dcim.models import DeviceType, InventoryItem  # Device, Location
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, LocationType
 from prometheus_client.core import GaugeMetricFamily
 
 from nautobot_device_lifecycle_mgmt.models import (
@@ -112,7 +113,7 @@ def metrics_lcm_validation_report_inventory_item():
 
 
 def metrics_lcm_hw_end_of_support():  # pylint: disable=too-many-locals
-    """Calculate number of End of Support devices and inventory items per Part Number and per Site.
+    """Calculate number of End of Support devices and inventory items per Part Number and per Location.
 
     Yields:
         GaugeMetricFamily: Prometheus Metrics
@@ -122,9 +123,11 @@ def metrics_lcm_hw_end_of_support():  # pylint: disable=too-many-locals
         "Nautobot LCM Hardware End of Support per Part Number",
         labels=["part_number"],
     )
-    # hw_end_of_support_site_gauge = GaugeMetricFamily(
-    #     "nautobot_lcm_hw_end_of_support_per_site", "Nautobot LCM Hardware End of Support per Site", labels=["site"]
-    # )
+    hw_end_of_support_location_gauge = GaugeMetricFamily(
+        "nautobot_lcm_hw_end_of_support_per_location",
+        "Nautobot LCM Hardware End of Support per Location",
+        labels=["location"],
+    )
 
     today = datetime.today().date()
     hw_end_of_support = HardwareLCM.objects.filter(end_of_support__lt=today)
@@ -183,41 +186,48 @@ def metrics_lcm_hw_end_of_support():  # pylint: disable=too-many-locals
 
     yield hw_end_of_support_part_number_gauge
 
-    # Initialize per site count to 0 for all sites
-    # init_site_counts = Site.objects.values(site_slug=F("slug")).annotate(
-    #     site_count=Value(0, output_field=IntegerField())
-    # )
-    # # Get count of out of hw support devices per site
-    # hw_end_of_support_per_site_devices = (
-    #     Device.objects.order_by()
-    #     .filter(device_type_id__in=hw_end_of_support_device_types)
-    #     .values(site_slug=F("site__slug"))
-    #     .annotate(site_count=Count("id"))
-    # )
-    # # Get count of out of hw support inventory items per site
-    # hw_end_of_support_per_site_invitems = (
-    #     InventoryItem.objects.order_by()
-    #     .filter(part_id__in=hw_end_of_support_invitems)
-    #     .values(site_slug=F("device__site__slug"))
-    #     .annotate(site_count=Count("id"))
-    # )
+    # Initialize per location count to 0 for all locations
+    device_location_types = LocationType.objects.filter(content_types=ContentType.objects.get_for_model(Device))
+    init_location_counts = (
+        Location.objects.filter(location_type__in=device_location_types)
+        .values(location_name=F("name"))
+        .annotate(location_count=Value(0, output_field=IntegerField()))
+    )
+    # Get count of out of hw support devices per location
+    hw_end_of_support_per_location_devices = (
+        Device.objects.order_by()
+        .filter(device_type_id__in=hw_end_of_support_device_types)
+        .values(location_name=F("location__name"))
+        .annotate(location_count=Count("id"))
+    )
+    # Get count of out of hw support inventory items per location
+    hw_end_of_support_per_location_invitems = (
+        InventoryItem.objects.order_by()
+        .filter(part_id__in=hw_end_of_support_invitems)
+        .values(location_name=F("device__location__name"))
+        .annotate(location_count=Count("id"))
+    )
 
-    # # Build subqueries used in the final query offloading count sum to the DB
-    # hw_end_of_support_per_site_devices_sq = Subquery(
-    #     hw_end_of_support_per_site_devices.filter(site_slug=OuterRef("site_slug")).values_list("site_count")
-    # )
-    # hw_end_of_support_per_site_invitems_sq = Subquery(
-    #     hw_end_of_support_per_site_invitems.filter(site_slug=OuterRef("site_slug")).values_list("site_count")
-    # )
-    # # Build query summing counts per site and generate corresponding metrics
-    # for site_slug, total_count in init_site_counts.annotate(
-    #     total_count=F("site_count")
-    #     + Coalesce(hw_end_of_support_per_site_devices_sq, 0)
-    #     + Coalesce(hw_end_of_support_per_site_invitems_sq, 0)
-    # ).values_list("site_slug", "total_count"):
-    #     hw_end_of_support_site_gauge.add_metric(labels=[site_slug], value=total_count)
+    # Build subqueries used in the final query offloading count sum to the DB
+    hw_end_of_support_per_location_devices_sq = Subquery(
+        hw_end_of_support_per_location_devices.filter(location_name=OuterRef("location_name")).values_list(
+            "location_count"
+        )
+    )
+    hw_end_of_support_per_location_invitems_sq = Subquery(
+        hw_end_of_support_per_location_invitems.filter(location_name=OuterRef("location_name")).values_list(
+            "location_count"
+        )
+    )
+    # Build query summing counts per site and generate corresponding metrics
+    for location_name, total_count in init_location_counts.annotate(
+        total_count=F("location_count")
+        + Coalesce(hw_end_of_support_per_location_devices_sq, 0)
+        + Coalesce(hw_end_of_support_per_location_invitems_sq, 0)
+    ).values_list("location_name", "total_count"):
+        hw_end_of_support_location_gauge.add_metric(labels=[location_name], value=total_count)
 
-    # yield hw_end_of_support_site_gauge
+    yield hw_end_of_support_location_gauge
 
 
 metrics = [
