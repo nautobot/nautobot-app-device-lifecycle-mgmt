@@ -32,7 +32,7 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
         if instance.inventory_item:
             return {
                 "devices": Device.objects.restrict(request.user, "view").filter(
-                    inventoryitems__part_id=instance.inventory_item
+                    inventory_items__part_id=instance.inventory_item
                 )
             }
         return {"devices": []}
