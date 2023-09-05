@@ -17,7 +17,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.12"
+python = ">=3.8,<3.10"
 pycountry = "^22.3.5"
 matplotlib = "^3.3.4"
 nautobot = "^1.4.0"
