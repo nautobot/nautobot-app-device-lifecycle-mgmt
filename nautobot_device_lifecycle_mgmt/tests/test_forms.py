@@ -22,6 +22,7 @@ class HardwareLCMFormTest(TestCase):
         self.manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
         self.device_type, _ = DeviceType.objects.get_or_create(model="c9300-24", manufacturer=self.manufacturer)
         self.devicerole, _ = Role.objects.get_or_create(name="backbone-switch")
+        self.devicerole.content_types.add(ContentType.objects.get_for_model(Device))
         location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
         location_type_location_a.content_types.add(
             ContentType.objects.get_for_model(Device),

@@ -286,6 +286,8 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             Role.objects.get_or_create(name="router", color="ff0000")[0],
             Role.objects.get_or_create(name="switch", color="ffff00")[0],
         )
+        for devicerole in deviceroles:
+            devicerole.content_types.add(ContentType.objects.get_for_model(Device))
         devicetypes = (
             DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000"),
             DeviceType.objects.create(manufacturer=manufacturer, model="Catalyst 6500"),
@@ -564,6 +566,7 @@ class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
             name="Location1", location_type=location_type_location_a, status=location_status
         )
         devicerole, _ = Role.objects.get_or_create(name="router", color="ff0000")
+        devicerole.content_types.add(ContentType.objects.get_for_model(Device))
         devicetypes_cisco = (
             DeviceType.objects.create(manufacturer=manufacturer_cisco, model="ASR-1000"),
             DeviceType.objects.create(manufacturer=manufacturer_cisco, model="Catalyst 6500"),

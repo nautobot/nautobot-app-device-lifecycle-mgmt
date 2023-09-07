@@ -26,6 +26,7 @@ class DeviceSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too-many-i
         self.devicetype_2, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_arista, model="7150S")
         self.devicetype_3, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_arista, model="7500")
         devicerole, _ = Role.objects.get_or_create(name="switch", color="ff0000")
+        devicerole.content_types.add(ContentType.objects.get_for_model(Device))
         device_status = Status.objects.get_for_model(Device).first()
         location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
         location_type_location_a.content_types.add(
@@ -180,6 +181,7 @@ class InventoryItemSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too
 
         self.devicetype_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_arista, model="7124")
         devicerole, _ = Role.objects.get_or_create(name="switch", color="ff0000")
+        devicerole.content_types.add(ContentType.objects.get_for_model(Device))
         device_status = Status.objects.get_for_model(Device).first()
         location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
         location_type_location_a.content_types.add(

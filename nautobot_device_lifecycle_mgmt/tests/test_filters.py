@@ -46,6 +46,7 @@ class HardwareLCMTestCase(TestCase):
             DeviceType.objects.get_or_create(model="c9300-48", manufacturer=self.manufacturer)[0],
         )
         self.devicerole, _ = Role.objects.get_or_create(name="switch", color="ff0000")
+        self.devicerole.content_types.add(ContentType.objects.get_for_model(Device))
         location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
         location_type_location_a.content_types.add(
             ContentType.objects.get_for_model(Device),
