@@ -161,6 +161,11 @@ urlpatterns = [
         kwargs={"model": ContractLCM},
     ),
     path("contract/import/", views.ContractLCMBulkImportView.as_view(), name="contractlcm_import"),
+    path(
+        "contract-devices/",
+        views.ContractDevicesReportView.as_view(),
+        name="contractdevicesreport_list",
+    ),
     # Contract Provider Lifecycle Management URLs
     path("provider/", views.ProviderLCMListView.as_view(), name="providerlcm_list"),
     path("provider/<uuid:pk>/", views.ProviderLCMView.as_view(), name="providerlcm"),

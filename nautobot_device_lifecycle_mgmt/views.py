@@ -9,12 +9,13 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import numpy as np
 
-from django.db.models import Q, F, Count, ExpressionWrapper, FloatField
+from django.db.models import Q, F, Count, ExpressionWrapper, FloatField, OuterRef, Subquery
 from django_tables2 import RequestConfig
 
 from nautobot.core.forms import SearchForm
 from nautobot.core.views import generic
 from nautobot.dcim.models import Device
+from nautobot.extras.models import RelationshipAssociation
 from nautobot.utilities.paginator import EnhancedPaginator, get_paginate_count
 from nautobot.utilities.views import ContentTypePermissionRequiredMixin
 from nautobot_device_lifecycle_mgmt import choices
@@ -45,6 +46,7 @@ from nautobot_device_lifecycle_mgmt.tables import (
     CVELCMTable,
     VulnerabilityLCMTable,
     SoftwareImageLCMTable,
+    ContractDevicesReportTable,
 )
 from nautobot_device_lifecycle_mgmt.forms import (
     HardwareLCMForm,
@@ -954,6 +956,24 @@ class ContractLCMBulkEditView(generic.BulkEditView):
     table = ContractLCMTable
     form = ContractLCMBulkEditForm
     bulk_edit_url = "plugins:nautobot_device_lifecycle_mgmt.contractlcm_bulk_edit"
+
+
+class ContractDevicesReportView(generic.ObjectListView):
+    """View providing details for devices linked to a contract."""
+
+    # filterset = ContractDevicesReportFilterSet
+    # filterset_form = ContractDevicesReportFilterForm
+    # _device_subquery = Device.objects.filter(id=OuterRef("destination_id")).values("name", "serial")[:1]
+    table = ContractDevicesReportTable
+    template_name = "nautobot_device_lifecycle_mgmt/contract_devices_report_list.html"
+    # Show all devices under contract
+    # _queryset = RelationshipAssociation.objects.filter(relationship__slug="contractlcm-to-device").annotate(
+    #    device_name=Subquery(_device_subquery.values("name")), device_serial=Subquery(_device_subquery.values("serial"))
+    # )
+    queryset = RelationshipAssociation.objects.filter(relationship__slug="contractlcm-to-device")
+    action_buttons = ("export",)
+    # extra content dict to be returned by self.extra_context() method
+    extra_content = {}
 
 
 # ---------------------------------------------------------------------------------
