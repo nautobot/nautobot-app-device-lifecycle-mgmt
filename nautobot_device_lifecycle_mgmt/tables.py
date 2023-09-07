@@ -12,6 +12,7 @@ from nautobot.utilities.tables import (
     TagColumn,
     ToggleColumn,
 )
+from nautobot.extras.models import RelationshipAssociation
 from nautobot.extras.tables import StatusTableMixin
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
@@ -458,6 +459,34 @@ class ContractLCMTable(BaseTable):
             "contract_type",
             "provider",
             "actions",
+        )
+
+
+class ContractDevicesReportTable(BaseTable):
+    """Table for list view."""
+
+    pk = ToggleColumn()
+    contract = tables.LinkColumn(
+        "plugins:nautobot_device_lifecycle_mgmt:contractlcm", text=lambda record: record.source, args=[A("source_id")]
+    )
+    device_name = tables.LinkColumn(
+        "dcim:device", text=lambda record: record.destination.name, args=[A("destination_id")]
+    )
+    device_serial = tables.Column(verbose_name="Device serial", accessor="destination.serial")
+    device_site = tables.LinkColumn(
+        "dcim:site", text=lambda record: record.destination.site.name, args=[A("destination.site.slug")]
+    )
+
+    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = RelationshipAssociation
+        fields = (
+            "pk",
+            "contract",
+            "device_name",
+            "device_serial",
+            "device_site",
         )
 
 
