@@ -415,6 +415,7 @@ class ContractLCMTable(BaseTable):
             "cost",
             "support_level",
             "contract_type",
+            "devices",
             "provider",
             "actions",
         )
@@ -511,6 +512,7 @@ class CVELCMTable(StatusTableMixin, BaseTable):
             "cvss",
             "cvss_v2",
             "cvss_v3",
+            "affected_softwares",
             "status",
             "tags",
             "actions",

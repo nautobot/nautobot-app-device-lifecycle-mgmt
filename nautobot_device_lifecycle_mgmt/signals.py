@@ -17,7 +17,7 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
     _Relationship = apps.get_model("extras", "Relationship")
 
     contract_lcm = sender.get_model("ContractLCM")
-    CVELCM = sender.get_model("CVELCM")
+    # CVELCM = sender.get_model("CVELCM")
 
     for relationship_dict in [
         {
@@ -38,15 +38,15 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
             "destination_type": ContentType.objects.get_for_model(InventoryItem),
             "destination_label": "Software Version",
         },
-        {
-            "label": "Contract to dcim.Device",
-            "key": "contractlcm-to-device",
-            "type": RelationshipTypeChoices.TYPE_MANY_TO_MANY,
-            "source_type": ContentType.objects.get_for_model(contract_lcm),
-            "source_label": "Devices",
-            "destination_type": ContentType.objects.get_for_model(_Device),
-            "destination_label": "Contracts",
-        },
+        # {
+        #     "label": "Contract to dcim.Device",
+        #     "key": "contractlcm-to-device",
+        #     "type": RelationshipTypeChoices.TYPE_MANY_TO_MANY,
+        #     "source_type": ContentType.objects.get_for_model(contract_lcm),
+        #     "source_label": "Devices",
+        #     "destination_type": ContentType.objects.get_for_model(_Device),
+        #     "destination_label": "Contracts",
+        # },
         {
             "label": "Contract to dcim.InventoryItem",
             "key": "contractlcm-to-inventoryitem",
@@ -56,15 +56,15 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
             "destination_type": ContentType.objects.get_for_model(InventoryItem),
             "destination_label": "Contract",
         },
-        {
-            "label": "Software to CVE",
-            "key": "soft_cve",
-            "type": RelationshipTypeChoices.TYPE_MANY_TO_MANY,
-            "source_type": ContentType.objects.get_for_model(SoftwareLCM),
-            "source_label": "Corresponding CVEs",
-            "destination_type": ContentType.objects.get_for_model(CVELCM),
-            "destination_label": "Affected Softwares",
-        },
+        # {
+        #     "label": "Software to CVE",
+        #     "key": "soft_cve",
+        #     "type": RelationshipTypeChoices.TYPE_MANY_TO_MANY,
+        #     "source_type": ContentType.objects.get_for_model(SoftwareLCM),
+        #     "source_label": "Corresponding CVEs",
+        #     "destination_type": ContentType.objects.get_for_model(CVELCM),
+        #     "destination_label": "Affected Softwares",
+        # },
     ]:
         _Relationship.objects.get_or_create(label=relationship_dict["label"], defaults=relationship_dict)
 

@@ -148,6 +148,7 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):
         "id",
         "name",
         "provider",
+        "devices",
         "start",
         "support_level",
     ]
@@ -155,6 +156,7 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):
     @classmethod
     def setUpTestData(cls):  # pylint: disable=invalid-name
         """Create a superuser and token for API calls."""
+        devices = create_devices()
         provider = ProviderLCM.objects.create(
             name="Cisco",
             description="Cisco Support",
@@ -172,6 +174,7 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):
                 "support_level": "24/7",
                 "contract_type": "Hardware",
                 "provider": provider.id,
+                "devices": [device.pk for device in devices],
             },
             {
                 "name": "Nexus Support - Software",
@@ -405,6 +408,7 @@ class CVELCMAPITest(APIViewTestCases.APIViewTestCase):
         "severity",
         "status",
         "url",
+        "affected_softwares",
     ]
 
     choices_fields = ["severity"]
@@ -412,21 +416,25 @@ class CVELCMAPITest(APIViewTestCases.APIViewTestCase):
     @classmethod
     def setUpTestData(cls):  # pylint: disable=invalid-name
         """Set up test objects."""
+        softwares = create_softwares()
         cls.create_data = [
             {
                 "name": "CVE-2021-40128",
                 "published_date": datetime.date(2021, 11, 4),
                 "link": "https://www.cvedetails.com/cve/CVE-2021-40128/",
+                "affected_softwares": [software.pk for software in softwares],
             },
             {
                 "name": "CVE-2021-40126",
                 "published_date": datetime.date(2021, 11, 4),
                 "link": "https://www.cvedetails.com/cve/CVE-2021-40126/",
+                "affected_softwares": [software.pk for software in softwares],
             },
             {
                 "name": "CVE-2021-40125",
                 "published_date": datetime.date(2021, 10, 27),
                 "link": "https://www.cvedetails.com/cve/CVE-2021-40125/",
+                "affected_softwares": [software.pk for software in softwares],
             },
         ]
 

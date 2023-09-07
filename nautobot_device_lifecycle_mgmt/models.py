@@ -427,6 +427,7 @@ class ContractLCM(PrimaryModel):
     support_level = models.CharField(verbose_name="Support Level", max_length=64, blank=True, default="")
     currency = models.CharField(verbose_name="Currency", max_length=4, blank=True, default="")
     contract_type = models.CharField(verbose_name="Contract Type", max_length=32, blank=True, default="")
+    devices = models.ManyToManyField(to="dcim.Device", related_name="device_contracts", blank=True)
     comments = models.TextField(blank=True)
 
     class Meta:
@@ -581,6 +582,7 @@ class CVELCM(PrimaryModel):
     cvss_v3 = models.FloatField(blank=True, null=True, verbose_name="CVSSv3 Score")
     fix = models.CharField(max_length=255, blank=True, default="")
     comments = models.TextField(blank=True)
+    affected_softwares = models.ManyToManyField(to="SoftwareLCM", related_name="corresponding_cves", blank=True)
 
     class Meta:
         """Meta attributes for the class."""

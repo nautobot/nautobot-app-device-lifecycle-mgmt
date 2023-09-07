@@ -48,6 +48,14 @@
                 <td>{% if object.cvss_v3 %} {{ object.cvss_v3 }} {% else %} &mdash; {% endif %}</td>
             </tr>
             <tr>
+                <td>Affected Softwares</td>
+                <td>
+                    {% for affected_software in object.affected_softwares.all %}
+                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwarelcm' pk=affected_software.pk %}">{{ affected_software }}</a>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+            <tr>
                 <td>Fix</td>
                 <td>{% if object.fix %} {{ object.fix }} {% else %} &mdash; {% endif %}</td>
             </tr>
