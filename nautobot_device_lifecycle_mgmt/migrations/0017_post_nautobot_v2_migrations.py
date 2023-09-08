@@ -56,4 +56,16 @@ class Migration(migrations.Migration):
             name="vulnerabilitylcm",
             unique_together={("cve", "software", "inventory_item"), ("cve", "software", "device")},
         ),
+        migrations.AddField(
+            model_name="cvelcm",
+            name="affected_softwares",
+            field=models.ManyToManyField(
+                blank=True, related_name="corresponding_cves", to="nautobot_device_lifecycle_mgmt.SoftwareLCM"
+            ),
+        ),
+        migrations.AddField(
+            model_name="contractlcm",
+            name="devices",
+            field=models.ManyToManyField(blank=True, related_name="device_contracts", to="dcim.Device"),
+        ),
     ]

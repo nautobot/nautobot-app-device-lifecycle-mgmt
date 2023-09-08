@@ -59,7 +59,7 @@ def migrate_contract_devices(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("nautobot_device_lifecycle_mgmt", "0018_cve_and_contract_cust_rels_to_m2m"),
+        ("nautobot_device_lifecycle_mgmt", "0017_post_nautobot_v2_migrations"),
     ]
 
     operations = [
