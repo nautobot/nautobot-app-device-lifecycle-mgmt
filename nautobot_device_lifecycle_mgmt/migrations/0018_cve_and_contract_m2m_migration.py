@@ -3,7 +3,7 @@ from django.db import migrations
 
 def migrate_cve_affected_software(apps, schema_editor):
     """
-    Migrate CVE affected software from custom rel to m2m field on CVELCM model.
+    Migrate CVE affected software from custom relationship to m2m field on CVELCM model.
     """
     Relationship = apps.get_model("extras", "Relationship")
     RelationshipAssociation = apps.get_model("extras", "RelationshipAssociation")
@@ -13,7 +13,7 @@ def migrate_cve_affected_software(apps, schema_editor):
     try:
         soft_cve_relationship = Relationship.objects.get(key="soft_cve")
     except Relationship.DoesNotExist:
-        print("Did not find relationship: soft_cve")
+        pass
         return
 
     soft_cve_relationship_associations = RelationshipAssociation.objects.filter(
@@ -31,7 +31,7 @@ def migrate_cve_affected_software(apps, schema_editor):
 
 def migrate_contract_devices(apps, schema_editor):
     """
-    Migrate devices linked to contract from custom rel to m2m field on ContractLCM model.
+    Migrate devices linked to contract from custom relationship to m2m field on ContractLCM model.
     """
     Device = apps.get_model("dcim", "Device")
     Relationship = apps.get_model("extras", "Relationship")
@@ -41,7 +41,7 @@ def migrate_contract_devices(apps, schema_editor):
     try:
         contract_devices_relationship = Relationship.objects.get(key="contractlcm-to-device")
     except Relationship.DoesNotExist:
-        print("Did not find relationship: contractlcm-to-device")
+        pass
         return
 
     contract_devices_relationship_associations = RelationshipAssociation.objects.filter(
