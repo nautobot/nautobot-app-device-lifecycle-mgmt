@@ -8,7 +8,7 @@ def rename_relationship_slugs(apps, schema_editor):
     Relationship = apps.get_model("extras", "Relationship")
 
     try:
-        contract_inventoryitem_relationship = Relationship.objects.get(slug="contractlcm-to-inventoryitem")
+        contract_inventoryitem_relationship = Relationship.objects.get(key="contractlcm-to-inventoryitem")
         contract_inventoryitem_relationship.slug = "contractlcm_to_inventoryitem"
         contract_inventoryitem_relationship.save()
     except Relationship.DoesNotExist:
@@ -80,11 +80,8 @@ def migrate_contract_devices(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("nautobot_device_lifecycle_mgmt", "0018_text_fields_default_and_new_m2m_fields"),
-    ]
-
-    run_before = [
         ("extras", "0083_ensure_relationship_keys_are_unique"),
+        ("nautobot_device_lifecycle_mgmt", "0018_text_fields_default_and_new_m2m_fields"),
     ]
 
     operations = [
