@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("dcim", "0049_remove_slugs_and_change_device_primary_ip_fields"),
-        ("nautobot_device_lifecycle_mgmt", "0016_role_migration_cleanup"),
+        ("nautobot_device_lifecycle_mgmt", "0017_set_default_on_text_fields"),
     ]
 
     operations = [

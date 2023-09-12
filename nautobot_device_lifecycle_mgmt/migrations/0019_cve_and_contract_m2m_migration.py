@@ -59,7 +59,7 @@ def migrate_contract_devices(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("nautobot_device_lifecycle_mgmt", "0017_text_fields_default_and_new_m2m_fields"),
+        ("nautobot_device_lifecycle_mgmt", "0018_text_fields_default_and_new_m2m_fields"),
     ]
 
     operations = [
