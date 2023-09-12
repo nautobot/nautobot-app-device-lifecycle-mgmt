@@ -50,7 +50,7 @@ class GenerateVulnerabilities(Job):
                 )
             for software in cve.affected_softwares.all():
                 # Loop through any device relationships
-                device_rels = software.source.get_relationships()["source"][Relationship.objects.get(key="device_soft")]
+                device_rels = software.get_relationships()["source"][Relationship.objects.get(key="device_soft")]
                 for dev_rel in device_rels:
                     vuln_obj, _ = VulnerabilityLCM.objects.get_or_create(
                         cve=cve, software=dev_rel.source, device=dev_rel.destination
