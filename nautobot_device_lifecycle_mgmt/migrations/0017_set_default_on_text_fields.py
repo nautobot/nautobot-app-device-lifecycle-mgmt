@@ -1,6 +1,18 @@
 from django.db import migrations
 
 
+def set_default_on_contact_text_fields(apps, schema_editor):
+    """
+    Set default on ContactLCM text field to an empty string instead of None.
+    """
+    ContactLCM = apps.get_model("nautobot_device_lifecycle_mgmt", "ContactLCM")
+
+    for contact in ContactLCM.objects.all():
+        if contact.comments is None:
+            contact.comments = ""
+            contact.save()
+
+
 def set_default_on_contract_text_fields(apps, schema_editor):
     """
     Set default on ContractLCM text field to an empty string instead of None.
@@ -9,7 +21,7 @@ def set_default_on_contract_text_fields(apps, schema_editor):
 
     for contract in ContractLCM.objects.all():
         object_updated = False
-        for field in ("contract_type", "currency", "number", "support_level"):
+        for field in ("comments", "contract_type", "currency", "number", "support_level"):
             if getattr(contract, field) is None:
                 setattr(contract, field, "")
                 object_updated = True
@@ -25,7 +37,7 @@ def set_default_on_cve_text_fields(apps, schema_editor):
 
     for cve in CVELCM.objects.all():
         object_updated = False
-        for field in ("description", "fix"):
+        for field in ("comments", "description", "fix"):
             if getattr(cve, field) is None:
                 setattr(cve, field, "")
                 object_updated = True
@@ -43,6 +55,18 @@ def set_default_on_hardware_text_fields(apps, schema_editor):
         if hardware.comments is None:
             hardware.comments = ""
             hardware.save()
+
+
+def set_default_on_provider_text_fields(apps, schema_editor):
+    """
+    Set default on ProviderLCM text field to an empty string instead of None.
+    """
+    ProviderLCM = apps.get_model("nautobot_device_lifecycle_mgmt", "ProviderLCM")
+
+    for provider in ProviderLCM.objects.all():
+        if provider.comments is None:
+            provider.comments = ""
+            provider.save()
 
 
 def set_default_on_software_text_fields(apps, schema_editor):
@@ -63,8 +87,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(set_default_on_contact_text_fields),
         migrations.RunPython(set_default_on_contract_text_fields),
         migrations.RunPython(set_default_on_cve_text_fields),
         migrations.RunPython(set_default_on_hardware_text_fields),
+        migrations.RunPython(set_default_on_provider_text_fields),
         migrations.RunPython(set_default_on_software_text_fields),
     ]

@@ -24,6 +24,16 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AlterField(
+            model_name="contactlcm",
+            name="comments",
+            field=models.TextField(blank=True, default=""),
+        ),
+        migrations.AlterField(
+            model_name="contractlcm",
+            name="comments",
+            field=models.TextField(blank=True, default=""),
+        ),
+        migrations.AlterField(
             model_name="contractlcm",
             name="contract_type",
             field=models.CharField(blank=True, default="", max_length=32),
@@ -45,6 +55,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name="cvelcm",
+            name="comments",
+            field=models.TextField(blank=True, default=""),
+        ),
+        migrations.AlterField(
+            model_name="cvelcm",
             name="description",
             field=models.CharField(blank=True, default="", max_length=255),
         ),
@@ -55,6 +70,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name="hardwarelcm",
+            name="comments",
+            field=models.TextField(blank=True, default=""),
+        ),
+        migrations.AlterField(
+            model_name="providerlcm",
             name="comments",
             field=models.TextField(blank=True, default=""),
         ),

@@ -428,7 +428,7 @@ class ContractLCM(PrimaryModel):
     currency = models.CharField(verbose_name="Currency", max_length=4, blank=True, default="")
     contract_type = models.CharField(verbose_name="Contract Type", max_length=32, blank=True, default="")
     devices = models.ManyToManyField(to="dcim.Device", related_name="device_contracts", blank=True)
-    comments = models.TextField(blank=True)
+    comments = models.TextField(blank=True, default="")
 
     class Meta:
         """Meta attributes for the ContractLCM class."""
@@ -482,7 +482,7 @@ class ProviderLCM(OrganizationalModel):
     phone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True, verbose_name="E-mail")
     portal_url = models.URLField(blank=True, verbose_name="Portal URL")
-    comments = models.TextField(blank=True)
+    comments = models.TextField(blank=True, default="")
 
     class Meta:
         """Meta attributes for the class."""
@@ -517,7 +517,7 @@ class ContactLCM(PrimaryModel):
     address = models.CharField(max_length=200, blank=True)
     phone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True, verbose_name="Contact E-mail")
-    comments = models.TextField(blank=True)
+    comments = models.TextField(blank=True, default="True")
     priority = models.PositiveIntegerField(default=100)
     type = models.CharField(max_length=50, default=choices.PoCTypeChoices.UNASSIGNED)
     contract = models.ForeignKey(
@@ -581,7 +581,7 @@ class CVELCM(PrimaryModel):
     cvss_v2 = models.FloatField(blank=True, null=True, verbose_name="CVSSv2 Score")
     cvss_v3 = models.FloatField(blank=True, null=True, verbose_name="CVSSv3 Score")
     fix = models.CharField(max_length=255, blank=True, default="")
-    comments = models.TextField(blank=True)
+    comments = models.TextField(blank=True, default="")
     affected_softwares = models.ManyToManyField(to="SoftwareLCM", related_name="corresponding_cves", blank=True)
 
     class Meta:
