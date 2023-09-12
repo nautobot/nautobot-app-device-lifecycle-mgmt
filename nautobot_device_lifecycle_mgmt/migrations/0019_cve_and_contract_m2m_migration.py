@@ -1,6 +1,27 @@
 from django.db import migrations
 
 
+def rename_relationship_slugs(apps, schema_editor):
+    """
+    Rename relationship slugs for Contract to InventoryItem and Contract to Devices.
+    """
+    Relationship = apps.get_model("extras", "Relationship")
+
+    try:
+        contract_inventoryitem_relationship = Relationship.objects.get(slug="contractlcm-to-inventoryitem")
+        contract_inventoryitem_relationship.slug = "contractlcm_to_inventoryitem"
+        contract_inventoryitem_relationship.save()
+    except Relationship.DoesNotExist:
+        pass
+
+    try:
+        contract_devices_relationship = Relationship.objects.get(key="contractlcm-to-device")
+        contract_devices_relationship.slug = "contractlcm_to_device"
+        contract_devices_relationship.save()
+    except Relationship.DoesNotExist:
+        pass
+
+
 def migrate_cve_affected_software(apps, schema_editor):
     """
     Migrate CVE affected software from custom relationship to m2m field on CVELCM model.
@@ -39,7 +60,7 @@ def migrate_contract_devices(apps, schema_editor):
     ContractLCM = apps.get_model("nautobot_device_lifecycle_mgmt", "ContractLCM")
 
     try:
-        contract_devices_relationship = Relationship.objects.get(key="contractlcm-to-device")
+        contract_devices_relationship = Relationship.objects.get(key="contractlcm_to_device")
     except Relationship.DoesNotExist:
         pass
         return
@@ -59,10 +80,13 @@ def migrate_contract_devices(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("nautobot_device_lifecycle_mgmt", "0018_text_fields_default_and_new_m2m_fields"),
+        ("extras", "0082_rename_relationship_name_to_label")(
+            "nautobot_device_lifecycle_mgmt", "0018_text_fields_default_and_new_m2m_fields"
+        ),
     ]
 
     operations = [
+        migrations.RunPython(rename_relationship_slugs),
         migrations.RunPython(migrate_cve_affected_software),
         migrations.RunPython(migrate_contract_devices),
     ]

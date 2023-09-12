@@ -39,7 +39,7 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
         },
         {
             "label": "Contract to dcim.InventoryItem",
-            "key": "contractlcm-to-inventoryitem",
+            "key": "contractlcm_to_inventoryitem",
             "type": RelationshipTypeChoices.TYPE_ONE_TO_MANY,
             "source_type": ContentType.objects.get_for_model(contract_lcm),
             "source_label": "Inventory Items",
