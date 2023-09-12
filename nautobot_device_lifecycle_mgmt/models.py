@@ -517,7 +517,7 @@ class ContactLCM(PrimaryModel):
     address = models.CharField(max_length=200, blank=True)
     phone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True, verbose_name="Contact E-mail")
-    comments = models.TextField(blank=True, default="True")
+    comments = models.TextField(blank=True, default="")
     priority = models.PositiveIntegerField(default=100)
     type = models.CharField(max_length=50, default=choices.PoCTypeChoices.UNASSIGNED)
     contract = models.ForeignKey(
