@@ -80,8 +80,11 @@ def migrate_contract_devices(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("extras", "0082_rename_relationship_name_to_label"),
         ("nautobot_device_lifecycle_mgmt", "0018_text_fields_default_and_new_m2m_fields"),
+    ]
+
+    run_before = [
+        ("extras", "0083_ensure_relationship_keys_are_unique"),
     ]
 
     operations = [
