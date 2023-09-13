@@ -411,6 +411,7 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
             )
         return msg
 
+
 @extras_features(
     "custom_fields",
     "custom_links",

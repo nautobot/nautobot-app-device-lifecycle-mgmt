@@ -319,7 +319,7 @@ class InventoryItemSoftwareValidationResultTable(BaseTable):
         accessor="inventory_item__name",
         orderable=True,
     )
-    device =  tables.TemplateColumn(
+    device = tables.TemplateColumn(
         template_code="""<a href='/dcim/devices/{{ record.inventory_item__device__pk }}'>
                         {{ record.inventory_item__device__name }}</a>""",
         orderable=True,
@@ -382,7 +382,7 @@ class InventoryItemSoftwareValidationResultListTable(BaseTable):
         accessor="inventory_item__name",
         orderable=True,
     )
-    device_name =  tables.TemplateColumn(
+    device_name = tables.TemplateColumn(
         template_code="""<a href='/dcim/devices/{{ record.inventory_item.device.pk }}'>
                         {{ record.inventory_item.device.name }}</a>""",
         orderable=True,
