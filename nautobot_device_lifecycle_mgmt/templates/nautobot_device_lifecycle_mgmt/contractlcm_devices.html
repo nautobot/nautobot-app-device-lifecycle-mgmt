@@ -5,7 +5,7 @@
 <div class="col-md-12">
     {% include table_template|default:'responsive_table.html' %}
     <div class="pull-left noprint">
-        <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm' pk=object.pk %}?export_devices" class="btn btn-success btn-xs">
+        <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm' pk=object.pk %}?export_contract=devices" class="btn btn-success btn-xs">
             <span class="mdi mdi-database-export" aria-hidden="true">Export</span> 
         </a>
     </div>

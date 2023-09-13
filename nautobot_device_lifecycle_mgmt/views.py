@@ -9,12 +9,16 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import numpy as np
 
-from django.db.models import Q, F, Count, ExpressionWrapper, FloatField, OuterRef, Subquery
+from django.db.models import Q, F, Count, ExpressionWrapper, FloatField
+from django.http import HttpResponse
 from django_tables2 import RequestConfig
+from django.utils import timezone
+from django.utils.text import slugify
 
 from nautobot.core.forms import SearchForm
 from nautobot.core.views import generic
-from nautobot.dcim.models import Device
+from nautobot.dcim.models import Device, InventoryItem
+from nautobot.dcim.tables import DeviceTable, InventoryItemTable
 from nautobot.extras.models import RelationshipAssociation
 from nautobot.utilities.paginator import EnhancedPaginator, get_paginate_count
 from nautobot.utilities.views import ContentTypePermissionRequiredMixin
@@ -46,7 +50,6 @@ from nautobot_device_lifecycle_mgmt.tables import (
     CVELCMTable,
     VulnerabilityLCMTable,
     SoftwareImageLCMTable,
-    ContractDevicesReportTable,
 )
 from nautobot_device_lifecycle_mgmt.forms import (
     HardwareLCMForm,
@@ -903,6 +906,135 @@ class ContractLCMView(generic.ObjectView):
             .order_by("type", "priority"),
         }
 
+    def get(self, request, *args, **kwargs):
+        """Override inherited get to allow custom export for related devices and inventory items."""
+        if "export_contract" in request.GET and request.GET.get("export_contract") in ("devices", "inventoryitems"):
+            contract_pk = kwargs.get("pk")
+            try:
+                contract = ContractLCM.objects.get(pk=contract_pk)
+            except ContractLCM.DoesNotExist:
+                return super().get(request, *args, **kwargs)
+            current_datetime = timezone.now()
+            formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M")
+            export_object_type = request.GET.get("export_contract")
+            response = HttpResponse(self.export_csv(request, contract, export_object_type), content_type="text/csv")
+            filename = f"contract_{slugify(contract.name)}_{export_object_type}_{formatted_datetime}.csv"
+            response["Content-Disposition"] = f'attachment; filename="{filename}"'
+            return response
+        else:
+            return super().get(request, *args, **kwargs)
+
+    def export_csv(self, request, contract, object_type):
+        """Export queryset of objects as comma-separated value (CSV)."""
+        csv_data = []
+        if object_type == "devices":
+            csv_data.append(",".join(["Contract Name", "Contract Type", "Device Name", "Device Serial", "Device Site"]))
+            qs = (
+                Device.objects.filter(
+                    id__in=RelationshipAssociation.objects.filter(
+                        relationship__slug="contractlcm-to-device", source_id=contract.pk
+                    ).values_list("destination_id", flat=True)
+                )
+                .values("name", "serial", "site__name")
+                .restrict(request.user, "view")
+            )
+        elif object_type == "inventoryitems":
+            csv_data.append(
+                ",".join(
+                    [
+                        "Contract Name",
+                        "Contract Type",
+                        "Item Name",
+                        "Item Part ID",
+                        "Item Serial",
+                        "Item Parent Device",
+                        "Item Site",
+                    ]
+                )
+            )
+            qs = (
+                InventoryItem.objects.filter(
+                    id__in=RelationshipAssociation.objects.filter(
+                        relationship__slug="contractlcm-to-inventoryitem", source_id=contract.pk
+                    ).values_list("destination_id", flat=True)
+                )
+                .values("name", "part_id", "serial", "device__name", "device__site__name")
+                .restrict(request.user, "view")
+            )
+        else:
+            return ""
+
+        contract_columns = f"{contract.name},{contract.contract_type},"
+        for obj in qs:
+            csv_data.append(contract_columns + ",".join([f"{str(val)}" for key, val in obj.items()]))
+
+        return "\n".join(csv_data)
+
+
+class ContractDevicesLCMView(generic.ObjectView):
+    """Devices under contract tab for Contract view."""
+
+    queryset = ContractLCM.objects.all()
+    template_name = "nautobot_device_lifecycle_mgmt/contractlcm_devices.html"
+    action_buttons = ("export",)
+
+    def get_extra_context(self, request, instance):
+        """Adds Devices under contract table."""
+        devices_under_contract = Device.objects.filter(
+            id__in=RelationshipAssociation.objects.filter(
+                relationship__slug="contractlcm-to-device", source_id=instance.id
+            ).values_list("destination_id", flat=True)
+        ).restrict(request.user, "view")
+        if devices_under_contract.exists():
+            devices_under_contract_table = DeviceTable(data=devices_under_contract, user=request.user, orderable=False)
+            devices_under_contract_table.columns.show("serial")
+        else:
+            devices_under_contract_table = None
+
+        paginate = {
+            "paginator_class": EnhancedPaginator,
+            "per_page": get_paginate_count(request),
+        }
+        RequestConfig(request, paginate).configure(devices_under_contract_table)
+
+        return {
+            "table": devices_under_contract_table,
+            "active_tab": "devices-under-contract",
+        }
+
+
+class ContractInventoryItemsLCMView(generic.ObjectView):
+    """Inventory Items under contract tab for Contract view."""
+
+    queryset = ContractLCM.objects.all()
+    template_name = "nautobot_device_lifecycle_mgmt/contractlcm_inventoryitems.html"
+    action_buttons = ("export",)
+
+    def get_extra_context(self, request, instance):
+        """Adds Inventory Items under contract table."""
+        invitems_under_contract = InventoryItem.objects.filter(
+            id__in=RelationshipAssociation.objects.filter(
+                relationship__slug="contractlcm-to-inventoryitem", source_id=instance.id
+            ).values_list("destination_id", flat=True)
+        ).restrict(request.user, "view")
+        if invitems_under_contract.exists():
+            inventoryitem_under_contract_table = InventoryItemTable(
+                data=invitems_under_contract, user=request.user, orderable=False
+            )
+        else:
+            inventoryitem_under_contract_table = None
+
+        paginate = {
+            "paginator_class": EnhancedPaginator,
+            "per_page": get_paginate_count(request),
+        }
+        RequestConfig(request, paginate).configure(inventoryitem_under_contract_table)
+
+        return {
+            "table": inventoryitem_under_contract_table,
+            "active_tab": "inventoryitems-under-contract",
+        }
+
 
 class ContractLCMCreateView(generic.ObjectEditView):
     """Create view."""
@@ -956,24 +1088,6 @@ class ContractLCMBulkEditView(generic.BulkEditView):
     table = ContractLCMTable
     form = ContractLCMBulkEditForm
     bulk_edit_url = "plugins:nautobot_device_lifecycle_mgmt.contractlcm_bulk_edit"
-
-
-class ContractDevicesReportView(generic.ObjectListView):
-    """View providing details for devices linked to a contract."""
-
-    # filterset = ContractDevicesReportFilterSet
-    # filterset_form = ContractDevicesReportFilterForm
-    # _device_subquery = Device.objects.filter(id=OuterRef("destination_id")).values("name", "serial")[:1]
-    table = ContractDevicesReportTable
-    template_name = "nautobot_device_lifecycle_mgmt/contract_devices_report_list.html"
-    # Show all devices under contract
-    # _queryset = RelationshipAssociation.objects.filter(relationship__slug="contractlcm-to-device").annotate(
-    #    device_name=Subquery(_device_subquery.values("name")), device_serial=Subquery(_device_subquery.values("serial"))
-    # )
-    queryset = RelationshipAssociation.objects.filter(relationship__slug="contractlcm-to-device")
-    action_buttons = ("export",)
-    # extra content dict to be returned by self.extra_context() method
-    extra_content = {}
 
 
 # ---------------------------------------------------------------------------------
