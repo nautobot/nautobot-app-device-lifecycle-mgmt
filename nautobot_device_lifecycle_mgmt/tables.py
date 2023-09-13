@@ -325,10 +325,11 @@ class InventoryItemSoftwareValidationResultTable(BaseTable):
         accessor="inventory_item__name",
         orderable=True,
     )
-    device = tables.TemplateColumn(
-        template_code="{{ record.inventory_item__device__name }}",
+    device =  tables.TemplateColumn(
+        template_code="""<a href='/dcim/devices/{{ record.inventory_item__device__pk }}'>
+                        {{ record.inventory_item__device__name }}</a>""",
         orderable=True,
-        accessor="inventory_item__device__name",
+        accessor="inventory_item__device__pk",
         verbose_name="Device",
     )
     total = tables.TemplateColumn(
@@ -387,7 +388,13 @@ class InventoryItemSoftwareValidationResultListTable(BaseTable):
         accessor="inventory_item__name",
         orderable=True,
     )
-    device_name = tables.Column(accessor="inventory_item__device__name", verbose_name="Device")
+    device_name =  tables.TemplateColumn(
+        template_code="""<a href='/dcim/devices/{{ record.inventory_item.device.pk }}'>
+                        {{ record.inventory_item.device.name }}</a>""",
+        orderable=True,
+        accessor="inventory_item__device__pk",
+        verbose_name="Device",
+    )
     software = tables.Column(accessor="software", verbose_name="Current Software", linkify=True)
     valid = tables.Column(accessor="is_validated", verbose_name="Valid")
     last_run = tables.Column(accessor="last_run", verbose_name="Last Run")
