@@ -162,11 +162,6 @@ urlpatterns = [
     ),
     path("contract/import/", views.ContractLCMBulkImportView.as_view(), name="contractlcm_import"),
     path(
-        "contract-devices/",
-        views.ContractDevicesReportView.as_view(),
-        name="contractdevicesreport_list",
-    ),
-    path(
         "contract/<uuid:pk>/contract-devices/",
         views.ContractDevicesLCMView.as_view(),
         name="contract_devices",
