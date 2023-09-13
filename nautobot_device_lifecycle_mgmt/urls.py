@@ -166,6 +166,16 @@ urlpatterns = [
         views.ContractDevicesReportView.as_view(),
         name="contractdevicesreport_list",
     ),
+    path(
+        "contract/<uuid:pk>/contract-devices/",
+        views.ContractDevicesLCMView.as_view(),
+        name="contract_devices",
+    ),
+    path(
+        "contract/<uuid:pk>/contract-inventoryitems/",
+        views.ContractInventoryItemsLCMView.as_view(),
+        name="contract_inventoryitems",
+    ),
     # Contract Provider Lifecycle Management URLs
     path("provider/", views.ProviderLCMListView.as_view(), name="providerlcm_list"),
     path("provider/<uuid:pk>/", views.ProviderLCMView.as_view(), name="providerlcm"),
