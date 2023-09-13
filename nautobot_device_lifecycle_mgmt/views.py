@@ -976,7 +976,6 @@ class ContractDevicesLCMView(generic.ObjectView):
 
     queryset = ContractLCM.objects.all()
     template_name = "nautobot_device_lifecycle_mgmt/contractlcm_devices.html"
-    action_buttons = ("export",)
 
     def get_extra_context(self, request, instance):
         """Adds Devices under contract table."""
@@ -985,11 +984,8 @@ class ContractDevicesLCMView(generic.ObjectView):
                 relationship__slug="contractlcm-to-device", source_id=instance.id
             ).values_list("destination_id", flat=True)
         ).restrict(request.user, "view")
-        if devices_under_contract.exists():
-            devices_under_contract_table = DeviceTable(data=devices_under_contract, user=request.user, orderable=False)
-            devices_under_contract_table.columns.show("serial")
-        else:
-            devices_under_contract_table = None
+        devices_under_contract_table = DeviceTable(data=devices_under_contract, user=request.user, orderable=False)
+        devices_under_contract_table.columns.show("serial")
 
         paginate = {
             "paginator_class": EnhancedPaginator,
@@ -1008,7 +1004,6 @@ class ContractInventoryItemsLCMView(generic.ObjectView):
 
     queryset = ContractLCM.objects.all()
     template_name = "nautobot_device_lifecycle_mgmt/contractlcm_inventoryitems.html"
-    action_buttons = ("export",)
 
     def get_extra_context(self, request, instance):
         """Adds Inventory Items under contract table."""
@@ -1017,12 +1012,9 @@ class ContractInventoryItemsLCMView(generic.ObjectView):
                 relationship__slug="contractlcm-to-inventoryitem", source_id=instance.id
             ).values_list("destination_id", flat=True)
         ).restrict(request.user, "view")
-        if invitems_under_contract.exists():
-            inventoryitem_under_contract_table = InventoryItemTable(
-                data=invitems_under_contract, user=request.user, orderable=False
-            )
-        else:
-            inventoryitem_under_contract_table = None
+        inventoryitem_under_contract_table = InventoryItemTable(
+            data=invitems_under_contract, user=request.user, orderable=False
+        )
 
         paginate = {
             "paginator_class": EnhancedPaginator,
