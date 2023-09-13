@@ -385,6 +385,8 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
 
     csv_headers = [
         "inventory_item",
+        "item_name",
+        "device",
         "software",
         "valid",
         "last_run",
@@ -398,6 +400,16 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
         verbose_name = "Inventory Item Software Validation Report"
         ordering = ("inventory_item",)
 
+    def __str__(self):
+        """String representation of InventoryItemSoftwareValidationResult."""
+        if self.is_validated:
+            msg = f"Inventory Item: {self.inventory_item.name} - " f"Device: {self.inventory_item.device.name} - Valid"
+        else:
+            msg = (
+                f"Inventory Item: {self.inventory_item.name} - "
+                f"Device: {self.inventory_item.device.name} - Not Valid"
+            )
+        return msg
 
 @extras_features(
     "custom_fields",
