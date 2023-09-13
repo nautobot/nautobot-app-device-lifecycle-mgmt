@@ -16,7 +16,7 @@ ARG PYTHON_VER="3.10"
 # FROM ghcr.io/nautobot/nautobot-dev:${NAUTOBOT_VER}-py${PYTHON_VER}
 
 # This needs to be reverted once we release
-FROM ghcr.io/nautobot/nautobot-dev:2.0.0-rc.2-py${PYTHON_VER}
+FROM ghcr.io/nautobot/nautobot-dev:${NAUTOBOT_VER}-py${PYTHON_VER}
 
 # Runtime argument and environment setup
 ARG NAUTOBOT_ROOT=/opt/nautobot
