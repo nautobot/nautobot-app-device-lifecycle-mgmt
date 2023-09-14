@@ -1,3 +1,4 @@
+# pylint: disable=unsupported-binary-operation
 """Filters for Software Lifecycle QuerySets."""
 
 from django.contrib.contenttypes.models import ContentType
