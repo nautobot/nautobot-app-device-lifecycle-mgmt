@@ -984,7 +984,7 @@ class ContractDevicesLCMView(generic.ObjectView):
                 relationship__slug="contractlcm-to-device", source_id=instance.id
             ).values_list("destination_id", flat=True)
         ).restrict(request.user, "view")
-        devices_under_contract_table = DeviceTable(data=devices_under_contract, user=request.user, orderable=False)
+        devices_under_contract_table = DeviceTable(data=devices_under_contract, user=request.user, orderable=True)
         devices_under_contract_table.columns.show("serial")
 
         paginate = {
@@ -1013,7 +1013,7 @@ class ContractInventoryItemsLCMView(generic.ObjectView):
             ).values_list("destination_id", flat=True)
         ).restrict(request.user, "view")
         inventoryitem_under_contract_table = InventoryItemTable(
-            data=invitems_under_contract, user=request.user, orderable=False
+            data=invitems_under_contract, user=request.user, orderable=True
         )
 
         paginate = {
