@@ -94,12 +94,12 @@ def delete_inventory_item_software_relationship(sender, instance, **kwargs):  # 
 @receiver(pre_delete, sender="nautobot_device_lifecycle_mgmt.SoftwareLCM")
 def delete_software_to_cve_relationships(sender, instance, **kwargs):  # pylint: disable=unused-argument
     """Delete all SoftwareLCM relationships to CVELCM objects."""
-    soft_relationships = Relationship.objects.filter(slug__in=("cve_soft"))
+    soft_relationships = Relationship.objects.filter(slug__in=("cve_soft",))
     RelationshipAssociation.objects.filter(relationship__in=soft_relationships, source_id=instance.pk).delete()
 
 
 @receiver(pre_delete, sender="nautobot_device_lifecycle_mgmt.CVELCM")
 def delete_cve_to_software_relationships(sender, instance, **kwargs):  # pylint: disable=unused-argument
     """Delete all CVELCM relationships to SoftwareLCM objects."""
-    soft_relationships = Relationship.objects.filter(slug__in=("cve_soft"))
+    soft_relationships = Relationship.objects.filter(slug__in=("cve_soft",))
     RelationshipAssociation.objects.filter(relationship__in=soft_relationships, source_id=instance.pk).delete()

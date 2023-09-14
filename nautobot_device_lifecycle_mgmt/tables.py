@@ -12,7 +12,6 @@ from nautobot.utilities.tables import (
     TagColumn,
     ToggleColumn,
 )
-from nautobot.extras.models import RelationshipAssociation
 from nautobot.extras.tables import StatusTableMixin
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,

@@ -2,7 +2,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("nautobot_device_lifecycle_mgmt", "0010_softwareimagelcm_hash_algorithm"),
     ]

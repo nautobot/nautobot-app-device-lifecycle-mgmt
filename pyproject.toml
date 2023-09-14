@@ -17,7 +17,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 pycountry = "^22.3.5"
 matplotlib = "^3.3.4"
 nautobot = "^1.4.0"
@@ -87,7 +87,6 @@ no-docstring-rgx="^(_|test_|Meta$)"
 # Pylint and Black disagree about how to format multi-line arrays; Black wins.
 disable = """
     line-too-long,
-    bad-continuation,
     duplicate-code,
     too-many-lines,
     too-many-ancestors,

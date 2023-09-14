@@ -11,9 +11,10 @@ import numpy as np
 
 from django.db.models import Q, F, Count, ExpressionWrapper, FloatField
 from django.http import HttpResponse
-from django_tables2 import RequestConfig
 from django.utils import timezone
 from django.utils.text import slugify
+
+from django_tables2 import RequestConfig
 
 from nautobot.core.forms import SearchForm
 from nautobot.core.views import generic
@@ -921,8 +922,8 @@ class ContractLCMView(generic.ObjectView):
             filename = f"contract_{slugify(contract.name)}_{export_object_type}_{formatted_datetime}.csv"
             response["Content-Disposition"] = f'attachment; filename="{filename}"'
             return response
-        else:
-            return super().get(request, *args, **kwargs)
+
+        return super().get(request, *args, **kwargs)
 
     def export_csv(self, request, contract, object_type):
         """Export queryset of objects as comma-separated value (CSV)."""
