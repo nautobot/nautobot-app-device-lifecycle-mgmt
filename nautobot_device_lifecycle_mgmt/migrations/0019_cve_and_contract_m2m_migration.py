@@ -1,22 +1,22 @@
 from django.db import migrations
 
 
-def rename_relationship_slugs(apps, schema_editor):
+def rename_relationship_keys(apps, schema_editor):
     """
-    Rename relationship slugs for Contract to InventoryItem and Contract to Devices.
+    Rename relationship keys for Contract to InventoryItem and Contract to Devices.
     """
     Relationship = apps.get_model("extras", "Relationship")
 
     try:
         contract_inventoryitem_relationship = Relationship.objects.get(key="contractlcm-to-inventoryitem")
-        contract_inventoryitem_relationship.slug = "contractlcm_to_inventoryitem"
+        contract_inventoryitem_relationship.key = "contractlcm_to_inventoryitem"
         contract_inventoryitem_relationship.save()
     except Relationship.DoesNotExist:
         pass
 
     try:
         contract_devices_relationship = Relationship.objects.get(key="contractlcm-to-device")
-        contract_devices_relationship.slug = "contractlcm_to_device"
+        contract_devices_relationship.key = "contractlcm_to_device"
         contract_devices_relationship.save()
     except Relationship.DoesNotExist:
         pass
@@ -85,7 +85,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(rename_relationship_slugs),
+        migrations.RunPython(rename_relationship_keys),
         migrations.RunPython(migrate_cve_affected_software),
         migrations.RunPython(migrate_contract_devices),
     ]
