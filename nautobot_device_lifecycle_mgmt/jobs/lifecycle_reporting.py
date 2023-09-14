@@ -26,6 +26,8 @@ class DeviceSoftwareValidationFullReport(Job):
     class Meta:
         """Meta class for the job."""
 
+        has_sensitive_variables = False
+
     def run(self) -> None:  # pylint: disable=arguments-differ
         """Check if software assigned to each device is valid. If no software is assigned return warning message."""
         devices = Device.objects.all()
@@ -56,6 +58,8 @@ class InventoryItemSoftwareValidationFullReport(Job):
 
     class Meta:
         """Meta class for the job."""
+
+        has_sensitive_variables = False
 
     def run(self):  # pylint: disable=arguments-differ
         """Check if software assigned to each inventory item is valid. If no software is assigned return warning message."""

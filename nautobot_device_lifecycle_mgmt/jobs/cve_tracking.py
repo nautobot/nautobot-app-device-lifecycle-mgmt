@@ -3,7 +3,7 @@
 from datetime import datetime
 
 from nautobot.extras.jobs import BooleanVar, Job, StringVar
-from nautobot.extras.models import Relationship, RelationshipAssociation
+from nautobot.extras.models import Relationship
 
 from nautobot_device_lifecycle_mgmt.models import CVELCM, VulnerabilityLCM
 
@@ -48,10 +48,9 @@ class GenerateVulnerabilities(Job):
                     "Generating vulnerabilities for CVE %s" % cve,
                     extra={"object": cve},
                 )
-            software_rels = RelationshipAssociation.objects.filter(relationship__key="soft_cve", destination_id=cve.id)
-            for soft_rel in software_rels:
+            for software in cve.affected_softwares.all():
                 # Loop through any device relationships
-                device_rels = soft_rel.source.get_relationships()["source"][Relationship.objects.get(key="device_soft")]
+                device_rels = software.get_relationships()["source"][Relationship.objects.get(key="device_soft")]
                 for dev_rel in device_rels:
                     vuln_obj, _ = VulnerabilityLCM.objects.get_or_create(
                         cve=cve, software=dev_rel.source, device=dev_rel.destination
@@ -59,9 +58,7 @@ class GenerateVulnerabilities(Job):
                     vuln_obj.validated_save()
 
                 # Loop through any inventory tem relationships
-                item_rels = soft_rel.source.get_relationships()["source"][
-                    Relationship.objects.get(key="inventory_item_soft")
-                ]
+                item_rels = software.get_relationships()["source"][Relationship.objects.get(key="inventory_item_soft")]
                 for item_rel in item_rels:
                     vuln_obj, _ = VulnerabilityLCM.objects.get_or_create(
                         cve=cve, software=item_rel.source, inventory_item=item_rel.destination

@@ -4,13 +4,11 @@ import logging
 from django import forms
 from django.db.models import Q
 from nautobot.apps.forms import (
-    CustomFieldModelFormMixin,
     DatePicker,
     DynamicModelChoiceField,
     DynamicModelMultipleChoiceField,
     NautobotBulkEditForm,
     NautobotModelForm,
-    RelationshipModelFormMixin,
     TagFilterField,
     add_blank_choice,
 )
@@ -636,6 +634,7 @@ class ContractLCMForm(NautobotModelForm):
     contract_type = forms.ChoiceField(choices=add_blank_choice(ContractTypeChoices.CHOICES), label="Contract Type")
     currency = forms.ChoiceField(required=False, choices=add_blank_choice(CurrencyChoices.CHOICES))
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+    devices = DynamicModelMultipleChoiceField(queryset=Device.objects.all(), required=False)
 
     class Meta:
         """Meta attributes for the ContractLCMForm class."""
@@ -651,6 +650,7 @@ class ContractLCMForm(NautobotModelForm):
             "currency",
             "support_level",
             "contract_type",
+            "devices",
             "comments",
             "tags",
         ]
@@ -716,6 +716,7 @@ class ContractLCMFilterForm(NautobotFilterForm):
             "currency",
             "support_level",
             "contract_type",
+            "devices",
         ]
 
         widgets = {
@@ -872,12 +873,13 @@ class ContactLCMFilterForm(NautobotFilterForm):
         ]
 
 
-class CVELCMForm(CustomFieldModelFormMixin, RelationshipModelFormMixin):
+class CVELCMForm(NautobotModelForm):
     """CVE Lifecycle Management creation/edit form."""
 
     published_date = forms.DateField(widget=DatePicker())
     severity = forms.ChoiceField(choices=CVESeverityChoices.CHOICES, label="Severity", required=False)
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+    affected_softwares = DynamicModelMultipleChoiceField(queryset=SoftwareLCM.objects.all(), required=False)
 
     class Meta:
         """Meta attributes for the CVELCMForm class."""
@@ -895,6 +897,7 @@ class CVELCMForm(CustomFieldModelFormMixin, RelationshipModelFormMixin):
             "cvss_v2",
             "cvss_v3",
             "fix",
+            "affected_softwares",
             "comments",
             "tags",
         ]
@@ -949,6 +952,7 @@ class CVELCMFilterForm(NautobotFilterForm):
 
     cvss_v3__gte = forms.FloatField(label="CVSSv3 Score Above", required=False)
     cvss_v3__lte = forms.FloatField(label="CVSSv3 Score Below", required=False)
+    affected_softwares = forms.ModelMultipleChoiceField(queryset=SoftwareLCM.objects.all(), required=False)
 
     status = DynamicModelMultipleChoiceField(queryset=Status.objects.all(), required=False, to_field_name="name")
     exclude_status = DynamicModelMultipleChoiceField(
@@ -970,6 +974,7 @@ class CVELCMFilterForm(NautobotFilterForm):
             "published_date_after",
             "severity",
             "status",
+            "affected_softwares",
         ]
 
 
