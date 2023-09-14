@@ -4,21 +4,23 @@ import datetime
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
-
-from nautobot.utilities.testing import ViewTestCases
-from nautobot.dcim.models import DeviceType, Manufacturer
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, Manufacturer
+from nautobot.extras.models import Relationship, RelationshipAssociation, Status
 from nautobot.users.models import ObjectPermission
-from nautobot.extras.models import Status
+from nautobot.utilities.testing import TestCase, ViewTestCases
 
 from nautobot_device_lifecycle_mgmt.models import (
-    HardwareLCM,
-    DeviceSoftwareValidationResult,
-    InventoryItemSoftwareValidationResult,
     CVELCM,
-    VulnerabilityLCM,
+    ContractLCM,
+    DeviceSoftwareValidationResult,
+    HardwareLCM,
+    InventoryItemSoftwareValidationResult,
+    ProviderLCM,
     SoftwareImageLCM,
+    VulnerabilityLCM,
 )
-from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
+
+from .conftest import create_cves, create_devices, create_inventory_items, create_softwares
 
 User = get_user_model()
 
@@ -522,3 +524,119 @@ class InventoryItemSoftwareValidationResultListViewTest(ViewTestCases.ListObject
 
     def test_list_objects_with_permission(self):
         pass
+
+
+class ContractLCMExportLinkedObjectsTest(TestCase):
+    """Test Contract Devices and Contract Inventory Items CSV exports."""
+
+    @classmethod
+    def setUpTestData(cls):
+        """Set up test objects."""
+        devices = create_devices()
+        inventoryitems = create_inventory_items()
+        provider1 = ProviderLCM(name="Cisco")
+        provider1.validated_save()
+        provider2 = ProviderLCM(name="Arista")
+        provider2.validated_save()
+        contract1 = ContractLCM(provider=provider1, name="CiscoHW1", contract_type="Hardware")
+        contract1.validated_save()
+        contract2 = ContractLCM(provider=provider2, name="AristaHW1", contract_type="Hardware")
+        contract2.validated_save()
+
+        dev_contract_rel = Relationship.objects.get(slug="contractlcm-to-device")
+        RelationshipAssociation.objects.create(
+            source=contract1,
+            destination=devices[0],
+            relationship=dev_contract_rel,
+        )
+        RelationshipAssociation.objects.create(
+            source=contract1,
+            destination=devices[1],
+            relationship=dev_contract_rel,
+        )
+        RelationshipAssociation.objects.create(
+            source=contract2,
+            destination=devices[2],
+            relationship=dev_contract_rel,
+        )
+
+        inv_item_contract_rel = Relationship.objects.get(slug="contractlcm-to-inventoryitem")
+        RelationshipAssociation.objects.create(
+            source=contract1,
+            destination=inventoryitems[0],
+            relationship=inv_item_contract_rel,
+        )
+        RelationshipAssociation.objects.create(
+            source=contract2,
+            destination=inventoryitems[1],
+            relationship=inv_item_contract_rel,
+        )
+        RelationshipAssociation.objects.create(
+            source=contract2,
+            destination=inventoryitems[2],
+            relationship=inv_item_contract_rel,
+        )
+        # breakpoint()
+
+    def test_contract_devices_export(self):
+        """Test CSV export for Devices connected to Contract."""
+        # Add model-level permission
+        obj_perm = ObjectPermission(name="Test permission", actions=["view"])
+        obj_perm.save()
+        obj_perm.users.add(self.user)
+        obj_perm.object_types.add(ContentType.objects.get_for_model(ContractLCM))
+        obj_perm.object_types.add(ContentType.objects.get_for_model(Device))
+
+        contract1 = ContractLCM.objects.filter(name="CiscoHW1").first()
+        response = self.client.get(f"{contract1.get_absolute_url()}?export_contract=devices")
+        self.assertHttpStatus(response, [200])
+        self.assertEqual(response.get("Content-Type"), "text/csv")
+        response_body = response.content.decode(response.charset)
+        self.assertEqual(
+            response_body,
+            "Contract Name,Contract Type,Device Name,Device Serial,Device Site"
+            "\nCiscoHW1,Hardware,sw1,,Test 1"
+            "\nCiscoHW1,Hardware,sw2,,Test 1",
+        )
+
+        contract2 = ContractLCM.objects.filter(name="AristaHW1").first()
+        response = self.client.get(f"{contract2.get_absolute_url()}?export_contract=devices")
+        self.assertHttpStatus(response, [200])
+        self.assertEqual(response.get("Content-Type"), "text/csv")
+        response_body = response.content.decode(response.charset)
+        self.assertEqual(
+            response_body,
+            "Contract Name,Contract Type,Device Name,Device Serial,Device Site\nAristaHW1,Hardware,sw3,,Test 1",
+        )
+
+    def test_contract_inventoryitems_export(self):
+        """Test CSV export for InventoryItems connected to Contract."""
+        # Add model-level permission
+        obj_perm = ObjectPermission(name="Test permission", actions=["view"])
+        obj_perm.save()
+        obj_perm.users.add(self.user)
+        obj_perm.object_types.add(ContentType.objects.get_for_model(ContractLCM))
+        obj_perm.object_types.add(ContentType.objects.get_for_model(InventoryItem))
+
+        contract1 = ContractLCM.objects.filter(name="CiscoHW1").first()
+        response = self.client.get(f"{contract1.get_absolute_url()}?export_contract=inventoryitems")
+        self.assertHttpStatus(response, [200])
+        self.assertEqual(response.get("Content-Type"), "text/csv")
+        response_body = response.content.decode(response.charset)
+        self.assertEqual(
+            response_body,
+            "Contract Name,Contract Type,Item Name,Item Part ID,Item Serial,Item Parent Device,Item Site"
+            "\nCiscoHW1,Hardware,SUP2T Card,VS-S2T-10G,,sw1,Test 1",
+        )
+
+        contract2 = ContractLCM.objects.filter(name="AristaHW1").first()
+        response = self.client.get(f"{contract2.get_absolute_url()}?export_contract=inventoryitems")
+        self.assertHttpStatus(response, [200])
+        self.assertEqual(response.get("Content-Type"), "text/csv")
+        response_body = response.content.decode(response.charset)
+        self.assertEqual(
+            response_body,
+            "Contract Name,Contract Type,Item Name,Item Part ID,Item Serial,Item Parent Device,Item Site"
+            "\nAristaHW1,Hardware,100GBASE-SR4 QSFP Transceiver,QSFP-100G-SR4-S,,sw2,Test 1"
+            "\nAristaHW1,Hardware,48x RJ-45 Line Card,WS-X6548-GE-TX,,sw3,Test 1",
+        )
