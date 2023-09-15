@@ -383,17 +383,6 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
         to="ValidatedSoftwareLCM", related_name="inventory_item_software_validation_results"
     )
 
-    csv_headers = [
-        "inventory_item",
-        "item_name",
-        "device",
-        "software",
-        "valid",
-        "last_run",
-        "run_type",
-        "approved_software",
-    ]
-
     class Meta:
         """Meta attributes for InventoryItemSoftwareValidationResult."""
 
