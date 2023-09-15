@@ -383,20 +383,22 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
         to="ValidatedSoftwareLCM", related_name="inventory_item_software_validation_results"
     )
 
-    csv_headers = [
-        "inventory_item",
-        "software",
-        "valid",
-        "last_run",
-        "run_type",
-        "approved_software",
-    ]
-
     class Meta:
         """Meta attributes for InventoryItemSoftwareValidationResult."""
 
         verbose_name = "Inventory Item Software Validation Report"
         ordering = ("inventory_item",)
+
+    def __str__(self):
+        """String representation of InventoryItemSoftwareValidationResult."""
+        if self.is_validated:
+            msg = f"Inventory Item: {self.inventory_item.name} - " f"Device: {self.inventory_item.device.name} - Valid"
+        else:
+            msg = (
+                f"Inventory Item: {self.inventory_item.name} - "
+                f"Device: {self.inventory_item.device.name} - Not Valid"
+            )
+        return msg
 
 
 @extras_features(
