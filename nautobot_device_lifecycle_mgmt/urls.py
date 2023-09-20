@@ -1,19 +1,8 @@
 """Django urlpatterns declaration for the Lifecycle Management plugin."""
 from django.urls import path
 from nautobot.apps.urls import NautobotUIViewSetRouter
-from nautobot.extras.views import ObjectChangeLogView, ObjectNotesView
+
 from nautobot_device_lifecycle_mgmt import views, viewsets
-from nautobot_device_lifecycle_mgmt.models import (
-    HardwareLCM,
-    SoftwareImageLCM,
-    SoftwareLCM,
-    ValidatedSoftwareLCM,
-    ContractLCM,
-    ProviderLCM,
-    ContactLCM,
-    CVELCM,
-    VulnerabilityLCM,
-)
 
 router = NautobotUIViewSetRouter()
 router.register("hardware", viewset=viewsets.HardwareLCMUIViewSet)
@@ -35,12 +24,12 @@ urlpatterns += [
         name="software_software_images",
     ),
     path(
-        "validated-software/device-report/",
+        "validated-software-device-report/",
         views.ValidatedSoftwareDeviceReportView.as_view(),
         name="validatedsoftware_device_report",
     ),
     path(
-        "validated-software/inventoryitem-report/",
+        "validated-software-inventoryitem-report/",
         views.ValidatedSoftwareInventoryItemReportView.as_view(),
         name="validatedsoftware_inventoryitem_report",
     ),

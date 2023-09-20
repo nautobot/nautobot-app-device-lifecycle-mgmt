@@ -1,15 +1,11 @@
 """Nautobot UI Viewsets."""
 
-from django_tables2 import RequestConfig
-
 from nautobot.apps.views import NautobotUIViewSet
-from nautobot.core.forms import SearchForm
-from nautobot.core.views.paginator import EnhancedPaginator, get_paginate_count
+from nautobot.core.forms.search import SearchForm
 from nautobot.dcim.models import Device
 
-from nautobot_device_lifecycle_mgmt import forms, models, filters, tables
+from nautobot_device_lifecycle_mgmt import filters, forms, models, tables
 from nautobot_device_lifecycle_mgmt.api import serializers
-from nautobot_device_lifecycle_mgmt.utils import count_related_m2m
 
 
 class HardwareLCMUIViewSet(NautobotUIViewSet):
@@ -23,7 +19,7 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.HardwareLCMSerializer
     table_class = tables.HardwareLCMTable
 
-    def get_extra_context(self, request, instance):
+    def get_extra_context(self, request, instance):  # pylint: disable=signature-differs
         """Return any additional context data for the template.
 
         request: The current request
@@ -36,7 +32,7 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
         if instance.inventory_item:
             return {
                 "devices": Device.objects.restrict(request.user, "view").filter(
-                    inventoryitems__part_id=instance.inventory_item
+                    inventory_items__part_id=instance.inventory_item
                 )
             }
         return {"devices": []}
@@ -54,23 +50,11 @@ class SoftwareLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.SoftwareLCMSerializer
     table_class = tables.SoftwareLCMTable
 
-    def get_extra_context(self, request, instance):
+    def get_extra_context(self, request, instance):  # pylint: disable=signature-differs
         """Changes "Softwares" => "Software"."""
         search_form = SearchForm(data=self.request.GET)
-        if not instance:
-            return {
-                "search_form": search_form,
-                "title": "Software",
-                "verbose_name_plural": "Software",
-            }
-        softwareimages = instance.software_images.restrict(request.user, "view")
-        if softwareimages.exists():
-            softwareimages_table = tables.SoftwareImageLCMTable(data=softwareimages, user=request.user, orderable=False)
-        else:
-            softwareimages_table = None
 
         return {
-            "softwareimages_table": softwareimages_table,
             "search_form": search_form,
             "title": "Software",
             "verbose_name_plural": "Software",
@@ -88,31 +72,6 @@ class SoftwareImageLCMUIViewSet(NautobotUIViewSet):
     queryset = models.SoftwareImageLCM.objects.all()
     serializer_class = serializers.SoftwareImageLCMSerializer
     table_class = tables.SoftwareImageLCMTable
-
-    def get_extra_context(self, request, instance):
-        """Adds Software Images table."""
-        if not instance:
-            return {}
-        softwareimages = (
-            instance.software_images.annotate(
-                device_type_count=count_related_m2m(models.SoftwareImageLCM, "device_types")
-            )
-            .annotate(object_tag_count=count_related_m2m(models.SoftwareImageLCM, "object_tags"))
-            .restrict(request.user, "view")
-        )
-
-        softwareimages_table = tables.SoftwareImageLCMTable(data=softwareimages, user=request.user, orderable=False)
-
-        paginate = {
-            "paginator_class": EnhancedPaginator,
-            "per_page": get_paginate_count(request),
-        }
-        RequestConfig(request, paginate).configure(softwareimages_table)
-
-        return {
-            "softwareimages_table": softwareimages_table,
-            "active_tab": "software-images",
-        }
 
 
 class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
@@ -139,7 +98,7 @@ class ContractLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.ContractLCMSerializer
     table_class = tables.ContractLCMTable
 
-    def get_extra_context(self, request, instance):
+    def get_extra_context(self, request, instance):  # pylint: disable=signature-differs
         """Return any additional context data for the template.
 
         request: The current request
@@ -167,7 +126,7 @@ class ProviderLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.ProviderLCMSerializer
     table_class = tables.ProviderLCMTable
 
-    def get_extra_context(self, request, instance):
+    def get_extra_context(self, request, instance):  # pylint: disable=signature-differs
         """Return any additional context data for the template.
 
         request: The current request

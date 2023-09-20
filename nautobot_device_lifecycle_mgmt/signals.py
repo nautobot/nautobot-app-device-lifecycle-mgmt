@@ -3,14 +3,12 @@
 from django.apps import apps as global_apps
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
-
 from nautobot.extras.choices import RelationshipTypeChoices
 from nautobot.extras.models import Relationship, RelationshipAssociation
 
 
 def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # pylint: disable=unused-argument
     """Callback function for post_migrate() -- create Relationship records."""
-    # return
     # pylint: disable=invalid-name
     SoftwareLCM = sender.get_model("SoftwareLCM")
     ContentType = apps.get_model("contenttypes", "ContentType")
@@ -19,7 +17,6 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
     _Relationship = apps.get_model("extras", "Relationship")
 
     contract_lcm = sender.get_model("ContractLCM")
-    CVELCM = sender.get_model("CVELCM")
 
     for relationship_dict in [
         {
@@ -41,31 +38,13 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
             "destination_label": "Software Version",
         },
         {
-            "label": "Contract to dcim.Device",
-            "key": "contractlcm-to-device",
-            "type": RelationshipTypeChoices.TYPE_MANY_TO_MANY,
-            "source_type": ContentType.objects.get_for_model(contract_lcm),
-            "source_label": "Devices",
-            "destination_type": ContentType.objects.get_for_model(_Device),
-            "destination_label": "Contracts",
-        },
-        {
             "label": "Contract to dcim.InventoryItem",
-            "key": "contractlcm-to-inventoryitem",
+            "key": "contractlcm_to_inventoryitem",
             "type": RelationshipTypeChoices.TYPE_ONE_TO_MANY,
             "source_type": ContentType.objects.get_for_model(contract_lcm),
             "source_label": "Inventory Items",
             "destination_type": ContentType.objects.get_for_model(InventoryItem),
             "destination_label": "Contract",
-        },
-        {
-            "label": "Software to CVE",
-            "key": "soft_cve",
-            "type": RelationshipTypeChoices.TYPE_MANY_TO_MANY,
-            "source_type": ContentType.objects.get_for_model(SoftwareLCM),
-            "source_label": "Corresponding CVEs",
-            "destination_type": ContentType.objects.get_for_model(CVELCM),
-            "destination_label": "Affected Softwares",
         },
     ]:
         _Relationship.objects.get_or_create(label=relationship_dict["label"], defaults=relationship_dict)
@@ -90,17 +69,3 @@ def delete_inventory_item_software_relationship(sender, instance, **kwargs):  # 
     """Delete InventoryItem relationship to SoftwareLCM object."""
     soft_relationships = Relationship.objects.filter(key__in=("device_soft", "inventory_item_soft"))
     RelationshipAssociation.objects.filter(relationship__in=soft_relationships, destination_id=instance.pk).delete()
-
-
-@receiver(pre_delete, sender="nautobot_device_lifecycle_mgmt.SoftwareLCM")
-def delete_software_to_cve_relationships(sender, instance, **kwargs):  # pylint: disable=unused-argument
-    """Delete all SoftwareLCM relationships to CVELCM objects."""
-    soft_relationships = Relationship.objects.filter(key__in=("cve_soft"))
-    RelationshipAssociation.objects.filter(relationship__in=soft_relationships, source_id=instance.pk).delete()
-
-
-@receiver(pre_delete, sender="nautobot_device_lifecycle_mgmt.CVELCM")
-def delete_cve_to_software_relationships(sender, instance, **kwargs):  # pylint: disable=unused-argument
-    """Delete all CVELCM relationships to SoftwareLCM objects."""
-    soft_relationships = Relationship.objects.filter(key__in=("cve_soft"))
-    RelationshipAssociation.objects.filter(relationship__in=soft_relationships, source_id=instance.pk).delete()

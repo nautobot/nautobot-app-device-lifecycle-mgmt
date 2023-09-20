@@ -5,41 +5,38 @@ import logging
 import urllib
 
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
 import numpy as np
-
-from django.db.models import Q, F, Count, ExpressionWrapper, FloatField
+from django.conf import settings
+from django.db.models import Count, ExpressionWrapper, F, FloatField, Q
 from django_tables2 import RequestConfig
-
+from matplotlib.ticker import MaxNLocator
 from nautobot.core.views import generic
-from nautobot.core.views.paginator import EnhancedPaginator, get_paginate_count
 from nautobot.core.views.mixins import ContentTypePermissionRequiredMixin
+from nautobot.core.views.paginator import EnhancedPaginator, get_paginate_count
+
 from nautobot_device_lifecycle_mgmt import choices
-from nautobot_device_lifecycle_mgmt.models import (
-    SoftwareLCM,
-    DeviceSoftwareValidationResult,
-    InventoryItemSoftwareValidationResult,
-    SoftwareImageLCM,
-)
-from nautobot_device_lifecycle_mgmt.tables import (
-    DeviceSoftwareValidationResultTable,
-    DeviceSoftwareValidationResultListTable,
-    InventoryItemSoftwareValidationResultTable,
-    InventoryItemSoftwareValidationResultListTable,
-    SoftwareImageLCMTable,
+from nautobot_device_lifecycle_mgmt.filters import (
+    DeviceSoftwareValidationResultFilterSet,
+    InventoryItemSoftwareValidationResultFilterSet,
 )
 from nautobot_device_lifecycle_mgmt.forms import (
     DeviceSoftwareValidationResultFilterForm,
     InventoryItemSoftwareValidationResultFilterForm,
 )
-from nautobot_device_lifecycle_mgmt.filters import (
-    DeviceSoftwareValidationResultFilterSet,
-    InventoryItemSoftwareValidationResultFilterSet,
+from nautobot_device_lifecycle_mgmt.models import (
+    DeviceSoftwareValidationResult,
+    InventoryItemSoftwareValidationResult,
+    SoftwareImageLCM,
+    SoftwareLCM,
 )
-
+from nautobot_device_lifecycle_mgmt.tables import (
+    DeviceSoftwareValidationResultListTable,
+    DeviceSoftwareValidationResultTable,
+    InventoryItemSoftwareValidationResultListTable,
+    InventoryItemSoftwareValidationResultTable,
+    SoftwareImageLCMTable,
+)
 from nautobot_device_lifecycle_mgmt.utils import count_related_m2m
-from django.conf import settings
-
 
 PLUGIN_CFG = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]
 
@@ -136,7 +133,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
         return ReportOverviewHelper.url_encode_figure(fig)
 
     @staticmethod
-    def plot_barchart_visual(qs, chart_attrs):  # pylint: disable=too-many-locals
+    def plot_barchart_visual(qs, chart_attrs):  # pylint: disable=too-many-locals, invalid-name
         """Construct report visual from queryset."""
         labels = [item[chart_attrs["label_accessor"]] for item in qs]
 
@@ -239,7 +236,7 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
                 .latest("last_updated")
                 .last_run
             )
-        except DeviceSoftwareValidationResult.DoesNotExist:
+        except DeviceSoftwareValidationResult.DoesNotExist:  # pylint: disable=no-member
             report_last_run = None
 
         device_aggr = self.get_global_aggr(request)
@@ -320,7 +317,7 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
         )
         csv_data.append(",".join([]))
 
-        qs = self.queryset.values(
+        qs = self.queryset.values(  # pylint: disable=invalid-name
             "device__device_type__model", "total", "valid", "invalid", "no_software", "valid_percent"
         )
         csv_data.append(
@@ -358,7 +355,13 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
     table = InventoryItemSoftwareValidationResultTable
     template_name = "nautobot_device_lifecycle_mgmt/validatedsoftware_inventoryitem_report.html"
     queryset = (
-        InventoryItemSoftwareValidationResult.objects.values("inventory_item__part_id", "inventory_item__pk")
+        InventoryItemSoftwareValidationResult.objects.values(
+            "inventory_item__part_id",
+            "inventory_item__name",
+            "inventory_item__pk",
+            "inventory_item__device__name",
+            "inventory_item__device__pk",
+        )
         .distinct()
         .annotate(
             total=Count("inventory_item__part_id"),
@@ -384,7 +387,7 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
                 .latest("last_updated")
                 .last_run
             )
-        except InventoryItemSoftwareValidationResult.DoesNotExist:
+        except InventoryItemSoftwareValidationResult.DoesNotExist:  # pylint: disable=no-member
             report_last_run = None
 
         inventory_aggr = self.get_global_aggr(request)
@@ -466,8 +469,16 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
         )
         csv_data.append(",".join([]))
 
-        qs = self.queryset.values(
-            "inventory_item__part_id", "total", "valid", "invalid", "no_software", "valid_percent"
+        qs = self.queryset.values(  # pylint: disable=invalid-name
+            "inventory_item__part_id",
+            "inventory_item__name",
+            "inventory_item__device__name",
+            "inventory_item__device__pk",
+            "total",
+            "valid",
+            "invalid",
+            "no_software",
+            "valid_percent",
         )
         csv_data.append(
             ",".join(
@@ -486,7 +497,7 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
 
 
 class InventoryItemSoftwareValidationResultListView(generic.ObjectListView):
-    """DeviceSoftawareValidationResult List view."""
+    """InvenotryItemSoftawareValidationResult List view."""
 
     queryset = InventoryItemSoftwareValidationResult.objects.all()
     filterset = InventoryItemSoftwareValidationResultFilterSet

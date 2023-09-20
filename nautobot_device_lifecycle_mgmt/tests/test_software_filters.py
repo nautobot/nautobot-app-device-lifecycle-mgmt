@@ -1,3 +1,4 @@
+# pylint: disable=no-member
 """nautobot_device_lifecycle_mgmt test class for software queryset filters."""
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
@@ -25,6 +26,8 @@ class DeviceSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too-many-i
         self.devicetype_2, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_arista, model="7150S")
         self.devicetype_3, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_arista, model="7500")
         devicerole, _ = Role.objects.get_or_create(name="switch", color="ff0000")
+        devicerole.content_types.add(ContentType.objects.get_for_model(Device))
+        device_status = Status.objects.get_for_model(Device).first()
         location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
         location_type_location_a.content_types.add(
             ContentType.objects.get_for_model(Device),
@@ -42,6 +45,7 @@ class DeviceSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too-many-i
             device_type=self.devicetype_1,
             role=devicerole,
             location=location1,
+            status=device_status,
         )
         self.device_1.tags.add(self.tag_1)
         self.device_1.save()
@@ -56,6 +60,7 @@ class DeviceSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too-many-i
             device_type=self.devicetype_2,
             role=devicerole,
             location=location1,
+            status=device_status,
         )
         self.device_2.save()
         RelationshipAssociation.objects.create(
@@ -69,6 +74,7 @@ class DeviceSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too-many-i
             device_type=self.devicetype_1,
             role=devicerole,
             location=location1,
+            status=device_status,
         )
         self.device_3.save()
         RelationshipAssociation.objects.create(
@@ -82,6 +88,7 @@ class DeviceSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too-many-i
             device_type=self.devicetype_3,
             role=devicerole,
             location=location1,
+            status=device_status,
         )
         self.device_4.tags.add(self.tag_2)
         self.device_4.save()
@@ -174,6 +181,8 @@ class InventoryItemSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too
 
         self.devicetype_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_arista, model="7124")
         devicerole, _ = Role.objects.get_or_create(name="switch", color="ff0000")
+        devicerole.content_types.add(ContentType.objects.get_for_model(Device))
+        device_status = Status.objects.get_for_model(Device).first()
         location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
         location_type_location_a.content_types.add(
             ContentType.objects.get_for_model(Device),
@@ -191,6 +200,7 @@ class InventoryItemSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too
             device_type=self.devicetype_1,
             role=devicerole,
             location=location1,
+            status=device_status,
         )
 
         self.inventoryitem_1 = InventoryItem.objects.create(device=self.device_1, name="SwitchModule1")

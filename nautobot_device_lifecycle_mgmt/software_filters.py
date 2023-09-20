@@ -1,19 +1,18 @@
 """Filters for Software Lifecycle QuerySets."""
 
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Case, IntegerField, Q, Value, When, Subquery
-
+from django.db.models import Case, IntegerField, Q, Subquery, Value, When
 from nautobot.dcim.models import Device, InventoryItem
 from nautobot.extras.models import RelationshipAssociation
 
 
-class BaseSoftwareFilter:  # pylint: disable=too-few-public-methods
+class BaseSoftwareFilter:
     """Base class for SoftwareFilter classes."""
 
     soft_obj_model = None
     soft_relation_name = None
 
-    def __init__(self, qs, item_obj):
+    def __init__(self, qs, item_obj):  # pylint: disable=invalid-name
         """Initalize BaseSoftwareFilter."""
         self.software_qs = qs
         self.item_obj = item_obj
@@ -30,24 +29,24 @@ class BaseSoftwareFilter:  # pylint: disable=too-few-public-methods
         return self.software_qs
 
 
-class DeviceSoftwareFilter(BaseSoftwareFilter):  # pylint: disable=too-few-public-methods
+class DeviceSoftwareFilter(BaseSoftwareFilter):
     """Filter SoftwareLCM objects based on the Device object."""
 
     soft_obj_model = Device
     soft_relation_name = "device_soft"
 
 
-class InventoryItemSoftwareFilter(BaseSoftwareFilter):  # pylint: disable=too-few-public-methods
+class InventoryItemSoftwareFilter(BaseSoftwareFilter):
     """Filter SoftwareLCM objects based on the Device object."""
 
     soft_obj_model = InventoryItem
     soft_relation_name = "inventory_item_soft"
 
 
-class DeviceValidatedSoftwareFilter:  # pylint: disable=too-few-public-methods
+class DeviceValidatedSoftwareFilter:
     """Filter ValidatedSoftwareLCM objects based on the Device object."""
 
-    def __init__(self, qs, item_obj):
+    def __init__(self, qs, item_obj):  # pylint: disable=invalid-name
         """Initalize DeviceValidatedSoftwareFilter."""
         self.validated_software_qs = qs
         self.item_obj = item_obj
@@ -56,9 +55,9 @@ class DeviceValidatedSoftwareFilter:  # pylint: disable=too-few-public-methods
         """Returns filtered ValidatedSoftwareLCM query set."""
         self.validated_software_qs = self.validated_software_qs.filter(
             Q(devices=self.item_obj.pk)
-            | Q(device_types=self.item_obj.device_type.pk, device_roles=self.item_obj.device_role.pk)
+            | Q(device_types=self.item_obj.device_type.pk, device_roles=self.item_obj.role.pk)
             | Q(device_types=self.item_obj.device_type.pk, device_roles=None)
-            | Q(device_types=None, device_roles=self.item_obj.device_role.pk)
+            | Q(device_types=None, device_roles=self.item_obj.role.pk)
             | Q(object_tags__in=self.item_obj.tags.all())
         ).distinct()
 
@@ -74,20 +73,20 @@ class DeviceValidatedSoftwareFilter:  # pylint: disable=too-few-public-methods
                 When(devices=self.item_obj.pk, preferred=False, then=Value(1000)),
                 When(
                     device_types=self.item_obj.device_type.pk,
-                    device_roles=self.item_obj.device_role.pk,
+                    device_roles=self.item_obj.role.pk,
                     preferred=True,
                     then=Value(20),
                 ),
                 When(
                     device_types=self.item_obj.device_type.pk,
-                    device_roles=self.item_obj.device_role.pk,
+                    device_roles=self.item_obj.role.pk,
                     preferred=False,
                     then=Value(1010),
                 ),
                 When(device_types=self.item_obj.device_type.pk, device_roles=None, preferred=True, then=Value(30)),
                 When(device_types=self.item_obj.device_type.pk, device_roles=None, preferred=False, then=Value(1030)),
-                When(device_roles=self.item_obj.device_role.pk, preferred=True, then=Value(40)),
-                When(device_roles=self.item_obj.device_role.pk, preferred=False, then=Value(1040)),
+                When(device_roles=self.item_obj.role.pk, preferred=True, then=Value(40)),
+                When(device_roles=self.item_obj.role.pk, preferred=False, then=Value(1040)),
                 When(preferred=True, then=Value(990)),
                 default=Value(1990),
                 output_field=IntegerField(),
@@ -95,10 +94,10 @@ class DeviceValidatedSoftwareFilter:  # pylint: disable=too-few-public-methods
         )
 
 
-class InventoryItemValidatedSoftwareFilter:  # pylint: disable=too-few-public-methods
+class InventoryItemValidatedSoftwareFilter:
     """Filter ValidatedSoftwareLCM objects based on the InventoryItem object."""
 
-    def __init__(self, qs, item_obj):
+    def __init__(self, qs, item_obj):  # pylint: disable=invalid-name
         """Initalize InventoryItemValidatedSoftwareFilter."""
         self.validated_software_qs = qs
         self.item_obj = item_obj
@@ -127,13 +126,13 @@ class InventoryItemValidatedSoftwareFilter:  # pylint: disable=too-few-public-me
         )
 
 
-class DeviceSoftwareImageFilter:  # pylint: disable=too-few-public-methods
+class DeviceSoftwareImageFilter:
     """Filter SoftwareImageLCM objects based on the Device object."""
 
     soft_obj_model = Device
     soft_relation_name = "device_soft"
 
-    def __init__(self, qs, item_obj):
+    def __init__(self, qs, item_obj):  # pylint: disable=invalid-name
         """Initalize DeviceSoftwareImageLCMFilter."""
         self.softwareimage_qs = qs
         self.item_obj = item_obj
@@ -161,13 +160,13 @@ class DeviceSoftwareImageFilter:  # pylint: disable=too-few-public-methods
         return self.softwareimage_qs.filter(default_image_q)
 
 
-class InventoryItemSoftwareImageFilter:  # pylint: disable=too-few-public-methods
+class InventoryItemSoftwareImageFilter:
     """Filter SoftwareImageLCM objects based on the InventoryItem object."""
 
     soft_obj_model = InventoryItem
     soft_relation_name = "inventory_item_soft"
 
-    def __init__(self, qs, item_obj):
+    def __init__(self, qs, item_obj):  # pylint: disable=invalid-name
         """Initalize InventoryItemSoftwareImageLCMFilter."""
         self.softwareimage_qs = qs
         self.item_obj = item_obj

@@ -17,10 +17,10 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.8,<3.12"
 pycountry = "^22.3.5"
 matplotlib = "^3.3.4"
-nautobot = "2.0.0b2"
+nautobot = ">=2.0.0rc1,<2.0.0rc99"
 drf-spectacular = "0.26.3"
 
 [tool.poetry.dev-dependencies]
@@ -50,7 +50,8 @@ mkdocs-version-annotations = "1.0.0"
 # Automatic documentation from sources, for MkDocs
 mkdocstrings = "0.19"
 mkdocstrings-python = "0.7.1"
-pylint-nautobot = "^0.1.0"
+# pylint-nautobot = "*"
+pylint-nautobot = { git = "https://github.com/nautobot/pylint-nautobot.git", branch = "develop" }
 
 [tool.poetry.group.dev.dependencies]
 toml = "^0.10.2"
@@ -80,7 +81,7 @@ exclude = '''
 
 [tool.pylint.master]
 # Include the pylint_django plugin to avoid spurious warnings about Django patterns
-load-plugins=["pylint_django", "pylint_nautobot"]
+load-plugins=["pylint_django", "pylint_nautobot", "pylint.extensions.no_self_use"]
 ignore=["nautobot_device_lifecycle_mgmt/migrations"]
 
 [tool.pylint.basic]
@@ -92,8 +93,8 @@ no-docstring-rgx="^(_|test_|Meta$)"
 # Pylint and Black disagree about how to format multi-line arrays; Black wins.
 disable = """
     line-too-long,
-    bad-continuation,
     duplicate-code,
+    too-few-public-methods,
     too-many-lines,
     too-many-ancestors,
     """

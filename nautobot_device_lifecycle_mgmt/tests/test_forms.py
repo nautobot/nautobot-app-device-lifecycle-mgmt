@@ -22,6 +22,7 @@ class HardwareLCMFormTest(TestCase):
         self.manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
         self.device_type, _ = DeviceType.objects.get_or_create(model="c9300-24", manufacturer=self.manufacturer)
         self.devicerole, _ = Role.objects.get_or_create(name="backbone-switch")
+        self.devicerole.content_types.add(ContentType.objects.get_for_model(Device))
         location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
         location_type_location_a.content_types.add(
             ContentType.objects.get_for_model(Device),
@@ -30,11 +31,13 @@ class HardwareLCMFormTest(TestCase):
         self.location1, _ = Location.objects.get_or_create(
             name="Location1", location_type=location_type_location_a, status=location_status
         )
+        device_status = Status.objects.get_for_model(Device).first()
         self.device = Device.objects.create(
             name="Test-9300-Switch",
             device_type=self.device_type,
             role=self.devicerole,
             location=self.location1,
+            status=device_status,
         )
         self.inventory_item = InventoryItem.objects.create(
             device=self.device,
@@ -295,7 +298,7 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
             "preferred": False,
         }
         form = self.form_class(data)
-        with self.assertRaises(SoftwareLCM.DoesNotExist):
+        with self.assertRaises(SoftwareLCM.DoesNotExist):  # pylint: disable=no-member
             form.is_valid()
 
     def test_validation_error_start(self):

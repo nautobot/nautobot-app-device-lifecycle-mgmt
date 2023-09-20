@@ -1,3 +1,4 @@
+# pylint: disable=no-member
 """nautobot_device_lifecycle_mgmt test class for models."""
 from datetime import date
 
@@ -138,7 +139,7 @@ class SoftwareLCMTestCase(TestCase):
 
     def setUp(self):
         """Set up base objects."""
-        self.device_platformm, _ = Platform.objects.get_or_create(name="cisco_ios")
+        self.device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
 
     def test_create_softwarelcm_required_only(self):
         """Successfully create SoftwareLCM with required fields only."""
@@ -435,9 +436,9 @@ class CVELCMTestCase(TestCase):
         self.cve_ct = ContentType.objects.get_for_model(CVELCM)
         self.software_ct = ContentType.objects.get_for_model(SoftwareLCM)
         self.relationship = Relationship.objects.get_or_create(
-            name="CVE to Software",
+            label="CVE to Software",
             defaults={
-                "name": "CVE to Software",
+                "label": "CVE to Software",
                 "key": "cve_soft",
                 "type": RelationshipTypeChoices.TYPE_MANY_TO_MANY,
                 "source_type": ContentType.objects.get_for_model(CVELCM),

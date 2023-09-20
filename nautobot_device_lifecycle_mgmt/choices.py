@@ -1,7 +1,6 @@
 """Static choices uses for the Device Lifecycle plugin."""
-from pycountry import countries
-
 from nautobot.apps.choices import ChoiceSet
+from pycountry import countries
 
 
 class ContractTypeChoices(ChoiceSet):
