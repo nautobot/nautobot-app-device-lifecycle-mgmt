@@ -1,7 +1,5 @@
 """API Views implementation for the Lifecycle Management plugin."""
-
-from nautobot.core.api.views import ModelViewSet
-from nautobot.extras.api.views import CustomFieldModelViewSet
+from nautobot.apps.api import NautobotModelViewSet
 
 from nautobot_device_lifecycle_mgmt.filters import (
     ContactLCMFilterSet,
@@ -45,7 +43,7 @@ from .serializers import (
 )
 
 
-class HardwareLCMView(ModelViewSet):
+class HardwareLCMView(NautobotModelViewSet):
     """CRUD operations set for the Hardware Lifecycle Management view."""
 
     queryset = HardwareLCM.objects.all()
@@ -53,7 +51,7 @@ class HardwareLCMView(ModelViewSet):
     serializer_class = HardwareLCMSerializer
 
 
-class ContractLCMView(ModelViewSet):
+class ContractLCMView(NautobotModelViewSet):
     """CRUD operations set for the Contract Lifecycle Management view."""
 
     queryset = ContractLCM.objects.all()
@@ -61,7 +59,7 @@ class ContractLCMView(ModelViewSet):
     serializer_class = ContractLCMSerializer
 
 
-class ProviderLCMView(ModelViewSet):
+class ProviderLCMView(NautobotModelViewSet):
     """CRUD operations set for the Contract Provider Lifecycle Management view."""
 
     queryset = ProviderLCM.objects.all()
@@ -69,7 +67,7 @@ class ProviderLCMView(ModelViewSet):
     serializer_class = ProviderLCMSerializer
 
 
-class ContactLCMView(ModelViewSet):
+class ContactLCMView(NautobotModelViewSet):
     """CRUD operations set for the Contact Lifecycle Management view."""
 
     queryset = ContactLCM.objects.all()
@@ -77,7 +75,7 @@ class ContactLCMView(ModelViewSet):
     serializer_class = ContactLCMSerializer
 
 
-class SoftwareLCMViewSet(CustomFieldModelViewSet):
+class SoftwareLCMViewSet(NautobotModelViewSet):
     """REST API viewset for SoftwareLCM records."""
 
     queryset = SoftwareLCM.objects.prefetch_related("software_images")
@@ -85,7 +83,7 @@ class SoftwareLCMViewSet(CustomFieldModelViewSet):
     filterset_class = SoftwareLCMFilterSet
 
 
-class SoftwareImageLCMViewSet(CustomFieldModelViewSet):
+class SoftwareImageLCMViewSet(NautobotModelViewSet):
     """REST API viewset for SoftwareImageLCM records."""
 
     queryset = SoftwareImageLCM.objects.prefetch_related("software")
@@ -93,7 +91,7 @@ class SoftwareImageLCMViewSet(CustomFieldModelViewSet):
     filterset_class = SoftwareImageLCMFilterSet
 
 
-class ValidatedSoftwareLCMViewSet(CustomFieldModelViewSet):
+class ValidatedSoftwareLCMViewSet(NautobotModelViewSet):
     """REST API viewset for ValidatedSoftwareLCM records."""
 
     queryset = ValidatedSoftwareLCM.objects.all()
@@ -101,7 +99,7 @@ class ValidatedSoftwareLCMViewSet(CustomFieldModelViewSet):
     filterset_class = ValidatedSoftwareLCMFilterSet
 
 
-class CVELCMViewSet(CustomFieldModelViewSet):
+class CVELCMViewSet(NautobotModelViewSet):
     """REST API viewset for CVELCM records."""
 
     queryset = CVELCM.objects.all()
@@ -109,7 +107,7 @@ class CVELCMViewSet(CustomFieldModelViewSet):
     filterset_class = CVELCMFilterSet
 
 
-class VulnerabilityLCMViewSet(CustomFieldModelViewSet):
+class VulnerabilityLCMViewSet(NautobotModelViewSet):
     """REST API viewset for VulnerabilityLCM records."""
 
     queryset = VulnerabilityLCM.objects.all()
@@ -120,7 +118,7 @@ class VulnerabilityLCMViewSet(CustomFieldModelViewSet):
     http_method_names = ["get", "put", "patch", "delete", "head", "options"]
 
 
-class DeviceSoftwareValidationResultListViewSet(CustomFieldModelViewSet):
+class DeviceSoftwareValidationResultListViewSet(NautobotModelViewSet):
     """REST API viewset for DeviceSoftwareValidationResult records."""
 
     queryset = DeviceSoftwareValidationResult.objects.all()
@@ -131,7 +129,7 @@ class DeviceSoftwareValidationResultListViewSet(CustomFieldModelViewSet):
     http_method_names = ["get", "head", "options"]
 
 
-class InventoryItemSoftwareValidationResultListViewSet(CustomFieldModelViewSet):
+class InventoryItemSoftwareValidationResultListViewSet(NautobotModelViewSet):
     """REST API viewset for DeviceSoftwareValidationResult records."""
 
     queryset = InventoryItemSoftwareValidationResult.objects.all()
