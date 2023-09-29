@@ -43,10 +43,7 @@ class DeviceSoftwareValidationFullReport(Job):
             validate_obj.last_run = job_run_time
             validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
             validate_obj.validated_save()
-        self.logger.info(
-            "Performed validation on: %d devices."  # pylint: disable=logging-not-lazy, consider-using-f-string
-            % devices.count()
-        )
+            self.logger.info("Performed validation on: %d devices.", devices.count())
 
 
 class InventoryItemSoftwareValidationFullReport(Job):
