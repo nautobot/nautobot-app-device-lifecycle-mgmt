@@ -342,6 +342,13 @@ class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
             image_file_checksum="58arfabd75b051fr7fde7a7ac6faa3fv",
             default_image=False,
         )
+        SoftwareImageLCM.objects.create(
+            image_file_name="c1900-universalk9-mz.SPA.157-3.M9.bin",
+            software=softwares[1],
+            download_url="ftp://images.local/cisco/c1900-universalk9-mz.SPA.157-3.M9.bin",
+            image_file_checksum="2eb0d3b3127c904bfc640655285c4604",
+            default_image=False,
+        )
 
         cls.form_data = {
             "image_file_name": "eos_4.21m.swi",
@@ -368,6 +375,10 @@ class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
 
     @skip("Not implemented")
     def test_bulk_edit_form_contains_all_pks(self):
+        pass
+
+    @skip("Not implemented")
+    def test_bulk_edit_form_contains_all_filtered(self):
         pass
 
 
