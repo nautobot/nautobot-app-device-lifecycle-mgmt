@@ -13,11 +13,17 @@ This release includes some of the following highlights:
  - Adds table for matching ValidatedSoftware objects
  - Removes compatibility code for Nautobot versions <1.4
 
+## [v1.3.2] - 2023-08-02
+### Changed
+- [#200](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/200) Provides more clarity by adding in device and inventory item name to help identify. Fix API name and making columns sortable.
+
+
 ## [v1.3.1] - 2023-07-29
 
 ### Added
 - [#196](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/196) Adds reverse relationship from device type to software image.
 - [#194](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/194) Adds table with matching ValidatedSoftware objects to the DeviceType detailed view in GUI.
+
 
 ### Removed
 - [#197](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/197) Removes compatibility code for Nautobot versions < 1.4

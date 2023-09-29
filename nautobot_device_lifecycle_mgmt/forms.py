@@ -4,15 +4,16 @@ import logging
 from django import forms
 from django.db.models import Q
 from nautobot.apps.forms import (
+    add_blank_choice,
     DatePicker,
     DynamicModelChoiceField,
     DynamicModelMultipleChoiceField,
     NautobotBulkEditForm,
     NautobotModelForm,
+    StaticSelect2,
+    StaticSelect2Multiple,
     TagFilterField,
-    add_blank_choice,
 )
-from nautobot.core.forms import StaticSelect2, StaticSelect2Multiple
 from nautobot.core.forms.constants import BOOLEAN_WITH_BLANK_CHOICES
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform
 from nautobot.extras.forms import CustomFieldModelBulkEditFormMixin, NautobotFilterForm
@@ -698,6 +699,9 @@ class ContractLCMFilterForm(NautobotFilterForm):
     provider = forms.ModelMultipleChoiceField(required=False, queryset=ProviderLCM.objects.all(), to_field_name="pk")
     currency = forms.MultipleChoiceField(
         required=False, choices=CurrencyChoices.CHOICES, widget=StaticSelect2Multiple()
+    )
+    contract_type = forms.ChoiceField(
+        required=False, widget=StaticSelect2, choices=add_blank_choice(ContractTypeChoices.CHOICES)
     )
     name = forms.CharField(required=False)
 
