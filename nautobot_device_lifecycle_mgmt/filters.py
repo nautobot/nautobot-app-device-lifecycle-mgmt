@@ -106,10 +106,10 @@ class SoftwareLCMFilterSet(NautobotFilterSet):
     q = django_filters.CharFilter(method="search", label="Search")
 
     device_platform = django_filters.ModelMultipleChoiceFilter(
-        field_name="device_platform__model",
+        field_name="device_platform__name",
         queryset=Platform.objects.all(),
-        to_field_name="model",
-        label="Device Platform (Model)",
+        to_field_name="name",
+        label="Device Platform (Name)",
     )
 
     documentation_url = django_filters.CharFilter(
