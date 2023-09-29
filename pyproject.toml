@@ -44,8 +44,7 @@ mkdocs-version-annotations = "1.0.0"
 # Automatic documentation from sources, for MkDocs
 mkdocstrings = "0.19"
 mkdocstrings-python = "0.7.1"
-# pylint-nautobot = "*"
-pylint-nautobot = { git = "https://github.com/nautobot/pylint-nautobot.git", branch = "develop" }
+pylint-nautobot = "*"
 
 [tool.poetry.group.dev.dependencies]
 toml = "^0.10.2"
