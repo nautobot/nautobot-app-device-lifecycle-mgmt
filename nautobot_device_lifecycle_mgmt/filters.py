@@ -3,20 +3,9 @@ import datetime
 
 import django_filters
 from django.db.models import Q
-from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Platform, Region, Site, Manufacturer
-from nautobot.extras.filters import StatusFilter, StatusModelFilterSetMixin, TagFilter
+from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Manufacturer, Platform, Region, Site
+from nautobot.extras.filters import NautobotFilterSet, StatusFilter, StatusModelFilterSetMixin, TagFilter
 from nautobot.extras.models import Tag
-
-try:
-    from nautobot.extras.filters import NautobotFilterSet
-except ImportError:
-    # TODO: Remove once plugin no longer supports Nautobot < 1.4.0
-    from nautobot.extras.filters import CustomFieldModelFilterSet
-    from nautobot.utilities.filters import BaseFilterSet
-
-    class NautobotFilterSet(BaseFilterSet, CustomFieldModelFilterSet):
-        """Emulate NautobotFilterSet from Nautobot 1.4.0 ."""
-
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -718,6 +707,7 @@ class ContractLCMFilterSet(NautobotFilterSet):
             "support_level",
             "contract_type",
             "expired",
+            "currency",
         ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use

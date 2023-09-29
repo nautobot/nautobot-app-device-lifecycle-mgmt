@@ -719,7 +719,9 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
     table = InventoryItemSoftwareValidationResultTable
     template_name = "nautobot_device_lifecycle_mgmt/validatedsoftware_inventoryitem_report.html"
     queryset = (
-        InventoryItemSoftwareValidationResult.objects.values("inventory_item__part_id", "inventory_item__pk")
+        InventoryItemSoftwareValidationResult.objects.values(
+            "inventory_item__part_id", "inventory_item__name", "inventory_item__pk", "inventory_item__device__name"
+        )
         .distinct()
         .annotate(
             total=Count("inventory_item__part_id"),
@@ -828,7 +830,14 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
         csv_data.append(",".join([]))
 
         qs = self.queryset.values(
-            "inventory_item__part_id", "total", "valid", "invalid", "no_software", "valid_percent"
+            "inventory_item__part_id",
+            "inventory_item__name",
+            "inventory_item__device__name",
+            "total",
+            "valid",
+            "invalid",
+            "no_software",
+            "valid_percent",
         )
         csv_data.append(
             ",".join(

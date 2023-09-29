@@ -1,51 +1,53 @@
 """Forms implementation for the Lifecycle Management plugin."""
 import logging
+
 from django import forms
 from django.db.models import Q
-
-from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Platform, Region, Site, Manufacturer
+from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Manufacturer, Platform, Region, Site
 from nautobot.extras.forms import (
+    CustomFieldModelBulkEditFormMixin,
     CustomFieldModelCSVForm,
-    CustomFieldModelForm,
-    CustomFieldFilterForm,
-    CustomFieldBulkEditForm,
-    RelationshipModelForm,
-    StatusBulkEditFormMixin,
+    CustomFieldModelFilterFormMixin,
+    CustomFieldModelFormMixin,
+    RelationshipModelFormMixin,
+    StatusModelBulkEditFormMixin,
     StatusModelCSVFormMixin,
-    StatusFilterFormMixin,
+    StatusModelFilterFormMixin,
 )
-from nautobot.extras.models import Tag, Status
+from nautobot.extras.models import Status, Tag
 from nautobot.utilities.forms import (
+    BOOLEAN_WITH_BLANK_CHOICES,
     BootstrapMixin,
     BulkEditForm,
+    CSVModelChoiceField,
     DatePicker,
     DynamicModelChoiceField,
     DynamicModelMultipleChoiceField,
     StaticSelect2,
-    BOOLEAN_WITH_BLANK_CHOICES,
-    add_blank_choice,
-    CSVModelChoiceField,
     TagFilterField,
+    add_blank_choice,
+    StaticSelect2Multiple,
 )
+
 from nautobot_device_lifecycle_mgmt.choices import (
     ContractTypeChoices,
-    CurrencyChoices,
-    PoCTypeChoices,
     CountryCodes,
+    CurrencyChoices,
     CVESeverityChoices,
+    PoCTypeChoices,
 )
 from nautobot_device_lifecycle_mgmt.models import (
+    CVELCM,
+    ContactLCM,
+    ContractLCM,
+    DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
+    ProviderLCM,
+    SoftwareImageLCM,
     SoftwareLCM,
     ValidatedSoftwareLCM,
-    DeviceSoftwareValidationResult,
-    ContractLCM,
-    ProviderLCM,
-    ContactLCM,
-    CVELCM,
     VulnerabilityLCM,
-    SoftwareImageLCM,
 )
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
@@ -63,7 +65,7 @@ class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):
         return super().prepare_value(pk_list)
 
 
-class HardwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+class HardwareLCMForm(BootstrapMixin, CustomFieldModelFormMixin, RelationshipModelFormMixin):
     """Hardware Device Lifecycle creation/edit form."""
 
     inventory_item = forms.ModelChoiceField(
@@ -185,7 +187,7 @@ class HardwareLCMCSVForm(CustomFieldModelCSVForm):
         fields = HardwareLCM.csv_headers
 
 
-class SoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+class SoftwareLCMForm(BootstrapMixin, CustomFieldModelFormMixin, RelationshipModelFormMixin):
     """SoftwareLCM creation/edit form."""
 
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
@@ -262,7 +264,7 @@ class SoftwareLCMCSVForm(CustomFieldModelCSVForm):
         fields = SoftwareLCM.csv_headers
 
 
-class SoftwareImageLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+class SoftwareImageLCMForm(BootstrapMixin, CustomFieldModelFormMixin, RelationshipModelFormMixin):
     """SoftwareImageLCM creation/edit form."""
 
     software = DynamicModelChoiceField(queryset=SoftwareLCM.objects.all(), required=True)
@@ -422,7 +424,7 @@ class SoftwareImageLCMCSVForm(CustomFieldModelCSVForm):
         fields = SoftwareImageLCM.csv_headers
 
 
-class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelFormMixin, RelationshipModelFormMixin):
     """ValidatedSoftwareLCM creation/edit form."""
 
     software = DynamicModelChoiceField(queryset=SoftwareLCM.objects.all(), required=True)
@@ -471,7 +473,7 @@ class ValidatedSoftwareLCMForm(BootstrapMixin, CustomFieldModelForm, Relationshi
             self.add_error(None, msg)
 
 
-class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelFormMixin, RelationshipModelFormMixin):
     """Filter form to filter searches for SoftwareLCM."""
 
     q = forms.CharField(
@@ -531,7 +533,7 @@ class ValidatedSoftwareLCMFilterForm(BootstrapMixin, CustomFieldModelForm, Relat
         ]
 
 
-class DeviceSoftwareValidationResultFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+class DeviceSoftwareValidationResultFilterForm(BootstrapMixin, CustomFieldModelFormMixin, RelationshipModelFormMixin):
     """Filter form to filter searches for DeviceSoftwareValidationResult."""
 
     q = forms.CharField(
@@ -608,7 +610,9 @@ class DeviceSoftwareValidationResultFilterForm(BootstrapMixin, CustomFieldModelF
         ]
 
 
-class InventoryItemSoftwareValidationResultFilterForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+class InventoryItemSoftwareValidationResultFilterForm(
+    BootstrapMixin, CustomFieldModelFormMixin, RelationshipModelFormMixin
+):
     """Filter form to filter searches for InventoryItemSoftwareValidationResult."""
 
     q = forms.CharField(
@@ -740,7 +744,7 @@ class ValidatedSoftwareLCMCSVForm(CustomFieldModelCSVForm):
         fields = ValidatedSoftwareLCM.csv_headers
 
 
-class ContractLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+class ContractLCMForm(BootstrapMixin, CustomFieldModelFormMixin, RelationshipModelFormMixin):
     """Device Lifecycle Contracts creation/edit form."""
 
     provider = forms.ModelChoiceField(
@@ -813,7 +817,12 @@ class ContractLCMFilterForm(BootstrapMixin, forms.ModelForm):
 
     q = forms.CharField(required=False, label="Search")
     provider = forms.ModelMultipleChoiceField(required=False, queryset=ProviderLCM.objects.all(), to_field_name="pk")
-    currency = forms.ChoiceField(required=False, widget=StaticSelect2, choices=CurrencyChoices.CHOICES)
+    currency = forms.MultipleChoiceField(
+        required=False, choices=CurrencyChoices.CHOICES, widget=StaticSelect2Multiple()
+    )
+    contract_type = forms.ChoiceField(
+        required=False, widget=StaticSelect2, choices=add_blank_choice(ContractTypeChoices.CHOICES)
+    )
     name = forms.CharField(required=False)
 
     class Meta:
@@ -853,7 +862,7 @@ class ContractLCMCSVForm(CustomFieldModelCSVForm):
         fields = ContractLCM.csv_headers
 
 
-class ProviderLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+class ProviderLCMForm(BootstrapMixin, CustomFieldModelFormMixin, RelationshipModelFormMixin):
     """Device Lifecycle Contract Providers creation/edit form."""
 
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
@@ -910,11 +919,7 @@ class ProviderLCMFilterForm(BootstrapMixin, forms.ModelForm):
 
     q = forms.CharField(required=False, label="Search")
     name = forms.CharField(required=False)
-    country = forms.ChoiceField(
-        widget=StaticSelect2,
-        required=False,
-        choices=add_blank_choice(CountryCodes.CHOICES),
-    )
+    country = forms.MultipleChoiceField(required=False, choices=CountryCodes.CHOICES, widget=StaticSelect2Multiple())
 
     class Meta:
         """Meta attributes for the ProviderLCMFilterForm class."""
@@ -943,7 +948,7 @@ class ProviderLCMCSVForm(CustomFieldModelCSVForm):
         fields = ProviderLCM.csv_headers
 
 
-class ContactLCMForm(BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+class ContactLCMForm(BootstrapMixin, CustomFieldModelFormMixin, RelationshipModelFormMixin):
     """Device Lifecycle Contract Resources creation/edit form."""
 
     type = forms.ChoiceField(choices=PoCTypeChoices.CHOICES, required=False)
@@ -1029,7 +1034,7 @@ class ContactLCMCSVForm(CustomFieldModelCSVForm):
         fields = ContactLCM.csv_headers
 
 
-class CVELCMForm(StatusBulkEditFormMixin, BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+class CVELCMForm(StatusModelBulkEditFormMixin, BootstrapMixin, CustomFieldModelFormMixin, RelationshipModelFormMixin):
     """CVE Lifecycle Management creation/edit form."""
 
     published_date = forms.DateField(widget=DatePicker())
@@ -1053,7 +1058,7 @@ class CVELCMForm(StatusBulkEditFormMixin, BootstrapMixin, CustomFieldModelForm, 
         }
 
 
-class CVELCMBulkEditForm(StatusBulkEditFormMixin, BootstrapMixin, CustomFieldBulkEditForm):
+class CVELCMBulkEditForm(StatusModelBulkEditFormMixin, BootstrapMixin, CustomFieldModelBulkEditFormMixin):
     """CVE Lifecycle Management bulk edit form."""
 
     model = CVELCM
@@ -1073,7 +1078,7 @@ class CVELCMBulkEditForm(StatusBulkEditFormMixin, BootstrapMixin, CustomFieldBul
         ]
 
 
-class CVELCMFilterForm(BootstrapMixin, StatusFilterFormMixin, CustomFieldFilterForm):
+class CVELCMFilterForm(BootstrapMixin, StatusModelFilterFormMixin, CustomFieldModelFilterFormMixin):
     """Filter form to filter searches for CVELCM."""
 
     model = CVELCM
@@ -1135,7 +1140,9 @@ class CVELCMCSVForm(CustomFieldModelCSVForm, StatusModelCSVFormMixin):
         fields = CVELCM.csv_headers
 
 
-class VulnerabilityLCMForm(StatusBulkEditFormMixin, BootstrapMixin, CustomFieldModelForm, RelationshipModelForm):
+class VulnerabilityLCMForm(
+    StatusModelBulkEditFormMixin, BootstrapMixin, CustomFieldModelFormMixin, RelationshipModelFormMixin
+):
     """Vulnerability Lifecycle Management creation/edit form."""
 
     model = VulnerabilityLCM
@@ -1152,7 +1159,7 @@ class VulnerabilityLCMForm(StatusBulkEditFormMixin, BootstrapMixin, CustomFieldM
         ]
 
 
-class VulnerabilityLCMBulkEditForm(StatusBulkEditFormMixin, BootstrapMixin, CustomFieldBulkEditForm):
+class VulnerabilityLCMBulkEditForm(StatusModelBulkEditFormMixin, BootstrapMixin, CustomFieldModelBulkEditFormMixin):
     """Vulnerability Lifecycle Management bulk edit form."""
 
     model = VulnerabilityLCM
@@ -1168,7 +1175,7 @@ class VulnerabilityLCMBulkEditForm(StatusBulkEditFormMixin, BootstrapMixin, Cust
         ]
 
 
-class VulnerabilityLCMFilterForm(BootstrapMixin, StatusFilterFormMixin, CustomFieldFilterForm):
+class VulnerabilityLCMFilterForm(BootstrapMixin, StatusModelFilterFormMixin, CustomFieldModelFilterFormMixin):
     """Filter form to filter searches for VulnerabilityLCM."""
 
     model = VulnerabilityLCM
