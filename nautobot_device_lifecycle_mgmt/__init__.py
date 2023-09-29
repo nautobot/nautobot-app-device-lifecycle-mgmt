@@ -22,8 +22,8 @@ class DeviceLifeCycleConfig(PluginConfig):
     description = "Manages device lifecycle of Nautobot Devices and Components."
     base_url = "nautobot-device-lifecycle-mgmt"
     required_settings = []
-    min_version = "1.4.0"
-    max_version = "1.9999"
+    min_version = "2.0.0"
+    max_version = "2.99.99"
     default_settings = {
         "expired_field": "end_of_support",
         "barchart_bar_width": 0.1,

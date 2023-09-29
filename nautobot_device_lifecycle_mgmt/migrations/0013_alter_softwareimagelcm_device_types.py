@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dcim", "0016_device_components__timestamp_data_migration"),
         ("nautobot_device_lifecycle_mgmt", "0012_add_related_name_to_results_model"),

@@ -1,24 +1,25 @@
+# pylint: disable=no-member
 """Unit tests for nautobot_device_lifecycle_mgmt."""
 import datetime
+from unittest import skip
+
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-
-from nautobot.utilities.testing import APIViewTestCases
-from nautobot.dcim.models import DeviceType, Manufacturer, Platform, Device, DeviceRole, InventoryItem, Site
-from nautobot.extras.models import Status, Tag
+from nautobot.apps.testing import APIViewTestCases
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, LocationType, Manufacturer, Platform
+from nautobot.extras.models import Role, Status, Tag
 
 from nautobot_device_lifecycle_mgmt.models import (
-    HardwareLCM,
-    SoftwareLCM,
-    ContractLCM,
-    ProviderLCM,
-    ValidatedSoftwareLCM,
     CVELCM,
-    VulnerabilityLCM,
+    ContractLCM,
+    HardwareLCM,
+    ProviderLCM,
     SoftwareImageLCM,
+    SoftwareLCM,
+    ValidatedSoftwareLCM,
+    VulnerabilityLCM,
 )
-from nautobot_device_lifecycle_mgmt.tests.conftest import create_devices, create_cves, create_softwares
-
+from nautobot_device_lifecycle_mgmt.tests.conftest import create_cves, create_devices, create_softwares
 
 User = get_user_model()
 
@@ -46,16 +47,16 @@ class HardwareLCMAPITest(APIViewTestCases.APIViewTestCase):
     ]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
         """Create a superuser and token for API calls."""
-        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        manufacturer = Manufacturer.objects.create(name="Cisco")
         device_types = (
-            DeviceType.objects.create(model="c9300-24", slug="c9300-24", manufacturer=manufacturer),
-            DeviceType.objects.create(model="c9300-48", slug="c9300-48", manufacturer=manufacturer),
-            DeviceType.objects.create(model="c9500-24", slug="c9500-24", manufacturer=manufacturer),
-            DeviceType.objects.create(model="c9500-48", slug="c9500-48", manufacturer=manufacturer),
-            DeviceType.objects.create(model="c9407", slug="c9407", manufacturer=manufacturer),
-            DeviceType.objects.create(model="c9410", slug="c9410", manufacturer=manufacturer),
+            DeviceType.objects.get_or_create(model="c9300-24", manufacturer=manufacturer)[0],
+            DeviceType.objects.get_or_create(model="c9300-48", manufacturer=manufacturer)[0],
+            DeviceType.objects.get_or_create(model="c9500-24", manufacturer=manufacturer)[0],
+            DeviceType.objects.get_or_create(model="c9500-48", manufacturer=manufacturer)[0],
+            DeviceType.objects.get_or_create(model="c9407", manufacturer=manufacturer)[0],
+            DeviceType.objects.get_or_create(model="c9410", manufacturer=manufacturer)[0],
         )
 
         HardwareLCM.objects.create(device_type=device_types[3], end_of_sale=datetime.date(2021, 4, 1))
@@ -69,20 +70,13 @@ class HardwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             {"device_type": device_types[2].id, "end_of_sale": datetime.date(2021, 4, 1)},
         ]
 
-    def test_bulk_create_objects(self):
-        """Currently don't support bulk operations."""
-
+    @skip("Not implemented")
     def test_bulk_delete_objects(self):
-        """Currently don't support bulk operations."""
+        pass
 
+    @skip("Not implemented")
     def test_bulk_update_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_notes_url_on_object(self):
-        """Currently don't support notes."""
-
-    def test_list_objects_brief(self):
-        """Nautobot 1.4 adds 'created' and 'last_updated' causing testing mismatch with previous versions."""
+        pass
 
 
 class SoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
@@ -99,12 +93,12 @@ class SoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
     ]
 
     @classmethod
-    def setUpTestData(cls):
-
+    def setUpTestData(cls):  # pylint: disable=invalid-name
+        """Set up test objects."""
         device_platforms = (
-            Platform.objects.create(name="Cisco IOS", slug="cisco_ios"),
-            Platform.objects.create(name="Arista EOS", slug="arista_eos"),
-            Platform.objects.create(name="Juniper Junos", slug="juniper_junos"),
+            Platform.objects.get_or_create(name="cisco_ios")[0],
+            Platform.objects.get_or_create(name="arista_eos")[0],
+            Platform.objects.get_or_create(name="juniper_junos")[0],
         )
 
         cls.create_data = [
@@ -135,17 +129,9 @@ class SoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             device_platform=device_platforms[2], version="21.4R3", end_of_support=datetime.date(2024, 5, 19)
         )
 
-    def test_bulk_create_objects(self):
-        """Currently don't support bulk operations."""
-
+    @skip("Not implemented")
     def test_bulk_delete_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_bulk_update_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_notes_url_on_object(self):
-        """Currently don't support notes."""
+        pass
 
 
 class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):
@@ -162,13 +148,15 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):
         "id",
         "name",
         "provider",
+        "devices",
         "start",
         "support_level",
     ]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
         """Create a superuser and token for API calls."""
+        devices = create_devices()
         provider = ProviderLCM.objects.create(
             name="Cisco",
             description="Cisco Support",
@@ -186,6 +174,7 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):
                 "support_level": "24/7",
                 "contract_type": "Hardware",
                 "provider": provider.id,
+                "devices": [device.pk for device in devices],
             },
             {
                 "name": "Nexus Support - Software",
@@ -227,17 +216,13 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):
             provider=provider,
         )
 
-    def test_bulk_create_objects(self):
-        """Currently don't support bulk operations."""
-
+    @skip("Not implemented")
     def test_bulk_delete_objects(self):
         """Currently don't support bulk operations."""
 
+    @skip("Not implemented")
     def test_bulk_update_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_notes_url_on_object(self):
-        """Currently don't support notes."""
+        pass
 
 
 class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
@@ -263,9 +248,9 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
     ]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
         """Create a superuser and token for API calls."""
-        device_platform = Platform.objects.create(name="Cisco IOS", slug="cisco_ios")
+        device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
         softwares = (
             SoftwareLCM.objects.create(
                 **{
@@ -291,23 +276,40 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             ),
         )
 
-        status_active = Status.objects.get(slug="active")
-        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
-        site = Site.objects.create(name="Site 1", slug="site-1")
+        manufacturer = Manufacturer.objects.create(name="Cisco")
+        location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
+        location_type_location_a.content_types.add(
+            ContentType.objects.get_for_model(Device),
+        )
+        location_status = Status.objects.get_for_model(Location).first()
+        location1, _ = Location.objects.get_or_create(
+            name="Location1", location_type=location_type_location_a, status=location_status
+        )
         deviceroles = (
-            DeviceRole.objects.create(name="Router", slug="router", color="ff0000"),
-            DeviceRole.objects.create(name="Switch", slug="switch", color="ffff00"),
+            Role.objects.get_or_create(name="router", color="ff0000")[0],
+            Role.objects.get_or_create(name="switch", color="ffff00")[0],
         )
+        for devicerole in deviceroles:
+            devicerole.content_types.add(ContentType.objects.get_for_model(Device))
         devicetypes = (
-            DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000"),
-            DeviceType.objects.create(manufacturer=manufacturer, model="Catalyst 6500", slug="catalyst-6500"),
+            DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000"),
+            DeviceType.objects.create(manufacturer=manufacturer, model="Catalyst 6500"),
         )
+        device_status = Status.objects.get_for_model(Device).first()
         devices = (
             Device.objects.create(
-                device_type=devicetypes[0], device_role=deviceroles[0], name="Device 1", site=site, status=status_active
+                device_type=devicetypes[0],
+                role=deviceroles[0],
+                name="Device 1",
+                location=location1,
+                status=device_status,
             ),
             Device.objects.create(
-                device_type=devicetypes[1], device_role=deviceroles[1], name="Device 2", site=site, status=status_active
+                device_type=devicetypes[1],
+                role=deviceroles[1],
+                name="Device 2",
+                location=location1,
+                status=device_status,
             ),
         )
         inventoryitems = (
@@ -382,20 +384,9 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
         validated_software.inventory_items.set([inventoryitem.pk for inventoryitem in inventoryitems])
         validated_software.save()
 
-    def test_bulk_create_objects(self):
-        """Currently don't support bulk operations."""
-
+    @skip("Not implemented")
     def test_bulk_delete_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_bulk_update_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_notes_url_on_object(self):
-        """Currently don't support notes."""
-
-    def test_list_objects_brief(self):
-        """Nautobot 1.4 adds 'created' and 'last_updated' causing testing mismatch with previous versions."""
+        pass
 
 
 class CVELCMAPITest(APIViewTestCases.APIViewTestCase):
@@ -417,28 +408,33 @@ class CVELCMAPITest(APIViewTestCases.APIViewTestCase):
         "severity",
         "status",
         "url",
+        "affected_softwares",
     ]
 
     choices_fields = ["severity"]
 
     @classmethod
-    def setUpTestData(cls):
-
+    def setUpTestData(cls):  # pylint: disable=invalid-name
+        """Set up test objects."""
+        softwares = create_softwares()
         cls.create_data = [
             {
                 "name": "CVE-2021-40128",
                 "published_date": datetime.date(2021, 11, 4),
                 "link": "https://www.cvedetails.com/cve/CVE-2021-40128/",
+                "affected_softwares": [software.pk for software in softwares],
             },
             {
                 "name": "CVE-2021-40126",
                 "published_date": datetime.date(2021, 11, 4),
                 "link": "https://www.cvedetails.com/cve/CVE-2021-40126/",
+                "affected_softwares": [software.pk for software in softwares],
             },
             {
                 "name": "CVE-2021-40125",
                 "published_date": datetime.date(2021, 10, 27),
                 "link": "https://www.cvedetails.com/cve/CVE-2021-40125/",
+                "affected_softwares": [software.pk for software in softwares],
             },
         ]
 
@@ -458,17 +454,9 @@ class CVELCMAPITest(APIViewTestCases.APIViewTestCase):
             link="https://www.cvedetails.com/cve/CVE-2020-27134/",
         )
 
-    def test_bulk_create_objects(self):
-        """Currently don't support bulk operations."""
-
+    @skip("Not implemented")
     def test_bulk_delete_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_bulk_update_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_notes_url_on_object(self):
-        """Currently don't support notes."""
+        pass
 
 
 class VulnerabilityLCMAPITest(
@@ -496,7 +484,8 @@ class VulnerabilityLCMAPITest(
     validation_excluded_fields = ["status"]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
+        """Set up test objects."""
         devices = create_devices()
         cves = create_cves()
         softwares = create_softwares()
@@ -505,27 +494,21 @@ class VulnerabilityLCMAPITest(
             VulnerabilityLCM.objects.create(cve=cve, device=devices[i], software=softwares[i])
 
         vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
-        status = Status.objects.create(name="Exempt", slug="exempt", color="4caf50", description="This unit is exempt.")
+        status = Status.objects.create(name="Exempt", color="4caf50", description="This unit is exempt.")
         status.content_types.set([vuln_ct])
-        cls.create_data = [{"status": "exempt"}]
+        cls.create_data = [{"status": {"name": "Exempt"}}]
 
+    @skip("Not implemented")
     def test_bulk_delete_objects(self):
-        """Currently don't support bulk operations."""
+        pass
 
+    @skip("Not implemented")
     def test_bulk_update_objects(self):
-        """Currently don't support bulk operations."""
+        pass
 
+    @skip("Not implemented")
     def test_options_returns_expected_choices(self):
-        """Disabling inherited test that uses POST."""
-
-    def test_options_objects_returns_display_and_value(self):
-        """Disabling inherited test that uses POST."""
-
-    def test_notes_url_on_object(self):
-        """Currently don't support notes."""
-
-    def test_list_objects_brief(self):
-        """Nautobot 1.4 adds 'created' and 'last_updated' causing testing mismatch with previous versions."""
+        pass
 
 
 class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
@@ -547,10 +530,10 @@ class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
     ]
 
     @classmethod
-    def setUpTestData(cls):  # pylint: disable=too-many-locals
+    def setUpTestData(cls):  # pylint: disable=too-many-locals,invalid-name
         """Create a superuser and token for API calls."""
-        device_platform_cisco, _ = Platform.objects.get_or_create(name="Cisco IOS", slug="cisco_ios")
-        device_platform_arista, _ = Platform.objects.get_or_create(name="Arista EOS", slug="arista_eos")
+        device_platform_cisco, _ = Platform.objects.get_or_create(name="cisco_ios")
+        device_platform_arista, _ = Platform.objects.get_or_create(name="arista_eos")
         softwares_cisco = (
             SoftwareLCM.objects.get_or_create(
                 **{
@@ -580,24 +563,36 @@ class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
             )[0],
         )
 
-        status_active = Status.objects.get(slug="active")
-        manufacturer_cisco = Manufacturer.objects.create(name="Cisco", slug="cisco")
-        manufacturer_arista = Manufacturer.objects.create(name="Arista", slug="arista")
-        site = Site.objects.create(name="Site 1", slug="site-1")
-        devicerole = DeviceRole.objects.create(name="Router", slug="router", color="ff0000")
+        manufacturer_cisco = Manufacturer.objects.create(name="Cisco")
+        manufacturer_arista = Manufacturer.objects.create(name="Arista")
+        location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
+        location_type_location_a.content_types.add(
+            ContentType.objects.get_for_model(Device),
+        )
+        location_status = Status.objects.get_for_model(Location).first()
+        location1, _ = Location.objects.get_or_create(
+            name="Location1", location_type=location_type_location_a, status=location_status
+        )
+        devicerole, _ = Role.objects.get_or_create(name="router", color="ff0000")
+        devicerole.content_types.add(ContentType.objects.get_for_model(Device))
         devicetypes_cisco = (
-            DeviceType.objects.create(manufacturer=manufacturer_cisco, model="ASR-1000", slug="asr-1000"),
-            DeviceType.objects.create(manufacturer=manufacturer_cisco, model="Catalyst 6500", slug="catalyst-6500"),
+            DeviceType.objects.create(manufacturer=manufacturer_cisco, model="ASR-1000"),
+            DeviceType.objects.create(manufacturer=manufacturer_cisco, model="Catalyst 6500"),
         )
         devicetypes_arista = (
-            DeviceType.objects.create(manufacturer=manufacturer_arista, model="7150S", slug="7150s"),
-            DeviceType.objects.create(manufacturer=manufacturer_arista, model="7508R", slug="7508r"),
+            DeviceType.objects.create(manufacturer=manufacturer_arista, model="7150S"),
+            DeviceType.objects.create(manufacturer=manufacturer_arista, model="7508R"),
         )
+        device_status = Status.objects.get_for_model(Device).first()
         device_cisco = Device.objects.create(
-            device_type=devicetypes_cisco[0], device_role=devicerole, name="Device 1", site=site, status=status_active
+            device_type=devicetypes_cisco[0], role=devicerole, name="Device 1", location=location1, status=device_status
         )
         device_arista = Device.objects.create(
-            device_type=devicetypes_arista[0], device_role=devicerole, name="Device 2", site=site, status=status_active
+            device_type=devicetypes_arista[0],
+            role=devicerole,
+            name="Device 2",
+            location=location1,
+            status=device_status,
         )
         inventoryitems_cisco = (
             InventoryItem.objects.create(device=device_cisco, name="SwitchModule1"),
@@ -608,7 +603,7 @@ class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
             InventoryItem.objects.create(device=device_arista, name="QSFP1"),
         )
 
-        tags = (Tag.objects.create(name="asr", slug="asr"), Tag.objects.create(name="edge", slug="edge"))
+        tags = (Tag.objects.create(name="asr"), Tag.objects.create(name="edge"))
 
         cls.create_data = [
             {
@@ -664,17 +659,9 @@ class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
         software_image.device_types.set([devicetype.pk for devicetype in devicetypes_arista])
         software_image.save()
 
-    def test_bulk_create_objects(self):
-        """Currently don't support bulk operations."""
-
+    @skip("Not implemented")
     def test_bulk_delete_objects(self):
         """Currently don't support bulk operations."""
-
-    def test_bulk_update_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_notes_url_on_object(self):
-        """Currently don't support notes."""
 
 
 class ProviderLCMAPITest(APIViewTestCases.APIViewTestCase):
@@ -692,7 +679,7 @@ class ProviderLCMAPITest(APIViewTestCases.APIViewTestCase):
     ]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
         """Create a Provider for API calls."""
 
         cls.create_data = [
@@ -759,17 +746,6 @@ class ProviderLCMAPITest(APIViewTestCases.APIViewTestCase):
             comments="Test Comment",
         )
 
-    def test_bulk_create_objects(self):
-        """Currently don't support bulk operations."""
-
+    @skip("Not implemented")
     def test_bulk_delete_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_bulk_update_objects(self):
-        """Currently don't support bulk operations."""
-
-    def test_notes_url_on_object(self):
-        """Currently don't support notes."""
-
-    def test_list_objects_brief(self):
-        """Nautobot 1.4 adds 'created' and 'last_updated' causing testing mismatch with previous versions."""
+        pass

@@ -1,14 +1,9 @@
 """GraphQL implementation for the Device LifeCycle Management plugin."""
 import graphene
-
 from graphene_django import DjangoObjectType
 
-from nautobot_device_lifecycle_mgmt.models import (
-    ValidatedSoftwareLCM,
-)
-from nautobot_device_lifecycle_mgmt.filters import (
-    ValidatedSoftwareLCMFilterSet,
-)
+from nautobot_device_lifecycle_mgmt.filters import ValidatedSoftwareLCMFilterSet
+from nautobot_device_lifecycle_mgmt.models import ValidatedSoftwareLCM
 
 
 class ValidatedSoftwareLCMType(DjangoObjectType):
