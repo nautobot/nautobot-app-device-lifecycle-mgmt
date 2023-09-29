@@ -49,6 +49,14 @@
                 <td>{% if object.contract_type %} {{ object.contract_type }} {% else %} &mdash; {% endif %}</td>
             </tr>
             <tr>
+                <td>Devices</td>
+                <td>
+                    {% for device in object.devices.all %}
+                    <a href="{% url 'dcim:device' pk=device.pk %}">{{ device }}</a>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+            <tr>
                 <td>Comments</td>
                 <td>{% if object.comments %}<pre>{{ object.comments|placeholder  }}</pre>{% else %} &mdash; {% endif %}</td>
             </tr>

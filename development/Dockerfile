@@ -6,11 +6,11 @@
 # -------------------------------------------------------------------------------------
 # !!! USE CAUTION WHEN MODIFYING LINES BELOW
 
-# Accepts a desired Nautobot version as build argument, default to 1.4
-ARG NAUTOBOT_VER="1.4"
+# Accepts a desired Nautobot version as build argument, default to 2.0.0
+ARG NAUTOBOT_VER="2.0.0"
 
-# Accepts a desired Python version as build argument, default to 3.8
-ARG PYTHON_VER="3.8"
+# Accepts a desired Python version as build argument, default to 3.10
+ARG PYTHON_VER="3.10"
 
 # Retrieve published development image of Nautobot base which should include most CI dependencies
 FROM ghcr.io/nautobot/nautobot-dev:${NAUTOBOT_VER}-py${PYTHON_VER}
@@ -32,7 +32,7 @@ RUN curl -sSL https://install.python-poetry.org | python3 - && \
 # !!! USE CAUTION WHEN MODIFYING LINES ABOVE
 # -------------------------------------------------------------------------------------
 # App-specifc system build/test dependencies.
-# 
+#
 # Example: LDAP requires `libldap2-dev` to be apt-installed before the Python package.
 # -------------------------------------------------------------------------------------
 # --> Start safe to modify section
@@ -76,3 +76,6 @@ RUN pip install -c constraints.txt -r poetry_freeze_dev.txt
 
 COPY development/nautobot_config.py ${NAUTOBOT_ROOT}/nautobot_config.py
 # !!! USE CAUTION WHEN MODIFYING LINES ABOVE
+
+# With USER nautobot Coverage is unable to write to /source which is a locally mounted volume
+USER root

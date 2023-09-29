@@ -2,15 +2,12 @@
 from abc import ABCMeta
 
 from django.db.models import Q
-
-from nautobot.extras.plugins import PluginTemplateExtension
 from nautobot.dcim.models import InventoryItem
-from .models import HardwareLCM, ValidatedSoftwareLCM
-from .software import (
-    DeviceSoftware,
-    InventoryItemSoftware,
-)
-from .tables import ValidatedSoftwareLCMTable
+from nautobot.extras.plugins import PluginTemplateExtension
+
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.software import DeviceSoftware, InventoryItemSoftware
+from nautobot_device_lifecycle_mgmt.tables import ValidatedSoftwareLCMTable
 
 
 class DeviceTypeHWLCM(PluginTemplateExtension, metaclass=ABCMeta):

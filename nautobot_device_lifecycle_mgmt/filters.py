@@ -3,10 +3,12 @@ import datetime
 
 import django_filters
 from django.db.models import Q
-from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Manufacturer, Platform, Region, Site
-from nautobot.extras.filters import NautobotFilterSet, StatusFilter, StatusModelFilterSetMixin, TagFilter
-from nautobot.extras.models import Tag
+from nautobot.apps.filters import NautobotFilterSet, StatusModelFilterSetMixin
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform
+from nautobot.extras.filters.mixins import StatusFilter
+from nautobot.extras.models import Role, Tag
 
+from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContactLCM,
@@ -28,10 +30,10 @@ class HardwareLCMFilterSet(NautobotFilterSet):
     q = django_filters.CharFilter(method="search", label="Search")
 
     device_type = django_filters.ModelMultipleChoiceFilter(
-        field_name="device_type__slug",
+        field_name="device_type__model",
         queryset=DeviceType.objects.all(),
-        to_field_name="slug",
-        label="Device Type (Slug)",
+        to_field_name="model",
+        label="Device Type (Model)",
     )
     device_type_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device_type", queryset=DeviceType.objects.all(), label="Device Type"
@@ -104,10 +106,10 @@ class SoftwareLCMFilterSet(NautobotFilterSet):
     q = django_filters.CharFilter(method="search", label="Search")
 
     device_platform = django_filters.ModelMultipleChoiceFilter(
-        field_name="device_platform__slug",
+        field_name="device_platform__name",
         queryset=Platform.objects.all(),
-        to_field_name="slug",
-        label="Device Platform (Slug)",
+        to_field_name="name",
+        label="Device Platform (Name)",
     )
 
     documentation_url = django_filters.CharFilter(
@@ -186,10 +188,10 @@ class SoftwareImageLCMFilterSet(NautobotFilterSet):
         label="Object Tags",
     )
     object_tags = django_filters.ModelMultipleChoiceFilter(
-        field_name="object_tags__slug",
+        field_name="object_tags__name",
         queryset=Tag.objects.all(),
-        to_field_name="slug",
-        label="Object Tags (slug)",
+        to_field_name="name",
+        label="Object Tags (name)",
     )
     device_name = django_filters.CharFilter(method="device", label="Device Name")
     device_id = django_filters.CharFilter(method="device", label="Device ID")
@@ -290,14 +292,14 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
     )
     device_roles_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device_roles",
-        queryset=DeviceRole.objects.all(),
+        queryset=Role.objects.all(),
         label="Device Roles",
     )
     device_roles = django_filters.ModelMultipleChoiceFilter(
-        field_name="device_roles__slug",
-        queryset=DeviceRole.objects.all(),
-        to_field_name="slug",
-        label="Device Roles (slug)",
+        field_name="device_roles__name",
+        queryset=Role.objects.all(),
+        to_field_name="name",
+        label="Device Roles (name)",
     )
     inventory_items_id = django_filters.ModelMultipleChoiceFilter(
         field_name="inventory_items",
@@ -316,10 +318,10 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         label="Object Tags",
     )
     object_tags = django_filters.ModelMultipleChoiceFilter(
-        field_name="object_tags__slug",
+        field_name="object_tags__name",
         queryset=Tag.objects.all(),
-        to_field_name="slug",
-        label="Object Tags (slug)",
+        to_field_name="name",
+        label="Object Tags (name)",
     )
     device_name = django_filters.CharFilter(method="device", label="Device Name")
     device_id = django_filters.CharFilter(method="device", label="Device ID")
@@ -422,27 +424,16 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         queryset=Platform.objects.all(),
         label="Platform",
     )
-    site_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="device__site",
-        queryset=Site.objects.all(),
-        label="Site",
+    location_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__location",
+        queryset=Location.objects.all(),
+        label="Location",
     )
-    site = django_filters.ModelMultipleChoiceFilter(
-        field_name="device__site__slug",
-        queryset=Site.objects.all(),
-        to_field_name="slug",
-        label="Site (slug)",
-    )
-    region_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="device__site__region",
-        queryset=Region.objects.all(),
-        label="Region",
-    )
-    region = django_filters.ModelMultipleChoiceFilter(
-        field_name="device__site__region__slug",
-        queryset=Region.objects.all(),
-        to_field_name="slug",
-        label="Region (slug)",
+    location = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__location__name",
+        queryset=Location.objects.all(),
+        to_field_name="name",
+        label="Location (name)",
     )
     device_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device",
@@ -467,15 +458,15 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         label="Device Type (model)",
     )
     device_role_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="device__device_role_id",
-        queryset=DeviceRole.objects.all(),
+        field_name="device__role",
+        queryset=Role.objects.all(),
         label="Device Role",
     )
     device_role = django_filters.ModelMultipleChoiceFilter(
-        field_name="device__device_role__slug",
-        queryset=DeviceRole.objects.all(),
-        to_field_name="slug",
-        label="Device Role (slug)",
+        field_name="device__role__name",
+        queryset=Role.objects.all(),
+        to_field_name="name",
+        label="Device Role (name)",
     )
     exclude_sw_missing = django_filters.BooleanFilter(
         method="_exclude_sw_missing",
@@ -494,8 +485,6 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         fields = [
             "software",
             "platform",
-            "site",
-            "region",
             "device",
             "device_type",
             "device_role",
@@ -545,27 +534,16 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         queryset=Manufacturer.objects.all(),
         label="Manufacturer",
     )
-    site_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="inventory_item__device__site",
-        queryset=Site.objects.all(),
-        label="Site",
+    location_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item__device__location",
+        queryset=Location.objects.all(),
+        label="Location",
     )
-    site = django_filters.ModelMultipleChoiceFilter(
-        field_name="inventory_item__device__site__slug",
-        queryset=Site.objects.all(),
-        to_field_name="slug",
-        label="Site (slug)",
-    )
-    region_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="inventory_item__device__site__region",
-        queryset=Region.objects.all(),
-        label="Region",
-    )
-    region = django_filters.ModelMultipleChoiceFilter(
-        field_name="inventory_item__device__site__region__slug",
-        queryset=Region.objects.all(),
-        to_field_name="slug",
-        label="Region (slug)",
+    location = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item__device__location__name",
+        queryset=Location.objects.all(),
+        to_field_name="name",
+        label="Location (name)",
     )
     inventory_item_id = django_filters.ModelMultipleChoiceFilter(
         field_name="inventory_item",
@@ -602,15 +580,15 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         label="Device Type (model)",
     )
     device_role_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="inventory_item__device__device_role_id",
-        queryset=DeviceRole.objects.all(),
+        field_name="inventory_item__device__role",
+        queryset=Role.objects.all(),
         label="Device Role",
     )
     device_role = django_filters.ModelMultipleChoiceFilter(
-        field_name="inventory_item__device__device_role__slug",
-        queryset=DeviceRole.objects.all(),
-        to_field_name="slug",
-        label="Device Role (slug)",
+        field_name="inventory_item__device__role__name",
+        queryset=Role.objects.all(),
+        to_field_name="name",
+        label="Device Role (name)",
     )
     exclude_sw_missing = django_filters.BooleanFilter(
         method="_exclude_sw_missing",
@@ -629,8 +607,6 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         fields = [
             "software",
             "manufacturer",
-            "site",
-            "region",
             "inventory_item",
             "part_id",
             "device",
@@ -742,7 +718,16 @@ class ProviderLCMFilterSet(NautobotFilterSet):
 
         model = ProviderLCM
 
-        fields = ProviderLCM.csv_headers
+        fields = [
+            "name",
+            "description",
+            "physical_address",
+            "country",
+            "phone",
+            "email",
+            "portal_url",
+            "comments",
+        ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""
@@ -769,7 +754,16 @@ class ContactLCMFilterSet(NautobotFilterSet):
 
         model = ContactLCM
 
-        fields = ContactLCM.csv_headers
+        fields = [
+            "contract",
+            "name",
+            "address",
+            "phone",
+            "email",
+            "comments",
+            "type",
+            "priority",
+        ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""
@@ -802,17 +796,26 @@ class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , Custom
 
     cvss_v3__gte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="gte")
     cvss_v3__lte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="lte")
-
-    status = StatusFilter()
     exclude_status = StatusFilter(field_name="status", exclude=True)
-    tag = TagFilter()
 
     class Meta:
         """Meta attributes for filter."""
 
         model = CVELCM
 
-        fields = CVELCM.csv_headers
+        fields = [
+            "name",
+            "published_date",
+            "link",
+            "status",
+            "description",
+            "severity",
+            "cvss",
+            "cvss_v2",
+            "cvss_v3",
+            "fix",
+            "comments",
+        ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""
@@ -831,17 +834,20 @@ class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  
     cve__published_date = django_filters.DateTimeFromToRangeFilter()
     cve__published_date__gte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="gte")
     cve__published_date__lte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="lte")
-
-    status = StatusFilter()
-    exclude_status = StatusFilter(field_name="status", exclude=True)
-    tag = TagFilter()
+    cve__severity = django_filters.ChoiceFilter(field_name="cve__severity", choices=CVESeverityChoices)
 
     class Meta:
         """Meta attributes for filter."""
 
         model = VulnerabilityLCM
 
-        fields = VulnerabilityLCM.csv_headers
+        fields = [
+            "cve",
+            "software",
+            "device",
+            "inventory_item",
+            "status",
+        ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""

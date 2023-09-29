@@ -1,9 +1,11 @@
 ---
 name: "CI"
-on:  # yamllint disable-line rule:truthy
+on: # yamllint disable-line rule:truthy rule:comments
   - "push"
   - "pull_request"
-
+concurrency:  # Cancel any existing runs of this workflow for this same PR
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
 env:
   PLUGIN_NAME: "nautobot-device-lifecycle-mgmt"
 
@@ -30,8 +32,6 @@ jobs:
         uses: "networktocode/gh-action-setup-poetry-environment@v2"
       - name: "Linting: bandit"
         run: "poetry run invoke bandit"
-    needs:
-      - "black"
   pydocstyle:
     runs-on: "ubuntu-20.04"
     env:
@@ -43,8 +43,6 @@ jobs:
         uses: "networktocode/gh-action-setup-poetry-environment@v2"
       - name: "Linting: pydocstyle"
         run: "poetry run invoke pydocstyle"
-    needs:
-      - "black"
   flake8:
     runs-on: "ubuntu-20.04"
     env:
@@ -56,8 +54,6 @@ jobs:
         uses: "networktocode/gh-action-setup-poetry-environment@v2"
       - name: "Linting: flake8"
         run: "poetry run invoke flake8"
-    needs:
-      - "black"
   yamllint:
     runs-on: "ubuntu-20.04"
     env:
@@ -69,18 +65,22 @@ jobs:
         uses: "networktocode/gh-action-setup-poetry-environment@v2"
       - name: "Linting: yamllint"
         run: "poetry run invoke yamllint"
+  pylint:
     needs:
+      - "bandit"
+      - "pydocstyle"
+      - "flake8"
+      - "yamllint"
       - "black"
-  build:
+    runs-on: "ubuntu-20.04"
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
-        nautobot-version: ["1.4.10", "stable"]
+        python-version: ["3.11"]
+        nautobot-version: ["2.0.0"]
     env:
       INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_PYTHON_VER: "${{ matrix.python-version }}"
       INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_NAUTOBOT_VER: "${{ matrix.nautobot-version }}"
-    runs-on: "ubuntu-20.04"
     steps:
       - name: "Check out repository code"
         uses: "actions/checkout@v2"
@@ -95,59 +95,40 @@ jobs:
           builder: "${{ steps.buildx.outputs.name }}"
           context: "./"
           push: false
+          load: true
           tags: "${{ env.PLUGIN_NAME }}/nautobot:${{ matrix.nautobot-version }}-py${{ matrix.python-version }}"
           file: "./development/Dockerfile"
           cache-from: "type=gha,scope=${{ matrix.nautobot-version }}-py${{ matrix.python-version }}"
           cache-to: "type=gha,scope=${{ matrix.nautobot-version }}-py${{ matrix.python-version }}"
-          outputs: "type=docker,dest=/tmp/${{ env.PLUGIN_NAME }}-${{ matrix.nautobot-version }}-py${{ matrix.python-version }}.tar"
           build-args: |
             NAUTOBOT_VER=${{ matrix.nautobot-version }}
             PYTHON_VER=${{ matrix.python-version }}
-      - name: "Upload the docker image"
-        uses: "actions/upload-artifact@v2"
-        with:
-          name: "${{ env.PLUGIN_NAME }}-${{ matrix.nautobot-version }}-py${{ matrix.python-version }}"
-          path: "/tmp/${{ env.PLUGIN_NAME }}-${{ matrix.nautobot-version }}-py${{ matrix.python-version }}.tar"
-          retention-days: 1
-    needs:
-      - "bandit"
-      - "pydocstyle"
-      - "flake8"
-      - "yamllint"
-  pylint:
-    strategy:
-      fail-fast: true
-      matrix:
-        python-version: ["3.8"]
-        nautobot-version: ["1.4.10"]
-    env:
-      INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_PYTHON_VER: "${{ matrix.python-version }}"
-      INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_NAUTOBOT_VER: "${{ matrix.nautobot-version }}"
-    runs-on: "ubuntu-20.04"
-    steps:
-      - name: "Check out repository code"
-        uses: "actions/checkout@v2"
-      - name: "Setup environment"
-        uses: "networktocode/gh-action-setup-poetry-environment@v2"
-      - name: "Download the docker image"
-        uses: "actions/download-artifact@v2"
-        with:
-          name: "${{ env.PLUGIN_NAME }}-${{ matrix.nautobot-version }}-py${{ matrix.python-version }}"
-          path: "/tmp"
-      - name: "Load the image"
-        run: "docker load < /tmp/${{ env.PLUGIN_NAME }}-${{ matrix.nautobot-version }}-py${{ matrix.python-version }}.tar"
       - name: "Copy credentials"
         run: "cp development/creds.example.env development/creds.env"
       - name: "Linting: pylint"
         run: "poetry run invoke pylint"
-    needs:
-      - "build"
   unittest:
+    needs:
+      - "pylint"
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
-        nautobot-version: ["1.4.10", "stable"]
+        python-version: ["3.8"]
+        db-backend: ["postgresql"]
+        nautobot-version: ["2.0.0"]
+        # The include is a method to limit the amount of jobs ran. This essentially
+        # means that in addition to standard postgres and stable, also the lowest
+        # supported version and with mysql
+        include:
+          - python-version: "3.11"
+            db-backend: "postgresql"
+            nautobot-version: "2.0.0"
+          - python-version: "3.11"
+            db-backend: "postgresql"
+            nautobot-version: "stable"
+          # - python-version: "3.11"
+          #   db-backend: "mysql"
+          #   nautobot-version: "2.0.0-rc.4"
     runs-on: "ubuntu-20.04"
     env:
       INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_PYTHON_VER: "${{ matrix.python-version }}"
@@ -157,20 +138,33 @@ jobs:
         uses: "actions/checkout@v2"
       - name: "Setup environment"
         uses: "networktocode/gh-action-setup-poetry-environment@v2"
-      - name: "Download the docker image"
-        uses: "actions/download-artifact@v2"
+      - name: "Set up Docker Buildx"
+        id: "buildx"
+        uses: "docker/setup-buildx-action@v1"
+      - name: "Build"
+        uses: "docker/build-push-action@v2"
         with:
-          name: "${{ env.PLUGIN_NAME }}-${{ matrix.nautobot-version }}-py${{ matrix.python-version }}"
-          path: "/tmp"
-      - name: "Load the image"
-        run: "docker load < /tmp/${{ env.PLUGIN_NAME }}-${{ matrix.nautobot-version }}-py${{ matrix.python-version }}.tar"
+          builder: "${{ steps.buildx.outputs.name }}"
+          context: "./"
+          push: false
+          load: true
+          tags: "${{ env.PLUGIN_NAME }}/nautobot:${{ matrix.nautobot-version }}-py${{ matrix.python-version }}"
+          file: "./development/Dockerfile"
+          cache-from: "type=gha,scope=${{ matrix.nautobot-version }}-py${{ matrix.python-version }}"
+          cache-to: "type=gha,scope=${{ matrix.nautobot-version }}-py${{ matrix.python-version }}"
+          build-args: |
+            NAUTOBOT_VER=${{ matrix.nautobot-version }}
+            PYTHON_VER=${{ matrix.python-version }}
       - name: "Copy credentials"
         run: "cp development/creds.example.env development/creds.env"
+      - name: "Use Mysql invoke settings when needed"
+        run: "cp invoke.mysql.yml invoke.yml"
+        if: "${{ matrix.db-backend == 'mysql' }}"
       - name: "Run Tests"
         run: "poetry run invoke unittest"
-    needs:
-      - "pylint"
   publish_gh:
+    needs:
+      - "unittest"
     name: "Publish to GitHub"
     runs-on: "ubuntu-20.04"
     if: "startsWith(github.ref, 'refs/tags/v')"
@@ -187,6 +181,10 @@ jobs:
         run: "echo RELEASE_VERSION=${GITHUB_REF:10} >> $GITHUB_ENV"
       - name: "Run Poetry Version"
         run: "poetry version $RELEASE_VERSION"
+      - name: "Install Dependencies (needed for mkdocs)"
+        run: "poetry install"
+      - name: "Build Documentation"
+        run: "poetry run mkdocs build --no-directory-urls --strict"
       - name: "Run Poetry Build"
         run: "poetry build"
       - name: "Upload binaries to release"
@@ -197,9 +195,9 @@ jobs:
           tag: "${{ github.ref }}"
           overwrite: true
           file_glob: true
+  publish_pypi:
     needs:
       - "unittest"
-  publish_pypi:
     name: "Push Package to PyPI"
     runs-on: "ubuntu-20.04"
     if: "startsWith(github.ref, 'refs/tags/v')"
@@ -216,6 +214,10 @@ jobs:
         run: "echo RELEASE_VERSION=${GITHUB_REF:10} >> $GITHUB_ENV"
       - name: "Run Poetry Version"
         run: "poetry version $RELEASE_VERSION"
+      - name: "Install Dependencies (needed for mkdocs)"
+        run: "poetry install"
+      - name: "Build Documentation"
+        run: "poetry run mkdocs build --no-directory-urls --strict"
       - name: "Run Poetry Build"
         run: "poetry build"
       - name: "Push to PyPI"
@@ -223,5 +225,37 @@ jobs:
         with:
           user: "__token__"
           password: "${{ secrets.PYPI_API_TOKEN }}"
+  slack-notify:
     needs:
-      - "unittest"
+      - "publish_gh"
+      - "publish_pypi"
+    runs-on: "ubuntu-20.04"
+    env:
+      SLACK_WEBHOOK_URL: "${{ '{{ secrets.SLACK_WEBHOOK_URL }}' }}"
+      SLACK_MESSAGE: >-
+        *NOTIFICATION: NEW-RELEASE-PUBLISHED*\n
+        Repository: <${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>\n
+        Release: <${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}|${{ github.ref_name }}>\n
+        Published by: <${{ github.server_url }}/${{ github.actor }}|${{ github.actor }}>
+    steps:
+      - name: "Send a notification to Slack"
+        # ENVs cannot be used directly in job.if. This is a workaround to check
+        # if SLACK_WEBHOOK_URL is present.
+        if: "${{ env.SLACK_WEBHOOK_URL != '' }}"
+        uses: "slackapi/slack-github-action@v1.17.0"
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "${{ env.SLACK_MESSAGE }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: "${{ secrets.SLACK_WEBHOOK_URL }}"
+          SLACK_WEBHOOK_TYPE: "INCOMING_WEBHOOK"

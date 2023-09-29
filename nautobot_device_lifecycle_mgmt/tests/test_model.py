@@ -1,35 +1,30 @@
+# pylint: disable=no-member
 """nautobot_device_lifecycle_mgmt test class for models."""
 from datetime import date
-from django.test import TestCase
-from django.core.exceptions import ValidationError
-from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 
 import time_machine
-
+from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
+from django.test import TestCase
 from nautobot.dcim.models import DeviceType, Manufacturer, Platform
 from nautobot.extras.choices import RelationshipTypeChoices
 from nautobot.extras.models import Relationship, RelationshipAssociation, Status, Tag
 
 from nautobot_device_lifecycle_mgmt.models import (
+    CVELCM,
+    ContractLCM,
+    DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
+    ProviderLCM,
+    SoftwareImageLCM,
     SoftwareLCM,
     ValidatedSoftwareLCM,
-    DeviceSoftwareValidationResult,
-    CVELCM,
     VulnerabilityLCM,
-    SoftwareImageLCM,
-    ProviderLCM,
-    ContractLCM,
 )
-from .conftest import (
-    create_devices,
-    create_inventory_items,
-    create_cves,
-    create_softwares,
-    create_validated_softwares,
-)
+
+from .conftest import create_cves, create_devices, create_inventory_items, create_softwares, create_validated_softwares
 
 
 class HardwareLCMTestCase(TestCase):
@@ -37,8 +32,8 @@ class HardwareLCMTestCase(TestCase):
 
     def setUp(self):
         """Set up base objects."""
-        self.manufacturer = Manufacturer.objects.create(name="Cisco")
-        self.device_type = DeviceType.objects.create(model="c9300-24", slug="c9300-24", manufacturer=self.manufacturer)
+        self.manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+        self.device_type, _ = DeviceType.objects.get_or_create(model="c9300-24", manufacturer=self.manufacturer)
 
     def test_create_hwlcm_success_eo_sale(self):
         """Successfully create basic notice with end_of_sale."""
@@ -144,7 +139,7 @@ class SoftwareLCMTestCase(TestCase):
 
     def setUp(self):
         """Set up base objects."""
-        self.device_platform = Platform.objects.create(name="Cisco IOS", slug="cisco_ios")
+        self.device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
 
     def test_create_softwarelcm_required_only(self):
         """Successfully create SoftwareLCM with required fields only."""
@@ -185,15 +180,15 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
 
     def setUp(self):
         """Set up base objects."""
-        device_platform = Platform.objects.create(name="Cisco IOS", slug="cisco_ios")
+        device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
         self.software = SoftwareLCM.objects.create(
             device_platform=device_platform,
             version="17.3.3 MD",
             release_date=date(2019, 1, 10),
         )
-        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
-        self.device_type_1 = DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000")
-        self.device_type_2 = DeviceType.objects.create(manufacturer=manufacturer, model="CAT-3750", slug="cat-3750")
+        manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+        self.device_type_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="ASR-1000")
+        self.device_type_2, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="CAT-3750")
         self.content_type_devicetype = ContentType.objects.get(app_label="dcim", model="devicetype")
         self.device_1, self.device_2 = create_devices()[:2]
         self.inventoryitem_1, self.inventoryitem_2 = create_inventory_items()[:2]
@@ -436,15 +431,15 @@ class CVELCMTestCase(TestCase):
 
     def setUp(self):
         """Set up the test objects."""
-        self.device_platform = Platform.objects.create(name="Cisco IOS", slug="cisco_ios")
+        self.device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
         self.softwarelcm = SoftwareLCM.objects.create(device_platform=self.device_platform, version="15.2(5)e")
         self.cve_ct = ContentType.objects.get_for_model(CVELCM)
         self.software_ct = ContentType.objects.get_for_model(SoftwareLCM)
         self.relationship = Relationship.objects.get_or_create(
-            name="CVE to Software",
+            label="CVE to Software",
             defaults={
-                "name": "CVE to Software",
-                "slug": "cve_soft",
+                "label": "CVE to Software",
+                "key": "cve_soft",
                 "type": RelationshipTypeChoices.TYPE_MANY_TO_MANY,
                 "source_type": ContentType.objects.get_for_model(CVELCM),
                 "source_label": "Affected Softwares",
@@ -452,9 +447,7 @@ class CVELCMTestCase(TestCase):
                 "destination_label": "Corresponding CVEs",
             },
         )[0]
-        self.status = Status.objects.create(
-            name="Fixed", slug="fixed", color="4caf50", description="Unit has been fixed"
-        )
+        self.status, _ = Status.objects.get_or_create(name="Fixed", color="4caf50", description="Unit has been fixed")
         self.status.content_types.set([self.cve_ct])
 
     def test_create_cvelcm_required_only(self):
@@ -524,31 +517,29 @@ class VulnerabilityLCMTestCase(TestCase):
         self.cves = create_cves()
         self.softwares = create_softwares()
         vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
-        self.status = Status.objects.create(
-            name="Exempt", slug="exempt", color="4caf50", description="This unit is exempt."
-        )
+        self.status = Status.objects.create(name="Exempt", color="4caf50", description="This unit is exempt.")
         self.status.content_types.set([vuln_ct])
 
     def test_create_vulnerabilitylcm_device_required_only(self):
-        """Successfully create VulnerabilityLCM with required fields only."""
+        """Successfully create VulnerabilityLCM for device with required fields only."""
         vulnerability = VulnerabilityLCM.objects.create(
             cve=self.cves[0], software=self.softwares[0], device=self.devices[0]
         )
 
-        self.assertEqual(str(vulnerability), "Device: sw1 - Software: Cisco IOS - 15.1(2)M - CVE: CVE-2021-1391")
+        self.assertEqual(str(vulnerability), "Device: sw1 - Software: cisco_ios - 15.1(2)M - CVE: CVE-2021-1391")
         self.assertEqual(vulnerability.cve, self.cves[0])
         self.assertEqual(vulnerability.software, self.softwares[0])
         self.assertEqual(vulnerability.device, self.devices[0])
 
     def test_create_vulnerabilitylcm_inventory_item_required_only(self):
-        """Successfully create VulnerabilityLCM with required fields only."""
+        """Successfully create VulnerabilityLCM for inventory item with required fields only."""
         vulnerability = VulnerabilityLCM.objects.create(
             cve=self.cves[1], software=self.softwares[1], inventory_item=self.inv_items[1]
         )
 
         self.assertEqual(
             str(vulnerability),
-            "Inventory Part: 100GBASE-SR4 QSFP Transceiver - Software: Cisco IOS - 4.22.9M - CVE: CVE-2021-44228",
+            "Inventory Part: 100GBASE-SR4 QSFP Transceiver - Software: cisco_ios - 4.22.9M - CVE: CVE-2021-44228",
         )
         self.assertEqual(vulnerability.cve, self.cves[1])
         self.assertEqual(vulnerability.software, self.softwares[1])
@@ -560,7 +551,7 @@ class VulnerabilityLCMTestCase(TestCase):
             cve=self.cves[2], software=self.softwares[2], device=self.devices[2], status=self.status
         )
 
-        self.assertEqual(str(vulnerability), "Device: sw3 - Software: Cisco IOS - 21.4R3 - CVE: CVE-2020-27134")
+        self.assertEqual(str(vulnerability), "Device: sw3 - Software: cisco_ios - 21.4R3 - CVE: CVE-2020-27134")
         self.assertEqual(vulnerability.cve, self.cves[2])
         self.assertEqual(vulnerability.software, self.softwares[2])
         self.assertEqual(vulnerability.device, self.devices[2])
@@ -572,17 +563,17 @@ class SoftwareImageLCMTestCase(TestCase):
 
     def setUp(self):
         """Set up base objects."""
-        device_platform = Platform.objects.get_or_create(name="Cisco IOS", slug="cisco_ios")[0]
+        device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
         self.software = SoftwareLCM.objects.create(
             device_platform=device_platform,
             version="17.3.3 MD",
             release_date=date(2019, 1, 10),
         )
-        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
-        self.device_type_1 = DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000", slug="asr-1000")
-        self.device_type_2 = DeviceType.objects.create(manufacturer=manufacturer, model="CAT-3750", slug="cat-3750")
+        manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+        self.device_type_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="ASR-1000")
+        self.device_type_2, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="CAT-3750")
         self.inventory_item = create_inventory_items()[0]
-        self.tag = Tag.objects.create(name="asr", slug="asr")
+        self.tag = Tag.objects.create(name="asr")
 
     def test_create_softwareimage_required_only(self):
         """Successfully create SoftwareImageLCM with required fields only."""

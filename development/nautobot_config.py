@@ -118,7 +118,7 @@ BANNER_BOTTOM = os.environ.get("BANNER_BOTTOM", "")
 BANNER_LOGIN = os.environ.get("BANNER_LOGIN", "")
 
 # Maximum number of days to retain logged changes. Set to 0 to retain changes indefinitely. (Default: 90)
-CHANGELOG_RETENTION = int(os.environ.get("CHANGELOG_RETENTION", 90))
+CHANGELOG_RETENTION = int(os.environ.get("NAUTOBOT_CHANGELOG_RETENTION", 90))
 
 # If True, all origins will be allowed. Other settings restricting allowed origins will be ignored.
 # Defaults to False. Setting this to True can be dangerous, as it allows any website to make
@@ -217,7 +217,7 @@ MAINTENANCE_MODE = False
 # An API consumer can request an arbitrary number of objects =by appending the "limit" parameter to the URL (e.g.
 # "?limit=1000"). This setting defines the maximum limit. Setting it to 0 or None will allow an API consumer to request
 # all objects by specifying "?limit=0".
-MAX_PAGE_SIZE = int(os.environ.get("MAX_PAGE_SIZE", 1000))
+MAX_PAGE_SIZE = int(os.environ.get("NAUTOBOT_MAX_PAGE_SIZE", 1000))
 
 # The file path where uploaded media such as image attachments are stored. A trailing slash is not needed. Note that
 # the default value of this setting is within the invoking user's home directory
@@ -234,7 +234,7 @@ MAX_PAGE_SIZE = int(os.environ.get("MAX_PAGE_SIZE", 1000))
 # }
 
 # Expose Prometheus monitoring metrics at the HTTP endpoint '/metrics'
-METRICS_ENABLED = False
+METRICS_ENABLED = os.environ.get("NAUTOBOT_METRICS_ENABLED", False)
 
 # Credentials that Nautobot will uses to authenticate to devices when connecting via NAPALM.
 NAPALM_USERNAME = os.environ.get("NAPALM_USERNAME", "")

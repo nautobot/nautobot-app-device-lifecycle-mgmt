@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("nautobot_device_lifecycle_mgmt", "0008_software_image_data_migration"),
     ]
