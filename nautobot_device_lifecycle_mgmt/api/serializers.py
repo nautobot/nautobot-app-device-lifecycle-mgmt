@@ -7,34 +7,19 @@ from nautobot.dcim.api.nested_serializers import (
     NestedPlatformSerializer,
 )
 from nautobot.extras.api.customfields import CustomFieldModelSerializer
-from nautobot.extras.api.serializers import (
-    StatusModelSerializerMixin,
-    StatusSerializerField,
-    TaggedObjectSerializer,
-)
-from rest_framework import serializers
-
-# Nautobot 1.4 introduced RelationshipModelSerializerMixin
-# TODO: Remove this once plugin drops support for Nautobot < 1.4
-try:
-    from nautobot.extras.api.relationships import RelationshipModelSerializerMixin  # pylint: disable=ungrouped-imports
-
-    serializer_base_classes = [
-        RelationshipModelSerializerMixin,
-        TaggedObjectSerializer,
-        CustomFieldModelSerializer,
-    ]  # pylint: disable=invalid-name
-except ImportError:
-    serializer_base_classes = [TaggedObjectSerializer, CustomFieldModelSerializer]  # pylint: disable=invalid-name
-
+from nautobot.extras.api.relationships import RelationshipModelSerializerMixin  # pylint: disable=ungrouped-imports
+from nautobot.extras.api.serializers import StatusModelSerializerMixin, StatusSerializerField, TaggedObjectSerializer
 from nautobot.extras.models import Status
+from rest_framework import serializers
 
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContactLCM,
     ContractLCM,
+    DeviceSoftwareValidationResult,
     HardwareLCM,
+    InventoryItemSoftwareValidationResult,
     ProviderLCM,
     SoftwareImageLCM,
     SoftwareLCM,
@@ -49,6 +34,12 @@ from .nested_serializers import (
     NestedSoftwareImageLCMSerializer,
     NestedSoftwareLCMSerializer,
 )
+
+serializer_base_classes = [
+    RelationshipModelSerializerMixin,
+    TaggedObjectSerializer,
+    CustomFieldModelSerializer,
+]  # pylint: disable=invalid-name
 
 
 class HardwareLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,too-few-public-methods
@@ -326,4 +317,54 @@ class VulnerabilityLCMSerializer(
             "software",
             "device",
             "inventory_item",
+        ]
+
+
+class DeviceSoftwareValidationResultSerializer(*serializer_base_classes):  # pylint: disable=too-few-public-methods
+    """REST API serializer for DeviceSoftwareValidationResult records."""
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:devicesoftwarevalidationresult-detail"
+    )
+    device = NestedDeviceSerializer(read_only=True)
+    software = NestedSoftwareLCMSerializer(read_only=True)
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = DeviceSoftwareValidationResult
+        fields = [
+            "device",
+            "software",
+            "is_validated",
+            "last_run",
+            "run_type",
+            "valid_software",
+            "url",
+        ]
+
+
+class InventoryItemSoftwareValidationResultSerializer(
+    *serializer_base_classes
+):  # pylint: disable=too-few-public-methods
+    """REST API serializer for InventoryItemSoftwareValidationResult records."""
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:inventoryitemsoftwarevalidationresult-detail"
+    )
+    inventory_item = NestedDeviceSerializer(read_only=True)
+    software = NestedSoftwareLCMSerializer(read_only=True)
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Meta attributes."""
+
+        model = InventoryItemSoftwareValidationResult
+        fields = [
+            "inventory_item",
+            "software",
+            "is_validated",
+            "last_run",
+            "run_type",
+            "valid_software",
+            "url",
         ]

@@ -1,6 +1,6 @@
 """Django urlpatterns declaration for the Lifecycle Management plugin."""
 from django.urls import path
-from nautobot.extras.views import ObjectChangeLogView
+from nautobot.extras.views import ObjectChangeLogView, ObjectNotesView
 from nautobot_device_lifecycle_mgmt import views
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
@@ -30,6 +30,12 @@ urlpatterns = [
         name="hardwarelcm_changelog",
         kwargs={"model": HardwareLCM},
     ),
+    path(
+        "hardware/<uuid:pk>/notes/",
+        ObjectNotesView.as_view(),
+        name="hardwarelcm_notes",
+        kwargs={"model": HardwareLCM},
+    ),
     path("hardware/import/", views.HardwareLCMBulkImportView.as_view(), name="hardwarelcm_import"),
     # Software Lifecycle Management URLs
     path("software/", views.SoftwareLCMListView.as_view(), name="softwarelcm_list"),
@@ -41,6 +47,12 @@ urlpatterns = [
         "software/<uuid:pk>/changelog/",
         ObjectChangeLogView.as_view(),
         name="softwarelcm_changelog",
+        kwargs={"model": SoftwareLCM},
+    ),
+    path(
+        "software/<uuid:pk>/notes/",
+        ObjectNotesView.as_view(),
+        name="softwarelcm_notes",
         kwargs={"model": SoftwareLCM},
     ),
     path("software/import/", views.SoftwareLCMBulkImportView.as_view(), name="softwarelcm_import"),
@@ -62,6 +74,12 @@ urlpatterns = [
         "software-image/<uuid:pk>/changelog/",
         ObjectChangeLogView.as_view(),
         name="softwareimagelcm_changelog",
+        kwargs={"model": SoftwareImageLCM},
+    ),
+    path(
+        "software-image/<uuid:pk>/notes/",
+        ObjectNotesView.as_view(),
+        name="softwareimagelcm_notes",
         kwargs={"model": SoftwareImageLCM},
     ),
     path(
@@ -90,6 +108,12 @@ urlpatterns = [
         kwargs={"model": ValidatedSoftwareLCM},
     ),
     path(
+        "validated-software/<uuid:pk>/notes/",
+        ObjectNotesView.as_view(),
+        name="validatedsoftwarelcm_notes",
+        kwargs={"model": ValidatedSoftwareLCM},
+    ),
+    path(
         "validated-software/import/",
         views.ValidatedSoftwareLCMBulkImportView.as_view(),
         name="validatedsoftwarelcm_import",
@@ -104,6 +128,18 @@ urlpatterns = [
         views.ValidatedSoftwareInventoryItemReportView.as_view(),
         name="validatedsoftware_inventoryitem_report",
     ),
+    # DeviceValidatedSoftwareResult
+    path(
+        "device-validated-software-result/",
+        views.DeviceSoftwareValidationResultListView.as_view(),
+        name="devicesoftwarevalidationresult_list",
+    ),
+    # InventoryItemValidatedSoftwareResult
+    path(
+        "inventory-item-validated-software-result/",
+        views.InventoryItemSoftwareValidationResultListView.as_view(),
+        name="inventoryitemsoftwarevalidationresult_list",
+    ),
     # Contract Lifecycle Management URLs
     path("contract/", views.ContractLCMListView.as_view(), name="contractlcm_list"),
     path("contract/<uuid:pk>/", views.ContractLCMView.as_view(), name="contractlcm"),
@@ -116,6 +152,12 @@ urlpatterns = [
         "contract/<uuid:pk>/changelog/",
         ObjectChangeLogView.as_view(),
         name="contractlcm_changelog",
+        kwargs={"model": ContractLCM},
+    ),
+    path(
+        "contract/<uuid:pk>/notes/",
+        ObjectNotesView.as_view(),
+        name="contractlcm_notes",
         kwargs={"model": ContractLCM},
     ),
     path("contract/import/", views.ContractLCMBulkImportView.as_view(), name="contractlcm_import"),
@@ -133,6 +175,12 @@ urlpatterns = [
         name="providerlcm_changelog",
         kwargs={"model": ProviderLCM},
     ),
+    path(
+        "provider/<uuid:pk>/notes/",
+        ObjectNotesView.as_view(),
+        name="providerlcm_notes",
+        kwargs={"model": ProviderLCM},
+    ),
     path("provider/import/", views.ProviderLCMBulkImportView.as_view(), name="providerlcm_import"),
     # Contract Resources Lifecycle Management URLs
     path("contact/", views.ContactLCMListView.as_view(), name="contactlcm_list"),
@@ -146,6 +194,12 @@ urlpatterns = [
         "contact/<uuid:pk>/changelog/",
         ObjectChangeLogView.as_view(),
         name="contactlcm_changelog",
+        kwargs={"model": ContactLCM},
+    ),
+    path(
+        "contact/<uuid:pk>/notes/",
+        ObjectNotesView.as_view(),
+        name="contactlcm_notes",
         kwargs={"model": ContactLCM},
     ),
     path("contact/import/", views.ContactLCMBulkImportView.as_view(), name="contactlcm_import"),
@@ -163,6 +217,12 @@ urlpatterns = [
         name="cvelcm_changelog",
         kwargs={"model": CVELCM},
     ),
+    path(
+        "cve/<uuid:pk>/notes/",
+        ObjectNotesView.as_view(),
+        name="cvelcm_notes",
+        kwargs={"model": CVELCM},
+    ),
     path("cve/import/", views.CVELCMBulkImportView.as_view(), name="cvelcm_import"),
     # Vulnerability Lifecycle Management URLs
     path("vulnerability/", views.VulnerabilityLCMListView.as_view(), name="vulnerabilitylcm_list"),
@@ -175,6 +235,12 @@ urlpatterns = [
         "vulnerability/<uuid:pk>/changelog/",
         ObjectChangeLogView.as_view(),
         name="vulnerabilitylcm_changelog",
+        kwargs={"model": VulnerabilityLCM},
+    ),
+    path(
+        "vulnerability/<uuid:pk>/notes/",
+        ObjectNotesView.as_view(),
+        name="vulnerabilitylcm_notes",
         kwargs={"model": VulnerabilityLCM},
     ),
 ]

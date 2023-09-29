@@ -51,18 +51,45 @@
                         <th><a>No Software</a></th>
                         <th><a>Validation (%)</a></th>
                         <th><a>Summary</a></th>
+                        <th><a>Export Data</a></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr class="even">
-                        <td>Inventory Items</td>
-                        <td>{% if inventory_aggr.total is not None %} {{ inventory_aggr.total }} {% else %} -- {% endif %}</td>
-                        <td>{% if inventory_aggr.valid is not None %} {{ inventory_aggr.valid }} {% else %} -- {% endif %}</td>
-                        <td>{% if inventory_aggr.invalid is not None %} {{ inventory_aggr.invalid }} {% else %} -- {% endif %}</td>
-                        <td>{% if inventory_aggr.no_software is not None %} {{ inventory_aggr.no_software }} {% else %} -- {% endif %}</td>
+                        <td>
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/">
+                                Inventory Items
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/">
+                                {% if inventory_aggr.total is not None %} {{ inventory_aggr.total }} {% else %} -- {% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/?&valid=True">
+                                {% if inventory_aggr.valid is not None %} {{ inventory_aggr.valid }} {% else %} -- {% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/?&valid=False">
+                                {% if inventory_aggr.invalid is not None %} {{ inventory_aggr.invalid }} {% else %} -- {% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/?&sw_missing_only=True">
+                                {% if inventory_aggr.no_software is not None %} {{ inventory_aggr.no_software }} {% else %} -- {% endif %}
+                            </a>
+                        </td>
                         <td>{% if inventory_aggr.valid_percent is not None %} {{ inventory_aggr.valid_percent }} % {% else %} -- {% endif %}</td>
                         <td><a target="_blank" href="data:image/png;base64,{{ inventory_visual|safe }}" title="Inventory Pie Chart">
                             <img style="width:150px;" src="data:image/png;base64,{{ inventory_visual|safe }}" alt="Inventory Pie Chart">
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/?export" 
+                                class="btn btn-default btn-xs" title="Export data for all inventory items" aria-hidden="true"> 
+                                <i class="mdi mdi-download"></i>
                             </a>
                         </td>
                     </tr>

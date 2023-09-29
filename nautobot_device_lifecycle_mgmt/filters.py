@@ -3,20 +3,9 @@ import datetime
 
 import django_filters
 from django.db.models import Q
-from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Platform, Region, Site
-from nautobot.extras.filters import StatusFilter, StatusModelFilterSetMixin, TagFilter
+from nautobot.dcim.models import Device, DeviceRole, DeviceType, InventoryItem, Manufacturer, Platform, Region, Site
+from nautobot.extras.filters import NautobotFilterSet, StatusFilter, StatusModelFilterSetMixin, TagFilter
 from nautobot.extras.models import Tag
-
-try:
-    from nautobot.extras.filters import NautobotFilterSet
-except ImportError:
-    # TODO: Remove once plugin no longer supports Nautobot < 1.4.0
-    from nautobot.extras.filters import CustomFieldModelFilterSet
-    from nautobot.utilities.filters import BaseFilterSet
-
-    class NautobotFilterSet(BaseFilterSet, CustomFieldModelFilterSet):
-        """Emulate NautobotFilterSet from Nautobot 1.4.0 ."""
-
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -424,6 +413,15 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         queryset=SoftwareLCM.objects.all(),
         label="Software",
     )
+    valid = django_filters.BooleanFilter(
+        label="Valid",
+        field_name="is_validated",
+    )
+    platform = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__platform",
+        queryset=Platform.objects.all(),
+        label="Platform",
+    )
     site_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device__site",
         queryset=Site.objects.all(),
@@ -483,6 +481,10 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         method="_exclude_sw_missing",
         label="Exclude missing software",
     )
+    sw_missing_only = django_filters.BooleanFilter(
+        method="_sw_missing_only",
+        label="Show only missing software",
+    )
 
     class Meta:
         """Meta attributes for filter."""
@@ -491,12 +493,14 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
 
         fields = [
             "software",
+            "platform",
             "site",
             "region",
             "device",
             "device_type",
             "device_role",
             "exclude_sw_missing",
+            "sw_missing_only",
         ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
@@ -513,6 +517,13 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
 
         return queryset
 
+    def _sw_missing_only(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Only show devices with missing software."""
+        if value:
+            return queryset.filter(Q(software=None))
+
+        return queryset
+
 
 class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
     """Filter for InventoryItemSoftwareValidationResult."""
@@ -524,6 +535,15 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         to_field_name="version",
         queryset=SoftwareLCM.objects.all(),
         label="Software",
+    )
+    valid = django_filters.BooleanFilter(
+        label="Valid",
+        field_name="is_validated",
+    )
+    manufacturer = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_item__manufacturer",
+        queryset=Manufacturer.objects.all(),
+        label="Manufacturer",
     )
     site_id = django_filters.ModelMultipleChoiceFilter(
         field_name="inventory_item__device__site",
@@ -596,6 +616,10 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         method="_exclude_sw_missing",
         label="Exclude missing software",
     )
+    sw_missing_only = django_filters.BooleanFilter(
+        method="_sw_missing_only",
+        label="Show only missing software",
+    )
 
     class Meta:
         """Meta attributes for filter."""
@@ -604,6 +628,7 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
 
         fields = [
             "software",
+            "manufacturer",
             "site",
             "region",
             "inventory_item",
@@ -612,6 +637,7 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
             "device_type",
             "device_role",
             "exclude_sw_missing",
+            "sw_missing_only",
         ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
@@ -636,6 +662,13 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         """Exclude devices with missing software."""
         if value:
             return queryset.filter(~Q(software=None))
+
+        return queryset
+
+    def _sw_missing_only(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Only show devices with missing software."""
+        if value:
+            return queryset.filter(Q(software=None))
 
         return queryset
 
@@ -674,6 +707,7 @@ class ContractLCMFilterSet(NautobotFilterSet):
             "support_level",
             "contract_type",
             "expired",
+            "currency",
         ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
