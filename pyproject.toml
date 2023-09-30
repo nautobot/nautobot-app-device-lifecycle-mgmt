@@ -35,7 +35,7 @@ yamllint = "*"
 mysqlclient = "*"
 python-dotenv = "*"
 Markdown = "*"
-mkdocs = "~1.4.3"
+mkdocs = "1.4.3"
 # Material for mkdocs theme
 mkdocs-material = "~9.1.18"
 # Render custom markdown for version added/changed/remove notes
@@ -44,6 +44,7 @@ mkdocs-version-annotations = "1.0.0"
 mkdocstrings = "~0.22.0"
 # Python-specific extension to mkdocstrings
 mkdocstrings-python = "~1.3.0"
+mkdocs-include-markdown-plugin = "3.9.1"
 pylint-nautobot = "*"
 
 [tool.poetry.group.dev.dependencies]
