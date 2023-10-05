@@ -18,6 +18,7 @@ matplotlib = "^3.3.4"
 nautobot = "^2.0.0"
 
 [tool.poetry.dev-dependencies]
+ipython = "*"
 invoke = "*"
 black = "*"
 bandit = "*"
