@@ -929,14 +929,25 @@ class ContractLCMView(generic.ObjectView):
         """Export queryset of objects as comma-separated value (CSV)."""
         csv_data = []
         if object_type == "devices":
-            csv_data.append(",".join(["Contract Name", "Contract Type", "Device Name", "Device Serial", "Device Site"]))
+            csv_data.append(
+                ",".join(
+                    [
+                        "Contract Name",
+                        "Contract Type",
+                        "Device Name",
+                        "Device Serial",
+                        "Device Manufacturer",
+                        "Device Site",
+                    ]
+                )
+            )
             qs = (
                 Device.objects.filter(
                     id__in=RelationshipAssociation.objects.filter(
                         relationship__slug="contractlcm-to-device", source_id=contract.pk
                     ).values_list("destination_id", flat=True)
                 )
-                .values("name", "serial", "site__name")
+                .values("name", "serial", "device_type__manufacturer__name", "site__name")
                 .restrict(request.user, "view")
             )
         elif object_type == "inventoryitems":
@@ -948,6 +959,7 @@ class ContractLCMView(generic.ObjectView):
                         "Item Name",
                         "Item Part ID",
                         "Item Serial",
+                        "Item Manufacturer",
                         "Item Parent Device",
                         "Item Site",
                     ]
@@ -959,7 +971,7 @@ class ContractLCMView(generic.ObjectView):
                         relationship__slug="contractlcm-to-inventoryitem", source_id=contract.pk
                     ).values_list("destination_id", flat=True)
                 )
-                .values("name", "part_id", "serial", "device__name", "device__site__name")
+                .values("name", "part_id", "serial", "manufacturer__name", "device__name", "device__site__name")
                 .restrict(request.user, "view")
             )
         else:

@@ -586,6 +586,8 @@ class ContractLCMExportLinkedObjectsTest(TestCase):
         obj_perm.users.add(self.user)
         obj_perm.object_types.add(ContentType.objects.get_for_model(ContractLCM))
         obj_perm.object_types.add(ContentType.objects.get_for_model(Device))
+        # obj_perm.object_types.add(ContentType.objects.get_for_model(DeviceType))
+        # obj_perm.object_types.add(ContentType.objects.get_for_model(Manufacturer))
 
         contract1 = ContractLCM.objects.filter(name="CiscoHW1").first()
         response = self.client.get(f"{contract1.get_absolute_url()}?export_contract=devices")
@@ -594,9 +596,9 @@ class ContractLCMExportLinkedObjectsTest(TestCase):
         response_body = response.content.decode(response.charset)
         self.assertEqual(
             response_body,
-            "Contract Name,Contract Type,Device Name,Device Serial,Device Site"
-            "\nCiscoHW1,Hardware,sw1,,Test 1"
-            "\nCiscoHW1,Hardware,sw2,,Test 1",
+            "Contract Name,Contract Type,Device Name,Device Serial,Device Manufacturer,Device Site"
+            "\nCiscoHW1,Hardware,sw1,,Cisco,Test 1"
+            "\nCiscoHW1,Hardware,sw2,,Cisco,Test 1",
         )
 
         contract2 = ContractLCM.objects.filter(name="AristaHW1").first()
@@ -606,7 +608,8 @@ class ContractLCMExportLinkedObjectsTest(TestCase):
         response_body = response.content.decode(response.charset)
         self.assertEqual(
             response_body,
-            "Contract Name,Contract Type,Device Name,Device Serial,Device Site\nAristaHW1,Hardware,sw3,,Test 1",
+            "Contract Name,Contract Type,Device Name,Device Serial,Device Manufacturer,Device Site"
+            "\nAristaHW1,Hardware,sw3,,Cisco,Test 1",
         )
 
     def test_contract_inventoryitems_export(self):
@@ -617,6 +620,7 @@ class ContractLCMExportLinkedObjectsTest(TestCase):
         obj_perm.users.add(self.user)
         obj_perm.object_types.add(ContentType.objects.get_for_model(ContractLCM))
         obj_perm.object_types.add(ContentType.objects.get_for_model(InventoryItem))
+        # obj_perm.object_types.add(ContentType.objects.get_for_model(Manufacturer))
 
         contract1 = ContractLCM.objects.filter(name="CiscoHW1").first()
         response = self.client.get(f"{contract1.get_absolute_url()}?export_contract=inventoryitems")
@@ -625,8 +629,8 @@ class ContractLCMExportLinkedObjectsTest(TestCase):
         response_body = response.content.decode(response.charset)
         self.assertEqual(
             response_body,
-            "Contract Name,Contract Type,Item Name,Item Part ID,Item Serial,Item Parent Device,Item Site"
-            "\nCiscoHW1,Hardware,SUP2T Card,VS-S2T-10G,,sw1,Test 1",
+            "Contract Name,Contract Type,Item Name,Item Part ID,Item Serial,Item Manufacturer,Item Parent Device,Item Site"
+            "\nCiscoHW1,Hardware,SUP2T Card,VS-S2T-10G,,Cisco,sw1,Test 1",
         )
 
         contract2 = ContractLCM.objects.filter(name="AristaHW1").first()
@@ -636,7 +640,7 @@ class ContractLCMExportLinkedObjectsTest(TestCase):
         response_body = response.content.decode(response.charset)
         self.assertEqual(
             response_body,
-            "Contract Name,Contract Type,Item Name,Item Part ID,Item Serial,Item Parent Device,Item Site"
-            "\nAristaHW1,Hardware,100GBASE-SR4 QSFP Transceiver,QSFP-100G-SR4-S,,sw2,Test 1"
-            "\nAristaHW1,Hardware,48x RJ-45 Line Card,WS-X6548-GE-TX,,sw3,Test 1",
+            "Contract Name,Contract Type,Item Name,Item Part ID,Item Serial,Item Manufacturer,Item Parent Device,Item Site"
+            "\nAristaHW1,Hardware,100GBASE-SR4 QSFP Transceiver,QSFP-100G-SR4-S,,Cisco,sw2,Test 1"
+            "\nAristaHW1,Hardware,48x RJ-45 Line Card,WS-X6548-GE-TX,,Cisco,sw3,Test 1",
         )

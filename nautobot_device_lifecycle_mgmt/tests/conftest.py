@@ -9,7 +9,7 @@ from nautobot_device_lifecycle_mgmt.models import CVELCM, SoftwareLCM, Validated
 def create_devices():
     """Create devices for tests."""
     device_platform, _ = Platform.objects.get_or_create(name="Cisco IOS", slug="cisco_ios")
-    manufacturer, _ = Manufacturer.objects.get_or_create(slug="cisco")
+    manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco", slug="cisco")
     device_type, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="6509-E", slug="6509-e")
     device_role, _ = DeviceRole.objects.get_or_create(name="Core Switch", slug="core-switch")
     site, _ = Site.objects.get_or_create(name="Test 1", slug="test-1")
