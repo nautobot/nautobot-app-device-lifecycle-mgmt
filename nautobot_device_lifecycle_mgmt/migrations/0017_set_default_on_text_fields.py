@@ -83,7 +83,10 @@ def set_default_on_software_text_fields(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("nautobot_device_lifecycle_mgmt", "0016_role_migration_cleanup"),
+        ("nautobot_device_lifecycle_mgmt", "0001_hardwarelcm"),
+        ("nautobot_device_lifecycle_mgmt", "0002_softwarelcm"),
+        ("nautobot_device_lifecycle_mgmt", "0003_service_contracts"),
+        ("nautobot_device_lifecycle_mgmt", "0006_cvelcm_vulnerabilitylcm"),
     ]
 
     operations = [
