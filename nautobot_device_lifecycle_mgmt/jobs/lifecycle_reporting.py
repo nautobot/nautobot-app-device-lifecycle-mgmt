@@ -1,3 +1,4 @@
+# pylint: disable=logging-not-lazy, consider-using-f-string
 """Jobs for the Lifecycle Management plugin."""
 from datetime import datetime
 
@@ -12,7 +13,6 @@ from nautobot_device_lifecycle_mgmt.models import (
 )
 from nautobot_device_lifecycle_mgmt.software import DeviceSoftware, InventoryItemSoftware
 
-
 name = "Device/Software Lifecycle Reporting"  # pylint: disable=invalid-name
 
 
@@ -23,12 +23,12 @@ class DeviceSoftwareValidationFullReport(Job):
     description = "Validates software version on devices."
     read_only = False
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta class for the job."""
 
-        commit_default = True
+        has_sensitive_variables = False
 
-    def test_device_software_validity(self) -> None:
+    def run(self) -> None:  # pylint: disable=arguments-differ
         """Check if software assigned to each device is valid. If no software is assigned return warning message."""
         devices = Device.objects.all()
         job_run_time = datetime.now()
@@ -43,7 +43,7 @@ class DeviceSoftwareValidationFullReport(Job):
             validate_obj.last_run = job_run_time
             validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
             validate_obj.validated_save()
-        self.log_success(message=f"Performed validation on: {devices.count()} devices.")
+            self.logger.info("Performed validation on: %d devices.", devices.count())
 
 
 class InventoryItemSoftwareValidationFullReport(Job):
@@ -53,12 +53,12 @@ class InventoryItemSoftwareValidationFullReport(Job):
     description = "Validates software version on inventory items."
     read_only = False
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta class for the job."""
 
-        commit_default = True
+        has_sensitive_variables = False
 
-    def test_inventory_item_software_validity(self):
+    def run(self):  # pylint: disable=arguments-differ
         """Check if software assigned to each inventory item is valid. If no software is assigned return warning message."""
         inventory_items = InventoryItem.objects.all()
         job_run_time = datetime.now()
@@ -74,4 +74,4 @@ class InventoryItemSoftwareValidationFullReport(Job):
             validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
             validate_obj.validated_save()
 
-        self.log_success(message=f"Performed validation on: {inventory_items.count()} inventory items.")
+        self.logger.info("Performed validation on: %d inventory items." % inventory_items.count())

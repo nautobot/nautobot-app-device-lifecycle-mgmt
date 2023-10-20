@@ -1,25 +1,26 @@
 """Django models for the Lifecycle Management plugin."""
 
-from datetime import datetime, date
+from datetime import date, datetime
 
-from django.db import models
-from django.urls import reverse
-from django.core.exceptions import ValidationError
 from django.conf import settings
-from nautobot.extras.utils import extras_features
-from nautobot.extras.models.statuses import StatusField
-from nautobot.core.models.generics import PrimaryModel, OrganizationalModel
+
+# from django.urls import reverse
+from django.core.exceptions import ValidationError
+from django.db import models
+from nautobot.core.models.generics import OrganizationalModel, PrimaryModel
+from nautobot.core.models.querysets import RestrictedQuerySet
 from nautobot.dcim.models import Device, DeviceType, InventoryItem
-from nautobot.utilities.querysets import RestrictedQuerySet
+from nautobot.extras.models.statuses import StatusField
+from nautobot.extras.utils import extras_features
 
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.software_filters import (
-    DeviceValidatedSoftwareFilter,
-    InventoryItemValidatedSoftwareFilter,
     DeviceSoftwareFilter,
-    InventoryItemSoftwareFilter,
     DeviceSoftwareImageFilter,
+    DeviceValidatedSoftwareFilter,
+    InventoryItemSoftwareFilter,
     InventoryItemSoftwareImageFilter,
+    InventoryItemValidatedSoftwareFilter,
 )
 
 
@@ -43,26 +44,16 @@ class HardwareLCM(PrimaryModel):
         blank=True,
         null=True,
     )
-    inventory_item = models.CharField(verbose_name="Inventory Item Part", max_length=255, blank=True, null=True)
+    inventory_item = models.CharField(  # pylint: disable=nb-string-field-blank-null
+        verbose_name="Inventory Item Part", max_length=255, blank=True, null=True
+    )
     release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
     end_of_sale = models.DateField(null=True, blank=True, verbose_name="End of Sale")
     end_of_support = models.DateField(null=True, blank=True, verbose_name="End of Support")
     end_of_sw_releases = models.DateField(null=True, blank=True, verbose_name="End of Software Releases")
     end_of_security_patches = models.DateField(null=True, blank=True, verbose_name="End of Security Patches")
     documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
-    comments = models.TextField(null=True, blank=True, verbose_name="Comments")
-
-    csv_headers = [
-        "device_type",
-        "inventory_item",
-        "release_date",
-        "end_of_sale",
-        "end_of_support",
-        "end_of_sw_releases",
-        "end_of_security_patches",
-        "documentation_url",
-        "comments",
-    ]
+    comments = models.TextField(blank=True, default="", verbose_name="Comments")
 
     class Meta:
         """Meta attributes for the HardwareLCM class."""
@@ -93,10 +84,6 @@ class HardwareLCM(PrimaryModel):
         else:
             msg = f"{name} - End of sale: {self.end_of_sale}"
         return msg
-
-    def get_absolute_url(self):
-        """Returns the Detail view for HardwareLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:hardwarelcm", kwargs={"pk": self.pk})
 
     @property
     def expired(self):
@@ -138,20 +125,6 @@ class HardwareLCM(PrimaryModel):
                 }
             )
 
-    def to_csv(self):
-        """Return fields for bulk view."""
-        return (
-            self.device_type,
-            self.inventory_item,
-            self.release_date,
-            self.end_of_sale,
-            self.end_of_support,
-            self.end_of_sw_releases,
-            self.end_of_security_patches,
-            self.documentation_url,
-            self.comments,
-        )
-
 
 class SoftwareLCMQuerySet(RestrictedQuerySet):
     """Queryset for `SoftwareLCM` objects."""
@@ -161,11 +134,11 @@ class SoftwareLCMQuerySet(RestrictedQuerySet):
         if not isinstance(obj, models.Model):
             raise TypeError(f"{obj} is not an instance of Django Model class")
         if isinstance(obj, Device):
-            qs = DeviceSoftwareFilter(qs=self, item_obj=obj).filter_qs()
+            qs = DeviceSoftwareFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
         elif isinstance(obj, InventoryItem):
-            qs = InventoryItemSoftwareFilter(qs=self, item_obj=obj).filter_qs()
+            qs = InventoryItemSoftwareFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
         else:
-            qs = self
+            qs = self  # pylint: disable=invalid-name
 
         return qs
 
@@ -185,23 +158,12 @@ class SoftwareLCM(PrimaryModel):
 
     device_platform = models.ForeignKey(to="dcim.Platform", on_delete=models.CASCADE, verbose_name="Device Platform")
     version = models.CharField(max_length=50)
-    alias = models.CharField(max_length=50, blank=True, null=True)
+    alias = models.CharField(max_length=50, blank=True, default="")
     release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
     end_of_support = models.DateField(null=True, blank=True, verbose_name="End of Software Support")
     documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
     long_term_support = models.BooleanField(verbose_name="Long Term Support", default=False)
     pre_release = models.BooleanField(verbose_name="Pre-Release", default=False)
-
-    csv_headers = [
-        "device_platform",
-        "version",
-        "alias",
-        "release_date",
-        "end_of_support",
-        "documentation_url",
-        "long_term_support",
-        "pre_release",
-    ]
 
     class Meta:
         """Meta attributes for SoftwareLCM."""
@@ -217,23 +179,6 @@ class SoftwareLCM(PrimaryModel):
         """String representation of SoftwareLCM."""
         return f"{self.device_platform} - {self.version}"
 
-    def get_absolute_url(self):
-        """Returns the Detail view for SoftwareLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:softwarelcm", kwargs={"pk": self.pk})
-
-    def to_csv(self):
-        """Return fields for bulk view."""
-        return (
-            self.device_platform.slug,
-            self.version,
-            self.alias,
-            self.release_date,
-            self.end_of_support,
-            self.documentation_url,
-            self.long_term_support,
-            self.pre_release,
-        )
-
     objects = SoftwareLCMQuerySet.as_manager()
 
 
@@ -245,11 +190,11 @@ class SoftwareImageLCMQuerySet(RestrictedQuerySet):
         if not isinstance(obj, models.Model):
             raise TypeError(f"{obj} is not an instance of Django Model class")
         if isinstance(obj, Device):
-            qs = DeviceSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()
+            qs = DeviceSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
         elif isinstance(obj, InventoryItem):
-            qs = InventoryItemSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()
+            qs = InventoryItemSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
         else:
-            qs = self
+            qs = self  # pylint: disable=invalid-name
 
         return qs
 
@@ -279,18 +224,6 @@ class SoftwareImageLCM(PrimaryModel):
     hashing_algorithm = models.CharField(default="", blank=True, max_length=32, verbose_name="Hashing Algorithm")
     default_image = models.BooleanField(verbose_name="Default Image", default=False)
 
-    csv_headers = [
-        "image_file_name",
-        "software",
-        "device_types",
-        "inventory_items",
-        "object_tags",
-        "download_url",
-        "image_file_checksum",
-        "hashing_algorithm",
-        "default_image",
-    ]
-
     class Meta:
         """Meta attributes for SoftwareImageLCM."""
 
@@ -303,24 +236,6 @@ class SoftwareImageLCM(PrimaryModel):
         msg = f"{self.image_file_name}"
         return msg
 
-    def get_absolute_url(self):
-        """Returns the Detail view for SoftwareImageLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm", kwargs={"pk": self.pk})
-
-    def to_csv(self):
-        """Return fields for bulk view."""
-        return (
-            self.image_file_name,
-            self.software.id,
-            ",".join(str(device_type["model"]) for device_type in self.device_types.values()),
-            ",".join(str(inventory_item["id"]) for inventory_item in self.inventory_items.values()),
-            ",".join(str(object_tag["slug"]) for object_tag in self.object_tags.values()),
-            self.download_url,
-            self.image_file_checksum,
-            self.hashing_algorithm,
-            self.default_image,
-        )
-
     objects = SoftwareImageLCMQuerySet.as_manager()
 
 
@@ -332,13 +247,13 @@ class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):
         if not isinstance(obj, models.Model):
             raise TypeError(f"{obj} is not an instance of Django Model class")
         if isinstance(obj, Device):
-            qs = DeviceValidatedSoftwareFilter(qs=self, item_obj=obj).filter_qs()
+            qs = DeviceValidatedSoftwareFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
         elif isinstance(obj, InventoryItem):
-            qs = InventoryItemValidatedSoftwareFilter(qs=self, item_obj=obj).filter_qs()
+            qs = InventoryItemValidatedSoftwareFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
         elif isinstance(obj, DeviceType):
-            qs = ValidatedSoftwareLCM.objects.filter(device_types=obj)
+            qs = ValidatedSoftwareLCM.objects.filter(device_types=obj)  # pylint: disable=invalid-name
         else:
-            qs = self
+            qs = self  # pylint: disable=invalid-name
 
         return qs
 
@@ -358,39 +273,24 @@ class ValidatedSoftwareLCM(PrimaryModel):
     software = models.ForeignKey(to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Software Version")
     devices = models.ManyToManyField(to="dcim.Device", related_name="+", blank=True)
     device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
-    device_roles = models.ManyToManyField(to="dcim.DeviceRole", related_name="+", blank=True)
+    device_roles = models.ManyToManyField(to="extras.Role", related_name="+", blank=True)
     inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="+", blank=True)
     object_tags = models.ManyToManyField(to="extras.Tag", related_name="+", blank=True)
     start = models.DateField(verbose_name="Valid Since")
     end = models.DateField(verbose_name="Valid Until", blank=True, null=True)
     preferred = models.BooleanField(verbose_name="Preferred Version", default=False)
 
-    csv_headers = [
-        "software",
-        "devices",
-        "device_types",
-        "device_roles",
-        "inventory_items",
-        "object_tags",
-        "start",
-        "end",
-        "preferred",
-    ]
-
     class Meta:
         """Meta attributes for ValidatedSoftwareLCM."""
 
         verbose_name = "Validated Software"
         ordering = ("software", "preferred", "start")
+        unique_together = ("software", "start", "end")
 
     def __str__(self):
         """String representation of ValidatedSoftwareLCM."""
         msg = f"{self.software} - Valid since: {self.start}"
         return msg
-
-    def get_absolute_url(self):
-        """Returns the Detail view for ValidatedSoftwareLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm", kwargs={"pk": self.pk})
 
     @property
     def valid(self):
@@ -420,20 +320,6 @@ class ValidatedSoftwareLCM(PrimaryModel):
                 "Validated Software object with this Software and Valid Since and Valid Until dates already exists."
             )
 
-    def to_csv(self):
-        """Return fields for bulk view."""
-        return (
-            self.software.id,
-            ",".join(str(device["name"]) for device in self.devices.values()),
-            ",".join(str(device_type["model"]) for device_type in self.device_types.values()),
-            ",".join(str(device_role["slug"]) for device_role in self.device_roles.values()),
-            ",".join(str(inventory_item["id"]) for inventory_item in self.inventory_items.values()),
-            ",".join(str(object_tag["slug"]) for object_tag in self.object_tags.values()),
-            self.start,
-            self.end,
-            self.preferred,
-        )
-
     objects = ValidatedSoftwareLCMQuerySet.as_manager()
 
 
@@ -460,15 +346,6 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         to="ValidatedSoftwareLCM", related_name="device_software_validation_results"
     )
 
-    csv_headers = [
-        "device",
-        "software",
-        "valid",
-        "last_run",
-        "run_type",
-        "approved_software",
-    ]
-
     class Meta:
         """Meta attributes for DeviceSoftwareValidationResult."""
 
@@ -482,17 +359,6 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         else:
             msg = f"Device: {self.device} - Not Valid"
         return msg
-
-    def to_csv(self):
-        """Indicates model fields to return as csv."""
-        return (
-            self.device.name,
-            self.software if self.software else "None",
-            str(self.is_validated),
-            self.last_run.strftime("%Y-%m-%d %H:%M:%S") if self.last_run else "-",
-            self.run_type,
-            ",".join(str(valid.software) for valid in ValidatedSoftwareLCM.objects.get_for_object(self.device)),
-        )
 
 
 @extras_features(
@@ -517,35 +383,11 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
         to="ValidatedSoftwareLCM", related_name="inventory_item_software_validation_results"
     )
 
-    csv_headers = [
-        "inventory_item",
-        "item_name",
-        "device",
-        "software",
-        "valid",
-        "last_run",
-        "run_type",
-        "approved_software",
-    ]
-
     class Meta:
         """Meta attributes for InventoryItemSoftwareValidationResult."""
 
         verbose_name = "Inventory Item Software Validation Report"
         ordering = ("inventory_item",)
-
-    def to_csv(self):
-        """Indicates model fields to return as csv."""
-        return (
-            self.inventory_item.part_id,
-            self.inventory_item.name,
-            self.inventory_item.device.name,
-            self.software if self.software else "None",
-            str(self.is_validated),
-            self.last_run.strftime("%Y-%m-%d %H:%M:%S") if self.last_run else "-",
-            self.run_type,
-            ",".join(str(valid.software) for valid in ValidatedSoftwareLCM.objects.get_for_object(self.inventory_item)),
-        )
 
     def __str__(self):
         """String representation of InventoryItemSoftwareValidationResult."""
@@ -580,27 +422,15 @@ class ContractLCM(PrimaryModel):
         null=True,
     )
     name = models.CharField(max_length=100, unique=True)
-    number = models.CharField(max_length=100, null=True, blank=True)
+    number = models.CharField(max_length=100, blank=True, default="")
     start = models.DateField(null=True, blank=True, verbose_name="Contract Start Date")
     end = models.DateField(null=True, blank=True, verbose_name="Contract End Date")
     cost = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=15, verbose_name="Contract Cost")
-    support_level = models.CharField(verbose_name="Support Level", max_length=64, blank=True, null=True)
-    currency = models.CharField(verbose_name="Currency", max_length=4, blank=True, null=True)
-    contract_type = models.CharField(null=True, blank=True, max_length=32, verbose_name="Contract Type")
-    comments = models.TextField(blank=True)
-
-    csv_headers = [
-        "provider",
-        "name",
-        "number",
-        "start",
-        "end",
-        "cost",
-        "currency",
-        "support_level",
-        "contract_type",
-        "comments",
-    ]
+    support_level = models.CharField(verbose_name="Support Level", max_length=64, blank=True, default="")
+    currency = models.CharField(verbose_name="Currency", max_length=4, blank=True, default="")
+    contract_type = models.CharField(verbose_name="Contract Type", max_length=32, blank=True, default="")
+    devices = models.ManyToManyField(to="dcim.Device", related_name="device_contracts", blank=True)
+    comments = models.TextField(blank=True, default="")
 
     class Meta:
         """Meta attributes for the ContractLCM class."""
@@ -610,11 +440,7 @@ class ContractLCM(PrimaryModel):
 
     def __str__(self):
         """String representation of ContractLCM."""
-        return self.name
-
-    def get_absolute_url(self):
-        """Returns the Detail view for ContractLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:contractlcm", kwargs={"pk": self.pk})
+        return f"{self.name}"
 
     @property
     def expired(self):
@@ -637,21 +463,6 @@ class ContractLCM(PrimaryModel):
             if self.end <= self.start:
                 raise ValidationError("End date must be after the start date of the contract.")
 
-    def to_csv(self):
-        """Return fields for bulk view."""
-        return (
-            self.provider,
-            self.name,
-            self.number,
-            self.start,
-            self.end,
-            self.cost,
-            self.currency,
-            self.support_level,
-            self.contract_type,
-            self.comments,
-        )
-
 
 @extras_features(
     "custom_fields",
@@ -673,18 +484,7 @@ class ProviderLCM(OrganizationalModel):
     phone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True, verbose_name="E-mail")
     portal_url = models.URLField(blank=True, verbose_name="Portal URL")
-    comments = models.TextField(blank=True)
-
-    csv_headers = [
-        "name",
-        "description",
-        "physical_address",
-        "country",
-        "phone",
-        "email",
-        "portal_url",
-        "comments",
-    ]
+    comments = models.TextField(blank=True, default="")
 
     class Meta:
         """Meta attributes for the class."""
@@ -694,30 +494,13 @@ class ProviderLCM(OrganizationalModel):
 
     def __str__(self):
         """String representation of ProviderLCM."""
-        return self.name
-
-    def get_absolute_url(self):
-        """Returns the Detail view for ProviderLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:providerlcm", kwargs={"pk": self.pk})
+        return f"{self.name}"
 
     def save(self, *args, **kwargs):
         """Override save to assert a full clean."""
         # Full clean to assert custom validation in clean() for ORM, etc.
         super().full_clean()
         super().save(*args, **kwargs)
-
-    def to_csv(self):
-        """Return fields for bulk view."""
-        return (
-            self.name,
-            self.description,
-            self.physical_address,
-            self.country,
-            self.phone,
-            self.email,
-            self.portal_url,
-            self.comments,
-        )
 
 
 @extras_features(
@@ -736,23 +519,12 @@ class ContactLCM(PrimaryModel):
     address = models.CharField(max_length=200, blank=True)
     phone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True, verbose_name="Contact E-mail")
-    comments = models.TextField(blank=True)
+    comments = models.TextField(blank=True, default="")
     priority = models.PositiveIntegerField(default=100)
     type = models.CharField(max_length=50, default=choices.PoCTypeChoices.UNASSIGNED)
     contract = models.ForeignKey(
         to="nautobot_device_lifecycle_mgmt.ContractLCM", on_delete=models.CASCADE, verbose_name="Contract", null=True
     )
-
-    csv_headers = [
-        "contract",
-        "name",
-        "address",
-        "phone",
-        "email",
-        "comments",
-        "type",
-        "priority",
-    ]
 
     class Meta:
         """Meta attributes for the class."""
@@ -762,10 +534,6 @@ class ContactLCM(PrimaryModel):
         unique_together = ("contract", "name")
 
         ordering = ("contract", "priority", "name")
-
-    def get_absolute_url(self):
-        """Returns the Detail view for ContactLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:contactlcm", kwargs={"pk": self.pk})
 
     def clean(self):
         """Override clean to do custom validation."""
@@ -783,19 +551,6 @@ class ContactLCM(PrimaryModel):
     def __str__(self):
         """String representation of the model."""
         return f"{self.name}"
-
-    def to_csv(self):
-        """Return fields for bulk view."""
-        return (
-            self.contract,
-            self.name,
-            self.address,
-            self.phone,
-            self.email,
-            self.comments,
-            self.type,
-            self.priority,
-        )
 
 
 @extras_features(
@@ -820,29 +575,16 @@ class CVELCM(PrimaryModel):
         on_delete=models.PROTECT,
         to="extras.status",
     )
-    description = models.CharField(max_length=255, blank=True, null=True)
+    description = models.CharField(max_length=255, blank=True, default="")
     severity = models.CharField(
         max_length=50, choices=choices.CVESeverityChoices, default=choices.CVESeverityChoices.NONE
     )
     cvss = models.FloatField(blank=True, null=True, verbose_name="CVSS Base Score")
     cvss_v2 = models.FloatField(blank=True, null=True, verbose_name="CVSSv2 Score")
     cvss_v3 = models.FloatField(blank=True, null=True, verbose_name="CVSSv3 Score")
-    fix = models.CharField(max_length=255, blank=True, null=True)
-    comments = models.TextField(blank=True)
-
-    csv_headers = [
-        "name",
-        "published_date",
-        "link",
-        "status",
-        "description",
-        "severity",
-        "cvss",
-        "cvss_v2",
-        "cvss_v3",
-        "fix",
-        "comments",
-    ]
+    fix = models.CharField(max_length=255, blank=True, default="")
+    comments = models.TextField(blank=True, default="")
+    affected_softwares = models.ManyToManyField(to="SoftwareLCM", related_name="corresponding_cves", blank=True)
 
     class Meta:
         """Meta attributes for the class."""
@@ -851,29 +593,9 @@ class CVELCM(PrimaryModel):
 
         ordering = ("severity", "name")
 
-    def get_absolute_url(self):
-        """Returns the Detail view for CVELCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:cvelcm", kwargs={"pk": self.pk})
-
     def __str__(self):
         """String representation of the model."""
         return f"{self.name}"
-
-    def to_csv(self):
-        """Return fields for bulk view."""
-        return (
-            self.name,
-            self.published_date,
-            self.link,
-            self.status,
-            self.description,
-            self.severity,
-            self.cvss,
-            self.cvss_v2,
-            self.cvss_v3,
-            self.fix,
-            self.comments,
-        )
 
 
 @extras_features(
@@ -900,23 +622,15 @@ class VulnerabilityLCM(PrimaryModel):
         to="extras.status",
     )
 
-    csv_headers = [
-        "cve",
-        "software",
-        "device",
-        "inventory_item",
-        "status",
-    ]
-
     class Meta:
         """Meta attributes for the class."""
 
         verbose_name = "Vulnerability"
         verbose_name_plural = "Vulnerabilities"
-
-    def get_absolute_url(self):
-        """Returns the Detail view for VulnerabilityLCM models."""
-        return reverse("plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm", kwargs={"pk": self.pk})
+        unique_together = (
+            ("cve", "software", "device"),
+            ("cve", "software", "inventory_item"),
+        )
 
     def __str__(self):
         """String representation of the model."""
@@ -926,13 +640,3 @@ class VulnerabilityLCM(PrimaryModel):
         if self.cve:
             name += f" - CVE: {self.cve}"
         return name
-
-    def to_csv(self):
-        """Return fields for bulk view."""
-        return (
-            self.cve,
-            self.software,
-            self.device,
-            self.inventory_item,
-            self.status,
-        )

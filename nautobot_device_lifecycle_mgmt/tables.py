@@ -1,30 +1,24 @@
 """Tables implementation for the Lifecycle Management plugin."""
 
+import django_tables2 as tables
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-import django_tables2 as tables
 from django_tables2.utils import A
-from nautobot.utilities.tables import (
-    BaseTable,
-    ButtonsColumn,
-    BooleanColumn,
-    LinkedCountColumn,
-    TagColumn,
-    ToggleColumn,
-)
-from nautobot.extras.tables import StatusTableMixin
+from nautobot.apps.tables import BaseTable, BooleanColumn, ButtonsColumn, StatusTableMixin, TagColumn, ToggleColumn
+from nautobot.core.tables import LinkedCountColumn
+
 from nautobot_device_lifecycle_mgmt.models import (
+    CVELCM,
+    ContactLCM,
+    ContractLCM,
+    DeviceSoftwareValidationResult,
     HardwareLCM,
+    InventoryItemSoftwareValidationResult,
+    ProviderLCM,
+    SoftwareImageLCM,
     SoftwareLCM,
     ValidatedSoftwareLCM,
-    ContractLCM,
-    ProviderLCM,
-    ContactLCM,
-    CVELCM,
     VulnerabilityLCM,
-    DeviceSoftwareValidationResult,
-    InventoryItemSoftwareValidationResult,
-    SoftwareImageLCM,
 )
 
 
@@ -86,7 +80,7 @@ class HardwareLCMTable(BaseTable):
     )
     actions = ButtonsColumn(HardwareLCM, buttons=("changelog", "edit", "delete"))
 
-    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+    class Meta(BaseTable.Meta):
         """Meta attributes."""
 
         model = HardwareLCM
@@ -119,7 +113,7 @@ class SoftwareLCMTable(BaseTable):
     pre_release = BooleanColumn()
     actions = ButtonsColumn(SoftwareLCM, buttons=("edit", "delete"))
 
-    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+    class Meta(BaseTable.Meta):
         """Meta attributes."""
 
         model = SoftwareLCM
@@ -164,7 +158,7 @@ class SoftwareImageLCMTable(BaseTable):
         viewname="dcim:devicetype_list", url_params={"model": ("device_types", "model")}, verbose_name="Device Types"
     )
     object_tag_count = M2MLinkedCountColumn(
-        viewname="extras:tag_list", url_params={"slug": ("object_tags", "slug")}, verbose_name="Object Tags"
+        viewname="extras:tag_list", url_params={"name": ("object_tags", "name")}, verbose_name="Object Tags"
     )
     default_image = BooleanColumn()
     actions = ButtonsColumn(SoftwareImageLCM, buttons=("edit", "delete"))
@@ -176,7 +170,7 @@ class SoftwareImageLCMTable(BaseTable):
         verbose_name="Download URL",
     )
 
-    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+    class Meta(BaseTable.Meta):
         """Meta attributes."""
 
         model = SoftwareImageLCM
@@ -209,7 +203,7 @@ class ValidatedSoftwareLCMTable(BaseTable):
     actions = ButtonsColumn(ValidatedSoftwareLCM, buttons=("edit", "delete"))
     preferred = BooleanColumn()
 
-    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+    class Meta(BaseTable.Meta):
         """Meta attributes."""
 
         model = ValidatedSoftwareLCM
@@ -257,7 +251,7 @@ class DeviceSoftwareValidationResultTable(BaseTable):
         verbose_name="Export Data",
     )
 
-    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+    class Meta(BaseTable.Meta):
         """Metaclass attributes of DeviceSoftwareValidationResultTable."""
 
         model = DeviceSoftwareValidationResult
@@ -292,7 +286,7 @@ class DeviceSoftwareValidationResultListTable(BaseTable):
         orderable=True,
     )
 
-    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+    class Meta(BaseTable.Meta):
         """Metaclass attributes of DeviceSoftwareValidationResultTable."""
 
         model = DeviceSoftwareValidationResult
@@ -355,7 +349,7 @@ class InventoryItemSoftwareValidationResultTable(BaseTable):
         verbose_name="Export Data",
     )
 
-    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+    class Meta(BaseTable.Meta):
         """Metaclass attributes of InventoryItemSoftwareValidationResultTable."""
 
         model = InventoryItemSoftwareValidationResult
@@ -410,7 +404,7 @@ class InventoryItemSoftwareValidationResultListTable(BaseTable):
         orderable=True,
     )
 
-    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+    class Meta(BaseTable.Meta):
         """Metaclass attributes of InventoryItemSoftwareValidationResultTable."""
 
         model = InventoryItemSoftwareValidationResult
@@ -444,7 +438,7 @@ class ContractLCMTable(BaseTable):
     )
     actions = ButtonsColumn(ContractLCM, buttons=("changelog", "edit", "delete"))
 
-    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+    class Meta(BaseTable.Meta):
         """Meta attributes."""
 
         model = ContractLCM
@@ -456,6 +450,7 @@ class ContractLCMTable(BaseTable):
             "cost",
             "support_level",
             "contract_type",
+            "devices",
             "provider",
             "actions",
         )
@@ -477,7 +472,7 @@ class ProviderLCMTable(BaseTable):
     )
     actions = ButtonsColumn(ProviderLCM, buttons=("changelog", "edit", "delete"))
 
-    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+    class Meta(BaseTable.Meta):
         """Meta attributes."""
 
         model = ProviderLCM
@@ -501,7 +496,7 @@ class ContactLCMTable(BaseTable):
     )
     actions = ButtonsColumn(ContactLCM, buttons=("changelog", "edit", "delete"))
 
-    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+    class Meta(BaseTable.Meta):
         """Meta attributes."""
 
         model = ContactLCM
@@ -539,7 +534,7 @@ class CVELCMTable(StatusTableMixin, BaseTable):
     tags = TagColumn()
     actions = ButtonsColumn(CVELCM, buttons=("changelog", "edit", "delete"))
 
-    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+    class Meta(BaseTable.Meta):
         """Meta attributes."""
 
         model = CVELCM
@@ -552,6 +547,7 @@ class CVELCMTable(StatusTableMixin, BaseTable):
             "cvss",
             "cvss_v2",
             "cvss_v3",
+            "affected_softwares",
             "status",
             "tags",
             "actions",
@@ -585,7 +581,7 @@ class VulnerabilityLCMTable(StatusTableMixin, BaseTable):
     tags = TagColumn()
     actions = ButtonsColumn(VulnerabilityLCM, buttons=("changelog", "edit", "delete"))
 
-    class Meta(BaseTable.Meta):  # pylint: disable=too-few-public-methods
+    class Meta(BaseTable.Meta):
         """Meta attributes."""
 
         model = VulnerabilityLCM

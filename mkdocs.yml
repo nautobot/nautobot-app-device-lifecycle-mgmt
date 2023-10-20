@@ -81,6 +81,7 @@ markdown_extensions:
   - "footnotes"
 plugins:
   - "search"
+  - "include-markdown"
   - "mkdocs-version-annotations"
   - "mkdocstrings":
       default_handler: "python"

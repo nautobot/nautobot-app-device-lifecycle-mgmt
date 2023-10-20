@@ -29,7 +29,7 @@ services:
   celery_worker:
     entrypoint:
       - "sh"
-      - "-c" # this is to evaluate the $NAUTOBOT_LOG_LEVEL from the env
+      - "-c"  # this is to evaluate the $NAUTOBOT_LOG_LEVEL from the env
       - "watchmedo auto-restart --directory './' --pattern '*.py' --recursive -- nautobot-server celery worker -l $$NAUTOBOT_LOG_LEVEL --events"
     depends_on:
       - "nautobot"
@@ -51,7 +51,7 @@ services:
     entrypoint:
       - "sh"
       - "-c"
-      - "nautobot-server celery beat -l $$NAUTOBOT_LOG_LEVEL" # this is to evaluate the $NAUTOBOT_LOG_LEVEL from the env
+      - "nautobot-server celery beat -l $$NAUTOBOT_LOG_LEVEL"  # this is to evaluate the $NAUTOBOT_LOG_LEVEL from the env
     healthcheck:
       disable: true
     depends_on:

@@ -1,4 +1,4 @@
-{% extends 'generic/object_detail.html' %}
+{% extends 'generic/object_retrieve.html' %}
 
 {% block masthead %}
     <h2>{% block title %}{{ object }}{% endblock %}</h2>
@@ -29,7 +29,7 @@
                 <td>Device Platform</td>
                 <td>
                     {% if object.device_platform %}
-                        <a href="{% url 'dcim:platform' slug=object.device_platform.slug %}">{{ object.device_platform }}</a>
+                        <a href="{% url 'dcim:platform' pk=object.device_platform.pk %}">{{ object.device_platform }}</a>
                     {% else %}
                         &mdash;
                     {% endif %}

@@ -5,7 +5,7 @@ from nautobot.dcim.models import Device, InventoryItem
 from nautobot.extras.models import RelationshipAssociation
 
 from nautobot_device_lifecycle_mgmt.filters import ValidatedSoftwareLCMFilterSet
-from nautobot_device_lifecycle_mgmt.models import ValidatedSoftwareLCM, SoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import SoftwareLCM, ValidatedSoftwareLCM
 from nautobot_device_lifecycle_mgmt.tables import ValidatedSoftwareLCMTable
 
 
@@ -29,12 +29,12 @@ class ItemSoftware:
         """Get software assigned to the object."""
         try:
             obj_soft_relation = RelationshipAssociation.objects.get(
-                relationship__slug=self.soft_relation_name,
+                relationship__key=self.soft_relation_name,
                 destination_type=ContentType.objects.get_for_model(self.soft_obj_model),
                 destination_id=self.item_obj.id,
             )
             obj_soft = SoftwareLCM.objects.get(id=obj_soft_relation.source_id)
-        except (RelationshipAssociation.DoesNotExist, SoftwareLCM.DoesNotExist):
+        except (RelationshipAssociation.DoesNotExist, SoftwareLCM.DoesNotExist):  # pylint: disable=no-member
             obj_soft = None
 
         return obj_soft
