@@ -2,7 +2,7 @@
 extends: "default"
 rules:
   comments: "enable"
-  empty-values: "disable"
+  empty-values: "enable"
   indentation:
     indent-sequences: "consistent"
   line-length: "disable"

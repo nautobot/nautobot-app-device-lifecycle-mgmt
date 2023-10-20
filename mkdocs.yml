@@ -102,8 +102,12 @@ nav:
       - App Overview: "user/app_overview.md"
       - Getting Started: "user/app_getting_started.md"
       - Using the App: "user/app_use_cases.md"
+      - CVE Tracking: "user/cve_tracking.md"
+      - Software Lifecycle: "user/software_lifecycle.md"
+      - Lifecycle Reporting: "user/lifecycle_reporting.md"
       - Frequently Asked Questions: "user/faq.md"
       - External Interactions: "user/external_interactions.md"
+      - Metrics: "user/metrics.md"
   - Administrator Guide:
       - Install and Configure: "admin/install.md"
       - Upgrade: "admin/upgrade.md"
@@ -111,7 +115,15 @@ nav:
       - Compatibility Matrix: "admin/compatibility_matrix.md"
       - Release Notes:
           - "admin/release_notes/index.md"
+          - v1.3: "admin/release_notes/version_1.3.md"
+          - v1.2: "admin/release_notes/version_1.2.md"
+          - v1.1: "admin/release_notes/version_1.1.md"
           - v1.0: "admin/release_notes/version_1.0.md"
+          - v0.4: "admin/release_notes/version_0.4.md"
+          - v0.3: "admin/release_notes/version_0.3.md"
+          - v0.2: "admin/release_notes/version_0.2.md"
+          - v0.1: "admin/release_notes/version_0.1.md"
+
   - Developer Guide:
       - Extending the App: "dev/extending.md"
       - Contributing to the App: "dev/contributing.md"
@@ -121,4 +133,5 @@ nav:
           - "dev/code_reference/index.md"
           - Package: "dev/code_reference/package.md"
           - API: "dev/code_reference/api.md"
+          - Models: "dev/code_reference/models.md"
   - Nautobot Docs Home ↗︎: "https://docs.nautobot.com"

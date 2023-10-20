@@ -2,9 +2,6 @@
 
 Here you will find detailed instructions on how to **install** and **configure** the App within your Nautobot environment.
 
-!!! warning "Developer Note - Remove Me!"
-    Detailed instructions on installing the App. You will need to update this section based on any additional dependencies or prerequisites.
-
 ## Prerequisites
 
 - The plugin is compatible with Nautobot 2.0.0 and higher.
@@ -15,8 +12,7 @@ Here you will find detailed instructions on how to **install** and **configure**
 
 ### Access Requirements
 
-!!! warning "Developer Note - Remove Me!"
-    What external systems (if any) it needs access to in order to work.
+This plugin can be run with no additional access requirements, however there are extended services such as CVSS / NIST integration which depends on integration to the NIST public api service.  Other examples would include access to the Cisco EoX api service which can be used to enrich data based on devices under contract coverage.  Please leverage the documentation pages for the specific plugin integrations for details.
 
 ## Install Guide
 
@@ -44,11 +40,14 @@ Once installed, the plugin needs to be enabled in your Nautobot configuration. T
 # In your nautobot_config.py
 PLUGINS = ["nautobot_device_lifecycle_mgmt"]
 
-# PLUGINS_CONFIG = {
-#   "nautobot_device_lifecycle_mgmt": {
-#     ADD YOUR SETTINGS HERE
-#   }
-# }
+# Optionally you can override default settings for config items in the device lifecylce plugin (as seen in this example)
+PLUGINS_CONFIG = {
+    "nautobot_device_lifecycle_mgmt": {
+        "barchart_bar_width": float(os.environ.get("BARCHART_BAR_WIDTH", 0.1)),
+        "barchart_width": int(os.environ.get("BARCHART_WIDTH", 12)),
+        "barchart_height": int(os.environ.get("BARCHART_HEIGHT", 5)),
+    },
+}
 ```
 
 Once the Nautobot configuration is updated, run the Post Upgrade command (`nautobot-server post_upgrade`) to run migrations and clear any cache:
@@ -69,13 +68,11 @@ sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
 
 ## App Configuration
 
-!!! warning "Developer Note - Remove Me!"
-    Any configuration required to get the App set up. Edit the table below as per the examples provided.
-
 The plugin behavior can be controlled with the following list of settings:
+| Key                  | Example                   | Default | Description                                                          |
+| -------------------- | ------------------------- | ------- | -------------------------------------------------------------------- |
+| `expired_field`      | `end_of_support`          |         | The field name representing the expiry date.                          |
+| `barchart_bar_width` | `0.1`                     | `0.15`  | The width of the table bar within the overview report.                |
+| `barchart_width`     | `12`                      |         | The width of the barchart within the overview report.                 |
+| `barchart_height`    | `5`                       |         | The height of the barchart within the overview report.                |
 
-| Key     | Example | Default | Description                          |
-| ------- | ------ | -------- | ------------------------------------- |
-| `enable_backup` | `True` | `True` | A boolean to represent whether or not to run backup configurations within the plugin. |
-| `platform_slug_map` | `{"cisco_wlc": "cisco_aireos"}` | `None` | A dictionary in which the key is the platform slug and the value is what netutils uses in any "network_os" parameter. |
-| `per_feature_bar_width` | `0.15` | `0.15` | The width of the table bar within the overview report |
