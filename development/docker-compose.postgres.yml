@@ -1,18 +1,22 @@
 ---
-version: "3.4"
+version: "3.8"
 
 services:
+  nautobot:
+    environment:
+      - "NAUTOBOT_DB_ENGINE=django.db.backends.postgresql"
   db:
     image: "postgres:13-alpine"
+    command:
+      - "-c"
+      - "max_connections=200"
     env_file:
-      - "dev.env"
+      - "development.env"
       - "creds.env"
     volumes:
       - "postgres_data:/var/lib/postgresql/data"
-    ports:
-      - "127.0.0.1:5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
+      test: "pg_isready --username=$$POSTGRES_USER --dbname=$$POSTGRES_DB"
       interval: "10s"
       timeout: "5s"
       retries: 10

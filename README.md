@@ -1,61 +1,43 @@
 # Device Lifecycle Management
 
+<!--
+Developer Note - Remove Me!
+
+The README will have certain links/images broken until the PR is merged into `develop`. Update the GitHub links with whichever branch you're using (main etc.) if different.
+
+The logo of the project is a placeholder (docs/images/icon-nautobot-device-lifecycle-mgmt.png) - please replace it with your app icon, making sure it's at least 200x200px and has a transparent background!
+
+To avoid extra work and temporary links, make sure that publishing docs (or merging a PR) is done at the same time as setting up the docs site on RTD, then test everything.
+-->
+
 <p align="center">
-  <img src="https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/icon-DeviceLifecycle.png" class="logo" height="200px">
+  <img src="https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/icon-nautobot-device-lifecycle-mgmt.png" class="logo" height="200px">
   <br>
   <a href="https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/actions"><img src="https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/actions/workflows/ci.yml/badge.svg?branch=main"></a>
   <a href="https://docs.nautobot.com/projects/device-lifecycle/en/latest"><img src="https://readthedocs.org/projects/nautobot-plugin-device-lifecycle-mgmt/badge/"></a>
   <a href="https://pypi.org/project/nautobot-device-lifecycle-mgmt/"><img src="https://img.shields.io/pypi/v/nautobot-device-lifecycle-mgmt"></a>
   <a href="https://pypi.org/project/nautobot-device-lifecycle-mgmt/"><img src="https://img.shields.io/pypi/dm/nautobot-device-lifecycle-mgmt"></a>
   <br>
-  An App for <a href="https://github.com/nautobot/nautobot">Nautobot</a>.
+  An <a href="https://www.networktocode.com/nautobot/apps/">App</a> for <a href="https://nautobot.com/">Nautobot</a>.
 </p>
 
 ## Overview
 
-A plugin for [Nautobot](https://github.com/nautobot/nautobot) to manage device lifecycles. This plugin works by making related associations to Devices, Device Types, and Inventory Items to help provide data about the hardware end of life notices, appropriate software versions to be running on the devices, and the maintenance contracts associated with devices. This will help with the various aspects of planning Lifecycle events, and provides quick access to ancillary data about the devices in Nautobot.
+> Developer Note: Add a long (2-3 paragraphs) description of what the App does, what problems it solves, what functionality it adds to Nautobot, what external systems it works with etc.
 
 ### Screenshots
 
+> Developer Note: Add any representative screenshots of the App in action. These images should also be added to the `docs/user/app_use_cases.md` section.
+
+> Developer Note: Place the files in the `docs/images/` folder and link them using only full URLs from GitHub, for example: `![Overview](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/plugin-overview.png)`. This absolute static linking is required to ensure the README renders properly in GitHub, the docs site, and any other external sites like PyPI.
+
 More screenshots can be found in the [Using the App](https://docs.nautobot.com/projects/device-lifecycle/en/latest/user/app_use_cases/) page in the documentation. Here's a quick overview of some of the plugin's added functionality:
 
-**Device Lifecycle Management List View**
-
-You can view the list of Hardware/Software notices as well as filter the table.
-
-![](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/lcm_hardware_list_view.png)
-
-**Device Lifecycle Management Detail View**
-
-You can also click a Hardware/Software Notice and see the detail view. This view provides links to the devices that are part affected by this EoX notice due to their device type.
-
-![](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/lcm_hardware_detail_view.png)
-
-**Software Lifecycle Management List View**
-
-You can view the list of Software versions as well as filter the table.
-
-![](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/lcm_software_list_view.png)
-
-**Software Lifecycle Reporting**
-
-Reports can be created from the Nautobot's software validation jobs **Device Software Validation - Report** or **Inventory Item Software Validation - Report**.
-
-![](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/lcm_software_validation_report_run_graph.png)
-
-Individual CSV files can be exported per platform or inventory item.
-
-![](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/lcm_software_validation_report_run_detailed_summary.png)
-
-Sample CSV.
-
-![](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/lcm_software_validation_report_csv_small.png)
-
-You can also view validation results as a list from the Nautobot GUI.
-
-![](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/lcm_software_validation_report_run_results_list.png)
+![](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/develop/docs/images/placeholder.png)
 
 ## Try it out!
+
+> Developer Note: Only keep this section if appropriate. Update link to correct sandbox.
 
 This App is installed in the Nautobot Community Sandbox found over at [demo.nautobot.com](https://demo.nautobot.com/)!
 
@@ -63,7 +45,7 @@ This App is installed in the Nautobot Community Sandbox found over at [demo.naut
 
 ## Documentation
 
-Full web-based HTML documentation for this app can be found over on the [Nautobot Docs](https://docs.nautobot.com) website:
+Full documentation for this App can be found over on the [Nautobot Docs](https://docs.nautobot.com) website:
 
 - [User Guide](https://docs.nautobot.com/projects/device-lifecycle/en/latest/user/app_overview/) - Overview, Using the App, Getting Started.
 - [Administrator Guide](https://docs.nautobot.com/projects/device-lifecycle/en/latest/admin/install/) - How to Install, Configure, Upgrade, or Uninstall the App.
@@ -71,11 +53,11 @@ Full web-based HTML documentation for this app can be found over on the [Nautobo
 - [Release Notes / Changelog](https://docs.nautobot.com/projects/device-lifecycle/en/latest/admin/release_notes/).
 - [Frequently Asked Questions](https://docs.nautobot.com/projects/device-lifecycle/en/latest/user/faq/).
 
-### Contributing to the Docs
+### Contributing to the Documentation
 
-You can find all the Markdown source for the App documentation under the [docs](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/tree/develop/docs) folder in this repository. For simple edits, a Markdown capable editor is sufficient - clone the repository and edit away.
+You can find all the Markdown source for the App documentation under the [`docs`](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/tree/develop/docs) folder in this repository. For simple edits, a Markdown capable editor is sufficient: clone the repository and edit away.
 
-If you need to view the fully generated documentation site, you can build it with [mkdocs](https://www.mkdocs.org/). A container hosting the docs will be started using the invoke commands (details in the [Development Environment Guide](https://docs.nautobot.com/projects/device-lifecycle/en/latest/dev/dev_environment/#docker-development-environment)) on [http://localhost:8001](http://localhost:8001). As your changes are saved, the live docs will be automatically reloaded.
+If you need to view the fully-generated documentation site, you can build it with [MkDocs](https://www.mkdocs.org/). A container hosting the documentation can be started using the `invoke` commands (details in the [Development Environment Guide](https://docs.nautobot.com/projects/device-lifecycle/en/latest/dev/dev_environment/#docker-development-environment)) on [http://localhost:8001](http://localhost:8001). Using this container, as your changes to the documentation are saved, they will be automatically rebuilt and any pages currently being viewed will be reloaded in your browser.
 
 Any PRs with fixes or improvements are very welcome!
 

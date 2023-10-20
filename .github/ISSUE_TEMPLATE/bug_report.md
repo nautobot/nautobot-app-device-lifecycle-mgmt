@@ -1,12 +1,12 @@
 ---
 name: 🐛 Bug Report
-about: Report a reproducible bug in the current release of nautobot-plugin-device-lifecycle-mgmt
+about: Report a reproducible bug in the current release of nautobot-device-lifecycle-mgmt
 ---
 
 ### Environment
-* Python version:  <!-- Example: 3.7.7 -->
-* Nautobot version:  <!-- Example: 2.8.4 -->
-* nautobot-plugin-device-lifecycle-mgmt version:  <!-- Example: 1.0.0 -->
+* Python version:  <!-- Example: 3.11.4 -->
+* Nautobot version:  <!-- Example: 2.0.0 -->
+* nautobot-device-lifecycle-mgmt version:  <!-- Example: 1.0.0 -->
 
 <!-- What did you expect to happen? -->
 ### Expected Behavior

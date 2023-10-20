@@ -2,5 +2,6 @@
 
 The intention is to document deviations from a standard Model View Controller (MVC) design.
 
-!!! Success "Standards Based Architectural Decisions"
-    Device Lifecycle Management Plugin stays within the standard design for MVC, however if anything changes in the future, references can be found here.
+!!! warning "Developer Note - Remove Me!"
+    Optional page, remove if not applicable.
+    For examples see [Golden Config](https://github.com/nautobot/nautobot-plugin-golden-config/tree/develop/docs/dev/dev_adr.md) and [nautobot-plugin-reservation](https://github.com/networktocode/nautobot-plugin-reservation/blob/develop/docs/dev/dev_adr.md).
