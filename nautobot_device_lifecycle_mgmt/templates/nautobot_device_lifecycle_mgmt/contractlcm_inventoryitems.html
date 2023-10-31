@@ -1,0 +1,15 @@
+{% extends 'nautobot_device_lifecycle_mgmt/contractlcm.html' %}
+{% block title %}{{ block.super }} - Inventory Items{% endblock %}
+
+{% block content %}
+<div class="col-md-12">
+    {% include table_template|default:'responsive_table.html' %}
+    <div class="pull-left noprint">
+        <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contractlcm' pk=object.pk %}?export_contract=inventoryitems" class="btn btn-success btn-xs">
+            <span class="mdi mdi-database-export" aria-hidden="true">Export</span>
+        </a>
+    </div>
+    {% include 'inc/paginator.html' with paginator=table.paginator page=table.page %}
+    <div class="clearfix"></div>
+</div>
+{% endblock %}

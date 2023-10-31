@@ -6,6 +6,15 @@
     <h2>Contract: {% block title %}{{ object }}{% endblock %}</h2>
 {% endblock masthead %}
 
+{% block extra_nav_tabs %}
+    <li role="presentation"{% if active_tab == 'devices-under-contract' %} class="active"{% endif %}>
+        <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contract_devices' pk=object.pk %}">Contract devices</a>
+    </li>
+    <li role="presentation"{% if active_tab == 'inventoryitems-under-contract' %} class="active"{% endif %}>
+        <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:contract_inventoryitems' pk=object.pk %}">Contract inventory items</a>
+    </li>
+{% endblock %}
+
 {% block content_left_page %}
     <div class="panel panel-default">
         <div class="panel-heading">
