@@ -1,8 +1,10 @@
 # Installing the App in Nautobot
 
+Here you will find detailed instructions on how to **install** and **configure** the App within your Nautobot environment.
+
 ## Prerequisites
 
-- The plugin is compatible with Nautobot 1.1.6 and higher.
+- The plugin is compatible with Nautobot 2.0.0 and higher.
 - Databases supported: PostgreSQL, MySQL
 
 !!! note
@@ -48,7 +50,7 @@ PLUGINS_CONFIG = {
 }
 ```
 
-Once the Nautobot configuration is updated, run the Post Upgrade command (`nautobot-server post_upgrade`) to run migrations and clear any cache.
+Once the Nautobot configuration is updated, run the Post Upgrade command (`nautobot-server post_upgrade`) to run migrations and clear any cache:
 
 ```shell
 nautobot-server post_upgrade
@@ -64,16 +66,13 @@ Then restart (if necessary) the Nautobot services which may include:
 sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
 ```
 
-!!! note
-    If you are on Nautobot >= 1.1.0 and have the RQ worker continuing on, also restart the RQ worker service: `sudo systemctl restart nautobot-rq-worker`.
-
-
 ## App Configuration
 
-The plugin behavior can be controlled with the following list of settings.
+The plugin behavior can be controlled with the following list of settings:
+| Key                  | Example                   | Default | Description                                                          |
+| -------------------- | ------------------------- | ------- | -------------------------------------------------------------------- |
+| `expired_field`      | `end_of_support`          |         | The field name representing the expiry date.                          |
+| `barchart_bar_width` | `0.1`                     | `0.15`  | The width of the table bar within the overview report.                |
+| `barchart_width`     | `12`                      |         | The width of the barchart within the overview report.                 |
+| `barchart_height`    | `5`                       |         | The height of the barchart within the overview report.                |
 
-| Key     | Example | Default | Description                          |
-| ------- | ------ | -------- | ------------------------------------- |
-| enable_backup | True | True | A boolean to represent whether or not to run backup configurations within the plugin. |
-| platform_slug_map | {"cisco_wlc": "cisco_aireos"} | None | A dictionary in which the key is the platform slug and the value is what netutils uses in any "network_os" parameter. |
-| per_feature_bar_width | 0.15 | 0.15 | The width of the table bar within the overview report |

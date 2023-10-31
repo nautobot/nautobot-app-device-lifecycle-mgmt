@@ -8,5 +8,5 @@ nautobot_device_lifecycle_mgmt:
   compose_files:
     - "docker-compose.base.yml"
     - "docker-compose.redis.yml"
-    - "docker-compose.postgres.yml"
+    - "docker-compose.mysql.yml"
     - "docker-compose.dev.yml"

@@ -1,11 +1,13 @@
 # App Overview
 
+This document provides an overview of the App including critical information and import considerations when applying it to your Nautobot environment.
+
 The Device Lifecycle Management plugin aims to help in managing the lifecycle of the device hardware and software components.
 
 !!! note
     Throughout this documentation, the terms "app" and "plugin" will be used interchangeably.
 
-## Description/Overview
+## Description
 
 Devices and their components, both hardware, and software, have fixed-period vendor support related to updates and availability. These are also often associated with several maintenance contracts. Managing these relationships is often complex and engineering teams may lack visibility into the processes involved.
 
