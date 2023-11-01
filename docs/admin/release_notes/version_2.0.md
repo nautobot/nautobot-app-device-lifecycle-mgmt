@@ -6,6 +6,16 @@ This document describes all new features and changes in the release `2.0`. The f
 
 This release adds support for [Nautobot v2.0.0](https://github.com/nautobot/nautobot/releases/tag/v2.0.0).
 
+## [v2.0.1] - 2023-10-31
+Note: This release fixes an issue with clean installations of this plugin on Nautobot 2.0.X environments.
+
+### Added
+- [240](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/240) - Add Network to Code Drift Management to keep development environment up to code standards.
+
+### Fixed
+- [#236](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/236) - Fix circular dependencies which result in installation issues.
+
+
 ## [v2.0.0] - 2023-09-29
 
 ### Added
