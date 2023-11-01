@@ -1,8 +1,10 @@
 # Upgrading the App
 
+Here you will find any steps necessary to upgrade the App in your Nautobot environment.
+
 ## Upgrade Guide
 
-This document is intended to provide an upgrade procedure for the Device Lifecycle Plugin within Nautobot. The most stable version of the plugin is available as a Python package in [PyPI](https://pypi.org/project/nautobot-device-lifecycle-mgmt/) and can be upgraded using pip.
+When a new release comes out it may be necessary to run a migration of the database to account for any changes in the data models used by this plugin. Execute the command `nautobot-server post-upgrade` within the runtime environment of your Nautobot installation after updating the `nautobot-device-lifecycle-mgmt` package via `pip`.
 
 ```shell
 pip3 install --upgrade nautobot-device-lifecycle-mgmt

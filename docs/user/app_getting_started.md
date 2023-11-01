@@ -1,6 +1,6 @@
 # Getting Started with the App
 
-A step-by-step tutorial on how to get the App going and how to use it.
+This document provides a step-by-step tutorial on how to get the App going and how to use it.
 
 ## Install the App
 
@@ -9,6 +9,7 @@ To install the App, please follow the instructions detailed in the [Installation
 ## First steps with the App
 
 Once you have the app installed a great first step would be to read the blog post [nautobot-and-device-lifecycle-part-1](https://blog.networktocode.com/post/nautobot-and-device-lifecycle-part-1/).  This is a great place to gain foundational knowledge on how to use the app and what it's capabilities are.  It even shares some approaches on synchronizing data.
+
 ## What are the next steps?
 
 If you've already consumed the part I of the blog article mentioned above.  

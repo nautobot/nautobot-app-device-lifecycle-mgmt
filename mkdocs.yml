@@ -1,9 +1,9 @@
 ---
 dev_addr: "127.0.0.1:8001"
-edit_uri: "edit/develop/docs"
+edit_uri: "edit/main/nautobot-plugin-device-lifecycle-mgmt/docs"
 site_dir: "nautobot_device_lifecycle_mgmt/static/nautobot_device_lifecycle_mgmt/docs"
 site_name: "Device Lifecycle Management Documentation"
-site_url: "https://docs.nautobot.com/projects/device-lifecycle/"
+site_url: "https://docs.nautobot.com/projects/device-lifecycle/en/latest/"
 repo_url: "https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt"
 copyright: "Copyright &copy; The Authors"
 theme:
@@ -14,13 +14,17 @@ theme:
     - "django"
     - "yaml"
   features:
-    - "navigation.tracking"
+    - "content.action.edit"
+    - "content.action.view"
+    - "content.code.copy"
+    - "navigation.footer"
+    - "navigation.indexes"
     - "navigation.tabs"
     - "navigation.tabs.sticky"
-    - "search.suggest"
+    - "navigation.tracking"
     - "search.highlight"
     - "search.share"
-    - "navigation.indexes"
+    - "search.suggest"
   favicon: "assets/favicon.ico"
   logo: "assets/nautobot_logo.svg"
   palette:
@@ -81,7 +85,6 @@ markdown_extensions:
   - "footnotes"
 plugins:
   - "search"
-  - "include-markdown"
   - "mkdocs-version-annotations"
   - "mkdocstrings":
       default_handler: "python"
@@ -97,8 +100,8 @@ nav:
   - Overview: "index.md"
   - User Guide:
       - App Overview: "user/app_overview.md"
-      - Using the App: "user/app_use_cases.md"
       - Getting Started: "user/app_getting_started.md"
+      - Using the App: "user/app_use_cases.md"
       - CVE Tracking: "user/cve_tracking.md"
       - Software Lifecycle: "user/software_lifecycle.md"
       - Lifecycle Reporting: "user/lifecycle_reporting.md"
@@ -125,9 +128,10 @@ nav:
       - Extending the App: "dev/extending.md"
       - Contributing to the App: "dev/contributing.md"
       - Development Environment: "dev/dev_environment.md"
-      - Arch Decision: "dev/arch_decision.md"
+      - Architecture Decision Records: "dev/arch_decision.md"
       - Code Reference:
           - "dev/code_reference/index.md"
-          - Models: "dev/code_reference/models.md"
+          - Package: "dev/code_reference/package.md"
           - API: "dev/code_reference/api.md"
+          - Models: "dev/code_reference/models.md"
   - Nautobot Docs Home ↗︎: "https://docs.nautobot.com"
