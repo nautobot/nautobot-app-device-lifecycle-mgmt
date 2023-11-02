@@ -262,7 +262,7 @@ PLUGINS_CONFIG = {
         "barchart_bar_width": float(os.environ.get("BARCHART_BAR_WIDTH", 0.1)),
         "barchart_width": int(os.environ.get("BARCHART_WIDTH", 12)),
         "barchart_height": int(os.environ.get("BARCHART_HEIGHT", 5)),
-        "contract_types": ["Software Licensing", "Software Hardware"],
+        "contract_types": ["Hardware Maintenance", "Subscription", "Software License", "Services", "Lease"],
     },
 }
 
