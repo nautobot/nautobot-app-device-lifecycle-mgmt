@@ -72,8 +72,10 @@ sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
 
 The plugin behavior can be controlled with the following list of settings.
 
-| Key     | Example | Default | Description                          |
-| ------- | ------ | -------- | ------------------------------------- |
-| enable_backup | True | True | A boolean to represent whether or not to run backup configurations within the plugin. |
-| platform_slug_map | {"cisco_wlc": "cisco_aireos"} | None | A dictionary in which the key is the platform slug and the value is what netutils uses in any "network_os" parameter. |
-| per_feature_bar_width | 0.15 | 0.15 | The width of the table bar within the overview report |
+| Key                         | Example                                        | Default | Description                                                                     |
+| --------------------------- | ---------------------------------------------- | ------- | ------------------------------------------------------------------------------- |
+| `expired_field`             | `end_of_support`                               |         | The field name representing the expiry date.                                    |
+| `barchart_bar_width`        | `0.1`                                          | `0.15`  | The width of the table bar within the overview report.                          |
+| `barchart_width`            | `12`                                           |         | The width of the barchart within the overview report.                           |
+| `barchart_height`           | `5`                                            |         | The height of the barchart within the overview report.                          |
+| `additional_contract_types` | `["Software Maintenance", "Software License"]` | `None`  | A list of contract types to append to the existing Hardware and Software types. |

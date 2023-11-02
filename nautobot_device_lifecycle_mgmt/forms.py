@@ -49,6 +49,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
+from nautobot_device_lifecycle_mgmt.utils import add_custom_contract_types
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 
@@ -753,7 +754,9 @@ class ContractLCMForm(BootstrapMixin, CustomFieldModelFormMixin, RelationshipMod
         to_field_name="pk",
         required=True,
     )
-    contract_type = forms.ChoiceField(choices=add_blank_choice(ContractTypeChoices.CHOICES), label="Contract Type")
+    contract_type = forms.ChoiceField(
+        choices=add_blank_choice(add_custom_contract_types(ContractTypeChoices.CHOICES)), label="Contract Type"
+    )
     currency = forms.ChoiceField(
         required=False, widget=StaticSelect2, choices=add_blank_choice(CurrencyChoices.CHOICES)
     )
