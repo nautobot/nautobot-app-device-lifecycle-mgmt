@@ -151,7 +151,6 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):
     """Test the ContractLCM API."""
 
     model = ContractLCM
-    bulk_update_data = {"documentation_url": "https://cisco.com/eox"}
     brief_fields = [
         "contract_type",
         "cost",
@@ -209,6 +208,7 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):
             number="MERK00001",
             start=datetime.date(2021, 4, 1),
             end=datetime.date(2022, 4, 1),
+            contract_type="Hardware",
             provider=provider,
         )
         ContractLCM.objects.create(
@@ -216,6 +216,7 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):
             number="MERK00002",
             start=datetime.date(2021, 4, 1),
             end=datetime.date(2022, 4, 1),
+            contract_type="Software",
             provider=provider,
         )
         ContractLCM.objects.create(
@@ -223,6 +224,7 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):
             number="CSCO0000001",
             start=datetime.date(2021, 4, 1),
             end=datetime.date(2022, 4, 1),
+            contract_type="Hardware",
             provider=provider,
         )
 

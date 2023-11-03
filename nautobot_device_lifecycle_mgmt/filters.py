@@ -682,8 +682,10 @@ class ContractLCMFilterSet(NautobotFilterSet):
     provider = django_filters.ModelMultipleChoiceFilter(
         queryset=ProviderLCM.objects.all(),
         label="Provider",
+        field_name="provider__name",
+        to_field_name="name",
     )
-
+    number = django_filters.CharFilter()
     expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
 
     start = django_filters.DateFilter()
@@ -702,6 +704,7 @@ class ContractLCMFilterSet(NautobotFilterSet):
         fields = [
             "provider",
             "name",
+            "number",
             "start",
             "end",
             "cost",

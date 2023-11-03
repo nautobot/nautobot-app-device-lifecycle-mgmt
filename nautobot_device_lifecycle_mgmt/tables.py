@@ -451,6 +451,7 @@ class ContractLCMTable(BaseTable):
         fields = (
             "pk",
             "name",
+            "number",
             "start",
             "end",
             "cost",

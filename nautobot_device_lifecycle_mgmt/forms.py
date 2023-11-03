@@ -816,7 +816,7 @@ class ContractLCMFilterForm(BootstrapMixin, forms.ModelForm):
     """Filter form to filter searches."""
 
     q = forms.CharField(required=False, label="Search")
-    provider = forms.ModelMultipleChoiceField(required=False, queryset=ProviderLCM.objects.all(), to_field_name="pk")
+    provider = forms.ModelMultipleChoiceField(required=False, queryset=ProviderLCM.objects.all(), to_field_name="name")
     currency = forms.MultipleChoiceField(
         required=False, choices=CurrencyChoices.CHOICES, widget=StaticSelect2Multiple()
     )
@@ -824,6 +824,7 @@ class ContractLCMFilterForm(BootstrapMixin, forms.ModelForm):
         required=False, widget=StaticSelect2, choices=add_blank_choice(ContractTypeChoices.CHOICES)
     )
     name = forms.CharField(required=False)
+    number = forms.CharField(required=False)
 
     class Meta:
         """Meta attributes for the ContractLCMFilterForm class."""
@@ -834,6 +835,7 @@ class ContractLCMFilterForm(BootstrapMixin, forms.ModelForm):
             "q",
             "provider",
             "name",
+            "number",
             "start",
             "end",
             "cost",

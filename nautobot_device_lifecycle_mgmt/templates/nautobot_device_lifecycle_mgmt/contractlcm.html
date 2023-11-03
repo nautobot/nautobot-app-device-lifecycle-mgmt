@@ -26,6 +26,10 @@
                 <td>{{ object.name }}</td>
             </tr>
             <tr>
+                <td>Number</td>
+                <td>{% if object.number %} {{ object.number }} {% else %} &mdash; {% endif %}</td>
+            </tr>
+            <tr>
                 <td>Provider</td>
                 <td>
                     <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:providerlcm' pk=object.provider.id %}">

@@ -636,6 +636,14 @@ class ContractLCM(PrimaryModel):
         if self.end and self.start:
             if self.end <= self.start:
                 raise ValidationError("End date must be after the start date of the contract.")
+        if not self.provider:
+            raise ValidationError("Contract must have a provider.")
+        if not self.contract_type:
+            raise ValidationError("Contract must have a contract type.")
+        if self.contract_type not in choices.ContractTypeChoices.values():
+            raise ValidationError(
+                f"Contract type {self.contract_type} is not on the list of defined contract type choices."
+            )
 
     def to_csv(self):
         """Return fields for bulk view."""
