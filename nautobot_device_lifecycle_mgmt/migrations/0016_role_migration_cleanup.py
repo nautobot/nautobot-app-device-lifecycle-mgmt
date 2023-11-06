@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
         if self.nautobot_run_before:
             recorder = migrations.recorder.MigrationRecorder(connection)
             applied_migrations = recorder.applied_migrations()
-            if ("nautobot_device_onboarding", "0004_validated_software_m2m") in applied_migrations:
+            if ("nautobot_device_lifecycle_mgmt", "0004_validated_software_m2m") in applied_migrations:
                 for migration in self.nautobot_run_before:
                     if migration not in applied_migrations:
                         self.run_before.append(migration)

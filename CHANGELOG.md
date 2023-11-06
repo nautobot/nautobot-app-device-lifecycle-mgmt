@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [v2.0.2] - 2023-11-06
+
+Note: This release fixes an issue with upgrading this plugin from 1.x version to 2.x versions.
+
+### Fixed
+- [#250](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/250) - Fix issue with migrations in 2.0.1 causing issues with upgrading plugin from 1.x versions.
+
 
 ## [v2.0.1] - 2023-10-31
 Note: This release fixes an issue with clean installations of this plugin on Nautobot 2.0.X environments.
