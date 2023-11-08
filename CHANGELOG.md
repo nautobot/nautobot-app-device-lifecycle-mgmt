@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v2.0.3] - 2023-11-08
+
+### Fixed
+- [#253](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/253) - Fixes issue with incorrect logging in the Device Software Validation Report job.
+
+
 ## [v2.0.2] - 2023-11-06
 
 Note: This release fixes an issue with upgrading this plugin from 1.x version to 2.x versions.
