@@ -2,7 +2,7 @@
 from datetime import datetime
 
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Case, Count, F, IntegerField, OuterRef, Q, Subquery, Value, When
+from django.db.models import Count, F, IntegerField, OuterRef, Q, Subquery, Value
 from django.db.models.functions import Coalesce
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, LocationType
 from prometheus_client.core import GaugeMetricFamily
@@ -141,13 +141,7 @@ def metrics_lcm_hw_end_of_support():  # pylint: disable=too-many-locals
     # Generate metrics with counts for out of support devices per device type
     for part_number, model, device_count in (
         DeviceType.objects.order_by()
-        .annotate(
-            num_devices=Case(
-                When(id__in=hw_end_of_support_device_types, then=Count("devices")),
-                default=0,
-                output_field=IntegerField(),
-            )
-        )
+        .annotate(num_devices=Count("devices", filter=Q(id__in=hw_end_of_support_device_types)))
         .values_list("part_number", "model", "num_devices")
     ):
         hw_end_of_support_part_number_gauge.add_metric(
