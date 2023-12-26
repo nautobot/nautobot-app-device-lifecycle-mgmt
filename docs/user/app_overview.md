@@ -2,7 +2,7 @@
 
 This document provides an overview of the App including critical information and import considerations when applying it to your Nautobot environment.
 
-The Device Lifecycle Management plugin aims to help in managing the lifecycle of the device hardware and software components.
+The Device Lifecycle Management app aims to help in managing the lifecycle of the device hardware and software components.
 
 !!! note
     Throughout this documentation, the terms "app" and "plugin" will be used interchangeably.
@@ -35,11 +35,11 @@ Additionally, you can run jobs allowing you to:
 
 ## Authors and Maintainers
 
-Nautobot Device Lifecycle plugin is maintained by Network to Code and members of the Nautobot community.  Anyone is welcome to contribute code, issues, feature requests, etc...  
+Nautobot Device Lifecycle App is maintained by Network to Code and members of the Nautobot community.  Anyone is welcome to contribute code, issues, feature requests, etc...  
 
 ## Extras
 
-The following custom relationships are automatically created by the plugin:
+The following custom relationships are automatically created by the app:
 
 - **Software on Device** - links Software version to Device
 - **Software on InventoryItem** - links Software version to Inventory Item
@@ -47,7 +47,7 @@ The following custom relationships are automatically created by the plugin:
 - **Contract to dcim.InventoryItem** - links contract to Inventory Item
 - **Software to CVE** - links Software to CVE
 
-This plugin provides the following jobs:
+This app provides the following jobs:
 
 - **Device Software Validation Report** - generates a report showing the summary of devices running valid/invalid software version
 - **Inventory Item Software Validation Report** - generates a report showing the summary of inventory items running valid/invalid software version
