@@ -6,6 +6,11 @@ This document describes all new features and changes in the release `2.0`. The f
 
 This release adds support for [Nautobot v2.0.0](https://github.com/nautobot/nautobot/releases/tag/v2.0.0).
 
+## [v2.0.4] - 2023-12-15
+
+### Fixed
+- [#265](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/265) - Fixes incorrect query used to generate `nautobot_lcm_hw_end_of_support_per_part_number` metric.
+
 ## [v2.0.3] - 2023-11-08
 
 ### Fixed
