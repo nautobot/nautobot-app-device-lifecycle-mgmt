@@ -20,4 +20,4 @@ def add_custom_contract_types(choices):
         choices (tuple): Existing Device Lifecycle Contract Type tuple.
     """
     defined_additional_contract_types = PLUGIN_SETTINGS.get("additional_contract_types", [])
-    return tuple((type, type) for type in defined_additional_contract_types) + tuple(choices)
+    return tuple((contract_type, contract_type) for contract_type in defined_additional_contract_types) + tuple(choices)
