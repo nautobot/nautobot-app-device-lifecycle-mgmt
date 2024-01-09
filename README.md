@@ -13,7 +13,7 @@
 
 ## Overview
 
-A app for [Nautobot](https://github.com/nautobot/nautobot) to manage device lifecycles. This app works by making related associations to Devices, Device Types, and Inventory Items to help provide data about the hardware end of life notices, appropriate software versions to be running on the devices, and the maintenance contracts associated with devices. This will help with the various aspects of planning Lifecycle events, and provides quick access to ancillary data about the devices in Nautobot.
+An app for [Nautobot](https://github.com/nautobot/nautobot) to manage device lifecycles. This app works by making related associations to Devices, Device Types, and Inventory Items to help provide data about the hardware end of life notices, appropriate software versions to be running on the devices, and the maintenance contracts associated with devices. This will help with the various aspects of planning Lifecycle events, and provides quick access to ancillary data about the devices in Nautobot.
 
 ### Screenshots
 
