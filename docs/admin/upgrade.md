@@ -11,7 +11,7 @@ pip3 install --upgrade nautobot-device-lifecycle-mgmt
 ```
 
 !!! note
-    To ensure Nautobot Device Life Cycle Management app is automatically re-installed during future upgrades, check for a file named `local_requirements.txt` in the Nautobot root directory (alongside `requirements.txt`). The `nautobot-app-device-lifecycle-mgmt` package should be listed in it.
+    To ensure Nautobot Device Life Cycle Management app is automatically re-installed during future upgrades, check for a file named `local_requirements.txt` in the Nautobot root directory (alongside `requirements.txt`). The `nautobot-device-lifecycle-mgmt` package should be listed in it.
 
 ## Run Post Upgrade Steps
 
