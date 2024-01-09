@@ -40,7 +40,7 @@ Once installed, the app needs to be enabled in your Nautobot configuration. The 
 # In your nautobot_config.py
 PLUGINS = ["nautobot_device_lifecycle_mgmt"]
 
-# Optionally you can override default settings for config items in the device lifecylce app (as seen in this example)
+# Optionally you can override default settings for config items in the device lifecycle app (as seen in this example)
 PLUGINS_CONFIG = {
     "nautobot_device_lifecycle_mgmt": {
         "barchart_bar_width": float(os.environ.get("BARCHART_BAR_WIDTH", 0.1)),
