@@ -8,7 +8,7 @@ import time_machine
 from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Site, Platform
 from nautobot.extras.models import Status
 
-from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
+from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, CurrencyChoices, CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     SoftwareLCM,
@@ -18,6 +18,8 @@ from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     VulnerabilityLCM,
     SoftwareImageLCM,
+    ContractLCM,
+    ProviderLCM,
 )
 from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
@@ -28,6 +30,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     CVELCMFilterSet,
     VulnerabilityLCMFilterSet,
     SoftwareImageLCMFilterSet,
+    ContractLCMFilterSet,
 )
 from .conftest import create_devices, create_inventory_items, create_cves, create_softwares
 
@@ -777,4 +780,111 @@ class SoftwareImageLCMFilterSetTestCase(TestCase):
     def test_device_types(self):
         """Test device_types filter."""
         params = {"device_types": [self.devicetype_2.model]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+
+class ContractLCMFilterSetTestCase(TestCase):
+    """Tests for ContractLCMFilterSet."""
+
+    queryset = ContractLCM.objects.all()
+    filterset = ContractLCMFilterSet
+
+    def setUp(self):
+        self.provider_cisco = ProviderLCM.objects.create(name="Cisco")
+        self.provider_arista = ProviderLCM.objects.create(name="Arista")
+
+        self.contracts = (
+            ContractLCM.objects.create(
+                name="CiscoHardware",
+                provider=self.provider_cisco,
+                number="CSCO0000001",
+                start=date(2022, 5, 10),
+                end=date(2029, 11, 8),
+                cost=1_000_000,
+                support_level="24-7",
+                contract_type=ContractTypeChoices.HARDWARE,
+                currency=CurrencyChoices.GBP,
+            ),
+            ContractLCM.objects.create(
+                name="CiscoSoftware",
+                provider=self.provider_cisco,
+                number="CSCO0000002",
+                start=date(2023, 7, 17),
+                end=date(2030, 6, 12),
+                cost=2_000_000,
+                support_level="12-5",
+                contract_type=ContractTypeChoices.SOFTWARE,
+                currency=CurrencyChoices.GBP,
+            ),
+            ContractLCM.objects.create(
+                name="AristaHardware",
+                provider=self.provider_arista,
+                number="ARISTA0000001",
+                start=date(2023, 1, 1),
+                end=date(2023, 8, 30),
+                cost=6_000_000,
+                support_level="24-7",
+                contract_type=ContractTypeChoices.HARDWARE,
+                currency=CurrencyChoices.USD,
+            ),
+        )
+
+    def test_q_one_name(self):
+        """Test q filter to find single record based on name."""
+        params = {"q": "CiscoHardware"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_one_cost(self):
+        """Test q filter to find single record based on cost."""
+        params = {"q": "6000000"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_two_contract_type(self):
+        """Test q filter to find two records with Hardware contract type."""
+        params = {"q": "Hardware"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_start_gte(self):
+        """Test start__gte filter."""
+        params = {"start__gte": "2023-07-01"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_end_lte(self):
+        """Test end__lte filter."""
+        params = {"end__lte": "2024-01-01"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_provider(self):
+        """Test provider filter."""
+        params = {"provider": ["Cisco"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_number(self):
+        """Test number filter."""
+        params = {"number": "ARISTA0000001"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_cost(self):
+        """Test cost filter."""
+        params = {"cost": "1000000"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_support_level(self):
+        """Test support_level filter."""
+        params = {"support_level": "12-5"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_contract_type(self):
+        """Test contract_type filter."""
+        params = {"contract_type": "Hardware"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_expired(self):
+        """Test expired filter."""
+        params = {"expired": True}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_currency(self):
+        """Test currency filter."""
+        params = {"currency": "USD"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)

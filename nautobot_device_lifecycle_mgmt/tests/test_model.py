@@ -11,6 +11,7 @@ from nautobot.dcim.models import DeviceType, Manufacturer, Platform
 from nautobot.extras.choices import RelationshipTypeChoices
 from nautobot.extras.models import Relationship, RelationshipAssociation, Status, Tag
 
+from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, CurrencyChoices
 from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -689,3 +690,45 @@ class ProviderLCMTestCase(TestCase):
         self.assertEqual(cisco_contract.currency, "USD")
         self.assertEqual(cisco_contract.contract_type, "Hardware")
         self.assertEqual(cisco_contract.comments, "Cisco gave us discount")
+
+
+class ContractLCMTestCase(TestCase):
+    """Tests for the ContractLCM model."""
+
+    def setUp(self):
+        """Set up base objects."""
+        self.provider_cisco = ProviderLCM.objects.create(name="Cisco")
+
+    def test_create_contractlcm_required_only(self):
+        """Successfully create ContractLCM with required fields only."""
+        contractlcm = ContractLCM.objects.create(
+            name="Cisco Contract", provider=self.provider_cisco, contract_type=ContractTypeChoices.HARDWARE
+        )
+        self.assertEqual(contractlcm.name, "Cisco Contract")
+        self.assertEqual(contractlcm.provider, self.provider_cisco)
+        self.assertEqual(contractlcm.contract_type, "Hardware")
+
+    def test_create_contractlcm_all(self):
+        """Successfully create ContractLCM with all fields."""
+        contractlcm_full = ContractLCM.objects.create(
+            name="Cisco Hardware Contract",
+            provider=self.provider_cisco,
+            number="CSCO0000001",
+            start=date(2022, 5, 10),
+            end=date(2029, 11, 8),
+            cost=1_000_000,
+            support_level="24-7",
+            contract_type=ContractTypeChoices.HARDWARE,
+            currency=CurrencyChoices.GBP,
+        )
+
+        self.assertEqual(contractlcm_full.name, "Cisco Hardware Contract")
+        self.assertEqual(contractlcm_full.provider, self.provider_cisco)
+        self.assertEqual(contractlcm_full.number, "CSCO0000001")
+        self.assertEqual(str(contractlcm_full.start), "2022-05-10")
+        self.assertEqual(str(contractlcm_full.end), "2029-11-08")
+        self.assertEqual(contractlcm_full.cost, 1_000_000)
+        self.assertEqual(contractlcm_full.support_level, "24-7")
+        self.assertEqual(contractlcm_full.contract_type, "Hardware")
+        self.assertEqual(contractlcm_full.currency, "GBP")
+        self.assertEqual(str(contractlcm_full), f"{contractlcm_full.name}")

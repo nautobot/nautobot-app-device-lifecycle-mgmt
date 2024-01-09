@@ -576,7 +576,6 @@ class ContractLCMExportLinkedObjectsTest(TestCase):
             destination=inventoryitems[2],
             relationship=inv_item_contract_rel,
         )
-        # breakpoint()
 
     def test_contract_devices_export(self):
         """Test CSV export for Devices connected to Contract."""
@@ -586,8 +585,6 @@ class ContractLCMExportLinkedObjectsTest(TestCase):
         obj_perm.users.add(self.user)
         obj_perm.object_types.add(ContentType.objects.get_for_model(ContractLCM))
         obj_perm.object_types.add(ContentType.objects.get_for_model(Device))
-        # obj_perm.object_types.add(ContentType.objects.get_for_model(DeviceType))
-        # obj_perm.object_types.add(ContentType.objects.get_for_model(Manufacturer))
 
         contract1 = ContractLCM.objects.filter(name="CiscoHW1").first()
         response = self.client.get(f"{contract1.get_absolute_url()}?export_contract=devices")
@@ -620,7 +617,6 @@ class ContractLCMExportLinkedObjectsTest(TestCase):
         obj_perm.users.add(self.user)
         obj_perm.object_types.add(ContentType.objects.get_for_model(ContractLCM))
         obj_perm.object_types.add(ContentType.objects.get_for_model(InventoryItem))
-        # obj_perm.object_types.add(ContentType.objects.get_for_model(Manufacturer))
 
         contract1 = ContractLCM.objects.filter(name="CiscoHW1").first()
         response = self.client.get(f"{contract1.get_absolute_url()}?export_contract=inventoryitems")
@@ -644,3 +640,61 @@ class ContractLCMExportLinkedObjectsTest(TestCase):
             "\nAristaHW1,Hardware,100GBASE-SR4 QSFP Transceiver,QSFP-100G-SR4-S,,Cisco,sw2,Test 1"
             "\nAristaHW1,Hardware,48x RJ-45 Line Card,WS-X6548-GE-TX,,Cisco,sw3,Test 1",
         )
+
+
+class ContractLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
+    """Test the ContractLCM views."""
+
+    model = ContractLCM
+
+    def _get_base_url(self):
+        return "plugins:{}:{}_{{}}".format(  # pylint: disable=consider-using-f-string
+            self.model._meta.app_label, self.model._meta.model_name
+        )
+
+    @classmethod
+    def setUpTestData(cls):
+        """Set up test data."""
+        provider = ProviderLCM.objects.create(name="Cisco")
+
+        ContractLCM.objects.create(name="Cisco Support - Hardware Routers", provider=provider, contract_type="Hardware")
+        ContractLCM.objects.create(
+            name="Cisco Support - Hardware Switches", provider=provider, contract_type="Hardware"
+        )
+        ContractLCM.objects.create(name="Cisco Support - Software", provider=provider, contract_type="Software")
+
+        cls.form_data = {
+            "name": "Cisco Support - Software - Line Cards",
+            "provider": provider.id,
+            "contract_type": "Software",
+        }
+        cls.csv_data = (
+            "name,provider,contract_type",
+            f"Cisco Support - Hardware1, {provider.id}, Hardware",
+            f"Cisco Support - Hardware2, {provider.id}, Hardware",
+            f"Cisco Support - Software, {provider.id}, Software",
+        )
+
+    def test_has_advanced_tab(self):
+        pass
+
+    def test_get_object_notes(self):
+        pass
+
+    def test_list_objects_with_permission(self):
+        pass
+
+    def test_bulk_import_objects_with_permission_csv_file(self):
+        pass
+
+    def test_bulk_import_objects_with_constrained_permission(self):
+        pass
+
+    def test_bulk_import_objects_with_permission(self):
+        pass
+
+    def test_bulk_edit_objects_with_constrained_permission(self):
+        pass
+
+    def test_bulk_edit_objects_with_permission(self):
+        pass
