@@ -755,7 +755,7 @@ class ContractLCMForm(BootstrapMixin, CustomFieldModelFormMixin, RelationshipMod
         required=True,
     )
     contract_type = forms.ChoiceField(
-        choices=add_blank_choice(add_custom_contract_types(ContractTypeChoices.CHOICES)), label="Contract Type"
+        choices=lambda: add_blank_choice(add_custom_contract_types(ContractTypeChoices.CHOICES)), label="Contract Type"
     )
     currency = forms.ChoiceField(
         required=False, widget=StaticSelect2, choices=add_blank_choice(CurrencyChoices.CHOICES)

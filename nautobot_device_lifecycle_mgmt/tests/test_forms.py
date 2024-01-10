@@ -1,6 +1,7 @@
 """Test forms."""
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.contrib.contenttypes.models import ContentType
+from unittest.mock import patch
 
 from nautobot.dcim.models import DeviceType, Manufacturer, Device, DeviceRole, Site, InventoryItem, Platform
 from nautobot.extras.models import Status, Tag
@@ -11,6 +12,7 @@ from nautobot_device_lifecycle_mgmt.forms import (
     ValidatedSoftwareLCMForm,
     CVELCMForm,
     SoftwareImageLCMForm,
+    ContractLCMForm,
 )
 from nautobot_device_lifecycle_mgmt.models import SoftwareImageLCM, SoftwareLCM, CVELCM
 
@@ -587,3 +589,20 @@ class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member,too-many-
         self.assertFalse(form.is_valid())
         self.assertIn("download_url", form.errors)
         self.assertIn("Enter a valid URL.", form.errors["download_url"])
+
+
+class ContractFormTest(TestCase):
+    """Test class for Device Lifecycle Contract Form."""
+
+    def test_custom_contract_types(self):
+        form = ContractLCMForm()
+        choices = form.base_fields["contract_type"].choices  # pylint: disable=no-member
+
+        self.assertIn(("Software License", "Software License"), list(choices))
+
+    @patch("nautobot_device_lifecycle_mgmt.utils.PLUGIN_SETTINGS", {"additional_contract_types": []})
+    def test_no_custom_contract_types(self):
+        form = ContractLCMForm()
+
+        choices = form.base_fields["contract_type"].choices  # pylint: disable=no-member
+        self.assertNotIn(("Software License", "Software License"), list(choices))
