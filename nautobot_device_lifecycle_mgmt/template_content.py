@@ -1,4 +1,4 @@
-"""Extended core templates for the Lifecycle Management plugin."""
+"""Extended core templates for the Lifecycle Management app."""
 from abc import ABCMeta
 
 from django.db.models import Q

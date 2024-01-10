@@ -1,8 +1,8 @@
 # Software Lifecycle
 
-The Software Lifecycle portion of the plugin helps in managing the lifecycle of the software running on the devices and inventory items.
+The Software Lifecycle portion of the app helps in managing the lifecycle of the software running on the devices and inventory items.
 
-To help in achieving this goal the plugin provides three types of objects: Software, Software Image and Validated Software.
+To help in achieving this goal the app provides three types of objects: Software, Software Image and Validated Software.
 
 Software objects can be used on their own and are used to record detailed information about a software release. These objects can then be associated with devices and inventory items to track the versions used by the infrastructure hardware.
 
@@ -71,7 +71,7 @@ The following constrains apply to the Software Image objects:
 
 ## Software Image - matching to devices and inventory items
 
-When using List view search form, or API, it's possible to pass device name, device id or inventory id as a filter. Plugin will then attempt to find a Software Image object that applies to devices and inventory items.
+When using List view search form, or API, it's possible to pass device name, device id or inventory id as a filter. App will then attempt to find a Software Image object that applies to devices and inventory items.
 
 To find a software image assigned to an object, that object must have Software assigned, and that Software must have at least Software Image linked to it.
 
@@ -204,7 +204,7 @@ One Validated Software object can be assigned to multiple other objects.
 
 ## Validated Software matching logic
 
-When a device or inventory item has Software assigned plugin will attempt to find a Validated Software object that is linked to the Software and matches the device/inventory item through assignment resolution.
+When a device or inventory item has Software assigned app will attempt to find a Validated Software object that is linked to the Software and matches the device/inventory item through assignment resolution.
 
 If at least one Validated Software object, which is currently valid, matching Software and device/inventory item is found, then the Software is marked as valid. Otherwise, it is marked as invalid.
 

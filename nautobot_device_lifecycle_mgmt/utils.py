@@ -1,4 +1,4 @@
-"""Utility functions and classes used by the plugin."""
+"""Utility functions and classes used by the app."""
 from django.db.models import Count, OuterRef, Subquery
 from django.db.models.functions import Coalesce
 

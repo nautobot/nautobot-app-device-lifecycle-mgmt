@@ -4,13 +4,13 @@ This document describes common use-cases and scenarios for this App.
 
 ## General Usage
 
-### Adding Information into the Plugin
+### Adding Information into the App
 
-To add data into the Device Life Cycle Plugin, you need to either add it manually throughout the UI, or through the REST API endpoint. In this current version there is no synchronization of data from a vendor API endpoint, but this may be a feature request in the future.
+To add data into the Device Life Cycle App, you need to either add it manually throughout the UI, or through the REST API endpoint. In this current version there is no synchronization of data from a vendor API endpoint, but this may be a feature request in the future.
 
-#### Plugin API Definition
+#### App API Definition
 
-To add information via the REST API, please look at the Swagger API docs for the plugin once installed. This will provide you the same documentation for working with other devices.
+To add information via the REST API, please look at the Swagger API docs for the app once installed. This will provide you the same documentation for working with other devices.
 
 #### Hardware Lifecycle
 

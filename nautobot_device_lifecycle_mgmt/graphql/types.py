@@ -1,4 +1,4 @@
-"""GraphQL implementation for the Device LifeCycle Management plugin."""
+"""GraphQL implementation for the Device LifeCycle Management app."""
 import graphene
 from graphene_django import DjangoObjectType
 

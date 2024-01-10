@@ -1,5 +1,5 @@
 # pylint: disable=logging-not-lazy, consider-using-f-string
-"""Jobs for the Lifecycle Management plugin."""
+"""Jobs for the Lifecycle Management app."""
 from datetime import datetime
 
 from nautobot.dcim.models import Device, InventoryItem

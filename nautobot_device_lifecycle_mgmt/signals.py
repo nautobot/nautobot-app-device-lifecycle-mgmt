@@ -1,4 +1,4 @@
-"""Custom signals for the Lifecycle Management plugin."""
+"""Custom signals for the Lifecycle Management app."""
 
 from django.apps import apps as global_apps
 from django.db.models.signals import pre_delete
