@@ -1,4 +1,4 @@
-"""Nautobot Jobs for the Device Lifecycle plugin."""
+"""Nautobot Jobs for the Device Lifecycle app."""
 from nautobot.core.celery import register_jobs
 
 from .cve_tracking import GenerateVulnerabilities

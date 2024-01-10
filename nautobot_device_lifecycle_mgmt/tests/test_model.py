@@ -120,7 +120,7 @@ class HardwareLCMTestCase(TestCase):
         self.assertFalse(hwlcm_obj.expired)
 
     def test_expired_field_setting_end_of_sale_expired(self):
-        """Test expired property is expired with end_of_sale when set within plugin settings."""
+        """Test expired property is expired with end_of_sale when set within app settings."""
         settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]["expired_field"] = "end_of_sale"
         hwlcm_obj = HardwareLCM.objects.create(
             device_type=self.device_type, end_of_sale=date(2021, 4, 1), end_of_support=date(2999, 4, 1)
@@ -128,7 +128,7 @@ class HardwareLCMTestCase(TestCase):
         self.assertTrue(hwlcm_obj.expired)
 
     def test_expired_field_setting_end_of_sale_not_expired(self):
-        """Test expired property is NOT expired with end_of_sale not existing but plugin setting set to end_of_sale."""
+        """Test expired property is NOT expired with end_of_sale not existing but app setting set to end_of_sale."""
         settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]["expired_field"] = "end_of_sale"
         hwlcm_obj = HardwareLCM.objects.create(device_type=self.device_type, end_of_support=date(2999, 4, 1))
         self.assertFalse(hwlcm_obj.expired)

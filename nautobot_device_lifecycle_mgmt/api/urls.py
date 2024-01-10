@@ -1,4 +1,4 @@
-"""API URLs for the Lifecycle Management plugin."""
+"""API URLs for the Lifecycle Management app."""
 
 from rest_framework import routers
 

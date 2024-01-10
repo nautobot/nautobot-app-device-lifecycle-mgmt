@@ -1,4 +1,4 @@
-"""API Views implementation for the Lifecycle Management plugin."""
+"""API Views implementation for the Lifecycle Management app."""
 from nautobot.apps.api import NautobotModelViewSet
 
 from nautobot_device_lifecycle_mgmt.filters import (

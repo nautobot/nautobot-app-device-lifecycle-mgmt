@@ -1,4 +1,4 @@
-"""Forms implementation for the Lifecycle Management plugin."""
+"""Forms implementation for the Lifecycle Management app."""
 import logging
 
 from django import forms

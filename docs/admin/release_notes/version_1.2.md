@@ -18,13 +18,13 @@ This release includes some of the following highlights:
 !!! warning "Note: - This release increases minimum supported Nautobot version to 1.4.0."
 
 ### Added
-- [#137](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/issues/137) Add testing against the upstream version of Nautobot.
-- [#140](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/issues/140) Add progress info log messages to the Generate Vulnerabilities job.
+- [#137](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/137) Add testing against the upstream version of Nautobot.
+- [#140](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/140) Add progress info log messages to the Generate Vulnerabilities job.
 
 ### Changed
 
-- [#130](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/issues/130): Change plural for Software and Validated Software models. Use generic template as the base for details templates.
-- [#131](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/issues/131): Update documentation.
-- [#160](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/issues/160): Define default columns for the Software list view.
+- [#130](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/130): Change plural for Software and Validated Software models. Use generic template as the base for details templates.
+- [#131](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/131): Update documentation.
+- [#160](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/160): Define default columns for the Software list view.
 
 ### Fixed

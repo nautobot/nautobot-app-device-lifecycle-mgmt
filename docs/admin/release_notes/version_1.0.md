@@ -17,7 +17,7 @@ This release includes some of the following highlights:
 
 ### Fixed
 
-- [#76](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/issues/76) Fixes data migration bug, between Software and Software Image, when upgrading from version < v1.0.0.
+- [#76](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/76) Fixes data migration bug, between Software and Software Image, when upgrading from version < v1.0.0.
 
 
 ## [v1.0.1] - 2022-03-09
@@ -28,8 +28,8 @@ This release includes some of the following highlights:
 
 ### Fixed
 
-- [#72](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/issues/72) Fixes Software Images tab rendering error in the Software details view when Software does not have Software Images linked.
-- [#73](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/issues/73) Fixes occasional post migrate signal failure.
+- [#72](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/72) Fixes Software Images tab rendering error in the Software details view when Software does not have Software Images linked.
+- [#73](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/73) Fixes occasional post migrate signal failure.
 
 
 ## [v1.0.0] - 2022-03-02
@@ -37,10 +37,10 @@ This release includes some of the following highlights:
     - Software model fields `image_file_name`, `download_url` and `image_file_checksum` have been removed.
 
 ### Added
-- [#55](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/issues/55) Added Software Image model.
+- [#55](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/55) Added Software Image model.
 
 ### Changed
-- [#55](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/issues/55) Removed image related fields from Software model.
+- [#55](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/55) Removed image related fields from Software model.
 
 ### Fixed
 

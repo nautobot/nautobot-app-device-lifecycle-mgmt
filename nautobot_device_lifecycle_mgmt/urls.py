@@ -1,4 +1,4 @@
-"""Django urlpatterns declaration for the Lifecycle Management plugin."""
+"""Django urlpatterns declaration for the Lifecycle Management app."""
 from django.urls import path
 from nautobot.apps.urls import NautobotUIViewSetRouter
 

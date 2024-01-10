@@ -1,4 +1,4 @@
-"""Tables implementation for the Lifecycle Management plugin."""
+"""Tables implementation for the Lifecycle Management app."""
 
 import django_tables2 as tables
 from django.urls import reverse
