@@ -634,7 +634,7 @@ class ContractLCMForm(NautobotModelForm):
         required=True,
     )
     contract_type = forms.ChoiceField(
-        choices=add_blank_choice(add_custom_contract_types(ContractTypeChoices.CHOICES)), label="Contract Type"
+        choices=lambda: add_blank_choice(add_custom_contract_types(ContractTypeChoices.CHOICES)), label="Contract Type"
     )
     currency = forms.ChoiceField(required=False, choices=add_blank_choice(CurrencyChoices.CHOICES))
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
