@@ -1,7 +1,7 @@
 """Test forms."""
+from unittest.mock import patch
 from django.test import TestCase
 from django.contrib.contenttypes.models import ContentType
-from unittest.mock import patch
 
 from nautobot.dcim.models import DeviceType, Manufacturer, Device, DeviceRole, Site, InventoryItem, Platform
 from nautobot.extras.models import Status, Tag
