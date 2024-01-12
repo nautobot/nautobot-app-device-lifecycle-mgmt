@@ -1,6 +1,9 @@
 """Static choices uses for the Device Lifecycle app."""
+from django.conf import settings
 from nautobot.apps.choices import ChoiceSet
 from pycountry import countries
+
+PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]
 
 
 class ContractTypeChoices(ChoiceSet):
@@ -12,6 +15,7 @@ class ContractTypeChoices(ChoiceSet):
     CHOICES = (
         (HARDWARE, "Hardware"),
         (SOFTWARE, "Software"),
+        *[(contract_type, contract_type) for contract_type in PLUGIN_SETTINGS.get("additional_contract_types", [])],
     )
 
 
