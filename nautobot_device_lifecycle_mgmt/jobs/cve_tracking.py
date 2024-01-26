@@ -55,22 +55,16 @@ class GenerateVulnerabilities(Job):
                 # Loop through any device relationships~
                 device_rels = soft_rel.source.get_relationships()["source"][device_soft_rel]
                 for dev_rel in device_rels:
-                    vuln_obj, created = VulnerabilityLCM.objects.get_or_create(
-                        cve=cve, software=dev_rel.source, device=dev_rel.destination
-                    )
-                    if created:
-                        vuln_obj.validated_save()
+                    VulnerabilityLCM.objects.get_or_create(cve=cve, software=dev_rel.source, device=dev_rel.destination)
 
                 # Loop through any inventory tem relationships
                 item_rels = soft_rel.source.get_relationships()["source"][inv_item_soft_rel]
                 for item_rel in item_rels:
-                    vuln_obj, created = VulnerabilityLCM.objects.get_or_create(
+                    VulnerabilityLCM.objects.get_or_create(
                         cve=cve,
                         software=item_rel.source,
                         inventory_item=item_rel.destination,
                     )
-                    if created:
-                        vuln_obj.validated_save()
 
         diff = VulnerabilityLCM.objects.count() - count_before
         self.log_success(message=f"Processed {cves.count()} CVEs and generated {diff} Vulnerabilities.")
