@@ -2,7 +2,7 @@
 from datetime import datetime
 
 from nautobot.extras.jobs import Job, StringVar, BooleanVar
-from nautobot.extras.models import Relationship, RelationshipAssociation
+from nautobot.extras.models import Relationship
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -39,33 +39,32 @@ class GenerateVulnerabilities(Job):
         """Check if software assigned to each device is valid. If no software is assigned return warning message."""
         # Although the default is set on the class attribute for the UI, it doesn't default for the API
         published_after = data.get("published_after", "1970-01-01")
-        cves = CVELCM.objects.filter(published_date__gte=datetime.fromisoformat(published_after))
+        cves = CVELCM.objects.filter(published_date__gte=datetime.fromisoformat(published_after)).prefetch_related(
+            "destination_for_associations", "destination_for_associations__relationship"
+        )
         count_before = VulnerabilityLCM.objects.count()
+        device_soft_rel = Relationship.objects.get(slug="device_soft")
+        inv_item_soft_rel = Relationship.objects.get(slug="inventory_item_soft")
 
         for cve in cves:
             if data["debug"]:
                 self.log_info(obj=cve, message="Generating vulnerabilities for CVE {cve}")
-            software_rels = RelationshipAssociation.objects.filter(relationship__slug="soft_cve", destination_id=cve.id)
+            # Get Software Relationships from the `_prefetched_objects_cache`
+            software_rels = cve.destination_for_associations.filter(relationship__slug="soft_cve")
             for soft_rel in software_rels:
-                # Loop through any device relationships
-                device_rels = soft_rel.source.get_relationships()["source"][
-                    Relationship.objects.get(slug="device_soft")
-                ]
+                # Loop through any device relationships~
+                device_rels = soft_rel.source.get_relationships()["source"][device_soft_rel]
                 for dev_rel in device_rels:
-                    vuln_obj, _ = VulnerabilityLCM.objects.get_or_create(
-                        cve=cve, software=dev_rel.source, device=dev_rel.destination
-                    )
-                    vuln_obj.validated_save()
+                    VulnerabilityLCM.objects.get_or_create(cve=cve, software=dev_rel.source, device=dev_rel.destination)
 
                 # Loop through any inventory tem relationships
-                item_rels = soft_rel.source.get_relationships()["source"][
-                    Relationship.objects.get(slug="inventory_item_soft")
-                ]
+                item_rels = soft_rel.source.get_relationships()["source"][inv_item_soft_rel]
                 for item_rel in item_rels:
-                    vuln_obj, _ = VulnerabilityLCM.objects.get_or_create(
-                        cve=cve, software=item_rel.source, inventory_item=item_rel.destination
+                    VulnerabilityLCM.objects.get_or_create(
+                        cve=cve,
+                        software=item_rel.source,
+                        inventory_item=item_rel.destination,
                     )
-                    vuln_obj.validated_save()
 
         diff = VulnerabilityLCM.objects.count() - count_before
         self.log_success(message=f"Processed {cves.count()} CVEs and generated {diff} Vulnerabilities.")
