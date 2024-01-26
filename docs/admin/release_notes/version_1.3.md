@@ -24,7 +24,6 @@ This release includes some of the following highlights:
 - [#196](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/196) Adds reverse relationship from device type to software image.
 - [#194](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/194) Adds table with matching ValidatedSoftware objects to the DeviceType detailed view in GUI.
 
-
 ### Removed
 - [#197](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/197) Removes compatibility code for Nautobot versions < 1.4
 
