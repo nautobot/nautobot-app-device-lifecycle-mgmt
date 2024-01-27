@@ -1,5 +1,5 @@
 # pylint: disable=logging-not-lazy, consider-using-f-string
-"""Jobs for the CVE Tracking portion of the Device Lifecycle plugin."""
+"""Jobs for the CVE Tracking portion of the Device Lifecycle app."""
 from datetime import datetime
 
 from nautobot.extras.jobs import BooleanVar, Job, StringVar
@@ -42,6 +42,9 @@ class GenerateVulnerabilities(Job):
         cves = CVELCM.objects.filter(published_date__gte=datetime.fromisoformat(published_after))
         count_before = VulnerabilityLCM.objects.count()
 
+        device_soft_rel = Relationship.objects.get(key="device_soft")
+        inv_item_soft_rel = Relationship.objects.get(key="inventory_item_soft")
+
         for cve in cves:
             if debug:
                 self.logger.info(
@@ -50,20 +53,16 @@ class GenerateVulnerabilities(Job):
                 )
             for software in cve.affected_softwares.all():
                 # Loop through any device relationships
-                device_rels = software.get_relationships()["source"][Relationship.objects.get(key="device_soft")]
+                device_rels = software.get_relationships()["source"][device_soft_rel]
                 for dev_rel in device_rels:
-                    vuln_obj, _ = VulnerabilityLCM.objects.get_or_create(
-                        cve=cve, software=dev_rel.source, device=dev_rel.destination
-                    )
-                    vuln_obj.validated_save()
+                    VulnerabilityLCM.objects.get_or_create(cve=cve, software=dev_rel.source, device=dev_rel.destination)
 
                 # Loop through any inventory tem relationships
-                item_rels = software.get_relationships()["source"][Relationship.objects.get(key="inventory_item_soft")]
+                item_rels = software.get_relationships()["source"][inv_item_soft_rel]
                 for item_rel in item_rels:
-                    vuln_obj, _ = VulnerabilityLCM.objects.get_or_create(
+                    VulnerabilityLCM.objects.get_or_create(
                         cve=cve, software=item_rel.source, inventory_item=item_rel.destination
                     )
-                    vuln_obj.validated_save()
 
         diff = VulnerabilityLCM.objects.count() - count_before
         self.logger.info("Processed %d CVEs and generated %d Vulnerabilities." % (cves.count(), diff))

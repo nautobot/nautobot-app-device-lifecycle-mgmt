@@ -1,4 +1,4 @@
-"""Django models for the Lifecycle Management plugin."""
+"""Django models for the Lifecycle Management app."""
 
 from datetime import date, datetime
 
@@ -34,7 +34,7 @@ from nautobot_device_lifecycle_mgmt.software_filters import (
     "webhooks",
 )
 class HardwareLCM(PrimaryModel):
-    """HardwareLCM model for plugin."""
+    """HardwareLCM model for app."""
 
     # Set model columns
     device_type = models.ForeignKey(
@@ -411,7 +411,7 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
     "webhooks",
 )
 class ContractLCM(PrimaryModel):
-    """ContractLCM model for plugin."""
+    """ContractLCM model for app."""
 
     # Set model columns
     provider = models.ForeignKey(
@@ -474,7 +474,7 @@ class ContractLCM(PrimaryModel):
     "webhooks",
 )
 class ProviderLCM(OrganizationalModel):
-    """ProviderLCM model for plugin."""
+    """ProviderLCM model for app."""
 
     # Set model columns
     name = models.CharField(max_length=100, unique=True)

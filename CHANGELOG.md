@@ -1,103 +1,108 @@
 # CHANGELOG
 
+## [v2.0.4] - 2023-12-15
+
+### Fixed
+- [#265](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/265) - Fixes incorrect query used to generate `nautobot_lcm_hw_end_of_support_per_part_number` metric.
+
 ## [v2.0.3] - 2023-11-08
 
 ### Fixed
-- [#253](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/253) - Fixes issue with incorrect logging in the Device Software Validation Report job.
+- [#253](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/253) - Fixes issue with incorrect logging in the Device Software Validation Report job.
 
 
 ## [v2.0.2] - 2023-11-06
 
-Note: This release fixes an issue with upgrading this plugin from 1.x version to 2.x versions.
+Note: This release fixes an issue with upgrading this app from 1.x version to 2.x versions.
 
 ### Fixed
-- [#250](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/250) - Fix issue with migrations in 2.0.1 causing issues with upgrading plugin from 1.x versions.
+- [#250](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/250) - Fix issue with migrations in 2.0.1 causing issues with upgrading app from 1.x versions.
 
 
 ## [v2.0.1] - 2023-10-31
-Note: This release fixes an issue with clean installations of this plugin on Nautobot 2.0.X environments.
+Note: This release fixes an issue with clean installations of this app on Nautobot 2.0.X environments.
 
 ### Added
-- [240](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/240) - Add Network to Code Drift Management to keep development environment up to code standards.
+- [240](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/240) - Add Network to Code Drift Management to keep development environment up to code standards.
 
 ### Fixed
-- [#236](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/236) - Fix circular dependencies which result in installation issues.
+- [#236](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/236) - Fix circular dependencies which result in installation issues.
 
 
 ## [v2.0.0] - 2023-09-29
 
 ### Added
 
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Add support for Python 3.11.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Add uniqueness constraints to `ValidatedSoftwareLCM` and `VulnerabilityLCM` models.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Add support for Python 3.11.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Add uniqueness constraints to `ValidatedSoftwareLCM` and `VulnerabilityLCM` models.
 
 ### Changed
 
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Metric `hw_end_of_support_site_gauge` has been renamed to `hw_end_of_support_location_gauge`. This now uses `location` label instead of `site`.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - `CVELCM` to `SoftwareLCM` relationship is now represented by `affected_softwares` M2M field on the `CVELCM` model. Reverse relationships on the `SoftwareLCM` model is accessed via `corresponding_cves` field.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - `ContractLCM` to `Device` relationship is now represented by `devices` M2M field on the `ContractLCM` model. Reverse relationships on the `Device` model is accessed via `device_contracts` field.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Replace all references to `slug` field with the primary key for each relevant model.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Replace all references to `device_role` field with `role` when working with `Device` model.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Replace references to `Site` model with `Location` model.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Simplify serializers. All serializers now inherit from `NautobotModelSerializer`.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - All forms now inherit from `NautobotModelForm`.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Migrate jobs to Nautobot 2.0 standard.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Update tests for Nautobot 2.0.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Migrate `View` classes to use `ViewSet`.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Model fields of type `TextField` and `CharField` that allowed Null values no longer do so and default to an empty string "".
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - `ContractLCM` to `InventoryItem` relationship key renamed from `contractlcm-to-inventoryitem` to `contractlcm_to_inventoryitem`. This is enforced by Nautobot 2.0.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Validated Software Device report url changed from `validated-software/device-report/` to `validated-software-device-report/` due to viewset routing changes.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Validated Software Inventory Items report url changed from `validated-software/inventoryitem-report/` to `validated-software-inventoryitem-report/` due to viewset routing changes.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Metric `hw_end_of_support_site_gauge` has been renamed to `hw_end_of_support_location_gauge`. This now uses `location` label instead of `site`.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - `CVELCM` to `SoftwareLCM` relationship is now represented by `affected_softwares` M2M field on the `CVELCM` model. Reverse relationships on the `SoftwareLCM` model is accessed via `corresponding_cves` field.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - `ContractLCM` to `Device` relationship is now represented by `devices` M2M field on the `ContractLCM` model. Reverse relationships on the `Device` model is accessed via `device_contracts` field.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Replace all references to `slug` field with the primary key for each relevant model.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Replace all references to `device_role` field with `role` when working with `Device` model.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Replace references to `Site` model with `Location` model.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Simplify serializers. All serializers now inherit from `NautobotModelSerializer`.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - All forms now inherit from `NautobotModelForm`.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Migrate jobs to Nautobot 2.0 standard.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Update tests for Nautobot 2.0.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Migrate `View` classes to use `ViewSet`.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Model fields of type `TextField` and `CharField` that allowed Null values no longer do so and default to an empty string "".
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - `ContractLCM` to `InventoryItem` relationship key renamed from `contractlcm-to-inventoryitem` to `contractlcm_to_inventoryitem`. This is enforced by Nautobot 2.0.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Validated Software Device report url changed from `validated-software/device-report/` to `validated-software-device-report/` due to viewset routing changes.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Validated Software Inventory Items report url changed from `validated-software/inventoryitem-report/` to `validated-software-inventoryitem-report/` due to viewset routing changes.
 
 ### Removed
 
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Remove support for Python 3.7.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Remove nested serializers.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Remove `to_csv()` csv export method from model classes. Rely on default csv export provided by Nautobot 2.0.
-- [#207](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/207) - Remove unused dry-run option from jobs.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Remove support for Python 3.7.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Remove nested serializers.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Remove `to_csv()` csv export method from model classes. Rely on default csv export provided by Nautobot 2.0.
+- [#207](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/207) - Remove unused dry-run option from jobs.
 
 
 ## [v1.3.3] - 2023-09-29
 
 ### Changed
-- [#157](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/157) Changes development use of `docker-compose` as standalone to Docker's built-in `docker compose`.
+- [#157](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/157) Changes development use of `docker-compose` as standalone to Docker's built-in `docker compose`.
 
 
 ## [v1.3.2] - 2023-08-02
 ### Changed
-- [#200](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/200) Provides more clarity by adding in device and inventory item name to help identify. Fix API name and making columns sortable.
+- [#200](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/200) Provides more clarity by adding in device and inventory item name to help identify. Fix API name and making columns sortable.
 
 ## [v1.3.1] - 2023-07-29
 
 ### Added
-- [#196](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/196) Adds reverse relationship from device type to software image.
-- [#194](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/194) Adds table with matching ValidatedSoftware objects to the DeviceType detailed view in GUI.
+- [#196](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/196) Adds reverse relationship from device type to software image.
+- [#194](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/194) Adds table with matching ValidatedSoftware objects to the DeviceType detailed view in GUI.
 
 ### Removed
-- [#197](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/197) Removes compatibility code for Nautobot versions < 1.4
+- [#197](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/197) Removes compatibility code for Nautobot versions < 1.4
 
 
 ## [v1.3.0] - 2023-06-17
 
 ### Added
-- [#165](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/165) Add Portal URL to API and Template.
-- [#170](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/170) Add download url column to SoftwareImage table.
-- [#166](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/166) Add Hashing Algorithm to Image Model.
-- [#151](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/151) Hacky friday DLCM metrics.
-- [#176](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/176) Rewrite software validation metric generation using queries with annotations.
-- [#148](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/148) Prometheus Metrics.
-- [#175](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/175) Add Notes urls to all models.
-- [#156](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/156) Add functionality summary page.
+- [#165](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/165) Add Portal URL to API and Template.
+- [#170](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/170) Add download url column to SoftwareImage table.
+- [#166](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/166) Add Hashing Algorithm to Image Model.
+- [#151](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/151) Hacky friday DLCM metrics.
+- [#176](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/176) Rewrite software validation metric generation using queries with annotations.
+- [#148](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/148) Prometheus Metrics.
+- [#175](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/175) Add Notes urls to all models.
+- [#156](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/156) Add functionality summary page.
 
 ### Removed
-- [#168](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/168) Delete unused admin interface.
+- [#168](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/168) Delete unused admin interface.
 
 ### Changed
-- [#161](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/161) Update the debug env variable name to NAUTOBOT_DEBUG.
-- [#178](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/178) Make HW End Of Support metric names consistent.
+- [#161](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/161) Update the debug env variable name to NAUTOBOT_DEBUG.
+- [#178](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/178) Make HW End Of Support metric names consistent.
 
 ### Fixed
-- [#184](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/184) address docker compose development environment.
+- [#184](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/184) address docker compose development environment.
 
 ## v1.2.0 - 18-04-2023
 
@@ -121,7 +126,7 @@ Note: This release fixes an issue with clean installations of this plugin on Nau
 ### Fixed
 
 - #123: Fixed CustomFieldModelFilterSet import source
-- #124: Remove testing of permissions on plugin
+- #124: Remove testing of permissions on app
 
 ## v1.1.1 - 11-22-2022
 
@@ -180,7 +185,7 @@ As part of the migrations to v1.0.0, a Software Image object, linked to relevant
 
 ## v0.4.0 - 02-08-2022
 
-- PR#47: Added Plugin Upgrade Guide to the README
+- PR#47: Added App Upgrade Guide to the README
 - PR#50: Fixed view permissions for Device Notices
 - PR#57: Added CVE Tracking model and Vulnerability model
 
@@ -188,7 +193,7 @@ As part of the migrations to v1.0.0, a Software Image object, linked to relevant
 
 - PR#39: Adds feature-rich reporting functionality for Software Validation.
 - PR#37: Fixes GraphQL incompatibility with Nautobot >= 1.2.0.
-- PR#36: Adds documentation for the Software Lifecycle part of the plugin.
+- PR#36: Adds documentation for the Software Lifecycle part of the app.
 - PR#33: Updates Hardware LCM to support MySQL Compliant Queries.
 - PR#32: Refactors ValidatedSoftwareLCM model to support assignment to multiple objects.
 
@@ -203,14 +208,14 @@ As part of the migrations to v1.0.0, a Software Image object, linked to relevant
 
 - PR#26: Sets view permissions on all models in the navigation menu.
 - PR#26: Fixes navigation menu for Contract Imports.
-- PR#25: Add documentation for use-cases and plugin info to repo.
+- PR#25: Add documentation for use-cases and app info to repo.
 - PR#20: Adds `valid` property to the validated software serializers.
 - PR#18: Adds CSV export option to software and validated software models.
 
 ## v0.2.0 - 09-22-2021
 
-- **Adds Maintenance/Service Contracts to the Lifecycle Plugin.**
-- **Adds Software and Validated Software tracking to the Lifecycle Plugin.**
+- **Adds Maintenance/Service Contracts to the Lifecycle App.**
+- **Adds Software and Validated Software tracking to the Lifecycle App.**
 
 ## v0.1.0 - 08-05-2021
 

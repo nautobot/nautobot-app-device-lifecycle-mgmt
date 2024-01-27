@@ -1,6 +1,6 @@
 # CVE Tracking
 
-The CVE Tracking portion of the plugin provides two additional objects - CVE objects and Vulnerability objects.
+The CVE Tracking portion of the app provides two additional objects - CVE objects and Vulnerability objects.
 
 ## CVE objects
 
@@ -42,7 +42,7 @@ Example of a breadcrumb link on a Software item's view:
 
 A Vulnerability object is the representation of a discovered relationship between a CVE object, a Software object and a Device (or Inventory Item) object. Vulnerability objects cannot be created manually, but rather they must be generated via a Job. They require the combination of a CVE object that is associated to a Software object **and** that Software object to be associated to a Device or Inventory Item object in order to be discovered and generated. You can think of Vulnerability objects like an attack surface that was found in your infrastructure that must be mitigated (such as upgrading the affected device to a patched software version).
 
-To generate Vulnerability objects you must run the ``Generate Vulnerabilities`` Job that is packaged as part of this plugin. One Vulnerability object will be created for **each** unique combination of CVE/Software/Device and CVE/Software/Inventory Item.
+To generate Vulnerability objects you must run the ``Generate Vulnerabilities`` Job that is packaged as part of this app. One Vulnerability object will be created for **each** unique combination of CVE/Software/Device and CVE/Software/Inventory Item.
 
 !!! note
     When running the ``Generate Vulnerabilities`` Job, if any unique combinations are found that match an existing Vulnerability object, the Job will not create a duplicate object nor modify the existing object.
