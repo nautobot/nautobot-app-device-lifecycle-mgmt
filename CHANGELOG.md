@@ -1,7 +1,7 @@
 # CHANGELOG
 
 
-## [v2.1.0] - 2023-01-26
+## [v2.1.0] - 2024-01-26
 
 ### Changed
 - [#269](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/269) - Renaming effort to standardize on Nautobot terminology for Apps/Plugins.
@@ -9,6 +9,15 @@
 ### Fixed
 - [#277](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/277) - Updated cve_tracking.py job in order to reduce the DB queries and the overall execution time of the Job. 
 - [#265](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/265) - Fixed incorrect query used to generate nautobot_lcm_hw_end_of_support_per_part_number metric.
+
+## [v1.6.0] - 2024-01-26
+### Added
+- [#217](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/217) - Adds new tab "Contract devices" to the Contract details view. Adds "Contract devices" export feature to the Contract details view. Adds new tab "Contract inventory items" to the Contract details view. Adds "Contract inventory items" export feature to the Contract details view. Linting targeting Python 3.8
+
+### Fixed
+- [#275](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/275) - Updated in cve_tracking.py job in order to get the Related Software Relationships fetched from the CVELVM database query. That way we reduce the DB queries and the overall execution time of the Job.
+- [#248](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/248) - Fixes issue with number field not showing up in UI and API. Fixes model validation to match UI validation. This ensures provider and contract_type fields are set. Adds missing tests. Addresses #242.
+- [#259](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/259) - Fixes incorrect query used to generate nautobot_lcm_hw_end_of_support_per_part_number metric.
 
 ## [v2.0.4] - 2023-12-15
 
