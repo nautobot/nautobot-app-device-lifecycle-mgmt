@@ -1,5 +1,15 @@
 # CHANGELOG
 
+
+## [v2.1.0] - 2023-01-26
+
+### Changed
+- [#269](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/269) - Renaming effort to standardize on Nautobot terminology for Apps/Plugins.
+
+### Fixed
+- [#277](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/277) - Updated cve_tracking.py job in order to reduce the DB queries and the overall execution time of the Job. 
+- [#265](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/265) - Fixed incorrect query used to generate nautobot_lcm_hw_end_of_support_per_part_number metric.
+
 ## [v2.0.4] - 2023-12-15
 
 ### Fixed
