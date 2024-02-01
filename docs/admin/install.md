@@ -76,3 +76,10 @@ The app behavior can be controlled with the following list of settings:
 | `barchart_width`     | `12`                      |         | The width of the barchart within the overview report.                 |
 | `barchart_height`    | `5`                       |         | The height of the barchart within the overview report.                |
 
+The app behavior can be controlled with the following list of settings:
+
+| Key     | Example | Default | Description                          |
+| ------- | ------ | -------- | ------------------------------------- |
+| `enable_backup` | `True` | `True` | A boolean to represent whether or not to run backup configurations within the app. |
+| `platform_slug_map` | `{"cisco_wlc": "cisco_aireos"}` | `None` | A dictionary in which the key is the platform slug and the value is what netutils uses in any "network_os" parameter. |
+| `per_feature_bar_width` | `0.15` | `0.15` | The width of the table bar within the overview report |
