@@ -1,14 +1,14 @@
-"""Plugin declaration for nautobot_device_lifecycle_mgmt."""
+"""App declaration for nautobot_device_lifecycle_mgmt."""
 # Metadata is inherited from Nautobot. If not including Nautobot in the environment, this should be added
 from importlib import metadata
 
-__version__ = metadata.version(__name__)
+from nautobot.apps import NautobotAppConfig
 
-from nautobot.extras.plugins import NautobotAppConfig
+__version__ = metadata.version(__name__)
 
 
 class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
-    """Plugin configuration for the nautobot_device_lifecycle_mgmt plugin."""
+    """App configuration for the nautobot_device_lifecycle_mgmt app."""
 
     name = "nautobot_device_lifecycle_mgmt"
     verbose_name = "Device Lifecycle Management"
