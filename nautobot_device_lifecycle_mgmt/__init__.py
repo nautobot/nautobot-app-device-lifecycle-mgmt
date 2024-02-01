@@ -3,12 +3,13 @@
 from importlib import metadata
 
 from nautobot.apps import NautobotAppConfig
+from nautobot.core.signals import nautobot_database_ready
 
 __version__ = metadata.version(__name__)
 
 
 class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
-    """App configuration for the nautobot_device_lifecycle_mgmt app."""
+    """App configuration for the Device Lifecycle Management app."""
 
     name = "nautobot_device_lifecycle_mgmt"
     verbose_name = "Nautobot Device Lifecycle Management"

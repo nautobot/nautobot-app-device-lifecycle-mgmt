@@ -39,8 +39,7 @@ Nautobot Device Lifecycle App is maintained by Network to Code and members of th
 
 ## Extras
 
-!!! warning "Developer Note - Remove Me!"
-    What is shown today in the Installed Apps page in Nautobot. What parts of Nautobot does it interact with, what does it add etc. ?
+The following custom relationships are automatically created by the app:
 
 - **Software on Device** - links Software version to Device
 - **Software on InventoryItem** - links Software version to Inventory Item

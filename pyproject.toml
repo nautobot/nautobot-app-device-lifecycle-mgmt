@@ -56,6 +56,8 @@ mkdocs-version-annotations = "1.0.0"
 # Automatic documentation from sources, for MkDocs
 mkdocstrings = "0.22.0"
 mkdocstrings-python = "1.5.2"
+sentry-sdk = "*"
+time-machine = "*"
 towncrier = "~23.6.0"
 
 [tool.poetry.extras]

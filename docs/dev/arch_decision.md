@@ -2,6 +2,5 @@
 
 The intention is to document deviations from a standard Model View Controller (MVC) design.
 
-!!! warning "Developer Note - Remove Me!"
-    Optional page, remove if not applicable.
-    For examples see [Golden Config](https://github.com/nautobot/nautobot-plugin-golden-config/tree/develop/docs/dev/dev_adr.md).
+!!! success "Standards Based Architectural Decisions"
+    Device Lifecycle Management App stays within the standard design for MVC, however if anything changes in the future, references can be found here.

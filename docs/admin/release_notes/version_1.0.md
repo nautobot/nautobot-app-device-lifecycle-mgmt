@@ -9,11 +9,7 @@ This release includes some of the following highlights:
  - Fixes intermittent post migrate signal failure
  - Removed image related fields from software model (back compatibility references listed below)
 
-- Major features or milestones
-- Achieved in this `x.y` release
-- Changes to compatibility with Nautobot and/or other apps, libraries etc.
-
-## [v1.0.1] - 2021-09-08
+## [v1.0.2] - 2022-03-10
 
 ### Added
 
@@ -21,7 +17,7 @@ This release includes some of the following highlights:
 
 ### Fixed
 
-- [#123](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/123) Fixed Tag filtering not working in job launch form
+- [#76](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/76) Fixes data migration bug, between Software and Software Image, when upgrading from version < v1.0.0.
 
 
 ## [v1.0.1] - 2022-03-09
