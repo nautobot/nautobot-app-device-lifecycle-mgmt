@@ -75,4 +75,3 @@ The app behavior can be controlled with the following list of settings:
 | `barchart_bar_width` | `0.1`                     | `0.15`  | The width of the table bar within the overview report.                |
 | `barchart_width`     | `12`                      |         | The width of the barchart within the overview report.                 |
 | `barchart_height`    | `5`                       |         | The height of the barchart within the overview report.                |
-
