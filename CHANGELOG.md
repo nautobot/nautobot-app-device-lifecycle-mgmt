@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1.6.1] - 2024-02-02
+### Added
+- [#287](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/287) - Adds support for Python 3.11
+
 ## [v1.6.0] - 2024-01-26
 ### Added
 - [#217](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/217) - Adds new tab "Contract devices" to the Contract details view. Adds "Contract devices" export feature to the Contract details view. Adds new tab "Contract inventory items" to the Contract details view. Adds "Contract inventory items" export feature to the Contract details view. Linting targeting Python 3.8
