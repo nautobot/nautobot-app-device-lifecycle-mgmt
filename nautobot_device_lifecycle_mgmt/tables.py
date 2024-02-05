@@ -440,7 +440,7 @@ class ContractLCMTable(BaseTable):
         args=[A("provider.pk")],
     )
     cost = tables.TemplateColumn(
-        template_code="""{{ record.cost }}{% if record.currency %} {{ record.currency }}{% endif %}"""
+        template_code="""{% load humanize %}{{ record.cost|intcomma }}{% if record.currency %} {{ record.currency }}{% endif %}"""
     )
     actions = ButtonsColumn(ContractLCM, buttons=("changelog", "edit", "delete"))
 
