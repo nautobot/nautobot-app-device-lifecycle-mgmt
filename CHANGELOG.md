@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [v1.6.1] - 2024-02-02
+## [v1.6.1] - 2024-02-04
 ### Added
 - [#287](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/287) - Adds support for Python 3.11
 
