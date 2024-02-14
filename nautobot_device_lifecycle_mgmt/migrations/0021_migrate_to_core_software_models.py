@@ -122,9 +122,11 @@ def migrate_dlm_software_models_to_core(apps, schema_editor):
         CoreSoftwareImage.objects.filter(id=core_software_image.id).update(created=dlm_software_image.created)
 
         # Map the DLM object_tags to devices and set the Device.software_image_files m2m field
-        device_pks = TaggedItem.objects.filter(
-            tag__in=dlm_software_image.object_tags.all(), content_type=device_ct
-        ).values_list("object_id")
+        device_pks = (
+            TaggedItem.objects.filter(tag__in=dlm_software_image.object_tags.all(), content_type=device_ct)
+            .values_list("object_id")
+            .distinct()
+        )
         for device in Device.objects.filter(pk__in=device_pks):
             device.software_image_files.add(core_software_image)
 
