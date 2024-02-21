@@ -332,7 +332,9 @@ class Migration(migrations.Migration):
     dependencies = [
         ("dcim", "0055_softwareimage_softwareversion_data_migration"),
         ("contenttypes", "0002_remove_content_type_name"),
+        ("extras", "0057_jobbutton"),
         ("nautobot_device_lifecycle_mgmt", "0020_alter_created_tags"),
+        ("users", "0001_initial"),
     ]
 
     operations = [
