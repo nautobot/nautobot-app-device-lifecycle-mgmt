@@ -322,7 +322,7 @@ def _migrate_software_version(apps, dlm_software_version):
     )
 
 
-@functools.cache
+@functools.lru_cache(maxsize=None)
 def _objectchange_request_id():
     # Common request ID for all object changes created during this migration
     return uuid.uuid4()
