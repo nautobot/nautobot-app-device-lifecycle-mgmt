@@ -1,5 +1,4 @@
 from difflib import SequenceMatcher
-import functools
 from string import ascii_letters, digits
 import uuid
 
@@ -10,6 +9,9 @@ from nautobot.core.models.utils import serialize_object, serialize_object_v2
 import nautobot.dcim.choices as dcim_choices
 from nautobot.extras import choices as extras_choices, models as extras_models
 from nautobot.extras.constants import CHANGELOG_MAX_OBJECT_REPR
+
+
+common_objectchange_request_id = uuid.uuid4()
 
 
 def migrate_dlm_software_models_to_core(apps, schema_editor):
@@ -226,7 +228,7 @@ def _migrate_software_image(apps, dlm_software_image):
         f"{core_software_image.image_file_name}"[:CHANGELOG_MAX_OBJECT_REPR],
         related_object_id=dlm_software_image.id,
         related_object_type=dlm_software_image_ct,
-        request_id=_objectchange_request_id(),
+        request_id=common_objectchange_request_id,
         user=None,
         user_name="Undefined",
     )
@@ -316,16 +318,10 @@ def _migrate_software_version(apps, dlm_software_version):
         ],
         related_object_id=dlm_software_version.id,
         related_object_type=dlm_software_version_ct,
-        request_id=_objectchange_request_id(),
+        request_id=common_objectchange_request_id,
         user=None,
         user_name="Undefined",
     )
-
-
-@functools.lru_cache(maxsize=None)
-def _objectchange_request_id():
-    # Common request ID for all object changes created during this migration
-    return uuid.uuid4()
 
 
 class Migration(migrations.Migration):
