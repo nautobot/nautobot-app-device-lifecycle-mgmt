@@ -4,12 +4,15 @@ import uuid
 
 from django.db import migrations
 
-from nautobot.core.models.managers import TagsManager
-from nautobot.core.models.utils import serialize_object, serialize_object_v2
-import nautobot.dcim.choices as dcim_choices
-from nautobot.extras import choices as extras_choices, models as extras_models
+from nautobot.apps.choices import (
+    ObjectChangeActionChoices,
+    ObjectChangeEventContextChoices,
+    SoftwareImageFileHashingAlgorithmChoices,
+)
+from nautobot.apps.models import serialize_object, serialize_object_v2, TagsManager
+from nautobot.apps.utils import migrate_content_type_references_to_new_model
+from nautobot.extras import models as extras_models
 from nautobot.extras.constants import CHANGELOG_MAX_OBJECT_REPR
-
 
 common_objectchange_request_id = uuid.uuid4()
 
@@ -28,8 +31,8 @@ def migrate_dlm_software_models_to_core(apps, schema_editor):
     core_software_image_ct = ContentType.objects.get_for_model(CoreSoftwareImage)
 
     # Migrate content types for all related extras models
-    _migrate_content_types(apps, dlm_software_version_ct, core_software_version_ct)
-    _migrate_content_types(apps, dlm_software_image_ct, core_software_image_ct)
+    migrate_content_type_references_to_new_model(apps, dlm_software_version_ct, core_software_version_ct)
+    migrate_content_type_references_to_new_model(apps, dlm_software_image_ct, core_software_image_ct)
 
     # Migrate nautobot_device_lifecycle_mgmt.SoftwareLCM instances to dcim.SoftwareVersion
     for dlm_software_version in DLMSoftwareVersion.objects.all():
@@ -48,88 +51,10 @@ def migrate_dlm_software_models_to_core(apps, schema_editor):
     DLMSoftwareVersion.objects.all().delete()
 
 
-def _migrate_content_types(apps, old_ct, new_ct):
-    ComputedField = apps.get_model("extras", "ComputedField")
-    CustomField = apps.get_model("extras", "CustomField")
-    CustomLink = apps.get_model("extras", "CustomLink")
-    ExportTemplate = apps.get_model("extras", "ExportTemplate")
-    JobButton = apps.get_model("extras", "JobButton")
-    JobHook = apps.get_model("extras", "JobHook")
-    Note = apps.get_model("extras", "Note")
-    ObjectChange = apps.get_model("extras", "ObjectChange")
-    ObjectPermission = apps.get_model("users", "ObjectPermission")
-    Relationship = apps.get_model("extras", "Relationship")
-    RelationshipAssociation = apps.get_model("extras", "RelationshipAssociation")
-    Status = apps.get_model("extras", "Status")
-    Tag = apps.get_model("extras", "Tag")
-    TaggedItem = apps.get_model("extras", "TaggedItem")
-    WebHook = apps.get_model("extras", "WebHook")
-
-    # Migrate ComputedField content type
-    ComputedField.objects.filter(content_type=old_ct).update(content_type=new_ct)
-
-    # Migrate CustomField content type
-    for cf in CustomField.objects.filter(content_types=old_ct):
-        cf.content_types.add(new_ct)
-
-    # Migrate CustomLink content type
-    CustomLink.objects.filter(content_type=old_ct).update(content_type=new_ct)
-
-    # Migrate ExportTemplate content type - skip git export templates
-    ExportTemplate.objects.filter(content_type=old_ct, owner_content_type=None).update(content_type=new_ct)
-
-    # Migrate JobButton content type
-    for job_button in JobButton.objects.filter(content_types=old_ct):
-        job_button.content_types.add(new_ct)
-
-    # Migrate JobHook content type
-    for job_hook in JobHook.objects.filter(content_types=old_ct):
-        job_hook.content_types.add(new_ct)
-
-    # Migrate Note content type
-    Note.objects.filter(assigned_object_type=old_ct).update(assigned_object_type=new_ct)
-
-    # Migrate ObjectChange content type
-    ObjectChange.objects.filter(changed_object_type=old_ct).update(changed_object_type=new_ct)
-
-    # Migrate ObjectPermission content type
-    for object_permission in ObjectPermission.objects.filter(object_types=old_ct):
-        object_permission.object_types.add(new_ct)
-
-    # Migrate Relationship content type
-    Relationship.objects.filter(source_type=old_ct).update(source_type=new_ct)
-    Relationship.objects.filter(destination_type=old_ct).update(destination_type=new_ct)
-
-    # Migration RelationshipAssociation content type
-    RelationshipAssociation.objects.filter(source_type=old_ct).update(source_type=new_ct)
-    RelationshipAssociation.objects.filter(destination_type=old_ct).update(destination_type=new_ct)
-
-    # Migrate Status content type
-    for status in Status.objects.filter(content_types=old_ct):
-        status.content_types.add(new_ct)
-
-    # Migrate Tag content type
-    for tag in Tag.objects.filter(content_types=old_ct):
-        tag.content_types.add(new_ct)
-
-    # Migrate TaggedItem content type
-    TaggedItem.objects.filter(content_type=old_ct).update(content_type=new_ct)
-
-    # DLM forms are using a custom tag field that doesn't enforce content type. Fix that here if necessary.
-    for tag_id in TaggedItem.objects.filter(content_type=new_ct).values_list("tag_id", flat=True).distinct():
-        tag = Tag.objects.get(id=tag_id)
-        if not tag.content_types.filter(id=new_ct.id).exists():
-            tag.content_types.add(new_ct)
-
-    # Migrate WebHook content type
-    for web_hook in WebHook.objects.filter(content_types=old_ct):
-        web_hook.content_types.add(new_ct)
-
-
 def _migrate_hashing_algorithm(value):
     # Attempt to map the hashing algorithm to one of the valid choices for dcim.SoftwareImageFile
     similarity = {}
-    for choice in dcim_choices.SoftwareImageFileHashingAlgorithmChoices.values():
+    for choice in SoftwareImageFileHashingAlgorithmChoices.values():
         # Use difflib.SequenceMatcher to compare the similarity of the hashing algorithm to the valid choices, ignoring case and punctuation
         # This returns a float between 0 and 1; 1 if the compared strings are identical, and 0 if they have nothing in common
         ratio = SequenceMatcher(lambda x: x not in ascii_letters + digits, value.lower(), choice.lower()).ratio()
@@ -216,8 +141,8 @@ def _migrate_software_image(apps, dlm_software_image):
 
     # Create an object change to document migration
     ObjectChange.objects.create(
-        action=extras_choices.ObjectChangeActionChoices.ACTION_UPDATE,
-        change_context=extras_choices.ObjectChangeEventContextChoices.CONTEXT_ORM,
+        action=ObjectChangeActionChoices.ACTION_UPDATE,
+        change_context=ObjectChangeEventContextChoices.CONTEXT_ORM,
         change_context_detail="Migrated from Nautobot App Device Lifecycle Management",
         changed_object_id=core_software_image.id,
         changed_object_type=core_software_image_ct,
@@ -306,8 +231,8 @@ def _migrate_software_version(apps, dlm_software_version):
 
     # Create an object change to document migration
     ObjectChange.objects.create(
-        action=extras_choices.ObjectChangeActionChoices.ACTION_UPDATE,
-        change_context=extras_choices.ObjectChangeEventContextChoices.CONTEXT_ORM,
+        action=ObjectChangeActionChoices.ACTION_UPDATE,
+        change_context=ObjectChangeEventContextChoices.CONTEXT_ORM,
         change_context_detail="Migrated from Nautobot App Device Lifecycle Management",
         changed_object_id=core_software_version.id,
         changed_object_type=core_software_version_ct,
