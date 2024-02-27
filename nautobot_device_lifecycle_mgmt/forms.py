@@ -670,7 +670,7 @@ class ContractLCMBulkEditForm(NautobotBulkEditForm):
     """Device Lifecycle Contrcts bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=ContractLCM.objects.all(), widget=forms.MultipleHiddenInput)
-    provider = forms.ModelMultipleChoiceField(queryset=ProviderLCM.objects.all(), required=False)
+    provider = forms.ModelChoiceField(queryset=ProviderLCM.objects.all(), required=False)
     start = forms.DateField(widget=DatePicker(), required=False)
     end = forms.DateField(widget=DatePicker(), required=False)
     cost = forms.FloatField(required=False)
