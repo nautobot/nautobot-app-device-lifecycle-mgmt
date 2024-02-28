@@ -1,0 +1,22 @@
+{
+    "type": "object",
+    "properties": {
+        "expired_field": {
+            "type": "string",
+            "default": "end_of_support"
+        },
+        "barchart_bar_width": {
+            "type": "number",
+            "default": 0.1
+        },
+        "barchart_width": {
+            "type": "integer",
+            "default": 12
+        },
+        "barchart_height": {
+            "type": "integer",
+            "default": 5
+        }
+    },
+    "additionalProperties": false
+}
