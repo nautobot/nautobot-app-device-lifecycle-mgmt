@@ -1,6 +1,6 @@
 # App Overview
 
-This document provides an overview of the App including critical information and import considerations when applying it to your Nautobot environment.
+This document provides an overview of the App including critical information and important considerations when applying it to your Nautobot environment.
 
 The Device Lifecycle Management app aims to help in managing the lifecycle of the device hardware and software components.
 
