@@ -30,7 +30,7 @@ class DeviceSoftwareValidationFullReport(Job):
 
     def run(self) -> None:  # pylint: disable=arguments-differ
         """Check if software assigned to each device is valid. If no software is assigned return warning message."""
-        devices = Device.objects.all()
+        devices = Device.objects.filter(destination_for_associations__isnull=False)
         job_run_time = datetime.now()
 
         for device in devices:
@@ -61,7 +61,7 @@ class InventoryItemSoftwareValidationFullReport(Job):
 
     def run(self):  # pylint: disable=arguments-differ
         """Check if software assigned to each inventory item is valid. If no software is assigned return warning message."""
-        inventory_items = InventoryItem.objects.all()
+        inventory_items = InventoryItem.objects.filter(destination_for_associations__isnull=False)
         job_run_time = datetime.now()
 
         for inventoryitem in inventory_items:
