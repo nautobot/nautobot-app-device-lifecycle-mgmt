@@ -1,0 +1,1 @@
+Refactored Jobs to filter processed objects to only those with a RelationshipAssociation.
