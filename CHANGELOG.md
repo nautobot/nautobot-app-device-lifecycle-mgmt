@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v2.1.1] - 2024-03-12
+
+### Fixed
+- [#313](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/313) - Fixes bug that could lead to InventoryItem metric queries erroring out.
+
+
 ## [v1.6.1] - 2024-02-04
 ### Added
 - [#287](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/287) - Adds support for Python 3.11
