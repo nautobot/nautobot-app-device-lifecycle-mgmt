@@ -6,6 +6,11 @@ This document describes all new features and changes in the release `2.0`. The f
 
 This release adds support for various improvements, bug fixes, and performance improvements.
 
+## [v2.1.1] - 2024-03-12
+
+### Fixed
+- [#313](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/313) - Fixes bug that could lead to InventoryItem metric queries erroring out.
+
 ## [v2.1.0] - 2024-01-26
 
 ### Changed

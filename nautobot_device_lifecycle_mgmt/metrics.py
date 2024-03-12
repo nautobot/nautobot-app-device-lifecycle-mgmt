@@ -75,7 +75,9 @@ def metrics_lcm_validation_report_inventory_item():
         "Number of devices that have valid/invalid software by inventory item",
         labels=["inventory_item", "is_valid"],
     )
-    inventory_item_part_ids = InventoryItem.objects.exclude(part_id="").order_by().values("part_id").distinct()
+    inventory_item_part_ids = (
+        InventoryItem.objects.exclude(part_id="").without_tree_fields().order_by().values("part_id").distinct()
+    )
 
     # Annotate InventoryItemSoftwareValidationResult with counts for valid and invalid software per part id
     validation_counts = (
@@ -150,7 +152,8 @@ def metrics_lcm_hw_end_of_support():  # pylint: disable=too-many-locals
 
     # Generate metrics with counts for out of support inventory items per part id
     for part_id, inv_item_count in (
-        InventoryItem.objects.order_by()
+        InventoryItem.objects.without_tree_fields()
+        .order_by()
         .filter(part_id__in=hw_end_of_support_invitems)
         .values("part_id")
         .annotate(inv_item_count=Count("id"))
@@ -196,7 +199,8 @@ def metrics_lcm_hw_end_of_support():  # pylint: disable=too-many-locals
     )
     # Get count of out of hw support inventory items per location
     hw_end_of_support_per_location_invitems = (
-        InventoryItem.objects.order_by()
+        InventoryItem.objects.without_tree_fields()
+        .order_by()
         .filter(part_id__in=hw_end_of_support_invitems)
         .values(location_name=F("device__location__name"))
         .annotate(location_count=Count("id"))
