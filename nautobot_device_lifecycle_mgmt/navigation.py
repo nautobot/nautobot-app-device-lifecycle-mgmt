@@ -45,6 +45,7 @@ menu_items = (
                 name="Software Lifecycle",
                 weight=100,
                 items=(
+                    # TODO: Remove. @progala
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:softwarelcm_list",
                         name="Software",
@@ -70,6 +71,7 @@ menu_items = (
                             "nautobot_device_lifecycle_mgmt.view_softwarelcm",
                         ],
                     ),
+                    # TODO: Remove @progala
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_list",
                         name="Software Image",

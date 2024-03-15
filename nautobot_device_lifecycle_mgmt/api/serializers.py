@@ -46,6 +46,7 @@ class ContractLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,t
         fields = "__all__"
 
 
+# TODO: Remove. @progala
 class ContactLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
@@ -56,6 +57,7 @@ class ContactLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,to
         fields = "__all__"
 
 
+# TODO: Remove. @progala
 class SoftwareLCMSerializer(NautobotModelSerializer):
     """REST API serializer for SoftwareLCM records."""
 
@@ -66,6 +68,7 @@ class SoftwareLCMSerializer(NautobotModelSerializer):
         fields = "__all__"
 
 
+# TODO: Remove. @progala
 class SoftwareImageLCMSerializer(NautobotModelSerializer):
     """REST API serializer for SoftwareImageLCM records."""
 

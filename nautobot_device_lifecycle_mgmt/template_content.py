@@ -97,6 +97,7 @@ class InventoryItemHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
         )
 
 
+# TODO: Redo to include ValidateSoftware only. @progala
 class DeviceSoftwareLCMAndValidatedSoftwareLCM(
     PluginTemplateExtension,
 ):  # pylint: disable=abstract-method
@@ -113,7 +114,7 @@ class DeviceSoftwareLCMAndValidatedSoftwareLCM(
         """Display table on right side of page."""
         extra_context = {
             "validsoft_table": self.device_software.get_validated_software_table(),
-            "obj_soft": self.device_software.software,
+            "obj_soft": self.device_software.software,  # TODO: Remove: @progala
             "obj_soft_valid": self.device_software.validate_software(),
         }
 
@@ -123,6 +124,7 @@ class DeviceSoftwareLCMAndValidatedSoftwareLCM(
         )
 
 
+# TODO: Redo to include ValidateSoftware only. @progala
 class InventoryItemSoftwareLCMAndValidatedSoftwareLCM(
     PluginTemplateExtension,
 ):  # pylint: disable=abstract-method
@@ -139,7 +141,7 @@ class InventoryItemSoftwareLCMAndValidatedSoftwareLCM(
         """Display table on right side of page."""
         extra_context = {
             "validsoft_table": self.inventory_item_software.get_validated_software_table,
-            "obj_soft": self.inventory_item_software.software,
+            "obj_soft": self.inventory_item_software.software,  # TODO: Remove: @progala
             "obj_soft_valid": self.inventory_item_software.validate_software(),
         }
 

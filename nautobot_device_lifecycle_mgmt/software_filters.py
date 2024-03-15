@@ -6,6 +6,7 @@ from nautobot.dcim.models import Device, InventoryItem
 from nautobot.extras.models import RelationshipAssociation
 
 
+# TODO: Remove. @progala
 class BaseSoftwareFilter:
     """Base class for SoftwareFilter classes."""
 
@@ -29,6 +30,7 @@ class BaseSoftwareFilter:
         return self.software_qs
 
 
+# TODO: Remove. @progala
 class DeviceSoftwareFilter(BaseSoftwareFilter):
     """Filter SoftwareLCM objects based on the Device object."""
 
@@ -36,6 +38,7 @@ class DeviceSoftwareFilter(BaseSoftwareFilter):
     soft_relation_name = "device_soft"
 
 
+# TODO: Remove. @progala
 class InventoryItemSoftwareFilter(BaseSoftwareFilter):
     """Filter SoftwareLCM objects based on the Device object."""
 
@@ -126,6 +129,7 @@ class InventoryItemValidatedSoftwareFilter:
         )
 
 
+# TODO: Remove. @progala
 class DeviceSoftwareImageFilter:
     """Filter SoftwareImageLCM objects based on the Device object."""
 
@@ -160,6 +164,7 @@ class DeviceSoftwareImageFilter:
         return self.softwareimage_qs.filter(default_image_q)
 
 
+# TODO: Remove. @progala
 class InventoryItemSoftwareImageFilter:
     """Filter SoftwareImageLCM objects based on the InventoryItem object."""
 

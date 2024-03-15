@@ -16,6 +16,7 @@ from nautobot_device_lifecycle_mgmt.software import DeviceSoftware, InventoryIte
 name = "Device/Software Lifecycle Reporting"  # pylint: disable=invalid-name
 
 
+# TODO: Redo to use core models. @progala
 class DeviceSoftwareValidationFullReport(Job):
     """Checks if devices run validated software version."""
 

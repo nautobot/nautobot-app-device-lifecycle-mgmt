@@ -67,6 +67,7 @@ class ProviderLCMView(NautobotModelViewSet):
     serializer_class = ProviderLCMSerializer
 
 
+# TODO: Remove. @progala
 class ContactLCMView(NautobotModelViewSet):
     """CRUD operations set for the Contact Lifecycle Management view."""
 
@@ -75,6 +76,7 @@ class ContactLCMView(NautobotModelViewSet):
     serializer_class = ContactLCMSerializer
 
 
+# TODO: Remove. @progala
 class SoftwareLCMViewSet(NautobotModelViewSet):
     """REST API viewset for SoftwareLCM records."""
 
@@ -83,6 +85,7 @@ class SoftwareLCMViewSet(NautobotModelViewSet):
     filterset_class = SoftwareLCMFilterSet
 
 
+# TODO: Remove. @progala
 class SoftwareImageLCMViewSet(NautobotModelViewSet):
     """REST API viewset for SoftwareImageLCM records."""
 

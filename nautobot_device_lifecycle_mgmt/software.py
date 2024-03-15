@@ -12,7 +12,7 @@ from nautobot_device_lifecycle_mgmt.tables import ValidatedSoftwareLCMTable
 class ItemSoftware:
     """Base class providing functions for computing SoftwareLCM and ValidatedSoftwareLCM related objects."""
 
-    soft_relation_name = None
+    soft_relation_name = None  # TODO: Remove. @progala
     soft_obj_model = None
 
     def __init__(self, item_obj):
@@ -20,11 +20,13 @@ class ItemSoftware:
         self.item_obj = item_obj
         self.validated_software_qs = ValidatedSoftwareLCM.objects.get_for_object(self.item_obj)
 
+        # TODO: Link to core.  @progala
         if self.soft_relation_name:
             self.software = self.get_software()
         else:
             self.software = None
 
+    # TODO: Link to core. @progala
     def get_software(self):
         """Get software assigned to the object."""
         try:

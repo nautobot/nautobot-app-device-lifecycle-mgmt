@@ -98,6 +98,7 @@ class HardwareLCMTable(BaseTable):
         )
 
 
+# TODO: Remove. @progala
 class SoftwareLCMTable(BaseTable):
     """Table for SoftwareLCMListView."""
 
@@ -143,6 +144,7 @@ class SoftwareLCMTable(BaseTable):
         )
 
 
+# TODO: Remove. @progala
 class SoftwareImageLCMTable(BaseTable):
     """Table for SoftwareImageLCM."""
 
@@ -487,6 +489,7 @@ class ProviderLCMTable(BaseTable):
         )
 
 
+# TODO: Remove. @progala
 class ContactLCMTable(BaseTable):
     """Table for list view."""
 

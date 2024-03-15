@@ -126,6 +126,8 @@ class HardwareLCM(PrimaryModel):
             )
 
 
+# TODO: Remove @progala
+# TODO: Check if core replicates functionality @progala
 class SoftwareLCMQuerySet(RestrictedQuerySet):
     """Queryset for `SoftwareLCM` objects."""
 
@@ -143,6 +145,7 @@ class SoftwareLCMQuerySet(RestrictedQuerySet):
         return qs
 
 
+# TODO: Remove. @progala
 @extras_features(
     "custom_fields",
     "custom_links",
@@ -182,6 +185,8 @@ class SoftwareLCM(PrimaryModel):
     objects = SoftwareLCMQuerySet.as_manager()
 
 
+# TODO: Remove.
+# TODO: Confirm core replicates functionality. @progala
 class SoftwareImageLCMQuerySet(RestrictedQuerySet):
     """Queryset for `SoftwareImageLCM` objects."""
 
@@ -199,6 +204,7 @@ class SoftwareImageLCMQuerySet(RestrictedQuerySet):
         return qs
 
 
+# TODO: Remove. @progala
 @extras_features(
     "custom_fields",
     "custom_links",
@@ -270,6 +276,7 @@ class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):
 class ValidatedSoftwareLCM(PrimaryModel):
     """ValidatedSoftwareLCM model."""
 
+    # TODO: Point to new core model. @progala
     software = models.ForeignKey(to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Software Version")
     devices = models.ManyToManyField(to="dcim.Device", related_name="+", blank=True)
     device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
@@ -336,6 +343,7 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         blank=False,
         related_name="device_software_validation",
     )
+    # TODO: Point to core model. @progala
     software = models.ForeignKey(
         to="SoftwareLCM", on_delete=models.CASCADE, help_text="Device software", null=True, blank=True, related_name="+"
     )
@@ -373,6 +381,7 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
         help_text="The Inventory Item",
         related_name="inventoryitem_software_validation",
     )
+    # TODO: Point to core model. @progala
     software = models.ForeignKey(
         to="SoftwareLCM", on_delete=models.CASCADE, help_text="Inventory Item software", blank=True, null=True
     )
@@ -503,6 +512,7 @@ class ProviderLCM(OrganizationalModel):
         super().save(*args, **kwargs)
 
 
+# TODO: Remove. Replaced by core model. @progala
 @extras_features(
     "custom_fields",
     "custom_links",
@@ -520,8 +530,11 @@ class ContactLCM(PrimaryModel):
     phone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True, verbose_name="Contact E-mail")
     comments = models.TextField(blank=True, default="")
+    # TODO: Is it worth replicating this on ContractLCM? @progala
     priority = models.PositiveIntegerField(default=100)
     type = models.CharField(max_length=50, default=choices.PoCTypeChoices.UNASSIGNED)
+    # TODO: Replace with a M2M field on ContractLCM @progala
+    # TODO: One contact can belong to many contracts, contract can have many contacts
     contract = models.ForeignKey(
         to="nautobot_device_lifecycle_mgmt.ContractLCM", on_delete=models.CASCADE, verbose_name="Contract", null=True
     )
@@ -543,6 +556,8 @@ class ContactLCM(PrimaryModel):
 
         # Would to an exist() here, but we need to compare the pk in the event we are editing an
         # existing record.
+        # TODO: If this is replicated we'd have to move this to Contract Itself. @progala
+        # We'd have to check that primary is in the list of associated contracts
         primary = ContactLCM.objects.filter(contract=self.contract, type=choices.PoCTypeChoices.PRIMARY).first()
         if primary:
             if self.pk != primary.pk and self.type == choices.PoCTypeChoices.PRIMARY:
@@ -584,6 +599,7 @@ class CVELCM(PrimaryModel):
     cvss_v3 = models.FloatField(blank=True, null=True, verbose_name="CVSSv3 Score")
     fix = models.CharField(max_length=255, blank=True, default="")
     comments = models.TextField(blank=True, default="")
+    # TODO: Migrate to core model @progala
     affected_softwares = models.ManyToManyField(to="SoftwareLCM", related_name="corresponding_cves", blank=True)
 
     class Meta:
@@ -612,6 +628,7 @@ class VulnerabilityLCM(PrimaryModel):
     """VulnerabilityLCM is a model representation of vulnerability that affects a device."""
 
     cve = models.ForeignKey(CVELCM, on_delete=models.CASCADE, blank=True, null=True)
+    # TODO: Migrate to core model @progala
     software = models.ForeignKey(SoftwareLCM, on_delete=models.CASCADE, blank=True, null=True)
     device = models.ForeignKey(Device, on_delete=models.CASCADE, blank=True, null=True)
     inventory_item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, blank=True, null=True)

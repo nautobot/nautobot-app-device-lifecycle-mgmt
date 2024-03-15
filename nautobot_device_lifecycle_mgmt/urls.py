@@ -6,12 +6,12 @@ from nautobot_device_lifecycle_mgmt import views, viewsets
 
 router = NautobotUIViewSetRouter()
 router.register("hardware", viewset=viewsets.HardwareLCMUIViewSet)
-router.register("software", viewset=viewsets.SoftwareLCMUIViewSet)
-router.register("software-image", viewset=viewsets.SoftwareImageLCMUIViewSet)
+router.register("software", viewset=viewsets.SoftwareLCMUIViewSet)  # TODO: Remove. @progala
+router.register("software-image", viewset=viewsets.SoftwareImageLCMUIViewSet)  # TODO: Remove. @progala
 router.register("validated-software", viewset=viewsets.ValidatedSoftwareLCMUIViewSet)
 router.register("contract", viewset=viewsets.ContractLCMUIViewSet)
 router.register("provider", viewset=viewsets.ProviderLCMUIViewSet)
-router.register("contact", viewset=viewsets.ContactLCMUIViewSet)
+router.register("contact", viewset=viewsets.ContactLCMUIViewSet)  # TODO: Remove. @progala
 router.register("cve", viewset=viewsets.CVELCMUIViewSet)
 router.register("vulnerability", viewset=viewsets.VulnerabilityLCMUIViewSet)
 

@@ -48,6 +48,7 @@ logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 GREEN, RED, GREY = ("#D5E8D4", "#F8CECC", "#808080")
 
 
+# TODO: Remove. @progala
 class SoftwareSoftwareImagesLCMView(generic.ObjectView):
     """Software Images tab for Software view."""
 

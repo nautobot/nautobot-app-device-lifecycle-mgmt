@@ -38,6 +38,7 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
         return {"devices": []}
 
 
+# TODO: Remove. @progala
 class SoftwareLCMUIViewSet(NautobotUIViewSet):
     """SoftwareLCM UI ViewSet."""
 
@@ -61,6 +62,7 @@ class SoftwareLCMUIViewSet(NautobotUIViewSet):
         }
 
 
+# TODO: Remove. @progala
 class SoftwareImageLCMUIViewSet(NautobotUIViewSet):
     """SoftwareImageLCM UI ViewSet."""
 
@@ -135,6 +137,7 @@ class ProviderLCMUIViewSet(NautobotUIViewSet):
         return {"contracts": models.ContractLCM.objects.restrict(request.user, "view").filter(provider=instance)}
 
 
+# TODO: Remove. @progala
 class ContactLCMUIViewSet(NautobotUIViewSet):
     """ContactLCM UI ViewSet."""
 

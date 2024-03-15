@@ -10,6 +10,7 @@ from nautobot_device_lifecycle_mgmt.models import CVELCM, VulnerabilityLCM
 name = "CVE Tracking"  # pylint: disable=invalid-name
 
 
+# TODO: Redo to use core models. @progala
 class GenerateVulnerabilities(Job):
     """Generates VulnerabilityLCM objects based on CVEs that are related to Devices."""
 
