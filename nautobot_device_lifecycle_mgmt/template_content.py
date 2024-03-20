@@ -98,15 +98,15 @@ class InventoryItemHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
 
 
 # TODO: Redo to include ValidateSoftware only. @progala
-class DeviceSoftwareLCMAndValidatedSoftwareLCM(
+class DeviceValidatedSoftwareLCM(
     PluginTemplateExtension,
 ):  # pylint: disable=abstract-method
-    """Class to add table for SoftwareLCM and ValidatedSoftwareLCM related to device."""
+    """Class to add table for ValidatedSoftwareLCM related to device."""
 
     model = "dcim.device"
 
     def __init__(self, context):
-        """Init setting up the DeviceSoftwareLCMAndValidatedSoftwareLCM object."""
+        """Init setting up the DeviceValidatedSoftwareLCM object."""
         super().__init__(context)
         self.device_software = DeviceSoftware(item_obj=self.context["object"])
 
@@ -114,39 +114,36 @@ class DeviceSoftwareLCMAndValidatedSoftwareLCM(
         """Display table on right side of page."""
         extra_context = {
             "validsoft_table": self.device_software.get_validated_software_table(),
-            "obj_soft": self.device_software.software,  # TODO: Remove: @progala
             "obj_soft_valid": self.device_software.validate_software(),
         }
 
         return self.render(
-            "nautobot_device_lifecycle_mgmt/inc/software_and_validatedsoftware_info.html",
+            "nautobot_device_lifecycle_mgmt/inc/validatedsoftware_info.html",
             extra_context=extra_context,
         )
 
 
-# TODO: Redo to include ValidateSoftware only. @progala
-class InventoryItemSoftwareLCMAndValidatedSoftwareLCM(
+class InventoryItemValidatedSoftwareLCM(
     PluginTemplateExtension,
 ):  # pylint: disable=abstract-method
-    """Class to add table for SoftwareLCM and ValidatedSoftwareLCM related to inventory item."""
+    """Class to add table for ValidatedSoftwareLCM related to inventory item."""
 
     model = "dcim.inventoryitem"
 
     def __init__(self, context):
-        """Init setting up the InventoryItemSoftwareLCMAndValidatedSoftwareLCM object."""
+        """Init setting up the InventoryItemValidatedSoftwareLCM object."""
         super().__init__(context)
         self.inventory_item_software = InventoryItemSoftware(item_obj=self.context["object"])
 
     def right_page(self):
         """Display table on right side of page."""
         extra_context = {
-            "validsoft_table": self.inventory_item_software.get_validated_software_table,
-            "obj_soft": self.inventory_item_software.software,  # TODO: Remove: @progala
+            "validsoft_table": self.inventory_item_software.get_validated_software_table(),
             "obj_soft_valid": self.inventory_item_software.validate_software(),
         }
 
         return self.render(
-            "nautobot_device_lifecycle_mgmt/inc/software_and_validatedsoftware_info.html",
+            "nautobot_device_lifecycle_mgmt/inc/validatedsoftware_info.html",
             extra_context=extra_context,
         )
 
@@ -156,6 +153,6 @@ template_extensions = [
     DeviceTypeValidatedSoftwareLCM,
     DeviceHWLCM,
     InventoryItemHWLCM,
-    DeviceSoftwareLCMAndValidatedSoftwareLCM,
-    InventoryItemSoftwareLCMAndValidatedSoftwareLCM,
+    DeviceValidatedSoftwareLCM,
+    InventoryItemValidatedSoftwareLCM,
 ]
