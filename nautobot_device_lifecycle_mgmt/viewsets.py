@@ -100,22 +100,6 @@ class ContractLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.ContractLCMSerializer
     table_class = tables.ContractLCMTable
 
-    def get_extra_context(self, request, instance):  # pylint: disable=signature-differs
-        """Return any additional context data for the template.
-
-        request: The current request
-        instance: The object being viewed
-        """
-        return {
-            "contacts": models.ContactLCM.objects.restrict(request.user, "view")
-            .filter(contract=instance)
-            .exclude(type="Owner")
-            .order_by("type", "priority"),
-            "owners": models.ContactLCM.objects.restrict(request.user, "view")
-            .filter(contract=instance, type="Owner")
-            .order_by("type", "priority"),
-        }
-
 
 class ProviderLCMUIViewSet(NautobotUIViewSet):
     """ProviderLCM UI ViewSet."""
