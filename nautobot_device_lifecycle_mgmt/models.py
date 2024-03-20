@@ -276,8 +276,7 @@ class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):
 class ValidatedSoftwareLCM(PrimaryModel):
     """ValidatedSoftwareLCM model."""
 
-    # TODO: Point to new core model. @progala
-    software = models.ForeignKey(to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Software Version")
+    software = models.ForeignKey(to="dcim.SoftwareVersion", on_delete=models.CASCADE, verbose_name="Software Version")
     devices = models.ManyToManyField(to="dcim.Device", related_name="+", blank=True)
     device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
     device_roles = models.ManyToManyField(to="extras.Role", related_name="+", blank=True)
@@ -343,9 +342,13 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         blank=False,
         related_name="device_software_validation",
     )
-    # TODO: Point to core model. @progala
     software = models.ForeignKey(
-        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Device software", null=True, blank=True, related_name="+"
+        to="dcim.SoftwareVersion",
+        on_delete=models.CASCADE,
+        help_text="Device software",
+        null=True,
+        blank=True,
+        related_name="+",
     )
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
@@ -381,9 +384,8 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
         help_text="The Inventory Item",
         related_name="inventoryitem_software_validation",
     )
-    # TODO: Point to core model. @progala
     software = models.ForeignKey(
-        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Inventory Item software", blank=True, null=True
+        to="dcim.SoftwareVersion", on_delete=models.CASCADE, help_text="Inventory Item software", blank=True, null=True
     )
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
@@ -599,8 +601,9 @@ class CVELCM(PrimaryModel):
     cvss_v3 = models.FloatField(blank=True, null=True, verbose_name="CVSSv3 Score")
     fix = models.CharField(max_length=255, blank=True, default="")
     comments = models.TextField(blank=True, default="")
-    # TODO: Migrate to core model @progala
-    affected_softwares = models.ManyToManyField(to="SoftwareLCM", related_name="corresponding_cves", blank=True)
+    affected_softwares = models.ManyToManyField(
+        to="dcim.SoftwareVersion", related_name="corresponding_cves", blank=True
+    )
 
     class Meta:
         """Meta attributes for the class."""
@@ -628,8 +631,7 @@ class VulnerabilityLCM(PrimaryModel):
     """VulnerabilityLCM is a model representation of vulnerability that affects a device."""
 
     cve = models.ForeignKey(CVELCM, on_delete=models.CASCADE, blank=True, null=True)
-    # TODO: Migrate to core model @progala
-    software = models.ForeignKey(SoftwareLCM, on_delete=models.CASCADE, blank=True, null=True)
+    software = models.ForeignKey(to="dcim.SoftwareVersion", on_delete=models.CASCADE, blank=True, null=True)
     device = models.ForeignKey(Device, on_delete=models.CASCADE, blank=True, null=True)
     inventory_item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, blank=True, null=True)
     status = StatusField(
