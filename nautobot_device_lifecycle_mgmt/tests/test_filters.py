@@ -5,7 +5,7 @@ from datetime import date
 import time_machine
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
-from nautobot.dcim.models import Device, DeviceType, Location, LocationType, Manufacturer, Platform
+from nautobot.dcim.models import Device, DeviceType, Location, LocationType, Manufacturer, Platform, SoftwareVersion
 from nautobot.extras.models import Role, Status
 
 from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
@@ -14,8 +14,6 @@ from nautobot_device_lifecycle_mgmt.filters import (
     DeviceSoftwareValidationResultFilterSet,
     HardwareLCMFilterSet,
     InventoryItemSoftwareValidationResultFilterSet,
-    SoftwareImageLCMFilterSet,
-    SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
     VulnerabilityLCMFilterSet,
 )
@@ -24,8 +22,6 @@ from nautobot_device_lifecycle_mgmt.models import (
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
-    SoftwareImageLCM,
-    SoftwareLCM,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
@@ -162,72 +158,6 @@ class HardwareLCMTestCase(TestCase):
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
 
-class SoftwareLCMFilterSetTestCase(TestCase):
-    """Tests for SoftwareLCMFilterSet."""
-
-    queryset = SoftwareLCM.objects.all()
-    filterset = SoftwareLCMFilterSet
-
-    def setUp(self):
-        device_platforms = (
-            Platform.objects.get_or_create(name="cisco_ios")[0],
-            Platform.objects.get_or_create(name="arista_eos")[0],
-        )
-
-        self.softwares = (
-            SoftwareLCM.objects.create(
-                device_platform=device_platforms[0],
-                version="17.3.3 MD",
-                alias="Amsterdam-17.3.3 MD",
-                release_date="2019-01-10",
-                end_of_support="2022-05-15",
-                documentation_url="https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
-                long_term_support=False,
-                pre_release=True,
-            ),
-            SoftwareLCM.objects.create(
-                device_platform=device_platforms[1],
-                version="4.25M",
-                alias="EOS 4.25M",
-                release_date="2021-01-10",
-                end_of_support="2026-05-13",
-                documentation_url="https://www.arista.com/softdocs",
-                long_term_support=True,
-                pre_release=False,
-            ),
-        )
-
-    def test_q_one_release_date(self):
-        """Test q filter to find single record based on release_date."""
-        params = {"q": "2021"}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-
-    def test_q_one_eo_support(self):
-        """Test q filter to find single record based on end_of_support."""
-        params = {"q": "2022"}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-
-    def test_q_one_version(self):
-        """Test q filter to find single record based on version."""
-        params = {"q": "4.25M"}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-
-    def test_documentation_url(self):
-        """Test documentation_url filter."""
-        params = {"documentation_url": "https://www.arista.com/softdocs"}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-
-    def test_long_term_support(self):
-        """Test long_term_support filter."""
-        params = {"long_term_support": True}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-
-    def test_pre_release(self):
-        """Test pre_release filter."""
-        params = {"pre_release": True}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-
-
 class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
     """Tests for ValidatedSoftwareLCMFilterSet."""
 
@@ -242,16 +172,19 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
             Platform.objects.get_or_create(name="arista_eos")[0],
         )
 
+        software_status = Status.objects.get_for_model(SoftwareVersion).first()
         self.softwares = (
-            SoftwareLCM.objects.create(
-                device_platform=device_platforms[0],
+            SoftwareVersion.objects.create(
+                platform=device_platforms[0],
                 version="17.3.3 MD",
                 release_date="2019-01-10",
+                status=software_status,
             ),
-            SoftwareLCM.objects.create(
-                device_platform=device_platforms[1],
+            SoftwareVersion.objects.create(
+                platform=device_platforms[1],
                 version="4.25M",
                 release_date="2021-01-10",
+                status=software_status,
             ),
         )
 
@@ -346,10 +279,12 @@ class DeviceSoftwareValidationResultFilterSetTestCase(TestCase):
         self.device_1, self.device_2, self.device_3 = create_devices()
         self.location = self.device_1.location
         self.platform = Platform.objects.all().first()
-        self.software = SoftwareLCM.objects.create(
-            device_platform=self.platform,
+        software_status = Status.objects.get_for_model(SoftwareVersion).first()
+        self.software = SoftwareVersion.objects.create(
+            platform=self.platform,
             version="17.3.3 MD",
             release_date="2019-01-10",
+            status=software_status,
         )
 
         DeviceSoftwareValidationResult.objects.create(
@@ -442,10 +377,12 @@ class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
         self.inventory_items = create_inventory_items()
         self.location = self.inventory_items[0].device.location
         self.platform = Platform.objects.all().first()
-        self.software = SoftwareLCM.objects.create(
-            device_platform=self.platform,
+        software_status = Status.objects.get_for_model(SoftwareVersion).first()
+        self.software = SoftwareVersion.objects.create(
+            platform=self.platform,
             version="17.3.3 MD",
             release_date="2019-01-10",
+            status=software_status,
         )
 
         InventoryItemSoftwareValidationResult.objects.create(
@@ -730,83 +667,4 @@ class VulnerabilityLCMTestCase(TestCase):
     def test_q_software_version(self):
         """Test q filter to find single record based on Software version."""
         params = {"q": "4.22.9M"}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-
-
-class SoftwareImageLCMFilterSetTestCase(TestCase):
-    """Tests for SoftwareImageLCMFilterSet."""
-
-    queryset = SoftwareImageLCM.objects.all()
-    filterset = SoftwareImageLCMFilterSet
-
-    def setUp(self):
-        manufacturer_cisco, _ = Manufacturer.objects.get_or_create(
-            name="Cisco",
-        )
-        manufacturer_arista, _ = Manufacturer.objects.get_or_create(name="Arista")
-        device_platform_cisco, _ = Platform.objects.get_or_create(name="cisco_ios", manufacturer=manufacturer_cisco)
-        device_platform_arista, _ = Platform.objects.get_or_create(name="arista_eos", manufacturer=manufacturer_arista)
-
-        self.softwares = (
-            SoftwareLCM.objects.create(
-                device_platform=device_platform_cisco,
-                version="17.3.3 MD",
-                release_date="2019-01-10",
-            ),
-            SoftwareLCM.objects.create(
-                device_platform=device_platform_arista,
-                version="4.25M",
-                release_date="2021-01-10",
-            ),
-        )
-
-        devicetype_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_cisco, model="ASR-1000")
-        self.devicetype_2, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_arista, model="7150S")
-
-        soft_image = SoftwareImageLCM(
-            image_file_name="ios17.3.3md.img",
-            software=self.softwares[0],
-            default_image=True,
-        )
-        soft_image.save()
-
-        soft_image = SoftwareImageLCM(
-            image_file_name="ios17.3.3md-ssl.img",
-            software=self.softwares[0],
-            default_image=False,
-        )
-        soft_image.device_types.set([devicetype_1.pk])
-        soft_image.save()
-
-        soft_image = SoftwareImageLCM(
-            image_file_name="eos4.25.m.swi",
-            software=self.softwares[1],
-            default_image=True,
-        )
-        soft_image.device_types.set([self.devicetype_2.pk])
-        soft_image.save()
-
-    def test_q_image_name(self):
-        """Test q filter to find single record based on the image name."""
-        params = {"q": "ios17.3.3"}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-
-    def test_q_soft_version(self):
-        """Test q filter to find single record based on the software version."""
-        params = {"q": "4.25M"}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
-
-    def test_software(self):
-        """Test software filter."""
-        params = {"software": [self.softwares[0].pk]}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-
-    def test_default_image(self):
-        """Test default_image filter."""
-        params = {"default_image": True}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-
-    def test_device_types(self):
-        """Test device_types filter."""
-        params = {"device_types": [self.devicetype_2.model]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
