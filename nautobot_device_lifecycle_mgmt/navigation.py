@@ -45,58 +45,6 @@ menu_items = (
                 name="Software Lifecycle",
                 weight=100,
                 items=(
-                    # TODO: Remove. @progala
-                    NavMenuItem(
-                        link="plugins:nautobot_device_lifecycle_mgmt:softwarelcm_list",
-                        name="Software",
-                        buttons=(
-                            NavMenuButton(
-                                link="plugins:nautobot_device_lifecycle_mgmt:softwarelcm_add",
-                                title="Add",
-                                icon_class="mdi mdi-plus-thick",
-                                button_class=ButtonColorChoices.GREEN,
-                                permissions=[
-                                    "nautobot_device_lifecycle_mgmt.add_softwarelcm",
-                                ],
-                            ),
-                            NavMenuButton(
-                                link="plugins:nautobot_device_lifecycle_mgmt:softwarelcm_import",
-                                title="Import",
-                                icon_class="mdi mdi-database-import-outline",
-                                button_class=ButtonColorChoices.BLUE,
-                                permissions=["nautobot_device_lifecycle_mgmt.add_softwarelcm"],
-                            ),
-                        ),
-                        permissions=[
-                            "nautobot_device_lifecycle_mgmt.view_softwarelcm",
-                        ],
-                    ),
-                    # TODO: Remove @progala
-                    NavMenuItem(
-                        link="plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_list",
-                        name="Software Image",
-                        buttons=(
-                            NavMenuButton(
-                                link="plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_add",
-                                title="Add",
-                                icon_class="mdi mdi-plus-thick",
-                                button_class=ButtonColorChoices.GREEN,
-                                permissions=[
-                                    "nautobot_device_lifecycle_mgmt.add_softwareimagelcm",
-                                ],
-                            ),
-                            NavMenuButton(
-                                link="plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm_import",
-                                title="Import",
-                                icon_class="mdi mdi-database-import-outline",
-                                button_class=ButtonColorChoices.BLUE,
-                                permissions=["nautobot_device_lifecycle_mgmt.add_softwareimagelcm"],
-                            ),
-                        ),
-                        permissions=[
-                            "nautobot_device_lifecycle_mgmt.view_softwareimagelcm",
-                        ],
-                    ),
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_list",
                         name="Validated Software",
@@ -212,33 +160,6 @@ menu_items = (
                         ),
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_providerlcm",
-                        ],
-                    ),
-                    NavMenuItem(
-                        link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_list",
-                        name="POC",
-                        buttons=(
-                            NavMenuButton(
-                                link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_add",
-                                title="Add",
-                                icon_class="mdi mdi-plus-thick",
-                                button_class=ButtonColorChoices.GREEN,
-                                permissions=[
-                                    "nautobot_device_lifecycle_mgmt.add_contactlcm",
-                                ],
-                            ),
-                            NavMenuButton(
-                                link="plugins:nautobot_device_lifecycle_mgmt:contactlcm_import",
-                                title="Import",
-                                icon_class="mdi mdi-database-import-outline",
-                                button_class=ButtonColorChoices.BLUE,
-                                permissions=[
-                                    "nautobot_device_lifecycle_mgmt.add_contactlcm",
-                                ],
-                            ),
-                        ),
-                        permissions=[
-                            "nautobot_device_lifecycle_mgmt.view_contactlcm",
                         ],
                     ),
                 ),
