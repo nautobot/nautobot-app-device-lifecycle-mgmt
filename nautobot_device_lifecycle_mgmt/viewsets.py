@@ -1,7 +1,6 @@
 """Nautobot UI Viewsets."""
 
 from nautobot.apps.views import NautobotUIViewSet
-from nautobot.core.forms.search import SearchForm
 from nautobot.dcim.models import Device
 
 from nautobot_device_lifecycle_mgmt import filters, forms, models, tables
@@ -36,44 +35,6 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
                 )
             }
         return {"devices": []}
-
-
-# TODO: Remove. @progala
-class SoftwareLCMUIViewSet(NautobotUIViewSet):
-    """SoftwareLCM UI ViewSet."""
-
-    # TODO: Add bulk edit form
-    # bulk_update_form_class = forms.SoftwareLCMBulkEditForm
-    filterset_class = filters.SoftwareLCMFilterSet
-    filterset_form_class = forms.SoftwareLCMFilterForm
-    form_class = forms.SoftwareLCMForm
-    queryset = models.SoftwareLCM.objects.prefetch_related("device_platform")
-    serializer_class = serializers.SoftwareLCMSerializer
-    table_class = tables.SoftwareLCMTable
-
-    def get_extra_context(self, request, instance):  # pylint: disable=signature-differs
-        """Changes "Softwares" => "Software"."""
-        search_form = SearchForm(data=self.request.GET)
-
-        return {
-            "search_form": search_form,
-            "title": "Software",
-            "verbose_name_plural": "Software",
-        }
-
-
-# TODO: Remove. @progala
-class SoftwareImageLCMUIViewSet(NautobotUIViewSet):
-    """SoftwareImageLCM UI ViewSet."""
-
-    # TODO: Add bulk edit form
-    # bulk_update_form_class = forms.SoftwareImageLCMBulkEditForm
-    filterset_class = filters.SoftwareImageLCMFilterSet
-    filterset_form_class = forms.SoftwareImageLCMFilterForm
-    form_class = forms.SoftwareImageLCMForm
-    queryset = models.SoftwareImageLCM.objects.all()
-    serializer_class = serializers.SoftwareImageLCMSerializer
-    table_class = tables.SoftwareImageLCMTable
 
 
 class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
@@ -119,19 +80,6 @@ class ProviderLCMUIViewSet(NautobotUIViewSet):
         instance: The object being viewed
         """
         return {"contracts": models.ContractLCM.objects.restrict(request.user, "view").filter(provider=instance)}
-
-
-# TODO: Remove. @progala
-class ContactLCMUIViewSet(NautobotUIViewSet):
-    """ContactLCM UI ViewSet."""
-
-    bulk_update_form_class = forms.ContactLCMBulkEditForm
-    filterset_class = filters.ContactLCMFilterSet
-    filterset_form_class = forms.ContactLCMFilterForm
-    form_class = forms.ContactLCMForm
-    queryset = models.ContactLCM.objects.all()
-    serializer_class = serializers.ContactLCMSerializer
-    table_class = tables.ContactLCMTable
 
 
 class CVELCMUIViewSet(NautobotUIViewSet):
