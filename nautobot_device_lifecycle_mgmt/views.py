@@ -8,11 +8,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from django.conf import settings
 from django.db.models import Count, ExpressionWrapper, F, FloatField, Q
-from django_tables2 import RequestConfig
 from matplotlib.ticker import MaxNLocator
 from nautobot.core.views import generic
 from nautobot.core.views.mixins import ContentTypePermissionRequiredMixin
-from nautobot.core.views.paginator import EnhancedPaginator, get_paginate_count
 
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.filters import (
@@ -23,20 +21,13 @@ from nautobot_device_lifecycle_mgmt.forms import (
     DeviceSoftwareValidationResultFilterForm,
     InventoryItemSoftwareValidationResultFilterForm,
 )
-from nautobot_device_lifecycle_mgmt.models import (
-    DeviceSoftwareValidationResult,
-    InventoryItemSoftwareValidationResult,
-    SoftwareImageLCM,
-    SoftwareLCM,
-)
+from nautobot_device_lifecycle_mgmt.models import DeviceSoftwareValidationResult, InventoryItemSoftwareValidationResult
 from nautobot_device_lifecycle_mgmt.tables import (
     DeviceSoftwareValidationResultListTable,
     DeviceSoftwareValidationResultTable,
     InventoryItemSoftwareValidationResultListTable,
     InventoryItemSoftwareValidationResultTable,
-    SoftwareImageLCMTable,
 )
-from nautobot_device_lifecycle_mgmt.utils import count_related_m2m
 
 PLUGIN_CFG = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]
 
@@ -46,35 +37,6 @@ logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 #  Hardware Lifecycle Management Views
 # ---------------------------------------------------------------------------------
 GREEN, RED, GREY = ("#D5E8D4", "#F8CECC", "#808080")
-
-
-# TODO: Remove. @progala
-class SoftwareSoftwareImagesLCMView(generic.ObjectView):
-    """Software Images tab for Software view."""
-
-    queryset = SoftwareLCM.objects.all()
-    template_name = "nautobot_device_lifecycle_mgmt/softwarelcm_software_images.html"
-
-    def get_extra_context(self, request, instance):
-        """Adds Software Images table."""
-        softwareimages = (
-            instance.software_images.annotate(device_type_count=count_related_m2m(SoftwareImageLCM, "device_types"))
-            .annotate(object_tag_count=count_related_m2m(SoftwareImageLCM, "object_tags"))
-            .restrict(request.user, "view")
-        )
-
-        softwareimages_table = SoftwareImageLCMTable(data=softwareimages, user=request.user, orderable=False)
-
-        paginate = {
-            "paginator_class": EnhancedPaginator,
-            "per_page": get_paginate_count(request),
-        }
-        RequestConfig(request, paginate).configure(softwareimages_table)
-
-        return {
-            "softwareimages_table": softwareimages_table,
-            "active_tab": "software-images",
-        }
 
 
 class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
