@@ -7,9 +7,8 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-from nautobot.dcim.models import DeviceType, Manufacturer, Platform
-from nautobot.extras.choices import RelationshipTypeChoices
-from nautobot.extras.models import Relationship, RelationshipAssociation, Status, Tag
+from nautobot.dcim.models import DeviceType, Manufacturer, Platform, SoftwareVersion
+from nautobot.extras.models import Status
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -18,8 +17,6 @@ from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
     ProviderLCM,
-    SoftwareImageLCM,
-    SoftwareLCM,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
@@ -134,57 +131,18 @@ class HardwareLCMTestCase(TestCase):
         self.assertFalse(hwlcm_obj.expired)
 
 
-class SoftwareLCMTestCase(TestCase):
-    """Tests for the SoftwareLCM model."""
-
-    def setUp(self):
-        """Set up base objects."""
-        self.device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
-
-    def test_create_softwarelcm_required_only(self):
-        """Successfully create SoftwareLCM with required fields only."""
-        softwarelcm = SoftwareLCM.objects.create(device_platform=self.device_platform, version="4.21.3F")
-
-        self.assertEqual(softwarelcm.device_platform, self.device_platform)
-        self.assertEqual(softwarelcm.version, "4.21.3F")
-
-    def test_create_softwarelcm_all(self):
-        """Successfully create SoftwareLCM with all fields."""
-        softwarelcm_full = SoftwareLCM.objects.create(
-            device_platform=self.device_platform,
-            version="17.3.3 MD",
-            alias="Amsterdam-17.3.3 MD",
-            release_date=date(2019, 1, 10),
-            end_of_support=date(2022, 5, 15),
-            documentation_url="https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
-            long_term_support=False,
-            pre_release=True,
-        )
-
-        self.assertEqual(softwarelcm_full.device_platform, self.device_platform)
-        self.assertEqual(softwarelcm_full.version, "17.3.3 MD")
-        self.assertEqual(softwarelcm_full.alias, "Amsterdam-17.3.3 MD")
-        self.assertEqual(str(softwarelcm_full.release_date), "2019-01-10")
-        self.assertEqual(str(softwarelcm_full.end_of_support), "2022-05-15")
-        self.assertEqual(
-            softwarelcm_full.documentation_url,
-            "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
-        )
-        self.assertEqual(softwarelcm_full.long_term_support, False)
-        self.assertEqual(softwarelcm_full.pre_release, True)
-        self.assertEqual(str(softwarelcm_full), f"{self.device_platform.name} - {softwarelcm_full.version}")
-
-
 class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
     """Tests for the ValidatedSoftwareLCM model."""
 
     def setUp(self):
         """Set up base objects."""
         device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
-        self.software = SoftwareLCM.objects.create(
-            device_platform=device_platform,
+        software_status = Status.objects.get_for_model(SoftwareVersion).first()
+        self.software = SoftwareVersion.objects.create(
+            platform=device_platform,
             version="17.3.3 MD",
             release_date=date(2019, 1, 10),
+            status=software_status,
         )
         manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
         self.device_type_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="ASR-1000")
@@ -432,21 +390,11 @@ class CVELCMTestCase(TestCase):
     def setUp(self):
         """Set up the test objects."""
         self.device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
-        self.softwarelcm = SoftwareLCM.objects.create(device_platform=self.device_platform, version="15.2(5)e")
+        software_status = Status.objects.get_for_model(SoftwareVersion).first()
+        self.software = SoftwareVersion.objects.create(
+            platform=self.device_platform, version="15.2(5)e", status=software_status
+        )
         self.cve_ct = ContentType.objects.get_for_model(CVELCM)
-        self.software_ct = ContentType.objects.get_for_model(SoftwareLCM)
-        self.relationship = Relationship.objects.get_or_create(
-            label="CVE to Software",
-            defaults={
-                "label": "CVE to Software",
-                "key": "cve_soft",
-                "type": RelationshipTypeChoices.TYPE_MANY_TO_MANY,
-                "source_type": ContentType.objects.get_for_model(CVELCM),
-                "source_label": "Affected Softwares",
-                "destination_type": ContentType.objects.get_for_model(SoftwareLCM),
-                "destination_label": "Corresponding CVEs",
-            },
-        )[0]
         self.status, _ = Status.objects.get_or_create(name="Fixed", color="4caf50", description="Unit has been fixed")
         self.status.content_types.set([self.cve_ct])
 
@@ -475,6 +423,8 @@ class CVELCMTestCase(TestCase):
             fix="Avengers",
             comments="This is very bad juju.",
         )
+        cvelcm.affected_softwares.set([self.software])
+        cvelcm.save()
 
         self.assertEqual(cvelcm.name, "CVE-2021-34699")
         self.assertEqual(cvelcm.published_date, "2021-09-23")
@@ -487,24 +437,7 @@ class CVELCMTestCase(TestCase):
         self.assertEqual(cvelcm.cvss_v3, 6.7)
         self.assertEqual(cvelcm.fix, "Avengers")
         self.assertEqual(cvelcm.comments, "This is very bad juju.")
-
-    def test_create_cve_soft_relationship_association(self):
-        """Successfully create a relationship between CVE and Software."""
-        cvelcm = CVELCM.objects.create(
-            name="CVE-2021-1391", published_date="2021-03-24", link="https://www.cvedetails.com/cve/CVE-2021-1391/"
-        )
-
-        association = RelationshipAssociation.objects.create(
-            relationship_id=self.relationship.id,
-            source_id=cvelcm.id,
-            source_type_id=self.cve_ct.id,
-            destination_id=self.softwarelcm.id,
-            destination_type_id=self.software_ct.id,
-        )
-
-        cve_rels = cvelcm.get_relationships()
-
-        self.assertEqual(cve_rels["source"][self.relationship].first(), association)
+        self.assertEqual(list(cvelcm.affected_softwares.all()), [self.software])
 
 
 class VulnerabilityLCMTestCase(TestCase):
@@ -556,72 +489,6 @@ class VulnerabilityLCMTestCase(TestCase):
         self.assertEqual(vulnerability.software, self.softwares[2])
         self.assertEqual(vulnerability.device, self.devices[2])
         self.assertEqual(vulnerability.status, self.status)
-
-
-class SoftwareImageLCMTestCase(TestCase):
-    """Tests for the SoftwareImageLCM model."""
-
-    def setUp(self):
-        """Set up base objects."""
-        device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
-        self.software = SoftwareLCM.objects.create(
-            device_platform=device_platform,
-            version="17.3.3 MD",
-            release_date=date(2019, 1, 10),
-        )
-        manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
-        self.device_type_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="ASR-1000")
-        self.device_type_2, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="CAT-3750")
-        self.inventory_item = create_inventory_items()[0]
-        self.tag = Tag.objects.create(name="asr")
-
-    def test_create_softwareimage_required_only(self):
-        """Successfully create SoftwareImageLCM with required fields only."""
-        softwareimage = SoftwareImageLCM(image_file_name="ios17.3.3md.img", software=self.software)
-        softwareimage.device_types.set([self.device_type_1])
-        softwareimage.save()
-
-        self.assertEqual(softwareimage.image_file_name, "ios17.3.3md.img")
-        self.assertEqual(softwareimage.software, self.software)
-        self.assertEqual(list(softwareimage.device_types.all()), [self.device_type_1])
-
-    def test_create_softwareimage_all(self):
-        """Successfully create SoftwareImageLCM with all fields."""
-        softwareimage = SoftwareImageLCM(
-            image_file_name="ios17.3.3md.img",
-            software=self.software,
-            download_url="ftp://images.local/cisco/ios17.3.3md.img",
-            image_file_checksum="441rfabd75b0512r7fde7a7a66faa596",
-            default_image=True,
-        )
-        softwareimage.device_types.set([self.device_type_1])
-        softwareimage.inventory_items.set([self.inventory_item])
-        softwareimage.object_tags.set([self.tag])
-        softwareimage.save()
-
-        self.assertEqual(softwareimage.image_file_name, "ios17.3.3md.img")
-        self.assertEqual(softwareimage.software, self.software)
-        self.assertEqual(softwareimage.download_url, "ftp://images.local/cisco/ios17.3.3md.img")
-        self.assertEqual(softwareimage.image_file_checksum, "441rfabd75b0512r7fde7a7a66faa596")
-        self.assertEqual(softwareimage.default_image, True)
-        self.assertEqual(list(softwareimage.device_types.all()), [self.device_type_1])
-        self.assertEqual(list(softwareimage.inventory_items.all()), [self.inventory_item])
-        self.assertEqual(list(softwareimage.object_tags.all()), [self.tag])
-        self.assertEqual(str(softwareimage), f"{softwareimage.image_file_name}")
-
-    def test_get_software_images_for_device_type(self):
-        """Test related reverse relationship from device type to software image"""
-        softwareimage = SoftwareImageLCM(
-            image_file_name="ios17.3.3md.img",
-            software=self.software,
-            download_url="ftp://images.local/cisco/ios17.3.3md.img",
-            image_file_checksum="441rfabd75b0512r7fde7a7a66faa596",
-            default_image=False,
-        )
-        softwareimage.device_types.set([self.device_type_1])
-        softwareimage.save()
-
-        self.assertEqual(list(self.device_type_1.software_images.all()), [softwareimage])
 
 
 class ProviderLCMTestCase(TestCase):
