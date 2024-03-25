@@ -53,7 +53,7 @@ class DeviceTypeValidatedSoftwareLCM(
         }
 
         return self.render(
-            "nautobot_device_lifecycle_mgmt/inc/software_and_validatedsoftware_info.html",
+            "nautobot_device_lifecycle_mgmt/inc/validatedsoftware_info.html",
             extra_context=extra_context,
         )
 
@@ -97,7 +97,6 @@ class InventoryItemHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
         )
 
 
-# TODO: Redo to include ValidateSoftware only. @progala
 class DeviceValidatedSoftwareLCM(
     PluginTemplateExtension,
 ):  # pylint: disable=abstract-method

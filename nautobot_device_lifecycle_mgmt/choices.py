@@ -15,6 +15,7 @@ class ContractTypeChoices(ChoiceSet):
     )
 
 
+# TODO: Create those in core via init signal and remove from LCM @progala
 class PoCTypeChoices(ChoiceSet):
     """Choices for the types of point-of-contacts."""
 

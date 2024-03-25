@@ -16,7 +16,7 @@ from nautobot.dcim.models import (
     Platform,
     SoftwareVersion,
 )
-from nautobot.extras.models import Role, Status, Tag
+from nautobot.extras.models import Role, Status
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
