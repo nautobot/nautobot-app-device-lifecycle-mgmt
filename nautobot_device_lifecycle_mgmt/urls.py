@@ -2,18 +2,18 @@
 from django.urls import path
 from nautobot.apps.urls import NautobotUIViewSetRouter
 
-from nautobot_device_lifecycle_mgmt import views, viewsets
+from nautobot_device_lifecycle_mgmt import views
 
 router = NautobotUIViewSetRouter()
-router.register("hardware", viewset=viewsets.HardwareLCMUIViewSet)
-router.register("software", viewset=viewsets.SoftwareLCMUIViewSet)
-router.register("software-image", viewset=viewsets.SoftwareImageLCMUIViewSet)
-router.register("validated-software", viewset=viewsets.ValidatedSoftwareLCMUIViewSet)
-router.register("contract", viewset=viewsets.ContractLCMUIViewSet)
-router.register("provider", viewset=viewsets.ProviderLCMUIViewSet)
-router.register("contact", viewset=viewsets.ContactLCMUIViewSet)
-router.register("cve", viewset=viewsets.CVELCMUIViewSet)
-router.register("vulnerability", viewset=viewsets.VulnerabilityLCMUIViewSet)
+router.register("hardware", viewset=views.HardwareLCMUIViewSet)
+router.register("software", viewset=views.SoftwareLCMUIViewSet)
+router.register("software-image", viewset=views.SoftwareImageLCMUIViewSet)
+router.register("validated-software", viewset=views.ValidatedSoftwareLCMUIViewSet)
+router.register("contract", viewset=views.ContractLCMUIViewSet)
+router.register("provider", viewset=views.ProviderLCMUIViewSet)
+router.register("contact", viewset=views.ContactLCMUIViewSet)
+router.register("cve", viewset=views.CVELCMUIViewSet)
+router.register("vulnerability", viewset=views.VulnerabilityLCMUIViewSet)
 
 urlpatterns = router.urls
 
