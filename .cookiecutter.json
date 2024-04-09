@@ -4,11 +4,11 @@
         "full_name": "Network to Code, LLC",
         "email": "info@networktocode.com",
         "github_org": "nautobot",
-        "plugin_name": "nautobot_device_lifecycle_mgmt",
+        "app_name": "nautobot_device_lifecycle_mgmt",
         "verbose_name": "Device Lifecycle Management",
-        "plugin_slug": "nautobot-device-lifecycle-mgmt",
-        "project_slug": "nautobot-plugin-device-lifecycle-mgmt",
-        "repo_url": "https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt",
+        "app_slug": "nautobot-device-lifecycle-mgmt",
+        "project_slug": "nautobot-app-device-lifecycle-mgmt",
+        "repo_url": "https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt",
         "base_url": "nautobot-device-lifecycle-mgmt",
         "min_nautobot_version": "2.0.0",
         "max_nautobot_version": "2.9999",
@@ -21,7 +21,7 @@
         "_drift_manager": {
             "template": "https://github.com/nautobot/cookiecutter-nautobot-app.git",
             "template_dir": "nautobot-app",
-            "template_ref": "develop",
+            "template_ref": "refs/tags/nautobot-app-v2.2.0",
             "cookie_dir": "",
             "branch_prefix": "drift-manager",
             "pull_request_strategy": "create",
@@ -29,7 +29,7 @@
                 "black"
             ],
             "draft": true,
-            "baked_commit_ref": "a07609a3fcfaab9b8b2d8d54ce60a293d68d8720"
+            "baked_commit_ref": "88f34a0a58485295d8fb90427ee664eda511430d"
         }
     }
 }
