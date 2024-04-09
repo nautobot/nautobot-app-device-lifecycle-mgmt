@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, LocationType, Manufacturer, Platform
 from nautobot.extras.models import Role, Status
 
-from nautobot_device_lifecycle_mgmt.models import CVELCM, SoftwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import CVELCM, HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
 
 
 def create_devices():
@@ -160,3 +160,34 @@ def create_validated_softwares():
     )
 
     return validated_items
+
+
+def create_inventory_item_hardware_notices():
+    """Create inventory item hardware notices for tests."""
+
+    return (
+        HardwareLCM.objects.create(
+            inventory_item="VS-S2T-10G",
+            end_of_sale=date(2022, 4, 1),
+            end_of_support=date(2023, 4, 1),
+            end_of_sw_releases=date(2024, 4, 1),
+            end_of_security_patches=date(2025, 4, 1),
+            documentation_url="https://test.com",
+        ),
+        HardwareLCM.objects.create(
+            inventory_item="QSFP-100G-SR4-S",
+            end_of_sale=date(2022, 4, 1),
+            end_of_support=date(2024, 1, 1),
+            end_of_sw_releases=date(2024, 4, 1),
+            end_of_security_patches=date(2025, 4, 1),
+            documentation_url="https://test.com",
+        ),
+        HardwareLCM.objects.create(
+            inventory_item="WS-X6548-GE-TX",
+            end_of_sale=date(2022, 4, 1),
+            end_of_support=date(2999, 1, 1),
+            end_of_sw_releases=date(2024, 4, 1),
+            end_of_security_patches=date(2025, 4, 1),
+            documentation_url="https://test.com",
+        ),
+    )

@@ -1,0 +1,1 @@
+Fixes bug that could lead to InventoryItem metric queries erroring out.
