@@ -10,7 +10,7 @@ This release adds support for various improvements, bug fixes, and performance i
 
 ### Fixed
 - [#313](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/313) - Fixed bug that could lead to InventoryItem metric queries erroring out.
-- [299](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/299) - Fixed Order for 1.6.1 release notes in admin file so most recent is at the top
+- [#299](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/299) - Fixed Order for 1.6.1 release notes in admin file so most recent is at the top
 - [#306](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/306) - Fixed Provider field in Contract Bulk Edit Form
 - [#320](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/320) - Fixed location of views for upstream Nautobot 2.2 tests.
 
