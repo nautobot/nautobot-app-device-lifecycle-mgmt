@@ -7,6 +7,7 @@ from django.conf import settings
 # from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.db import models
+from nautobot.apps.constants import CHARFIELD_MAX_LENGTH
 from nautobot.core.models.generics import OrganizationalModel, PrimaryModel
 from nautobot.core.models.querysets import RestrictedQuerySet
 from nautobot.dcim.models import Device, DeviceType, InventoryItem
@@ -22,8 +23,6 @@ from nautobot_device_lifecycle_mgmt.software_filters import (
     InventoryItemSoftwareImageFilter,
     InventoryItemValidatedSoftwareFilter,
 )
-
-CHARFIELD_MAX_LENGTH = 255
 
 
 @extras_features(
