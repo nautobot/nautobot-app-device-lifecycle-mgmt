@@ -7,7 +7,12 @@ from django.conf import settings
 # from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.db import models
-from nautobot.apps.constants import CHARFIELD_MAX_LENGTH
+
+try:
+    from nautobot.apps.constants import CHARFIELD_MAX_LENGTH
+except ImportError:
+    CHARFIELD_MAX_LENGTH = 255
+
 from nautobot.core.models.generics import OrganizationalModel, PrimaryModel
 from nautobot.core.models.querysets import RestrictedQuerySet
 from nautobot.dcim.models import Device, DeviceType, InventoryItem
