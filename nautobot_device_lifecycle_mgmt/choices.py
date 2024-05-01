@@ -16,27 +16,6 @@ class ContractTypeChoices(ChoiceSet):
     )
 
 
-# TODO: Create those in core via init signal and remove from LCM @progala
-class PoCTypeChoices(ChoiceSet):
-    """Choices for the types of point-of-contacts."""
-
-    PRIMARY = "Primary"
-    TIER1 = "Tier 1"
-    TIER2 = "Tier 2"
-    TIER3 = "Tier 3"
-    OWNER = "Owner"
-    UNASSIGNED = "Unassigned"
-
-    CHOICES = (
-        (UNASSIGNED, UNASSIGNED),
-        (PRIMARY, PRIMARY),
-        (TIER1, TIER1),
-        (TIER2, TIER2),
-        (TIER3, TIER3),
-        (OWNER, OWNER),
-    )
-
-
 class CurrencyChoices(ChoiceSet):
     """List of currencies for representing contract amounts."""
 
