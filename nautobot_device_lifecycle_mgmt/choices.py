@@ -1,4 +1,5 @@
 """Static choices uses for the Device Lifecycle app."""
+
 from nautobot.apps.choices import ChoiceSet
 from pycountry import countries
 

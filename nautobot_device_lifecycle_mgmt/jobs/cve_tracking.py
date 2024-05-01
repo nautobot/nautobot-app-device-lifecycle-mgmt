@@ -2,15 +2,14 @@
 """Jobs for the CVE Tracking portion of the Device Lifecycle app."""
 from datetime import datetime
 
+from nautobot.dcim.models import Device, InventoryItem
 from nautobot.extras.jobs import BooleanVar, Job, StringVar
-from nautobot.extras.models import Relationship
 
 from nautobot_device_lifecycle_mgmt.models import CVELCM, VulnerabilityLCM
 
 name = "CVE Tracking"  # pylint: disable=invalid-name
 
 
-# TODO: Redo to use core models. @progala
 class GenerateVulnerabilities(Job):
     """Generates VulnerabilityLCM objects based on CVEs that are related to Devices."""
 
@@ -43,9 +42,6 @@ class GenerateVulnerabilities(Job):
         cves = CVELCM.objects.filter(published_date__gte=datetime.fromisoformat(published_after))
         count_before = VulnerabilityLCM.objects.count()
 
-        device_soft_rel = Relationship.objects.get(key="device_soft")
-        inv_item_soft_rel = Relationship.objects.get(key="inventory_item_soft")
-
         for cve in cves:
             if debug:
                 self.logger.info(
@@ -53,17 +49,11 @@ class GenerateVulnerabilities(Job):
                     extra={"object": cve},
                 )
             for software in cve.affected_softwares.all():
-                # Loop through any device relationships
-                device_rels = software.get_relationships()["source"][device_soft_rel]
-                for dev_rel in device_rels:
-                    VulnerabilityLCM.objects.get_or_create(cve=cve, software=dev_rel.source, device=dev_rel.destination)
+                for device in Device.objects.filter(software_version=software):
+                    VulnerabilityLCM.objects.get_or_create(cve=cve, software=software, device=device)
 
-                # Loop through any inventory tem relationships
-                item_rels = software.get_relationships()["source"][inv_item_soft_rel]
-                for item_rel in item_rels:
-                    VulnerabilityLCM.objects.get_or_create(
-                        cve=cve, software=item_rel.source, inventory_item=item_rel.destination
-                    )
+                for inventory_item in InventoryItem.objects.filter(software_version=software):
+                    VulnerabilityLCM.objects.get_or_create(cve=cve, software=software, inventory_item=inventory_item)
 
         diff = VulnerabilityLCM.objects.count() - count_before
         self.logger.info("Processed %d CVEs and generated %d Vulnerabilities." % (cves.count(), diff))

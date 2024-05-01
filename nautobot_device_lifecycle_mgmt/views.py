@@ -1,4 +1,5 @@
 """Views implementation for the Lifecycle Management app."""
+
 import base64
 import io
 import logging

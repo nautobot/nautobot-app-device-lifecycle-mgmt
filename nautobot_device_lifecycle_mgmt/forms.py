@@ -1,4 +1,5 @@
 """Forms implementation for the Lifecycle Management app."""
+
 import logging
 
 from django import forms
