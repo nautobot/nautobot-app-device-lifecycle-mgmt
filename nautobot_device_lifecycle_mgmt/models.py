@@ -15,11 +15,7 @@ from nautobot.extras.utils import extras_features
 
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.software_filters import (
-    DeviceSoftwareFilter,
-    DeviceSoftwareImageFilter,
     DeviceValidatedSoftwareFilter,
-    InventoryItemSoftwareFilter,
-    InventoryItemSoftwareImageFilter,
     InventoryItemValidatedSoftwareFilter,
 )
 
@@ -124,125 +120,6 @@ class HardwareLCM(PrimaryModel):
                     "end_of_support": "End of Sale or End of Support must be specified.",
                 }
             )
-
-
-# TODO: Remove @progala
-# TODO: Check if core replicates functionality @progala
-class SoftwareLCMQuerySet(RestrictedQuerySet):
-    """Queryset for `SoftwareLCM` objects."""
-
-    def get_for_object(self, obj):
-        """Return all `SoftwareLCM` assigned to the given object."""
-        if not isinstance(obj, models.Model):
-            raise TypeError(f"{obj} is not an instance of Django Model class")
-        if isinstance(obj, Device):
-            qs = DeviceSoftwareFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
-        elif isinstance(obj, InventoryItem):
-            qs = InventoryItemSoftwareFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
-        else:
-            qs = self  # pylint: disable=invalid-name
-
-        return qs
-
-
-# TODO: Remove. @progala
-@extras_features(
-    "custom_fields",
-    "custom_links",
-    "custom_validators",
-    "export_templates",
-    "graphql",
-    "relationships",
-    "statuses",
-    "webhooks",
-)
-class SoftwareLCM(PrimaryModel):
-    """Software Life-Cycle Management model."""
-
-    device_platform = models.ForeignKey(to="dcim.Platform", on_delete=models.CASCADE, verbose_name="Device Platform")
-    version = models.CharField(max_length=50)
-    alias = models.CharField(max_length=50, blank=True, default="")
-    release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
-    end_of_support = models.DateField(null=True, blank=True, verbose_name="End of Software Support")
-    documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
-    long_term_support = models.BooleanField(verbose_name="Long Term Support", default=False)
-    pre_release = models.BooleanField(verbose_name="Pre-Release", default=False)
-
-    class Meta:
-        """Meta attributes for SoftwareLCM."""
-
-        verbose_name = "Software"
-        ordering = ("device_platform", "version", "end_of_support", "release_date")
-        unique_together = (
-            "device_platform",
-            "version",
-        )
-
-    def __str__(self):
-        """String representation of SoftwareLCM."""
-        return f"{self.device_platform} - {self.version}"
-
-    objects = SoftwareLCMQuerySet.as_manager()
-
-
-# TODO: Remove.
-# TODO: Confirm core replicates functionality. @progala
-class SoftwareImageLCMQuerySet(RestrictedQuerySet):
-    """Queryset for `SoftwareImageLCM` objects."""
-
-    def get_for_object(self, obj):
-        """Return all `SoftwareImageLCM` assigned to the given object."""
-        if not isinstance(obj, models.Model):
-            raise TypeError(f"{obj} is not an instance of Django Model class")
-        if isinstance(obj, Device):
-            qs = DeviceSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
-        elif isinstance(obj, InventoryItem):
-            qs = InventoryItemSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
-        else:
-            qs = self  # pylint: disable=invalid-name
-
-        return qs
-
-
-# TODO: Remove. @progala
-@extras_features(
-    "custom_fields",
-    "custom_links",
-    "custom_validators",
-    "export_templates",
-    "graphql",
-    "relationships",
-    "statuses",
-    "webhooks",
-)
-class SoftwareImageLCM(PrimaryModel):
-    """SoftwareImageLCM model."""
-
-    image_file_name = models.CharField(blank=False, max_length=100, verbose_name="Image File Name")
-    software = models.ForeignKey(
-        to="SoftwareLCM", on_delete=models.CASCADE, related_name="software_images", verbose_name="Software Version"
-    )
-    device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="software_images", blank=True)
-    inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="+", blank=True)
-    object_tags = models.ManyToManyField(to="extras.Tag", related_name="+", blank=True)
-    download_url = models.URLField(blank=True, verbose_name="Download URL")
-    image_file_checksum = models.CharField(blank=True, max_length=256, verbose_name="Image File Checksum")
-    hashing_algorithm = models.CharField(default="", blank=True, max_length=32, verbose_name="Hashing Algorithm")
-    default_image = models.BooleanField(verbose_name="Default Image", default=False)
-
-    class Meta:
-        """Meta attributes for SoftwareImageLCM."""
-
-        verbose_name = "Software Image"
-        ordering = ("software", "default_image", "image_file_name")
-        unique_together = ("image_file_name", "software")
-
-    def __str__(self):
-        """String representation of SoftwareImageLCM."""
-        msg = f"{self.image_file_name}"
-        return msg
-
-    objects = SoftwareImageLCMQuerySet.as_manager()
 
 
 class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):
@@ -512,62 +389,6 @@ class ProviderLCM(OrganizationalModel):
         # Full clean to assert custom validation in clean() for ORM, etc.
         super().full_clean()
         super().save(*args, **kwargs)
-
-
-# TODO: Remove. Replaced by core model. @progala
-@extras_features(
-    "custom_fields",
-    "custom_links",
-    "custom_validators",
-    "export_templates",
-    "graphql",
-    "relationships",
-    "webhooks",
-)
-class ContactLCM(PrimaryModel):
-    """ContactLCM is a model representation of a contact used in Contracts."""
-
-    name = models.CharField(max_length=80, null=True)
-    address = models.CharField(max_length=200, blank=True)
-    phone = models.CharField(max_length=20, blank=True)
-    email = models.EmailField(blank=True, verbose_name="Contact E-mail")
-    comments = models.TextField(blank=True, default="")
-    # TODO: Is it worth replicating this on ContractLCM? @progala
-    priority = models.PositiveIntegerField(default=100)
-    type = models.CharField(max_length=50, default=choices.PoCTypeChoices.UNASSIGNED)
-    # TODO: Replace with a M2M field on ContractLCM @progala
-    # TODO: One contact can belong to many contracts, contract can have many contacts
-    contract = models.ForeignKey(
-        to="nautobot_device_lifecycle_mgmt.ContractLCM", on_delete=models.CASCADE, verbose_name="Contract", null=True
-    )
-
-    class Meta:
-        """Meta attributes for the class."""
-
-        verbose_name = "Contract POC"
-
-        unique_together = ("contract", "name")
-
-        ordering = ("contract", "priority", "name")
-
-    def clean(self):
-        """Override clean to do custom validation."""
-        super().clean()
-        if not any([self.phone, self.email]):
-            raise ValidationError("Must specify at least one of phone or email for contact.")
-
-        # Would to an exist() here, but we need to compare the pk in the event we are editing an
-        # existing record.
-        # TODO: If this is replicated we'd have to move this to Contract Itself. @progala
-        # We'd have to check that primary is in the list of associated contracts
-        primary = ContactLCM.objects.filter(contract=self.contract, type=choices.PoCTypeChoices.PRIMARY).first()
-        if primary:
-            if self.pk != primary.pk and self.type == choices.PoCTypeChoices.PRIMARY:
-                raise ValidationError(f"A primary contact already exist for contract {self.contract.name}.")
-
-    def __str__(self):
-        """String representation of the model."""
-        return f"{self.name}"
 
 
 @extras_features(
