@@ -8,7 +8,7 @@ from nautobot_device_lifecycle_mgmt.tables import ValidatedSoftwareLCMTable
 
 
 class ItemSoftware:
-    """Base class providing functions for computing SoftwareLCM and ValidatedSoftwareLCM related objects."""
+    """Base class providing functions for computing ValidatedSoftwareLCM related objects."""
 
     soft_obj_model = None
 
