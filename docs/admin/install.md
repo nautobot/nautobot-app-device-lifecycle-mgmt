@@ -17,7 +17,7 @@ This app can be run with no additional access requirements, however there are ex
 ## Install Guide
 
 !!! note
-    Apps can be installed manually or using Python's `pip`. See the [nautobot documentation](https://nautobot.readthedocs.io/en/latest/plugins/#install-the-package) for more details. The pip package name for this app is [`nautobot-device-lifecycle-mgmt`](https://pypi.org/project/nautobot-device-lifecycle-mgmt/).
+    Apps can be installed from the [Python Package Index](https://pypi.org/) or locally. See the [Nautobot documentation](https://docs.nautobot.com/projects/core/en/stable/user-guide/administration/installation/app-install/) for more details. The pip package name for this app is [`nautobot-device-lifecycle-mgmt`](https://pypi.org/project/nautobot-device-lifecycle-mgmt/).
 
 The app is available as a Python package via PyPI and can be installed with `pip`:
 

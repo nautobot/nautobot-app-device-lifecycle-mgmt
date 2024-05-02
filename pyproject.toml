@@ -1,12 +1,13 @@
 [tool.poetry]
 name = "nautobot-device-lifecycle-mgmt"
-version = "2.1.0"
+version = "2.1.1"
 description = "Manages device lifecycles for platforms and software."
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
 readme = "README.md"
 homepage = "https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt"
 repository = "https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt"
+documentation = "https://docs.nautobot.com/projects/device-lifecycle/en/latest/"
 keywords = ["nautobot", "nautobot-app", "nautobot-plugin"]
 classifiers = [
     "Intended Audience :: Developers",
@@ -59,6 +60,8 @@ mkdocstrings-python = "1.5.2"
 sentry-sdk = "*"
 time-machine = "*"
 towncrier = "~23.6.0"
+to-json-schema = "*"
+jsonschema = "*"
 
 [tool.poetry.extras]
 all = [
@@ -168,7 +171,7 @@ requires = ["poetry_core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.towncrier]
-package = "nautobot"
+package = "nautobot_device_lifecycle_mgmt"
 directory = "changes"
 filename = "docs/admin/release_notes/version_X.Y.md"
 template = "development/towncrier_template.j2"
