@@ -59,7 +59,7 @@ def _migrate_contact(apps, dlm_contact):
     core_contact.save()
 
     ca_role, _ = Role.objects.get_or_create(name=dlm_contact.type)
-    ca_role.role.content_types.add(contact_association_ct)
+    ca_role.content_types.add(contact_association_ct)
     contact_association = ContactAssociation(
         contact=core_contact, associated_object=dlm_contact.contract, role=ca_role, status=status_active
     )
