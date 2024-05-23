@@ -48,8 +48,7 @@ def _migrate_contact(apps, dlm_contact):
     status_active = Status.objects.get(name="Active")
 
     core_contact = CoreContact(
-        id=dlm_contact.id,
-        status=status_active,  # DLM model lacks a status field so we default to active
+        id=dlm_contact.id,        
         name=dlm_contact.name,
         address=dlm_contact.address,
         phone=dlm_contact.phone,
