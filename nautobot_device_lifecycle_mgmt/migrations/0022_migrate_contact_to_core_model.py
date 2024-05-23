@@ -17,7 +17,7 @@ common_objectchange_request_id = uuid.uuid4()
 def migrate_dlm_contact_model_to_core(apps, schema_editor):
     ContentType = apps.get_model("contenttypes", "ContentType")
     DLMContact = apps.get_model("nautobot_device_lifecycle_mgmt", "ContactLCM")
-    CoreContact = apps.get_model("dcim", "SoftwareVersion")
+    CoreContact = apps.get_model("extras", "Contact")
 
     dlm_contact_ct = ContentType.objects.get_for_model(DLMContact)
     core_contact_ct = ContentType.objects.get_for_model(CoreContact)
@@ -35,8 +35,8 @@ def migrate_dlm_contact_model_to_core(apps, schema_editor):
 def _migrate_contact(apps, dlm_contact):
     ContentType = apps.get_model("contenttypes", "ContentType")
     DLMContact = apps.get_model("nautobot_device_lifecycle_mgmt", "ContactLCM")
-    CoreContact = apps.get_model("dcim", "SoftwareVersion")
-    ContactAssociation = apps.get_model("extras", "Role")
+    CoreContact = apps.get_model("extras", "Contact")
+    ContactAssociation = apps.get_model("extras", "ContactAssociation")
     Role = apps.get_model("extras", "Role")
     ObjectChange = apps.get_model("extras", "ObjectChange")
     Status = apps.get_model("extras", "Status")
