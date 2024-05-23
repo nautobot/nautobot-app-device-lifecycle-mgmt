@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dcim", "0058_controller_data_migration"),
         ("nautobot_device_lifecycle_mgmt", "0022_migrate_contact_to_core_model"),

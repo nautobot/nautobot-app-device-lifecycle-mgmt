@@ -35,6 +35,7 @@ def migrate_dlm_contact_model_to_core(apps, schema_editor):
 def _migrate_contact(apps, dlm_contact):
     ContentType = apps.get_model("contenttypes", "ContentType")
     DLMContact = apps.get_model("nautobot_device_lifecycle_mgmt", "ContactLCM")
+    DLMContract = apps.get_model("nautobot_device_lifecycle_mgmt", "ContractLCM")
     CoreContact = apps.get_model("extras", "Contact")
     ContactAssociation = apps.get_model("extras", "ContactAssociation")
     Role = apps.get_model("extras", "Role")
@@ -42,13 +43,14 @@ def _migrate_contact(apps, dlm_contact):
     Status = apps.get_model("extras", "Status")
 
     dlm_contact_ct = ContentType.objects.get_for_model(DLMContact)
+    dlm_contract_ct = ContentType.objects.get_for_model(DLMContract)
     core_contact_ct = ContentType.objects.get_for_model(CoreContact)
     contact_association_ct = ContentType.objects.get_for_model(ContactAssociation)
 
     status_active = Status.objects.get(name="Active")
 
     core_contact = CoreContact(
-        id=dlm_contact.id,        
+        id=dlm_contact.id,
         name=dlm_contact.name,
         address=dlm_contact.address,
         phone=dlm_contact.phone,
@@ -61,7 +63,11 @@ def _migrate_contact(apps, dlm_contact):
     ca_role, _ = Role.objects.get_or_create(name=dlm_contact.type)
     ca_role.content_types.add(contact_association_ct)
     contact_association = ContactAssociation(
-        contact=core_contact, associated_object=dlm_contact.contract, role=ca_role, status=status_active
+        contact=core_contact,
+        associated_object_id=dlm_contact.contract.id,
+        associated_object_type=dlm_contract_ct,
+        role=ca_role,
+        status=status_active,
     )
     contact_association.save()
 
