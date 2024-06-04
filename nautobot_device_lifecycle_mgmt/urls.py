@@ -56,4 +56,15 @@ urlpatterns += [
         RedirectView.as_view(url=static("nautobot_device_lifecycle_mgmt/docs/index.html")),
         name="docs",
     ),
+    # SoftwareVersionRelatedCVEResult
+    path(
+        "software-versions/<uuid:pk>/related-cves/",
+        views.SoftwareVersionRelatedCveView.as_view(),
+        name="softwareversion_related_cves",
+    ),
+    path(
+        "docs/",
+        RedirectView.as_view(url=static("nautobot_device_lifecycle_mgmt/docs/index.html")),
+        name="docs",
+    ),
 ]
