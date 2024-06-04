@@ -1,12 +1,10 @@
-# pylint: disable=nb-use-fields-all
+# pylint: disable='nb-use-fields-all'
 """Tables implementation for the Lifecycle Management app."""
 
 import django_tables2 as tables
-from django.urls import reverse
-from django.utils.safestring import mark_safe
 from django_tables2.utils import A
 from nautobot.apps.tables import BaseTable, BooleanColumn, ButtonsColumn, StatusTableMixin, TagColumn, ToggleColumn
-from nautobot.core.tables import LinkedCountColumn
+
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -158,7 +156,7 @@ class DeviceSoftwareValidationResultTable(BaseTable):
         ]
 
 
-class DeviceSoftwareValidationResultListTable(BaseTable):  # pylint: disable=nb-sub-class-name
+class DeviceSoftwareValidationResultListTable(BaseTable):  # pylint: disable='nb-sub-class-name'
     """Table for a list of device to software validation report."""
 
     device = tables.Column(accessor="device", verbose_name="Device", linkify=True)
@@ -258,7 +256,7 @@ class InventoryItemSoftwareValidationResultTable(BaseTable):
         ]
 
 
-class InventoryItemSoftwareValidationResultListTable(BaseTable):  # pylint: disable=nb-sub-class-name
+class InventoryItemSoftwareValidationResultListTable(BaseTable):  # pylint: disable='nb-sub-class-name'
     """Table for a list of intenotry items to software validation report."""
 
     part_id = tables.Column(
@@ -409,6 +407,7 @@ class CVELCMTable(StatusTableMixin, BaseTable):
             "pk",
             "name",
             "published_date",
+            "last_modified_date",
             "link",
             "severity",
             "cvss",
@@ -423,6 +422,7 @@ class CVELCMTable(StatusTableMixin, BaseTable):
             "pk",
             "name",
             "published_date",
+            "last_modified_date",
             "link",
             "severity",
             "cvss",

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-lifecycle-mgmt"
-version = "2.2.0"
+version = "3.1.0"
 description = "Manages device lifecycles for platforms and software."
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
@@ -32,9 +32,9 @@ python = ">=3.8,<3.12"
 pycountry = "^22.3.5"
 matplotlib = "^3.3.4"
 nautobot = "^2.2.0"
+netutils = ">=1.9.0"
 
 [tool.poetry.group.dev.dependencies]
-Django = "~3.2.25"
 bandit = "*"
 black = "*"
 coverage = "*"
@@ -159,7 +159,7 @@ ignore = [
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "nautobot_device_lifecycle_mgmt/migrations/*" = [
     "D",  # pydocstyle
 ]
