@@ -587,5 +587,5 @@ class SoftwareVersionRelatedCveView(generic.ObjectView):
 
         return {
             "relatedcves_table": relatedcves_table,
-            "active_tab": "related-cves",
+            "active_tab": request.GET.get("tab", "main"),
         }

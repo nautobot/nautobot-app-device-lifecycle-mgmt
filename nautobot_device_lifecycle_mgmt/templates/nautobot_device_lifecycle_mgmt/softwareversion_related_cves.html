@@ -3,12 +3,6 @@
 
 {% block title %}{{ block.super }} - Related CVEs{% endblock %}
 
-{% block extra_nav_tabs %}
-    <li role="presentation"{% if active_tab == 'related-cves' %} class="active"{% endif %}>
-        <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:softwareversion_related_cves' pk=object.pk %}">Related CVEs <span class="badge">{{ object.corresponding_cves.count }}</span></a>
-    </li>
-{% endblock %}
-
 {% block content %}
     <div class="row">
         <div class="col-md-8">

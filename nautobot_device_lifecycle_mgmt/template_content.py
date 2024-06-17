@@ -5,17 +5,13 @@ from abc import ABCMeta
 from django.db.models import Q
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render
-from django_tables2 import RequestConfig
-from nautobot.dcim.models import InventoryItem, SoftwareVersion
+from nautobot.dcim.models import InventoryItem
 from nautobot.apps.ui import TemplateExtension
 from nautobot.extras.plugins import PluginTemplateExtension
-from nautobot.core.views.paginator import EnhancedPaginator, get_paginate_count
-from nautobot.core.models.querysets import count_related
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, ValidatedSoftwareLCM, CVELCM
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM, ValidatedSoftwareLCM
 from nautobot_device_lifecycle_mgmt.software import DeviceSoftware, InventoryItemSoftware
-from nautobot_device_lifecycle_mgmt.tables import ValidatedSoftwareLCMTable, CVELCMTable
+from nautobot_device_lifecycle_mgmt.tables import ValidatedSoftwareLCMTable
 
 
 class DeviceTypeHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
