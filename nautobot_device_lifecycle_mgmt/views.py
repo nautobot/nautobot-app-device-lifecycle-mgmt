@@ -7,8 +7,8 @@ import urllib
 
 import matplotlib.pyplot as plt
 import numpy as np
-from django.conf import settings
 from django_tables2 import RequestConfig
+from django.conf import settings
 from django.db.models import Count, ExpressionWrapper, F, FloatField, Q
 from matplotlib.ticker import MaxNLocator
 from nautobot.apps.views import NautobotUIViewSet

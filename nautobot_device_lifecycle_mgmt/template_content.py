@@ -150,25 +150,32 @@ class InventoryItemValidatedSoftwareLCM(
             extra_context=extra_context,
         )
 
-class SoftwareVersionRelatedCVELCMTab(TemplateExtension):
-    model = 'dcim.softwareversion'
+
+class SoftwareVersionRelatedCVELCMTab(TemplateExtension):  # pylint: disable=abstract-method
+    """Class to add new tab with related CVE table to the SoftwareVersion display."""
+
+    model = "dcim.softwareversion"
 
     @property
     def software(self):
+        """Set software as the referenced variable."""
         return self.context["object"]
 
     def detail_tabs(self):
-        
+        """Create new detail tab on SoftwareVersion for Related CVEs."""
         try:
             return [
                 {
                     "title": "Related CVEs",
-                    "url": reverse("plugins:nautobot_device_lifecycle_mgmt:softwareversion_related_cves", kwargs={"pk": self.software.pk}),
+                    "url": reverse(
+                        "plugins:nautobot_device_lifecycle_mgmt:softwareversion_related_cves",
+                        kwargs={"pk": self.software.pk},
+                    ),
                 },
             ]
         except ObjectDoesNotExist:
             return []
-        
+
 
 template_extensions = [
     DeviceTypeHWLCM,
