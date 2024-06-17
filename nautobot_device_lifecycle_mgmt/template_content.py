@@ -3,12 +3,19 @@
 from abc import ABCMeta
 
 from django.db.models import Q
-from nautobot.dcim.models import InventoryItem
+from django.urls import reverse
+from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import render
+from django_tables2 import RequestConfig
+from nautobot.dcim.models import InventoryItem, SoftwareVersion
+from nautobot.apps.ui import TemplateExtension
 from nautobot.extras.plugins import PluginTemplateExtension
+from nautobot.core.views.paginator import EnhancedPaginator, get_paginate_count
+from nautobot.core.models.querysets import count_related
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import HardwareLCM, ValidatedSoftwareLCM, CVELCM
 from nautobot_device_lifecycle_mgmt.software import DeviceSoftware, InventoryItemSoftware
-from nautobot_device_lifecycle_mgmt.tables import ValidatedSoftwareLCMTable
+from nautobot_device_lifecycle_mgmt.tables import ValidatedSoftwareLCMTable, CVELCMTable
 
 
 class DeviceTypeHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
@@ -147,6 +154,25 @@ class InventoryItemValidatedSoftwareLCM(
             extra_context=extra_context,
         )
 
+class SoftwareVersionRelatedCVELCMTab(TemplateExtension):
+    model = 'dcim.softwareversion'
+
+    @property
+    def software(self):
+        return self.context["object"]
+
+    def detail_tabs(self):
+        
+        try:
+            return [
+                {
+                    "title": "Related CVEs",
+                    "url": reverse("plugins:nautobot_device_lifecycle_mgmt:softwareversion_related_cves", kwargs={"pk": self.software.pk}),
+                },
+            ]
+        except ObjectDoesNotExist:
+            return []
+        
 
 template_extensions = [
     DeviceTypeHWLCM,
@@ -155,4 +181,5 @@ template_extensions = [
     InventoryItemHWLCM,
     DeviceValidatedSoftwareLCM,
     InventoryItemValidatedSoftwareLCM,
+    SoftwareVersionRelatedCVELCMTab,
 ]

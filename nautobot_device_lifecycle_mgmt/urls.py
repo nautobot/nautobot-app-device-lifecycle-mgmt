@@ -38,4 +38,10 @@ urlpatterns += [
         views.InventoryItemSoftwareValidationResultListView.as_view(),
         name="inventoryitemsoftwarevalidationresult_list",
     ),
+    # SoftwareVersionRelatedCVEResult
+    path(
+        "software-versions/<uuid:pk>/related-cves/",
+        views.SoftwareVersionRelatedCveView.as_view(),
+        name="softwareversion_related_cves",
+    ),
 ]

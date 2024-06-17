@@ -604,6 +604,7 @@ class CVELCMForm(NautobotModelForm):
     """CVE Lifecycle Management creation/edit form."""
 
     published_date = forms.DateField(widget=DatePicker())
+    last_modified_date = forms.DateField(widget=DatePicker(), required=False)
     severity = forms.ChoiceField(choices=CVESeverityChoices.CHOICES, label="Severity", required=False)
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     affected_softwares = DynamicModelMultipleChoiceField(queryset=SoftwareVersion.objects.all(), required=False)
@@ -616,6 +617,7 @@ class CVELCMForm(NautobotModelForm):
         fields = [
             "name",
             "published_date",
+            "last_modified_date",
             "link",
             "status",
             "description",
@@ -631,6 +633,7 @@ class CVELCMForm(NautobotModelForm):
 
         widgets = {
             "published_date": DatePicker(),
+            "last_modified_date": DatePicker(),
         }
 
 
@@ -671,6 +674,9 @@ class CVELCMFilterForm(NautobotFilterForm):
     published_date_before = forms.DateField(label="Published Date Before", required=False, widget=DatePicker())
     published_date_after = forms.DateField(label="Published Date After", required=False, widget=DatePicker())
 
+    last_modified_date_before = forms.DateField(label="Last Modified Date Before", required=False, widget=DatePicker())
+    last_modified_date_after = forms.DateField(label="Last Modified Date After", required=False, widget=DatePicker())
+
     cvss__gte = forms.FloatField(label="CVSS Score Above", required=False)
     cvss__lte = forms.FloatField(label="CVSS Score Below", required=False)
 
@@ -699,6 +705,8 @@ class CVELCMFilterForm(NautobotFilterForm):
             "q",
             "published_date_before",
             "published_date_after",
+            "last_modified_date_before",
+            "last_modified_date_after",
             "severity",
             "status",
             "affected_softwares",
