@@ -13,6 +13,7 @@ from nautobot.extras.models import Relationship, RelationshipAssociation, Status
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
+    ContactLCM,
     ContractLCM,
     DeviceSoftwareValidationResult,
     HardwareLCM,
