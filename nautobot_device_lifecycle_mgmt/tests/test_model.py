@@ -685,6 +685,8 @@ class ProviderLCMTestCase(TestCase):
 
 # Test the field sizes for updated models
 class MigrationTestCase(TestCase):
+    """Tests for the migration update to 255 character length."""
+
     def test_contactlcm_fields(self):
         contact = ContactLCM.objects.create(name=None, address="", phone="", type="Unassigned")
         self.assertEqual(contact._meta.get_field("address").max_length, 255)
