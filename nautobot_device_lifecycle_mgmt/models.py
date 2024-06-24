@@ -7,6 +7,12 @@ from django.conf import settings
 # from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.db import models
+
+try:
+    from nautobot.apps.constants import CHARFIELD_MAX_LENGTH
+except ImportError:
+    CHARFIELD_MAX_LENGTH = 255
+
 from nautobot.core.models.generics import OrganizationalModel, PrimaryModel
 from nautobot.core.models.querysets import RestrictedQuerySet
 from nautobot.dcim.models import Device, DeviceType, InventoryItem
@@ -41,7 +47,7 @@ class HardwareLCM(PrimaryModel):
         null=True,
     )
     inventory_item = models.CharField(  # pylint: disable=nb-string-field-blank-null
-        verbose_name="Inventory Item Part", max_length=255, blank=True, null=True
+        verbose_name="Inventory Item Part", max_length=CHARFIELD_MAX_LENGTH, blank=True, null=True
     )
     release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
     end_of_sale = models.DateField(null=True, blank=True, verbose_name="End of Sale")
@@ -229,7 +235,7 @@ class DeviceSoftwareValidationResult(PrimaryModel):
     )
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
-    run_type = models.CharField(max_length=50, choices=choices.ReportRunTypeChoices)
+    run_type = models.CharField(max_length=CHARFIELD_MAX_LENGTH, choices=choices.ReportRunTypeChoices)
     valid_software = models.ManyToManyField(
         to="ValidatedSoftwareLCM", related_name="device_software_validation_results"
     )
@@ -266,7 +272,7 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
     )
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
-    run_type = models.CharField(max_length=50, choices=choices.ReportRunTypeChoices)
+    run_type = models.CharField(max_length=CHARFIELD_MAX_LENGTH, choices=choices.ReportRunTypeChoices)
     valid_software = models.ManyToManyField(
         to="ValidatedSoftwareLCM", related_name="inventory_item_software_validation_results"
     )
@@ -309,14 +315,18 @@ class ContractLCM(PrimaryModel):
         blank=True,
         null=True,
     )
-    name = models.CharField(max_length=100, unique=True)
-    number = models.CharField(max_length=100, blank=True, default="")
+    name = models.CharField(max_length=CHARFIELD_MAX_LENGTH, unique=True)
+    number = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True, default="")
     start = models.DateField(null=True, blank=True, verbose_name="Contract Start Date")
     end = models.DateField(null=True, blank=True, verbose_name="Contract End Date")
     cost = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=15, verbose_name="Contract Cost")
-    support_level = models.CharField(verbose_name="Support Level", max_length=64, blank=True, default="")
+    support_level = models.CharField(
+        verbose_name="Support Level", max_length=CHARFIELD_MAX_LENGTH, blank=True, default=""
+    )
     currency = models.CharField(verbose_name="Currency", max_length=4, blank=True, default="")
-    contract_type = models.CharField(verbose_name="Contract Type", max_length=32, blank=True, default="")
+    contract_type = models.CharField(
+        verbose_name="Contract Type", max_length=CHARFIELD_MAX_LENGTH, blank=True, default=""
+    )
     devices = models.ManyToManyField(to="dcim.Device", related_name="device_contracts", blank=True)
     comments = models.TextField(blank=True, default="")
 
@@ -365,11 +375,11 @@ class ProviderLCM(OrganizationalModel):
     """ProviderLCM model for app."""
 
     # Set model columns
-    name = models.CharField(max_length=100, unique=True)
-    description = models.CharField(max_length=200, blank=True)
-    physical_address = models.CharField(max_length=200, blank=True)
+    name = models.CharField(max_length=CHARFIELD_MAX_LENGTH, unique=True)
+    description = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True)
+    physical_address = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True)
     country = models.CharField(max_length=3, blank=True)
-    phone = models.CharField(max_length=20, blank=True)
+    phone = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True)
     email = models.EmailField(blank=True, verbose_name="E-mail")
     portal_url = models.URLField(blank=True, verbose_name="Portal URL")
     comments = models.TextField(blank=True, default="")
@@ -404,7 +414,7 @@ class ProviderLCM(OrganizationalModel):
 class CVELCM(PrimaryModel):
     """CVELCM is a model representation of a cve vulnerability record."""
 
-    name = models.CharField(max_length=16, blank=False, unique=True)
+    name = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=False, unique=True)
     published_date = models.DateField(verbose_name="Published Date")
     link = models.URLField()
     status = StatusField(
@@ -413,9 +423,9 @@ class CVELCM(PrimaryModel):
         on_delete=models.PROTECT,
         to="extras.status",
     )
-    description = models.CharField(max_length=255, blank=True, default="")
+    description = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True, default="")
     severity = models.CharField(
-        max_length=50, choices=choices.CVESeverityChoices, default=choices.CVESeverityChoices.NONE
+        max_length=CHARFIELD_MAX_LENGTH, choices=choices.CVESeverityChoices, default=choices.CVESeverityChoices.NONE
     )
     cvss = models.FloatField(blank=True, null=True, verbose_name="CVSS Base Score")
     cvss_v2 = models.FloatField(blank=True, null=True, verbose_name="CVSSv2 Score")
