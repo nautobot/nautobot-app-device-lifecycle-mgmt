@@ -45,5 +45,5 @@ urlpatterns += [
         "docs/",
         RedirectView.as_view(url=static("nautobot_device_lifecycle_mgmt/docs/index.html")),
         name="docs",
-    )
+    ),
 ]
