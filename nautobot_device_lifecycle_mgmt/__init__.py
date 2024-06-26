@@ -27,6 +27,7 @@ class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
         "barchart_height": 5,
     }
     caching_config = {}
+    docs_view_name = "plugins:nautobot_device_lifecycle_mgmt:docs"
 
     def ready(self):
         """Register custom signals."""

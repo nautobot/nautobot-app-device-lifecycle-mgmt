@@ -1,5 +1,8 @@
 """Django urlpatterns declaration for the Lifecycle Management app."""
 from django.urls import path
+from django.templatetags.static import static
+from django.views.generic import RedirectView
+
 from nautobot.apps.urls import NautobotUIViewSetRouter
 
 from nautobot_device_lifecycle_mgmt import views
@@ -45,4 +48,9 @@ urlpatterns += [
         views.InventoryItemSoftwareValidationResultListView.as_view(),
         name="inventoryitemsoftwarevalidationresult_list",
     ),
+    path(
+        "docs/",
+        RedirectView.as_view(url=static("nautobot_device_lifecycle_mgmt/docs/index.html")),
+        name="docs",
+    )
 ]
