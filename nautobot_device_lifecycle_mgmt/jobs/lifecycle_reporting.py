@@ -84,7 +84,7 @@ class InventoryItemSoftwareValidationFullReport(Job):
             validate_obj.validated_save()
             validation_count += 1
 
-        for inventoryitem in Device.objects.filter(software_version__isnull=False):
+        for inventoryitem in InventoryItem.objects.filter(software_version__isnull=False):
             inventoryitem_software = InventoryItemSoftware(inventoryitem)
             validate_obj, _ = InventoryItemSoftwareValidationResult.objects.get_or_create(inventory_item=inventoryitem)
             validate_obj.is_validated = inventoryitem_software.validate_software()
