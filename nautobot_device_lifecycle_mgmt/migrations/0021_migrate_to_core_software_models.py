@@ -3,6 +3,7 @@ from string import ascii_letters, digits
 import uuid
 
 from django.db import migrations
+from django.utils.text import slugify
 
 from nautobot.apps.choices import (
     ObjectChangeActionChoices,
@@ -42,13 +43,16 @@ def migrate_dlm_software_models_to_core(apps, schema_editor):
     for dlm_software_image in DLMSoftwareImage.objects.all():
         _migrate_software_image(apps, dlm_software_image)
 
+    # Create placeholder software image files for software, device type pairs that don't currently have image files
+    # This is to satisfy Nautobot's 2.2 requirement that device can only have software assigned if there is a matching image
+    _create_placeholder_software_images(apps)
+
     # Delete DLM relationships from software to devices and inventory items
     Relationship.objects.filter(key="device_soft").delete()
     Relationship.objects.filter(key="inventory_item_soft").delete()
 
     # Delete DLM SoftwareLCM and SoftwareImageLCM instances
     DLMSoftwareImage.objects.all().delete()
-    DLMSoftwareVersion.objects.all().delete()
 
 
 def _migrate_hashing_algorithm(value):
@@ -247,6 +251,37 @@ def _migrate_software_version(apps, dlm_software_version):
         user=None,
         user_name="Undefined",
     )
+
+
+def _create_placeholder_software_images(apps):
+    # Create placeholder software image files for software that is used by devices but no image currently exists
+    SoftwareImageFile = apps.get_model("dcim", "SoftwareImageFile")
+    Device = apps.get_model("dcim", "Device")
+    DeviceType = apps.get_model("dcim", "DeviceType")
+    SoftwareVersion = apps.get_model("dcim", "SoftwareVersion")
+    Status = apps.get_model("extras", "Status")
+
+    status_active = Status.objects.get(name="Active")
+
+    # Get all (software_version, device_type) pairs where software_version is in use by a device with given device_type
+    for soft, dt in (
+        Device.objects.filter(software_version__isnull=False)
+        .order_by()
+        .values_list("software_version", "device_type")
+        .distinct()
+    ):
+        if SoftwareImageFile.objects.filter(software_version=soft, device_types=dt).exists():
+            continue
+        software_version = SoftwareVersion.objects.get(id=soft)
+        device_type = DeviceType.objects.get(id=dt)
+        image_name = f"{slugify(software_version.version)}-{slugify(device_type.model)}"[:242]
+        software_image = SoftwareImageFile(
+            software_version=software_version,
+            image_file_name=f"{image_name}-placeholder",
+            status=status_active,
+        )
+        software_image.save()
+        software_image.device_types.add(device_type)
 
 
 class Migration(migrations.Migration):
