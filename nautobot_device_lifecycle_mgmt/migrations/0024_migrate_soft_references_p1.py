@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("nautobot_device_lifecycle_mgmt", "0022_migrate_contact_to_core_model"),
+        ("nautobot_device_lifecycle_mgmt", "0023_migrate_contact_to_core_model"),
     ]
 
     operations = [

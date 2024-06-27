@@ -6,47 +6,10 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("dcim", "0058_controller_data_migration"),
-        ("nautobot_device_lifecycle_mgmt", "0027_migrate_soft_references_p5"),
+        ("nautobot_device_lifecycle_mgmt", "0025_migrate_soft_references_p2"),
     ]
 
     operations = [
-        migrations.AlterUniqueTogether(
-            name="softwareimagelcm",
-            unique_together=None,
-        ),
-        migrations.RemoveField(
-            model_name="softwareimagelcm",
-            name="device_types",
-        ),
-        migrations.RemoveField(
-            model_name="softwareimagelcm",
-            name="inventory_items",
-        ),
-        migrations.RemoveField(
-            model_name="softwareimagelcm",
-            name="object_tags",
-        ),
-        migrations.RemoveField(
-            model_name="softwareimagelcm",
-            name="software",
-        ),
-        migrations.RemoveField(
-            model_name="softwareimagelcm",
-            name="tags",
-        ),
-        migrations.AlterUniqueTogether(
-            name="softwarelcm",
-            unique_together=None,
-        ),
-        migrations.RemoveField(
-            model_name="softwarelcm",
-            name="device_platform",
-        ),
-        migrations.RemoveField(
-            model_name="softwarelcm",
-            name="tags",
-        ),
         migrations.AlterField(
             model_name="cvelcm",
             name="affected_softwares",
@@ -81,14 +44,5 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="dcim.softwareversion"
             ),
-        ),
-        migrations.DeleteModel(
-            name="ContactLCM",
-        ),
-        migrations.DeleteModel(
-            name="SoftwareImageLCM",
-        ),
-        migrations.DeleteModel(
-            name="SoftwareLCM",
         ),
     ]

@@ -116,7 +116,7 @@ class Migration(migrations.Migration):
         ("extras", "0104_contact_contactassociation_team"),
         ("contenttypes", "0002_remove_content_type_name"),
         ("extras", "0057_jobbutton"),
-        ("nautobot_device_lifecycle_mgmt", "0021_migrate_to_core_software_models"),
+        ("nautobot_device_lifecycle_mgmt", "0022_migrate_to_core_software_models"),
         ("users", "0001_initial"),
     ]
 
