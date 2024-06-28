@@ -4,7 +4,8 @@ from django.db import ProgrammingError
 from nautobot.core.testing import TestCase
 
 from nautobot_device_lifecycle_mgmt.metrics import (
-    metrics_lcm_hw_end_of_support,
+    metrics_lcm_hw_end_of_support_part_number,
+    metrics_lcm_hw_end_of_support_location,
     metrics_lcm_validation_report_device_type,
     metrics_lcm_validation_report_inventory_item,
 )
@@ -54,22 +55,20 @@ class MetricsTest(TestCase):
             sample_labels = tuple(sample.labels.items())
             self.assertEqual(expected_ts_samples[sample_labels], sample.value)
 
-    def test_metrics_lcm_hw_end_of_support_does_not_error(self):
-        """Query providing data to hw_end_of_support_location_gauge metric should not error out.
+    def test_metrics_lcm_hw_end_of_support_location_does_not_error(self):
+        """Query providing data to metrics_lcm_hw_end_of_support_part_number metric should not error out.
         Guards against https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/309
         """
-        metric_gen = metrics_lcm_hw_end_of_support()
-        # skip hw_end_of_support_part_number_gauge
-        next(metric_gen)
+        metric_gen = metrics_lcm_hw_end_of_support_location()
         try:
             # Get hw_end_of_support_location_gauge
             next(metric_gen)
         except ProgrammingError:
-            self.fail("hw_end_of_support_location_gauge query bug")
+            self.fail("metrics_lcm_hw_end_of_support_location query bug")
 
     def test_metrics_lcm_hw_end_of_support_part_number(self):
         """Test metric hw_end_of_support_part_number_gauge."""
-        metric_gen = metrics_lcm_hw_end_of_support()
+        metric_gen = metrics_lcm_hw_end_of_support_part_number()
 
         # Get hw_end_of_support_part_number_gauge
         metric = next(metric_gen)
@@ -87,10 +86,7 @@ class MetricsTest(TestCase):
 
     def test_metrics_lcm_hw_end_of_support_location(self):
         """Test metric hw_end_of_support_location_gauge."""
-        metric_gen = metrics_lcm_hw_end_of_support()
-
-        # skip hw_end_of_support_part_number_gauge
-        next(metric_gen)
+        metric_gen = metrics_lcm_hw_end_of_support_location()
 
         # Get hw_end_of_support_location_gauge
         metric = next(metric_gen)
