@@ -270,14 +270,17 @@ def _create_placeholder_software_images(apps):
         .values_list("software_version", "device_type")
         .distinct()
     ):
-        if SoftwareImageFile.objects.filter(software_version=soft, device_types=dt).exists():
-            continue
         software_version = SoftwareVersion.objects.get(id=soft)
         device_type = DeviceType.objects.get(id=dt)
-        image_name = f"{slugify(software_version.version)}-{slugify(device_type.model)}"[:242]
+        image_soft_and_dt = f"{slugify(software_version.version)}-{slugify(device_type.model)}"[:242]
+        image_file_name = f"{image_soft_and_dt}-placeholder"
+        if SoftwareImageFile.objects.filter(software_version=soft, device_types=dt).exists():
+            continue
+        if SoftwareImageFile.objects.filter(image_file_name=image_file_name).exists():
+            continue
         software_image = SoftwareImageFile(
             software_version=software_version,
-            image_file_name=f"{image_name}-placeholder",
+            image_file_name=image_file_name,
             status=status_active,
         )
         software_image.save()

@@ -47,41 +47,6 @@ class Migration(migrations.Migration):
             model_name="softwarelcm",
             name="tags",
         ),
-        migrations.AlterField(
-            model_name="cvelcm",
-            name="affected_softwares",
-            field=models.ManyToManyField(blank=True, related_name="corresponding_cves", to="dcim.SoftwareVersion"),
-        ),
-        migrations.AlterField(
-            model_name="devicesoftwarevalidationresult",
-            name="software",
-            field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="+",
-                to="dcim.softwareversion",
-            ),
-        ),
-        migrations.AlterField(
-            model_name="inventoryitemsoftwarevalidationresult",
-            name="software",
-            field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="dcim.softwareversion"
-            ),
-        ),
-        migrations.AlterField(
-            model_name="validatedsoftwarelcm",
-            name="software",
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="dcim.softwareversion"),
-        ),
-        migrations.AlterField(
-            model_name="vulnerabilitylcm",
-            name="software",
-            field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="dcim.softwareversion"
-            ),
-        ),
         migrations.DeleteModel(
             name="ContactLCM",
         ),
