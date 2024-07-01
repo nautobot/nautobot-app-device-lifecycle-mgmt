@@ -4,7 +4,7 @@ import datetime
 
 import django_filters
 from django.db.models import Q
-from nautobot.apps.filters import NautobotFilterSet, StatusModelFilterSetMixin
+from nautobot.apps.filters import NautobotFilterSet, StatusModelFilterSetMixin, NameSearchFilterSet
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform, SoftwareVersion
 from nautobot.extras.filters.mixins import StatusFilter
 from nautobot.extras.models import Role, Tag
@@ -488,32 +488,14 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         return queryset
 
 
-class ContractLCMFilterSet(NautobotFilterSet):
+class ContractLCMFilterSet(NautobotFilterSet, NameSearchFilterSet):
     """Filter for ContractLCMFilter."""
-
-    q = django_filters.CharFilter(method="search", label="Search")
-
-    provider = django_filters.ModelMultipleChoiceFilter(
-        queryset=ProviderLCM.objects.all(),
-        label="Provider",
-    )
-
     expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
 
-    start = django_filters.DateFilter()
-    start__gte = django_filters.DateFilter(field_name="start", lookup_expr="gte")
-    start__lte = django_filters.DateFilter(field_name="start", lookup_expr="lte")
-
-    end = django_filters.DateFilter()
-    end__gte = django_filters.DateFilter(field_name="end", lookup_expr="gte")
-    end__lte = django_filters.DateFilter(field_name="end", lookup_expr="lte")
-
     class Meta:
-        """Meta attributes for filter."""
-
         model = ContractLCM
-
         fields = [
+            "devices",
             "provider",
             "name",
             "start",
@@ -521,22 +503,9 @@ class ContractLCMFilterSet(NautobotFilterSet):
             "cost",
             "support_level",
             "contract_type",
-            "expired",
+            "expired", #TODO: Fix this, it is not working
             "currency",
         ]
-
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
-        """Perform the filtered search."""
-        if not value.strip():
-            return queryset
-
-        qs_filter = (
-            Q(name__icontains=value)
-            | Q(cost__icontains=value)
-            | Q(contract_type__icontains=value)
-            | Q(support_level__icontains=value)
-        )
-        return queryset.filter(qs_filter)
 
     def expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""

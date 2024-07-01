@@ -4,11 +4,14 @@ import logging
 
 from django import forms
 from nautobot.apps.forms import (
+    CustomFieldModelBulkEditFormMixin,
     DatePicker,
     DynamicModelChoiceField,
     DynamicModelMultipleChoiceField,
     NautobotBulkEditForm,
     NautobotModelForm,
+    NautobotFilterForm,
+    NullableDateField,
     StaticSelect2,
     StaticSelect2Multiple,
     TagFilterField,
@@ -16,7 +19,6 @@ from nautobot.apps.forms import (
 )
 from nautobot.core.forms.constants import BOOLEAN_WITH_BLANK_CHOICES
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform, SoftwareVersion
-from nautobot.extras.forms import CustomFieldModelBulkEditFormMixin, NautobotFilterForm
 from nautobot.extras.models import Role, Status, Tag
 
 from nautobot_device_lifecycle_mgmt.choices import (
@@ -491,37 +493,34 @@ class ContractLCMFilterForm(NautobotFilterForm):
 
     model = ContractLCM
     q = forms.CharField(required=False, label="Search")
-    provider = forms.ModelMultipleChoiceField(required=False, queryset=ProviderLCM.objects.all(), to_field_name="pk")
+    devices = DynamicModelMultipleChoiceField(queryset=Device.objects.all(), required=False)
+    provider = DynamicModelMultipleChoiceField(queryset=ProviderLCM.objects.all(), required=False)
+    name = forms.CharField(required=False, label="Name")
+    support_level = forms.CharField(required=False, label="Suport Level")
+    cost = forms.FloatField(required=False, label="Cost")
+    start = NullableDateField(required=False, widget=DatePicker(), label="Contract Start Date")
+    end = NullableDateField(required=False, widget=DatePicker(), label="Contract End Date")
     currency = forms.MultipleChoiceField(
         required=False, choices=CurrencyChoices.CHOICES, widget=StaticSelect2Multiple()
     )
     contract_type = forms.ChoiceField(
         required=False, widget=StaticSelect2, choices=add_blank_choice(ContractTypeChoices.CHOICES)
     )
-    name = forms.CharField(required=False)
+    expired = forms.BooleanField(required=False, label="Expired")
 
-    class Meta:
-        """Meta attributes for the ContractLCMFilterForm class."""
-
-        model = ContractLCM
-        # Define the fields above for ordering and widget purposes
-        fields = [
-            "q",
-            "provider",
-            "name",
-            "start",
-            "end",
-            "cost",
-            "currency",
-            "support_level",
-            "contract_type",
-            "devices",
-        ]
-
-        widgets = {
-            "start": DatePicker(),
-            "end": DatePicker(),
-        }
+    field_order = [
+        "q",
+        "devices",
+        "provider",
+        "name",
+        "start",
+        "end",
+        "cost",
+        "currency",
+        "support_level",
+        "contract_type",
+        "expired",
+    ]
 
 
 class ProviderLCMForm(NautobotModelForm):

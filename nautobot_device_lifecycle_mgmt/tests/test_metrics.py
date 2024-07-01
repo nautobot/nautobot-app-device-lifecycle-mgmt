@@ -4,8 +4,8 @@ from django.db import ProgrammingError
 from nautobot.core.testing import TestCase
 
 from nautobot_device_lifecycle_mgmt.metrics import (
-    metrics_lcm_hw_end_of_support_part_number,
     metrics_lcm_hw_end_of_support_location,
+    metrics_lcm_hw_end_of_support_part_number,
     metrics_lcm_validation_report_device_type,
     metrics_lcm_validation_report_inventory_item,
 )

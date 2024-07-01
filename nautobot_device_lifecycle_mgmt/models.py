@@ -24,6 +24,10 @@ from nautobot_device_lifecycle_mgmt.software_filters import (
     DeviceValidatedSoftwareFilter,
     InventoryItemValidatedSoftwareFilter,
 )
+from nautobot_device_lifecycle_mgmt.contract_filters import (
+    InventoryItemContractFilter,
+    DeviceContractFilter,
+)
 
 
 @extras_features(
@@ -295,6 +299,23 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
         return msg
 
 
+class ContractLCMQuerySet(RestrictedQuerySet):
+    """Queryset for `ContactLCM` objects."""
+
+    def get_for_object(self, obj):
+        """Return all `ContractLCM` objets assigned to the given object."""
+        if not isinstance(obj, models.Model):
+            raise TypeError(f"{obj} is not an instance of Django Model class")
+        if isinstance(obj, Device):
+            qs = DeviceContractFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
+        elif isinstance(obj, InventoryItem):
+            qs = InventoryItemContractFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
+        else:
+            qs = self  # pylint: disable=invalid-name
+
+        return qs
+
+
 @extras_features(
     "custom_fields",
     "custom_links",
@@ -360,6 +381,8 @@ class ContractLCM(PrimaryModel):
         if self.end and self.start:
             if self.end <= self.start:
                 raise ValidationError("End date must be after the start date of the contract.")
+            
+    objects = ContractLCMQuerySet.as_manager()
 
 
 @extras_features(

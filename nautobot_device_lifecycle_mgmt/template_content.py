@@ -3,15 +3,15 @@
 from abc import ABCMeta
 
 from django.db.models import Q
+from nautobot.apps.ui import TemplateExtension
 from nautobot.dcim.models import InventoryItem
-from nautobot.extras.plugins import PluginTemplateExtension
 
-from nautobot_device_lifecycle_mgmt.models import HardwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import ContractLCM, HardwareLCM, ValidatedSoftwareLCM
 from nautobot_device_lifecycle_mgmt.software import DeviceSoftware, InventoryItemSoftware
-from nautobot_device_lifecycle_mgmt.tables import ValidatedSoftwareLCMTable
+from nautobot_device_lifecycle_mgmt.tables import ContractLCMTable, ValidatedSoftwareLCMTable
 
 
-class DeviceTypeHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
+class DeviceTypeHWLCM(TemplateExtension, metaclass=ABCMeta):
     """Class to add table for HardwareLCM related to device type."""
 
     model = "dcim.devicetype"
@@ -27,7 +27,7 @@ class DeviceTypeHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
 
 
 class DeviceTypeValidatedSoftwareLCM(
-    PluginTemplateExtension,
+    TemplateExtension,
 ):  # pylint: disable=abstract-method
     """Class to add table for ValidatedSoftwareLCM related to device type."""
 
@@ -59,7 +59,7 @@ class DeviceTypeValidatedSoftwareLCM(
         )
 
 
-class DeviceHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
+class DeviceHWLCM(TemplateExtension, metaclass=ABCMeta):
     """Class to add table for DeviceHWLCM related to device type."""
 
     model = "dcim.device"
@@ -83,7 +83,7 @@ class DeviceHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
         )
 
 
-class InventoryItemHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
+class InventoryItemHWLCM(TemplateExtension, metaclass=ABCMeta):
     """Class to add table for InventoryItemHWLCM related to inventory items."""
 
     model = "dcim.inventoryitem"
@@ -99,7 +99,7 @@ class InventoryItemHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
 
 
 class DeviceValidatedSoftwareLCM(
-    PluginTemplateExtension,
+    TemplateExtension,
 ):  # pylint: disable=abstract-method
     """Class to add table for ValidatedSoftwareLCM related to device."""
 
@@ -124,7 +124,7 @@ class DeviceValidatedSoftwareLCM(
 
 
 class InventoryItemValidatedSoftwareLCM(
-    PluginTemplateExtension,
+    TemplateExtension,
 ):  # pylint: disable=abstract-method
     """Class to add table for ValidatedSoftwareLCM related to inventory item."""
 
@@ -148,7 +148,45 @@ class InventoryItemValidatedSoftwareLCM(
         )
 
 
+class DeviceContractLCM(
+    TemplateExtension,
+):  # pylint: disable=abstract-method
+    """Class to add table for ContractLCM related to device."""
+
+    model = "dcim.device"
+
+    def __init__(self, context):
+        """Init setting up the ContractLCM object."""
+        super().__init__(context)
+        self.device_contracts = ContractLCM.objects.get_for_object(self.context["object"])
+        self.device_contracts_table = ContractLCMTable(
+            list(self.device_contracts),
+            orderable=False,
+            exclude=(
+                "actions",
+                "cost",
+                "contract_type",
+                "devices",
+                "provider",
+                "support_level",
+                "cr_contractlcm_to_inventoryitem_src"
+            ),
+        )
+
+    def right_page(self):
+        """Display table on right side of page."""
+        extra_context = {
+            "contracts_table": self.device_contracts_table,
+        }
+
+        return self.render(
+            "nautobot_device_lifecycle_mgmt/inc/contract_info.html",
+            extra_context=extra_context,
+        )
+
+
 template_extensions = [
+    DeviceContractLCM,
     DeviceTypeHWLCM,
     DeviceTypeValidatedSoftwareLCM,
     DeviceHWLCM,
