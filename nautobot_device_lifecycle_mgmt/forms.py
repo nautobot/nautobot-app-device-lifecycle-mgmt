@@ -492,24 +492,9 @@ class ContractLCMFilterForm(NautobotFilterForm):
     """Filter form to filter searches."""
 
     model = ContractLCM
-    q = forms.CharField(required=False, label="Search")
-    devices = DynamicModelMultipleChoiceField(queryset=Device.objects.all(), required=False)
-    provider = DynamicModelMultipleChoiceField(queryset=ProviderLCM.objects.all(), required=False)
-    name = forms.CharField(required=False, label="Name")
-    support_level = forms.CharField(required=False, label="Suport Level")
-    cost = forms.FloatField(required=False, label="Cost")
-    start = NullableDateField(required=False, widget=DatePicker(), label="Contract Start Date")
-    end = NullableDateField(required=False, widget=DatePicker(), label="Contract End Date")
-    currency = forms.MultipleChoiceField(
-        required=False, choices=CurrencyChoices.CHOICES, widget=StaticSelect2Multiple()
-    )
-    contract_type = forms.ChoiceField(
-        required=False, widget=StaticSelect2, choices=add_blank_choice(ContractTypeChoices.CHOICES)
-    )
-    expired = forms.BooleanField(required=False, label="Expired")
-
     field_order = [
         "q",
+        "expired",
         "devices",
         "provider",
         "name",
@@ -519,8 +504,26 @@ class ContractLCMFilterForm(NautobotFilterForm):
         "currency",
         "support_level",
         "contract_type",
-        "expired",
     ]
+    q = forms.CharField(required=False, label="Search")
+    expired = forms.BooleanField(
+        required=False,
+        label="Expired",
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+    )
+    devices = DynamicModelMultipleChoiceField(queryset=Device.objects.all(), required=False)
+    provider = DynamicModelMultipleChoiceField(queryset=ProviderLCM.objects.all(), required=False)
+    name = forms.CharField(required=False, label="Name")
+    cost = forms.FloatField(required=False, label="Cost")
+    start = NullableDateField(required=False, widget=DatePicker(), label="Contract Start Date")
+    end = NullableDateField(required=False, widget=DatePicker(), label="Contract End Date")
+    currency = forms.MultipleChoiceField(
+        required=False, choices=CurrencyChoices.CHOICES, widget=StaticSelect2Multiple()
+    )
+    support_level = forms.CharField(required=False, label="Suport Level")
+    contract_type = forms.ChoiceField(
+        required=False, widget=StaticSelect2, choices=add_blank_choice(ContractTypeChoices.CHOICES)
+    )
 
 
 class ProviderLCMForm(NautobotModelForm):

@@ -490,7 +490,7 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
 
 class ContractLCMFilterSet(NautobotFilterSet, NameSearchFilterSet):
     """Filter for ContractLCMFilter."""
-    expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
+    expired = django_filters.BooleanFilter(method="_expired_search", label="Expired")
 
     class Meta:
         model = ContractLCM
@@ -501,13 +501,13 @@ class ContractLCMFilterSet(NautobotFilterSet, NameSearchFilterSet):
             "start",
             "end",
             "cost",
+            "currency",
             "support_level",
             "contract_type",
-            "expired", #TODO: Fix this, it is not working
-            "currency",
+            "expired",
         ]
 
-    def expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""
         today = datetime.datetime.today().date()
         lookup = "gte" if not value else "lt"
