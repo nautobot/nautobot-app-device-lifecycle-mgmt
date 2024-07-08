@@ -158,7 +158,7 @@ class DeviceContractLCM(
     def __init__(self, context):
         """Init setting up the ContractLCM object."""
         super().__init__(context)
-        self.device_contracts = ContractLCM.objects.get_for_object(self.context["object"])
+        self.device_contracts = ContractLCM.objects.get_for_object(self.context["object"]).order_by("end")
         self.device_contracts_table = ContractLCMTable(
             list(self.device_contracts),
             orderable=False,
@@ -169,7 +169,7 @@ class DeviceContractLCM(
                 "devices",
                 "provider",
                 "support_level",
-                "cr_contractlcm_to_inventoryitem_src"
+                "cr_contractlcm_to_inventoryitem_src",
             ),
         )
 

@@ -20,13 +20,10 @@ from nautobot.extras.models.statuses import StatusField
 from nautobot.extras.utils import extras_features
 
 from nautobot_device_lifecycle_mgmt import choices
+from nautobot_device_lifecycle_mgmt.contract_filters import DeviceContractFilter, InventoryItemContractFilter
 from nautobot_device_lifecycle_mgmt.software_filters import (
     DeviceValidatedSoftwareFilter,
     InventoryItemValidatedSoftwareFilter,
-)
-from nautobot_device_lifecycle_mgmt.contract_filters import (
-    InventoryItemContractFilter,
-    DeviceContractFilter,
 )
 
 
@@ -381,7 +378,7 @@ class ContractLCM(PrimaryModel):
         if self.end and self.start:
             if self.end <= self.start:
                 raise ValidationError("End date must be after the start date of the contract.")
-            
+
     objects = ContractLCMQuerySet.as_manager()
 
 
