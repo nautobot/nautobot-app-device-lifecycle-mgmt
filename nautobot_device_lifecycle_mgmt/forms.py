@@ -58,12 +58,11 @@ class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):
 class HardwareLCMForm(NautobotModelForm):
     """Hardware Device Lifecycle creation/edit form."""
 
-    inventory_item = forms.ModelChoiceField(
-        queryset=InventoryItem.objects.exclude(part_id__exact="")
-        .distinct()
-        .order_by("part_id")
-        .values_list("part_id", flat=True),
+    device_type = DynamicModelChoiceField(queryset=DeviceType.objects.all(), required=False)
+    inventory_item = DynamicModelChoiceField(
+        queryset=InventoryItem.objects.all(),
         label="Inventory Part ID",
+        display_field="part_id",
         to_field_name="part_id",
         required=False,
     )
