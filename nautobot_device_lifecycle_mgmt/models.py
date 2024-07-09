@@ -216,6 +216,46 @@ class ValidatedSoftwareLCM(PrimaryModel):
 @extras_features(
     "graphql",
 )
+class DeviceHardwareNoticeResult(PrimaryModel):
+    """Device hardware notice details model."""
+
+    device = models.OneToOneField(
+        to="dcim.Device",
+        on_delete=models.CASCADE,
+        help_text="The device",
+        blank=False,
+        related_name="device_hardware_notice",
+    )
+    hardware_notice = models.ForeignKey(
+        to="nautobot_device_lifecycle_mgmt.HardwareLCM",
+        on_delete=models.CASCADE,
+        help_text="Device hardware notice",
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    is_supported = models.BooleanField(null=True, blank=True)
+    last_run = models.DateTimeField(null=True, blank=True)
+    run_type = models.CharField(max_length=CHARFIELD_MAX_LENGTH, choices=choices.ReportRunTypeChoices)
+
+    class Meta:
+        """Meta attributes for DeviceHardwareNoticeResult."""
+
+        verbose_name = "Device Hardware Notice Report"
+        ordering = ("device",)
+
+    def __str__(self):
+        """String representation of DeviceHardwareNoticeResult."""
+        if self.is_supported:
+            msg = f"Device: {self.device} - Supported"
+        else:
+            msg = f"Device: {self.device} - Not Supported"
+        return msg
+
+
+@extras_features(
+    "graphql",
+)
 class DeviceSoftwareValidationResult(PrimaryModel):
     """Device Software validation details model."""
 

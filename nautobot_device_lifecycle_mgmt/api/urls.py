@@ -5,6 +5,7 @@ from rest_framework import routers
 from nautobot_device_lifecycle_mgmt.api.views import (
     ContractLCMView,
     CVELCMViewSet,
+    DeviceHardwareNoticeResultListViewSet,
     DeviceSoftwareValidationResultListViewSet,
     HardwareLCMView,
     InventoryItemSoftwareValidationResultListViewSet,
@@ -21,6 +22,7 @@ router.register("provider", ProviderLCMView)
 router.register("validated-software", ValidatedSoftwareLCMViewSet)
 router.register("cve", CVELCMViewSet)
 router.register("vulnerability", VulnerabilityLCMViewSet)
+router.register("device-hardware-notice-result", DeviceHardwareNoticeResultListViewSet)
 router.register("device-validated-software-result", DeviceSoftwareValidationResultListViewSet)
 router.register("inventory-item-validated-software-result", InventoryItemSoftwareValidationResultListViewSet)
 

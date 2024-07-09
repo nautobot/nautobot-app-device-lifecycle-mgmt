@@ -255,6 +255,145 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
         return aggr
 
 
+class HardwareNoticeDeviceReportView(generic.ObjectListView):
+    """View for executive report on device hardware notices."""
+
+    filterset = filters.DeviceHardwareNoticeResultFilterSet
+    filterset_form = forms.DeviceHardwareNoticeResultFilterForm
+    table = tables.DeviceHardwareNoticeResultTable
+    template_name = "nautobot_device_lifecycle_mgmt/hardwarenotice_device_report.html"
+    queryset = (
+        models.DeviceHardwareNoticeResult.objects.values("device__device_type__model", "device__device_type__pk")
+        .distinct()
+        .annotate(
+            total=Count("device__device_type__model"),
+            valid=Count("device__device_type__model", filter=Q(is_supported=True)),
+            invalid=Count("device__device_type__model", filter=Q(is_supported=False)),
+            # support_unkonwn=Count("device__device_type__model", filter=Q(is_supported__isnull=True)),
+            valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
+        )
+        .order_by("-valid_percent")
+    )
+    action_buttons = ("export",)
+    # extra content dict to be returned by self.extra_context() method
+    extra_content = {}
+
+    def setup(self, request, *args, **kwargs):
+        """Using request object to perform filtering based on query params."""
+        super().setup(request, *args, **kwargs)  #
+        try:
+            report_last_run = (
+                models.DeviceHardwareNoticeResult.objects.filter(run_type=choices.ReportRunTypeChoices.REPORT_FULL_RUN)
+                .latest("last_updated")
+                .last_run
+            )
+        except models.DeviceHardwareNoticeResult.DoesNotExist:  # pylint: disable=no-member
+            report_last_run = None
+
+        device_aggr = self.get_global_aggr(request)
+        _platform_qs = (
+            models.DeviceHardwareNoticeResult.objects.values("device__device_type__model")
+            .distinct()
+            .annotate(
+                total=Count("device__device_type__model"),
+                valid=Count("device__device_type__model", filter=Q(is_supported=True)),
+                invalid=Count("device__device_type__model", filter=Q(is_supported=False)),
+                # support_unknown=Count("device__platform__name", filter=Q(is_supported__isnull=True)),
+                valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
+            )
+            .order_by("-total")
+        )
+        platform_qs = self.filterset(request.GET, _platform_qs).qs
+        pie_chart_attrs = {
+            "aggr_labels": ["valid", "invalid"],
+            "chart_labels": ["Valid", "Invalid"],
+        }
+        bar_chart_attrs = {
+            "label_accessor": "device__device_type__model",
+            "ylabel": "Device",
+            "title": "Support per Device Type",
+            "chart_bars": [
+                {"label": "Valid", "data_attr": "valid", "color": GREEN},
+                {"label": "Invalid", "data_attr": "invalid", "color": RED},
+                # {"label": "No Software", "data_attr": "no_software", "color": GREY},
+            ],
+        }
+        self.extra_content = {
+            "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
+            "device_aggr": device_aggr,
+            "device_visual": ReportOverviewHelper.plot_piechart_visual(device_aggr, pie_chart_attrs),
+            "report_last_run": report_last_run,
+        }
+        self.extra_content = {
+            "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
+            "device_aggr": device_aggr,
+            "device_visual": ReportOverviewHelper.plot_piechart_visual(device_aggr, pie_chart_attrs),
+            "report_last_run": report_last_run,
+        }
+
+    def get_global_aggr(self, request):
+        """Get device and inventory global reports.
+
+        Returns:
+            device_aggr: device global report dict
+        """
+        device_qs = models.DeviceHardwareNoticeResult.objects
+
+        device_aggr = {}
+        if self.filterset is not None:
+            device_aggr = self.filterset(request.GET, device_qs).qs.aggregate(
+                total=Count("device"),
+                valid=Count("device", filter=Q(is_supported=True)),
+                invalid=Count("device", filter=Q(is_supported=False)),
+                # support_unkonwn=Count("device", filter=Q(is_supported__isnull=True)),
+            )
+
+            device_aggr["name"] = "Devices"
+
+        return ReportOverviewHelper.calculate_aggr_percentage(device_aggr)
+
+    def extra_context(self):
+        """Extra content method on."""
+        # add global aggregations to extra context.
+
+        return self.extra_content
+
+    def queryset_to_csv(self):
+        """Export queryset of objects as comma-separated value (CSV)."""
+        csv_data = []
+
+        csv_data.append(",".join(["Type", "Total", "Valid", "Invalid", "No Software", "Compliance"]))
+        csv_data.append(
+            ",".join(
+                ["Devices"]
+                + [
+                    f"{str(val)} %" if key == "valid_percent" else str(val)
+                    for key, val in self.extra_content["device_aggr"].items()
+                    if key != "name"
+                ]
+            )
+        )
+        csv_data.append(",".join([]))
+
+        qs = self.queryset.values(  # pylint: disable=invalid-name
+            "device__device_type__model", "total", "valid", "invalid", "no_software", "valid_percent"
+        )
+        csv_data.append(
+            ",".join(
+                [
+                    "Device Model" if item == "device__device_type__model" else item.replace("_", " ").title()
+                    for item in qs[0].keys()
+                ]
+            )
+        )
+        for obj in qs:
+            csv_data.append(
+                ",".join([f"{str(val)} %" if key == "valid_percent" else str(val) for key, val in obj.items()])
+            )
+
+        return "\n".join(csv_data)
+
+
 class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
     """View for executive report on software Validation."""
 
@@ -387,6 +526,17 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
             )
 
         return "\n".join(csv_data)
+
+
+class DeviceHardwareNoticeResultListView(generic.ObjectListView):
+    """DeviceHardwareNoticeResultListView List view."""
+
+    queryset = models.DeviceHardwareNoticeResult.objects.all()
+    filterset = filters.DeviceHardwareNoticeResultFilterSet
+    filterset_form = forms.DeviceHardwareNoticeResultFilterForm
+    table = tables.DeviceHardwareNoticeResultListTable
+    action_buttons = ("export",)
+    template_name = "nautobot_device_lifecycle_mgmt/deviceshardwarenoticeresult_list.html"
 
 
 class DeviceSoftwareValidationResultListView(generic.ObjectListView):

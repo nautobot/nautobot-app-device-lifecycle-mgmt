@@ -13,6 +13,7 @@ from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
+    DeviceHardwareNoticeResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -217,6 +218,112 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         inventory_item = inventory_items.first()
 
         return ValidatedSoftwareLCM.objects.get_for_object(inventory_item)
+
+
+class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):
+    """Filter for DeviceHardwareNoticeResult."""
+
+    supported = django_filters.BooleanFilter(
+        label="Supported",
+        field_name="is_supported",
+    )
+    platform = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__platform",
+        queryset=Platform.objects.all(),
+        label="Platform",
+    )
+    location_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__location",
+        queryset=Location.objects.all(),
+        label="Location",
+    )
+    location = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__location__name",
+        queryset=Location.objects.all(),
+        to_field_name="name",
+        label="Location (name)",
+    )
+    device_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device",
+        queryset=Device.objects.all(),
+        label="Device",
+    )
+    device = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__name",
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        label="Device (name)",
+    )
+    device_type_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__device_type",
+        queryset=DeviceType.objects.all(),
+        label="Device Type",
+    )
+    device_type = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__device_type__model",
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        label="Device Type (model)",
+    )
+    device_role_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__role",
+        queryset=Role.objects.all(),
+        label="Device Role",
+    )
+    device_role = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__role__name",
+        queryset=Role.objects.all(),
+        to_field_name="name",
+        label="Device Role (name)",
+    )
+    manufacturer_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__device_type__manufacturer",
+        queryset=Role.objects.all(),
+        label="Manufacturer",
+    )
+    manufacturer = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__device_type__manufacturer__name",
+        queryset=Manufacturer.objects.all(),
+        to_field_name="name",
+        label="Manufacturer (name)",
+    )
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = DeviceHardwareNoticeResult
+
+        fields = [
+            "supported",
+            "platform",
+            "location",
+            "device",
+            "device_type",
+            "device_role",
+            # "exclude_sw_missing",
+            # "sw_missing_only",
+        ]
+
+    # def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    #     """Perform the filtered search."""
+    #     if not value.strip():
+    #         return queryset
+    #     qs_filter = Q(device__name__icontains=value) | Q(software__version__icontains=value)
+    #     return queryset.filter(qs_filter)
+
+    # def _exclude_sw_missing(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    #     """Exclude devices with missing software."""
+    #     if value:
+    #         return queryset.filter(~Q(software=None))
+
+    #     return queryset
+
+    # def _sw_missing_only(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    #     """Only show devices with missing software."""
+    #     if value:
+    #         return queryset.filter(Q(software=None))
+
+    # return queryset
 
 
 class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
@@ -508,7 +615,7 @@ class ContractLCMFilterSet(NautobotFilterSet):
     def _expired_search(self, queryset, name, value):
         """Perform the filtered search."""
         today = datetime.datetime.today().date()
-        lookup = "gt" if not value else "lte"
+        lookup = "gte" if not value else "lt"
 
         qs_filter = Q(**{f"end__{lookup}": today})
         return queryset.filter(qs_filter)

@@ -30,6 +30,7 @@ from nautobot_device_lifecycle_mgmt.choices import (
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
+    DeviceHardwareNoticeResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -259,6 +260,61 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
             "valid",
             "start_before",
             "start_after",
+        ]
+
+
+class DeviceHardwareNoticeResultFilterForm(NautobotFilterForm):
+    """Filter form to filter searches for DeviceHardwareNoticeResult."""
+
+    model = DeviceHardwareNoticeResult
+    supported = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Supported",
+    )
+    platform = DynamicModelMultipleChoiceField(
+        queryset=Platform.objects.all(),
+        label="Platform",
+        required=False,
+    )
+    location = DynamicModelMultipleChoiceField(
+        queryset=Location.objects.all(),
+        query_params={"content_type": "dcim.device"},
+        to_field_name="name",
+        required=False,
+    )
+    device = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
+    device_type = DynamicModelMultipleChoiceField(
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        required=False,
+    )
+    device_role = DynamicModelMultipleChoiceField(
+        queryset=Role.objects.all(), query_params={"content_types": "dcim.device"}, to_field_name="name", required=False
+    )
+    manufacturer = DynamicModelMultipleChoiceField(
+        queryset=Manufacturer.objects.all(), to_field_name="name", required=False
+    )
+
+    class Meta:
+        """Meta attributes."""
+
+        model = DeviceSoftwareValidationResult
+        fields = [
+            "q",
+            "supported",
+            "platform",
+            "location",
+            "device",
+            "device_type",
+            "device_role",
+            "manufacturer",
+            # "exclude_sw_missing",
+            # "sw_missing_only",
         ]
 
 

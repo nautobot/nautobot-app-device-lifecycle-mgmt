@@ -170,6 +170,20 @@ menu_items = (
                 weight=100,
                 items=(
                     NavMenuItem(
+                        link="plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report",
+                        name="Device Hardware Notices - Report",
+                        permissions=[
+                            "nautobot_device_lifecycle_mgmt.view_hardwarelcm",
+                        ],
+                    ),
+                    NavMenuItem(
+                        link="plugins:nautobot_device_lifecycle_mgmt:devicehardwarenoticeresult_list",
+                        name="Device Hardware Notices - List",
+                        permissions=[
+                            "nautobot_device_lifecycle_mgmt.view_hardwarelcm",
+                        ],
+                    ),
+                    NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
                         name="Device Software Validation - Report",
                         permissions=[
