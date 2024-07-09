@@ -346,6 +346,8 @@ class ContractLCMTable(BaseTable):
     cost = tables.TemplateColumn(
         template_code="""{{ record.cost }}{% if record.currency %} {{ record.currency }}{% endif %}"""
     )
+    active = BooleanColumn(verbose_name="Active", orderable=False)
+    expired = BooleanColumn(verbose_name="Expired", orderable=False)
     actions = ButtonsColumn(ContractLCM, buttons=("changelog", "edit", "delete"))
 
     class Meta(BaseTable.Meta):
@@ -362,6 +364,21 @@ class ContractLCMTable(BaseTable):
             "contract_type",
             "devices",
             "provider",
+            "expired",
+            "active",
+            "actions",
+        )
+
+        default_columns = (
+            "name",
+            "start",
+            "end",
+            "cost",
+            "support_level",
+            "contract_type",
+            "devices",
+            "provider",
+            "active",
             "actions",
         )
 

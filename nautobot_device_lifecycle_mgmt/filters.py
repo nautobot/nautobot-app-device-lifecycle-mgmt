@@ -508,7 +508,7 @@ class ContractLCMFilterSet(NautobotFilterSet):
     def _expired_search(self, queryset, name, value):
         """Perform the filtered search."""
         today = datetime.datetime.today().date()
-        lookup = "gte" if not value else "lt"
+        lookup = "gt" if not value else "lte"
 
         qs_filter = Q(**{f"end__{lookup}": today})
         return queryset.filter(qs_filter)

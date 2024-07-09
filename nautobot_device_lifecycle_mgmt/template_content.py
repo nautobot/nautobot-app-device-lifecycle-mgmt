@@ -158,7 +158,9 @@ class DeviceContractLCM(
     def __init__(self, context):
         """Init setting up the ContractLCM object."""
         super().__init__(context)
-        self.device_contracts = ContractLCM.objects.get_for_object(self.context["object"]).order_by("end")
+        self.device_contracts = (
+            ContractLCM.objects.get_for_object(self.context["object"]).order_by("name").order_by("-end")[:5]
+        )
         self.device_contracts_table = ContractLCMTable(
             list(self.device_contracts),
             orderable=False,
@@ -178,7 +180,6 @@ class DeviceContractLCM(
         extra_context = {
             "contracts_table": self.device_contracts_table,
         }
-
         return self.render(
             "nautobot_device_lifecycle_mgmt/inc/contract_info.html",
             extra_context=extra_context,

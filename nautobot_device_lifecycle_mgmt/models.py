@@ -363,7 +363,14 @@ class ContractLCM(PrimaryModel):
         """Return True or False if chosen field is expired."""
         if not self.end:
             return False
-        return datetime.today().date() >= self.end
+        return datetime.today().date() > self.end
+
+    @property
+    def active(self):
+        """Return True or False if chosen field is active."""
+        if not self.end:
+            return True
+        return datetime.today().date() <= self.end
 
     def save(self, *args, **kwargs):
         """Override save to assert a full clean."""
