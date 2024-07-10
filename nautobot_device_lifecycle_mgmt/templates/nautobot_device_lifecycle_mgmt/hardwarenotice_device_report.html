@@ -60,17 +60,15 @@
                             </a>
                         </td>
                         <td>
-                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-hardware-notice-result/">
-                                {% if device_aggr.total is not None %} {{ device_aggr.total }} {% else %} -- {% endif %}
-                            </a>
+                            {% if device_aggr.total is not None %} {{ device_aggr.total }} {% else %} -- {% endif %}
                         </td>
                         <td>
-                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-hardware-notice-result/?&valid=True">
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-hardware-notice-result/?&supported=True">
                                 {% if device_aggr.valid is not None %} {{ device_aggr.valid }} {% else %} -- {% endif %}
                             </a>
                         </td>
                         <td>
-                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-hardware-notice-result/?&valid=False">
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-hardware-notice-result/?&supported=False">
                                 {% if device_aggr.invalid is not None %} {{ device_aggr.invalid }} {% else %} -- {% endif %}
                             </a>
                         </td>

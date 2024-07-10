@@ -14,6 +14,7 @@ from nautobot.apps.views import NautobotUIViewSet
 from nautobot.core.views import generic
 from nautobot.core.views.mixins import ContentTypePermissionRequiredMixin
 from nautobot.dcim.models import Device
+from nautobot.apps.choices import ColorChoices
 
 from nautobot_device_lifecycle_mgmt import choices, filters, forms, models, tables
 from nautobot_device_lifecycle_mgmt.api import serializers
@@ -25,7 +26,7 @@ logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 # ---------------------------------------------------------------------------------
 #  Hardware Lifecycle Management Views
 # ---------------------------------------------------------------------------------
-GREEN, RED, GREY = ("#D5E8D4", "#F8CECC", "#808080")
+GREEN, RED, GREY = (f"#{ColorChoices.COLOR_LIGHT_GREEN}", f"#{ColorChoices.COLOR_RED}", f"#{ColorChoices.COLOR_GREY}")
 
 
 class HardwareLCMUIViewSet(NautobotUIViewSet):
@@ -139,7 +140,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
     def url_encode_figure(figure):
         """Save graph into string buffer and convert 64 bit code into image."""
         buf = io.BytesIO()
-        figure.savefig(buf, format="png")
+        figure.savefig(buf, format="png", bbox_inches="tight")
         buf.seek(0)
         string = base64.b64encode(buf.read())
 
@@ -254,6 +255,48 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
             aggr["valid_percent"] = 0
         return aggr
 
+    @staticmethod
+    def plot_barchart_visual__hardware_notice(qs, chart_attrs):
+        """Construct report visual from queryset."""
+        barchart_bar_width_min = 0.5
+        barchart_bar_width = max(barchart_bar_width_min, PLUGIN_CFG["barchart_bar_width"])
+        barchart_width = PLUGIN_CFG["barchart_width"]
+        barchart_height_calc = (qs.count()) * (barchart_bar_width * 0.75)
+        barchart_height = max(barchart_height_calc, PLUGIN_CFG["barchart_height"])
+
+        device_types = []
+        device_counts = []
+        bar_colors = []
+
+        for device_type in qs:
+            if device_type["valid"] > 0:
+                device_types.append(device_type[chart_attrs["label_accessor"]])
+                device_counts.append(device_type["valid"])
+                bar_colors.append(GREEN)
+            elif device_type["invalid"] > 0:
+                device_types.append(device_type[chart_attrs["label_accessor"]])
+                device_counts.append(device_type["invalid"])
+                bar_colors.append(RED)
+            else:
+                continue
+
+        # If no device types are returned by the filter, use None as a defult label
+        if not device_types:
+            device_types = ["None"]
+            device_counts = [0]
+            bar_colors = [RED]
+
+        fig, axis = plt.subplots(figsize=(barchart_width, barchart_height))
+        axis.barh(device_types, device_counts, color=bar_colors)
+        axis.set_xlabel(chart_attrs["xlabel"])
+        axis.set_title(chart_attrs["title"])
+        axis.margins(
+            0.1, barchart_height / ((qs.count() if qs else barchart_height) * barchart_height)
+        )  # dynamic y margin based on qs counts (more results = smaller margins)
+        axis.xaxis.set_major_locator(MaxNLocator(integer=True))
+
+        return ReportOverviewHelper.url_encode_figure(fig)
+
 
 class HardwareNoticeDeviceReportView(generic.ObjectListView):
     """View for executive report on device hardware notices."""
@@ -269,7 +312,6 @@ class HardwareNoticeDeviceReportView(generic.ObjectListView):
             total=Count("device__device_type__model"),
             valid=Count("device__device_type__model", filter=Q(is_supported=True)),
             invalid=Count("device__device_type__model", filter=Q(is_supported=False)),
-            # support_unkonwn=Count("device__device_type__model", filter=Q(is_supported__isnull=True)),
             valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
         )
         .order_by("-valid_percent")
@@ -291,41 +333,34 @@ class HardwareNoticeDeviceReportView(generic.ObjectListView):
             report_last_run = None
 
         device_aggr = self.get_global_aggr(request)
-        _platform_qs = (
+        _device_type_qs = (
             models.DeviceHardwareNoticeResult.objects.values("device__device_type__model")
             .distinct()
             .annotate(
                 total=Count("device__device_type__model"),
                 valid=Count("device__device_type__model", filter=Q(is_supported=True)),
                 invalid=Count("device__device_type__model", filter=Q(is_supported=False)),
-                # support_unknown=Count("device__platform__name", filter=Q(is_supported__isnull=True)),
                 valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
             )
             .order_by("-total")
         )
-        platform_qs = self.filterset(request.GET, _platform_qs).qs
+        device_type_qs = self.filterset(request.GET, _device_type_qs).qs
         pie_chart_attrs = {
             "aggr_labels": ["valid", "invalid"],
-            "chart_labels": ["Valid", "Invalid"],
+            "chart_labels": ["Supported", "Unsupported"],
         }
         bar_chart_attrs = {
             "label_accessor": "device__device_type__model",
-            "ylabel": "Device",
+            "xlabel": "Devices",
+            "ylabel": "Device Types",
             "title": "Support per Device Type",
             "chart_bars": [
-                {"label": "Valid", "data_attr": "valid", "color": GREEN},
-                {"label": "Invalid", "data_attr": "invalid", "color": RED},
-                # {"label": "No Software", "data_attr": "no_software", "color": GREY},
+                {"label": "Supported", "data_attr": "valid", "color": GREEN},
+                {"label": "Unsupported", "data_attr": "invalid", "color": RED},
             ],
         }
         self.extra_content = {
-            "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
-            "device_aggr": device_aggr,
-            "device_visual": ReportOverviewHelper.plot_piechart_visual(device_aggr, pie_chart_attrs),
-            "report_last_run": report_last_run,
-        }
-        self.extra_content = {
-            "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
+            "bar_chart": ReportOverviewHelper.plot_barchart_visual__hardware_notice(device_type_qs, bar_chart_attrs),
             "device_aggr": device_aggr,
             "device_visual": ReportOverviewHelper.plot_piechart_visual(device_aggr, pie_chart_attrs),
             "report_last_run": report_last_run,
@@ -345,7 +380,6 @@ class HardwareNoticeDeviceReportView(generic.ObjectListView):
                 total=Count("device"),
                 valid=Count("device", filter=Q(is_supported=True)),
                 invalid=Count("device", filter=Q(is_supported=False)),
-                # support_unkonwn=Count("device", filter=Q(is_supported__isnull=True)),
             )
 
             device_aggr["name"] = "Devices"

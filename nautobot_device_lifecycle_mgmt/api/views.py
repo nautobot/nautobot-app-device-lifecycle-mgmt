@@ -5,6 +5,7 @@ from nautobot.apps.api import NautobotModelViewSet
 from nautobot_device_lifecycle_mgmt.filters import (
     ContractLCMFilterSet,
     CVELCMFilterSet,
+    DeviceHardwareNoticeResultFilterSet,
     DeviceSoftwareValidationResultFilterSet,
     HardwareLCMFilterSet,
     InventoryItemSoftwareValidationResultFilterSet,
@@ -93,7 +94,7 @@ class DeviceHardwareNoticeResultListViewSet(NautobotModelViewSet):
 
     queryset = DeviceHardwareNoticeResult.objects.all()
     serializer_class = DeviceHardwareNoticeResultSerializer
-    # filterset_class = DeviceSoftwareValidationResultFilterSet #TODO: Update this
+    filterset_class = DeviceHardwareNoticeResultFilterSet
 
     # Disabling POST as these should only be created via Job.
     http_method_names = ["get", "head", "options"]

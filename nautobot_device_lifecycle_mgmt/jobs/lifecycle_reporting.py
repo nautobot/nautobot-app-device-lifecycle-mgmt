@@ -42,30 +42,20 @@ class DeviceHardwareNoticeFullReport(Job):
             if notice.device_type:
                 devices_qs = Device.objects.filter(device_type=notice.device_type)
                 for device in devices_qs:
+                    if notice.end_of_support:
+                        is_supported = datetime.today().date() <= notice.end_of_support
+                    else:
+                        is_supported = True
                     try:
-                        DeviceHardwareNoticeResult.objects.get(
-                            device=device,
-                            last_run=job_run_time,
-                            run_type=choices.ReportRunTypeChoices.REPORT_FULL_RUN,
-                        )
-                        self.logger.warning(
-                            f"Device {device} belongs to multiple hardware notices! Only the first processed result will be used."
-                        )
-                    except ObjectDoesNotExist:
-                        if notice.end_of_support:
-                            is_supported = datetime.today().date() <= notice.end_of_support
-                        else:
-                            is_supported = True
-                        try:
-                            hardware_notice_result, _ = DeviceHardwareNoticeResult.objects.get_or_create(device=device)
-                            hardware_notice_result.hardware_notice = notice
-                            hardware_notice_result.is_supported = is_supported
-                            hardware_notice_result.last_run = job_run_time
-                            hardware_notice_result.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
-                            hardware_notice_result.validated_save()
-                            device_count += 1
-                        except Exception as err:
-                            self.logger.error(f"Error creating hadware notice result {err}")
+                        hardware_notice_result, _ = DeviceHardwareNoticeResult.objects.get_or_create(device=device)
+                        hardware_notice_result.hardware_notice = notice
+                        hardware_notice_result.is_supported = is_supported
+                        hardware_notice_result.last_run = job_run_time
+                        hardware_notice_result.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
+                        hardware_notice_result.validated_save()
+                        device_count += 1
+                    except Exception as err:
+                        self.logger.error(f"Error creating hadware notice result {err}")
                 notice_count += 1
         # Process all devices skipping devices already processed in the previous step
         for device in Device.objects.all():

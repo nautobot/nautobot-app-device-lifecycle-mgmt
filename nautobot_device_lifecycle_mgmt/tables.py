@@ -145,17 +145,13 @@ class DeviceHardwareNoticeResultTable(BaseTable):
     )
     valid = tables.TemplateColumn(
         template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/hardware-notice-device-report/'
-        '?&device_type={{ record.device__device_type__model }}&valid=True&exclude_sw_missing=True">{{ record.valid }}</a>',
+        '?&device_type={{ record.device__device_type__model }}&supported=True">{{ record.valid }}</a>',
         verbose_name="Supported",
     )
     invalid = tables.TemplateColumn(
         template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/hardware-notice-device-report/'
-        '?&device_type={{ record.device__device_type__model }}&valid=False&exclude_sw_missing=True">{{ record.invalid }}</a>',
+        '?&device_type={{ record.device__device_type__model }}&supported=False">{{ record.invalid }}</a>',
         verbose_name="Unsupported",
-    )
-    no_software = tables.TemplateColumn(
-        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/hardware-notice-device-report/'
-        '?&device_type={{ record.device__device_type__model }}&sw_missing_only=True">{{ record.no_software }}</a>'
     )
     valid_percent = PercentageColumn(accessor="valid_percent", verbose_name="Support (%)")
     actions = tables.TemplateColumn(
