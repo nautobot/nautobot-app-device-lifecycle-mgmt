@@ -321,6 +321,38 @@ class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):
         to_field_name="name",
         label="Manufacturer (name)",
     )
+    end_of_sale = SearchFilter(
+        filter_predicates={
+            "hardware_notice__end_of_sale": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+        }
+    )
+    end_of_support = SearchFilter(
+        filter_predicates={
+            "hardware_notice__end_of_support": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+        }
+    )
+    end_of_sw_releases = SearchFilter(
+        filter_predicates={
+            "hardware_notice__end_of_sw_releases": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+        }
+    )
+    end_of_security_patches = SearchFilter(
+        filter_predicates={
+            "hardware_notice__end_of_security_patches": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+        }
+    )
 
     class Meta:
         """Meta attributes for filter."""
@@ -334,30 +366,12 @@ class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):
             "device",
             "device_type",
             "device_role",
-            # "exclude_sw_missing",
-            # "sw_missing_only",
+            "manufacturer",
+            "end_of_sale",
+            "end_of_support",
+            "end_of_sw_releases",
+            "end_of_security_patches",
         ]
-
-    # def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
-    #     """Perform the filtered search."""
-    #     if not value.strip():
-    #         return queryset
-    #     qs_filter = Q(device__name__icontains=value) | Q(software__version__icontains=value)
-    #     return queryset.filter(qs_filter)
-
-    # def _exclude_sw_missing(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
-    #     """Exclude devices with missing software."""
-    #     if value:
-    #         return queryset.filter(~Q(software=None))
-
-    #     return queryset
-
-    # def _sw_missing_only(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
-    #     """Only show devices with missing software."""
-    #     if value:
-    #         return queryset.filter(Q(software=None))
-
-    # return queryset
 
 
 class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):

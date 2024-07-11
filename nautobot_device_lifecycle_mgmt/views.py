@@ -287,6 +287,11 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
             bar_colors = [RED]
 
         fig, axis = plt.subplots(figsize=(barchart_width, barchart_height))
+
+        # Add device count text to top of bars
+        for index, value in enumerate(device_counts):
+            axis.text(x=value, y=index, s=f" {str(value)}")
+
         axis.barh(device_types, device_counts, color=bar_colors)
         axis.set_xlabel(chart_attrs["xlabel"])
         axis.set_title(chart_attrs["title"])
@@ -391,41 +396,6 @@ class HardwareNoticeDeviceReportView(generic.ObjectListView):
         # add global aggregations to extra context.
 
         return self.extra_content
-
-    def queryset_to_csv(self):
-        """Export queryset of objects as comma-separated value (CSV)."""
-        csv_data = []
-
-        csv_data.append(",".join(["Type", "Total", "Valid", "Invalid", "No Software", "Compliance"]))
-        csv_data.append(
-            ",".join(
-                ["Devices"]
-                + [
-                    f"{str(val)} %" if key == "valid_percent" else str(val)
-                    for key, val in self.extra_content["device_aggr"].items()
-                    if key != "name"
-                ]
-            )
-        )
-        csv_data.append(",".join([]))
-
-        qs = self.queryset.values(  # pylint: disable=invalid-name
-            "device__device_type__model", "total", "valid", "invalid", "no_software", "valid_percent"
-        )
-        csv_data.append(
-            ",".join(
-                [
-                    "Device Model" if item == "device__device_type__model" else item.replace("_", " ").title()
-                    for item in qs[0].keys()
-                ]
-            )
-        )
-        for obj in qs:
-            csv_data.append(
-                ",".join([f"{str(val)} %" if key == "valid_percent" else str(val) for key, val in obj.items()])
-            )
-
-        return "\n".join(csv_data)
 
 
 class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
