@@ -693,7 +693,7 @@ class ContractLCMFilterSet(NautobotFilterSet):
             "tags",
         ]
 
-    def _expired_search(self, queryset, name, value):
+    def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""
         today = datetime.datetime.today().date()
         lookup = "gte" if not value else "lt"

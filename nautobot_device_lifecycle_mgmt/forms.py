@@ -307,24 +307,24 @@ class DeviceHardwareNoticeResultFilterForm(NautobotFilterForm):
         queryset=Manufacturer.objects.all(), to_field_name="name", required=False
     )
     end_of_sale = forms.CharField(
-    required=False,
-    label="End of Sale Search",
-    help_text="Search the End of Sale field",
+        required=False,
+        label="End of Sale Search",
+        help_text="Search the End of Sale field",
     )
     end_of_support = forms.CharField(
-    required=False,
-    label="End of Support Search",
-    help_text="Search the End of Support field",
+        required=False,
+        label="End of Support Search",
+        help_text="Search the End of Support field",
     )
     end_of_sw_releases = forms.CharField(
-    required=False,
-    label="End of Software Releases Search",
-    help_text="Search the End of Software Support field",
+        required=False,
+        label="End of Software Releases Search",
+        help_text="Search the End of Software Support field",
     )
     end_of_security_patches = forms.CharField(
-    required=False,
-    label="End of Security Patches Search",
-    help_text="Search the End of Security Patches field",
+        required=False,
+        label="End of Security Patches Search",
+        help_text="Search the End of Security Patches field",
     )
 
     class Meta:

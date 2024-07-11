@@ -784,7 +784,7 @@ def unittest(
 @task
 def unittest_coverage(context):
     """Report on code test coverage as measured by 'invoke unittest'."""
-    command = "coverage report --skip-covered --include 'nautobot_device_lifecycle_mgmt/*' --omit *migrations*, *test*"
+    command = "coverage report --skip-covered --include 'nautobot_device_lifecycle_mgmt/*' --omit *migrations*"
 
     run_command(context, command)
 

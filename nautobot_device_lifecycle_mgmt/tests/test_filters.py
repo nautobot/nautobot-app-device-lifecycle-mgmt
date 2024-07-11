@@ -11,6 +11,7 @@ from nautobot.extras.models import Role, Status
 from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.filters import (
     CVELCMFilterSet,
+    DeviceHardwareNoticeResultFilterSet,
     DeviceSoftwareValidationResultFilterSet,
     HardwareLCMFilterSet,
     InventoryItemSoftwareValidationResultFilterSet,
@@ -19,6 +20,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
 )
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
+    DeviceHardwareNoticeResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -461,6 +463,116 @@ class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
     def test_location(self):
         """Test location filter."""
         params = {"location": [self.location.name]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+
+class DeviceHardwareNoticeResultFilterSetTestCase(TestCase):
+    """Tests for the DeviceHardwareNoticeResultFilterSet."""
+
+    def setUp(self):
+        self.queryset = DeviceHardwareNoticeResult.objects.all()
+        self.filterset = DeviceHardwareNoticeResultFilterSet
+
+        self.manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+        self.device_type_1, _ = DeviceType.objects.get_or_create(model="c9300-24", manufacturer=self.manufacturer)
+        self.device_type_2, _ = DeviceType.objects.get_or_create(model="c9300-48", manufacturer=self.manufacturer)
+        self.devicerole_1, _ = Role.objects.get_or_create(name="switch", color="ff0000")
+        self.devicerole_1.content_types.add(ContentType.objects.get_for_model(Device))
+        self.devicerole_2, _ = Role.objects.get_or_create(name="router", color="ff0000")
+        self.devicerole_2.content_types.add(ContentType.objects.get_for_model(Device))
+        location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
+        location_type_location_a.content_types.add(
+            ContentType.objects.get_for_model(Device),
+        )
+        location_status = Status.objects.get_for_model(Location).first()
+        self.location1, _ = Location.objects.get_or_create(
+            name="Location1", location_type=location_type_location_a, status=location_status
+        )
+        device_status = Status.objects.get_for_model(Device).first()
+        self.device_1, _ = Device.objects.get_or_create(
+            name="r1",
+            device_type=self.device_type_1,
+            role=self.devicerole_1,
+            location=self.location1,
+            status=device_status,
+        )
+        self.device_2, _ = Device.objects.get_or_create(
+            name="r2",
+            device_type=self.device_type_2,
+            role=self.devicerole_2,
+            location=self.location1,
+            status=device_status,
+        )
+        self.notice_1, _ = HardwareLCM.objects.get_or_create(
+            device_type=self.device_type_1,
+            end_of_sale="2022-04-01",
+            end_of_support="2023-04-01",
+            end_of_sw_releases="2024-04-01",
+            end_of_security_patches="2025-04-01",
+            documentation_url="https://cisco.com/c9300-24",
+        )
+        self.notice_2, _ = HardwareLCM.objects.get_or_create(
+            device_type=self.device_type_2,
+            end_of_sale="2024-04-01",
+            end_of_support="2025-05-01",
+            end_of_sw_releases="2026-05-01",
+            end_of_security_patches="2027-05-01",
+            documentation_url="https://cisco.com/c9300-48",
+        )
+        DeviceHardwareNoticeResult.objects.get_or_create(
+            device=self.device_1,
+            hardware_notice=self.notice_1,
+            is_supported=True,
+        )
+        DeviceHardwareNoticeResult.objects.get_or_create(
+            device=self.device_2,
+            hardware_notice=self.notice_2,
+            is_supported=False,
+        )
+
+    def test_devices_name_one(self):
+        """Test devices filter."""
+        params = {"device": ["r1"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_devices_name_all(self):
+        """Test devices filter."""
+        params = {"device": ["r1", "r2"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_device_type_name(self):
+        """Test device_type filter."""
+        params = {"device_type": ["c9300-24"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_device_role_name(self):
+        """Test device_role filter."""
+        params = {"device_role": ["switch"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_device_type_id(self):
+        """Test device_type_id filter."""
+        params = {"device_type_id": [self.device_type_1.id]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_device_role_id(self):
+        """Test device_role_id filter."""
+        params = {"device_role_id": [self.devicerole_1.id]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_device_id_all(self):
+        """Test device_id filter."""
+        params = {"device_id": [self.device_1.id, self.device_2.id]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_location(self):
+        """Test location filter."""
+        params = {"location": [self.location1.name]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_manufacturer(self):
+        """Test location filter."""
+        params = {"manufacturer": [self.manufacturer.name]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
 
