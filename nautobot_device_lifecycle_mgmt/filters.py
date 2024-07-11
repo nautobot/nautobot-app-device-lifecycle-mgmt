@@ -48,11 +48,44 @@ class HardwareLCMFilterSet(NautobotFilterSet):
                 "lookup_expr": "icontains",
                 "preprocessor": str.strip,
             },
+            "release_date": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "end_of_sale": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "end_of_support": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "end_of_sw_releases": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "end_of_security_patches": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
         }
     )
     unsupported = django_filters.BooleanFilter(method="_expired_search", label="Unsupported")
+    device_type_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_type",
+        queryset=DeviceType.objects.all(),
+        label="Device Type",
+    )
+    device_type = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_type__model",
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        label="Device Type (model)",
+    )
 
     class Meta:
+        """Meta attributes for filter."""
+
         model = HardwareLCM
 
         fields = [
@@ -64,9 +97,10 @@ class HardwareLCMFilterSet(NautobotFilterSet):
             "end_of_support",
             "end_of_sw_releases",
             "end_of_security_patches",
+            "documentation_url",
         ]
 
-    def _expired_search(self, queryset, name, value):
+    def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""
         today = datetime.datetime.today().date()
         lookup = "gte" if not value else "lt"
@@ -592,11 +626,44 @@ class ContractLCMFilterSet(NautobotFilterSet):
                 "lookup_expr": "icontains",
                 "preprocessor": str.strip,
             },
+            "start": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "end": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "cost": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "contract_type": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "currency": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
         }
     )
     expired = django_filters.BooleanFilter(method="_expired_search", label="Expired")
+    provider_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="provider",
+        queryset=ProviderLCM.objects.all(),
+        label="Provider",
+    )
+    provider = django_filters.ModelMultipleChoiceFilter(
+        field_name="provider__name",
+        queryset=ProviderLCM.objects.all(),
+        to_field_name="name",
+        label="Provider (name)",
+    )
 
     class Meta:
+        """Meta attributes for filter."""
+
         model = ContractLCM
         fields = [
             "devices",
@@ -662,6 +729,8 @@ class ProviderLCMFilterSet(NautobotFilterSet):
     )
 
     class Meta:
+        """Meta attributes for filter."""
+
         model = ProviderLCM
 
         fields = [

@@ -132,6 +132,7 @@ class HardwareLCMFilterForm(NautobotFilterForm):
         "end_of_support",
         "end_of_sw_releases",
         "end_of_security_patches",
+        "documentation_url",
     ]
     q = forms.CharField(required=False, label="Search")
     unsupported = forms.BooleanField(
@@ -139,7 +140,12 @@ class HardwareLCMFilterForm(NautobotFilterForm):
         label="No longer sold or supported",
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
     )
-    device_type = DynamicModelMultipleChoiceField(queryset=DeviceType.objects.all(), required=False)
+    device_type = forms.ModelMultipleChoiceField(
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        required=False,
+        widget=StaticSelect2Multiple(),
+    )
     inventory_item = forms.ModelMultipleChoiceField(
         queryset=HardwareLCM.objects.filter(inventory_item__isnull=False, device_type__isnull=True)
         .exclude(inventory_item__exact="")
@@ -154,6 +160,7 @@ class HardwareLCMFilterForm(NautobotFilterForm):
     end_of_support = NullableDateField(required=False, widget=DatePicker(), label="End of support")
     end_of_sw_releases = NullableDateField(required=False, widget=DatePicker(), label="End of software releases")
     end_of_security_patches = NullableDateField(required=False, widget=DatePicker(), label="End of security patches")
+    documentation_url = forms.CharField(required=False, label="Documentation URL")
 
 
 class ValidatedSoftwareLCMForm(NautobotModelForm):
@@ -563,7 +570,12 @@ class ContractLCMFilterForm(NautobotFilterForm):
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
     )
     devices = DynamicModelMultipleChoiceField(queryset=Device.objects.all(), required=False)
-    provider = DynamicModelMultipleChoiceField(queryset=ProviderLCM.objects.all(), required=False)
+    provider = forms.ModelMultipleChoiceField(
+        queryset=ProviderLCM.objects.all(),
+        to_field_name="name",
+        required=False,
+        widget=StaticSelect2Multiple(),
+    )
     name = forms.CharField(required=False, label="Name")
     cost = forms.FloatField(required=False, label="Cost")
     start = NullableDateField(required=False, widget=DatePicker(), label="Contract Start Date")

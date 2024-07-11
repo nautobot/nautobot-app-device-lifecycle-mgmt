@@ -418,6 +418,7 @@ class ContractLCMTable(BaseTable):
     active = BooleanColumn(verbose_name="Active", orderable=False)
     expired = BooleanColumn(verbose_name="Expired", orderable=False)
     actions = ButtonsColumn(ContractLCM, buttons=("changelog", "edit", "delete"))
+    tags = TagColumn()
 
     class Meta(BaseTable.Meta):
         """Meta attributes."""
@@ -436,6 +437,7 @@ class ContractLCMTable(BaseTable):
             "expired",
             "active",
             "actions",
+            "tags",
         )
 
         default_columns = (

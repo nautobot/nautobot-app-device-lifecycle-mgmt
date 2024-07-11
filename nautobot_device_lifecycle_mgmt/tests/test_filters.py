@@ -93,8 +93,8 @@ class HardwareLCMTestCase(TestCase):
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_q_one_eo_support(self):
-        """Test q filter to find single record based on end_of_support."""
-        params = {"q": "2024"}
+        """Test q filter to find single record based on end_of_security_patches."""
+        params = {"q": "2027"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_q_both_eo_sale_support(self):
