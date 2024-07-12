@@ -26,9 +26,7 @@ class HardwareLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,t
         fields = "__all__"
 
 
-class ProviderLCMSerializer(
-    NautobotModelSerializer, TaggedModelSerializerMixin
-):  # pylint: disable=R0901,too-few-public-methods
+class ProviderLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
     class Meta:
