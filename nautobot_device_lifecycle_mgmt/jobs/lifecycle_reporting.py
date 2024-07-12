@@ -80,7 +80,7 @@ class DeviceHardwareNoticeFullReport(Job):
 
         self.logger.info(f"Processed {notice_count} hardware notices and {device_count} devices.")
 
-    # TODO: CREATE INVENTORY ITEM JOB
+    # TODO: Create Inventory Item Report job (and related table, view, forms, filters etc.)
 
 
 class DeviceSoftwareValidationFullReport(Job):
