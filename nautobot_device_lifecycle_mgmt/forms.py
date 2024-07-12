@@ -60,7 +60,7 @@ class HardwareLCMForm(NautobotModelForm):
 
     device_type = DynamicModelChoiceField(queryset=DeviceType.objects.all(), required=False)
     inventory_item = DynamicModelChoiceField(
-        queryset=InventoryItem.objects.all(),
+        queryset=InventoryItem.objects.exclude(part_id__exact=""),
         label="Inventory Part ID",
         display_field="part_id",
         to_field_name="part_id",
@@ -127,15 +127,15 @@ class HardwareLCMFilterForm(NautobotFilterForm):
         label="Search",
         help_text="Select a date that will be used to search end_of_support and end_of_sale",
     )
-    device_type = forms.ModelMultipleChoiceField(
+    device_type = DynamicModelMultipleChoiceField(
         required=False, queryset=DeviceType.objects.all(), to_field_name="model"
     )
 
-    inventory_item = forms.ModelMultipleChoiceField(
-        queryset=HardwareLCM.objects.exclude(inventory_item__isnull=True)
-        .exclude(inventory_item__exact="")
-        .values_list("inventory_item", flat=True),
+    inventory_item = DynamicModelMultipleChoiceField(
+        queryset=HardwareLCM.objects.exclude(inventory_item__isnull=True).exclude(inventory_item__exact=""),
         label="Inventory Part ID",
+        display_field="inventory_item",
+        to_field_name="inventory_item",
         required=False,
     )
 
