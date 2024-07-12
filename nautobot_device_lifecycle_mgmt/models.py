@@ -485,7 +485,7 @@ class ContractLCM(PrimaryModel):
     "relationships",
     "webhooks",
 )
-class ProviderLCM(PrimaryModel):
+class ProviderLCM(OrganizationalModel):
     """ProviderLCM model for app."""
 
     # Set model columns
