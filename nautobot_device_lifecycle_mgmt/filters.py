@@ -7,7 +7,7 @@ from django.db.models import Q
 from nautobot.apps.filters import NautobotFilterSet, SearchFilter, StatusModelFilterSetMixin
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform, SoftwareVersion
 from nautobot.extras.filters.mixins import StatusFilter
-from nautobot.extras.models import Role, Tag
+from nautobot.extras.models import Role, Status, Tag
 
 from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.models import (
@@ -288,6 +288,11 @@ class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):
         to_field_name="name",
         label="Device (name)",
     )
+    device_status = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__status",
+        queryset=Status.objects.all(),
+        label="Device Status",
+    )
     device_type_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device__device_type",
         queryset=DeviceType.objects.all(),
@@ -361,6 +366,7 @@ class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):
 
         fields = [
             "supported",
+            "device_status",
             "platform",
             "location",
             "device",

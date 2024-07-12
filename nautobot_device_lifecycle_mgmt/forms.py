@@ -295,6 +295,9 @@ class DeviceHardwareNoticeResultFilterForm(NautobotFilterForm):
         to_field_name="name",
         required=False,
     )
+    device_status = DynamicModelChoiceField(
+        queryset=Status.objects.all(), query_params={"content_types": "dcim.device"}, required=False
+    )
     device_type = DynamicModelMultipleChoiceField(
         queryset=DeviceType.objects.all(),
         to_field_name="model",
@@ -336,6 +339,7 @@ class DeviceHardwareNoticeResultFilterForm(NautobotFilterForm):
             "platform",
             "location",
             "device",
+            "device_status",
             "device_type",
             "device_role",
             "manufacturer",
