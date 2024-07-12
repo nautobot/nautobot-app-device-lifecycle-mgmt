@@ -13,6 +13,7 @@ from nautobot.extras.models import Status
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
+    DeviceHardwareNoticeResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -20,8 +21,16 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
+from nautobot_device_lifecycle_mgmt.choices import ReportRunTypeChoices
 
-from .conftest import create_cves, create_devices, create_inventory_items, create_softwares, create_validated_softwares
+from .conftest import (
+    create_cves,
+    create_devices,
+    create_inventory_items,
+    create_softwares,
+    create_validated_softwares,
+    create_device_type_hardware_notices,
+)
 
 
 class HardwareLCMTestCase(TestCase):
@@ -137,12 +146,13 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
     def setUp(self):
         """Set up base objects."""
         device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
-        software_status = Status.objects.get_for_model(SoftwareVersion).first()
+        active_status, _ = Status.objects.get_or_create(name="Active")
+        active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
         self.software = SoftwareVersion.objects.create(
             platform=device_platform,
             version="17.3.3 MD",
             release_date=date(2019, 1, 10),
-            status=software_status,
+            status=active_status,
         )
         manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
         self.device_type_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="ASR-1000")
@@ -332,6 +342,29 @@ class DeviceSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-m
         self.assertEqual(validation_result.valid_software.values()[1]["software_id"], self.software_two.id)
 
 
+class DeviceHardwareNoticeResultTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
+    """Tests for the DeviceHardwareNoticeResult model."""
+
+    def setUp(self):
+        """Set up test objects."""
+        self.devices = create_devices()
+        self.hardware_notices = create_device_type_hardware_notices()
+
+    def test_create_devicehardwarenoticeresult(self):
+        """Successfully create DeviceHardwareNoticeResult with required fields only."""
+        hw_notice_resut = DeviceHardwareNoticeResult(
+            device=self.devices[0],
+            hardware_notice=self.hardware_notices[0],
+            run_type=ReportRunTypeChoices.REPORT_FULL_RUN,
+            is_supported=True,
+        )
+        hw_notice_resut.validated_save()
+        self.assertEqual(hw_notice_resut.device, self.devices[0])
+        self.assertEqual(hw_notice_resut.hardware_notice, self.hardware_notices[0])
+        self.assertEqual(hw_notice_resut.run_type, ReportRunTypeChoices.REPORT_FULL_RUN)
+        self.assertEqual(hw_notice_resut.is_supported, True)
+
+
 class InventoryItemSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
     """Tests for the DeviceSoftwareValidationResult model."""
 
@@ -390,9 +423,10 @@ class CVELCMTestCase(TestCase):
     def setUp(self):
         """Set up the test objects."""
         self.device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
-        software_status = Status.objects.get_for_model(SoftwareVersion).first()
+        active_status, _ = Status.objects.get_or_create(name="Active")
+        active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
         self.software = SoftwareVersion.objects.create(
-            platform=self.device_platform, version="15.2(5)e", status=software_status
+            platform=self.device_platform, version="15.2(5)e", status=active_status
         )
         self.cve_ct = ContentType.objects.get_for_model(CVELCM)
         self.status, _ = Status.objects.get_or_create(name="Fixed", color="4caf50", description="Unit has been fixed")

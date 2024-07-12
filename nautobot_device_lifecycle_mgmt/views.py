@@ -10,11 +10,11 @@ import numpy as np
 from django.conf import settings
 from django.db.models import Count, ExpressionWrapper, F, FloatField, Q
 from matplotlib.ticker import MaxNLocator
+from nautobot.apps.choices import ColorChoices
 from nautobot.apps.views import NautobotUIViewSet
 from nautobot.core.views import generic
 from nautobot.core.views.mixins import ContentTypePermissionRequiredMixin
 from nautobot.dcim.models import Device
-from nautobot.apps.choices import ColorChoices
 
 from nautobot_device_lifecycle_mgmt import choices, filters, forms, models, tables
 from nautobot_device_lifecycle_mgmt.api import serializers

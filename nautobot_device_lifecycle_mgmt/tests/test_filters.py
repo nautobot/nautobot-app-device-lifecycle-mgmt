@@ -1,6 +1,6 @@
 # pylint: disable=no-member
 """Test filters for lifecycle management."""
-from datetime import date
+from datetime import date, datetime
 
 import time_machine
 from django.contrib.contenttypes.models import ContentType
@@ -8,22 +8,26 @@ from django.test import TestCase
 from nautobot.dcim.models import Device, DeviceType, Location, LocationType, Manufacturer, Platform, SoftwareVersion
 from nautobot.extras.models import Role, Status
 
-from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
+from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, CurrencyChoices, CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.filters import (
+    ContractLCMFilterSet,
     CVELCMFilterSet,
     DeviceHardwareNoticeResultFilterSet,
     DeviceSoftwareValidationResultFilterSet,
     HardwareLCMFilterSet,
     InventoryItemSoftwareValidationResultFilterSet,
+    ProviderLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
     VulnerabilityLCMFilterSet,
 )
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
+    ContractLCM,
     DeviceHardwareNoticeResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
+    ProviderLCM,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
@@ -42,6 +46,7 @@ class HardwareLCMTestCase(TestCase):
         self.device_types = (
             DeviceType.objects.get_or_create(model="c9300-24", manufacturer=self.manufacturer)[0],
             DeviceType.objects.get_or_create(model="c9300-48", manufacturer=self.manufacturer)[0],
+            DeviceType.objects.get_or_create(model="c9300-16", manufacturer=self.manufacturer)[0],
         )
         self.devicerole, _ = Role.objects.get_or_create(name="switch", color="ff0000")
         self.devicerole.content_types.add(ContentType.objects.get_for_model(Device))
@@ -49,25 +54,26 @@ class HardwareLCMTestCase(TestCase):
         location_type_location_a.content_types.add(
             ContentType.objects.get_for_model(Device),
         )
-        location_status = Status.objects.get_for_model(Location).first()
+        active_status, _ = Status.objects.get_or_create(name="Active")
+        active_status.content_types.add(ContentType.objects.get_for_model(Location))
+        active_status.content_types.add(ContentType.objects.get_for_model(Device))
         self.location1, _ = Location.objects.get_or_create(
-            name="Location1", location_type=location_type_location_a, status=location_status
+            name="Location1", location_type=location_type_location_a, status=active_status
         )
-        device_status = Status.objects.get_for_model(Device).first()
         self.devices = (
             Device.objects.create(
                 name="r1",
                 device_type=self.device_types[0],
                 role=self.devicerole,
                 location=self.location1,
-                status=device_status,
+                status=active_status,
             ),
             Device.objects.create(
                 name="r2",
                 device_type=self.device_types[1],
                 role=self.devicerole,
                 location=self.location1,
-                status=device_status,
+                status=active_status,
             ),
         )
         self.notices = (
@@ -159,6 +165,290 @@ class HardwareLCMTestCase(TestCase):
         params = {"device_id": [self.devices[0].id, self.devices[1].id]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
+    def test_expired_search(self):
+        """Test returned devices are either end of sale or end of support."""
+        test_year = datetime.today().year
+        test_month = datetime.today().month
+        test_day = datetime.today().day + 1
+
+        HardwareLCM.objects.get_or_create(
+            device_type=self.device_types[2],
+            end_of_sale=f"{test_year}-{test_month}-{test_day}",
+            end_of_support=f"{test_year}-{test_month}-{test_day}",
+        )
+        params = {"unsupported": True}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+
+class ContractLCMTestCase(TestCase):
+    """Tests for ContractLCMFilter."""
+
+    queryset = ContractLCM.objects.all()
+    filterset = ContractLCMFilterSet
+
+    def setUp(self):
+        self.manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+        self.device_types = (
+            DeviceType.objects.get_or_create(model="c9300-24", manufacturer=self.manufacturer)[0],
+            DeviceType.objects.get_or_create(model="c9300-48", manufacturer=self.manufacturer)[0],
+            DeviceType.objects.get_or_create(model="c9300-16", manufacturer=self.manufacturer)[0],
+        )
+        self.devicerole, _ = Role.objects.get_or_create(name="switch", color="ff0000")
+        self.devicerole.content_types.add(ContentType.objects.get_for_model(Device))
+        location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
+        location_type_location_a.content_types.add(
+            ContentType.objects.get_for_model(Device),
+        )
+        active_status, _ = Status.objects.get_or_create(name="Active")
+        active_status.content_types.add(ContentType.objects.get_for_model(Location))
+        active_status.content_types.add(ContentType.objects.get_for_model(Device))
+        self.location1, _ = Location.objects.get_or_create(
+            name="Location1", location_type=location_type_location_a, status=active_status
+        )
+        self.devices = (
+            Device.objects.get_or_create(
+                name="r1",
+                device_type=self.device_types[0],
+                role=self.devicerole,
+                location=self.location1,
+                status=active_status,
+            )[0],
+            Device.objects.get_or_create(
+                name="r2",
+                device_type=self.device_types[1],
+                role=self.devicerole,
+                location=self.location1,
+                status=active_status,
+            )[0],
+        )
+        self.providers = (
+            ProviderLCM.objects.get_or_create(
+                name="Test Vendor 1",
+                description="this vendor supplies routers",
+                physical_address="123 vendor 1 street",
+                country="USA",
+                phone="123-4567",
+                email="vendor1@email.com",
+                portal_url="https://vendor1.portal.net",
+                comments="123-abc unique comment about vendor 1",
+            )[0],
+            ProviderLCM.objects.get_or_create(
+                name="Test Vendor 2",
+                description="this vendor supplies switches",
+                physical_address="ABC vendor 2 street",
+                country="CAN",
+                phone="555-1234",
+                email="vendor2@email.com",
+                portal_url="https://vendor2.portal.net",
+                comments="456-xyz unique comment about vendor 2",
+            )[0],
+        )
+        self.contracts = (
+            ContractLCM.objects.get_or_create(
+                provider=self.providers[0],
+                name="Contract 123456789-A",
+                number=123456789 - 111,
+                start="2020-01-01",
+                end="2020-12-31",
+                cost=100,
+                support_level="high",
+                currency=CurrencyChoices.USD,
+                contract_type=ContractTypeChoices.HARDWARE,
+                comments="ABCDEF-A unique comment about contract 1",
+            )[0],
+            ContractLCM.objects.get_or_create(
+                provider=self.providers[1],
+                name="Contract 987654321-Z",
+                number=987654321 - 222,
+                start="2022-02-01",
+                end="2023-01-31",
+                cost=200,
+                support_level="low",
+                currency=CurrencyChoices.CAD,
+                contract_type=ContractTypeChoices.SOFTWARE,
+                comments="FEDCBA-Z unique comment about contract 1",
+            )[0],
+        )
+        self.contracts[0].devices.add(self.devices[0])
+        self.contracts[0].save()
+        self.contracts[1].devices.add(self.devices[1])
+        self.contracts[1].save()
+
+    def test_q_name(self):
+        """Test q filter to find single record based on name."""
+        params = {"q": "123456789-A"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_number(self):
+        """Test q filter to find single record based on number"""
+        params = {"q": 123456789 - 111}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_devices_one(self):
+        """Test devices filter to find single record based on device id"""
+        params = {"devices": [self.devices[0].id]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_devices_two(self):
+        """Test devices filter to find multiple records based on device id"""
+        params = {"devices": [self.devices[0].id, self.devices[1].id]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_provider_one(self):
+        """Test providers filter to find single record based on provider id"""
+        params = {"provider": ["Test Vendor 1"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_provider_two(self):
+        """Test providers filter to find multiple records based on provider id"""
+        params = {"provider": ["Test Vendor 1", "Test Vendor 2"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_name(self):
+        """Test name filter."""
+        params = {"name": "Contract 123456789-A"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_start(self):
+        """Test start filter."""
+        params = {"start": "2020-01-01"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_end(self):
+        """Test end filter."""
+        params = {"end": "2020-12-31"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_cost(self):
+        """Test cost filter."""
+        params = {"cost": 100}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_support_level(self):
+        """Test support level filter."""
+        params = {"support_level": "high"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_contract_type(self):
+        """Test contract type filter."""
+        params = {"contract_type": "Hardware"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_expired(self):
+        """Test exipired filter."""
+        test_year = datetime.today().year
+        test_month = datetime.today().month
+        test_day = datetime.today().day + 1
+
+        ContractLCM.objects.get_or_create(
+            provider=self.providers[0],
+            name="Contract is Valid",
+            number=123,
+            start="2019-01-01",
+            end=f"{test_year}-{test_month}-{test_day}",
+            comments="Contract is Valid",
+        )
+        params = {"expired": True}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+
+class ProviderLCMTestCase(TestCase):
+    """Tests for ProviderLCMFilter."""
+
+    queryset = ProviderLCM.objects.all()
+    filterset = ProviderLCMFilterSet
+
+    def setUp(self):
+        self.providers = (
+            ProviderLCM.objects.get_or_create(
+                name="Test Vendor 1",
+                description="this vendor supplies routers",
+                physical_address="123 vendor 1 street",
+                country="USA",
+                phone="123-4567",
+                email="vendor1@email.com",
+                portal_url="https://vendor1.portal.net",
+                comments="123-abc unique comment about vendor 1",
+            )[0],
+            ProviderLCM.objects.get_or_create(
+                name="Test Vendor 2",
+                description="this vendor supplies switches",
+                physical_address="ABC vendor 2 street",
+                country="CAN",
+                phone="555-1234",
+                email="vendor2@email.com",
+                portal_url="https://vendor2.portal.net",
+                comments="456-xyz unique comment about vendor 2",
+            )[0],
+        )
+
+    def test_q_name(self):
+        """Test q filter to find single record based on name."""
+        params = {"q": "Test Vendor 1"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_description(self):
+        """Test q filter to find single record based on description"""
+        params = {"q": "routers"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_physical_address(self):
+        """Test q filter to find single record based on physical address"""
+        params = {"q": "123 vendor 1"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_country(self):
+        """Test q filter to find single record based on country"""
+        params = {"q": "USA"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_phone(self):
+        """Test q filter to find single record based on phone"""
+        params = {"q": "123-4567"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_email(self):
+        """Test q filter to find single record based on email"""
+        params = {"q": "vendor1@"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_comments(self):
+        """Test q filter to find single record based on comments"""
+        params = {"q": "123-abc"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_q_portal_url(self):
+        """Test q filter to find single record based on portal_url"""
+        params = {"q": "vendor2.portal.net"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_name(self):
+        """Test name filter."""
+        params = {"name": "Test Vendor 2"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_country(self):
+        """Test country filter."""
+        params = {"country": "USA"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_phone(self):
+        """Test phone filter."""
+        params = {"phone": "555-1234"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_email(self):
+        """Test email filter."""
+        params = {
+            "email": "vendor1@email.com",
+        }
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_portal_url(self):
+        """Test portal url filter."""
+        params = {"portal_url": "https://vendor1.portal.net"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
 
 class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
     """Tests for ValidatedSoftwareLCMFilterSet."""
@@ -174,19 +464,20 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
             Platform.objects.get_or_create(name="arista_eos")[0],
         )
 
-        software_status = Status.objects.get_for_model(SoftwareVersion).first()
+        active_status, _ = Status.objects.get_or_create(name="Active")
+        active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
         self.softwares = (
             SoftwareVersion.objects.create(
                 platform=device_platforms[0],
                 version="17.3.3 MD",
                 release_date="2019-01-10",
-                status=software_status,
+                status=active_status,
             ),
             SoftwareVersion.objects.create(
                 platform=device_platforms[1],
                 version="4.25M",
                 release_date="2021-01-10",
-                status=software_status,
+                status=active_status,
             ),
         )
 
@@ -281,12 +572,13 @@ class DeviceSoftwareValidationResultFilterSetTestCase(TestCase):
         self.device_1, self.device_2, self.device_3 = create_devices()
         self.location = self.device_1.location
         self.platform = Platform.objects.all().first()
-        software_status = Status.objects.get_for_model(SoftwareVersion).first()
+        active_status, _ = Status.objects.get_or_create(name="Active")
+        active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
         self.software = SoftwareVersion.objects.create(
             platform=self.platform,
             version="17.3.3 MD",
             release_date="2019-01-10",
-            status=software_status,
+            status=active_status,
         )
 
         DeviceSoftwareValidationResult.objects.create(
@@ -379,12 +671,13 @@ class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
         self.inventory_items = create_inventory_items()
         self.location = self.inventory_items[0].device.location
         self.platform = Platform.objects.all().first()
-        software_status = Status.objects.get_for_model(SoftwareVersion).first()
+        active_status, _ = Status.objects.get_or_create(name="Active")
+        active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
         self.software = SoftwareVersion.objects.create(
             platform=self.platform,
             version="17.3.3 MD",
             release_date="2019-01-10",
-            status=software_status,
+            status=active_status,
         )
 
         InventoryItemSoftwareValidationResult.objects.create(
@@ -466,13 +759,13 @@ class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
 
-class DeviceHardwareNoticeResultFilterSetTestCase(TestCase):
+class DeviceHardwareNoticeResultFilterSetTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
     """Tests for the DeviceHardwareNoticeResultFilterSet."""
 
-    def setUp(self):
-        self.queryset = DeviceHardwareNoticeResult.objects.all()
-        self.filterset = DeviceHardwareNoticeResultFilterSet
+    queryset = DeviceHardwareNoticeResult.objects.all()
+    filterset = DeviceHardwareNoticeResultFilterSet
 
+    def setUp(self):
         self.manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
         self.device_type_1, _ = DeviceType.objects.get_or_create(model="c9300-24", manufacturer=self.manufacturer)
         self.device_type_2, _ = DeviceType.objects.get_or_create(model="c9300-48", manufacturer=self.manufacturer)
@@ -484,24 +777,25 @@ class DeviceHardwareNoticeResultFilterSetTestCase(TestCase):
         location_type_location_a.content_types.add(
             ContentType.objects.get_for_model(Device),
         )
-        location_status = Status.objects.get_for_model(Location).first()
+        active_status, _ = Status.objects.get_or_create(name="Active")
+        active_status.content_types.add(ContentType.objects.get_for_model(Location))
+        active_status.content_types.add(ContentType.objects.get_for_model(Device))
         self.location1, _ = Location.objects.get_or_create(
-            name="Location1", location_type=location_type_location_a, status=location_status
+            name="Location1", location_type=location_type_location_a, status=active_status
         )
-        device_status = Status.objects.get_for_model(Device).first()
         self.device_1, _ = Device.objects.get_or_create(
             name="r1",
             device_type=self.device_type_1,
             role=self.devicerole_1,
             location=self.location1,
-            status=device_status,
+            status=active_status,
         )
         self.device_2, _ = Device.objects.get_or_create(
             name="r2",
             device_type=self.device_type_2,
             role=self.devicerole_2,
             location=self.location1,
-            status=device_status,
+            status=active_status,
         )
         self.notice_1, _ = HardwareLCM.objects.get_or_create(
             device_type=self.device_type_1,
@@ -571,9 +865,29 @@ class DeviceHardwareNoticeResultFilterSetTestCase(TestCase):
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
     def test_manufacturer(self):
-        """Test location filter."""
+        """Test manufacturer filter."""
         params = {"manufacturer": [self.manufacturer.name]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_end_of_sale_search(self):
+        """Test searching for a string within the end of sale field."""
+        params = {"end_of_sale": "2022-04-01"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_end_of_support_search(self):
+        """Test searching for a string within the end of support field."""
+        params = {"end_of_support": "2025-05-01"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_end_of_sw_releases_search(self):
+        """Test searching for a string within the end of software releases field."""
+        params = {"end_of_sw_releases": "2024-04-01"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_end_of_security_patches_search(self):
+        """Test searching for a string within the end of security patches field."""
+        params = {"end_of_security_patches": "2027-05-01"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
 
 class CVELCMTestCase(TestCase):

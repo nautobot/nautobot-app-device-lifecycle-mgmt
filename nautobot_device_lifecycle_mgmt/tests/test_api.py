@@ -203,7 +203,10 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
     def setUpTestData(cls):  # pylint: disable=invalid-name
         """Create a superuser and token for API calls."""
         device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
-        software_status = Status.objects.get_for_model(SoftwareVersion).first()
+        active_status, _ = Status.objects.get_or_create(name="Active")
+        active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
+        active_status.content_types.add(ContentType.objects.get_for_model(Location))
+        active_status.content_types.add(ContentType.objects.get_for_model(Device))
         softwares = (
             SoftwareVersion.objects.create(
                 **{
@@ -214,7 +217,7 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
                     "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
                     "long_term_support": True,
                     "pre_release": False,
-                    "status": software_status,
+                    "status": active_status,
                 }
             ),
             SoftwareVersion.objects.create(
@@ -226,7 +229,7 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
                     "documentation_url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst6500/ios/15-1SY/config_guide/sup2T/15_1_sy_swcg_2T/cef.html",
                     "long_term_support": False,
                     "pre_release": True,
-                    "status": software_status,
+                    "status": active_status,
                 }
             ),
         )
@@ -236,9 +239,8 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
         location_type_location_a.content_types.add(
             ContentType.objects.get_for_model(Device),
         )
-        location_status = Status.objects.get_for_model(Location).first()
         location1, _ = Location.objects.get_or_create(
-            name="Location1", location_type=location_type_location_a, status=location_status
+            name="Location1", location_type=location_type_location_a, status=active_status
         )
         deviceroles = (
             Role.objects.get_or_create(name="router", color="ff0000")[0],
@@ -250,21 +252,20 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             DeviceType.objects.create(manufacturer=manufacturer, model="ASR-1000"),
             DeviceType.objects.create(manufacturer=manufacturer, model="Catalyst 6500"),
         )
-        device_status = Status.objects.get_for_model(Device).first()
         devices = (
             Device.objects.create(
                 device_type=devicetypes[0],
                 role=deviceroles[0],
                 name="Device 1",
                 location=location1,
-                status=device_status,
+                status=active_status,
             ),
             Device.objects.create(
                 device_type=devicetypes[1],
                 role=deviceroles[1],
                 name="Device 2",
                 location=location1,
-                status=device_status,
+                status=active_status,
             ),
         )
         inventoryitems = (
