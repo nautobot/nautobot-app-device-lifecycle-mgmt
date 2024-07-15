@@ -56,6 +56,8 @@ mkdocs-material = "~9.1.15"
 mkdocstrings = "~0.24.1"
 # Python-specific extension to mkdocstrings
 mkdocstrings-python = "~1.9.0"
+# Render custom markdown for version added/changed/remove notes
+mkdocs-version-annotations = "1.0.0"
 sentry-sdk = "*"
 time-machine = "*"
 towncrier = "~23.6.0"
