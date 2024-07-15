@@ -256,7 +256,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
         return aggr
 
     @staticmethod
-    def plot_barchart_visual__hardware_notice(qs, chart_attrs):
+    def plot_barchart_visual__hardware_notice(qs, chart_attrs):  # pylint: disable=too-many-locals
         """Construct report visual from queryset."""
         barchart_bar_width_min = 0.5
         barchart_bar_width = max(barchart_bar_width_min, PLUGIN_CFG["barchart_bar_width"])

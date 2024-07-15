@@ -49,14 +49,13 @@ yamllint = "*"
 toml = "*"
 Markdown = "*"
 # Rendering docs to HTML
-mkdocs = "1.5.2"
+mkdocs = "~1.6.0"
 # Material for MkDocs theme
-mkdocs-material = "9.1.15"
-# Render custom markdown for version added/changed/remove notes
-mkdocs-version-annotations = "1.0.0"
+mkdocs-material = "~9.1.15"
 # Automatic documentation from sources, for MkDocs
-mkdocstrings = "0.22.0"
-mkdocstrings-python = "1.5.2"
+mkdocstrings = "~0.24.1"
+# Python-specific extension to mkdocstrings
+mkdocstrings-python = "~1.9.0"
 sentry-sdk = "*"
 time-machine = "*"
 towncrier = "~23.6.0"
