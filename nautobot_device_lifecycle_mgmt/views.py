@@ -302,7 +302,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
 
         legend_colors = {"supported": GREEN, "unsuported": RED}
         legend_labels = list(legend_colors.keys())
-        legend_handles = [plt.Rectangle((0,0),1,1, color=legend_colors[label]) for label in legend_labels]
+        legend_handles = [plt.Rectangle((0, 0), 1, 1, color=legend_colors[label]) for label in legend_labels]
         plt.legend(legend_handles, legend_labels)
 
         return ReportOverviewHelper.url_encode_figure(fig)
