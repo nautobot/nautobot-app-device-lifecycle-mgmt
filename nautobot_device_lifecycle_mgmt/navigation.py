@@ -171,14 +171,14 @@ menu_items = (
                 items=(
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report",
-                        name="Device Hardware Notices - Report",
+                        name="Device Hardware Notice - Report",
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_hardwarelcm",
                         ],
                     ),
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:devicehardwarenoticeresult_list",
-                        name="Device Hardware Notices - List",
+                        name="Device Hardware Notice - List",
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_hardwarelcm",
                         ],
