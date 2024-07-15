@@ -821,9 +821,8 @@ def tests(context, failfast=False, keepdb=False, lint_only=False):
     pylint(context)
     print("Running mkdocs...")
     build_and_check_docs(context)
-    # TODO: Re-enable this
-    # print("Checking app config schema...")
-    # validate_app_config(context)
+    print("Checking app config schema...")
+    validate_app_config(context)
     if not lint_only:
         print("Running unit tests...")
         unittest(context, failfast=failfast, keepdb=keepdb)
