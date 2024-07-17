@@ -7,7 +7,7 @@ from nautobot.apps.filters import FilterExtension
 def distinct_filter(queryset, _, value):
     """Returns distinct Inventory Items by part_id."""
     if value:
-        return queryset.exclude(part_id__exact="").without_tree_fields().order_by().distinct("part_id")
+        return queryset.without_tree_fields().order_by().distinct("part_id")
     return queryset
 
 

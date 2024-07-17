@@ -7,6 +7,7 @@ from nautobot.apps.forms import (
     add_blank_choice,
     DatePicker,
     DynamicModelChoiceField,
+    DynamicModelChoiceMixin,
     DynamicModelMultipleChoiceField,
     NautobotBulkEditForm,
     NautobotModelForm,
@@ -55,13 +56,25 @@ class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):
         return super().prepare_value(pk_list)
 
 
+class HardwareLCMDynamicModelChoiceField(DynamicModelChoiceMixin, forms.ModelChoiceField):
+    """DynamicModelChoiceField used for 'inventory_item' field in HardwareLCMForm."""
+
+    def to_python(self, value):
+        """Overload 'to_python' in forms.ModelChoiceField to force returning 'part_id' as the field value."""
+        if value in self.empty_values:
+            return None
+        if self.to_field_name == "part_id":
+            return value
+        super().to_python()
+
+
 class HardwareLCMForm(NautobotModelForm):
     """Hardware Device Lifecycle creation/edit form."""
 
     device_type = DynamicModelChoiceField(queryset=DeviceType.objects.all(), required=False)
-    inventory_item = DynamicModelChoiceField(
+    inventory_item = HardwareLCMDynamicModelChoiceField(
         queryset=InventoryItem.objects.without_tree_fields().order_by().distinct("part_id"),
-        query_params={"nautobot_device_lifecycle_mgmt_distinct_part_id": "true"},
+        query_params={"part_id__nre": "^$", "nautobot_device_lifecycle_mgmt_distinct_part_id": "true"},
         label="Inventory Part ID",
         display_field="part_id",
         to_field_name="part_id",
