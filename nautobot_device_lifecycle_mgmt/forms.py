@@ -60,7 +60,8 @@ class HardwareLCMForm(NautobotModelForm):
 
     device_type = DynamicModelChoiceField(queryset=DeviceType.objects.all(), required=False)
     inventory_item = DynamicModelChoiceField(
-        queryset=InventoryItem.objects.exclude(part_id__exact=""),
+        queryset=InventoryItem.objects.without_tree_fields().order_by().distinct("part_id"),
+        query_params={"part_id__nre": "^$"},
         label="Inventory Part ID",
         display_field="part_id",
         to_field_name="part_id",
