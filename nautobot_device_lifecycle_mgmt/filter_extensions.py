@@ -18,7 +18,7 @@ class InventoryItemFilterExtension(FilterExtension):
 
     filterset_fields = {
         "nautobot_device_lifecycle_mgmt_distinct_part_id": BooleanFilter(
-            method=distinct_filter, label="Distinct Part ID"
+            method=distinct_filter, label="_dlm_app_internal_use_only"
         )
     }
 

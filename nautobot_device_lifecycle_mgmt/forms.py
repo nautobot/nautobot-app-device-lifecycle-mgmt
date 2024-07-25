@@ -65,7 +65,7 @@ class HardwareLCMDynamicModelChoiceField(DynamicModelChoiceMixin, forms.ModelCho
             return None
         if self.to_field_name == "part_id":
             return value
-        super().to_python()
+        return super().to_python(value)
 
 
 class HardwareLCMForm(NautobotModelForm):
