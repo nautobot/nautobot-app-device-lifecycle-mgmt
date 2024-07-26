@@ -28,6 +28,7 @@ from nautobot.utilities.forms import (
     add_blank_choice,
     StaticSelect2Multiple,
 )
+from nautobot.utilities.forms.fields import DynamicModelChoiceMixin
 
 from nautobot_device_lifecycle_mgmt.choices import (
     ContractTypeChoices,
@@ -65,18 +66,40 @@ class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):
         return super().prepare_value(pk_list)
 
 
+class HardwareLCMDynamicModelChoiceField(DynamicModelChoiceMixin, forms.ModelChoiceField):
+    """DynamicModelChoiceField used for 'inventory_item' field in HardwareLCMForm."""
+
+    def to_python(self, value):
+        """Overload 'to_python' in forms.ModelChoiceField to force returning 'part_id' as the field value."""
+        if value in self.empty_values:
+            return None
+        if self.to_field_name == "part_id":
+            return value
+        return super().to_python(value)
+
+
 class HardwareLCMForm(BootstrapMixin, CustomFieldModelFormMixin, RelationshipModelFormMixin):
     """Hardware Device Lifecycle creation/edit form."""
 
-    inventory_item = forms.ModelChoiceField(
-        queryset=InventoryItem.objects.exclude(part_id__exact="")
-        .distinct()
-        .order_by("part_id")
-        .values_list("part_id", flat=True),
+    device_type = DynamicModelChoiceField(queryset=DeviceType.objects.all(), required=False)
+    inventory_item = HardwareLCMDynamicModelChoiceField(
+        queryset=InventoryItem.objects.order_by().distinct("part_id"),
+        query_params={"part_id__nre": "^$", "nautobot_device_lifecycle_mgmt_distinct_part_id": "true"},
         label="Inventory Part ID",
+        display_field="part_id",
         to_field_name="part_id",
+        brief_mode=False,
         required=False,
     )
+    # inventory_item = forms.ModelChoiceField(
+    #     queryset=InventoryItem.objects.exclude(part_id__exact="")
+    #     .distinct()
+    #     .order_by("part_id")
+    #     .values_list("part_id", flat=True),
+    #     label="Inventory Part ID",
+    #     to_field_name="part_id",
+    #     required=False,
+    # )
 
     class Meta:
         """Meta attributes for the HardwareLCMForm class."""
@@ -131,11 +154,11 @@ class HardwareLCMFilterForm(BootstrapMixin, forms.ModelForm):
         required=False, queryset=DeviceType.objects.all(), to_field_name="slug"
     )
 
-    inventory_item = forms.ModelMultipleChoiceField(
-        queryset=HardwareLCM.objects.exclude(inventory_item__isnull=True)
-        .exclude(inventory_item__exact="")
-        .values_list("inventory_item", flat=True),
+    inventory_item = DynamicModelMultipleChoiceField(
+        queryset=HardwareLCM.objects.exclude(inventory_item__isnull=True).exclude(inventory_item__exact=""),
         label="Inventory Part ID",
+        display_field="inventory_item",
+        to_field_name="inventory_item",
         required=False,
     )
 
