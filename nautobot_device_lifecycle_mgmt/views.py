@@ -8,6 +8,7 @@ import urllib
 import matplotlib.pyplot as plt
 import numpy as np
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, ExpressionWrapper, F, FloatField, Q
 from matplotlib.ticker import MaxNLocator
 from nautobot.apps.choices import ColorChoices
@@ -258,7 +259,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
     @staticmethod
     def plot_barchart_visual__hardware_notice(qs, chart_attrs):  # pylint: disable=too-many-locals
         """Construct report visual from queryset."""
-        barchart_bar_width_min = 0.5
+        barchart_bar_width_min = 0.7
         barchart_bar_width = max(barchart_bar_width_min, PLUGIN_CFG["barchart_bar_width"])
         barchart_width = PLUGIN_CFG["barchart_width"]
         barchart_height_calc = (qs.count()) * (barchart_bar_width * 0.75)
@@ -269,12 +270,19 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
         bar_colors = []
 
         for device_type in qs:
+            # Get the End of Support date
+            try:
+                hw_notice = models.HardwareLCM.objects.get(device_type__id=device_type[chart_attrs["device_type_id"]])
+                eos_date = hw_notice.end_of_support
+            except ObjectDoesNotExist:
+                eos_date = ""
+            # Add labels and set bar colors
             if device_type["valid"] > 0:
-                device_types.append(device_type[chart_attrs["label_accessor"]])
+                device_types.append(str(device_type[chart_attrs["label_accessor"]]) + "\n" + str(eos_date))
                 device_counts.append(device_type["valid"])
                 bar_colors.append(GREEN)
             elif device_type["invalid"] > 0:
-                device_types.append(device_type[chart_attrs["label_accessor"]])
+                device_types.append(str(device_type[chart_attrs["label_accessor"]]) + "\n" + str(eos_date))
                 device_counts.append(device_type["invalid"])
                 bar_colors.append(RED)
             else:
@@ -344,7 +352,7 @@ class HardwareNoticeDeviceReportView(generic.ObjectListView):
 
         device_aggr = self.get_global_aggr(request)
         _device_type_qs = (
-            models.DeviceHardwareNoticeResult.objects.values("device__device_type__model")
+            models.DeviceHardwareNoticeResult.objects.values("device__device_type__model", "device__device_type__id")
             .distinct()
             .annotate(
                 total=Count("device__device_type__model"),
@@ -352,7 +360,7 @@ class HardwareNoticeDeviceReportView(generic.ObjectListView):
                 invalid=Count("device__device_type__model", filter=Q(is_supported=False)),
                 valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
             )
-            .order_by("-total")
+            .order_by("-hardware_notice__end_of_support")
         )
         device_type_qs = self.filterset(request.GET, _device_type_qs).qs
         pie_chart_attrs = {
@@ -360,6 +368,7 @@ class HardwareNoticeDeviceReportView(generic.ObjectListView):
             "chart_labels": ["Supported", "Unsupported"],
         }
         bar_chart_attrs = {
+            "device_type_id": "device__device_type__id",
             "label_accessor": "device__device_type__model",
             "xlabel": "Devices",
             "ylabel": "Device Types",

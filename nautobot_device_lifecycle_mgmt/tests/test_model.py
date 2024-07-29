@@ -10,6 +10,7 @@ from django.test import TestCase
 from nautobot.dcim.models import DeviceType, Manufacturer, Platform, SoftwareVersion
 from nautobot.extras.models import Status
 
+from nautobot_device_lifecycle_mgmt.choices import ReportRunTypeChoices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
@@ -21,15 +22,14 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
-from nautobot_device_lifecycle_mgmt.choices import ReportRunTypeChoices
 
 from .conftest import (
     create_cves,
+    create_device_type_hardware_notices,
     create_devices,
     create_inventory_items,
     create_softwares,
     create_validated_softwares,
-    create_device_type_hardware_notices,
 )
 
 
