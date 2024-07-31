@@ -36,6 +36,8 @@ class DeviceHardwareNoticeFullReport(Job):
         job_run_time = datetime.now()
         notice_count = 0
         device_count = 0
+        devices_with_hw_notices_count = 0
+        devices_without_hw_notices_count = 0
 
         # Process devices through HardwareLCM.device_type
         for notice in HardwareLCM.objects.all():
@@ -54,30 +56,25 @@ class DeviceHardwareNoticeFullReport(Job):
                         hardware_notice_result.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
                         hardware_notice_result.validated_save()
                         device_count += 1
+                        devices_with_hw_notices_count += 1
                     except Exception as err:
                         self.logger.error(f"Error creating hadware notice result {err}")
                 notice_count += 1
+        self.logger.info(f"{devices_with_hw_notices_count} devices are affected by a hardware notice.")
         # Process all devices skipping devices already processed in the previous step
-        for device in Device.objects.all():
+        for device in Device.objects.exclude(device_hardware_notice__last_run=job_run_time):
             try:
-                DeviceHardwareNoticeResult.objects.get(
-                    device=device,
-                    last_run=job_run_time,
-                    run_type=choices.ReportRunTypeChoices.REPORT_FULL_RUN,
-                )
-                continue
-            except ObjectDoesNotExist:
-                try:
-                    hardware_notice_result, _ = DeviceHardwareNoticeResult.objects.get_or_create(device=device)
-                    hardware_notice_result.hardware_notice = None
-                    hardware_notice_result.is_supported = True
-                    hardware_notice_result.last_run = job_run_time
-                    hardware_notice_result.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
-                    hardware_notice_result.validated_save()
-                    device_count += 1
-                except Exception as err:
-                    self.logger.error(f"Error creating hadware notice result {err}")
-
+                hardware_notice_result, _ = DeviceHardwareNoticeResult.objects.get_or_create(device=device)
+                hardware_notice_result.hardware_notice = None
+                hardware_notice_result.is_supported = True
+                hardware_notice_result.last_run = job_run_time
+                hardware_notice_result.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
+                hardware_notice_result.validated_save()
+                device_count += 1
+                devices_without_hw_notices_count += 1
+            except Exception as err:
+                self.logger.error(f"Error creating hadware notice result {err}")
+        self.logger.info(f"{devices_without_hw_notices_count} devices are not affected by a hardware notice.")
         self.logger.info(f"Processed {notice_count} hardware notices and {device_count} devices.")
 
     # TODO: Create Inventory Item Report job (and related table, view, forms, filters etc.)
