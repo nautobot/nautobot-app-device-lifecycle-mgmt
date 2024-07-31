@@ -30,7 +30,6 @@ class InventoryItemContractFilter:
         """Returns filtered InventoryItemContractFilter query set."""
         self.contract_qs = self.contract_qs.filter(
             Q(inventory_items=self.item_obj.pk)
-            # | Q(object_tags__in=self.item_obj.tags.all())
         ).distinct()
 
         return self.contract_qs
