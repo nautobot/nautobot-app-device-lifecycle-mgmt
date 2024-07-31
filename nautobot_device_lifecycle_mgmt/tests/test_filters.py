@@ -1,6 +1,6 @@
 # pylint: disable=no-member
 """Test filters for lifecycle management."""
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 import time_machine
 from django.contrib.contenttypes.models import ContentType
@@ -87,8 +87,8 @@ class HardwareLCMTestCase(TestCase):
             ),
             HardwareLCM.objects.create(
                 device_type=self.device_types[1],
-                end_of_sale="2024-04-01",
-                end_of_support="2025-05-01",
+                end_of_sale="2020-04-01",
+                end_of_support="2021-05-01",
                 end_of_sw_releases="2026-05-01",
                 end_of_security_patches="2027-05-01",
                 documentation_url="https://cisco.com/c9300-48",
@@ -117,7 +117,7 @@ class HardwareLCMTestCase(TestCase):
 
     def test_eo_support(self):
         """Test end_of_support filter."""
-        params = {"end_of_support": "2025-05-01"}
+        params = {"end_of_support": "2021-05-01"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_eo_sw_releases(self):
@@ -167,9 +167,9 @@ class HardwareLCMTestCase(TestCase):
 
     def test_expired_search(self):
         """Test returned devices are either end of sale or end of support."""
-        test_year = datetime.today().year
+        test_year = (datetime.today() + timedelta(days=365)).year
         test_month = datetime.today().month
-        test_day = datetime.today().day + 1
+        test_day = datetime.today().day
 
         HardwareLCM.objects.get_or_create(
             device_type=self.device_types[2],
@@ -336,9 +336,9 @@ class ContractLCMTestCase(TestCase):
 
     def test_expired(self):
         """Test exipired filter."""
-        test_year = datetime.today().year
+        test_year = (datetime.today() + timedelta(days=365)).year
         test_month = datetime.today().month
-        test_day = datetime.today().day + 1
+        test_day = datetime.today().day
 
         ContractLCM.objects.get_or_create(
             provider=self.providers[0],
