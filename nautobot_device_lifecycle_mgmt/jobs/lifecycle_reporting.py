@@ -2,7 +2,6 @@
 """Jobs for the Lifecycle Management app."""
 from datetime import datetime
 
-from django.core.exceptions import ObjectDoesNotExist
 from nautobot.dcim.models import Device, InventoryItem
 from nautobot.extras.jobs import Job
 
