@@ -257,7 +257,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
         return aggr
 
     @staticmethod
-    def plot_barchart_visual__hardware_notice(qs, chart_attrs):  # pylint: disable=too-many-locals
+    def plot_barchart_visual_hardware_notice(qs, chart_attrs):  # pylint: disable=too-many-locals
         """Construct report visual from queryset."""
         barchart_bar_width_min = 0.7
         barchart_bar_width = max(barchart_bar_width_min, PLUGIN_CFG["barchart_bar_width"])
@@ -379,7 +379,7 @@ class HardwareNoticeDeviceReportView(generic.ObjectListView):
             ],
         }
         self.extra_content = {
-            "bar_chart": ReportOverviewHelper.plot_barchart_visual__hardware_notice(device_type_qs, bar_chart_attrs),
+            "bar_chart": ReportOverviewHelper.plot_barchart_visual_hardware_notice(device_type_qs, bar_chart_attrs),
             "device_aggr": device_aggr,
             "device_visual": ReportOverviewHelper.plot_piechart_visual(device_aggr, pie_chart_attrs),
             "report_last_run": report_last_run,
