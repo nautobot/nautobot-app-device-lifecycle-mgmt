@@ -95,7 +95,7 @@ class DeviceSoftwareValidationResultSerializer(NautobotModelSerializer):
 
 
 class DeviceHardwareNoticeResultSerializer(NautobotModelSerializer):
-    """REST API serializer for DeviceSoftwareValidationResult records."""
+    """REST API serializer for DeviceHardwareNoticeResult records."""
 
     class Meta:
         """Meta attributes."""

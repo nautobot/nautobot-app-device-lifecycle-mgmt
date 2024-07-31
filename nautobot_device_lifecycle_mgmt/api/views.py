@@ -90,7 +90,7 @@ class VulnerabilityLCMViewSet(NautobotModelViewSet):
 
 
 class DeviceHardwareNoticeResultListViewSet(NautobotModelViewSet):
-    """REST API viewset for DeviceSoftwareValidationResult records."""
+    """REST API viewset for DeviceHardwareNoticeResult records."""
 
     queryset = DeviceHardwareNoticeResult.objects.all()
     serializer_class = DeviceHardwareNoticeResultSerializer

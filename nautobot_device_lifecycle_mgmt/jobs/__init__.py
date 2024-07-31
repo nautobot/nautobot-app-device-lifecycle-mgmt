@@ -10,8 +10,8 @@ from .lifecycle_reporting import (
 )
 
 jobs = [
-    DeviceSoftwareValidationFullReport,
     DeviceHardwareNoticeFullReport,
+    DeviceSoftwareValidationFullReport,
     InventoryItemSoftwareValidationFullReport,
     GenerateVulnerabilities,
 ]
