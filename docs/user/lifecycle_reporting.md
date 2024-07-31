@@ -67,7 +67,7 @@ The device hardware notice list page contains the hardware notice results for ea
 | **Device** | Name of the device/inventory item in the job result. |
 | **Hardware Notice** | Hardware notice that applies to the device type of the device. |
 | **Supported** | Indicates if a device is currently supported based on hardware notice end of support dates. |
-| **Last Run** | Last time the hardware notice reporting job was ran on the deviceitem. |
+| **Last Run** | Last time the hardware notice reporting job was run on the device item. |
 | **Run Type** | Type of software validation job that was ran. |
 
 ## Exporting Software Validation Job Results
