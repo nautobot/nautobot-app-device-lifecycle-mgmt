@@ -100,7 +100,7 @@ There are various ways that you can export the device hardware notice report res
 
 **Device Hardware Notice - Report**
 
-From the executive summary table on the device hardware notice report page, click on the export data button. This will export all results, regardless of filtering applied.
+From the executive summary table on the device hardware notice report page, click on the export data button. This will export all results, regardless of the filtering applied.
 
 ![](../images/lcm_hardware_notice_reports_export_button.png)
 
