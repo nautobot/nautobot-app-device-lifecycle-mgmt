@@ -124,7 +124,7 @@ class HardwareLCMFilterForm(NautobotFilterForm):
     model = HardwareLCM
     field_order = [
         "q",
-        "unsupported",
+        "expired",
         "device_type",
         "inventory_item",
         "release_date",

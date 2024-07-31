@@ -89,7 +89,7 @@ class HardwareLCMFilterSet(NautobotFilterSet):
         model = HardwareLCM
 
         fields = [
-            "unsupported",
+            "expired",
             "device_type",
             "inventory_item",
             "release_date",

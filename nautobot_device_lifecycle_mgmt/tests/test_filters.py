@@ -176,7 +176,7 @@ class HardwareLCMTestCase(TestCase):
             end_of_sale=f"{test_year}-{test_month}-{test_day}",
             end_of_support=f"{test_year}-{test_month}-{test_day}",
         )
-        params = {"unsupported": True}
+        params = {"expired": True}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
 
