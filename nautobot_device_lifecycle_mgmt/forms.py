@@ -148,7 +148,6 @@ class HardwareLCMFilterForm(NautobotFilterForm):
     )
     inventory_item = forms.ModelMultipleChoiceField(
         queryset=HardwareLCM.objects.filter(inventory_item__isnull=False, device_type__isnull=True)
-        .exclude(inventory_item__exact="")
         .values_list("inventory_item", flat=True),
         to_field_name="inventory_item",
         label="Inventory Part ID",
