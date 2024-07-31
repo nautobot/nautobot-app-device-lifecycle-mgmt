@@ -47,7 +47,7 @@ Once the reporting jobs have been run, you can navigate to the results page by s
 
 ![](../images/lcm_software_validation_report_run_results_list.png)
 
-The software validation list page contaions the software report results for each device. All columns are sortable and filters can be applied.
+The software validation list page contains the software report results for each device. All columns are sortable and filters can be applied.
 
 | Column | Description |
 | -- | -- |
