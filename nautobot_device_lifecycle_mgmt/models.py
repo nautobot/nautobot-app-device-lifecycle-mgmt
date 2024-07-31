@@ -400,14 +400,29 @@ class ContractLCM(PrimaryModel):
 
     @property
     def expired(self):
-        """Return True or False if chosen field is expired."""
+        """
+        Return 'True' if a contract has expired, return 'False' if it is active.
+
+        If a contract does not have an end date it cannot expire. If the
+        current date is greater than the end date of a contract, it is
+        expired. The last day of a contract is still considered to be
+        in the 'active' period.
+        """
         if not self.end:
             return False
         return datetime.today().date() > self.end
 
     @property
     def active(self):
-        """Return True or False if chosen field is active."""
+        """
+        Return 'True' if a contract is active, return 'False' if it has expired.
+
+        An active contract is a contract that has not yet expired.
+        If a contract does not have an end date it cannot expire. If the
+        current date is less than or equal to the end date of a contract,
+        it is active. The last day of a contract is still considered to be
+        in the 'active' period.
+        """
         if not self.end:
             return True
         return datetime.today().date() <= self.end
