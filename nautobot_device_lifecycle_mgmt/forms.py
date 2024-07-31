@@ -135,7 +135,7 @@ class HardwareLCMFilterForm(NautobotFilterForm):
         "documentation_url",
     ]
     q = forms.CharField(required=False, label="Search")
-    unsupported = forms.BooleanField(
+    expired = forms.BooleanField(
         required=False,
         label="No longer sold or supported",
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),

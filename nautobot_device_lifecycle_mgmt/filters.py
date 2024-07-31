@@ -70,7 +70,7 @@ class HardwareLCMFilterSet(NautobotFilterSet):
             },
         }
     )
-    unsupported = django_filters.BooleanFilter(method="_expired_search", label="Unsupported")
+    expired = django_filters.BooleanFilter(method="_expired_search", label="Unsupported")
     device_type_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device_type",
         queryset=DeviceType.objects.all(),
