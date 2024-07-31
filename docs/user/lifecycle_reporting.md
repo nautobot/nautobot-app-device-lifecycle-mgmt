@@ -43,7 +43,7 @@ From the Device Software Validation and Hardware Notice Reports you can export t
 
 ## Validation Results Page
 
-Once the reporting jobs have been run, you can nagivate to the results page by selecting **Device Software Validation - List**, **Inventory Item Software Validation - List** or **Device Hardware Notice - List** from the "Device Lifecycle" dropdown menu.
+Once the reporting jobs have been run, you can navigate to the results page by selecting **Device Software Validation - List**, **Inventory Item Software Validation - List**, or **Device Hardware Notice - List** from the "Device Lifecycle" dropdown menu.
 
 ![](../images/lcm_software_validation_report_run_results_list.png)
 
