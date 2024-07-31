@@ -185,7 +185,7 @@ You are able to get the result of if the Device/Inventory Item is valid or not b
 
 ## Device Haredware Notice Results List - API
 
-You can gather all the results from report by using the API that is built into Nautobot.
+You can gather all the results from the report using the API that is built into Nautobot.
 
 API command
 
