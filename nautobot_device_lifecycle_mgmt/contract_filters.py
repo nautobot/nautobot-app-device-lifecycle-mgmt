@@ -7,7 +7,7 @@ class DeviceContractFilter:
     """Filter ContractLCM objects based on the Device object."""
 
     def __init__(self, qs, item_obj):  # pylint: disable=invalid-name
-        """Initalize DeviceContractfilter."""
+        """Initalize DeviceContractFilter."""
         self.contract_qs = qs
         self.item_obj = item_obj
 
