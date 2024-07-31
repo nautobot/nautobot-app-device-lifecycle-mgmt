@@ -60,7 +60,7 @@ The software validation list page contains the software report results for each 
 
 ![](../images/lcm_hardware_notice_report_run_results_list.png)
 
-The device hardware notice list page contaions the hardware notice results for each device. All columns are sortable and filters can be applied.
+The device hardware notice list page contains the hardware notice results for each device. All columns are sortable and filters can be applied.
 
 | Column | Description |
 | -- | -- |
