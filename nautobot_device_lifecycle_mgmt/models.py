@@ -232,7 +232,7 @@ class DeviceHardwareNoticeResult(PrimaryModel):
         help_text="Device hardware notice",
         null=True,
         blank=True,
-        related_name="+",
+        related_name="hardware_notice_device",
     )
     is_supported = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
