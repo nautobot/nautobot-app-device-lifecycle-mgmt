@@ -2,7 +2,7 @@
 
 import django_tables2 as tables
 from django.urls import reverse
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 from django_tables2.utils import A
 from nautobot.apps.tables import BaseTable, BooleanColumn, ButtonsColumn, StatusTableMixin, TagColumn, ToggleColumn
 
@@ -43,7 +43,7 @@ class M2MLinkedCountColumn(tables.Column):
                         url += "&".join([f"{key}={val[key]}" for val in values])
                     else:
                         url += f"&{key}={getattr(record, kval)}"
-            return mark_safe(f'<a href="{url}">{value}</a>')  # nosec
+            return format_html('<a href="{}">{}</a>', url, value)
         return value
 
 
