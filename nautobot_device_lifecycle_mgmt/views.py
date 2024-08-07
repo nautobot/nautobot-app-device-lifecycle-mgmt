@@ -93,7 +93,9 @@ class SoftwareImageLCMUIViewSet(NautobotUIViewSet):
     filterset_class = filters.SoftwareImageLCMFilterSet
     filterset_form_class = forms.SoftwareImageLCMFilterForm
     form_class = forms.SoftwareImageLCMForm
-    queryset = models.SoftwareImageLCM.objects.all()
+    queryset = models.SoftwareImageLCM.objects.annotate(
+        device_type_count=Count("device_types"), object_tag_count=Count("object_tags")
+    )
     serializer_class = serializers.SoftwareImageLCMSerializer
     table_class = tables.SoftwareImageLCMTable
 

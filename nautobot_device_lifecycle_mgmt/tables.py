@@ -5,7 +5,6 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django_tables2.utils import A
 from nautobot.apps.tables import BaseTable, BooleanColumn, ButtonsColumn, StatusTableMixin, TagColumn, ToggleColumn
-from nautobot.core.tables import LinkedCountColumn
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -22,8 +21,15 @@ from nautobot_device_lifecycle_mgmt.models import (
 )
 
 
-class M2MLinkedCountColumn(LinkedCountColumn):
+class M2MLinkedCountColumn(tables.Column):
     """Linked count column supporting many-to-many fields."""
+
+    def __init__(self, viewname, *args, view_kwargs=None, url_params=None, default=0, **kwargs):
+        """Initialize the column."""
+        self.viewname = viewname
+        self.view_kwargs = view_kwargs or {}
+        self.url_params = url_params
+        super().__init__(*args, default=default, **kwargs)
 
     def render(self, record, value):
         """Render the resulting URL."""
