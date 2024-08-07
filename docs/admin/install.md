@@ -78,7 +78,7 @@ The plugin behavior can be controlled with the following list of settings.
 | barchart_bar_width | BARCHART_BAR_WIDTH | 0.15 | 0.1 | The width of the table bar within the overview report. |
 | barchart_width | BARCHART_WIDTH | 15 | 12 | The width of the barchart within the overview report. |
 | barchart_height | BARCHART_HEIGHT | 8 | 5 | The height of the barchart within the overview report. |
-| enabled_metrics | NAUTOBOT_DLM_ENABLED_METRICS | `["nautobot_metrics_lcm_hw_end_of_support_site"]` | `[]` | Enables metrics corresponding to the provided entries. |
+| enabled_metrics | NAUTOBOT_DLM_ENABLED_METRICS | `["nautobot_metrics_lcm_hw_end_of_support_site"]` | `[]` | Enables metrics corresponding to the provided, comma separated, entries. |
 
 ### Available Metric Names
 
