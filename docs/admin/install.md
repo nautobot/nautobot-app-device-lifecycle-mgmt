@@ -44,6 +44,7 @@ PLUGINS_CONFIG = {
         "barchart_bar_width": float(os.environ.get("BARCHART_BAR_WIDTH", 0.1)),
         "barchart_width": int(os.environ.get("BARCHART_WIDTH", 12)),
         "barchart_height": int(os.environ.get("BARCHART_HEIGHT", 5)),
+        "enabled_metrics": [x for x in os.environ.get("NAUTOBOT_DLM_ENABLED_METRICS", "").split(",") if x],
     },
 }
 ```
@@ -72,8 +73,21 @@ sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
 
 The plugin behavior can be controlled with the following list of settings.
 
-| Key     | Example | Default | Description                          |
-| ------- | ------ | -------- | ------------------------------------- |
-| enable_backup | True | True | A boolean to represent whether or not to run backup configurations within the plugin. |
-| platform_slug_map | {"cisco_wlc": "cisco_aireos"} | None | A dictionary in which the key is the platform slug and the value is what netutils uses in any "network_os" parameter. |
-| per_feature_bar_width | 0.15 | 0.15 | The width of the table bar within the overview report |
+| Key     | ENV VAR | Example | Default | Description                          |
+| ------- | ------ |  ------ | -------- | ------------------------------------- |
+| barchart_bar_width | BARCHART_BAR_WIDTH | 0.15 | 0.1 | The width of the table bar within the overview report. |
+| barchart_width | BARCHART_WIDTH | 15 | 12 | The width of the barchart within the overview report. |
+| barchart_height | BARCHART_HEIGHT | 8 | 5 | The height of the barchart within the overview report. |
+| enabled_metrics | NAUTOBOT_DLM_ENABLED_METRICS | `["nautobot_metrics_lcm_hw_end_of_support_site"]` | `[]` | Enables metrics corresponding to the provided entries. |
+
+### Available Metric Names
+
+Following are the metric names that can be defined in `enabled_metrics`:
+
+- `nautobot_lcm_software_compliance_per_device_type`: Number of devices with valid/invalid software by device_type.
+
+- `nautobot_lcm_software_compliance_per_inventory_item`: Number of inventory items with valid/invalid software.
+
+- `nautobot_lcm_hw_end_of_support_per_part_number`: Number of End of Support devices and inventory items per Part Number.
+
+- `nautobot_metrics_lcm_hw_end_of_support_site`: Number of End of Support devices and inventory items per Site.
