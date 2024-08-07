@@ -31,7 +31,7 @@ class M2MLinkedCountColumn(tables.Column):
         self.url_params = url_params
         super().__init__(*args, default=default, **kwargs)
 
-    def render(self, record, value):
+    def render(self, record, value):  # pylint: disable=arguments-differ
         """Render the resulting URL."""
         if value:
             url = reverse(self.viewname, kwargs=self.view_kwargs)
