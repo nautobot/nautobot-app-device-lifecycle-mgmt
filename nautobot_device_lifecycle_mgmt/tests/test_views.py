@@ -16,7 +16,6 @@ from nautobot_device_lifecycle_mgmt.models import (
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
-    SoftwareImageLCM,
     VulnerabilityLCM,
 )
 
@@ -311,74 +310,6 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
 
     @skip("Not implemented")
     def test_bulk_edit_objects_with_constrained_permission(self):
-        pass
-
-
-class SoftwareImageLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
-    """Test the SoftwareImageLCM views."""
-
-    model = SoftwareImageLCM
-
-    @classmethod
-    def setUpTestData(cls):  # pylint: disable=invalid-name
-        """Set up test objects."""
-        softwares = create_softwares()
-        manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
-        device_type1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="6509")
-        device_type2, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="6509-E")
-
-        softimage = SoftwareImageLCM.objects.create(
-            image_file_name="ios15.1.2m.img",
-            software=softwares[0],
-            download_url="ftp://images.local/cisco/ios15.1.2m.img",
-            image_file_checksum="441rfabd75b0512r7fde7a7a66faa596",
-            default_image=True,
-        )
-        softimage.device_types.set([device_type1, device_type2])
-        SoftwareImageLCM.objects.create(
-            image_file_name="ios4.22.9m.img",
-            software=softwares[1],
-            download_url="ftp://images.local/cisco/ios4.22.9m.img",
-            image_file_checksum="58arfabd75b051fr7fde7a7ac6faa3fv",
-            default_image=False,
-        )
-        SoftwareImageLCM.objects.create(
-            image_file_name="c1900-universalk9-mz.SPA.157-3.M9.bin",
-            software=softwares[1],
-            download_url="ftp://images.local/cisco/c1900-universalk9-mz.SPA.157-3.M9.bin",
-            image_file_checksum="2eb0d3b3127c904bfc640655285c4604",
-            default_image=False,
-        )
-
-        cls.form_data = {
-            "image_file_name": "eos_4.21m.swi",
-            "software": softwares[-1].id,
-            "download_url": "ftp://images.local/arista/eos_4.21m.swi",
-            "image_file_checksum": "78arfabd75b0fa2vzas1e7a7ac6faa3fc",
-            "default_image": True,
-        }
-        cls.csv_data = (
-            "image_file_name,software",
-            f"ios11.7.0m.img,{softwares[0].composite_key}",
-            f"ios16.3.1t.img,{softwares[0].composite_key}",
-            f"eos_4.21m.swi,{softwares[-1].composite_key}",
-        )
-        cls.bulk_edit_data = {"default_image": True}
-
-    @skip("Not implemented")
-    def test_bulk_edit_objects_with_constrained_permission(self):
-        pass
-
-    @skip("Not implemented")
-    def test_bulk_edit_objects_with_permission(self):
-        pass
-
-    @skip("Not implemented")
-    def test_bulk_edit_form_contains_all_pks(self):
-        pass
-
-    @skip("Not implemented")
-    def test_bulk_edit_form_contains_all_filtered(self):
         pass
 
 

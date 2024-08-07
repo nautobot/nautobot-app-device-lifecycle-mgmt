@@ -1,3 +1,4 @@
+# pylint: disable=nb-use-fields-all
 """Tables implementation for the Lifecycle Management app."""
 
 import django_tables2 as tables
@@ -9,14 +10,11 @@ from nautobot.core.tables import LinkedCountColumn
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
-    ContactLCM,
     ContractLCM,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
     ProviderLCM,
-    SoftwareImageLCM,
-    SoftwareLCM,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
@@ -94,94 +92,6 @@ class HardwareLCMTable(BaseTable):
             "end_of_sw_releases",
             "end_of_security_patches",
             "documentation_url",
-            "actions",
-        )
-
-
-class SoftwareLCMTable(BaseTable):
-    """Table for SoftwareLCMListView."""
-
-    pk = ToggleColumn()
-    name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:softwarelcm",
-        text=lambda record: record,
-        args=[A("pk")],
-        orderable=False,
-    )
-    device_platform = tables.TemplateColumn("{{ record.device_platform }}")
-    long_term_support = BooleanColumn()
-    pre_release = BooleanColumn()
-    actions = ButtonsColumn(SoftwareLCM, buttons=("edit", "delete"))
-
-    class Meta(BaseTable.Meta):
-        """Meta attributes."""
-
-        model = SoftwareLCM
-        fields = (
-            "pk",
-            "name",
-            "version",
-            "alias",
-            "device_platform",
-            "release_date",
-            "end_of_support",
-            "long_term_support",
-            "pre_release",
-            "actions",
-        )
-        default_columns = (
-            "pk",
-            "name",
-            "version",
-            "alias",
-            "device_platform",
-            "release_date",
-            "end_of_support",
-            "long_term_support",
-            "pre_release",
-            "actions",
-        )
-
-
-class SoftwareImageLCMTable(BaseTable):
-    """Table for SoftwareImageLCM."""
-
-    pk = ToggleColumn()
-    name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:softwareimagelcm",
-        text=lambda record: record,
-        args=[A("pk")],
-        orderable=False,
-    )
-    software = tables.LinkColumn(verbose_name="Software")
-    device_type_count = M2MLinkedCountColumn(
-        viewname="dcim:devicetype_list", url_params={"model": ("device_types", "model")}, verbose_name="Device Types"
-    )
-    object_tag_count = M2MLinkedCountColumn(
-        viewname="extras:tag_list", url_params={"name": ("object_tags", "name")}, verbose_name="Object Tags"
-    )
-    default_image = BooleanColumn()
-    actions = ButtonsColumn(SoftwareImageLCM, buttons=("edit", "delete"))
-    download_url = tables.TemplateColumn(
-        template_code="""{% if record.download_url %}
-                    <a href="{{ record.download_url }}" target="_blank" data-toggle="tooltip" data-placement="left" title="{{ record.download_url }}">
-                        <span class="mdi mdi-open-in-new"></span>
-                    </a>{% else %} — {% endif %}""",
-        verbose_name="Download URL",
-    )
-
-    class Meta(BaseTable.Meta):
-        """Meta attributes."""
-
-        model = SoftwareImageLCM
-        fields = (
-            "pk",
-            "name",
-            "software",
-            "device_type_count",
-            "object_tag_count",
-            "default_image",
-            "download_url",
             "actions",
         )
 
@@ -267,7 +177,7 @@ class DeviceSoftwareValidationResultTable(BaseTable):
         ]
 
 
-class DeviceSoftwareValidationResultListTable(BaseTable):
+class DeviceSoftwareValidationResultListTable(BaseTable):  # pylint: disable=nb-sub-class-name
     """Table for a list of device to software validation report."""
 
     device = tables.Column(accessor="device", verbose_name="Device", linkify=True)
@@ -367,7 +277,7 @@ class InventoryItemSoftwareValidationResultTable(BaseTable):
         ]
 
 
-class InventoryItemSoftwareValidationResultListTable(BaseTable):
+class InventoryItemSoftwareValidationResultListTable(BaseTable):  # pylint: disable=nb-sub-class-name
     """Table for a list of intenotry items to software validation report."""
 
     part_id = tables.Column(
@@ -483,32 +393,6 @@ class ProviderLCMTable(BaseTable):
             "phone",
             "email",
             "portal_url",
-            "actions",
-        )
-
-
-class ContactLCMTable(BaseTable):
-    """Table for list view."""
-
-    pk = ToggleColumn()
-    name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:contactlcm", text=lambda record: record, args=[A("pk")]
-    )
-    actions = ButtonsColumn(ContactLCM, buttons=("changelog", "edit", "delete"))
-
-    class Meta(BaseTable.Meta):
-        """Meta attributes."""
-
-        model = ContactLCM
-        fields = (
-            "pk",
-            "name",
-            "address",
-            "phone",
-            "email",
-            "comments",
-            "priority",
-            "contract",
             "actions",
         )
 

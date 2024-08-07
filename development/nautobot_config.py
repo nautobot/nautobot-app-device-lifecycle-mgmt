@@ -1,4 +1,5 @@
 """Nautobot development configuration file."""
+
 import os
 import sys
 
@@ -74,9 +75,6 @@ CACHES = {
     }
 }
 
-# Redis Cacheops
-CACHEOPS_REDIS = parse_redis_connection(redis_database=1)
-
 #
 # Celery settings are not defined here because they can be overloaded with
 # environment variables. By default they use `CACHES["default"]["LOCATION"]`.
@@ -95,11 +93,11 @@ if not _TESTING:
         "disable_existing_loggers": False,
         "formatters": {
             "normal": {
-                "format": "%(asctime)s.%(msecs)03d %(levelname)-7s %(name)s :\n  %(message)s",
+                "format": "%(asctime)s.%(msecs)03d %(levelname)-7s %(name)s : %(message)s",
                 "datefmt": "%H:%M:%S",
             },
             "verbose": {
-                "format": "%(asctime)s.%(msecs)03d %(levelname)-7s %(name)-20s %(filename)-15s %(funcName)30s() :\n  %(message)s",
+                "format": "%(asctime)s.%(msecs)03d %(levelname)-7s %(name)-20s %(filename)-15s %(funcName)30s() : %(message)s",
                 "datefmt": "%H:%M:%S",
             },
         },
@@ -135,8 +133,10 @@ PLUGINS = ["nautobot_device_lifecycle_mgmt"]
 # Each key in the dictionary is the name of an installed App and its value is a dictionary of settings.
 PLUGINS_CONFIG = {
     "nautobot_device_lifecycle_mgmt": {
+        "expired_field": os.environ.get("NAUTOBOT_DLM_EXPIRED_FIELD", "end_of_support"),
         "barchart_bar_width": float(os.environ.get("BARCHART_BAR_WIDTH", 0.1)),
         "barchart_width": int(os.environ.get("BARCHART_WIDTH", 12)),
         "barchart_height": int(os.environ.get("BARCHART_HEIGHT", 5)),
+        "enabled_metrics": [x for x in os.environ.get("NAUTOBOT_DLM_ENABLED_METRICS", "").split(",") if x],
     },
 }

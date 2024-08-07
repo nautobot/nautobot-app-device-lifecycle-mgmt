@@ -1,16 +1,14 @@
 """API serializers implementation for the LifeCycle Management app."""
+
 from nautobot.apps.api import NautobotModelSerializer
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
-    ContactLCM,
     ContractLCM,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
     ProviderLCM,
-    SoftwareImageLCM,
-    SoftwareLCM,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
@@ -43,36 +41,6 @@ class ContractLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,t
         """Meta attributes."""
 
         model = ContractLCM
-        fields = "__all__"
-
-
-class ContactLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
-    """API serializer."""
-
-    class Meta:
-        """Meta attributes."""
-
-        model = ContactLCM
-        fields = "__all__"
-
-
-class SoftwareLCMSerializer(NautobotModelSerializer):
-    """REST API serializer for SoftwareLCM records."""
-
-    class Meta:
-        """Meta attributes."""
-
-        model = SoftwareLCM
-        fields = "__all__"
-
-
-class SoftwareImageLCMSerializer(NautobotModelSerializer):
-    """REST API serializer for SoftwareImageLCM records."""
-
-    class Meta:
-        """Meta attributes."""
-
-        model = SoftwareImageLCM
         fields = "__all__"
 
 

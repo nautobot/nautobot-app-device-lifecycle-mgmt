@@ -1,43 +1,22 @@
 """Django classes and functions handling Software Lifecycle related functionality."""
 
-from django.contrib.contenttypes.models import ContentType
 from nautobot.dcim.models import Device, InventoryItem
-from nautobot.extras.models import RelationshipAssociation
 
 from nautobot_device_lifecycle_mgmt.filters import ValidatedSoftwareLCMFilterSet
-from nautobot_device_lifecycle_mgmt.models import SoftwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import ValidatedSoftwareLCM
 from nautobot_device_lifecycle_mgmt.tables import ValidatedSoftwareLCMTable
 
 
 class ItemSoftware:
-    """Base class providing functions for computing SoftwareLCM and ValidatedSoftwareLCM related objects."""
+    """Base class providing functions for computing ValidatedSoftwareLCM related objects."""
 
-    soft_relation_name = None
     soft_obj_model = None
 
     def __init__(self, item_obj):
         """Initalize ItemSoftware object."""
         self.item_obj = item_obj
         self.validated_software_qs = ValidatedSoftwareLCM.objects.get_for_object(self.item_obj)
-
-        if self.soft_relation_name:
-            self.software = self.get_software()
-        else:
-            self.software = None
-
-    def get_software(self):
-        """Get software assigned to the object."""
-        try:
-            obj_soft_relation = RelationshipAssociation.objects.get(
-                relationship__key=self.soft_relation_name,
-                destination_type=ContentType.objects.get_for_model(self.soft_obj_model),
-                destination_id=self.item_obj.id,
-            )
-            obj_soft = SoftwareLCM.objects.get(id=obj_soft_relation.source_id)
-        except (RelationshipAssociation.DoesNotExist, SoftwareLCM.DoesNotExist):  # pylint: disable=no-member
-            obj_soft = None
-
-        return obj_soft
+        self.software = self.item_obj.software_version
 
     def get_validated_software_table(self):
         """Returns table of validated software linked to the object."""
@@ -72,11 +51,9 @@ class DeviceSoftware(ItemSoftware):
     """Computes validated software objects for Device objects."""
 
     soft_obj_model = Device
-    soft_relation_name = "device_soft"
 
 
 class InventoryItemSoftware(ItemSoftware):
     """Computes validated software objects for InventoryItem objects."""
 
     soft_obj_model = InventoryItem
-    soft_relation_name = "inventory_item_soft"

@@ -1,28 +1,21 @@
 """Django urlpatterns declaration for the Lifecycle Management app."""
+
 from django.urls import path
 from nautobot.apps.urls import NautobotUIViewSetRouter
 
-from nautobot_device_lifecycle_mgmt import views, viewsets
+from nautobot_device_lifecycle_mgmt import views
 
 router = NautobotUIViewSetRouter()
-router.register("hardware", viewset=viewsets.HardwareLCMUIViewSet)
-router.register("software", viewset=viewsets.SoftwareLCMUIViewSet)
-router.register("software-image", viewset=viewsets.SoftwareImageLCMUIViewSet)
-router.register("validated-software", viewset=viewsets.ValidatedSoftwareLCMUIViewSet)
-router.register("contract", viewset=viewsets.ContractLCMUIViewSet)
-router.register("provider", viewset=viewsets.ProviderLCMUIViewSet)
-router.register("contact", viewset=viewsets.ContactLCMUIViewSet)
-router.register("cve", viewset=viewsets.CVELCMUIViewSet)
-router.register("vulnerability", viewset=viewsets.VulnerabilityLCMUIViewSet)
+router.register("hardware", viewset=views.HardwareLCMUIViewSet)
+router.register("validated-software", viewset=views.ValidatedSoftwareLCMUIViewSet)
+router.register("contract", viewset=views.ContractLCMUIViewSet)
+router.register("provider", viewset=views.ProviderLCMUIViewSet)
+router.register("cve", viewset=views.CVELCMUIViewSet)
+router.register("vulnerability", viewset=views.VulnerabilityLCMUIViewSet)
 
 urlpatterns = router.urls
 
 urlpatterns += [
-    path(
-        "software/<uuid:pk>/software-images/",
-        views.SoftwareSoftwareImagesLCMView.as_view(),
-        name="software_software_images",
-    ),
     path(
         "validated-software-device-report/",
         views.ValidatedSoftwareDeviceReportView.as_view(),

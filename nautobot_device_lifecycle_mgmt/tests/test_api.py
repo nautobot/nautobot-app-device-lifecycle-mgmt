@@ -6,16 +6,23 @@ from unittest import skip
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from nautobot.apps.testing import APIViewTestCases
-from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, LocationType, Manufacturer, Platform
-from nautobot.extras.models import Role, Status, Tag
+from nautobot.dcim.models import (
+    Device,
+    DeviceType,
+    InventoryItem,
+    Location,
+    LocationType,
+    Manufacturer,
+    Platform,
+    SoftwareVersion,
+)
+from nautobot.extras.models import Role, Status
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
     HardwareLCM,
     ProviderLCM,
-    SoftwareImageLCM,
-    SoftwareLCM,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
@@ -76,61 +83,6 @@ class HardwareLCMAPITest(APIViewTestCases.APIViewTestCase):
 
     @skip("Not implemented")
     def test_bulk_update_objects(self):
-        pass
-
-
-class SoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
-    """Test the SoftwareLCM API."""
-
-    model = SoftwareLCM
-    brief_fields = [
-        "device_platform",
-        "display",
-        "end_of_support",
-        "id",
-        "url",
-        "version",
-    ]
-
-    @classmethod
-    def setUpTestData(cls):  # pylint: disable=invalid-name
-        """Set up test objects."""
-        device_platforms = (
-            Platform.objects.get_or_create(name="cisco_ios")[0],
-            Platform.objects.get_or_create(name="arista_eos")[0],
-            Platform.objects.get_or_create(name="juniper_junos")[0],
-        )
-
-        cls.create_data = [
-            {
-                "device_platform": device_platforms[0].id,
-                "version": "15.4(3)M",
-                "end_of_support": datetime.date(2022, 2, 28),
-            },
-            {
-                "device_platform": device_platforms[1].id,
-                "version": "4.21.3F",
-                "end_of_support": datetime.date(2021, 8, 9),
-            },
-            {
-                "device_platform": device_platforms[2].id,
-                "version": "20.3R3",
-                "end_of_support": datetime.date(2023, 9, 29),
-            },
-        ]
-
-        SoftwareLCM.objects.create(
-            device_platform=device_platforms[0], version="15.1(2)M", end_of_support=datetime.date(2023, 5, 8)
-        )
-        SoftwareLCM.objects.create(
-            device_platform=device_platforms[1], version="4.22.9M", end_of_support=datetime.date(2022, 4, 11)
-        )
-        SoftwareLCM.objects.create(
-            device_platform=device_platforms[2], version="21.4R3", end_of_support=datetime.date(2024, 5, 19)
-        )
-
-    @skip("Not implemented")
-    def test_bulk_delete_objects(self):
         pass
 
 
@@ -251,27 +203,30 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
     def setUpTestData(cls):  # pylint: disable=invalid-name
         """Create a superuser and token for API calls."""
         device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
+        software_status = Status.objects.get_for_model(SoftwareVersion).first()
         softwares = (
-            SoftwareLCM.objects.create(
+            SoftwareVersion.objects.create(
                 **{
-                    "device_platform": device_platform,
+                    "platform": device_platform,
                     "version": "17.3.3 MD",
                     "alias": "Amsterdam-17.3.3 MD",
-                    "end_of_support": "2022-05-15",
+                    "end_of_support_date": "2022-05-15",
                     "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
                     "long_term_support": True,
                     "pre_release": False,
+                    "status": software_status,
                 }
             ),
-            SoftwareLCM.objects.create(
+            SoftwareVersion.objects.create(
                 **{
-                    "device_platform": device_platform,
+                    "platform": device_platform,
                     "version": "15.5(1)SY",
                     "alias": "Catalyst-15.5(1)SY",
-                    "end_of_support": "2019-02-5",
+                    "end_of_support_date": "2019-02-5",
                     "documentation_url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst6500/ios/15-1SY/config_guide/sup2T/15_1_sy_swcg_2T/cef.html",
                     "long_term_support": False,
                     "pre_release": True,
+                    "status": software_status,
                 }
             ),
         )
@@ -509,159 +464,6 @@ class VulnerabilityLCMAPITest(
     @skip("Not implemented")
     def test_options_returns_expected_choices(self):
         pass
-
-
-class SoftwareImageLCMAPITest(APIViewTestCases.APIViewTestCase):
-    """Test the SoftwareImageLCM API."""
-
-    model = SoftwareImageLCM
-    brief_fields = [
-        "default_image",
-        "device_types",
-        "display",
-        "download_url",
-        "hashing_algorithm",
-        "id",
-        "image_file_checksum",
-        "image_file_name",
-        "inventory_items",
-        "object_tags",
-        "url",
-    ]
-
-    @classmethod
-    def setUpTestData(cls):  # pylint: disable=too-many-locals,invalid-name
-        """Create a superuser and token for API calls."""
-        device_platform_cisco, _ = Platform.objects.get_or_create(name="cisco_ios")
-        device_platform_arista, _ = Platform.objects.get_or_create(name="arista_eos")
-        softwares_cisco = (
-            SoftwareLCM.objects.get_or_create(
-                **{
-                    "device_platform": device_platform_cisco,
-                    "version": "17.3.3 MD",
-                }
-            )[0],
-            SoftwareLCM.objects.get_or_create(
-                **{
-                    "device_platform": device_platform_cisco,
-                    "version": "15.5(1)SY",
-                }
-            )[0],
-        )
-        softwares_arista = (
-            SoftwareLCM.objects.get_or_create(
-                **{
-                    "device_platform": device_platform_arista,
-                    "version": "4.21.6M",
-                }
-            )[0],
-            SoftwareLCM.objects.get_or_create(
-                **{
-                    "device_platform": device_platform_arista,
-                    "version": "4.25.7F",
-                }
-            )[0],
-        )
-
-        manufacturer_cisco = Manufacturer.objects.create(name="Cisco")
-        manufacturer_arista = Manufacturer.objects.create(name="Arista")
-        location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
-        location_type_location_a.content_types.add(
-            ContentType.objects.get_for_model(Device),
-        )
-        location_status = Status.objects.get_for_model(Location).first()
-        location1, _ = Location.objects.get_or_create(
-            name="Location1", location_type=location_type_location_a, status=location_status
-        )
-        devicerole, _ = Role.objects.get_or_create(name="router", color="ff0000")
-        devicerole.content_types.add(ContentType.objects.get_for_model(Device))
-        devicetypes_cisco = (
-            DeviceType.objects.create(manufacturer=manufacturer_cisco, model="ASR-1000"),
-            DeviceType.objects.create(manufacturer=manufacturer_cisco, model="Catalyst 6500"),
-        )
-        devicetypes_arista = (
-            DeviceType.objects.create(manufacturer=manufacturer_arista, model="7150S"),
-            DeviceType.objects.create(manufacturer=manufacturer_arista, model="7508R"),
-        )
-        device_status = Status.objects.get_for_model(Device).first()
-        device_cisco = Device.objects.create(
-            device_type=devicetypes_cisco[0], role=devicerole, name="Device 1", location=location1, status=device_status
-        )
-        device_arista = Device.objects.create(
-            device_type=devicetypes_arista[0],
-            role=devicerole,
-            name="Device 2",
-            location=location1,
-            status=device_status,
-        )
-        inventoryitems_cisco = (
-            InventoryItem.objects.create(device=device_cisco, name="SwitchModule1"),
-            InventoryItem.objects.create(device=device_cisco, name="Supervisor Engine 720"),
-        )
-        inventoryitems_arista = (
-            InventoryItem.objects.create(device=device_arista, name="SFP1"),
-            InventoryItem.objects.create(device=device_arista, name="QSFP1"),
-        )
-
-        tags = (Tag.objects.create(name="asr"), Tag.objects.create(name="edge"))
-
-        cls.create_data = [
-            {
-                "image_file_name": "asr1001x-universalk9.17.03.03.SPA.bin",
-                "software": softwares_cisco[0].id,
-                "device_types": [devicetype.pk for devicetype in devicetypes_cisco],
-                "download_url": "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.SPA.bin",
-                "image_file_checksum": "9cf2e09b59207a4d8ea408ea9971f6ae6facab9a1855a34e1ed8755f3ffe4b9e14",
-                "default_image": True,
-            },
-            {
-                "image_file_name": "asr1001x-universalk9.17.03.03.ssl.SPA.bin",
-                "software": softwares_cisco[0].id,
-                "inventory_items": [inventoryitem.pk for inventoryitem in inventoryitems_cisco],
-                "download_url": "ftp://device-images.local.com/cisco/asr1001x-universalk9.17.03.03.ssl.SPA.bin",
-                "image_file_checksum": "7f2e09b59207a4d8ea40fa132va71f6ae6facab9a1851a34e1ed8755f3ffe4b9e14",
-                "default_image": False,
-            },
-            {
-                "image_file_name": "s2t54-ipservicesk9_npe-mz.SPA.155-1.SY1.bin",
-                "software": softwares_cisco[1].id,
-                "object_tags": [tag.pk for tag in tags],
-                "download_url": "ftp://device-images.local.com/cisco/s2t54-ipservicesk9_npe-mz.SPA.155-1.SY1.bin",
-                "image_file_checksum": "74e61320f5518a2954b2d307b7e6a038",
-                "default_image": True,
-            },
-        ]
-        software_image = SoftwareImageLCM(
-            image_file_name="eos2gb_4.21.6m.swi",
-            software=softwares_arista[0],
-            download_url="ftp://images.local/arista/eos2gb_4.21m.swi",
-            image_file_checksum="78arfabd75b0fa2vzas1e7afcc6faa3fc",
-            default_image=True,
-        )
-        software_image.save()
-        software_image = SoftwareImageLCM(
-            image_file_name="eos_4.21.6m.swi",
-            software=softwares_arista[0],
-            download_url="ftp://images.local/arista/eos_4.21.6m.swi",
-            image_file_checksum="78arfabd75b0fa2vzas1e7a7ac6faa3fc",
-            default_image=True,
-        )
-        software_image.inventory_items.set([inventoryitem.pk for inventoryitem in inventoryitems_arista])
-        software_image.save()
-
-        software_image = SoftwareImageLCM(
-            image_file_name="eos_4.25.7f.swi",
-            software=softwares_arista[1],
-            download_url="ftp://images.local/arista/eos_4.25.7f.swi",
-            image_file_checksum="78arfabd75b0fa2vfas1e7a7ac6faa3fc",
-            default_image=True,
-        )
-        software_image.device_types.set([devicetype.pk for devicetype in devicetypes_arista])
-        software_image.save()
-
-    @skip("Not implemented")
-    def test_bulk_delete_objects(self):
-        """Currently don't support bulk operations."""
 
 
 class ProviderLCMAPITest(APIViewTestCases.APIViewTestCase):
