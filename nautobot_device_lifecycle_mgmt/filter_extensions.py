@@ -1,7 +1,11 @@
 """Extensions to core filters."""
 
 from django_filters import BooleanFilter
-from nautobot.apps.filters import FilterExtension
+
+try:
+    from nautobot.apps.filters import FilterExtension
+except ImportError:
+    from nautobot.extras.plugins import PluginFilterExtension as FilterExtension
 
 
 def distinct_filter(queryset, _, value):
