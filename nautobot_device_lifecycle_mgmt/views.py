@@ -1,4 +1,5 @@
 """Views implementation for the Lifecycle Management app."""
+
 import base64
 import io
 import logging
@@ -92,7 +93,9 @@ class SoftwareImageLCMUIViewSet(NautobotUIViewSet):
     filterset_class = filters.SoftwareImageLCMFilterSet
     filterset_form_class = forms.SoftwareImageLCMFilterForm
     form_class = forms.SoftwareImageLCMForm
-    queryset = models.SoftwareImageLCM.objects.all()
+    queryset = models.SoftwareImageLCM.objects.annotate(
+        device_type_count=Count("device_types"), object_tag_count=Count("object_tags")
+    )
     serializer_class = serializers.SoftwareImageLCMSerializer
     table_class = tables.SoftwareImageLCMTable
 
@@ -312,7 +315,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
         axis.set_ylabel(chart_attrs["ylabel"])
         axis.set_title(chart_attrs["title"])
         axis.set_xticks(label_locations)
-        axis.set_xticklabels(labels, rotation=0)
+        axis.set_xticklabels(labels, rotation=45, ha="right")  # Rotate x-axis labels for better readability
         # Force integer y-axis labels
         axis.yaxis.set_major_locator(MaxNLocator(integer=True))
         axis.margins(0.2, 0.2)
@@ -324,7 +327,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
                 height = rect.get_height()
                 axis.annotate(
                     f"{height}",
-                    xy=(rect.get_x() + rect.get_width() / 2, 0.5),
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
                     xytext=(0, 3),  # 3 points vertical offset
                     textcoords="offset points",
                     ha="center",
@@ -334,6 +337,9 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
 
         for rect in rects:
             autolabel(rect)
+
+        # Adjust layout to make room for rotated labels
+        fig.tight_layout()
 
         return ReportOverviewHelper.url_encode_figure(fig)
 

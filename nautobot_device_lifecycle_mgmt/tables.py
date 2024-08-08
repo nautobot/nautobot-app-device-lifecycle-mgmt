@@ -2,10 +2,9 @@
 
 import django_tables2 as tables
 from django.urls import reverse
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 from django_tables2.utils import A
 from nautobot.apps.tables import BaseTable, BooleanColumn, ButtonsColumn, StatusTableMixin, TagColumn, ToggleColumn
-from nautobot.core.tables import LinkedCountColumn
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -22,10 +21,17 @@ from nautobot_device_lifecycle_mgmt.models import (
 )
 
 
-class M2MLinkedCountColumn(LinkedCountColumn):
+class M2MLinkedCountColumn(tables.Column):
     """Linked count column supporting many-to-many fields."""
 
-    def render(self, record, value):
+    def __init__(self, viewname, *args, view_kwargs=None, url_params=None, default=0, **kwargs):
+        """Initialize the column."""
+        self.viewname = viewname
+        self.view_kwargs = view_kwargs or {}
+        self.url_params = url_params
+        super().__init__(*args, default=default, **kwargs)
+
+    def render(self, record, value):  # pylint: disable=arguments-differ
         """Render the resulting URL."""
         if value:
             url = reverse(self.viewname, kwargs=self.view_kwargs)
@@ -37,7 +43,7 @@ class M2MLinkedCountColumn(LinkedCountColumn):
                         url += "&".join([f"{key}={val[key]}" for val in values])
                     else:
                         url += f"&{key}={getattr(record, kval)}"
-            return mark_safe(f'<a href="{url}">{value}</a>')  # nosec
+            return format_html('<a href="{}">{}</a>', url, value)
         return value
 
 
