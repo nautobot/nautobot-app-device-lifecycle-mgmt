@@ -2,8 +2,6 @@
 
 from datetime import date, datetime
 
-from django.conf import settings
-
 # from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -90,17 +88,16 @@ class HardwareLCM(PrimaryModel):
 
     @property
     def expired(self):
-        """Return True or False if chosen field is expired."""
-        expired_field = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"].get("expired_field", "end_of_support")
+        """
+        Return True if the current date is greater than the end of support date.
 
-        # If the chosen or default field does not exist, default to one of the required fields that are present
-        if not getattr(self, expired_field) and not getattr(self, "end_of_support"):
-            expired_field = "end_of_sale"
-        elif not getattr(self, expired_field) and not getattr(self, "end_of_sale"):
-            expired_field = "end_of_support"
-
+        If the end of support date has not been provided, return False.
+        If the current date is less than or equal to the end of support date, return False. 
+        """
         today = datetime.today().date()
-        return today >= getattr(self, expired_field)
+        if not getattr(self, "end_of_support"):
+            return False
+        return today > getattr(self, "end_of_support")
 
     def save(self, *args, **kwargs):
         """Override save to assert a full clean."""

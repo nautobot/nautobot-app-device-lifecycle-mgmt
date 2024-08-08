@@ -43,7 +43,6 @@ PLUGINS = ["nautobot_device_lifecycle_mgmt"]
 # Optionally you can override default settings for config items in the device lifecycle app (as seen in this example)
 PLUGINS_CONFIG = {
     "nautobot_device_lifecycle_mgmt": {
-        "expired_field": os.environ.get("NAUTOBOT_DLM_EXPIRED_FIELD", "end_of_support"),
         "barchart_bar_width": float(os.environ.get("BARCHART_BAR_WIDTH", 0.1)),
         "barchart_width": int(os.environ.get("BARCHART_WIDTH", 12)),
         "barchart_height": int(os.environ.get("BARCHART_HEIGHT", 5)),
@@ -73,7 +72,6 @@ sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
 The app behavior can be controlled with the following list of settings:
 | Key                  | Example                                                             | Default            | Description                                                          |
 | -------------------- | ------------------------------------------------------------------- | ------------------ | -------------------------------------------------------------------- |
-| `expired_field`      | `end_of_support`                                                    | `end_of_support`   | The field name representing the expiry date.                         |
 | `barchart_bar_width` | `0.1`                                                               | `0.15`             | The width of the table bar within the overview report.               |
 | `barchart_width`     | `12`                                                                | `12`               | The width of the barchart within the overview report.                |
 | `barchart_height`    | `5`                                                                 | `5`                | The height of the barchart within the overview report.               |

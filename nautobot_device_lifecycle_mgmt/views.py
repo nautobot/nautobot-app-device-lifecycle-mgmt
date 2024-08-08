@@ -24,9 +24,6 @@ PLUGIN_CFG = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 
-# ---------------------------------------------------------------------------------
-#  Hardware Lifecycle Management Views
-# ---------------------------------------------------------------------------------
 GREEN, RED, GREY = (f"#{ColorChoices.COLOR_LIGHT_GREEN}", f"#{ColorChoices.COLOR_RED}", f"#{ColorChoices.COLOR_GREY}")
 
 
@@ -275,7 +272,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
                 hw_notice = models.HardwareLCM.objects.get(device_type__id=device_type[chart_attrs["device_type_id"]])
                 eos_date = hw_notice.end_of_support
             except ObjectDoesNotExist:
-                eos_date = ""
+                eos_date = "None"
             # Add labels and set bar colors
             if device_type["valid"] > 0:
                 device_types.append(str(device_type[chart_attrs["label_accessor"]]) + "\n" + str(eos_date))

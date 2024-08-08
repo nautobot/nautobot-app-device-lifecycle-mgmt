@@ -43,10 +43,7 @@ class DeviceHardwareNoticeFullReport(Job):
             if notice.device_type:
                 devices_qs = Device.objects.filter(device_type=notice.device_type)
                 for device in devices_qs:
-                    if notice.end_of_support:
-                        is_supported = datetime.today().date() <= notice.end_of_support
-                    else:
-                        is_supported = True
+                    is_supported = not notice.expired
                     try:
                         hardware_notice_result, _ = DeviceHardwareNoticeResult.objects.get_or_create(device=device)
                         hardware_notice_result.hardware_notice = notice

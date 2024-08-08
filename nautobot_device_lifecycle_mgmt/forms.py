@@ -137,7 +137,7 @@ class HardwareLCMFilterForm(NautobotFilterForm):
     q = forms.CharField(required=False, label="Search")
     expired = forms.BooleanField(
         required=False,
-        label="No longer sold or supported",
+        label="Support Expired",
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
     )
     device_type = forms.ModelMultipleChoiceField(
@@ -274,6 +274,11 @@ class DeviceHardwareNoticeResultFilterForm(NautobotFilterForm):
     """Filter form to filter searches for DeviceHardwareNoticeResult."""
 
     model = DeviceHardwareNoticeResult
+    hardware_notice_available = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Hardware Notice Available",
+    )
     supported = forms.BooleanField(
         required=False,
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),

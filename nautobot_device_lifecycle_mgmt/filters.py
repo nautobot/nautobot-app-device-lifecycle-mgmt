@@ -70,7 +70,7 @@ class HardwareLCMFilterSet(NautobotFilterSet):
             },
         }
     )
-    expired = django_filters.BooleanFilter(method="_expired_search", label="Unsupported")
+    expired = django_filters.BooleanFilter(method="_expired_search", label="Support Expired")
     device_type_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device_type",
         queryset=DeviceType.objects.all(),
@@ -103,9 +103,14 @@ class HardwareLCMFilterSet(NautobotFilterSet):
     def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""
         today = datetime.datetime.today().date()
-        lookup = "gte" if not value else "lt"
-
-        qs_filter = Q(**{f"end_of_sale__{lookup}": today}) | Q(**{f"end_of_support__{lookup}": today})
+        # End of support dates less than today are expired.
+        # End of support dates greater than or equal to today are not expired.
+        # If the end of support date is null, the notice will never be expired.
+        qs_filter = None
+        if value:
+            qs_filter = Q(**{"end_of_support__lt": today})
+        if not value:
+            qs_filter = Q(**{"end_of_support__gte": today}) | Q(**{"end_of_support__isnull": not value})
         return queryset.filter(qs_filter)
 
 
@@ -257,6 +262,10 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
 class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):
     """Filter for DeviceHardwareNoticeResult."""
 
+    hardware_notice_available = django_filters.BooleanFilter(
+        method="_hardware_notice_available_search",
+        label="Hardware Notice Available",
+    )
     supported = django_filters.BooleanFilter(
         label="Supported",
         field_name="is_supported",
@@ -378,6 +387,11 @@ class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):
             "end_of_sw_releases",
             "end_of_security_patches",
         ]
+
+    def _hardware_notice_available_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the filtered search."""
+        value = not value  # invert boolean for use in django filter
+        return queryset.filter(hardware_notice__isnull=value)
 
 
 class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
@@ -702,9 +716,14 @@ class ContractLCMFilterSet(NautobotFilterSet):
     def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""
         today = datetime.datetime.today().date()
-        lookup = "gte" if not value else "lt"
-
-        qs_filter = Q(**{f"end__{lookup}": today})
+        # Contract end dates less than today are expired.
+        # Contract end dates greater than or equal to today, are not expired.
+        # If the end date is null, the contract will never be expired.
+        qs_filter = None
+        if value:
+            qs_filter = Q(**{"end__lt": today})
+        if not value:
+            qs_filter = Q(**{"end__gte": today}) | Q(**{"end__isnull": not value})
         return queryset.filter(qs_filter)
 
 
