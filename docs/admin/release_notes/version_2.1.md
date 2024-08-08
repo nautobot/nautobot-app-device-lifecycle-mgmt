@@ -7,7 +7,7 @@ This document describes all new features and changes in the release `2.1`. The f
 This release adds support for various improvements, bug fixes, and performance improvements.
 
 <!-- towncrier release notes start -->
-## [v2.1.2 (2024-08-07)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v2.1.2)
+## [v2.1.2 (2024-08-08)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v2.1.2)
 
 ### Added
 
