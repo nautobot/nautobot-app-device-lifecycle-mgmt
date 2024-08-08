@@ -1,4 +1,5 @@
 """App declaration for nautobot_device_lifecycle_mgmt."""
+
 # Metadata is inherited from Nautobot. If not including Nautobot in the environment, this should be added
 from importlib import metadata
 
