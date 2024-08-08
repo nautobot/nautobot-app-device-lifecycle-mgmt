@@ -1,25 +1,12 @@
 # pylint: disable=no-member
 """Unit tests for nautobot_device_lifecycle_mgmt."""
-import datetime
-from unittest import skip
 
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.models import ContentType
-from nautobot.apps.testing import APIViewTestCases
-from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, LocationType, Manufacturer, Platform
-from nautobot.extras.models import Role, Status, Tag
-
-from nautobot_device_lifecycle_mgmt.models import (
-    CVELCM,
-    ContractLCM,
-    HardwareLCM,
-    ProviderLCM,
-    SoftwareImageLCM,
-    SoftwareLCM,
-    ValidatedSoftwareLCM,
-    VulnerabilityLCM,
-)
-from nautobot_device_lifecycle_mgmt.tests.conftest import create_cves, create_devices, create_softwares
+from django.test import TestCase
+from django.urls import reverse
+from nautobot.users.models import Token
+from rest_framework import status
+from rest_framework.test import APIClient
 
 User = get_user_model()
 
