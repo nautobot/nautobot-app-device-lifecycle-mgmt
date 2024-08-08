@@ -92,7 +92,7 @@ class HardwareLCM(PrimaryModel):
         Return True if the current date is greater than the end of support date.
 
         If the end of support date has not been provided, return False.
-        If the current date is less than or equal to the end of support date, return False. 
+        If the current date is less than or equal to the end of support date, return False.
         """
         today = datetime.today().date()
         if not getattr(self, "end_of_support"):
