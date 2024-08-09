@@ -704,6 +704,7 @@ class ContractLCMFilterForm(NautobotFilterForm):
         required=False, widget=StaticSelect2, choices=add_blank_choice(ContractTypeChoices.CHOICES)
     )
     name = forms.CharField(required=False)
+    tags = TagFilterField(model)
 
     class Meta:
         """Meta attributes for the ContractLCMFilterForm class."""
@@ -721,6 +722,7 @@ class ContractLCMFilterForm(NautobotFilterForm):
             "support_level",
             "contract_type",
             "devices",
+            "tags",
         ]
 
         widgets = {
