@@ -272,7 +272,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
                 hw_notice = models.HardwareLCM.objects.get(device_type__id=device_type[chart_attrs["device_type_id"]])
                 eos_date = hw_notice.end_of_support
             except ObjectDoesNotExist:
-                eos_date = "None"
+                eos_date = "Never"
             # Add labels and set bar colors
             if device_type["valid"] > 0:
                 device_types.append(str(device_type[chart_attrs["label_accessor"]]) + "\n" + str(eos_date))
