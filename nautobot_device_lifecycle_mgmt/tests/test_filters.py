@@ -129,22 +129,22 @@ class HardwareLCMTestCase(TestCase):
 
     def test_device_type_name_single(self):
         """Test device_type filter."""
-        params = {"device_type": ["c9300-24"]}
+        params = {"device_type_model": ["c9300-24"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_device_types_name_all(self):
         """Test device_type filter."""
-        params = {"device_type": ["c9300-24", "c9300-48"]}
+        params = {"device_type_model": ["c9300-24", "c9300-48"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
     def test_device_types_id_single(self):
         """Test device_type_id filter."""
-        params = {"device_type_id": [self.device_types[0].id]}
+        params = {"device_type": [self.device_types[0].id]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_device_types_id_all(self):
         """Test device_type_id filter."""
-        params = {"device_type_id": [self.device_types[0].id, self.device_types[1].id]}
+        params = {"device_type": [self.device_types[0].id, self.device_types[1].id]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
     def test_devices_name_all(self):

@@ -28,13 +28,14 @@ class HardwareLCMFilterSet(NautobotFilterSet):
     q = django_filters.CharFilter(method="search", label="Search")
 
     device_type = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_type", queryset=DeviceType.objects.all(), label="Device Type"
+    )
+
+    device_type_model = django_filters.ModelMultipleChoiceFilter(
         field_name="device_type__model",
         queryset=DeviceType.objects.all(),
         to_field_name="model",
         label="Device Type (Model)",
-    )
-    device_type_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="device_type", queryset=DeviceType.objects.all(), label="Device Type"
     )
 
     inventory_item = django_filters.ModelMultipleChoiceFilter(
