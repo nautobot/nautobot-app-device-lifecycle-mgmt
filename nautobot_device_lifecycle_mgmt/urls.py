@@ -1,9 +1,8 @@
 """Django urlpatterns declaration for the Lifecycle Management app."""
 
-from django.urls import path
 from django.templatetags.static import static
+from django.urls import path
 from django.views.generic import RedirectView
-
 from nautobot.apps.urls import NautobotUIViewSetRouter
 
 from nautobot_device_lifecycle_mgmt import views

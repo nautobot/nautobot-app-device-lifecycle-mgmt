@@ -4,7 +4,10 @@ import logging
 
 from django import forms
 from nautobot.apps.forms import (
+<<<<<<< HEAD
     CustomFieldModelBulkEditFormMixin,
+=======
+>>>>>>> 8b5c42d (Revert changes to test_api and ruff)
     DatePicker,
     DynamicModelChoiceField,
     DynamicModelChoiceMixin,
