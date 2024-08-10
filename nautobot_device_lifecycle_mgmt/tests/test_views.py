@@ -1,5 +1,6 @@
 # pylint: disable=no-member
 """Unit tests for views."""
+
 import datetime
 from unittest import skip
 
@@ -33,7 +34,8 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
 
     def _get_base_url(self):
         return "plugins:{}:{}_{{}}".format(  # pylint: disable=consider-using-f-string
-            self.model._meta.app_label, self.model._meta.model_name  # pylint: disable=protected-access
+            self.model._meta.app_label,
+            self.model._meta.model_name,  # pylint: disable=protected-access
         )
 
     @classmethod

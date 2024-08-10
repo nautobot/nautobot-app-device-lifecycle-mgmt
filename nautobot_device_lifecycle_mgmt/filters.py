@@ -1,4 +1,5 @@
 """Filtering implementation for the Lifecycle Management app."""
+
 import datetime
 
 import django_filters

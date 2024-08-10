@@ -1,10 +1,10 @@
 """Forms implementation for the Lifecycle Management app."""
+
 import logging
 
 from django import forms
 from django.db.models import Q
 from nautobot.apps.forms import (
-    add_blank_choice,
     DatePicker,
     DynamicModelChoiceField,
     DynamicModelMultipleChoiceField,
@@ -13,6 +13,7 @@ from nautobot.apps.forms import (
     StaticSelect2,
     StaticSelect2Multiple,
     TagFilterField,
+    add_blank_choice,
 )
 from nautobot.core.forms.constants import BOOLEAN_WITH_BLANK_CHOICES
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform

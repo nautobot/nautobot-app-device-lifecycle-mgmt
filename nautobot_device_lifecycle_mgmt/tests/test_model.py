@@ -1,5 +1,6 @@
 # pylint: disable=no-member
 """nautobot_device_lifecycle_mgmt test class for models."""
+
 from datetime import date
 
 import time_machine
