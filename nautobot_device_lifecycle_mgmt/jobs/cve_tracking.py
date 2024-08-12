@@ -116,7 +116,8 @@ class NistCveSyncSoftware(Job):
                 platform = NIST_LIB_MAPPER_REVERSE[platform]
             except KeyError:
                 self.logger.warning(
-                    "OS Platform %s is not yet supported; Skipping.", platform,
+                    "OS Platform %s is not yet supported; Skipping.",
+                    platform,
                     extra={"object": software.platform, "grouping": "CVE Information"},
                 )
                 continue
@@ -131,7 +132,8 @@ class NistCveSyncSoftware(Job):
                 continue
 
             self.logger.info(
-                "Gathering CVE Information for Software Version: %s", version,
+                "Gathering CVE Information for Software Version: %s",
+                version,
                 extra={"object": software.platform, "grouping": "CVE Information"},
             )
 
@@ -166,7 +168,8 @@ class NistCveSyncSoftware(Job):
 
         except IntegrityError as err:
             self.logger.error(
-                "Unable to create association between CVE and Software Version.  ERROR: %s", err,
+                "Unable to create association between CVE and Software Version.  ERROR: %s",
+                err,
                 extra={"object": cve, "grouping": "CVE Association"},
             )
 
@@ -224,7 +227,8 @@ class NistCveSyncSoftware(Job):
             all_cve_info = {"new": {}, "existing": {}}
             if result["totalResults"] > 0:
                 self.logger.info(
-                    "Received %s results.", result["totalResults"],
+                    "Received %s results.",
+                    result["totalResults"],
                     extra={"object": SoftwareVersion.objects.get(id=software_id), "grouping": "CVE Creation"},
                 )
                 cve_list = [cve["cve"] for cve in result["vulnerabilities"]]
@@ -301,23 +305,19 @@ class NistCveSyncSoftware(Job):
 
     def prep_cve_for_dlc(self, cve_json):  # pylint: disable=too-many-locals
         """Converts CVE info into DLC Model compatibility."""
-        cve = cve_json
-
-        # cve_base = cve["vulnerabilities"][0]['cve']
-        cve_base = cve
-        cve_name = cve_base["id"]
-        for desc in cve_base["descriptions"]:
+        cve_name = cve_json["id"]
+        for desc in cve_json["descriptions"]:
             if desc["lang"] == "en":
                 cve_description = desc["value"]
             else:
                 cve_description = "No description provided."
-        cve_published_date = cve_base.get("published")
-        cve_modified_date = cve_base.get("lastModified")
-        cve_impact = cve_base["metrics"]
+        cve_published_date = cve_json.get("published")
+        cve_modified_date = cve_json.get("lastModified")
+        cve_impact = cve_json["metrics"]
 
         # Determine URL
-        if len(cve_base["references"]) > 0:
-            cve_url = cve_base["references"][0].get("url", f"https://www.cvedetails.com/cve/{cve_name}/")
+        if len(cve_json["references"]) > 0:
+            cve_url = cve_json["references"][0].get("url", f"https://www.cvedetails.com/cve/{cve_name}/")
         else:
             cve_url = f"https://www.cvedetails.com/cve/{cve_name}/"
 

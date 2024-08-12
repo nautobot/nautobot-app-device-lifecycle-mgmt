@@ -69,7 +69,7 @@ In order to utilize the NIST CVE DB for automatic software CVE discovery, you wi
 
 Once received, this key will need to be added to your `creds.env`:
 ```
-NIST_API_KEY=your-key-will-go-here
+NAUTOBOT_DLM_NIST_API_KEY=your-key-will-go-here
 ```
 
 ### Run Job
