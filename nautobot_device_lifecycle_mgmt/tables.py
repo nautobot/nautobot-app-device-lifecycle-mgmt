@@ -443,6 +443,7 @@ class ContractLCMTable(BaseTable):
         template_code="""{{ record.cost }}{% if record.currency %} {{ record.currency }}{% endif %}"""
     )
     actions = ButtonsColumn(ContractLCM, buttons=("changelog", "edit", "delete"))
+    tags = TagColumn(url_name="plugins:nautobot_device_lifecycle_mgmt:contractlcm_list")
 
     class Meta(BaseTable.Meta):
         """Meta attributes."""
@@ -458,6 +459,7 @@ class ContractLCMTable(BaseTable):
             "contract_type",
             "devices",
             "provider",
+            "tags",
             "actions",
         )
 

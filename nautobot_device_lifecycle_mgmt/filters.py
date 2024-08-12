@@ -685,6 +685,7 @@ class ContractLCMFilterSet(NautobotFilterSet):
             "contract_type",
             "expired",
             "currency",
+            "tags",
         ]
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
