@@ -34,6 +34,7 @@ matplotlib = "^3.3.4"
 nautobot = "^2.2.0"
 
 [tool.poetry.group.dev.dependencies]
+Django = "~3.2.25"
 bandit = "*"
 black = "*"
 coverage = "*"
@@ -133,7 +134,7 @@ notes = """,
 
 [tool.pylint-nautobot]
 supported_nautobot_versions = [
-    "2.0.0"
+    "2.2.0"
 ]
 
 [tool.ruff]

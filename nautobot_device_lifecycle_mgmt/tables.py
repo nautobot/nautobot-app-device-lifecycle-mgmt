@@ -2,11 +2,8 @@
 """Tables implementation for the Lifecycle Management app."""
 
 import django_tables2 as tables
-from django.urls import reverse
-from django.utils.safestring import mark_safe
 from django_tables2.utils import A
 from nautobot.apps.tables import BaseTable, BooleanColumn, ButtonsColumn, StatusTableMixin, TagColumn, ToggleColumn
-from nautobot.core.tables import LinkedCountColumn
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -19,25 +16,6 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
-
-
-class M2MLinkedCountColumn(LinkedCountColumn):
-    """Linked count column supporting many-to-many fields."""
-
-    def render(self, record, value):
-        """Render the resulting URL."""
-        if value:
-            url = reverse(self.viewname, kwargs=self.view_kwargs)
-            if self.url_params:
-                url += "?"
-                for key, kval in self.url_params.items():
-                    if isinstance(kval, tuple):
-                        values = getattr(record, kval[0]).values(kval[1])
-                        url += "&".join([f"{key}={val[key]}" for val in values])
-                    else:
-                        url += f"&{key}={getattr(record, kval)}"
-            return mark_safe(f'<a href="{url}">{value}</a>')  # nosec
-        return value
 
 
 class PercentageColumn(tables.Column):
@@ -418,7 +396,7 @@ class ContractLCMTable(BaseTable):
     active = BooleanColumn(verbose_name="Active", orderable=False)
     expired = BooleanColumn(verbose_name="Expired", orderable=False)
     actions = ButtonsColumn(ContractLCM, buttons=("changelog", "edit", "delete"))
-    tags = TagColumn()
+    tags = TagColumn(url_name="plugins:nautobot_device_lifecycle_mgmt:contractlcm_list")
 
     class Meta(BaseTable.Meta):
         """Meta attributes."""
@@ -436,8 +414,8 @@ class ContractLCMTable(BaseTable):
             "provider",
             "expired",
             "active",
-            "actions",
             "tags",
+            "actions",
         )
 
         default_columns = (
@@ -447,9 +425,9 @@ class ContractLCMTable(BaseTable):
             "cost",
             "support_level",
             "contract_type",
-            "devices",
             "provider",
             "active",
+            "tags",
             "actions",
         )
 

@@ -6,7 +6,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("nautobot_device_lifecycle_mgmt", "0025_migrate_soft_references_p2"),
+        ("nautobot_device_lifecycle_mgmt", "0026_migrate_soft_references_p2"),
     ]
 
     operations = [

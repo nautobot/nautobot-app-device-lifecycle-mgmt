@@ -28,6 +28,7 @@ class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
         "enabled_metrics": [],
     }
     caching_config = {}
+    docs_view_name = "plugins:nautobot_device_lifecycle_mgmt:docs"
 
     def ready(self):
         """Register custom signals."""
