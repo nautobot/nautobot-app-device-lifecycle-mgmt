@@ -227,7 +227,8 @@ class NistCveSyncSoftware(Job):
             all_cve_info = {"new": {}, "existing": {}}
             if result["totalResults"] > 0:
                 self.logger.info(
-                    "Received %s results.", result["totalResults"],
+                    "Received %s results.",
+                    result["totalResults"],
                     extra={"object": SoftwareVersion.objects.get(id=software_id), "grouping": "CVE Creation"},
                 )
                 cve_list = [cve["cve"] for cve in result["vulnerabilities"]]
