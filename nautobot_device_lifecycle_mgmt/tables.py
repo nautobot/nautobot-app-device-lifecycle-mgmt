@@ -20,25 +20,6 @@ from nautobot_device_lifecycle_mgmt.models import (
 )
 
 
-class M2MLinkedCountColumn(LinkedCountColumn):
-    """Linked count column supporting many-to-many fields."""
-
-    def render(self, record, value):
-        """Render the resulting URL."""
-        if value:
-            url = reverse(self.viewname, kwargs=self.view_kwargs)
-            if self.url_params:
-                url += "?"
-                for key, kval in self.url_params.items():
-                    if isinstance(kval, tuple):
-                        values = getattr(record, kval[0]).values(kval[1])
-                        url += "&".join([f"{key}={val[key]}" for val in values])
-                    else:
-                        url += f"&{key}={getattr(record, kval)}"
-            return mark_safe(f'<a href="{url}">{value}</a>')  # nosec
-        return value
-
-
 class PercentageColumn(tables.Column):
     """Column used to display percentage."""
 
