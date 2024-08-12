@@ -292,7 +292,7 @@ class Migration(migrations.Migration):
         ("dcim", "0055_softwareimage_softwareversion_data_migration"),
         ("contenttypes", "0002_remove_content_type_name"),
         ("extras", "0057_jobbutton"),
-        ("nautobot_device_lifecycle_mgmt", "0021_update_max_char_length"),
+        ("nautobot_device_lifecycle_mgmt", "0022_alter_softwareimagelcm_inventory_items_and_more"),
         ("users", "0001_initial"),
     ]
 
