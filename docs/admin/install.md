@@ -71,13 +71,14 @@ sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
 ## App Configuration
 
 The app behavior can be controlled with the following list of settings:
-| Key                  | Example                                                             | Default            | Description                                                          |
-| -------------------- | ------------------------------------------------------------------- | ------------------ | -------------------------------------------------------------------- |
-| `expired_field`      | `end_of_support`                                                    | `end_of_support`   | The field name representing the expiry date.                         |
-| `barchart_bar_width` | `0.1`                                                               | `0.15`             | The width of the table bar within the overview report.               |
-| `barchart_width`     | `12`                                                                | `12`               | The width of the barchart within the overview report.                |
-| `barchart_height`    | `5`                                                                 | `5`                | The height of the barchart within the overview report.               |
-| `enabled_metrics`    | `["metrics_lcm_hw_end_of_support_location"]`                        | `[]`               | Enables metrics corresponding to the provided entries.               |
+
+| Key                  | ENV VAR | Example                   | Default | Description |
+| -------------------- | ------- |  ------------------------- | ------- | -------------------------------------------------------------------- |
+| `expired_field`      | `NAUTOBOT_DLM_EXPIRED_FIELD` | `end_of_support`          |    `end_of_support`     | The field name representing the expiry date.                          |
+| `barchart_bar_width` | `BARCHART_BAR_WIDTH` |  `0.1`                     | `0.15`  | The width of the table bar within the overview report.                |
+| `barchart_width`     | `BARCHART_WIDTH` | `12`                      |   `12`     | The width of the barchart within the overview report.                 |
+| `barchart_height`    | `BARCHART_HEIGHT` | `5`                       |   `5`      | The height of the barchart within the overview report.                |
+| `enabled_metrics`    | `NAUTOBOT_DLM_ENABLED_METRICS` | `["nautobot_lcm_hw_end_of_support_per_location"]`                        | `[]`               | Enables metrics corresponding to the provided, comma separated, entries.               |
 
 ### Available Metric Names
 

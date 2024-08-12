@@ -56,7 +56,7 @@ class MetricsTest(TestCase):
             self.assertEqual(expected_ts_samples[sample_labels], sample.value)
 
     def test_metrics_lcm_hw_end_of_support_location_does_not_error(self):
-        """Query providing data to metrics_lcm_hw_end_of_support_part_number metric should not error out.
+        """Query providing data to hw_end_of_support_location_gauge metric should not error out.
         Guards against https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/309
         """
         metric_gen = metrics_lcm_hw_end_of_support_location()
