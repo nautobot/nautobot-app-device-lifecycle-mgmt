@@ -83,7 +83,7 @@ class HardwareLCMFilterSet(NautobotFilterSet):
         field_name="device_type__model",
         queryset=DeviceType.objects.all(),
         to_field_name="model",
-        label="Device Type (model)",
+        label="Device Type (Model)",
     )
 
     inventory_item = django_filters.ModelMultipleChoiceFilter(
