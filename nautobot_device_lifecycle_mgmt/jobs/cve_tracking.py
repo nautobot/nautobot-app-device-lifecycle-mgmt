@@ -89,7 +89,7 @@ class NistCveSyncSoftware(Job):
     def __init__(self):
         """Initializing job with extra options."""
         super().__init__()
-        self.nist_api_key = getenv("NIST_API_KEY")
+        self.nist_api_key = getenv("NAUTOBOT_DLM_NIST_API_KEY")
         self.sleep_timer = 0.75
         self.headers = {"ContentType": "application/json", "apiKey": self.nist_api_key}
 
@@ -108,15 +108,15 @@ class NistCveSyncSoftware(Job):
         cve_counter = 0
 
         for software in SoftwareVersion.objects.all():
-            manufacturer = str(software.platform.manufacturer).lower()
-            platform = str(software.platform.network_driver).lower()
-            version = str(software.version).replace(" ", "")
+            manufacturer = software.platform.manufacturer.name.lower()
+            platform = software.platform.network_driver.lower()
+            version = software.version.replace(" ", "")
 
             try:
                 platform = NIST_LIB_MAPPER_REVERSE[platform]
             except KeyError:
                 self.logger.warning(
-                    "OS Platform %s is not yet supported; Skipping." % platform,
+                    "OS Platform %s is not yet supported; Skipping.", platform,
                     extra={"object": software.platform, "grouping": "CVE Information"},
                 )
                 continue
@@ -125,13 +125,13 @@ class NistCveSyncSoftware(Job):
                 cpe_software_search_urls = self.create_cpe_software_search_urls(manufacturer, platform, version)
             except TypeError:
                 self.logger.error(
-                    "There is an issue with the Software Version in Nautobot.  Please check the version value.",
+                    "There is an issue with the Software Version in Nautobot. Please check the version value.",
                     extra={"grouping": "URL Creation"},
                 )
                 continue
 
             self.logger.info(
-                "Gathering CVE Information for Version: %s" % version,
+                "Gathering CVE Information for Software Version: %s", version,
                 extra={"object": software.platform, "grouping": "CVE Information"},
             )
 
@@ -152,7 +152,7 @@ class NistCveSyncSoftware(Job):
             sleep(6)
 
         self.logger.info(
-            "Performed discovery on all software. Created %s CVE." % cve_counter, extra={"grouping": "CVE Creation"}
+            "Performed discovery on all software. Created %s CVE.", cve_counter, extra={"grouping": "CVE Creation"}
         )
         self.session.close()
 
@@ -166,7 +166,7 @@ class NistCveSyncSoftware(Job):
 
         except IntegrityError as err:
             self.logger.error(
-                "Unable to create association between CVE and Software Version.  ERROR: %s" % err,
+                "Unable to create association between CVE and Software Version.  ERROR: %s", err,
                 extra={"object": cve, "grouping": "CVE Association"},
             )
 
@@ -224,7 +224,7 @@ class NistCveSyncSoftware(Job):
             all_cve_info = {"new": {}, "existing": {}}
             if result["totalResults"] > 0:
                 self.logger.info(
-                    "Received %s results." % result["totalResults"],
+                    "Received %s results.", result["totalResults"],
                     extra={"object": SoftwareVersion.objects.get(id=software_id), "grouping": "CVE Creation"},
                 )
                 cve_list = [cve["cve"] for cve in result["vulnerabilities"]]
@@ -276,7 +276,7 @@ class NistCveSyncSoftware(Job):
         except HTTPError as err:
             code = err.response.status_code
             self.logger.error(
-                "The NIST Service is currently unavailable. Status Code: %s. Try running the job again later." % code
+                "The NIST Service is currently unavailable. Status Code: %s. Try running the job again later.", code
             )
 
         return result.json()
@@ -390,5 +390,5 @@ class NistCveSyncSoftware(Job):
 
         except ValidationError as err:
             self.logger.error(
-                "Unable to update CVE. ERROR: %s" % err, extra={"object": current_dlc_cve, "grouping": "CVE Updates"}
+                "Unable to update CVE. ERROR: %s", err, extra={"object": current_dlc_cve, "grouping": "CVE Updates"}
             )
