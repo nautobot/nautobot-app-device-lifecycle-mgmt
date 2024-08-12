@@ -116,7 +116,7 @@ class NistCveSyncSoftware(Job):
                 platform = NIST_LIB_MAPPER_REVERSE[platform]
             except KeyError:
                 self.logger.warning(
-                    "OS Platform %s is not yet supported; Skipping.",
+                    "OS Platform %s is not yet supported; Skipping.", 
                     platform,
                     extra={"object": software.platform, "grouping": "CVE Information"},
                 )
@@ -132,7 +132,7 @@ class NistCveSyncSoftware(Job):
                 continue
 
             self.logger.info(
-                "Gathering CVE Information for Software Version: %s",
+                "Gathering CVE Information for Software Version: %s", 
                 version,
                 extra={"object": software.platform, "grouping": "CVE Information"},
             )
@@ -168,7 +168,7 @@ class NistCveSyncSoftware(Job):
 
         except IntegrityError as err:
             self.logger.error(
-                "Unable to create association between CVE and Software Version.  ERROR: %s",
+                "Unable to create association between CVE and Software Version.  ERROR: %s", 
                 err,
                 extra={"object": cve, "grouping": "CVE Association"},
             )
@@ -227,8 +227,7 @@ class NistCveSyncSoftware(Job):
             all_cve_info = {"new": {}, "existing": {}}
             if result["totalResults"] > 0:
                 self.logger.info(
-                    "Received %s results.",
-                    result["totalResults"],
+                    "Received %s results.", result["totalResults"],
                     extra={"object": SoftwareVersion.objects.get(id=software_id), "grouping": "CVE Creation"},
                 )
                 cve_list = [cve["cve"] for cve in result["vulnerabilities"]]
