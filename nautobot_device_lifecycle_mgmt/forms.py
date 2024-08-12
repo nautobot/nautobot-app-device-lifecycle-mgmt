@@ -1,4 +1,4 @@
-"""Forms implementation for the Lifecycle Management app."""
+"""Forms implementation for the Lifecycle Management app."""  # pylint: disable=too-many-lines
 
 import logging
 
