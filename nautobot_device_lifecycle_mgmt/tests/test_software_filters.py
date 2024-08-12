@@ -1,5 +1,6 @@
 # pylint: disable=no-member
 """nautobot_device_lifecycle_mgmt test class for software queryset filters."""
+
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, LocationType, Manufacturer, Platform

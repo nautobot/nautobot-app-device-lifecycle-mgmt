@@ -1,4 +1,5 @@
 """Nautobot Device LCM App application level metrics ."""
+
 from datetime import datetime
 
 from django.contrib.contenttypes.models import ContentType

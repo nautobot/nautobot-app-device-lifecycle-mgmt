@@ -1,5 +1,6 @@
 # pylint: disable=logging-not-lazy, consider-using-f-string
 """Jobs for the CVE Tracking portion of the Device Lifecycle app."""
+
 from datetime import datetime
 
 from nautobot.extras.jobs import BooleanVar, Job, StringVar

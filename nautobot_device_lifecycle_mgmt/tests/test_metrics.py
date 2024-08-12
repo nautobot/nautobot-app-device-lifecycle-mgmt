@@ -1,4 +1,5 @@
 """nautobot_device_lifecycle_mgmt test class for metrics."""
+
 from django.db import ProgrammingError
 from nautobot.core.testing import TestCase
 
