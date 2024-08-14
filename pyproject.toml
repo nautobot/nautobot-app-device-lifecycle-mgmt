@@ -27,7 +27,7 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.12"
+python = ">=3.8,<=3.12"
 # Used for local development
 pycountry = "^22.3.5"
 matplotlib = "^3.3.4"
