@@ -142,7 +142,7 @@ class HardwareLCMFilterSet(NautobotFilterSet):
         if value:
             qs_filter = Q(**{"end_of_support__lt": today})
         if not value:
-            qs_filter = Q(**{"end_of_support__gte": today}) | Q(**{"end_of_support__isnull": not value})
+            qs_filter = Q(**{"end_of_support__gte": today}) | Q(**{"end_of_support__isnull": True})
         return queryset.filter(qs_filter)
 
 
