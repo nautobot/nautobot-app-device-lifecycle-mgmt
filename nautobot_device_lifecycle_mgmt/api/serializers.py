@@ -1,9 +1,11 @@
 """API serializers implementation for the LifeCycle Management app."""
+
 from nautobot.apps.api import NautobotModelSerializer, TaggedModelSerializerMixin
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
+    DeviceHardwareNoticeResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -91,6 +93,16 @@ class DeviceSoftwareValidationResultSerializer(NautobotModelSerializer):
         """Meta attributes."""
 
         model = DeviceSoftwareValidationResult
+        fields = "__all__"
+
+
+class DeviceHardwareNoticeResultSerializer(NautobotModelSerializer):
+    """REST API serializer for DeviceHardwareNoticeResult records."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = DeviceHardwareNoticeResult
         fields = "__all__"
 
 

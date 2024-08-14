@@ -2,6 +2,7 @@
 
 | Device Lifecycle Management Version | Nautobot First Support Version | Nautobot Last Support Version |
 | ------------- | -------------------- | ------------- |
+| 3.0.X         | 2.2.0                | 2.99.99       |
 | 2.1.X         | 2.0.0                | 2.99.99       |
 | 2.0.X         | 2.0.0                | 2.99.99       |
 | 1.6.X         | 1.4.0                | 1.6.X         |

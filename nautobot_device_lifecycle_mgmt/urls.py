@@ -20,6 +20,11 @@ urlpatterns = router.urls
 
 urlpatterns += [
     path(
+        "hardware-notice-device-report/",
+        views.HardwareNoticeDeviceReportView.as_view(),
+        name="hardwarenotice_device_report",
+    ),
+    path(
         "validated-software-device-report/",
         views.ValidatedSoftwareDeviceReportView.as_view(),
         name="validatedsoftware_device_report",
@@ -28,6 +33,12 @@ urlpatterns += [
         "validated-software-inventoryitem-report/",
         views.ValidatedSoftwareInventoryItemReportView.as_view(),
         name="validatedsoftware_inventoryitem_report",
+    ),
+    # DeviceHardwareNoticeResult
+    path(
+        "device-hardware-notice-result/",
+        views.DeviceHardwareNoticeResultListView.as_view(),
+        name="devicehardwarenoticeresult_list",
     ),
     # DeviceValidatedSoftwareResult
     path(

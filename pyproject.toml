@@ -50,14 +50,15 @@ yamllint = "*"
 toml = "*"
 Markdown = "*"
 # Rendering docs to HTML
-mkdocs = "1.5.2"
+mkdocs = "1.6.0"
 # Material for MkDocs theme
-mkdocs-material = "9.1.15"
+mkdocs-material = "9.5.25"
+# Automatic documentation from sources, for MkDocs
+mkdocstrings = "0.24.1"
+# Python-specific extension to mkdocstrings
+mkdocstrings-python = "1.9.0"
 # Render custom markdown for version added/changed/remove notes
 mkdocs-version-annotations = "1.0.0"
-# Automatic documentation from sources, for MkDocs
-mkdocstrings = "0.22.0"
-mkdocstrings-python = "1.5.2"
 sentry-sdk = "*"
 time-machine = "*"
 towncrier = "~23.6.0"
@@ -91,6 +92,9 @@ exclude = '''
 )
 '''
 
+[tool.coverage.report]
+show_missing = true
+
 [tool.pylint.master]
 # Include the pylint_django plugin to avoid spurious warnings about Django patterns
 load-plugins = [
@@ -112,10 +116,13 @@ no-docstring-rgx="^(_|test_|Meta$)"
 # Pylint and Black disagree about how to format multi-line arrays; Black wins.
 disable = """
     line-too-long,
+    broad-except,
     duplicate-code,
+    logging-fstring-interpolation,
     too-few-public-methods,
     too-many-lines,
     too-many-ancestors,
+    unused-argument,
     """
 
 [tool.pylint.miscellaneous]
@@ -159,7 +166,7 @@ ignore = [
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "nautobot_device_lifecycle_mgmt/migrations/*" = [
     "D",  # pydocstyle
 ]

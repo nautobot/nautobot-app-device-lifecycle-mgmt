@@ -2,15 +2,13 @@
 """Tables implementation for the Lifecycle Management app."""
 
 import django_tables2 as tables
-from django.urls import reverse
-from django.utils.safestring import mark_safe
 from django_tables2.utils import A
 from nautobot.apps.tables import BaseTable, BooleanColumn, ButtonsColumn, StatusTableMixin, TagColumn, ToggleColumn
-from nautobot.core.tables import LinkedCountColumn
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
+    DeviceHardwareNoticeResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -108,6 +106,74 @@ class ValidatedSoftwareLCMTable(BaseTable):
             "preferred",
             "actions",
         )
+
+
+class DeviceHardwareNoticeResultTable(BaseTable):
+    """Table for device hardware notice report."""
+
+    name = tables.TemplateColumn(
+        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/hardware-notice-device-report/'
+        '?&device_type={{ record.device__device_type__model }}">{{ record.device__device_type__model }}</a>',
+        orderable=True,
+        accessor="device__device_type__model",
+    )
+    total = tables.TemplateColumn(
+        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/hardware-notice-device-report/'
+        '?&device_type={{ record.device__device_type__model }}">{{ record.total }}</a>'
+    )
+    valid = tables.TemplateColumn(
+        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/hardware-notice-device-report/'
+        '?&device_type={{ record.device__device_type__model }}&supported=True">{{ record.valid }}</a>',
+        verbose_name="Supported",
+    )
+    invalid = tables.TemplateColumn(
+        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/hardware-notice-device-report/'
+        '?&device_type={{ record.device__device_type__model }}&supported=False">{{ record.invalid }}</a>',
+        verbose_name="Unsupported",
+    )
+    valid_percent = PercentageColumn(accessor="valid_percent", verbose_name="Support (%)")
+    actions = tables.TemplateColumn(
+        template_name="nautobot_device_lifecycle_mgmt/inc/validated_hw_notice_report_actions.html",
+        orderable=False,
+        verbose_name="Export Data",
+    )
+
+    class Meta(BaseTable.Meta):
+        """Metaclass attributes of DeviceHardwareNoticeResultTable."""
+
+        model = DeviceHardwareNoticeResult
+        fields = ["name", "total", "valid", "invalid", "valid_percent"]
+        default_columns = [
+            "name",
+            "total",
+            "valid",
+            "invalid",
+            "valid_percent",
+            "actions",
+        ]
+
+
+class DeviceHardwareNoticeResultListTable(BaseTable):  # pylint: disable=nb-sub-class-name
+    """Table for a list of device to hardware notice report."""
+
+    device = tables.Column(accessor="device", verbose_name="Device", linkify=True)
+    hardware_notice = tables.Column(accessor="hardware_notice", verbose_name="Hardware Notice", linkify=True)
+    valid = tables.Column(accessor="is_supported", verbose_name="Supported")
+    last_run = tables.Column(accessor="last_run", verbose_name="Last Run")
+    run_type = tables.Column(accessor="run_type", verbose_name="Run Type")
+
+    class Meta(BaseTable.Meta):
+        """Metaclass attributes of DeviceHardwareNoticeResultListTable."""
+
+        model = DeviceSoftwareValidationResult
+        fields = ["device", "hardware_notice", "valid", "last_run", "run_type"]
+        default_columns = [
+            "device",
+            "hardware_notice",
+            "valid",
+            "last_run",
+            "run_type",
+        ]
 
 
 class DeviceSoftwareValidationResultTable(BaseTable):
@@ -327,6 +393,8 @@ class ContractLCMTable(BaseTable):
     cost = tables.TemplateColumn(
         template_code="""{{ record.cost }}{% if record.currency %} {{ record.currency }}{% endif %}"""
     )
+    active = BooleanColumn(verbose_name="Active", orderable=False)
+    expired = BooleanColumn(verbose_name="Expired", orderable=False)
     actions = ButtonsColumn(ContractLCM, buttons=("changelog", "edit", "delete"))
     tags = TagColumn(url_name="plugins:nautobot_device_lifecycle_mgmt:contractlcm_list")
 
@@ -344,6 +412,21 @@ class ContractLCMTable(BaseTable):
             "contract_type",
             "devices",
             "provider",
+            "expired",
+            "active",
+            "tags",
+            "actions",
+        )
+
+        default_columns = (
+            "name",
+            "start",
+            "end",
+            "cost",
+            "support_level",
+            "contract_type",
+            "provider",
+            "active",
             "tags",
             "actions",
         )

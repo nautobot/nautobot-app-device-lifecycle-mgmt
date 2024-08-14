@@ -74,6 +74,12 @@ You can view the details of a provider, along with a listing of the service cont
 
 ![](../images/lcm_contract_provider_detail.png)
 
+### Contracts: Device View with Contracts
+
+Contracts associated with devices will appear on the device detail page. Five contracts at most will be displayed here, listed in order of end date (latest date first). The same information will also be displayed on inventory item detail pages for contracts associated with inventory items.
+
+![](../images/lcm_contract_device_view.png)
+
 ### Software: Software Lifecycle Management List View
 
 You can view the list of Software versions as well as filter the table.

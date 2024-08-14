@@ -4,15 +4,16 @@ import datetime
 
 import django_filters
 from django.db.models import Q
-from nautobot.apps.filters import NautobotFilterSet, StatusModelFilterSetMixin
+from nautobot.apps.filters import NautobotFilterSet, SearchFilter, StatusModelFilterSetMixin
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform, SoftwareVersion
 from nautobot.extras.filters.mixins import StatusFilter
-from nautobot.extras.models import Role, Tag
+from nautobot.extras.models import Role, Status, Tag
 
 from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
+    DeviceHardwareNoticeResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -25,8 +26,55 @@ from nautobot_device_lifecycle_mgmt.models import (
 class HardwareLCMFilterSet(NautobotFilterSet):
     """Filter for HardwareLCM."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
-
+    q = SearchFilter(
+        filter_predicates={
+            "device_type__model": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "device_type__part_number": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "inventory_item": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "comments": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "documentation_url": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "release_date": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "end_of_sale": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "end_of_support": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "end_of_sw_releases": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "end_of_security_patches": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+        }
+    )
+    device_type_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_type",
+        queryset=DeviceType.objects.all(),
+        label="Device Type",
+    )
     device_type = django_filters.ModelMultipleChoiceFilter(
         field_name="device_type", queryset=DeviceType.objects.all(), label="Device Type"
     )
@@ -65,7 +113,7 @@ class HardwareLCMFilterSet(NautobotFilterSet):
     end_of_sw_releases__gte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="gte")
     end_of_sw_releases__lte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="lte")
 
-    expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
+    expired = django_filters.BooleanFilter(method="_expired_search", label="Support Expired")
 
     class Meta:
         """Meta attributes for filter."""
@@ -73,29 +121,28 @@ class HardwareLCMFilterSet(NautobotFilterSet):
         model = HardwareLCM
 
         fields = [
+            "expired",
+            "device_type",
+            "inventory_item",
+            "release_date",
             "end_of_sale",
             "end_of_support",
             "end_of_sw_releases",
             "end_of_security_patches",
-            "inventory_item",
             "documentation_url",
-            "expired",
         ]
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
-        """Perform the filtered search."""
-        if not value.strip():
-            return queryset
-
-        qs_filter = Q(end_of_sale__icontains=value) | Q(end_of_support__icontains=value)
-        return queryset.filter(qs_filter)
-
-    def expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""
         today = datetime.datetime.today().date()
-        lookup = "gte" if not value else "lt"
-
-        qs_filter = Q(**{f"end_of_sale__{lookup}": today}) | Q(**{f"end_of_support__{lookup}": today})
+        # End of support dates less than today are expired.
+        # End of support dates greater than or equal to today are not expired.
+        # If the end of support date is null, the notice will never be expired.
+        qs_filter = None
+        if value:
+            qs_filter = Q(**{"end_of_support__lt": today})
+        if not value:
+            qs_filter = Q(**{"end_of_support__gte": today}) | Q(**{"end_of_support__isnull": True})
         return queryset.filter(qs_filter)
 
 
@@ -242,6 +289,141 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         inventory_item = inventory_items.first()
 
         return ValidatedSoftwareLCM.objects.get_for_object(inventory_item)
+
+
+class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):
+    """Filter for DeviceHardwareNoticeResult."""
+
+    hardware_notice_available = django_filters.BooleanFilter(
+        method="_hardware_notice_available_search",
+        label="Hardware Notice Available",
+    )
+    supported = django_filters.BooleanFilter(
+        label="Supported",
+        field_name="is_supported",
+    )
+    platform = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__platform",
+        queryset=Platform.objects.all(),
+        label="Platform",
+    )
+    location_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__location",
+        queryset=Location.objects.all(),
+        label="Location",
+    )
+    location = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__location__name",
+        queryset=Location.objects.all(),
+        to_field_name="name",
+        label="Location (name)",
+    )
+    device_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device",
+        queryset=Device.objects.all(),
+        label="Device",
+    )
+    device = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__name",
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        label="Device (name)",
+    )
+    device_status = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__status",
+        queryset=Status.objects.all(),
+        label="Device Status",
+    )
+    device_type_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__device_type",
+        queryset=DeviceType.objects.all(),
+        label="Device Type",
+    )
+    device_type = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__device_type__model",
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        label="Device Type (model)",
+    )
+    device_role_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__role",
+        queryset=Role.objects.all(),
+        label="Device Role",
+    )
+    device_role = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__role__name",
+        queryset=Role.objects.all(),
+        to_field_name="name",
+        label="Device Role (name)",
+    )
+    manufacturer_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__device_type__manufacturer",
+        queryset=Role.objects.all(),
+        label="Manufacturer",
+    )
+    manufacturer = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__device_type__manufacturer__name",
+        queryset=Manufacturer.objects.all(),
+        to_field_name="name",
+        label="Manufacturer (name)",
+    )
+    end_of_sale = SearchFilter(
+        filter_predicates={
+            "hardware_notice__end_of_sale": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+        }
+    )
+    end_of_support = SearchFilter(
+        filter_predicates={
+            "hardware_notice__end_of_support": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+        }
+    )
+    end_of_sw_releases = SearchFilter(
+        filter_predicates={
+            "hardware_notice__end_of_sw_releases": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+        }
+    )
+    end_of_security_patches = SearchFilter(
+        filter_predicates={
+            "hardware_notice__end_of_security_patches": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+        }
+    )
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = DeviceHardwareNoticeResult
+
+        fields = [
+            "supported",
+            "device_status",
+            "platform",
+            "location",
+            "device",
+            "device_type",
+            "device_role",
+            "manufacturer",
+            "end_of_sale",
+            "end_of_support",
+            "end_of_sw_releases",
+            "end_of_security_patches",
+        ]
+
+    def _hardware_notice_available_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        """Perform the filtered search."""
+        value = not value  # invert boolean for use in django filter
+        return queryset.filter(hardware_notice__isnull=value)
 
 
 class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
@@ -490,36 +672,73 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
 
 
 class ContractLCMFilterSet(NautobotFilterSet):
-    """Filter for ContractLCMFilter."""
+    """Filter for ContractLCM."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
-
-    provider = django_filters.ModelMultipleChoiceFilter(
+    q = SearchFilter(
+        filter_predicates={
+            "name": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "number": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "support_level": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "comments": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "start": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "end": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "cost": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "contract_type": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "currency": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+        }
+    )
+    expired = django_filters.BooleanFilter(method="_expired_search", label="Expired")
+    provider_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="provider",
         queryset=ProviderLCM.objects.all(),
         label="Provider",
     )
-
-    expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
-
-    start = django_filters.DateFilter()
-    start__gte = django_filters.DateFilter(field_name="start", lookup_expr="gte")
-    start__lte = django_filters.DateFilter(field_name="start", lookup_expr="lte")
-
-    end = django_filters.DateFilter()
-    end__gte = django_filters.DateFilter(field_name="end", lookup_expr="gte")
-    end__lte = django_filters.DateFilter(field_name="end", lookup_expr="lte")
+    provider = django_filters.ModelMultipleChoiceFilter(
+        field_name="provider__name",
+        queryset=ProviderLCM.objects.all(),
+        to_field_name="name",
+        label="Provider (name)",
+    )
 
     class Meta:
         """Meta attributes for filter."""
 
         model = ContractLCM
-
         fields = [
+            "devices",
             "provider",
             "name",
             "start",
             "end",
             "cost",
+            "currency",
             "support_level",
             "contract_type",
             "expired",
@@ -527,32 +746,59 @@ class ContractLCMFilterSet(NautobotFilterSet):
             "tags",
         ]
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
-        """Perform the filtered search."""
-        if not value.strip():
-            return queryset
-
-        qs_filter = (
-            Q(name__icontains=value)
-            | Q(cost__icontains=value)
-            | Q(contract_type__icontains=value)
-            | Q(support_level__icontains=value)
-        )
-        return queryset.filter(qs_filter)
-
-    def expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
         """Perform the filtered search."""
         today = datetime.datetime.today().date()
-        lookup = "gte" if not value else "lt"
-
-        qs_filter = Q(**{f"end__{lookup}": today})
+        # Contract end dates less than today are expired.
+        # Contract end dates greater than or equal to today, are not expired.
+        # If the end date is null, the contract will never be expired.
+        qs_filter = None
+        if value:
+            qs_filter = Q(**{"end__lt": today})
+        if not value:
+            qs_filter = Q(**{"end__gte": today}) | Q(**{"end__isnull": True})
         return queryset.filter(qs_filter)
 
 
 class ProviderLCMFilterSet(NautobotFilterSet):
-    """Filter for ProviderLCMFilter."""
+    """Filter for ProviderLCM."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = SearchFilter(
+        filter_predicates={
+            "name": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "description": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "physical_address": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "country": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "phone": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "email": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "portal_url": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "comments": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+        }
+    )
 
     class Meta:
         """Meta attributes for filter."""
@@ -567,22 +813,7 @@ class ProviderLCMFilterSet(NautobotFilterSet):
             "phone",
             "email",
             "portal_url",
-            "comments",
         ]
-
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
-        """Perform the filtered search."""
-        if not value.strip():
-            return queryset
-
-        qs_filter = (
-            Q(name__icontains=value)
-            | Q(description__icontains=value)
-            | Q(physical_address__icontains=value)
-            | Q(phone__icontains=value)
-            | Q(email__icontains=value)
-        )
-        return queryset.filter(qs_filter)
 
 
 class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , CustomFieldModelFilterSet):
