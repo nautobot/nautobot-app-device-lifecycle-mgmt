@@ -2,6 +2,7 @@
 
 from datetime import datetime
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count, F, IntegerField, OuterRef, Q, Subquery, Value
 from django.db.models.functions import Coalesce
@@ -13,6 +14,8 @@ from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
 )
+
+PLUGIN_CFG = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]
 
 
 def metrics_lcm_validation_report_device_type():
@@ -115,8 +118,8 @@ def metrics_lcm_validation_report_inventory_item():
     yield inventory_item_software_compliance_gauge
 
 
-def metrics_lcm_hw_end_of_support():  # pylint: disable=too-many-locals
-    """Calculate number of End of Support devices and inventory items per Part Number and per Location.
+def metrics_lcm_hw_end_of_support_part_number():  # pylint: disable=too-many-locals
+    """Calculate number of End of Support devices and inventory items per Part Number.
 
     Yields:
         GaugeMetricFamily: Prometheus Metrics
@@ -125,11 +128,6 @@ def metrics_lcm_hw_end_of_support():  # pylint: disable=too-many-locals
         "nautobot_lcm_hw_end_of_support_per_part_number",
         "Nautobot LCM Hardware End of Support per Part Number",
         labels=["part_number"],
-    )
-    hw_end_of_support_location_gauge = GaugeMetricFamily(
-        "nautobot_lcm_hw_end_of_support_per_location",
-        "Nautobot LCM Hardware End of Support per Location",
-        labels=["location"],
     )
 
     today = datetime.today().date()
@@ -184,6 +182,27 @@ def metrics_lcm_hw_end_of_support():  # pylint: disable=too-many-locals
 
     yield hw_end_of_support_part_number_gauge
 
+
+def metrics_lcm_hw_end_of_support_location():  # pylint: disable=too-many-locals
+    """Calculate number of End of Support devices and inventory items per Location.
+
+    Yields:
+        GaugeMetricFamily: Prometheus Metrics
+    """
+    hw_end_of_support_location_gauge = GaugeMetricFamily(
+        "nautobot_lcm_hw_end_of_support_per_location",
+        "Nautobot LCM Hardware End of Support per Location",
+        labels=["location"],
+    )
+
+    today = datetime.today().date()
+    hw_end_of_support = HardwareLCM.objects.filter(end_of_support__lt=today)
+    hw_end_of_support_device_types = hw_end_of_support.exclude(device_type__isnull=True).values_list(
+        "device_type", flat=True
+    )
+    hw_end_of_support_invitems = hw_end_of_support.exclude(inventory_item__isnull=True).values_list(
+        "inventory_item", flat=True
+    )
     # Initialize per location count to 0 for all locations
     device_location_types = LocationType.objects.filter(content_types=ContentType.objects.get_for_model(Device))
     init_location_counts = (
@@ -229,8 +248,12 @@ def metrics_lcm_hw_end_of_support():  # pylint: disable=too-many-locals
     yield hw_end_of_support_location_gauge
 
 
-metrics = [
-    metrics_lcm_hw_end_of_support,
-    metrics_lcm_validation_report_device_type,
-    metrics_lcm_validation_report_inventory_item,
-]
+metrics = []
+if "nautobot_lcm_software_compliance_per_device_type" in PLUGIN_CFG["enabled_metrics"]:
+    metrics.append(metrics_lcm_validation_report_device_type)
+if "nautobot_lcm_software_compliance_per_inventory_item" in PLUGIN_CFG["enabled_metrics"]:
+    metrics.append(metrics_lcm_validation_report_inventory_item)
+if "nautobot_lcm_hw_end_of_support_per_part_number" in PLUGIN_CFG["enabled_metrics"]:
+    metrics.append(metrics_lcm_hw_end_of_support_part_number)
+if "nautobot_lcm_hw_end_of_support_per_location" in PLUGIN_CFG["enabled_metrics"]:
+    metrics.append(metrics_lcm_hw_end_of_support_location)
