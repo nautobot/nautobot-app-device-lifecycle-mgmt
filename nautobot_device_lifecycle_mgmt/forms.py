@@ -91,15 +91,6 @@ class HardwareLCMForm(BootstrapMixin, CustomFieldModelFormMixin, RelationshipMod
         brief_mode=False,
         required=False,
     )
-    # inventory_item = forms.ModelChoiceField(
-    #     queryset=InventoryItem.objects.exclude(part_id__exact="")
-    #     .distinct()
-    #     .order_by("part_id")
-    #     .values_list("part_id", flat=True),
-    #     label="Inventory Part ID",
-    #     to_field_name="part_id",
-    #     required=False,
-    # )
 
     class Meta:
         """Meta attributes for the HardwareLCMForm class."""
