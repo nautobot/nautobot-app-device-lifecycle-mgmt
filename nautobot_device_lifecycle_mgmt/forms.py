@@ -7,6 +7,7 @@ from nautobot.apps.forms import (
     CustomFieldModelBulkEditFormMixin,
     DatePicker,
     DynamicModelChoiceField,
+    DynamicModelChoiceMixin,
     DynamicModelMultipleChoiceField,
     NautobotBulkEditForm,
     NautobotFilterForm,
@@ -54,15 +55,27 @@ class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):
         return super().prepare_value(pk_list)
 
 
+class HardwareLCMDynamicModelChoiceField(DynamicModelChoiceMixin, forms.ModelChoiceField):
+    """DynamicModelChoiceField used for 'inventory_item' field in HardwareLCMForm."""
+
+    def to_python(self, value):
+        """Overload 'to_python' in forms.ModelChoiceField to force returning 'part_id' as the field value."""
+        if value in self.empty_values:
+            return None
+        if self.to_field_name == "part_id":
+            return value
+        return super().to_python(value)
+
+
 class HardwareLCMForm(NautobotModelForm):
     """Hardware Device Lifecycle creation/edit form."""
 
-    inventory_item = forms.ModelChoiceField(
-        queryset=InventoryItem.objects.exclude(part_id__exact="")
-        .distinct()
-        .order_by("part_id")
-        .values_list("part_id", flat=True),
+    device_type = DynamicModelChoiceField(queryset=DeviceType.objects.all(), required=False)
+    inventory_item = HardwareLCMDynamicModelChoiceField(
+        queryset=InventoryItem.objects.without_tree_fields().order_by().distinct("part_id"),
+        query_params={"part_id__nre": "^$", "nautobot_device_lifecycle_mgmt_distinct_part_id": "true"},
         label="Inventory Part ID",
+        display_field="part_id",
         to_field_name="part_id",
         required=False,
     )
@@ -140,18 +153,14 @@ class HardwareLCMFilterForm(NautobotFilterForm):
         label="Support Expired",
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
     )
-    device_type = forms.ModelMultipleChoiceField(
-        queryset=DeviceType.objects.all(),
-        to_field_name="model",
-        required=False,
-        widget=StaticSelect2Multiple(),
-    )
-    inventory_item = forms.ModelMultipleChoiceField(
-        queryset=HardwareLCM.objects.filter(inventory_item__isnull=False, device_type__isnull=True).values_list(
-            "inventory_item", flat=True
-        ),
-        to_field_name="inventory_item",
+
+    device_type = DynamicModelMultipleChoiceField(required=False, queryset=DeviceType.objects.all())
+
+    inventory_item = DynamicModelMultipleChoiceField(
+        queryset=HardwareLCM.objects.exclude(inventory_item__isnull=True).exclude(inventory_item__exact=""),
         label="Inventory Part ID",
+        display_field="inventory_item",
+        to_field_name="inventory_item",
         required=False,
         widget=StaticSelect2Multiple(),
     )
