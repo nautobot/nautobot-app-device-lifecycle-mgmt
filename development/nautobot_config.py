@@ -234,7 +234,7 @@ MAX_PAGE_SIZE = int(os.environ.get("MAX_PAGE_SIZE", 1000))
 # }
 
 # Expose Prometheus monitoring metrics at the HTTP endpoint '/metrics'
-METRICS_ENABLED = False
+METRICS_ENABLED = True
 
 # Credentials that Nautobot will uses to authenticate to devices when connecting via NAPALM.
 NAPALM_USERNAME = os.environ.get("NAPALM_USERNAME", "")
@@ -262,6 +262,7 @@ PLUGINS_CONFIG = {
         "barchart_bar_width": float(os.environ.get("BARCHART_BAR_WIDTH", 0.1)),
         "barchart_width": int(os.environ.get("BARCHART_WIDTH", 12)),
         "barchart_height": int(os.environ.get("BARCHART_HEIGHT", 5)),
+        "enabled_metrics": [x for x in os.environ.get("NAUTOBOT_DLM_ENABLED_METRICS", "").split(",") if x],
     },
 }
 

@@ -29,6 +29,7 @@ class DeviceLifeCycleConfig(PluginConfig):
         "barchart_bar_width": 0.1,
         "barchart_width": 12,
         "barchart_height": 5,
+        "enabled_metrics": [],
     }
     caching_config = {}
 
