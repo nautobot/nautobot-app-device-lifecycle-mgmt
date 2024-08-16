@@ -1,13 +1,9 @@
-"""Forms implementation for the Lifecycle Management app."""  # pylint: disable=too-many-lines
+"""Forms implementation for the Lifecycle Management app."""
 
 import logging
 
 from django import forms
 from nautobot.apps.forms import (
-<<<<<<< HEAD
-    CustomFieldModelBulkEditFormMixin,
-=======
->>>>>>> 8b5c42d (Revert changes to test_api and ruff)
     DatePicker,
     DynamicModelChoiceField,
     DynamicModelChoiceMixin,
