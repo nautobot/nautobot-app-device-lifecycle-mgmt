@@ -137,9 +137,7 @@ class HardwareLCMFilterForm(NautobotFilterForm):
         label="Search",
         help_text="Select a date that will be used to search end_of_support and end_of_sale",
     )
-    device_type = DynamicModelMultipleChoiceField(
-        required=False, queryset=DeviceType.objects.all(), to_field_name="model"
-    )
+    device_type = DynamicModelMultipleChoiceField(required=False, queryset=DeviceType.objects.all())
 
     inventory_item = DynamicModelMultipleChoiceField(
         queryset=HardwareLCM.objects.exclude(inventory_item__isnull=True).exclude(inventory_item__exact=""),
