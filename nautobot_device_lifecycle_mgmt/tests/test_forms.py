@@ -31,17 +31,18 @@ class HardwareLCMFormTest(TestCase):
         location_type_location_a.content_types.add(
             ContentType.objects.get_for_model(Device),
         )
-        location_status = Status.objects.get_for_model(Location).first()
+        active_status, _ = Status.objects.get_or_create(name="Active")
+        active_status.content_types.add(ContentType.objects.get_for_model(Location))
+        active_status.content_types.add(ContentType.objects.get_for_model(Device))
         self.location1, _ = Location.objects.get_or_create(
-            name="Location1", location_type=location_type_location_a, status=location_status
+            name="Location1", location_type=location_type_location_a, status=active_status
         )
-        device_status = Status.objects.get_for_model(Device).first()
         self.device = Device.objects.create(
             name="Test-9300-Switch",
             device_type=self.device_type,
             role=self.devicerole,
             location=self.location1,
-            status=device_status,
+            status=active_status,
         )
         self.inventory_item = InventoryItem.objects.create(
             device=self.device,
@@ -170,7 +171,10 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
     def setUp(self):
         """Create necessary objects."""
         device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
-        software_status = Status.objects.get_for_model(SoftwareVersion).first()
+        active_status, _ = Status.objects.get_or_create(name="Active")
+        active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
+        active_status.content_types.add(ContentType.objects.get_for_model(Device))
+        active_status.content_types.add(ContentType.objects.get_for_model(Location))
         self.software = SoftwareVersion.objects.create(
             **{
                 "platform": device_platform,
@@ -180,24 +184,22 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
                 "documentation_url": "https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/series.html",
                 "long_term_support": True,
                 "pre_release": False,
-                "status": software_status,
+                "status": active_status,
             }
         )
 
-        device_status = Status.objects.get_for_model(Device).first()
         manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
         location_type_location_a, _ = LocationType.objects.get_or_create(name="LocationA")
         location_type_location_a.content_types.add(
             ContentType.objects.get_for_model(Device),
         )
-        location_status = Status.objects.get_for_model(Location).first()
         location1, _ = Location.objects.get_or_create(
-            name="Location1", location_type=location_type_location_a, status=location_status
+            name="Location1", location_type=location_type_location_a, status=active_status
         )
         devicerole, _ = Role.objects.get_or_create(name="router")
         self.devicetype_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="ASR-1000")
         self.device_1 = Device.objects.create(
-            device_type=self.devicetype_1, role=devicerole, name="Device 1", location=location1, status=device_status
+            device_type=self.devicetype_1, role=devicerole, name="Device 1", location=location1, status=active_status
         )
         self.inventoryitem_1 = InventoryItem.objects.create(device=self.device_1, name="SwitchModule1")
 

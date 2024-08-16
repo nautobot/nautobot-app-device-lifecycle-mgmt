@@ -2,8 +2,6 @@
 
 from datetime import date, datetime
 
-from django.conf import settings
-
 # from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -20,6 +18,7 @@ from nautobot.extras.models.statuses import StatusField
 from nautobot.extras.utils import extras_features
 
 from nautobot_device_lifecycle_mgmt import choices
+from nautobot_device_lifecycle_mgmt.contract_filters import DeviceContractFilter, InventoryItemContractFilter
 from nautobot_device_lifecycle_mgmt.software_filters import (
     DeviceValidatedSoftwareFilter,
     InventoryItemValidatedSoftwareFilter,
@@ -89,17 +88,16 @@ class HardwareLCM(PrimaryModel):
 
     @property
     def expired(self):
-        """Return True or False if chosen field is expired."""
-        expired_field = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"].get("expired_field", "end_of_support")
+        """
+        Return True if the current date is greater than the end of support date.
 
-        # If the chosen or default field does not exist, default to one of the required fields that are present
-        if not getattr(self, expired_field) and not getattr(self, "end_of_support"):
-            expired_field = "end_of_sale"
-        elif not getattr(self, expired_field) and not getattr(self, "end_of_sale"):
-            expired_field = "end_of_support"
-
+        If the end of support date has not been provided, return False.
+        If the current date is less than or equal to the end of support date, return False.
+        """
         today = datetime.today().date()
-        return today >= getattr(self, expired_field)
+        if not getattr(self, "end_of_support"):
+            return False
+        return today > getattr(self, "end_of_support")
 
     def save(self, *args, **kwargs):
         """Override save to assert a full clean."""
@@ -215,6 +213,46 @@ class ValidatedSoftwareLCM(PrimaryModel):
 @extras_features(
     "graphql",
 )
+class DeviceHardwareNoticeResult(PrimaryModel):
+    """Device hardware notice details model."""
+
+    device = models.OneToOneField(
+        to="dcim.Device",
+        on_delete=models.CASCADE,
+        help_text="The device",
+        blank=False,
+        related_name="device_hardware_notice",
+    )
+    hardware_notice = models.ForeignKey(
+        to="nautobot_device_lifecycle_mgmt.HardwareLCM",
+        on_delete=models.CASCADE,
+        help_text="Device hardware notice",
+        null=True,
+        blank=True,
+        related_name="hardware_notice_device",
+    )
+    is_supported = models.BooleanField(null=True, blank=True)
+    last_run = models.DateTimeField(null=True, blank=True)
+    run_type = models.CharField(max_length=CHARFIELD_MAX_LENGTH, choices=choices.ReportRunTypeChoices)
+
+    class Meta:
+        """Meta attributes for DeviceHardwareNoticeResult."""
+
+        verbose_name = "Device Hardware Notice Report"
+        ordering = ("device",)
+
+    def __str__(self):
+        """String representation of DeviceHardwareNoticeResult."""
+        if self.is_supported:
+            msg = f"Device: {self.device} - Supported"
+        else:
+            msg = f"Device: {self.device} - Not Supported"
+        return msg
+
+
+@extras_features(
+    "graphql",
+)
 class DeviceSoftwareValidationResult(PrimaryModel):
     """Device Software validation details model."""
 
@@ -295,6 +333,23 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
         return msg
 
 
+class ContractLCMQuerySet(RestrictedQuerySet):
+    """Queryset for `ContactLCM` objects."""
+
+    def get_for_object(self, obj):
+        """Return all `ContractLCM` objets assigned to the given object."""
+        if not isinstance(obj, models.Model):
+            raise TypeError(f"{obj} is not an instance of Django Model class")
+        if isinstance(obj, Device):
+            qs = DeviceContractFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
+        elif isinstance(obj, InventoryItem):
+            qs = InventoryItemContractFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
+        else:
+            qs = self  # pylint: disable=invalid-name
+
+        return qs
+
+
 @extras_features(
     "custom_fields",
     "custom_links",
@@ -342,10 +397,32 @@ class ContractLCM(PrimaryModel):
 
     @property
     def expired(self):
-        """Return True or False if chosen field is expired."""
+        """
+        Return 'True' if a contract has expired, return 'False' if it is active.
+
+        If a contract does not have an end date it cannot expire. If the
+        current date is greater than the end date of a contract, it is
+        expired. The last day of a contract is still considered to be
+        in the 'active' period.
+        """
         if not self.end:
             return False
-        return datetime.today().date() >= self.end
+        return datetime.today().date() > self.end
+
+    @property
+    def active(self):
+        """
+        Return 'True' if a contract is active, return 'False' if it has expired.
+
+        An active contract is a contract that has not yet expired.
+        If a contract does not have an end date it cannot expire. If the
+        current date is less than or equal to the end date of a contract,
+        it is active. The last day of a contract is still considered to be
+        in the 'active' period.
+        """
+        if not self.end:
+            return True
+        return datetime.today().date() <= self.end
 
     def save(self, *args, **kwargs):
         """Override save to assert a full clean."""
@@ -360,6 +437,8 @@ class ContractLCM(PrimaryModel):
         if self.end and self.start:
             if self.end <= self.start:
                 raise ValidationError("End date must be after the start date of the contract.")
+
+    objects = ContractLCMQuerySet.as_manager()
 
 
 @extras_features(

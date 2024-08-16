@@ -22,7 +22,6 @@ class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
     min_version = "2.0.0"
     max_version = "2.9999"
     default_settings = {
-        "expired_field": "end_of_support",
         "barchart_bar_width": 0.1,
         "barchart_width": 12,
         "barchart_height": 5,

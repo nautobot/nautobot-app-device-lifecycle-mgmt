@@ -10,7 +10,7 @@
         <span class="mdi mdi-plus-thick" aria-hidden="true"></span>Execute<span class="caret"></span>
     </button>
     <ul class="dropdown-menu">
-            <li><a href="{% url 'extras:job_run_by_class_path' class_path='nautobot_device_lifecycle_mgmt.jobs.lifecycle_reporting.DeviceSoftwareValidationFullReport' %}">Run Software Validation</a></li>
+            <li><a href="{% url 'extras:job_run_by_class_path' class_path='nautobot_device_lifecycle_mgmt.jobs.lifecycle_reporting.DeviceHardwareNoticeFullReport' %}">Run Hardware Notice Reporting</a></li>
     </ul>
 </div>
 {% if request.user.is_authenticated and table_config_form %}
@@ -20,7 +20,7 @@
     {% export_button content_type %}
 {% endif %}
 </div>
-    <h1>{% block title %}Device Software Validation Reports{% endblock %}</h1>
+    <h1>{% block title %}Device Hardware Notice Reports{% endblock %}</h1>
     <div class="row">
         <div class="col-md-9">
             <!-- VISUAL BLOCK -->
@@ -45,10 +45,9 @@
                     <tr>
                         <th><a>Type</a></th>
                         <th><a>Total</a></th>
-                        <th><a>Valid</a></th>
-                        <th><a>Invalid</a></th>
-                        <th><a>No Software</a></th>
-                        <th><a>Compliance (%)</a></th>
+                        <th><a>Supported</a></th>
+                        <th><a>Unsupported</a></th>
+                        <th><a>Support (%)</a></th>
                         <th><a>Summary</a></th>
                         <th><a>Export Data</a></th>
                     </tr>
@@ -56,28 +55,21 @@
                 <tbody>
                     <tr class="even">
                         <td>
-                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/">
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-hardware-notice-result/">
                                 Devices
                             </a>
                         </td>
                         <td>
-                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/">
-                                {% if device_aggr.total is not None %} {{ device_aggr.total }} {% else %} -- {% endif %}
-                            </a>
+                            {% if device_aggr.total is not None %} {{ device_aggr.total }} {% else %} -- {% endif %}
                         </td>
                         <td>
-                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/?&valid=True">
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-hardware-notice-result/?&supported=True">
                                 {% if device_aggr.valid is not None %} {{ device_aggr.valid }} {% else %} -- {% endif %}
                             </a>
                         </td>
                         <td>
-                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/?&valid=False">
+                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-hardware-notice-result/?&supported=False">
                                 {% if device_aggr.invalid is not None %} {{ device_aggr.invalid }} {% else %} -- {% endif %}
-                            </a>
-                        </td>
-                        <td>
-                            <a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/?&sw_missing_only=True">
-                                {% if device_aggr.no_software is not None %} {{ device_aggr.no_software }} {% else %} -- {% endif %}
                             </a>
                         </td>
                         <td>{% if device_aggr.valid_percent is not None %} {{ device_aggr.valid_percent }} % {% else %} -- {% endif %}</td>
@@ -87,7 +79,7 @@
                             </a>
                         </td>
                         <td>
-                            <a href="/api/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/?format=csv"
+                            <a href="/api/plugins/nautobot-device-lifecycle-mgmt/device-hardware-notice-result/?format=csv"
                                 class="btn btn-default btn-xs" title="Export data for all device types" aria-hidden="true"> 
                                 <i class="mdi mdi-download"></i>
                             </a>

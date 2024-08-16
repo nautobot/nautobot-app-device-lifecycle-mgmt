@@ -8,8 +8,10 @@ import urllib
 import matplotlib.pyplot as plt
 import numpy as np
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, ExpressionWrapper, F, FloatField, Q
 from matplotlib.ticker import MaxNLocator
+from nautobot.apps.choices import ColorChoices
 from nautobot.apps.views import NautobotUIViewSet
 from nautobot.core.views import generic
 from nautobot.core.views.mixins import ContentTypePermissionRequiredMixin
@@ -22,10 +24,7 @@ PLUGIN_CFG = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 
-# ---------------------------------------------------------------------------------
-#  Hardware Lifecycle Management Views
-# ---------------------------------------------------------------------------------
-GREEN, RED, GREY = ("#D5E8D4", "#F8CECC", "#808080")
+GREEN, RED, GREY = (f"#{ColorChoices.COLOR_LIGHT_GREEN}", f"#{ColorChoices.COLOR_RED}", f"#{ColorChoices.COLOR_GREY}")
 
 
 class HardwareLCMUIViewSet(NautobotUIViewSet):
@@ -139,7 +138,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
     def url_encode_figure(figure):
         """Save graph into string buffer and convert 64 bit code into image."""
         buf = io.BytesIO()
-        figure.savefig(buf, format="png")
+        figure.savefig(buf, format="png", bbox_inches="tight")
         buf.seek(0)
         string = base64.b64encode(buf.read())
 
@@ -256,6 +255,161 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
         except ZeroDivisionError:
             aggr["valid_percent"] = 0
         return aggr
+
+    @staticmethod
+    def plot_barchart_visual_hardware_notice(qs, chart_attrs):  # pylint: disable=too-many-locals
+        """Construct report visual from queryset."""
+        barchart_bar_width_min = 0.7
+        barchart_bar_width = max(barchart_bar_width_min, PLUGIN_CFG["barchart_bar_width"])
+        barchart_width = PLUGIN_CFG["barchart_width"]
+        barchart_height_calc = (qs.count()) * (barchart_bar_width * 0.75)
+        barchart_height = max(barchart_height_calc, PLUGIN_CFG["barchart_height"])
+
+        device_types = []
+        device_counts = []
+        bar_colors = []
+
+        for device_type in qs:
+            # Get the End of Support date
+            try:
+                hw_notice = models.HardwareLCM.objects.get(device_type__id=device_type[chart_attrs["device_type_id"]])
+                eos_date = hw_notice.end_of_support
+            except ObjectDoesNotExist:
+                eos_date = "Never"
+            # Add labels and set bar colors
+            if device_type["valid"] > 0:
+                device_types.append(str(device_type[chart_attrs["label_accessor"]]) + "\n" + str(eos_date))
+                device_counts.append(device_type["valid"])
+                bar_colors.append(GREEN)
+            elif device_type["invalid"] > 0:
+                device_types.append(str(device_type[chart_attrs["label_accessor"]]) + "\n" + str(eos_date))
+                device_counts.append(device_type["invalid"])
+                bar_colors.append(RED)
+            else:
+                continue
+
+        # If no device types are returned by the filter, use None as a defult label
+        if not device_types:
+            device_types = ["None"]
+            device_counts = [0]
+            bar_colors = [RED]
+
+        fig, axis = plt.subplots(figsize=(barchart_width, barchart_height))
+
+        # Add device count text to top of bars
+        for index, value in enumerate(device_counts):
+            axis.text(x=value, y=index, s=f" {str(value)}")
+
+        axis.barh(device_types, device_counts, color=bar_colors)
+        axis.set_xlabel(chart_attrs["xlabel"])
+        axis.set_title(chart_attrs["title"])
+        axis.margins(
+            0.1, barchart_height / ((qs.count() if qs else barchart_height) * barchart_height)
+        )  # dynamic y margin based on qs counts (more results = smaller margins)
+        axis.xaxis.set_major_locator(MaxNLocator(integer=True))
+
+        legend_colors = {"supported": GREEN, "unsuported": RED}
+        legend_labels = list(legend_colors.keys())
+        legend_handles = [plt.Rectangle((0, 0), 1, 1, color=legend_colors[label]) for label in legend_labels]
+        plt.legend(legend_handles, legend_labels)
+
+        return ReportOverviewHelper.url_encode_figure(fig)
+
+
+class HardwareNoticeDeviceReportView(generic.ObjectListView):
+    """View for executive report on device hardware notices."""
+
+    filterset = filters.DeviceHardwareNoticeResultFilterSet
+    filterset_form = forms.DeviceHardwareNoticeResultFilterForm
+    table = tables.DeviceHardwareNoticeResultTable
+    template_name = "nautobot_device_lifecycle_mgmt/hardwarenotice_device_report.html"
+    queryset = (
+        models.DeviceHardwareNoticeResult.objects.values("device__device_type__model", "device__device_type__pk")
+        .distinct()
+        .annotate(
+            total=Count("device__device_type__model"),
+            valid=Count("device__device_type__model", filter=Q(is_supported=True)),
+            invalid=Count("device__device_type__model", filter=Q(is_supported=False)),
+            valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
+        )
+        .order_by("-valid_percent")
+    )
+    action_buttons = ("export",)
+    # extra content dict to be returned by self.extra_context() method
+    extra_content = {}
+
+    def setup(self, request, *args, **kwargs):
+        """Using request object to perform filtering based on query params."""
+        super().setup(request, *args, **kwargs)  #
+        try:
+            report_last_run = (
+                models.DeviceHardwareNoticeResult.objects.filter(run_type=choices.ReportRunTypeChoices.REPORT_FULL_RUN)
+                .latest("last_updated")
+                .last_run
+            )
+        except models.DeviceHardwareNoticeResult.DoesNotExist:  # pylint: disable=no-member
+            report_last_run = None
+
+        device_aggr = self.get_global_aggr(request)
+        _device_type_qs = (
+            models.DeviceHardwareNoticeResult.objects.values("device__device_type__model", "device__device_type__id")
+            .distinct()
+            .annotate(
+                total=Count("device__device_type__model"),
+                valid=Count("device__device_type__model", filter=Q(is_supported=True)),
+                invalid=Count("device__device_type__model", filter=Q(is_supported=False)),
+                valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
+            )
+            .order_by("-hardware_notice__end_of_support")
+        )
+        device_type_qs = self.filterset(request.GET, _device_type_qs).qs
+        pie_chart_attrs = {
+            "aggr_labels": ["valid", "invalid"],
+            "chart_labels": ["Supported", "Unsupported"],
+        }
+        bar_chart_attrs = {
+            "device_type_id": "device__device_type__id",
+            "label_accessor": "device__device_type__model",
+            "xlabel": "Devices",
+            "ylabel": "Device Types",
+            "title": "Devices per device type",
+            "chart_bars": [
+                {"label": "Supported", "data_attr": "valid", "color": GREEN},
+                {"label": "Unsupported", "data_attr": "invalid", "color": RED},
+            ],
+        }
+        self.extra_content = {
+            "bar_chart": ReportOverviewHelper.plot_barchart_visual_hardware_notice(device_type_qs, bar_chart_attrs),
+            "device_aggr": device_aggr,
+            "device_visual": ReportOverviewHelper.plot_piechart_visual(device_aggr, pie_chart_attrs),
+            "report_last_run": report_last_run,
+        }
+
+    def get_global_aggr(self, request):
+        """Get device and inventory global reports.
+
+        Returns:
+            device_aggr: device global report dict
+        """
+        device_qs = models.DeviceHardwareNoticeResult.objects
+
+        device_aggr = {}
+        if self.filterset is not None:
+            device_aggr = self.filterset(request.GET, device_qs).qs.aggregate(
+                total=Count("device"),
+                valid=Count("device", filter=Q(is_supported=True)),
+                invalid=Count("device", filter=Q(is_supported=False)),
+            )
+
+            device_aggr["name"] = "Devices"
+
+        return ReportOverviewHelper.calculate_aggr_percentage(device_aggr)
+
+    def extra_context(self):
+        """Extra content method on."""
+        # add global aggregations to extra context.
+
+        return self.extra_content
 
 
 class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
@@ -390,6 +544,17 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
             )
 
         return "\n".join(csv_data)
+
+
+class DeviceHardwareNoticeResultListView(generic.ObjectListView):
+    """DeviceHardwareNoticeResultListView List view."""
+
+    queryset = models.DeviceHardwareNoticeResult.objects.all()
+    filterset = filters.DeviceHardwareNoticeResultFilterSet
+    filterset_form = forms.DeviceHardwareNoticeResultFilterForm
+    table = tables.DeviceHardwareNoticeResultListTable
+    action_buttons = ("export",)
+    template_name = "nautobot_device_lifecycle_mgmt/deviceshardwarenoticeresult_list.html"
 
 
 class DeviceSoftwareValidationResultListView(generic.ObjectListView):

@@ -26,6 +26,7 @@ Additionally, you can run jobs allowing you to:
 - Generate a report showing whether devices are running approved software version
 - Generate a report showing whether inventory items are running approved software version
 - Map recorded CVEs to affected devices, which creates corresponding vulnerability objects
+- Generate a report showing which device types, and how many device instances are affected by hardware notices.
 
 ## Audience (User Personas) - Who should use this App?
 
@@ -52,3 +53,4 @@ This app provides the following jobs:
 - **Device Software Validation Report** - generates a report showing the summary of devices running valid/invalid software version
 - **Inventory Item Software Validation Report** - generates a report showing the summary of inventory items running valid/invalid software version
 - **Generate Vulnerabilities** - links CVEs to devices and generates vulnerability objects
+- **Device Hardware Notice Report** - generates a report showing supported and unsupported device types based on hardware notices

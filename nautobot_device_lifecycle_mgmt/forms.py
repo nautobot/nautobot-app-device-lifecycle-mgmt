@@ -4,12 +4,15 @@ import logging
 
 from django import forms
 from nautobot.apps.forms import (
+    CustomFieldModelBulkEditFormMixin,
     DatePicker,
     DynamicModelChoiceField,
     DynamicModelChoiceMixin,
     DynamicModelMultipleChoiceField,
     NautobotBulkEditForm,
+    NautobotFilterForm,
     NautobotModelForm,
+    NullableDateField,
     StaticSelect2,
     StaticSelect2Multiple,
     TagFilterField,
@@ -17,7 +20,6 @@ from nautobot.apps.forms import (
 )
 from nautobot.core.forms.constants import BOOLEAN_WITH_BLANK_CHOICES
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform, SoftwareVersion
-from nautobot.extras.forms import CustomFieldModelBulkEditFormMixin, NautobotFilterForm
 from nautobot.extras.models import Role, Status, Tag
 
 from nautobot_device_lifecycle_mgmt.choices import (
@@ -29,6 +31,7 @@ from nautobot_device_lifecycle_mgmt.choices import (
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
+    DeviceHardwareNoticeResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -129,14 +132,28 @@ class HardwareLCMBulkEditForm(NautobotBulkEditForm):
 
 
 class HardwareLCMFilterForm(NautobotFilterForm):
-    """Filter form to filter searches."""
+    """Filter form for filtering HardwareLCM objects."""
 
     model = HardwareLCM
-    q = forms.CharField(
+    field_order = [
+        "q",
+        "expired",
+        "device_type",
+        "inventory_item",
+        "release_date",
+        "end_of_sale",
+        "end_of_support",
+        "end_of_sw_releases",
+        "end_of_security_patches",
+        "documentation_url",
+    ]
+    q = forms.CharField(required=False, label="Search")
+    expired = forms.BooleanField(
         required=False,
-        label="Search",
-        help_text="Select a date that will be used to search end_of_support and end_of_sale",
+        label="Support Expired",
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
     )
+
     device_type = DynamicModelMultipleChoiceField(required=False, queryset=DeviceType.objects.all())
 
     inventory_item = DynamicModelMultipleChoiceField(
@@ -145,30 +162,14 @@ class HardwareLCMFilterForm(NautobotFilterForm):
         display_field="inventory_item",
         to_field_name="inventory_item",
         required=False,
+        widget=StaticSelect2Multiple(),
     )
-
-    class Meta:
-        """Meta attributes for the HardwareLCMFilterForm class."""
-
-        # Define the fields above for ordering and widget purposes
-        model = HardwareLCM
-        fields = [
-            "q",
-            "device_type",
-            "inventory_item",
-            "end_of_sale",
-            "end_of_support",
-            "end_of_sw_releases",
-            "end_of_security_patches",
-            "documentation_url",
-        ]
-
-        widgets = {
-            "end_of_sale": DatePicker(),
-            "end_of_support": DatePicker(),
-            "end_of_sw_releases": DatePicker(),
-            "end_of_security_patches": DatePicker(),
-        }
+    release_date = NullableDateField(required=False, widget=DatePicker(), label="Release date")
+    end_of_sale = NullableDateField(required=False, widget=DatePicker(), label="End of sale")
+    end_of_support = NullableDateField(required=False, widget=DatePicker(), label="End of support")
+    end_of_sw_releases = NullableDateField(required=False, widget=DatePicker(), label="End of software releases")
+    end_of_security_patches = NullableDateField(required=False, widget=DatePicker(), label="End of security patches")
+    documentation_url = forms.CharField(required=False, label="Documentation URL")
 
 
 class ValidatedSoftwareLCMForm(NautobotModelForm):
@@ -275,6 +276,91 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
             "valid",
             "start_before",
             "start_after",
+        ]
+
+
+class DeviceHardwareNoticeResultFilterForm(NautobotFilterForm):
+    """Filter form to filter searches for DeviceHardwareNoticeResult."""
+
+    model = DeviceHardwareNoticeResult
+    hardware_notice_available = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Hardware Notice Available",
+    )
+    supported = forms.BooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="Supported",
+    )
+    platform = DynamicModelMultipleChoiceField(
+        queryset=Platform.objects.all(),
+        label="Platform",
+        required=False,
+    )
+    location = DynamicModelMultipleChoiceField(
+        queryset=Location.objects.all(),
+        query_params={"content_type": "dcim.device"},
+        to_field_name="name",
+        required=False,
+    )
+    device = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
+    device_status = DynamicModelChoiceField(
+        queryset=Status.objects.all(), query_params={"content_types": "dcim.device"}, required=False
+    )
+    device_type = DynamicModelMultipleChoiceField(
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        required=False,
+    )
+    device_role = DynamicModelMultipleChoiceField(
+        queryset=Role.objects.all(), query_params={"content_types": "dcim.device"}, to_field_name="name", required=False
+    )
+    manufacturer = DynamicModelMultipleChoiceField(
+        queryset=Manufacturer.objects.all(), to_field_name="name", required=False
+    )
+    end_of_sale = forms.CharField(
+        required=False,
+        label="End of Sale Search",
+        help_text="Search the End of Sale field",
+    )
+    end_of_support = forms.CharField(
+        required=False,
+        label="End of Support Search",
+        help_text="Search the End of Support field",
+    )
+    end_of_sw_releases = forms.CharField(
+        required=False,
+        label="End of Software Releases Search",
+        help_text="Search the End of Software Support field",
+    )
+    end_of_security_patches = forms.CharField(
+        required=False,
+        label="End of Security Patches Search",
+        help_text="Search the End of Security Patches field",
+    )
+
+    class Meta:
+        """Meta attributes."""
+
+        model = DeviceHardwareNoticeResult
+        fields = [
+            "supported",
+            "platform",
+            "location",
+            "device",
+            "device_status",
+            "device_type",
+            "device_role",
+            "manufacturer",
+            "end_of_sale",
+            "end_of_support",
+            "end_of_sw_releases",
+            "end_of_security_patches",
         ]
 
 
@@ -498,43 +584,49 @@ class ContractLCMBulkEditForm(NautobotBulkEditForm):
 
 
 class ContractLCMFilterForm(NautobotFilterForm):
-    """Filter form to filter searches."""
+    """Filter form for filtering ContractLCM objects."""
 
     model = ContractLCM
+    field_order = [
+        "q",
+        "expired",
+        "devices",
+        "inventory_items",
+        "provider",
+        "name",
+        "start",
+        "end",
+        "cost",
+        "currency",
+        "support_level",
+        "contract_type",
+        "tags",
+    ]
     q = forms.CharField(required=False, label="Search")
-    provider = forms.ModelMultipleChoiceField(required=False, queryset=ProviderLCM.objects.all(), to_field_name="pk")
+    expired = forms.BooleanField(
+        required=False,
+        label="Expired",
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+    )
+    devices = DynamicModelMultipleChoiceField(queryset=Device.objects.all(), required=False)
+    provider = forms.ModelMultipleChoiceField(
+        queryset=ProviderLCM.objects.all(),
+        to_field_name="name",
+        required=False,
+        widget=StaticSelect2Multiple(),
+    )
+    name = forms.CharField(required=False, label="Name")
+    cost = forms.FloatField(required=False, label="Cost")
+    start = NullableDateField(required=False, widget=DatePicker(), label="Contract Start Date")
+    end = NullableDateField(required=False, widget=DatePicker(), label="Contract End Date")
     currency = forms.MultipleChoiceField(
         required=False, choices=CurrencyChoices.CHOICES, widget=StaticSelect2Multiple()
     )
+    support_level = forms.CharField(required=False, label="Suport Level")
     contract_type = forms.ChoiceField(
         required=False, widget=StaticSelect2, choices=add_blank_choice(ContractTypeChoices.CHOICES)
     )
-    name = forms.CharField(required=False)
     tags = TagFilterField(model)
-
-    class Meta:
-        """Meta attributes for the ContractLCMFilterForm class."""
-
-        model = ContractLCM
-        # Define the fields above for ordering and widget purposes
-        fields = [
-            "q",
-            "provider",
-            "name",
-            "start",
-            "end",
-            "cost",
-            "currency",
-            "support_level",
-            "contract_type",
-            "devices",
-            "tags",
-        ]
-
-        widgets = {
-            "start": DatePicker(),
-            "end": DatePicker(),
-        }
 
 
 class ProviderLCMForm(NautobotModelForm):
@@ -589,28 +681,29 @@ class ProviderLCMBulkEditForm(NautobotBulkEditForm):
 
 
 class ProviderLCMFilterForm(NautobotFilterForm):
-    """Filter form to filter searches."""
+    """Filter form for filtering ProviderLCM objects."""
 
     model = ProviderLCM
+    field_order = [
+        "q",
+        "name",
+        "description",
+        "physical_address",
+        "country",
+        "phone",
+        "email",
+        "portal_url",
+    ]
     q = forms.CharField(required=False, label="Search")
-    name = forms.CharField(required=False)
-    country = forms.MultipleChoiceField(required=False, choices=CountryCodes.CHOICES, widget=StaticSelect2Multiple())
-
-    class Meta:
-        """Meta attributes for the ProviderLCMFilterForm class."""
-
-        model = ProviderLCM
-        # Define the fields above for ordering and widget purposes
-        fields = [
-            "q",
-            "name",
-            "description",
-            "physical_address",
-            "country",
-            "phone",
-            "email",
-            "comments",
-        ]
+    name = forms.CharField(required=False, label="Name")
+    description = forms.CharField(required=False, label="Description")
+    physical_address = forms.CharField(required=False, label="Physical address")
+    country = forms.MultipleChoiceField(
+        choices=CountryCodes.CHOICES, label="Country", required=False, widget=StaticSelect2Multiple()
+    )
+    phone = forms.CharField(required=False, label="Phone")
+    email = forms.CharField(required=False, label="E-mail")
+    portal_url = forms.CharField(required=False, label="Portal URL")
 
 
 class CVELCMForm(NautobotModelForm):

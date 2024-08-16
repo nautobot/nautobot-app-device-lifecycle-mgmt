@@ -5,6 +5,7 @@ from nautobot.apps.api import NautobotModelViewSet
 from nautobot_device_lifecycle_mgmt.filters import (
     ContractLCMFilterSet,
     CVELCMFilterSet,
+    DeviceHardwareNoticeResultFilterSet,
     DeviceSoftwareValidationResultFilterSet,
     HardwareLCMFilterSet,
     InventoryItemSoftwareValidationResultFilterSet,
@@ -15,6 +16,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
+    DeviceHardwareNoticeResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -26,6 +28,7 @@ from nautobot_device_lifecycle_mgmt.models import (
 from .serializers import (
     ContractLCMSerializer,
     CVELCMSerializer,
+    DeviceHardwareNoticeResultSerializer,
     DeviceSoftwareValidationResultSerializer,
     HardwareLCMSerializer,
     InventoryItemSoftwareValidationResultSerializer,
@@ -84,6 +87,17 @@ class VulnerabilityLCMViewSet(NautobotModelViewSet):
 
     # Disabling POST as these should only be created via Job.
     http_method_names = ["get", "put", "patch", "delete", "head", "options"]
+
+
+class DeviceHardwareNoticeResultListViewSet(NautobotModelViewSet):
+    """REST API viewset for DeviceHardwareNoticeResult records."""
+
+    queryset = DeviceHardwareNoticeResult.objects.all()
+    serializer_class = DeviceHardwareNoticeResultSerializer
+    filterset_class = DeviceHardwareNoticeResultFilterSet
+
+    # Disabling POST as these should only be created via Job.
+    http_method_names = ["get", "head", "options"]
 
 
 class DeviceSoftwareValidationResultListViewSet(NautobotModelViewSet):

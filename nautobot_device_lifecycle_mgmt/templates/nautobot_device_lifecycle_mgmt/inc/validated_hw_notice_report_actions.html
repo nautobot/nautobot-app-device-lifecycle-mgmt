@@ -1,0 +1,13 @@
+{% if record %}
+    {% if record.device__device_type__model %}
+        <a href="/api/plugins/nautobot-device-lifecycle-mgmt/device-hardware-notice-result/?device_type={{ record.device__device_type__model }}&format=csv"
+        class="btn btn-default btn-xs" title="Export data for device type" aria-hidden="true"> 
+        <i class="mdi mdi-download"></i>
+        </a>
+    {% elif record.inventory_item__part_id %}
+        <a href="/api/plugins/nautobot-device-lifecycle-mgmt/inventory-item-hardware-notice-result/?&part_id={{ record.inventory_item__part_id }}&format=csv"
+        class="btn btn-default btn-xs" title="Export data for device type" aria-hidden="true"> 
+        <i class="mdi mdi-download"></i>
+        </a>    
+    {% endif %}
+{% endif %}
