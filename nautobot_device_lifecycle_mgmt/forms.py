@@ -4,6 +4,7 @@ import logging
 
 from django import forms
 from nautobot.apps.forms import (
+    CustomFieldModelBulkEditFormMixin,
     DatePicker,
     DynamicModelChoiceField,
     DynamicModelChoiceMixin,

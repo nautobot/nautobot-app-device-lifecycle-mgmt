@@ -7,16 +7,23 @@ from unittest import skip
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from nautobot.apps.testing import APIViewTestCases
-from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, LocationType, Manufacturer, Platform
-from nautobot.extras.models import Role, Status, Tag
+from nautobot.dcim.models import (
+    Device,
+    DeviceType,
+    InventoryItem,
+    Location,
+    LocationType,
+    Manufacturer,
+    Platform,
+    SoftwareVersion,
+)
+from nautobot.extras.models import Role, Status
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
     HardwareLCM,
     ProviderLCM,
-    SoftwareImageLCM,
-    SoftwareLCM,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )

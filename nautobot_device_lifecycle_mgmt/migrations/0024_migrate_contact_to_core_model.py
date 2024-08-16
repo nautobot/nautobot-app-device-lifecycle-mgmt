@@ -1,12 +1,11 @@
 import uuid
 
 from django.db import migrations
-
 from nautobot.apps.choices import (
     ObjectChangeActionChoices,
     ObjectChangeEventContextChoices,
 )
-from nautobot.apps.models import serialize_object, serialize_object_v2, TagsManager
+from nautobot.apps.models import TagsManager, serialize_object, serialize_object_v2
 from nautobot.apps.utils import migrate_content_type_references_to_new_model
 from nautobot.extras import models as extras_models
 from nautobot.extras.constants import CHANGELOG_MAX_OBJECT_REPR
