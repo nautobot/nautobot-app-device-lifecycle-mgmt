@@ -17,6 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 packages = [
     { include = "nautobot_device_lifecycle_mgmt" },
@@ -27,7 +28,7 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.12"
+python = ">=3.8,<3.13"
 # Used for local development
 pycountry = "^22.3.5"
 matplotlib = "^3.3.4"
@@ -35,7 +36,7 @@ nautobot = "^2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "*"
-django-debug-toolbar = "*"
+django-debug-toolbar = "<4.4"
 invoke = "*"
 ipython = "*"
 pylint = "*"

@@ -1,9 +1,9 @@
 ---
 nautobot_device_lifecycle_mgmt:
   project_name: "nautobot-device-lifecycle-mgmt"
-  nautobot_ver: "2.0.0"
+  nautobot_ver: "2.3.0"
   local: false
-  python_ver: "3.11"
+  python_ver: "3.12"
   compose_dir: "development"
   compose_files:
     - "docker-compose.base.yml"
