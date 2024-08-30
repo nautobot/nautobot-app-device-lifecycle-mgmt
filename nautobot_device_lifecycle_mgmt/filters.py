@@ -74,15 +74,7 @@ class HardwareLCMFilterSet(NautobotFilterSet):
 
         model = HardwareLCM
 
-        fields = [
-            "end_of_sale",
-            "end_of_support",
-            "end_of_sw_releases",
-            "end_of_security_patches",
-            "inventory_item",
-            "documentation_url",
-            "expired",
-        ]
+        fields = '__all__'
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
@@ -124,13 +116,7 @@ class SoftwareLCMFilterSet(NautobotFilterSet):
 
         model = SoftwareLCM
 
-        fields = [
-            "version",
-            "alias",
-            "documentation_url",
-            "long_term_support",
-            "pre_release",
-        ]
+        fields = '__all__'
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
@@ -203,18 +189,7 @@ class SoftwareImageLCMFilterSet(NautobotFilterSet):
 
         model = SoftwareImageLCM
 
-        fields = [
-            "image_file_name",
-            "software",
-            "software_version",
-            "image_file_checksum",
-            "hashing_algorithm",
-            "download_url",
-            "device_types",
-            "inventory_items",
-            "object_tags",
-            "default_image",
-        ]
+        fields = '__all__'
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
@@ -336,21 +311,7 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
 
         model = ValidatedSoftwareLCM
 
-        fields = [
-            "software",
-            "devices",
-            "device_types",
-            "device_roles",
-            "inventory_items",
-            "object_tags",
-            "device_name",
-            "device_id",
-            "inventory_item_id",
-            "start",
-            "end",
-            "preferred",
-            "valid",
-        ]
+        fields = '__all__'
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
@@ -483,15 +444,7 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
 
         model = DeviceSoftwareValidationResult
 
-        fields = [
-            "software",
-            "platform",
-            "device",
-            "device_type",
-            "device_role",
-            "exclude_sw_missing",
-            "sw_missing_only",
-        ]
+        fields = '__all__'
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
@@ -605,17 +558,7 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
 
         model = InventoryItemSoftwareValidationResult
 
-        fields = [
-            "software",
-            "manufacturer",
-            "inventory_item",
-            "part_id",
-            "device",
-            "device_type",
-            "device_role",
-            "exclude_sw_missing",
-            "sw_missing_only",
-        ]
+        fields = '__all__'
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
@@ -675,18 +618,7 @@ class ContractLCMFilterSet(NautobotFilterSet):
 
         model = ContractLCM
 
-        fields = [
-            "provider",
-            "name",
-            "start",
-            "end",
-            "cost",
-            "support_level",
-            "contract_type",
-            "expired",
-            "currency",
-            "tags",
-        ]
+        fields = '__all__'
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
@@ -720,16 +652,7 @@ class ProviderLCMFilterSet(NautobotFilterSet):
 
         model = ProviderLCM
 
-        fields = [
-            "name",
-            "description",
-            "physical_address",
-            "country",
-            "phone",
-            "email",
-            "portal_url",
-            "comments",
-        ]
+        fields = '__all__'
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
@@ -756,16 +679,7 @@ class ContactLCMFilterSet(NautobotFilterSet):
 
         model = ContactLCM
 
-        fields = [
-            "contract",
-            "name",
-            "address",
-            "phone",
-            "email",
-            "comments",
-            "type",
-            "priority",
-        ]
+        fields = '__all__'
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
@@ -805,19 +719,7 @@ class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , Custom
 
         model = CVELCM
 
-        fields = [
-            "name",
-            "published_date",
-            "link",
-            "status",
-            "description",
-            "severity",
-            "cvss",
-            "cvss_v2",
-            "cvss_v3",
-            "fix",
-            "comments",
-        ]
+        fields = '__all__'
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
@@ -843,13 +745,7 @@ class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  
 
         model = VulnerabilityLCM
 
-        fields = [
-            "cve",
-            "software",
-            "device",
-            "inventory_item",
-            "status",
-        ]
+        fields = '__all__'
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
