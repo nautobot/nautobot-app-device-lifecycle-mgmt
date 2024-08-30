@@ -56,6 +56,8 @@ mkdocs-material = "9.5.32"
 mkdocstrings = "0.25.2"
 mkdocstrings-python = "1.10.8"
 griffe = "1.1.1"
+sentry-sdk = "*"
+time-machine = "*"
 towncrier = "~23.6.0"
 to-json-schema = "*"
 jsonschema = "*"
@@ -101,7 +103,6 @@ target-version = "py38"
 select = [
     "D",  # pydocstyle
     "F", "E", "W",  # flake8
-    "PL", # pylint
     "S",  # bandit
     "I",  # isort
 ]
