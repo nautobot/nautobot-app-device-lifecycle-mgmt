@@ -84,17 +84,7 @@ class HardwareLCMForm(NautobotModelForm):
         """Meta attributes for the HardwareLCMForm class."""
 
         model = HardwareLCM
-        fields = [
-            "device_type",
-            "inventory_item",
-            "release_date",
-            "end_of_sale",
-            "end_of_support",
-            "end_of_sw_releases",
-            "end_of_security_patches",
-            "documentation_url",
-            "comments",
-        ]
+        fields = '__all__'
 
         widgets = {
             "release_date": DatePicker(),
@@ -191,18 +181,7 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
         """Meta attributes."""
 
         model = ValidatedSoftwareLCM
-        fields = [
-            "software",
-            "devices",
-            "device_types",
-            "device_roles",
-            "inventory_items",
-            "object_tags",
-            "start",
-            "end",
-            "preferred",
-            "tags",
-        ]
+        fields = '__all__'
 
         widgets = {
             "start": DatePicker(),
@@ -533,20 +512,7 @@ class ContractLCMForm(NautobotModelForm):
         """Meta attributes for the ContractLCMForm class."""
 
         model = ContractLCM
-        fields = [
-            "provider",
-            "name",
-            "number",
-            "start",
-            "end",
-            "cost",
-            "currency",
-            "support_level",
-            "contract_type",
-            "devices",
-            "comments",
-            "tags",
-        ]
+        fields = '__all__'
 
         widgets = {
             "end": DatePicker(),
@@ -642,17 +608,7 @@ class ProviderLCMForm(NautobotModelForm):
         """Meta attributes for the ProviderLCMForm class."""
 
         model = ProviderLCM
-        fields = [
-            "name",
-            "description",
-            "physical_address",
-            "country",
-            "phone",
-            "email",
-            "portal_url",
-            "comments",
-            "tags",
-        ]
+        fields = '__all__'
 
 
 class ProviderLCMBulkEditForm(NautobotBulkEditForm):
@@ -719,21 +675,7 @@ class CVELCMForm(NautobotModelForm):
 
         model = CVELCM
 
-        fields = [
-            "name",
-            "published_date",
-            "link",
-            "status",
-            "description",
-            "severity",
-            "cvss",
-            "cvss_v2",
-            "cvss_v3",
-            "fix",
-            "affected_softwares",
-            "comments",
-            "tags",
-        ]
+        fields = '__all__'
 
         widgets = {
             "published_date": DatePicker(),
@@ -821,10 +763,7 @@ class VulnerabilityLCMForm(NautobotModelForm):
 
         model = VulnerabilityLCM
 
-        fields = [
-            "status",
-            "tags",
-        ]
+        fields = '__all__'
 
 
 class VulnerabilityLCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):
