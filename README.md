@@ -8,7 +8,7 @@
   <a href="https://pypi.org/project/nautobot-device-lifecycle-mgmt/"><img src="https://img.shields.io/pypi/v/nautobot-device-lifecycle-mgmt"></a>
   <a href="https://pypi.org/project/nautobot-device-lifecycle-mgmt/"><img src="https://img.shields.io/pypi/dm/nautobot-device-lifecycle-mgmt"></a>
   <br>
-  An App for <a href="https://github.com/nautobot/nautobot">Nautobot</a>.
+  An <a href="https://networktocode.com/nautobot-apps/">App</a> for <a href="https://nautobot.com/">Nautobot</a>.
 </p>
 
 ## Overview

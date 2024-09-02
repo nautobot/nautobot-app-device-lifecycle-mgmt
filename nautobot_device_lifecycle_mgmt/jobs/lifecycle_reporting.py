@@ -1,5 +1,6 @@
 # pylint: disable=logging-not-lazy, consider-using-f-string
 """Jobs for the Lifecycle Management app."""
+
 from datetime import datetime
 
 from nautobot.dcim.models import Device, InventoryItem
@@ -53,10 +54,10 @@ class DeviceHardwareNoticeFullReport(Job):
                         hardware_notice_result.validated_save()
                         device_count += 1
                         devices_with_hw_notices_count += 1
-                    except Exception as err:
-                        self.logger.error(f"Error creating hadware notice result {err}")
+                    except Exception as err:  # pylint: disable=broad-exception-caught
+                        self.logger.error(f"Error creating hardware notice result {err}")
                 notice_count += 1
-        self.logger.info(f"{devices_with_hw_notices_count} devices are affected by a hardware notice.")
+        self.logger.info("%s devices are affected by a hardware notice.", devices_with_hw_notices_count)
         # Process all devices skipping devices already processed in the previous step
         for device in Device.objects.exclude(device_hardware_notice__last_run=job_run_time):
             try:
@@ -68,10 +69,10 @@ class DeviceHardwareNoticeFullReport(Job):
                 hardware_notice_result.validated_save()
                 device_count += 1
                 devices_without_hw_notices_count += 1
-            except Exception as err:
-                self.logger.error(f"Error creating hadware notice result {err}")
-        self.logger.info(f"{devices_without_hw_notices_count} devices are not affected by a hardware notice.")
-        self.logger.info(f"Processed {notice_count} hardware notices and {device_count} devices.")
+            except Exception as err:  # pylint: disable=broad-exception-caught
+                self.logger.error("Error creating hadware notice result %s", err)
+        self.logger.info("%s devices are not affected by a hardware notice.", devices_without_hw_notices_count)
+        self.logger.info("Processed %s hardware notices and %s devices.", notice_count, device_count)
 
     # TODO: Create Inventory Item Report job (and related table, view, forms, filters etc.)
 
