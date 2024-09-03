@@ -84,7 +84,7 @@ class HardwareLCMForm(NautobotModelForm):
         """Meta attributes for the HardwareLCMForm class."""
 
         model = HardwareLCM
-        fields = '__all__'
+        fields = "__all__"
 
         widgets = {
             "release_date": DatePicker(),
@@ -181,7 +181,7 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
         """Meta attributes."""
 
         model = ValidatedSoftwareLCM
-        fields = '__all__'
+        fields = "__all__"
 
         widgets = {
             "start": DatePicker(),
@@ -512,7 +512,7 @@ class ContractLCMForm(NautobotModelForm):
         """Meta attributes for the ContractLCMForm class."""
 
         model = ContractLCM
-        fields = '__all__'
+        fields = "__all__"
 
         widgets = {
             "end": DatePicker(),
@@ -608,7 +608,7 @@ class ProviderLCMForm(NautobotModelForm):
         """Meta attributes for the ProviderLCMForm class."""
 
         model = ProviderLCM
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ProviderLCMBulkEditForm(NautobotBulkEditForm):
@@ -675,7 +675,7 @@ class CVELCMForm(NautobotModelForm):
 
         model = CVELCM
 
-        fields = '__all__'
+        fields = "__all__"
 
         widgets = {
             "published_date": DatePicker(),
@@ -763,7 +763,7 @@ class VulnerabilityLCMForm(NautobotModelForm):
 
         model = VulnerabilityLCM
 
-        fields = '__all__'
+        fields = "__all__"
 
 
 class VulnerabilityLCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):
