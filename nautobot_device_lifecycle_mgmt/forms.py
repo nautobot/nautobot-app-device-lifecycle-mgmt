@@ -86,7 +86,7 @@ class HardwareLCMForm(NautobotModelForm):
         """Meta attributes for the HardwareLCMForm class."""
 
         model = HardwareLCM
-        fields = '__all__'
+        fields = "__all__"
 
         widgets = {
             "release_date": DatePicker(),
@@ -177,7 +177,7 @@ class SoftwareLCMForm(NautobotModelForm):
         """Meta attributes."""
 
         model = SoftwareLCM
-        fields = '__all__'
+        fields = "__all__"
         widgets = {
             "release_date": DatePicker(),
             "end_of_support": DatePicker(),
@@ -234,7 +234,7 @@ class SoftwareImageLCMForm(NautobotModelForm):
         """Meta attributes."""
 
         model = SoftwareImageLCM
-        fields = '__all__'
+        fields = "__all__"
 
     def clean(self):  # pylint: disable=too-many-locals,too-many-branches
         """Custom validation of the SoftwareImageLCMForm."""
@@ -366,7 +366,7 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
         """Meta attributes."""
 
         model = ValidatedSoftwareLCM
-        fields = '__all__'
+        fields = "__all__"
 
         widgets = {
             "start": DatePicker(),
@@ -612,7 +612,7 @@ class ContractLCMForm(NautobotModelForm):
         """Meta attributes for the ContractLCMForm class."""
 
         model = ContractLCM
-        fields = '__all__'
+        fields = "__all__"
 
         widgets = {
             "end": DatePicker(),
@@ -702,7 +702,7 @@ class ProviderLCMForm(NautobotModelForm):
         """Meta attributes for the ProviderLCMForm class."""
 
         model = ProviderLCM
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ProviderLCMBulkEditForm(NautobotBulkEditForm):
@@ -765,7 +765,7 @@ class ContactLCMForm(NautobotModelForm):
         """Meta attributes for the ContactLCMForm class."""
 
         model = ContactLCM
-        fields = '__all__'
+        fields = "__all__"
 
     def get_form_kwargs(self):
         """Get from kwargs override to capture the query params sent from other pages withing the LCM project."""
@@ -830,7 +830,7 @@ class CVELCMForm(NautobotModelForm):
 
         model = CVELCM
 
-        fields = '__all__'
+        fields = "__all__"
 
         widgets = {
             "published_date": DatePicker(),
@@ -918,7 +918,7 @@ class VulnerabilityLCMForm(NautobotModelForm):
 
         model = VulnerabilityLCM
 
-        fields = '__all__'
+        fields = "__all__"
 
 
 class VulnerabilityLCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):
