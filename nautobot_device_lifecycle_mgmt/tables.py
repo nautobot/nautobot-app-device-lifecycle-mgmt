@@ -273,7 +273,7 @@ class DeviceSoftwareValidationResultTable(BaseTable):
         ]
 
 
-class DeviceSoftwareValidationResultListTable(BaseTable):
+class DeviceSoftwareValidationResultListTable(BaseTable):  # pylint: disable=nb-sub-class-name
     """Table for a list of device to software validation report."""
 
     device = tables.Column(accessor="device", verbose_name="Device", linkify=True)
@@ -373,7 +373,7 @@ class InventoryItemSoftwareValidationResultTable(BaseTable):
         ]
 
 
-class InventoryItemSoftwareValidationResultListTable(BaseTable):
+class InventoryItemSoftwareValidationResultListTable(BaseTable):  # pylint: disable=nb-sub-class-name
     """Table for a list of intenotry items to software validation report."""
 
     part_id = tables.Column(

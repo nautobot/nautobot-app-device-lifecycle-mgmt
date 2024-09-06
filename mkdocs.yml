@@ -1,6 +1,6 @@
 ---
 dev_addr: "127.0.0.1:8001"
-edit_uri: "edit/main/nautobot-app-device-lifecycle-mgmt/docs"
+edit_uri: "edit/main/docs"
 site_dir: "nautobot_device_lifecycle_mgmt/static/nautobot_device_lifecycle_mgmt/docs"
 site_name: "Device Lifecycle Management Documentation"
 site_url: "https://docs.nautobot.com/projects/device-lifecycle/en/latest/"
