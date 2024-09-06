@@ -6,7 +6,7 @@ This document describes all new features and changes in the release `2.2`. The f
 
 This release adds support for Python 3.12 and Django 4.
 
-## [v2.2.0 (2024-09-06)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v2.2.0)
+## [v2.2.0 (2024-09-07)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v2.2.0)
 
 ### Added
 
