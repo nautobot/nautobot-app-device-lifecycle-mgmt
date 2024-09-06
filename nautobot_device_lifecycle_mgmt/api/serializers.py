@@ -1,5 +1,6 @@
 """API serializers implementation for the LifeCycle Management app."""
-from nautobot.apps.api import NautobotModelSerializer
+
+from nautobot.apps.api import NautobotModelSerializer, TaggedModelSerializerMixin
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -36,7 +37,7 @@ class ProviderLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,t
         fields = "__all__"
 
 
-class ContractLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
+class ContractLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
     class Meta:

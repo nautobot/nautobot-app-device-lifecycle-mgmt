@@ -1,4 +1,5 @@
 """Menu items for the Lifecycle Management app."""
+
 # pylint: disable=C0412
 from nautobot.core.apps import NavMenuButton, NavMenuGroup, NavMenuItem, NavMenuTab
 from nautobot.core.choices import ButtonColorChoices

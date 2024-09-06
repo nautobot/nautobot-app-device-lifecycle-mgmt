@@ -1,4 +1,5 @@
 """App declaration for nautobot_device_lifecycle_mgmt."""
+
 # Metadata is inherited from Nautobot. If not including Nautobot in the environment, this should be added
 from importlib import metadata
 
@@ -25,6 +26,7 @@ class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
         "barchart_bar_width": 0.1,
         "barchart_width": 12,
         "barchart_height": 5,
+        "enabled_metrics": [],
     }
     caching_config = {}
     docs_view_name = "plugins:nautobot_device_lifecycle_mgmt:docs"

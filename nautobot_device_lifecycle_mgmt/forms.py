@@ -1,18 +1,20 @@
-"""Forms implementation for the Lifecycle Management app."""
+"""Forms implementation for the Lifecycle Management app."""  # pylint: disable=too-many-lines
+
 import logging
 
 from django import forms
 from django.db.models import Q
 from nautobot.apps.forms import (
-    add_blank_choice,
     DatePicker,
     DynamicModelChoiceField,
+    DynamicModelChoiceMixin,
     DynamicModelMultipleChoiceField,
     NautobotBulkEditForm,
     NautobotModelForm,
     StaticSelect2,
     StaticSelect2Multiple,
     TagFilterField,
+    add_blank_choice,
 )
 from nautobot.core.forms.constants import BOOLEAN_WITH_BLANK_CHOICES
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform
@@ -55,15 +57,27 @@ class CSVMultipleModelChoiceField(forms.ModelMultipleChoiceField):
         return super().prepare_value(pk_list)
 
 
+class HardwareLCMDynamicModelChoiceField(DynamicModelChoiceMixin, forms.ModelChoiceField):
+    """DynamicModelChoiceField used for 'inventory_item' field in HardwareLCMForm."""
+
+    def to_python(self, value):
+        """Overload 'to_python' in forms.ModelChoiceField to force returning 'part_id' as the field value."""
+        if value in self.empty_values:
+            return None
+        if self.to_field_name == "part_id":
+            return value
+        return super().to_python(value)
+
+
 class HardwareLCMForm(NautobotModelForm):
     """Hardware Device Lifecycle creation/edit form."""
 
-    inventory_item = forms.ModelChoiceField(
-        queryset=InventoryItem.objects.exclude(part_id__exact="")
-        .distinct()
-        .order_by("part_id")
-        .values_list("part_id", flat=True),
+    device_type = DynamicModelChoiceField(queryset=DeviceType.objects.all(), required=False)
+    inventory_item = HardwareLCMDynamicModelChoiceField(
+        queryset=InventoryItem.objects.without_tree_fields().order_by().distinct("part_id"),
+        query_params={"part_id__nre": "^$", "nautobot_device_lifecycle_mgmt_distinct_part_id": "true"},
         label="Inventory Part ID",
+        display_field="part_id",
         to_field_name="part_id",
         required=False,
     )
@@ -72,17 +86,7 @@ class HardwareLCMForm(NautobotModelForm):
         """Meta attributes for the HardwareLCMForm class."""
 
         model = HardwareLCM
-        fields = [
-            "device_type",
-            "inventory_item",
-            "release_date",
-            "end_of_sale",
-            "end_of_support",
-            "end_of_sw_releases",
-            "end_of_security_patches",
-            "documentation_url",
-            "comments",
-        ]
+        fields = "__all__"
 
         widgets = {
             "release_date": DatePicker(),
@@ -128,15 +132,15 @@ class HardwareLCMFilterForm(NautobotFilterForm):
         label="Search",
         help_text="Select a date that will be used to search end_of_support and end_of_sale",
     )
-    device_type = forms.ModelMultipleChoiceField(
+    device_type = DynamicModelMultipleChoiceField(
         required=False, queryset=DeviceType.objects.all(), to_field_name="model"
     )
 
-    inventory_item = forms.ModelMultipleChoiceField(
-        queryset=HardwareLCM.objects.exclude(inventory_item__isnull=True)
-        .exclude(inventory_item__exact="")
-        .values_list("inventory_item", flat=True),
+    inventory_item = DynamicModelMultipleChoiceField(
+        queryset=HardwareLCM.objects.exclude(inventory_item__isnull=True).exclude(inventory_item__exact=""),
         label="Inventory Part ID",
+        display_field="inventory_item",
+        to_field_name="inventory_item",
         required=False,
     )
 
@@ -173,18 +177,7 @@ class SoftwareLCMForm(NautobotModelForm):
         """Meta attributes."""
 
         model = SoftwareLCM
-        fields = [
-            "device_platform",
-            "version",
-            "alias",
-            "release_date",
-            "end_of_support",
-            "documentation_url",
-            "long_term_support",
-            "pre_release",
-            "tags",
-        ]
-
+        fields = "__all__"
         widgets = {
             "release_date": DatePicker(),
             "end_of_support": DatePicker(),
@@ -241,18 +234,7 @@ class SoftwareImageLCMForm(NautobotModelForm):
         """Meta attributes."""
 
         model = SoftwareImageLCM
-        fields = [
-            "image_file_name",
-            "software",
-            "device_types",
-            "inventory_items",
-            "object_tags",
-            "download_url",
-            "image_file_checksum",
-            "hashing_algorithm",
-            "default_image",
-            "tags",
-        ]
+        fields = "__all__"
 
     def clean(self):  # pylint: disable=too-many-locals,too-many-branches
         """Custom validation of the SoftwareImageLCMForm."""
@@ -384,18 +366,7 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
         """Meta attributes."""
 
         model = ValidatedSoftwareLCM
-        fields = [
-            "software",
-            "devices",
-            "device_types",
-            "device_roles",
-            "inventory_items",
-            "object_tags",
-            "start",
-            "end",
-            "preferred",
-            "tags",
-        ]
+        fields = "__all__"
 
         widgets = {
             "start": DatePicker(),
@@ -641,20 +612,7 @@ class ContractLCMForm(NautobotModelForm):
         """Meta attributes for the ContractLCMForm class."""
 
         model = ContractLCM
-        fields = [
-            "provider",
-            "name",
-            "number",
-            "start",
-            "end",
-            "cost",
-            "currency",
-            "support_level",
-            "contract_type",
-            "devices",
-            "comments",
-            "tags",
-        ]
+        fields = "__all__"
 
         widgets = {
             "end": DatePicker(),
@@ -704,6 +662,7 @@ class ContractLCMFilterForm(NautobotFilterForm):
         required=False, widget=StaticSelect2, choices=add_blank_choice(ContractTypeChoices.CHOICES)
     )
     name = forms.CharField(required=False)
+    tags = TagFilterField(model)
 
     class Meta:
         """Meta attributes for the ContractLCMFilterForm class."""
@@ -721,6 +680,7 @@ class ContractLCMFilterForm(NautobotFilterForm):
             "support_level",
             "contract_type",
             "devices",
+            "tags",
         ]
 
         widgets = {
@@ -742,17 +702,7 @@ class ProviderLCMForm(NautobotModelForm):
         """Meta attributes for the ProviderLCMForm class."""
 
         model = ProviderLCM
-        fields = [
-            "name",
-            "description",
-            "physical_address",
-            "country",
-            "phone",
-            "email",
-            "portal_url",
-            "comments",
-            "tags",
-        ]
+        fields = "__all__"
 
 
 class ProviderLCMBulkEditForm(NautobotBulkEditForm):
@@ -815,17 +765,7 @@ class ContactLCMForm(NautobotModelForm):
         """Meta attributes for the ContactLCMForm class."""
 
         model = ContactLCM
-        fields = [
-            "contract",
-            "name",
-            "address",
-            "phone",
-            "email",
-            "comments",
-            "type",
-            "priority",
-            "tags",
-        ]
+        fields = "__all__"
 
     def get_form_kwargs(self):
         """Get from kwargs override to capture the query params sent from other pages withing the LCM project."""
@@ -890,21 +830,7 @@ class CVELCMForm(NautobotModelForm):
 
         model = CVELCM
 
-        fields = [
-            "name",
-            "published_date",
-            "link",
-            "status",
-            "description",
-            "severity",
-            "cvss",
-            "cvss_v2",
-            "cvss_v3",
-            "fix",
-            "affected_softwares",
-            "comments",
-            "tags",
-        ]
+        fields = "__all__"
 
         widgets = {
             "published_date": DatePicker(),
@@ -992,10 +918,7 @@ class VulnerabilityLCMForm(NautobotModelForm):
 
         model = VulnerabilityLCM
 
-        fields = [
-            "status",
-            "tags",
-        ]
+        fields = "__all__"
 
 
 class VulnerabilityLCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):

@@ -273,7 +273,7 @@ class DeviceSoftwareValidationResultTable(BaseTable):
         ]
 
 
-class DeviceSoftwareValidationResultListTable(BaseTable):
+class DeviceSoftwareValidationResultListTable(BaseTable):  # pylint: disable=nb-sub-class-name
     """Table for a list of device to software validation report."""
 
     device = tables.Column(accessor="device", verbose_name="Device", linkify=True)
@@ -373,7 +373,7 @@ class InventoryItemSoftwareValidationResultTable(BaseTable):
         ]
 
 
-class InventoryItemSoftwareValidationResultListTable(BaseTable):
+class InventoryItemSoftwareValidationResultListTable(BaseTable):  # pylint: disable=nb-sub-class-name
     """Table for a list of intenotry items to software validation report."""
 
     part_id = tables.Column(
@@ -443,6 +443,7 @@ class ContractLCMTable(BaseTable):
         template_code="""{{ record.cost }}{% if record.currency %} {{ record.currency }}{% endif %}"""
     )
     actions = ButtonsColumn(ContractLCM, buttons=("changelog", "edit", "delete"))
+    tags = TagColumn(url_name="plugins:nautobot_device_lifecycle_mgmt:contractlcm_list")
 
     class Meta(BaseTable.Meta):
         """Meta attributes."""
@@ -458,6 +459,7 @@ class ContractLCMTable(BaseTable):
             "contract_type",
             "devices",
             "provider",
+            "tags",
             "actions",
         )
 

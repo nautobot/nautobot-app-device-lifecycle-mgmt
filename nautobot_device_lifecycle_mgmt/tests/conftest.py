@@ -1,4 +1,5 @@
 """Params for testing."""
+
 from datetime import date
 
 from django.contrib.contenttypes.models import ContentType
