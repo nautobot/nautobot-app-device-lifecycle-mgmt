@@ -1,4 +1,4 @@
-"""Generate test data for the Golden Config app."""
+"""Generate test data for the Device Lifecycle Management app."""
 
 import random
 
