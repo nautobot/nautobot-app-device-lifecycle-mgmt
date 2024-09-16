@@ -690,6 +690,9 @@ class CVELCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin
     description = forms.CharField(required=False)
     comments = forms.CharField(required=False)
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+    status = DynamicModelChoiceField(
+        queryset=Status.objects.all(), required=False, query_params={"content_types": model._meta.label_lower}
+    )
 
     class Meta:
         """Meta attributes for the CVELCMBulkEditForm class."""
@@ -729,7 +732,12 @@ class CVELCMFilterForm(NautobotFilterForm):
     cvss_v3__lte = forms.FloatField(label="CVSSv3 Score Below", required=False)
     affected_softwares = forms.ModelMultipleChoiceField(queryset=SoftwareVersion.objects.all(), required=False)
 
-    status = DynamicModelMultipleChoiceField(queryset=Status.objects.all(), required=False, to_field_name="name")
+    status = DynamicModelMultipleChoiceField(
+        queryset=Status.objects.all(),
+        required=False,
+        query_params={"content_types": model._meta.label_lower},
+        to_field_name="name",
+    )
     exclude_status = DynamicModelMultipleChoiceField(
         label="Exclude Status",
         required=False,

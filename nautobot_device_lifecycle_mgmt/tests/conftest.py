@@ -98,24 +98,33 @@ def create_inventory_items():
 
 def create_cves():
     """Create CVELCM items for tests."""
+    cve_ct = ContentType.objects.get_for_model(CVELCM)
+    status_review, _ = Status.objects.get_or_create(name="Review")
+    status_review.content_types.add(cve_ct)
+    status_resolved, _ = Status.objects.get_or_create(name="Resolved")
+    status_resolved.content_types.add(cve_ct)
+
     cves = (
         CVELCM.objects.create(
             name="CVE-2021-1391",
             published_date="2021-03-24",
             link="https://www.cvedetails.com/cve/CVE-2021-1391/",
             description="A vulnerability in the dragonite debugger of Cisco IOS XE Software",
+            status=status_review,
         ),
         CVELCM.objects.create(
             name="CVE-2021-44228",
             published_date="2021-12-10",
             link="https://www.cvedetails.com/cve/CVE-2021-44228/",
             description="Apache Log4j2 2.0-beta9 through 2.15.0",
+            status=status_review,
         ),
         CVELCM.objects.create(
             name="CVE-2020-27134",
             published_date="2020-12-11",
             link="https://www.cvedetails.com/cve/CVE-2020-27134/",
             description="Multiple vulnerabilities in Cisco Jabber",
+            status=status_review,
         ),
     )
     return cves
