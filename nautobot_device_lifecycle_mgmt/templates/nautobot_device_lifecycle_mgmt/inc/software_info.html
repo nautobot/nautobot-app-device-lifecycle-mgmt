@@ -1,12 +1,6 @@
-<div class="row">
-    <div class="col-md-12">
-        {% if obj_soft_valid %}
-        <div class="panel panel-success">
-        {% else %}
-        <div class="panel panel-danger">
-        {% endif %}
+        <div class="panel panel-default">
             <div class="panel-heading">
-                <strong>Software is {% if obj_soft_valid %}valid{% else %}invalid{% endif %}</strong>
+                <strong>Software</strong> {% if obj_soft_valid %}<span class="label label-success">Valid{% else %}<span class="label label-danger">Invalid{% endif %}</span>
             </div>
             <table class="table table-hover panel-body attr-table">
                 <tr>
@@ -29,5 +23,3 @@
                 </tr>
             </table>
         </div>
-    </div>
-</div>
