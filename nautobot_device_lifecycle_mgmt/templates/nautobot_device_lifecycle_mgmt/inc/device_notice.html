@@ -1,109 +1,72 @@
 {% load helpers %}
 {% if perms.nautobot_device_lifecycle_mgmt.view_hardwarelcm and hw_notices %}
-<style type="text/css">
-    .panel-heading .accordion-toggle:after {
-        /* symbol for "opening" panels */
-        font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
-        content: "\e114";    /* adjust as needed, taken from bootstrap.css */
-        float: right;        /* adjust as needed */
-        color: grey;         /* adjust as needed */
-    }
-    .panel-heading .accordion-toggle.collapsed:after {
-        /* symbol for "collapsed" panels */
-        content: "\e080";    /* adjust as needed, taken from bootstrap.css */
-    }
-</style>
-
-<div class="row">
-    <div class="col-md-12">
-        <!-- Nav tabs to support both hardware and software notices. -->
-        <ul class="nav nav-tabs" role="tablist">
-            {% if hw_notices %}
-            <li role="presentation" class="active">
-                <a href="#hardware" aria-controls="hardware" role="tab" data-toggle="tab">
-                    Hardware Lifecycle Notices  <span class="badge badge-pill badge-primary">{{ hw_notices.count }}</span>
-                </a>
-
-            </li>
-            {% endif %}
-            {% if sw_notices %}
-            <li role="presentation"><a href="#software" aria-controls="software" role="tab" data-toggle="tab">Software Lifecycle Notices</a></li>
-            {% endif %}
-        </ul>
-
-        <div class="tab-content">
+            <style>
+                .accordion-toggle {
+                    font-size: 14px;
+                    font-weight: 700;
+                }
+            </style>
 
             <!-- Defines all hardware notice logic within this tab-panel. -->
-            <div role="tabpanel" class="tab-pane active" id="hardware">
-                <div class="panel-group" id="hwAccordion" role="tablist" aria-multiselectable="true">
-                    {% for notice in hw_notices %}
-                    {% if forloop.counter < 6 %}
-                    <div class="panel panel-{% if notice.expired %}danger{% else %}warning{% endif %}">
-                        <div class="panel-heading" role="tab" id="heading{{ forloop.counter }}">
-                            <span role="button"
-                                  class="accordion-toggle collapsed"
-                                  style="font-size:14px"
-                                  data-toggle="collapse"
-                                  data-parent="#hwAccordion"
-                                  href="#collapse{{ forloop.counter }}"
-                                  aria-expanded="false"
-                                  aria-controls="collapse{{ forloop.counter }}">
-                                {{ notice }}
-                            </span>
-                        </div>
-                        <div id="collapse{{ forloop.counter }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{ forloop.counter }}">
-                            <div class="list-group">
-                                <table class="table">
-                                    <tr>
-                                        <td>End of Sale</td>
-                                        <td>{{ notice.end_of_sale }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>End of Support</td>
-                                        <td>{{ notice.end_of_support }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>End of Software Releases</td>
-                                        <td>{{ notice.end_of_sw_releases }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>End of Security Patches</td>
-                                        <td>{{ notice.end_of_security_patches }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Documentation URL</td>
-                                        <td>
-                                            {% if notice.documentation_url %}<a href="{{ notice.documentation_url }}">{{ notice.documentation_url }}</a>{% else %}&mdash;{% endif %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Comments</td>
-                                        <td>
-                                            {% if notice.comments %}<pre>{{ notice.comments }}</pre>{% else %}&mdash;{% endif %}
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    {% elif forloop.counter == 6 %}
-                    <div class="panel-footer text-right noprint">
-                        <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list'  %}?q={% for inv in object.inventoryitems.all %}&inventory_item={{ inv.part_id }}{% endfor %}" target="_blank" class="btn btn-primary btn-xs">
-                            <span class="mdi mdi-open-in-new" aria-hidden="true"></span>  See More Notices
-                        </a>
-                    </div>
-                    {% endif %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <strong>Hardware Lifecycle Notices {% badge hw_notices.count show_empty=True %}</strong>
+                </div>
+                <table id="accordion" class="table table-hover panel-body attr-table">
+                    {% for notice in hw_notices|slice:":5" %}
+                    <tbody>
+                        <tr>
+                            <th colspan="2">
+                                <button type="button" class="btn-link accordion-toggle mdi mdi-chevron-right"
+                                        name="hardware-notices-accordion-{{ forloop.counter }}" data-toggle="collapse"
+                                        data-target=".collapseme-hardware-notices-accordion-{{ forloop.counter }}">
+                                    {{ notice }}
+                                </button>
+                                {% if notice.expired %}
+                                    <span class="label label-danger pull-right">Expired</span>
+                                {% endif %}
+                            </th>
+                        </tr>
+                    </tbody>
+                    <tbody class="collapse collapseme-hardware-notices-accordion-{{ forloop.counter }}">
+                        <tr>
+                            <td>End of Sale</td>
+                            <td>{{ notice.end_of_sale|placeholder }}</td>
+                        </tr>
+                        <tr>
+                            <td>End of Support</td>
+                            <td>{{ notice.end_of_support|placeholder }}</td>
+                        </tr>
+                        <tr>
+                            <td>End of Software Releases</td>
+                            <td>{{ notice.end_of_sw_releases|placeholder }}</td>
+                        </tr>
+                        <tr>
+                            <td>End of Security Patches</td>
+                            <td>{{ notice.end_of_security_patches|placeholder }}</td>
+                        </tr>
+                        <tr>
+                            <td>Documentation URL</td>
+                            <td>
+                                {% if notice.documentation_url %}<a href="{{ notice.documentation_url }}">{{ notice.documentation_url }}</a>{% else %}{{ None|placeholder }}{% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Comments</td>
+                            <td>
+                                {% if notice.comments %}<pre>{{ notice.comments }}</pre>{% else %}{{ None|placeholder }}{% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
                     {% endfor %}
+                </table>
+                {% if hw_notices|length > 5 %}
+                <div class="panel-footer text-right noprint">
+                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list'  %}?q={% for inv in object.inventory_items.all %}{% if inv.part_id %}&inventory_item={{ inv.part_id|urlencode }}{% endif %}{% endfor %}" target="_blank" class="btn btn-primary btn-xs">
+                        <span class="mdi mdi-open-in-new" aria-hidden="true"></span>
+                        See More Notices
+                    </a>
                 </div>
+                {% endif %}
             </div>
-
-            <!-- Defines all software notice logic within this tab-panel. -->
-            <div role="tabpanel" class="tab-pane" id="software">
-                <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endif %}
