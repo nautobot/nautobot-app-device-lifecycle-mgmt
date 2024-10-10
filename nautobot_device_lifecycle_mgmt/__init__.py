@@ -31,13 +31,5 @@ class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
     caching_config = {}
     docs_view_name = "plugins:nautobot_device_lifecycle_mgmt:docs"
 
-    def ready(self):
-        """Register custom signals."""
-        from .signals import post_migrate_create_relationships  # pylint: disable=import-outside-toplevel
-
-        nautobot_database_ready.connect(post_migrate_create_relationships, sender=self)
-
-        super().ready()
-
 
 config = NautobotDeviceLifecycleManagementConfig  # pylint:disable=invalid-name
