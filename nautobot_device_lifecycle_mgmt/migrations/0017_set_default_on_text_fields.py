@@ -90,10 +90,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(set_default_on_contact_text_fields),
-        migrations.RunPython(set_default_on_contract_text_fields),
-        migrations.RunPython(set_default_on_cve_text_fields),
-        migrations.RunPython(set_default_on_hardware_text_fields),
-        migrations.RunPython(set_default_on_provider_text_fields),
-        migrations.RunPython(set_default_on_software_text_fields),
+        migrations.RunPython(code=set_default_on_contact_text_fields, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(code=set_default_on_contract_text_fields, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(code=set_default_on_cve_text_fields, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(code=set_default_on_hardware_text_fields, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(code=set_default_on_provider_text_fields, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(code=set_default_on_software_text_fields, reverse_code=migrations.RunPython.noop),
     ]
