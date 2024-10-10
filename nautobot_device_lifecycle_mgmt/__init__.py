@@ -22,6 +22,7 @@ class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
     max_version = "2.9999"
     default_settings = {}
     caching_config = {}
+    docs_view_name = "plugins:nautobot_device_lifecycle_mgmt:docs"
 
 
 config = NautobotDeviceLifecycleManagementConfig  # pylint:disable=invalid-name

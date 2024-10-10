@@ -14,7 +14,7 @@ To avoid extra work and temporary links, make sure that publishing docs (or merg
   <img src="https://raw.githubusercontent.com/nautobot/nautobot-app-device-lifecycle-mgmt/develop/docs/images/icon-nautobot-device-lifecycle-mgmt.png" class="logo" height="200px">
   <br>
   <a href="https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/actions"><img src="https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/actions/workflows/ci.yml/badge.svg?branch=main"></a>
-  <a href="https://docs.nautobot.com/projects/device-lifecycle/en/latest/"><img src="https://readthedocs.org/projects/nautobot-plugin-nautobot-device-lifecycle-mgmt/badge/"></a>
+  <a href="https://docs.nautobot.com/projects/device-lifecycle/en/latest/"><img src="https://readthedocs.org/projects/nautobot-app-nautobot-device-lifecycle-mgmt/badge/"></a>
   <a href="https://pypi.org/project/nautobot-device-lifecycle-mgmt/"><img src="https://img.shields.io/pypi/v/nautobot-device-lifecycle-mgmt"></a>
   <a href="https://pypi.org/project/nautobot-device-lifecycle-mgmt/"><img src="https://img.shields.io/pypi/dm/nautobot-device-lifecycle-mgmt"></a>
   <br>
