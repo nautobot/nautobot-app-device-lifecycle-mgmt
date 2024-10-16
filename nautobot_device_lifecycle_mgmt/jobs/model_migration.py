@@ -54,6 +54,7 @@ class DLMToNautoboCoreModelMigration(Job):
         label="Update Core to match DLM",
         description="Forcibly update existing Core objects to match DLM objects.",
     )
+    debug = BooleanVar(label="Show debug messages")
 
     class Meta:
         """Meta class for the job."""
@@ -64,9 +65,10 @@ class DLMToNautoboCoreModelMigration(Job):
         dryrun_default = True
         has_sensitive_variables = False
 
-    def run(self, dryrun, hide_changelog_migrations, update_core_to_match_dlm) -> None:  # pylint: disable=arguments-differ
+    def run(self, dryrun, hide_changelog_migrations, update_core_to_match_dlm, debug) -> None:  # pylint: disable=arguments-differ
         """Migration logic."""
         self.dryrun = dryrun
+        self.debug = debug
         self.update_core_to_match_dlm = update_core_to_match_dlm
         self.hide_changelog_migrations = hide_changelog_migrations
         self.softlcm_ct = str(ContentType.objects.get_for_model(SoftwareLCM))
@@ -92,12 +94,12 @@ class DLMToNautoboCoreModelMigration(Job):
         # Migrate nautobot_device_lifecycle_mgmt.SoftwareLCM instances to dcim.SoftwareVersion
         for dlm_software_version in SoftwareLCM.objects.all():
             self.logger.info(
-                "Migrating SoftwareLCM object __%s__.", dlm_software_version, extra={"object": dlm_software_version}
+                "Migrating DLM Software object __%s__.", dlm_software_version, extra={"object": dlm_software_version}
             )
             self._migrate_software_version(dlm_software_version)
 
         # TODO: Debug, remove
-        self.logger.info(json.dumps(self.dlm_to_core_id_map, indent=4))
+        # self.logger.info(json.dumps(self.dlm_to_core_id_map, indent=4))
 
         dlm_software_version_ct = ContentType.objects.get_for_model(SoftwareLCM)
         core_software_version_ct = ContentType.objects.get_for_model(SoftwareVersion)
@@ -111,7 +113,7 @@ class DLMToNautoboCoreModelMigration(Job):
         # Migrate nautobot_device_lifecycle_mgmt.SoftwareImageLCM instances to dcim.SoftwareImageFile
         for dlm_software_image in SoftwareImageLCM.objects.all():
             self.logger.info(
-                "Migrating SoftwareImageLCM object __%s__.", dlm_software_image, extra={"object": dlm_software_image}
+                "Migrating DLM SoftwareImage object __%s__.", dlm_software_image, extra={"object": dlm_software_image}
             )
             self._migrate_software_image(dlm_software_image)
 
@@ -125,7 +127,6 @@ class DLMToNautoboCoreModelMigration(Job):
         # Create placeholder software image files for software, device type pairs that don't currently have image files
         # This is to satisfy Nautobot's 2.2 requirement that device can only have software assigned if there is a matching image
         # TODO: progala: Should this be a toggle on the job?
-        self.logger.info("Creating placeholder images")
         self._create_placeholder_software_images()
 
         # Delete DLM relationships from software to devices and inventory items
@@ -140,7 +141,6 @@ class DLMToNautoboCoreModelMigration(Job):
 
     def _migrate_hashing_algorithm(self, value):
         # Attempt to map the hashing algorithm to one of the valid choices for dcim.SoftwareImageFile
-        self.logger.info("Migrating hashing algorithm __%s__", value)
         similarity = {}
         for choice in SoftwareImageFileHashingAlgorithmChoices.values():
             # Use difflib.SequenceMatcher to compare the similarity of the hashing algorithm to the valid choices, ignoring case and punctuation
@@ -154,6 +154,235 @@ class DLMToNautoboCoreModelMigration(Job):
             return similarity[max_similarity][0]
         return ""
 
+    def _migrate_software_version(self, dlm_software_version):
+        core_software_version_ct = ContentType.objects.get_for_model(SoftwareVersion)
+        device_ct = ContentType.objects.get_for_model(Device)
+        dlm_software_version_ct = ContentType.objects.get_for_model(SoftwareLCM)
+        inventory_item_ct = ContentType.objects.get_for_model(InventoryItem)
+        status_active = Status.objects.get(name="Active")
+
+        platform = dlm_software_version.device_platform
+        version = dlm_software_version.version
+
+        dlm_soft_attrs = {
+            "alias": dlm_software_version.alias,
+            "release_date": dlm_software_version.release_date,
+            "end_of_support_date": dlm_software_version.end_of_support,
+            "documentation_url": dlm_software_version.documentation_url,
+            "long_term_support": dlm_software_version.long_term_support,
+            "pre_release": dlm_software_version.pre_release,
+            "_custom_field_data": dlm_software_version._custom_field_data,
+        }
+
+        attrs_diff = {}
+        core_software_version = None
+        core_software_version_q = SoftwareVersion.objects.filter(platform=platform, version=version)
+        if core_software_version_q.exists():
+            core_software_version = core_software_version_q.first()
+            self.logger.info(
+                "Found existing Core SoftwareVersion __%s__ matching DLM Software __%s__.",
+                core_software_version,
+                dlm_software_version,
+                extra={"object": core_software_version},
+            )
+            for attr_name, dlm_attr_value in dlm_soft_attrs.items():
+                core_attr_value = getattr(core_software_version, attr_name)
+                if core_attr_value == dlm_attr_value:
+                    continue
+                attrs_diff[attr_name] = {
+                    "dlm_value": dlm_attr_value,
+                    "core_value": core_attr_value,
+                }
+                if not self.dryrun and self.update_core_to_match_dlm:
+                    setattr(core_software_version, attr_name, dlm_attr_value)
+            if not self.dryrun and self.update_core_to_match_dlm and attrs_diff:
+                self.logger.info(
+                    "Updated existing Core SoftwareVersion __%s__ to match DLM Software __%s__. Diff before update __%s__.",
+                    core_software_version,
+                    dlm_software_version,
+                    attrs_diff,
+                    extra={"object": core_software_version},
+                )
+                attrs_diff.clear()
+        elif not self.dryrun:
+            core_software_version = SoftwareVersion(
+                platform=dlm_software_version.device_platform,
+                version=dlm_software_version.version,
+                status=status_active,  # DLM model lacks a status field so we default to active
+                **dlm_soft_attrs,
+            )
+            core_software_version.validated_save()
+
+        if core_software_version is None:
+            return
+
+        # Map the DLM Software Version ID to the Core Software version ID. This is needed for SoftwareImage migrations.
+        self.dlm_to_core_id_map[self.softlcm_ct][str(dlm_software_version.id)] = str(core_software_version.id)
+
+        # Preserve ID of the DLM SoftwareLCM object. This is needed to rewrite references in DLM models that referenced this software.
+        if not self.dryrun:
+            dlm_id_tag, _ = Tag.objects.get_or_create(
+                name=f"DLM-SoftwareLCM__{dlm_software_version.id}",
+                defaults={
+                    "description": f"ID of the corresponding DLM Software for SoftwareVersion {str(core_software_version)}",
+                },
+            )
+            dlm_id_tag.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
+
+        # Validate whether the Core Software Version has the correct tag that references DLM Software Version ID
+        core_sv_dlm_id_tags = core_software_version.tags.filter(name__istartswith="DLM-SoftwareLCM__")
+        if core_sv_dlm_id_tags.count() > 1:
+            self.logger.warning(
+                "SoftwareVersion __%s__ has multiple tags with ID of the DLM Software",
+                core_software_version,
+                extra={"object": core_software_version},
+            )
+            if not self.dryrun and self.update_core_to_match_dlm:
+                core_sv_dlm_id_tags.delete()
+                core_software_version.tags.add(dlm_id_tag)
+                self.logger.info(
+                    "Updated tag referencing ID of corresponding DLM Software on SoftwareVersion __%s__",
+                    core_software_version,
+                    extra={"object": core_software_version},
+                )
+        elif core_sv_dlm_id_tags.count() == 1 and core_sv_dlm_id_tags.first().name != dlm_id_tag.name:
+            self.logger.warning(
+                "SoftwareVersion __%s__ has incorrect ID of corresponding DLM Software",
+                core_software_version,
+                extra={"object": core_software_version},
+            )
+            if not self.dryrun and self.update_core_to_match_dlm:
+                core_sv_dlm_id_tags.delete()
+                core_software_version.tags.add(dlm_id_tag)
+                self.logger.info(
+                    "Updated tag referencing ID of corresponding DLM Software on SoftwareVersion __%s__",
+                    core_software_version,
+                    extra={"object": core_software_version},
+                )
+        elif core_sv_dlm_id_tags.count() == 0 and not self.dryrun:
+            core_software_version.tags.add(dlm_id_tag)
+            self.logger.info(
+                "Updated tag referencing ID of corresponding DLM Software on SoftwareVersion __%s__",
+                core_software_version,
+                extra={"object": core_software_version},
+            )
+
+        if not self.dryrun:
+            core_software_version.validated_save()
+
+        if attrs_diff:
+            self.logger.warning(
+                "Attributes differ between DLM and Core SoftwareVersion objects: ```__%s__```",
+                json.dumps(attrs_diff),
+                extra={"object": core_software_version},
+            )
+
+        # Work around created field's auto_now_add behavior
+        if not self.dryrun and core_software_version.created != dlm_software_version.created:
+            core_software_version.created = dlm_software_version.created
+            core_software_version.refresh_from_db()
+
+        # Migrate "Software on Device" relationships to the Device.software_version foreign key
+        for relationship_association in RelationshipAssociation.objects.filter(
+            relationship__key="device_soft",
+            source_type=core_software_version_ct,
+            source_id=core_software_version.id,
+            destination_type=device_ct,
+        ):
+            device = Device.objects.get(id=relationship_association.destination_id)
+            existing_device_software = device.software_version
+            if existing_device_software and existing_device_software != core_software_version:
+                self.logger.warning(
+                    "Device __%s__ is already assigned to Core SoftwareVersion __%s__ but its DLM Software __%s__ assignment is different.",
+                    device,
+                    existing_device_software,
+                    core_software_version,
+                    extra={"object": device},
+                )
+                if not self.dryrun and self.update_core_to_match_dlm:
+                    device.software_version = core_software_version
+                    device.validated_save()
+                    self.logger.info(
+                        "Updated SoftwareVersion assignment to device __%s__. Old SoftwareVersion: __%s__. New SoftwareVersion: __%s__.",
+                        device,
+                        core_software_version,
+                        existing_device_software,
+                        extra={"object": device},
+                    )
+            elif not existing_device_software:
+                device.software_version = core_software_version
+                device.validated_save()
+
+        # Migrate "Software on InventoryItem" relationships to the InventoryItem.software_version foreign key
+        for relationship_association in RelationshipAssociation.objects.filter(
+            relationship__key="inventory_item_soft",
+            source_id=core_software_version.id,
+            source_type=core_software_version_ct,
+            destination_type=inventory_item_ct,
+        ):
+            inventory_item = InventoryItem.objects.get(id=relationship_association.destination_id)
+            existing_invitem_software = inventory_item.software_version
+            if existing_invitem_software and inventory_item.software_version != core_software_version:
+                self.logger.warning(
+                    "Inventory Item __%s__ is already assigned to Core SoftwareVersion __%s__ but its DLM Software __%s__ assignment is different.",
+                    inventory_item,
+                    existing_invitem_software,
+                    core_software_version,
+                    extra={"object": inventory_item},
+                )
+                if not self.dryrun and self.update_core_to_match_dlm:
+                    inventory_item.software_version = core_software_version
+                    device.validated_save()
+                    self.logger.info(
+                        "Updated SoftwareVersion assignment to inventory item __%s__. Old SoftwareVersion: __%s__. New SoftwareVersion: __%s__.",
+                        inventory_item,
+                        core_software_version,
+                        existing_invitem_software,
+                        extra={"object": inventory_item},
+                    )
+            elif not existing_invitem_software:
+                inventory_item.software_version = core_software_version
+                inventory_item.validated_save()
+
+        core_software_version.refresh_from_db()
+
+        # Create an object change to document migration
+        if ObjectChange.objects.filter(
+            changed_object_id=core_software_version.id,
+            related_object_id=dlm_software_version.id,
+        ).exists():
+            if self.debug:
+                self.logger.debug(
+                    "DLM Software __%s__ to Core SoftwareVersion __%s__ migration change log already in place. Skipping.",
+                    dlm_software_version,
+                    core_software_version,
+                )
+            return
+
+        if not self.dryrun:
+            ObjectChange.objects.create(
+                action=ObjectChangeActionChoices.ACTION_UPDATE,
+                change_context=ObjectChangeEventContextChoices.CONTEXT_ORM,
+                change_context_detail="Migrated from Nautobot App Device Lifecycle Management",
+                changed_object_id=core_software_version.id,
+                changed_object_type=core_software_version_ct,
+                object_data=serialize_object(core_software_version),
+                object_data_v2=serialize_object_v2(core_software_version),
+                object_repr=f"{core_software_version.platform.name} - {core_software_version.version}"[
+                    :CHANGELOG_MAX_OBJECT_REPR
+                ],
+                related_object_id=dlm_software_version.id,
+                related_object_type=dlm_software_version_ct,
+                request_id=common_objectchange_request_id,
+                user=None,
+                user_name="Undefined",
+            )
+            self.logger.info(
+                "DLM Software __%s__ to Core SoftwareVersion __%s__ migration change log created.",
+                dlm_software_version,
+                core_software_version,
+            )
+
     def _migrate_software_image(self, dlm_software_image):
         core_software_image_ct = ContentType.objects.get_for_model(SoftwareImageFile)
         dlm_software_image_ct = ContentType.objects.get_for_model(SoftwareImageLCM)
@@ -163,7 +392,8 @@ class DLMToNautoboCoreModelMigration(Job):
 
         image_file_name = dlm_software_image.image_file_name
         dlm_software_version = dlm_software_image.software.id
-        core_software_version = self.dlm_to_core_id_map[self.softlcm_ct][str(dlm_software_version)]
+        # Dry-run will not have populated mappings for not-yet-migrated Software Versions
+        core_software_version = self.dlm_to_core_id_map[self.softlcm_ct].get(str(dlm_software_version), None)
 
         if dlm_software_image.hashing_algorithm != "":
             hashing_algorithm = self._migrate_hashing_algorithm(dlm_software_image.hashing_algorithm)
@@ -270,7 +500,7 @@ class DLMToNautoboCoreModelMigration(Job):
                     core_software_image,
                     extra={"object": core_software_image},
                 )
-        elif not self.dryrun:
+        elif csv_dlm_id_tags.count() == 0 and not self.dryrun:
             core_software_image.tags.add(dlm_id_tag)
             self.logger.info(
                 "Updated tag referencing ID of corresponding DLM SoftwareImage on SoftwareImageFile __%s__",
@@ -297,6 +527,7 @@ class DLMToNautoboCoreModelMigration(Job):
             self.logger.info(
                 "Core SoftwareImageFile __%s__ is missing DLM SoftwareImage DeviceType assignments __%s__",
                 core_software_image,
+                dtypes_in_dlm_not_in_core,
                 extra={"object": core_software_image},
             )
             if not self.dryrun:
@@ -350,11 +581,12 @@ class DLMToNautoboCoreModelMigration(Job):
             changed_object_id=core_software_image.id,
             related_object_id=dlm_software_image.id,
         ).exists():
-            self.logger.debug(
-                "DLM SoftwareImage __%s__ to Core SoftwareImageFile __%s__ migration change log already in place. Skipping.",
-                dlm_software_image,
-                core_software_image,
-            )
+            if self.debug:
+                self.logger.debug(
+                    "DLM SoftwareImage __%s__ to Core SoftwareImageFile __%s__ migration change log already in place. Skipping.",
+                    dlm_software_image,
+                    core_software_image,
+                )
             return
 
         if not self.dryrun:
@@ -379,233 +611,6 @@ class DLMToNautoboCoreModelMigration(Job):
                 "DLM SoftwareImage __%s__ to Core SoftwareImageFile __%s__ migration change log created.",
                 dlm_software_image,
                 core_software_image,
-            )
-
-    def _migrate_software_version(self, dlm_software_version):
-        core_software_version_ct = ContentType.objects.get_for_model(SoftwareVersion)
-        device_ct = ContentType.objects.get_for_model(Device)
-        dlm_software_version_ct = ContentType.objects.get_for_model(SoftwareLCM)
-        inventory_item_ct = ContentType.objects.get_for_model(InventoryItem)
-        status_active = Status.objects.get(name="Active")
-
-        platform = dlm_software_version.device_platform
-        version = dlm_software_version.version
-
-        dlm_soft_attrs = {
-            "alias": dlm_software_version.alias,
-            "release_date": dlm_software_version.release_date,
-            "end_of_support_date": dlm_software_version.end_of_support,
-            "documentation_url": dlm_software_version.documentation_url,
-            "long_term_support": dlm_software_version.long_term_support,
-            "pre_release": dlm_software_version.pre_release,
-            "_custom_field_data": dlm_software_version._custom_field_data,
-        }
-
-        attrs_diff = {}
-        core_software_version = None
-        core_software_version_q = SoftwareVersion.objects.filter(platform=platform, version=version)
-        if core_software_version_q.exists():
-            core_software_version = core_software_version_q.first()
-            self.logger.info(
-                "Found existing Core SoftwareVersion __%s__ matching DLM Software __%s__.",
-                core_software_version,
-                dlm_software_version,
-                extra={"object": core_software_version},
-            )
-            for attr_name, dlm_attr_value in dlm_soft_attrs.items():
-                core_attr_value = getattr(core_software_version, attr_name)
-                if core_attr_value == dlm_attr_value:
-                    continue
-                attrs_diff[attr_name] = {
-                    "dlm_value": dlm_attr_value,
-                    "core_value": core_attr_value,
-                }
-                if not self.dryrun and self.update_core_to_match_dlm:
-                    setattr(core_software_version, attr_name, dlm_attr_value)
-            if not self.dryrun and self.update_core_to_match_dlm and attrs_diff:
-                self.logger.info(
-                    "Updated existing Core SoftwareVersion __%s__ to match DLM Software __%s__. Diff before update __%s__.",
-                    core_software_version,
-                    dlm_software_version,
-                    attrs_diff,
-                    extra={"object": core_software_version},
-                )
-                attrs_diff.clear()
-        elif not self.dryrun:
-            core_software_version = SoftwareVersion(
-                platform=dlm_software_version.device_platform,
-                version=dlm_software_version.version,
-                status=status_active,  # DLM model lacks a status field so we default to active
-                **dlm_soft_attrs,
-            )
-            core_software_version.validated_save()
-
-        if core_software_version is None:
-            return
-
-        # Preserve ID of the DLM SoftwareLCM object. This is needed to rewrite references in DLM models that referenced this software.
-        if not self.dryrun:
-            dlm_id_tag, _ = Tag.objects.get_or_create(
-                name=f"DLM-SoftwareLCM__{dlm_software_version.id}",
-                defaults={
-                    "description": f"ID of the corresponding DLM Software for SoftwareVersion {str(core_software_version)}",
-                },
-            )
-            dlm_id_tag.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
-
-        # Validate whether the Core Software Version has the correct tag that references DLM Software Version ID
-        core_sv_dlm_id_tags = core_software_version.tags.filter(name__istartswith="DLM-SoftwareLCM__")
-        if core_sv_dlm_id_tags.count() > 1:
-            self.logger.warning(
-                "SoftwareVersion __%s__ has multiple tags with ID of the DLM Software",
-                core_software_version,
-                extra={"object": core_software_version},
-            )
-            if not self.dryrun and self.update_core_to_match_dlm:
-                core_sv_dlm_id_tags.delete()
-                core_software_version.tags.add(dlm_id_tag)
-                self.logger.info(
-                    "Updated tag referencing ID of corresponding DLM Software on SoftwareVersion __%s__",
-                    core_software_version,
-                    extra={"object": core_software_version},
-                )
-        elif core_sv_dlm_id_tags.count() == 1 and core_sv_dlm_id_tags.first().name != dlm_id_tag.name:
-            self.logger.warning(
-                "SoftwareVersion __%s__ has incorrect ID of corresponding DLM Software",
-                core_software_version,
-                extra={"object": core_software_version},
-            )
-            if not self.dryrun and self.update_core_to_match_dlm:
-                core_sv_dlm_id_tags.delete()
-                core_software_version.tags.add(dlm_id_tag)
-                self.logger.info(
-                    "Updated tag referencing ID of corresponding DLM Software on SoftwareVersion __%s__",
-                    core_software_version,
-                    extra={"object": core_software_version},
-                )
-        elif not self.dryrun:
-            core_software_version.tags.add(dlm_id_tag)
-            self.logger.info(
-                "Updated tag referencing ID of corresponding DLM Software on SoftwareVersion __%s__",
-                core_software_version,
-                extra={"object": core_software_version},
-            )
-
-        if not self.dryrun:
-            core_software_version.validated_save()
-            # Map the DLM Software Version ID to the Core Software version ID. This is needed for SoftwareImage migrations.
-            self.dlm_to_core_id_map[self.softlcm_ct][str(dlm_software_version.id)] = str(core_software_version.id)
-
-        if attrs_diff:
-            self.logger.warning(
-                "Attributes differ between DLM and Core SoftwareVersion objects: ```__%s__```",
-                json.dumps(attrs_diff),
-                extra={"object": core_software_version},
-            )
-
-        # Work around created field's auto_now_add behavior
-        if not self.dryrun and core_software_version.created != dlm_software_version.created:
-            core_software_version.created = dlm_software_version.created
-            core_software_version.refresh_from_db()
-
-        # Migrate "Software on Device" relationships to the Device.software_version foreign key
-        for relationship_association in RelationshipAssociation.objects.filter(
-            relationship__key="device_soft",
-            source_type=core_software_version_ct,
-            source_id=core_software_version.id,
-            destination_type=device_ct,
-        ):
-            device = Device.objects.get(id=relationship_association.destination_id)
-            existing_device_software = device.software_version
-            if existing_device_software and existing_device_software != core_software_version:
-                self.logger.warning(
-                    "Device __%s__ is already assigned to Core SoftwareVersion __%s__ but its DLM Software __%s__ assignment is different.",
-                    device,
-                    existing_device_software,
-                    core_software_version,
-                    extra={"object": device},
-                )
-                if not self.dryrun and self.update_core_to_match_dlm:
-                    device.software_version = core_software_version
-                    device.validated_save()
-                    self.logger.info(
-                        "Updated SoftwareVersion assignment to device __%s__. Old SoftwareVersion: __%s__. New SoftwareVersion: __%s__.",
-                        device,
-                        core_software_version,
-                        existing_device_software,
-                        extra={"object": device},
-                    )
-            elif not existing_device_software:
-                device.software_version = core_software_version
-                device.validated_save()
-
-        # Migrate "Software on InventoryItem" relationships to the InventoryItem.software_version foreign key
-        for relationship_association in RelationshipAssociation.objects.filter(
-            relationship__key="inventory_item_soft",
-            source_id=core_software_version.id,
-            source_type=core_software_version_ct,
-            destination_type=inventory_item_ct,
-        ):
-            inventory_item = InventoryItem.objects.get(id=relationship_association.destination_id)
-            existing_invitem_software = inventory_item.software_version
-            if existing_invitem_software and inventory_item.software_version != core_software_version:
-                self.logger.warning(
-                    "Inventory Item __%s__ is already assigned to Core SoftwareVersion __%s__ but its DLM Software __%s__ assignment is different.",
-                    inventory_item,
-                    existing_invitem_software,
-                    core_software_version,
-                    extra={"object": inventory_item},
-                )
-                if not self.dryrun and self.update_core_to_match_dlm:
-                    inventory_item.software_version = core_software_version
-                    device.validated_save()
-                    self.logger.info(
-                        "Updated SoftwareVersion assignment to inventory item __%s__. Old SoftwareVersion: __%s__. New SoftwareVersion: __%s__.",
-                        inventory_item,
-                        core_software_version,
-                        existing_invitem_software,
-                        extra={"object": inventory_item},
-                    )
-            elif not existing_invitem_software:
-                inventory_item.software_version = core_software_version
-                inventory_item.validated_save()
-
-        core_software_version.refresh_from_db()
-
-        # Create an object change to document migration
-        if ObjectChange.objects.filter(
-            changed_object_id=core_software_version.id,
-            related_object_id=dlm_software_version.id,
-        ).exists():
-            self.logger.debug(
-                "DLM Software __%s__ to Core SoftwareVersion __%s__ migration change log already in place. Skipping.",
-                dlm_software_version,
-                core_software_version,
-            )
-            return
-
-        if not self.dryrun:
-            ObjectChange.objects.create(
-                action=ObjectChangeActionChoices.ACTION_UPDATE,
-                change_context=ObjectChangeEventContextChoices.CONTEXT_ORM,
-                change_context_detail="Migrated from Nautobot App Device Lifecycle Management",
-                changed_object_id=core_software_version.id,
-                changed_object_type=core_software_version_ct,
-                object_data=serialize_object(core_software_version),
-                object_data_v2=serialize_object_v2(core_software_version),
-                object_repr=f"{core_software_version.platform.name} - {core_software_version.version}"[
-                    :CHANGELOG_MAX_OBJECT_REPR
-                ],
-                related_object_id=dlm_software_version.id,
-                related_object_type=dlm_software_version_ct,
-                request_id=common_objectchange_request_id,
-                user=None,
-                user_name="Undefined",
-            )
-            self.logger.info(
-                "DLM Software __%s__ to Core SoftwareVersion __%s__ migration change log created.",
-                dlm_software_version,
-                core_software_version,
             )
 
     def migrate_content_type_references_to_new_model(self, old_ct, new_ct):
@@ -647,7 +652,7 @@ class DLMToNautoboCoreModelMigration(Job):
         # Migrate ComputedField content type
         for computed_field in ComputedField.objects.filter(content_type=old_ct):
             self.logger.info(
-                "The Computed Field __%s__ will be migrated to core SoftwareVersion model __%s__",
+                "The Computed Field __%s__ will be migrated to core model __%s__",
                 computed_field.label,
                 str(new_ct),
             )
@@ -656,9 +661,9 @@ class DLMToNautoboCoreModelMigration(Job):
                 computed_field.validated_save()
 
         # Migrate CustomField content type
-        for custom_field in CustomField.objects.filter(content_types=old_ct):
+        for custom_field in CustomField.objects.filter(content_types=old_ct).exclude(content_types=new_ct):
             self.logger.info(
-                "The Custom Field __%s__ will be migrated to core SoftwareVersion model __%s__",
+                "The Custom Field __%s__ will be migrated to core model __%s__",
                 custom_field.label,
                 str(new_ct),
             )
@@ -669,7 +674,7 @@ class DLMToNautoboCoreModelMigration(Job):
         # Migrate CustomLink content type
         for custom_link in CustomLink.objects.filter(content_type=old_ct):
             self.logger.info(
-                "The Custom Link __%s__ will be migrated to core SoftwareVersion model __%s__",
+                "The Custom Link __%s__ will be migrated to core model __%s__",
                 custom_link.name,
                 str(new_ct),
             )
@@ -680,7 +685,7 @@ class DLMToNautoboCoreModelMigration(Job):
         # Migrate ExportTemplate content type - skip git export templates
         for export_template in ExportTemplate.objects.filter(content_type=old_ct, owner_content_type=None):
             self.logger.info(
-                "The Export Template __%s__ will be migrated to core SoftwareVersion model __%s__",
+                "The Export Template __%s__ will be migrated to core model __%s__",
                 export_template.name,
                 str(new_ct),
             )
@@ -689,9 +694,9 @@ class DLMToNautoboCoreModelMigration(Job):
                 export_template.validated_save()
 
         # Migrate JobButton content type
-        for job_button in JobButton.objects.filter(content_types=old_ct):
+        for job_button in JobButton.objects.filter(content_types=old_ct).exclude(content_types=new_ct):
             self.logger.info(
-                "The Job Button __%s__ will be migrated to core SoftwareVersion model __%s__",
+                "The Job Button __%s__ will be migrated to core model __%s__",
                 job_button.name,
                 str(new_ct),
             )
@@ -699,18 +704,14 @@ class DLMToNautoboCoreModelMigration(Job):
                 job_button.content_types.add(new_ct)
 
         # Migrate JobHook content type
-        for job_hook in JobHook.objects.filter(content_types=old_ct):
-            self.logger.info(
-                "The Job Hook __%s__ will be migrated to core SoftwareVersion model __%s__", job_hook.name, str(new_ct)
-            )
+        for job_hook in JobHook.objects.filter(content_types=old_ct).exclude(content_types=new_ct):
+            self.logger.info("The Job Hook __%s__ will be migrated to core model __%s__", job_hook.name, str(new_ct))
             if not self.dryrun:
                 job_hook.content_types.add(new_ct)
 
         # Migrate Note content type
         for note in Note.objects.filter(assigned_object_type=old_ct):
-            self.logger.info(
-                "The Note __%s__ will be migrated to core SoftwareVersion model __%s__", str(note), str(new_ct)
-            )
+            self.logger.info("The Note __%s__ will be migrated to core model __%s__", str(note), str(new_ct))
             if not self.dryrun:
                 note.assigned_object_type = new_ct
                 note.assigned_object_id = self.dlm_to_core_id_map[str(old_ct)][str(note.assigned_object_id)]
@@ -720,7 +721,7 @@ class DLMToNautoboCoreModelMigration(Job):
         for object_change in ObjectChange.objects.filter(changed_object_type=old_ct):
             if not self.hide_changelog_migrations:
                 self.logger.info(
-                    "The Object Change __%s__ will be migrated to core SoftwareVersion model __%s__",
+                    "The Object Change __%s__ will be migrated to core model __%s__",
                     str(object_change),
                     str(new_ct),
                 )
@@ -743,25 +744,21 @@ class DLMToNautoboCoreModelMigration(Job):
                 object_change.validated_save()
 
         # Migrate Status content type
-        for status in Status.objects.filter(content_types=old_ct):
-            self.logger.info(
-                "The Status __%s__ will be migrated to core SoftwareVersion model __%s__", status.name, str(new_ct)
-            )
+        for status in Status.objects.filter(content_types=old_ct).exclude(content_types=new_ct):
+            self.logger.info("The Status __%s__ will be migrated to core model __%s__", status.name, str(new_ct))
             if not self.dryrun:
                 status.content_types.add(new_ct)
 
         # Migrate Tag content type
-        for tag in Tag.objects.filter(content_types=old_ct):
-            self.logger.info(
-                "The Tag __%s__ will be migrated to core SoftwareVersion model __%s__", tag.name, str(new_ct)
-            )
+        for tag in Tag.objects.filter(content_types=old_ct).exclude(content_types=new_ct):
+            self.logger.info("The Tag __%s__ will be migrated to core model __%s__", tag.name, str(new_ct))
             if not self.dryrun:
                 tag.content_types.add(new_ct)
 
         # Migrate TaggedItem content type
         for tagged_item in TaggedItem.objects.filter(content_type=old_ct):
             self.logger.info(
-                "The Tagged Item __%s__ will be migrated to core SoftwareVersion model __%s__",
+                "The Tagged Item __%s__ will be migrated to core model __%s__",
                 str(tagged_item),
                 str(new_ct),
             )
@@ -782,17 +779,15 @@ class DLMToNautoboCoreModelMigration(Job):
                     pass
 
         # Migrate WebHook content type
-        for web_hook in Webhook.objects.filter(content_types=old_ct):
-            self.logger.info(
-                "The Web Hook __%s__ will be migrated to SoftwareVersion core model __%s__", web_hook.name, str(new_ct)
-            )
+        for web_hook in Webhook.objects.filter(content_types=old_ct).exclude(content_types=new_ct):
+            self.logger.info("The Web Hook __%s__ will be migrated to core model __%s__", web_hook.name, str(new_ct))
             if not self.dryrun:
                 web_hook.content_types.add(new_ct)
 
         # Migrate ObjectPermission content type
-        for object_permission in ObjectPermission.objects.filter(object_types=old_ct):
+        for object_permission in ObjectPermission.objects.filter(object_types=old_ct).exclude(object_types=new_ct):
             self.logger.info(
-                "The Object Permission __%s__ will be migrated to SoftwareVersion core model __%s__",
+                "The Object Permission __%s__ will be migrated to core model __%s__",
                 str(object_permission),
                 str(new_ct),
             )
@@ -803,6 +798,7 @@ class DLMToNautoboCoreModelMigration(Job):
         excluded_relationships = ("device_soft", "inventory_item_soft")
         # Migrate Relationship content type
         relationship_associations_dlm_source = []
+        relationship_migration_error = False
         for relationship in Relationship.objects.filter(source_type=old_ct).exclude(key__in=excluded_relationships):
             self.logger.info(
                 "The Relationship __%s__ will be migrated to core model __%s__", relationship.label, str(new_ct)
@@ -810,9 +806,9 @@ class DLMToNautoboCoreModelMigration(Job):
             # We can't migrate relationships in place
             if not self.dryrun:
                 try:
-                    for relationship_association in RelationshipAssociation.objects.filter(source_type=old_ct).exclude(
-                        relationship__key__in=excluded_relationships
-                    ):
+                    for relationship_association in RelationshipAssociation.objects.filter(
+                        source_type=old_ct, relationship=relationship
+                    ).exclude(relationship__key__in=excluded_relationships):
                         self.logger.info(
                             "The Relationship Association __%s__ will be migrated to core model __%s__",
                             str(relationship_association),
@@ -829,9 +825,17 @@ class DLMToNautoboCoreModelMigration(Job):
                                 }
                             )
                             relationship_association.delete()
-                except:
-                    pass
-            if not self.dryrun:
+                except Exception as err:
+                    self.logger.warning(
+                        "Encountered exception __%s__ while disassociating Relationship __%s__. Rolling back relationship updates.",
+                        str(err),
+                        relationship.label,
+                    )
+                    relationship_migration_error = True
+                    for relationship_attrs in relationship_associations_dlm_source:
+                        RelationshipAssociation.objects.get_or_create(**relationship_attrs)
+
+            if not self.dryrun and not relationship_migration_error:
                 try:
                     relationship.source_type = new_ct
                     relationship.validated_save()
@@ -842,21 +846,26 @@ class DLMToNautoboCoreModelMigration(Job):
                             destination_type_id=relationship_attrs["destination_type_id"],
                             destination_id=relationship_attrs["destination_id"],
                             source_type=new_ct,
-                            source_id=self.dlm_to_core_id_map[str(old_ct)][str(relationship_association.source_id)],
+                            source_id=self.dlm_to_core_id_map[str(old_ct)][str(relationship_attrs["source_id"])],
                         )
                         new_relationship_association.validated_save()
                         new_relationship_associations.append(new_relationship_association)
-                except Exception:
+                except Exception as err:
+                    self.logger.warning(
+                        "Encountered exception __%s__ while migrating Relationship __%s__. Rolling back relationship updates.",
+                        str(err),
+                        relationship.label,
+                    )
                     for new_relationship_association in new_relationship_associations:
                         new_relationship_association.delete()
                     relationship.source_type = old_ct
                     relationship.validated_save()
 
                     for relationship_attrs in relationship_associations_dlm_source:
-                        old_relationship_association = RelationshipAssociation(**relationship_attrs)
-                        old_relationship_association.validated_save()
+                        RelationshipAssociation.objects.get_or_create(**relationship_attrs)
 
         relationship_associations_dlm_destination = []
+        relationship_migration_error = False
         for relationship in Relationship.objects.filter(destination_type=old_ct).exclude(
             key__in=excluded_relationships
         ):
@@ -867,7 +876,7 @@ class DLMToNautoboCoreModelMigration(Job):
             if not self.dryrun:
                 try:
                     for relationship_association in RelationshipAssociation.objects.filter(
-                        destination_type=old_ct
+                        destination_type=old_ct, relationship=relationship
                     ).exclude(relationship__key__in=excluded_relationships):
                         self.logger.info(
                             "The Relationship Association __%s__ will be migrated to core model __%s__",
@@ -885,34 +894,48 @@ class DLMToNautoboCoreModelMigration(Job):
                                 }
                             )
                             relationship_association.delete()
-                except:
-                    pass
-            if not self.dryrun:
+                except Exception as err:
+                    self.logger.warning(
+                        "Encountered exception __%s__ while disassociating instance of Relationship __%s__. Rolling back relationship updates.",
+                        str(err),
+                        relationship.label,
+                    )
+                    relationship_migration_error = True
+                    for relationship_attrs in relationship_associations_dlm_destination:
+                        RelationshipAssociation.objects.get_or_create(**relationship_attrs)
+            if not self.dryrun and not relationship_migration_error:
+                # {'source_type': ['source_type has a different value than defined in SoftToLocation']}
                 try:
                     relationship.destination_type = new_ct
                     relationship.validated_save()
                     new_relationship_associations = []
-                    for relationship_attrs in relationship_associations_dlm_source:
+                    for relationship_attrs in relationship_associations_dlm_destination:
+                        self.logger.debug("Migrating %s", relationship_attrs)
                         new_relationship_association = RelationshipAssociation(
                             relationship_id=relationship_attrs["relationship_id"],
                             source_type_id=relationship_attrs["source_type_id"],
                             source_id=relationship_attrs["source_id"],
                             destination_type=new_ct,
                             destination_id=self.dlm_to_core_id_map[str(old_ct)][
-                                str(relationship_association.destination_id)
+                                str(relationship_attrs["destination_id"])
                             ],
                         )
+                        self.logger.debug("Migrating %s", relationship_attrs)
                         new_relationship_association.validated_save()
                         new_relationship_associations.append(new_relationship_association)
-                except Exception:
+                except Exception as err:
+                    self.logger.warning(
+                        "Encountered exception __%s__ while migrating Relationship __%s__. Rolling back relationship updates.",
+                        str(err),
+                        relationship.label,
+                    )
                     for new_relationship_association in new_relationship_associations:
                         new_relationship_association.delete()
-                    relationship.source_tdestination_typeype = old_ct
+                    relationship.destination_type = old_ct
                     relationship.validated_save()
 
-                    for relationship_attrs in relationship_associations_dlm_source:
-                        old_relationship_association = RelationshipAssociation(**relationship_attrs)
-                        old_relationship_association.validated_save()
+                    for relationship_attrs in relationship_associations_dlm_destination:
+                        RelationshipAssociation.objects.get_or_create(**relationship_attrs)
 
     def _create_placeholder_software_images(self):
         # Create placeholder software image files for software that is used by devices but no image currently exists
