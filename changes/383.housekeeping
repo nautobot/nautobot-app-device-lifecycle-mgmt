@@ -1,1 +1,2 @@
 Fixed `invoke check-migrations`.
+Fixed RTD build errors.
