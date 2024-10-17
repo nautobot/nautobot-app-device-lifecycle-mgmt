@@ -437,7 +437,7 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
 
     def setup(self, request, *args, **kwargs):
         """Using request object to perform filtering based on query params."""
-        super().setup(request, *args, **kwargs)  #
+        super().setup(request, *args, **kwargs)
         try:
             report_last_run = (
                 models.DeviceSoftwareValidationResult.objects.filter(

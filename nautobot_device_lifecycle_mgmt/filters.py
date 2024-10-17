@@ -120,19 +120,9 @@ class HardwareLCMFilterSet(NautobotFilterSet):
 
         model = HardwareLCM
 
-        fields = [
-            "expired",
-            "device_type",
-            "inventory_item",
-            "release_date",
-            "end_of_sale",
-            "end_of_support",
-            "end_of_sw_releases",
-            "end_of_security_patches",
-            "documentation_url",
-        ]
+        fields = "__all__"
 
-    def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
         today = datetime.datetime.today().date()
         # End of support dates less than today are expired.
@@ -222,23 +212,9 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
 
         model = ValidatedSoftwareLCM
 
-        fields = [
-            "software",
-            "devices",
-            "device_types",
-            "device_roles",
-            "inventory_items",
-            "object_tags",
-            "device_name",
-            "device_id",
-            "inventory_item_id",
-            "start",
-            "end",
-            "preferred",
-            "valid",
-        ]
+        fields = "__all__"
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
         if not value.strip():
             return queryset
@@ -246,7 +222,7 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         qs_filter = Q(start__icontains=value) | Q(end__icontains=value)
         return queryset.filter(qs_filter)
 
-    def valid_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def valid_search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the valid_search search."""
         today = datetime.date.today()
         if value is True:
@@ -255,7 +231,7 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
             qs_filter = Q(start__gt=today) | Q(end__lt=today)
         return queryset.filter(qs_filter)
 
-    def device(self, queryset, name, value):  # pylint: disable=no-self-use
+    def device(self, queryset, name, value):
         """Search for validated software for a given device."""
         value = value.strip()
         if not value:
@@ -275,7 +251,7 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
 
         return ValidatedSoftwareLCM.objects.get_for_object(device)
 
-    def inventory_item(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def inventory_item(self, queryset, name, value):  # pylint: disable=unused-argument
         """Search for validated software for a given inventory item."""
         value = value.strip()
         if not value:
@@ -405,22 +381,9 @@ class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):
 
         model = DeviceHardwareNoticeResult
 
-        fields = [
-            "supported",
-            "device_status",
-            "platform",
-            "location",
-            "device",
-            "device_type",
-            "device_role",
-            "manufacturer",
-            "end_of_sale",
-            "end_of_support",
-            "end_of_sw_releases",
-            "end_of_security_patches",
-        ]
+        fields = "__all__"
 
-    def _hardware_notice_available_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def _hardware_notice_available_search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
         value = not value  # invert boolean for use in django filter
         return queryset.filter(hardware_notice__isnull=value)
@@ -504,31 +467,23 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
 
         model = DeviceSoftwareValidationResult
 
-        fields = [
-            "software",
-            "platform",
-            "device",
-            "device_type",
-            "device_role",
-            "exclude_sw_missing",
-            "sw_missing_only",
-        ]
+        fields = "__all__"
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
         if not value.strip():
             return queryset
         qs_filter = Q(device__name__icontains=value) | Q(software__version__icontains=value)
         return queryset.filter(qs_filter)
 
-    def _exclude_sw_missing(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def _exclude_sw_missing(self, queryset, name, value):  # pylint: disable=unused-argument
         """Exclude devices with missing software."""
         if value:
             return queryset.filter(~Q(software=None))
 
         return queryset
 
-    def _sw_missing_only(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def _sw_missing_only(self, queryset, name, value):  # pylint: disable=unused-argument
         """Only show devices with missing software."""
         if value:
             return queryset.filter(Q(software=None))
@@ -626,19 +581,9 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
 
         model = InventoryItemSoftwareValidationResult
 
-        fields = [
-            "software",
-            "manufacturer",
-            "inventory_item",
-            "part_id",
-            "device",
-            "device_type",
-            "device_role",
-            "exclude_sw_missing",
-            "sw_missing_only",
-        ]
+        fields = "__all__"
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
         if not value.strip():
             return queryset
@@ -649,21 +594,21 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         )
         return queryset.filter(qs_filter)
 
-    def search_part_id(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def search_part_id(self, queryset, name, value):  # pylint: disable=unused-argument
         """Filter on the inventory item part ID."""
         if not value.strip():
             return queryset
         qs_filter = Q(inventory_item__part_id__icontains=value)
         return queryset.filter(qs_filter)
 
-    def _exclude_sw_missing(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def _exclude_sw_missing(self, queryset, name, value):  # pylint: disable=unused-argument
         """Exclude devices with missing software."""
         if value:
             return queryset.filter(~Q(software=None))
 
         return queryset
 
-    def _sw_missing_only(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def _sw_missing_only(self, queryset, name, value):  # pylint: disable=unused-argument
         """Only show devices with missing software."""
         if value:
             return queryset.filter(Q(software=None))
@@ -731,22 +676,10 @@ class ContractLCMFilterSet(NautobotFilterSet):
         """Meta attributes for filter."""
 
         model = ContractLCM
-        fields = [
-            "devices",
-            "provider",
-            "name",
-            "start",
-            "end",
-            "cost",
-            "currency",
-            "support_level",
-            "contract_type",
-            "expired",
-            "currency",
-            "tags",
-        ]
 
-    def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+        fields = "__all__"
+
+    def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
         today = datetime.datetime.today().date()
         # Contract end dates less than today are expired.
@@ -805,15 +738,7 @@ class ProviderLCMFilterSet(NautobotFilterSet):
 
         model = ProviderLCM
 
-        fields = [
-            "name",
-            "description",
-            "physical_address",
-            "country",
-            "phone",
-            "email",
-            "portal_url",
-        ]
+        fields = "__all__"
 
 
 class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , CustomFieldModelFilterSet):
@@ -840,21 +765,9 @@ class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , Custom
 
         model = CVELCM
 
-        fields = [
-            "name",
-            "published_date",
-            "link",
-            "status",
-            "description",
-            "severity",
-            "cvss",
-            "cvss_v2",
-            "cvss_v3",
-            "fix",
-            "comments",
-        ]
+        fields = "__all__"
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
         if not value.strip():
             return queryset
@@ -878,15 +791,9 @@ class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  
 
         model = VulnerabilityLCM
 
-        fields = [
-            "cve",
-            "software",
-            "device",
-            "inventory_item",
-            "status",
-        ]
+        fields = "__all__"
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
         if not value.strip():
             return queryset
