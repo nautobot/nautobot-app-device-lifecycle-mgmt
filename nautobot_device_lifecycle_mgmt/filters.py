@@ -122,7 +122,7 @@ class HardwareLCMFilterSet(NautobotFilterSet):
 
         fields = "__all__"
 
-    def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
         today = datetime.datetime.today().date()
         # End of support dates less than today are expired.
@@ -381,22 +381,9 @@ class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):
 
         model = DeviceHardwareNoticeResult
 
-        fields = [
-            "supported",
-            "device_status",
-            "platform",
-            "location",
-            "device",
-            "device_type",
-            "device_role",
-            "manufacturer",
-            "end_of_sale",
-            "end_of_support",
-            "end_of_sw_releases",
-            "end_of_security_patches",
-        ]
+        fields = "__all__"
 
-    def _hardware_notice_available_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def _hardware_notice_available_search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
         value = not value  # invert boolean for use in django filter
         return queryset.filter(hardware_notice__isnull=value)
@@ -692,7 +679,7 @@ class ContractLCMFilterSet(NautobotFilterSet):
 
         fields = "__all__"
 
-    def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
         today = datetime.datetime.today().date()
         # Contract end dates less than today are expired.
