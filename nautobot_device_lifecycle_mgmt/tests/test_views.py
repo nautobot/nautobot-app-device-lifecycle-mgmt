@@ -225,18 +225,22 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the CVELCM views."""
 
     model = CVELCM
-    bulk_edit_data = {"description": "Bulk edit views"}
-
-    form_data = {
-        "name": "Test 1",
-        "published_date": datetime.date(2022, 1, 1),
-        "link": "https://www.cvedetails.com/cve/CVE-2022-0001/",
-    }
 
     @classmethod
     def setUpTestData(cls):  # pylint: disable=invalid-name
         """Set up test objects."""
         create_cves()
+        cls.bulk_edit_data = {
+            "description": "Bulk edit views",
+            "comments": "New",
+            "status": Status.objects.get_for_model(CVELCM).first().pk,
+        }
+
+        cls.form_data = {
+            "name": "Test 1",
+            "published_date": datetime.date(2022, 1, 1),
+            "link": "https://www.cvedetails.com/cve/CVE-2022-0001/",
+        }
 
     @skip("Not implemented")
     def test_bulk_import_objects_with_permission(self):
