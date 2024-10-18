@@ -10,7 +10,7 @@
 ARG NAUTOBOT_VER="1.4"
 
 # Accepts a desired Python version as build argument, default to 3.8
-ARG PYTHON_VER="3.8"
+ARG PYTHON_VER="3.11"
 
 # Retrieve published development image of Nautobot base which should include most CI dependencies
 FROM ghcr.io/nautobot/nautobot-dev:${NAUTOBOT_VER}-py${PYTHON_VER}
@@ -20,6 +20,7 @@ ARG NAUTOBOT_ROOT=/opt/nautobot
 
 ENV prometheus_multiproc_dir=/prom_cache
 ENV NAUTOBOT_ROOT ${NAUTOBOT_ROOT}
+ENV INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_LOCAL=true
 
 # Install Poetry manually via its installer script;
 # We might be using an older version of Nautobot that includes an older version of Poetry
@@ -68,11 +69,13 @@ RUN sort poetry_freeze_base.txt poetry_freeze_all.txt | uniq -u > poetry_freeze_
 
 # Install all local project as editable, constrained on Nautobot version, to get any additional
 #   direct dependencies of the app
-RUN pip install -c constraints.txt -e .
+RUN --mount=type=cache,target="/root/.cache/pip",sharing=locked \
+    pip install -c constraints.txt -e .[all]
 
 # Install any dev dependencies frozen from Poetry
 # Can be improved in Poetry 1.2 which allows `poetry install --only dev`
-RUN pip install -c constraints.txt -r poetry_freeze_dev.txt
+RUN --mount=type=cache,target="/root/.cache/pip",sharing=locked \
+    pip install -c constraints.txt -r poetry_freeze_dev.txt
 
 COPY development/nautobot_config.py ${NAUTOBOT_ROOT}/nautobot_config.py
 # !!! USE CAUTION WHEN MODIFYING LINES ABOVE
