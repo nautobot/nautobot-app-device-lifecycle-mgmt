@@ -67,7 +67,7 @@ namespace.configure(
 
 
 def _is_compose_included(context, name):
-    return f"docker-compose.{name}.yml" in context.{{cookiecutter.plugin_name}}.compose_files
+    return f"docker-compose.{name}.yml" in context.nautobot_device_lifecycle_mgmt.compose_files
 
 
 def _await_healthy_service(context, service):
