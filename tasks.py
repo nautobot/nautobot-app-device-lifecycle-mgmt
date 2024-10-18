@@ -78,7 +78,7 @@ def _await_healthy_service(context, service):
 def _await_healthy_container(context, container_id):
     while True:
         result = context.run(
-            "docker inspect --format='{% raw %}{{.State.Health.Status}}{% endraw %}' " + container_id,
+            "docker inspect --format='{{.State.Health.Status}}' " + container_id,
             pty=False,
             echo=False,
             hide=True,
