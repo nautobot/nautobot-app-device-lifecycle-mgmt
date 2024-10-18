@@ -35,14 +35,12 @@ from .nested_serializers import (
     NestedSoftwareLCMSerializer,
 )
 
-serializer_base_classes = [
+
+class HardwareLCMSerializer(
     RelationshipModelSerializerMixin,
     TaggedObjectSerializer,
     CustomFieldModelSerializer,
-]  # pylint: disable=invalid-name
-
-
-class HardwareLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,too-few-public-methods
+):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
     url = serializers.HyperlinkedIdentityField(
@@ -75,7 +73,11 @@ class HardwareLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,
         ]
 
 
-class ProviderLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,too-few-public-methods
+class ProviderLCMSerializer(
+    RelationshipModelSerializerMixin,
+    TaggedObjectSerializer,
+    CustomFieldModelSerializer,
+):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
     url = serializers.HyperlinkedIdentityField(
@@ -102,7 +104,11 @@ class ProviderLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,
         ]
 
 
-class ContractLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,too-few-public-methods
+class ContractLCMSerializer(
+    RelationshipModelSerializerMixin,
+    TaggedObjectSerializer,
+    CustomFieldModelSerializer,
+):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
     url = serializers.HyperlinkedIdentityField(
@@ -131,7 +137,11 @@ class ContractLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,
         ]
 
 
-class ContactLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,too-few-public-methods
+class ContactLCMSerializer(
+    RelationshipModelSerializerMixin,
+    TaggedObjectSerializer,
+    CustomFieldModelSerializer,
+):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
 
     url = serializers.HyperlinkedIdentityField(
@@ -157,7 +167,11 @@ class ContactLCMSerializer(*serializer_base_classes):  # pylint: disable=R0901,t
         ]
 
 
-class SoftwareLCMSerializer(*serializer_base_classes):  # pylint: disable=too-few-public-methods
+class SoftwareLCMSerializer(
+    RelationshipModelSerializerMixin,
+    TaggedObjectSerializer,
+    CustomFieldModelSerializer,
+):  # pylint: disable=too-few-public-methods
     """REST API serializer for SoftwareLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
@@ -192,7 +206,11 @@ class SoftwareLCMSerializer(*serializer_base_classes):  # pylint: disable=too-fe
         ]
 
 
-class SoftwareImageLCMSerializer(*serializer_base_classes):  # pylint: disable=too-few-public-methods
+class SoftwareImageLCMSerializer(
+    RelationshipModelSerializerMixin,
+    TaggedObjectSerializer,
+    CustomFieldModelSerializer,
+):  # pylint: disable=too-few-public-methods
     """REST API serializer for SoftwareImageLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
@@ -221,7 +239,11 @@ class SoftwareImageLCMSerializer(*serializer_base_classes):  # pylint: disable=t
         ]
 
 
-class ValidatedSoftwareLCMSerializer(*serializer_base_classes):  # pylint: disable=too-few-public-methods
+class ValidatedSoftwareLCMSerializer(
+    RelationshipModelSerializerMixin,
+    TaggedObjectSerializer,
+    CustomFieldModelSerializer,
+):  # pylint: disable=too-few-public-methods
     """REST API serializer for ValidatedSoftwareLCM records."""
 
     url = serializers.HyperlinkedIdentityField(
@@ -251,7 +273,12 @@ class ValidatedSoftwareLCMSerializer(*serializer_base_classes):  # pylint: disab
         ]
 
 
-class CVELCMSerializer(*serializer_base_classes, StatusModelSerializerMixin):  # pylint: disable=abstract-method
+class CVELCMSerializer(
+    RelationshipModelSerializerMixin,
+    TaggedObjectSerializer,
+    CustomFieldModelSerializer,
+    StatusModelSerializerMixin,
+):  # pylint: disable=abstract-method
     """REST API serializer for CVELCM records."""
 
     url = serializers.HyperlinkedIdentityField(view_name="plugins-api:nautobot_device_lifecycle_mgmt-api:cvelcm-detail")
@@ -282,7 +309,10 @@ class CVELCMSerializer(*serializer_base_classes, StatusModelSerializerMixin):  #
 
 
 class VulnerabilityLCMSerializer(
-    *serializer_base_classes, StatusModelSerializerMixin
+    RelationshipModelSerializerMixin,
+    TaggedObjectSerializer,
+    CustomFieldModelSerializer,
+    StatusModelSerializerMixin,
 ):  # pylint: disable=abstract-method
     """REST API serializer for VulnerabilityLCM records."""
 
@@ -321,7 +351,11 @@ class VulnerabilityLCMSerializer(
         ]
 
 
-class DeviceSoftwareValidationResultSerializer(*serializer_base_classes):  # pylint: disable=too-few-public-methods
+class DeviceSoftwareValidationResultSerializer(
+    RelationshipModelSerializerMixin,
+    TaggedObjectSerializer,
+    CustomFieldModelSerializer,
+):  # pylint: disable=too-few-public-methods
     """REST API serializer for DeviceSoftwareValidationResult records."""
 
     url = serializers.HyperlinkedIdentityField(
@@ -346,7 +380,9 @@ class DeviceSoftwareValidationResultSerializer(*serializer_base_classes):  # pyl
 
 
 class InventoryItemSoftwareValidationResultSerializer(
-    *serializer_base_classes
+    RelationshipModelSerializerMixin,
+    TaggedObjectSerializer,
+    CustomFieldModelSerializer,
 ):  # pylint: disable=too-few-public-methods
     """REST API serializer for InventoryItemSoftwareValidationResult records."""
 
