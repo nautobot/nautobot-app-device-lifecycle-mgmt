@@ -12,7 +12,6 @@ from nautobot.apps.choices import (
     ObjectChangeEventContextChoices,
     SoftwareImageFileHashingAlgorithmChoices,
 )
-from nautobot.apps.jobs import JobButtonReceiver, JobHookReceiver
 from nautobot.apps.models import serialize_object, serialize_object_v2
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, SoftwareImageFile, SoftwareVersion
 from nautobot.extras.constants import CHANGELOG_MAX_OBJECT_REPR
@@ -1318,28 +1317,3 @@ class DLMToNautoboCoreModelMigration(Job):
                     device_type,
                     extra={"object": software_image},
                 )
-
-
-class ExampleSimpleJobButtonReceiver(JobButtonReceiver):
-    """Used for testing migrations."""
-
-    class Meta:
-        """Meta class."""
-
-        name = "Example Simple Job Button Receiver"
-
-    def receive_job_button(self, obj):
-        """Button logic."""
-        self.logger.info("Running Job Button Receiver.", extra={"object": obj})
-
-
-class ExampleJobHookReceiver(JobHookReceiver):
-    """Used for testing migrations."""
-
-    def receive_job_hook(self, change, action, changed_object):
-        """Hook logic."""
-        # return on delete action
-        if action == ObjectChangeActionChoices.ACTION_DELETE:
-            return
-
-        self.logger.info("Running Job Button Receiver. __%s__", changed_object)
