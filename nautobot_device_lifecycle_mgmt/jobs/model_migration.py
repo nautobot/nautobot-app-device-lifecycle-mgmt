@@ -338,7 +338,16 @@ class DLMToNautoboCoreModelMigration(Job):
             source_id=dlm_software_version.id,
             destination_type=device_ct,
         ):
-            device = Device.objects.get(id=relationship_association.destination_id)
+            try:
+                device = Device.objects.get(id=relationship_association.destination_id)
+            except Device.DoesNotExist:
+                self.logger.error(
+                    "Found Software Relationship Association for DLM Software __%s__ that points to a non-existent Device with ID __%s__.",
+                    dlm_software_version,
+                    relationship_association.destination_id,
+                    extra={"object": dlm_software_version},
+                )
+                continue
             existing_device_software = device.software_version
             if existing_device_software and existing_device_software != core_software_version:
                 self.logger.warning(
@@ -375,7 +384,16 @@ class DLMToNautoboCoreModelMigration(Job):
             source_id=dlm_software_version.id,
             destination_type=inventory_item_ct,
         ):
-            inventory_item = InventoryItem.objects.get(id=relationship_association.destination_id)
+            try:
+                inventory_item = InventoryItem.objects.get(id=relationship_association.destination_id)
+            except InventoryItem.DoesNotExist:
+                self.logger.error(
+                    "Found Software Relationship Association for DLM Software __%s__ that points to a non-existent InventoryItem with ID __%s__.",
+                    dlm_software_version,
+                    relationship_association.destination_id,
+                    extra={"object": dlm_software_version},
+                )
+                continue
             existing_invitem_software = inventory_item.software_version
             if existing_invitem_software and existing_invitem_software != core_software_version:
                 self.logger.warning(
@@ -451,7 +469,7 @@ class DLMToNautoboCoreModelMigration(Job):
         core_contact_ct = ContentType.objects.get_for_model(Contact)
         contact_association_ct = ContentType.objects.get_for_model(ContactAssociation)
 
-        status_active = Status.objects.get(name="Active")
+        status_active, _ = Status.objects.get_or_create(name="Active")
 
         dlm_contact_attrs = {
             "address": dlm_contact.address,
@@ -688,7 +706,7 @@ class DLMToNautoboCoreModelMigration(Job):
         dlm_software_image_ct = ContentType.objects.get_for_model(SoftwareImageLCM)
         device_ct = ContentType.objects.get_for_model(Device)
         inventory_item_ct = ContentType.objects.get_for_model(InventoryItem)
-        status_active = Status.objects.get(name="Active")
+        status_active, _ = Status.objects.get_or_create(name="Active")
 
         image_file_name = dlm_software_image.image_file_name
         dlm_software_version = dlm_software_image.software.id
@@ -1273,7 +1291,7 @@ class DLMToNautoboCoreModelMigration(Job):
 
     def _create_placeholder_software_images(self):
         """Create placeholder software image files for software that is used by devices but no image currently exists."""
-        status_active = Status.objects.get(name="Active")
+        status_active, _ = Status.objects.get_or_create(name="Active")
 
         # Get all (software_version, device_type) pairs where software_version is in use by a device with given device_type
         for software, device_type in (
