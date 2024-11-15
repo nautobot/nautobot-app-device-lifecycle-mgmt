@@ -593,7 +593,7 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         return queryset
 
 
-class ContractLCMFilterSet(NautobotFilterSet):
+class ContractLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):
     """Filter for ContractLCMFilter."""
 
     q = django_filters.CharFilter(method="search", label="Search")

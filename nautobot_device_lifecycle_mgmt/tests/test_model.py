@@ -681,3 +681,88 @@ class ProviderLCMTestCase(TestCase):
         self.assertEqual(cisco_contract.currency, "USD")
         self.assertEqual(cisco_contract.contract_type, "Hardware")
         self.assertEqual(cisco_contract.comments, "Cisco gave us discount")
+
+
+class ContractLCMTest(TestCase):
+    """Tests for the ContractLCMTest models."""
+
+    def setUp(self):
+        # Create a provider to associate with the contract
+        self.provider = ProviderLCM.objects.create(
+            name="Test Vendor",
+            description="Test Vendor",
+            country="USA",
+        )
+        self.content_type_contract = ContentType.objects.get(
+            app_label="nautobot_device_lifecycle_mgmt", model="contractlcm"
+        )
+        self.active_status = Status.objects.get(name="Active")
+        self.active_status.content_types.add(self.content_type_contract)
+
+    def test_contract_creation(self):
+        """Test that a new contract can be created."""
+        contract = ContractLCM.objects.create(
+            name="Test Contract",
+            number="1234567890",
+            start="2022-01-01",
+            end="2025-12-31",
+            cost=10000.00,
+            support_level="Gold",
+            currency="USD",
+            contract_type="Hardware",
+        )
+        contract.save()
+
+        # Assert that the new contract has been saved to the database
+        self.assertEqual(ContractLCM.objects.count(), 1)
+
+    def test_contract_fields(self):
+        """Test that all required fields are present."""
+        contract = ContractLCM.objects.create(
+            name="Test Contract",
+            number="1234567890",
+            start="2022-01-01",
+            end="2025-12-31",
+            cost=10000.00,
+            support_level="Gold",
+            currency="USD",
+            contract_type="Hardware",
+        )
+        contract.save()
+
+        # Assert that all required fields are present
+        self.assertTrue(contract.name)
+        self.assertTrue(contract.number)
+        self.assertTrue(contract.start)
+        self.assertTrue(contract.end)
+        self.assertTrue(contract.cost)
+        self.assertTrue(contract.support_level)
+        self.assertTrue(contract.currency)
+        self.assertTrue(contract.contract_type)
+
+    def test_contract_status(self):
+        """Test that the contract's status is properly set."""
+        # Create a new contract
+        contract = ContractLCM.objects.create(
+            name="Test Contract",
+            number="1234567890",
+            start="2022-01-01",
+            end="2025-12-31",
+            cost=10000.00,
+            support_level="Gold",
+            currency="USD",
+            contract_type="Hardware",
+        )
+
+        # Save the contract with no status set
+        contract.save()
+
+        # Assert that the contract's status is not set
+        self.assertIsNone(contract.status)
+
+        # Set a new status for the contract and save it again
+        contract.status = self.active_status
+        contract.save()
+
+        # Assert that the contract's status has been updated correctly
+        self.assertEqual(contract.status.name, "Active")

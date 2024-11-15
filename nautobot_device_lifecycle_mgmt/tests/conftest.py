@@ -6,7 +6,14 @@ from django.contrib.contenttypes.models import ContentType
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, LocationType, Manufacturer, Platform
 from nautobot.extras.models import Role, Status
 
-from nautobot_device_lifecycle_mgmt.models import CVELCM, HardwareLCM, SoftwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import (
+    CVELCM,
+    ContractLCM,
+    HardwareLCM,
+    ProviderLCM,
+    SoftwareLCM,
+    ValidatedSoftwareLCM,
+)
 
 
 def create_devices():
@@ -199,5 +206,77 @@ def create_inventory_item_hardware_notices():
             end_of_sw_releases=date(2024, 4, 1),
             end_of_security_patches=date(2025, 4, 1),
             documentation_url="https://test.com",
+        ),
+    )
+
+
+def create_contracts():
+    """Create DeviceLifecycle Contracts for tests."""
+    contract_ct = ContentType.objects.get_for_model(ContractLCM)
+    not_supported = Status.objects.create(
+        name="End of Support", color="f44336", description="Contract no longer supported."
+    )
+    not_supported.content_types.set([contract_ct])
+    supported = Status.objects.create(name="Active Support", color="4caf50", description="Active Contract.")
+    supported.content_types.set([contract_ct])
+    hero_provider = ProviderLCM.objects.create(
+        name="Skyrim Merchant",
+        description="Whiteruns Merchant",
+        country="USA",
+    )
+    villain_provider = ProviderLCM.objects.create(
+        name="Skyrim Villain Merchant",
+        description="Whiteruns Villain Merchant",
+        country="USA",
+    )
+
+    return (
+        ContractLCM.objects.create(
+            provider=hero_provider,
+            name="Hero Discounts 1",
+            number="1234567890",
+            start="2022-01-01",
+            end="2022-12-31",
+            cost=5000.00,
+            support_level="Silver",
+            currency="USD",
+            contract_type="Hardware",
+            status=not_supported,
+        ),
+        ContractLCM.objects.create(
+            provider=hero_provider,
+            name="Hero Discounts 2",
+            number="1234567890",
+            start="2022-01-01",
+            end="2022-12-31",
+            cost=10000.00,
+            support_level="Gold",
+            currency="USD",
+            contract_type="Hardware",
+            status=not_supported,
+        ),
+        ContractLCM.objects.create(
+            provider=villain_provider,
+            name="Villain Discounts 1",
+            number="1234567890",
+            start="2021-01-01",
+            end="2060-12-31",
+            cost=5000.00,
+            support_level="Silver",
+            currency="USD",
+            contract_type="Hardware",
+            status=supported,
+        ),
+        ContractLCM.objects.create(
+            provider=villain_provider,
+            name="Villain Discounts 2",
+            number="1234567890",
+            start="2021-01-01",
+            end="2060-12-31",
+            cost=10000.00,
+            support_level="Gold",
+            currency="USD",
+            contract_type="Hardware",
+            status=supported,
         ),
     )

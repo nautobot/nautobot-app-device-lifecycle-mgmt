@@ -427,7 +427,7 @@ class InventoryItemSoftwareValidationResultListTable(BaseTable):  # pylint: disa
         ]
 
 
-class ContractLCMTable(BaseTable):
+class ContractLCMTable(StatusTableMixin, BaseTable):
     """Table for list view."""
 
     pk = ToggleColumn()
@@ -452,6 +452,7 @@ class ContractLCMTable(BaseTable):
         fields = (
             "pk",
             "name",
+            "status",
             "start",
             "end",
             "cost",

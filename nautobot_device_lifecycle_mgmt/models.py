@@ -417,6 +417,7 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
     "graphql",
     "relationships",
     "webhooks",
+    "statuses",
 )
 class ContractLCM(PrimaryModel):
     """ContractLCM model for app."""
@@ -442,6 +443,12 @@ class ContractLCM(PrimaryModel):
         verbose_name="Contract Type", max_length=CHARFIELD_MAX_LENGTH, blank=True, default=""
     )
     devices = models.ManyToManyField(to="dcim.Device", related_name="device_contracts", blank=True)
+    status = StatusField(
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        to="extras.status",
+    )
     comments = models.TextField(blank=True, default="")
 
     class Meta:

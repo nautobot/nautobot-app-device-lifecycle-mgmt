@@ -6,13 +6,14 @@ from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Lo
 from nautobot.extras.models import Role, Status, Tag
 
 from nautobot_device_lifecycle_mgmt.forms import (
+    ContractLCMForm,
     CVELCMForm,
     HardwareLCMForm,
     SoftwareImageLCMForm,
     SoftwareLCMForm,
     ValidatedSoftwareLCMForm,
 )
-from nautobot_device_lifecycle_mgmt.models import CVELCM, SoftwareImageLCM, SoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import CVELCM, ContractLCM, ProviderLCM, SoftwareImageLCM, SoftwareLCM
 
 
 class HardwareLCMFormTest(TestCase):
@@ -601,3 +602,98 @@ class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member,too-many-
         self.assertFalse(form.is_valid())
         self.assertIn("download_url", form.errors)
         self.assertIn("Enter a valid URL.", form.errors["download_url"])
+
+
+class ContractLCMFormTest(TestCase):
+    """Test class for ContractLCMFormTest forms."""
+
+    contract_form_class = ContractLCMForm
+
+    def setUp(self):
+        # Build Contract Status
+        self.contract_ct = ContentType.objects.get_for_model(ContractLCM)
+        self.contract_status = Status.objects.create(
+            name="End-of-Support", color="4caf50", description="Contract no longer supported."
+        )
+        self.contract_status.content_types.set([self.contract_ct])
+        # Build New Vendor/Provider for Contract
+        self.provider = ProviderLCM.objects.create(
+            name="Skyrim Merchant",
+            description="Whiteruns Merchant",
+            country="USA",
+        )
+        # Build test tag
+        self.test_tag, _ = Tag.objects.get_or_create(name="Dragonborn")
+        # Build Test Device for Contract
+        location_type_location_a, _ = LocationType.objects.get_or_create(name="City")
+        location_type_location_a.content_types.add(
+            ContentType.objects.get_for_model(Device),
+        )
+        location_status = Status.objects.get_for_model(Location).first()
+        device_status = Status.objects.get_for_model(Device).first()
+        location1, _ = Location.objects.get_or_create(
+            name="Whiterun", location_type=location_type_location_a, status=location_status
+        )
+        manufacturer_cisco, _ = Manufacturer.objects.get_or_create(name="Septim Empire")
+        self.devicetype, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_cisco, model="Sword")
+        devicerole, _ = Role.objects.get_or_create(name="Blade", defaults={"color": "ff0000"})
+        self.test_device, _ = Device.objects.get_or_create(
+            device_type=self.devicetype, role=devicerole, name="Dragonbane", location=location1, status=device_status
+        )
+
+    # Verify setUp is correct.
+    def test_provider_creation(self):
+        """Test that a provider is correctly created."""
+        self.assertEqual(ProviderLCM.objects.count(), 1)
+        self.assertEqual(ProviderLCM.objects.first().name, "Skyrim Merchant")
+
+    def test_device_creation(self):
+        """Test that a device is correctly created."""
+        self.assertEqual(Device.objects.count(), 1)
+        self.assertEqual(Device.objects.first().name, "Dragonbane")
+        self.assertEqual(Device.objects.first().device_type.manufacturer.name, "Septim Empire")
+        self.assertEqual(Device.objects.first().location.name, "Whiterun")
+
+    def test_status_assignment_to_contract(self):
+        """Test that the contract status is assigned correctly to the contract content type."""
+        self.contract_ct.statuses.set([self.contract_status])
+        self.assertEqual(self.contract_ct.statuses.all()[0].id, self.contract_status.id)
+
+    # Actual Tests Begin
+    def test_form_initiation(self):
+        form = self.contract_form_class(data={})
+        self.assertIsNotNone(form)
+        self.assertIsInstance(form, ContractLCMForm)
+
+    def test_form_all_fields(self):
+        form = self.contract_form_class(
+            data={
+                "provider": self.provider,
+                "name": "Hero Discount",
+                "number": "111-111-1111",
+                "start": "2018-03-05",
+                "end": "2019-03-04",
+                "cost": "1000.00",
+                "support_level": "high support",
+                "currency": "USD",
+                "contract_type": "Hardware",
+                "devices": [self.test_device],
+                "status": self.contract_status,
+                "comments": "Hero Discount for saving the city.",
+                "tags": [self.test_tag],
+            }
+        )
+        self.assertTrue(form.is_valid())
+        self.assertTrue(form.save())
+
+    def test_required_fields_missing(self):
+        form = self.contract_form_class(data={"cost": "0"})
+        self.assertFalse(form.is_valid())
+        self.assertDictEqual(
+            {
+                "provider": ["This field is required."],
+                "name": ["This field is required."],
+                "contract_type": ["This field is required."],
+            },
+            form.errors,
+        )

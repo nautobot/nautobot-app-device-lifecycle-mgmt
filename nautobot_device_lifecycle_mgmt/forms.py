@@ -627,6 +627,7 @@ class ContractLCMForm(NautobotModelForm):
 class ContractLCMBulkEditForm(NautobotBulkEditForm):
     """Device Lifecycle Contrcts bulk edit form."""
 
+    model = ContractLCM
     pk = forms.ModelMultipleChoiceField(queryset=ContractLCM.objects.all(), widget=forms.MultipleHiddenInput)
     provider = forms.ModelChoiceField(queryset=ProviderLCM.objects.all(), required=False)
     start = forms.DateField(widget=DatePicker(), required=False)
@@ -635,18 +636,14 @@ class ContractLCMBulkEditForm(NautobotBulkEditForm):
     currency = forms.ChoiceField(required=False, choices=CurrencyChoices.CHOICES)
     contract_type = forms.ChoiceField(choices=ContractTypeChoices.CHOICES, required=False)
     support_level = forms.CharField(required=False)
+    status = DynamicModelChoiceField(
+        queryset=Status.objects.all(), required=False, query_params={"content_types": model._meta.label_lower}
+    )
 
     class Meta:
         """Meta attributes for the ContractLCMBulkEditForm class."""
 
-        nullable_fields = [
-            "start",
-            "end",
-            "cost",
-            "currency",
-            "support_level",
-            "contract_type",
-        ]
+        nullable_fields = ["start", "end", "cost", "currency", "support_level", "contract_type", "status"]
 
 
 class ContractLCMFilterForm(NautobotFilterForm):
@@ -663,6 +660,12 @@ class ContractLCMFilterForm(NautobotFilterForm):
     )
     name = forms.CharField(required=False)
     tags = TagFilterField(model)
+    status = DynamicModelMultipleChoiceField(
+        queryset=Status.objects.all(),
+        required=False,
+        query_params={"content_types": model._meta.label_lower},
+        to_field_name="name",
+    )
 
     class Meta:
         """Meta attributes for the ContractLCMFilterForm class."""
@@ -672,6 +675,7 @@ class ContractLCMFilterForm(NautobotFilterForm):
         fields = [
             "q",
             "provider",
+            "status",
             "name",
             "start",
             "end",
