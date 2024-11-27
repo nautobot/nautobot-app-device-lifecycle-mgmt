@@ -64,7 +64,10 @@ class HardwareLCMTestCase(TestCase):
 
         self.assertEqual(hwlcm_obj.inventory_item, inventory_item)
         self.assertEqual(str(hwlcm_obj.end_of_sale), "2023-04-01")
-        self.assertEqual(str(hwlcm_obj), f"Inventory Part: {inventory_item} - End of sale: 2023-04-01")
+        self.assertEqual(
+            str(hwlcm_obj),
+            f"Inventory Part: {inventory_item} - End of sale: 2023-04-01",
+        )
 
     def test_create_hwlcm_notice_success_eo_all(self):
         """Successfully create basic notice."""
@@ -89,13 +92,18 @@ class HardwareLCMTestCase(TestCase):
         """Successfully create basic notice."""
         with self.assertRaises(ValidationError) as failure_exception:
             HardwareLCM.objects.create(device_type=self.device_type)
-        self.assertEqual(failure_exception.exception.messages[0], "End of Sale or End of Support must be specified.")
+        self.assertEqual(
+            failure_exception.exception.messages[0],
+            "End of Sale or End of Support must be specified.",
+        )
 
     def test_create_hwlcm_notice_failed_validation_documentation_url(self):
         """Successfully create basic notice."""
         with self.assertRaises(ValidationError) as failure_exception:
             HardwareLCM.objects.create(
-                device_type=self.device_type, end_of_support=date(2023, 4, 1), documentation_url="test.com"
+                device_type=self.device_type,
+                end_of_support=date(2023, 4, 1),
+                documentation_url="test.com",
             )
         self.assertEqual(failure_exception.exception.messages[0], "Enter a valid URL.")
 
@@ -103,7 +111,10 @@ class HardwareLCMTestCase(TestCase):
         """Successfully create basic notice."""
         with self.assertRaises(ValidationError) as failure_exception:
             HardwareLCM.objects.create(device_type=self.device_type, end_of_support="April 1st 2022")
-        self.assertIn("invalid date format. It must be in YYYY-MM-DD format.", failure_exception.exception.messages[0])
+        self.assertIn(
+            "invalid date format. It must be in YYYY-MM-DD format.",
+            failure_exception.exception.messages[0],
+        )
 
     def test_expired_property_end_of_support_expired(self):
         """Test expired property is expired with end_of_support."""
@@ -167,7 +178,10 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         self.assertEqual(str(validatedsoftwarelcm.end), "2022-11-01")
         self.assertEqual(list(validatedsoftwarelcm.device_types.all()), [self.device_type_1])
         self.assertEqual(validatedsoftwarelcm.preferred, False)
-        self.assertEqual(str(validatedsoftwarelcm), f"{self.software} - Valid since: {validatedsoftwarelcm.start}")
+        self.assertEqual(
+            str(validatedsoftwarelcm),
+            f"{self.software} - Valid since: {validatedsoftwarelcm.start}",
+        )
 
     def test_validatedsoftwarelcm_valid_property(self):
         """Test behavior of the 'valid' property."""
@@ -303,7 +317,10 @@ class DeviceSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-m
             is_validated=True,
         )
         validation_result.valid_software.set(self.validated_software_qs)
-        self.assertEqual(validation_result.valid_software.values()[0]["software_id"], self.software_one.id)
+        self.assertEqual(
+            validation_result.valid_software.values()[0]["software_id"],
+            self.software_one.id,
+        )
 
     def test_create_devicesoftwarevalidationresult_two_valid_softwares(self):
         """Successfully create DeviceSoftwareValidationResult with two valid software."""
@@ -314,8 +331,14 @@ class DeviceSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-m
         )
         validation_result.valid_software.set(self.validated_software_qs)
         validation_result.valid_software.set(self.validated_software_qs_two)
-        self.assertEqual(validation_result.valid_software.values()[0]["software_id"], self.software_one.id)
-        self.assertEqual(validation_result.valid_software.values()[1]["software_id"], self.software_two.id)
+        self.assertEqual(
+            validation_result.valid_software.values()[0]["software_id"],
+            self.software_one.id,
+        )
+        self.assertEqual(
+            validation_result.valid_software.values()[1]["software_id"],
+            self.software_two.id,
+        )
 
 
 class DeviceHardwareNoticeResultTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
@@ -378,7 +401,10 @@ class InventoryItemSoftwareValidationResultTestCase(TestCase):  # pylint: disabl
             is_validated=True,
         )
         validation_result.valid_software.set(self.validated_software_qs)
-        self.assertEqual(validation_result.valid_software.values()[0]["software_id"], self.software_one.id)
+        self.assertEqual(
+            validation_result.valid_software.values()[0]["software_id"],
+            self.software_one.id,
+        )
 
     def test_create_itemsoftwarevalidationresult_two_valid_softwares(self):
         """Successfully create InventoryItemSoftwareValidationResult with two valid software."""
@@ -389,8 +415,14 @@ class InventoryItemSoftwareValidationResultTestCase(TestCase):  # pylint: disabl
         )
         validation_result.valid_software.set(self.validated_software_qs)
         validation_result.valid_software.set(self.validated_software_qs_two)
-        self.assertEqual(validation_result.valid_software.values()[0]["software_id"], self.software_one.id)
-        self.assertEqual(validation_result.valid_software.values()[1]["software_id"], self.software_two.id)
+        self.assertEqual(
+            validation_result.valid_software.values()[0]["software_id"],
+            self.software_one.id,
+        )
+        self.assertEqual(
+            validation_result.valid_software.values()[1]["software_id"],
+            self.software_two.id,
+        )
 
 
 class CVELCMTestCase(TestCase):
@@ -411,7 +443,9 @@ class CVELCMTestCase(TestCase):
     def test_create_cvelcm_required_only(self):
         """Successfully create CVELCM with required fields only."""
         cvelcm = CVELCM.objects.create(
-            name="CVE-2021-1391", published_date="2021-03-24", link="https://www.cvedetails.com/cve/CVE-2021-1391/"
+            name="CVE-2021-1391",
+            published_date="2021-03-24",
+            link="https://www.cvedetails.com/cve/CVE-2021-1391/",
         )
 
         self.assertEqual(cvelcm.name, "CVE-2021-1391")
@@ -469,7 +503,10 @@ class VulnerabilityLCMTestCase(TestCase):
             cve=self.cves[0], software=self.softwares[0], device=self.devices[0]
         )
 
-        self.assertEqual(str(vulnerability), "Device: sw1 - Software: cisco_ios - 15.1(2)M - CVE: CVE-2021-1391")
+        self.assertEqual(
+            str(vulnerability),
+            "Device: sw1 - Software: cisco_ios - 15.1(2)M - CVE: CVE-2021-1391",
+        )
         self.assertEqual(vulnerability.cve, self.cves[0])
         self.assertEqual(vulnerability.software, self.softwares[0])
         self.assertEqual(vulnerability.device, self.devices[0])
@@ -477,7 +514,9 @@ class VulnerabilityLCMTestCase(TestCase):
     def test_create_vulnerabilitylcm_inventory_item_required_only(self):
         """Successfully create VulnerabilityLCM for inventory item with required fields only."""
         vulnerability = VulnerabilityLCM.objects.create(
-            cve=self.cves[1], software=self.softwares[1], inventory_item=self.inv_items[1]
+            cve=self.cves[1],
+            software=self.softwares[1],
+            inventory_item=self.inv_items[1],
         )
 
         self.assertEqual(
@@ -491,10 +530,16 @@ class VulnerabilityLCMTestCase(TestCase):
     def test_create_vulnerabilitylcm_all(self):
         """Successfully create VulnerabilityLCM with all fields."""
         vulnerability = VulnerabilityLCM.objects.create(
-            cve=self.cves[2], software=self.softwares[2], device=self.devices[2], status=self.status
+            cve=self.cves[2],
+            software=self.softwares[2],
+            device=self.devices[2],
+            status=self.status,
         )
 
-        self.assertEqual(str(vulnerability), "Device: sw3 - Software: cisco_ios - 21.4R3 - CVE: CVE-2020-27134")
+        self.assertEqual(
+            str(vulnerability),
+            "Device: sw3 - Software: cisco_ios - 21.4R3 - CVE: CVE-2020-27134",
+        )
         self.assertEqual(vulnerability.cve, self.cves[2])
         self.assertEqual(vulnerability.software, self.softwares[2])
         self.assertEqual(vulnerability.device, self.devices[2])
@@ -557,3 +602,112 @@ class ProviderLCMTestCase(TestCase):
         self.assertEqual(cisco_contract.currency, "USD")
         self.assertEqual(cisco_contract.contract_type, "Hardware")
         self.assertEqual(cisco_contract.comments, "Cisco gave us discount")
+
+
+class ContractLCMTest(TestCase):
+    """Tests for the ContractLCMTest models."""
+
+    def setUp(self):
+        # Create a provider to associate with the contract
+
+        self.provider = ProviderLCM.objects.create(
+            name="Test Vendor",
+            description="Test Vendor",
+            country="USA",
+        )
+
+        self.content_type_contract = ContentType.objects.get(
+            app_label="nautobot_device_lifecycle_mgmt", model="contractlcm"
+        )
+
+        self.active_status = Status.objects.get(name="Active")
+
+        self.active_status.content_types.add(self.content_type_contract)
+
+    def test_contract_creation(self):
+        """Test that a new contract can be created."""
+
+        contract = ContractLCM.objects.create(
+            name="Test Contract",
+            number="1234567890",
+            start="2022-01-01",
+            end="2025-12-31",
+            cost=10000.00,
+            support_level="Gold",
+            currency="USD",
+            contract_type="Hardware",
+        )
+
+        contract.save()
+
+        # Assert that the new contract has been saved to the database
+
+        self.assertEqual(ContractLCM.objects.count(), 1)
+
+    def test_contract_fields(self):
+        """Test that all required fields are present."""
+
+        contract = ContractLCM.objects.create(
+            name="Test Contract",
+            number="1234567890",
+            start="2022-01-01",
+            end="2025-12-31",
+            cost=10000.00,
+            support_level="Gold",
+            currency="USD",
+            contract_type="Hardware",
+        )
+
+        contract.save()
+
+        # Assert that all required fields are present
+
+        self.assertTrue(contract.name)
+
+        self.assertTrue(contract.number)
+
+        self.assertTrue(contract.start)
+
+        self.assertTrue(contract.end)
+
+        self.assertTrue(contract.cost)
+
+        self.assertTrue(contract.support_level)
+
+        self.assertTrue(contract.currency)
+
+        self.assertTrue(contract.contract_type)
+
+    def test_contract_status(self):
+        """Test that the contract's status is properly set."""
+
+        # Create a new contract
+
+        contract = ContractLCM.objects.create(
+            name="Test Contract",
+            number="1234567890",
+            start="2022-01-01",
+            end="2025-12-31",
+            cost=10000.00,
+            support_level="Gold",
+            currency="USD",
+            contract_type="Hardware",
+        )
+
+        # Save the contract with no status set
+
+        contract.save()
+
+        # Assert that the contract's status is not set
+
+        self.assertIsNone(contract.status)
+
+        # Set a new status for the contract and save it again
+
+        contract.status = self.active_status
+
+        contract.save()
+
+        # Assert that the contract's status has been updated correctly
+
+        self.assertEqual(contract.status.name, "Active")

@@ -6,10 +6,22 @@ from datetime import date, datetime, timedelta
 import time_machine
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
-from nautobot.dcim.models import Device, DeviceType, Location, LocationType, Manufacturer, Platform, SoftwareVersion
+from nautobot.dcim.models import (
+    Device,
+    DeviceType,
+    Location,
+    LocationType,
+    Manufacturer,
+    Platform,
+    SoftwareVersion,
+)
 from nautobot.extras.models import Role, Status
 
-from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, CurrencyChoices, CVESeverityChoices
+from nautobot_device_lifecycle_mgmt.choices import (
+    ContractTypeChoices,
+    CurrencyChoices,
+    CVESeverityChoices,
+)
 from nautobot_device_lifecycle_mgmt.filters import (
     ContractLCMFilterSet,
     CVELCMFilterSet,
@@ -33,7 +45,12 @@ from nautobot_device_lifecycle_mgmt.models import (
     VulnerabilityLCM,
 )
 
-from .conftest import create_cves, create_devices, create_inventory_items, create_softwares
+from .conftest import (
+    create_cves,
+    create_devices,
+    create_inventory_items,
+    create_softwares,
+)
 
 
 class HardwareLCMTestCase(TestCase):
@@ -59,7 +76,9 @@ class HardwareLCMTestCase(TestCase):
         active_status.content_types.add(ContentType.objects.get_for_model(Location))
         active_status.content_types.add(ContentType.objects.get_for_model(Device))
         self.location1, _ = Location.objects.get_or_create(
-            name="Location1", location_type=location_type_location_a, status=active_status
+            name="Location1",
+            location_type=location_type_location_a,
+            status=active_status,
         )
         self.devices = (
             Device.objects.create(
@@ -204,7 +223,9 @@ class ContractLCMTestCase(TestCase):
         active_status.content_types.add(ContentType.objects.get_for_model(Location))
         active_status.content_types.add(ContentType.objects.get_for_model(Device))
         self.location1, _ = Location.objects.get_or_create(
-            name="Location1", location_type=location_type_location_a, status=active_status
+            name="Location1",
+            location_type=location_type_location_a,
+            status=active_status,
         )
         self.devices = (
             Device.objects.get_or_create(
@@ -704,7 +725,13 @@ class InventoryItemSoftwareValidationResultFilterSetTestCase(TestCase):
 
     def test_inventory_items_name_all(self):
         """Test devices filter."""
-        params = {"inventory_item": ["SUP2T Card", "100GBASE-SR4 QSFP Transceiver", "48x RJ-45 Line Card"]}
+        params = {
+            "inventory_item": [
+                "SUP2T Card",
+                "100GBASE-SR4 QSFP Transceiver",
+                "48x RJ-45 Line Card",
+            ]
+        }
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
     def test_inventory_items_device_type_name(self):
@@ -782,7 +809,9 @@ class DeviceHardwareNoticeResultFilterSetTestCase(TestCase):  # pylint: disable=
         active_status.content_types.add(ContentType.objects.get_for_model(Location))
         active_status.content_types.add(ContentType.objects.get_for_model(Device))
         self.location1, _ = Location.objects.get_or_create(
-            name="Location1", location_type=location_type_location_a, status=active_status
+            name="Location1",
+            location_type=location_type_location_a,
+            status=active_status,
         )
         self.device_1, _ = Device.objects.get_or_create(
             name="r1",

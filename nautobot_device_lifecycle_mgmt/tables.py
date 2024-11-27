@@ -3,7 +3,14 @@
 
 import django_tables2 as tables
 from django_tables2.utils import A
-from nautobot.apps.tables import BaseTable, BooleanColumn, ButtonsColumn, StatusTableMixin, TagColumn, ToggleColumn
+from nautobot.apps.tables import (
+    BaseTable,
+    BooleanColumn,
+    ButtonsColumn,
+    StatusTableMixin,
+    TagColumn,
+    ToggleColumn,
+)
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -247,7 +254,14 @@ class DeviceSoftwareValidationResultListTable(BaseTable):  # pylint: disable=nb-
         """Metaclass attributes of DeviceSoftwareValidationResultTable."""
 
         model = DeviceSoftwareValidationResult
-        fields = ["device", "software", "valid", "last_run", "run_type", "valid_software"]
+        fields = [
+            "device",
+            "software",
+            "valid",
+            "last_run",
+            "run_type",
+            "valid_software",
+        ]
         default_columns = [
             "device",
             "software",
@@ -310,7 +324,16 @@ class InventoryItemSoftwareValidationResultTable(BaseTable):
         """Metaclass attributes of InventoryItemSoftwareValidationResultTable."""
 
         model = InventoryItemSoftwareValidationResult
-        fields = ["part_id", "item_name", "device", "total", "valid", "invalid", "no_software", "valid_percent"]
+        fields = [
+            "part_id",
+            "item_name",
+            "device",
+            "total",
+            "valid",
+            "invalid",
+            "no_software",
+            "valid_percent",
+        ]
         default_columns = [
             "part_id",
             "item_name",
@@ -365,7 +388,16 @@ class InventoryItemSoftwareValidationResultListTable(BaseTable):  # pylint: disa
         """Metaclass attributes of InventoryItemSoftwareValidationResultTable."""
 
         model = InventoryItemSoftwareValidationResult
-        fields = ["part_id", "item_name", "device_name", "software", "valid", "last_run", "run_type", "valid_software"]
+        fields = [
+            "part_id",
+            "item_name",
+            "device_name",
+            "software",
+            "valid",
+            "last_run",
+            "run_type",
+            "valid_software",
+        ]
         default_columns = [
             "part_id",
             "item_name",
@@ -378,12 +410,14 @@ class InventoryItemSoftwareValidationResultListTable(BaseTable):  # pylint: disa
         ]
 
 
-class ContractLCMTable(BaseTable):
+class ContractLCMTable(StatusTableMixin, BaseTable):
     """Table for list view."""
 
     pk = ToggleColumn()
     name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:contractlcm", text=lambda record: record, args=[A("pk")]
+        "plugins:nautobot_device_lifecycle_mgmt:contractlcm",
+        text=lambda record: record,
+        args=[A("pk")],
     )
     provider = tables.LinkColumn(
         "plugins:nautobot_device_lifecycle_mgmt:providerlcm",
@@ -405,6 +439,7 @@ class ContractLCMTable(BaseTable):
         fields = (
             "pk",
             "name",
+            "status",
             "start",
             "end",
             "cost",
@@ -420,6 +455,7 @@ class ContractLCMTable(BaseTable):
 
         default_columns = (
             "name",
+            "status",
             "start",
             "end",
             "cost",
@@ -437,7 +473,9 @@ class ProviderLCMTable(BaseTable):
 
     pk = ToggleColumn()
     name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:providerlcm", text=lambda record: record, args=[A("pk")]
+        "plugins:nautobot_device_lifecycle_mgmt:providerlcm",
+        text=lambda record: record,
+        args=[A("pk")],
     )
     portal_url = tables.TemplateColumn(
         template_code="""{% if record.portal_url %}
@@ -469,7 +507,9 @@ class CVELCMTable(StatusTableMixin, BaseTable):
     model = CVELCM
     pk = ToggleColumn()
     name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:cvelcm", text=lambda record: record, args=[A("pk")]
+        "plugins:nautobot_device_lifecycle_mgmt:cvelcm",
+        text=lambda record: record,
+        args=[A("pk")],
     )
     link = tables.TemplateColumn(
         template_code="""{% if record.link %}
@@ -522,7 +562,9 @@ class VulnerabilityLCMTable(StatusTableMixin, BaseTable):
     model = VulnerabilityLCM
     pk = ToggleColumn()
     name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm", text=lambda record: record, args=[A("pk")]
+        "plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm",
+        text=lambda record: record,
+        args=[A("pk")],
     )
     cve = tables.LinkColumn(verbose_name="CVE")
     software = tables.LinkColumn()

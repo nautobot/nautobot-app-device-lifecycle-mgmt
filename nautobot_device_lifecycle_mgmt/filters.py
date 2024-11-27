@@ -4,8 +4,20 @@ import datetime
 
 import django_filters
 from django.db.models import Q
-from nautobot.apps.filters import NautobotFilterSet, SearchFilter, StatusModelFilterSetMixin
-from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform, SoftwareVersion
+from nautobot.apps.filters import (
+    NautobotFilterSet,
+    SearchFilter,
+    StatusModelFilterSetMixin,
+)
+from nautobot.dcim.models import (
+    Device,
+    DeviceType,
+    InventoryItem,
+    Location,
+    Manufacturer,
+    Platform,
+    SoftwareVersion,
+)
 from nautobot.extras.filters.mixins import StatusFilter
 from nautobot.extras.models import Role, Status, Tag
 
@@ -616,7 +628,7 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         return queryset
 
 
-class ContractLCMFilterSet(NautobotFilterSet):
+class ContractLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):
     """Filter for ContractLCM."""
 
     q = SearchFilter(

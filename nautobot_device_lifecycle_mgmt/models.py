@@ -18,7 +18,10 @@ from nautobot.extras.models.statuses import StatusField
 from nautobot.extras.utils import extras_features
 
 from nautobot_device_lifecycle_mgmt import choices
-from nautobot_device_lifecycle_mgmt.contract_filters import DeviceContractFilter, InventoryItemContractFilter
+from nautobot_device_lifecycle_mgmt.contract_filters import (
+    DeviceContractFilter,
+    InventoryItemContractFilter,
+)
 from nautobot_device_lifecycle_mgmt.software_filters import (
     DeviceValidatedSoftwareFilter,
     InventoryItemValidatedSoftwareFilter,
@@ -46,7 +49,10 @@ class HardwareLCM(PrimaryModel):
         null=True,
     )
     inventory_item = models.CharField(  # pylint: disable=nb-string-field-blank-null
-        verbose_name="Inventory Item Part", max_length=CHARFIELD_MAX_LENGTH, blank=True, null=True
+        verbose_name="Inventory Item Part",
+        max_length=CHARFIELD_MAX_LENGTH,
+        blank=True,
+        null=True,
     )
     release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
     end_of_sale = models.DateField(null=True, blank=True, verbose_name="End of Sale")
@@ -157,7 +163,11 @@ class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):
 class ValidatedSoftwareLCM(PrimaryModel):
     """ValidatedSoftwareLCM model."""
 
-    software = models.ForeignKey(to="dcim.SoftwareVersion", on_delete=models.CASCADE, verbose_name="Software Version")
+    software = models.ForeignKey(
+        to="dcim.SoftwareVersion",
+        on_delete=models.CASCADE,
+        verbose_name="Software Version",
+    )
     devices = models.ManyToManyField(to="dcim.Device", related_name="+", blank=True)
     device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
     device_roles = models.ManyToManyField(to="extras.Role", related_name="+", blank=True)
@@ -306,13 +316,18 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
         related_name="inventoryitem_software_validation",
     )
     software = models.ForeignKey(
-        to="dcim.SoftwareVersion", on_delete=models.CASCADE, help_text="Inventory Item software", blank=True, null=True
+        to="dcim.SoftwareVersion",
+        on_delete=models.CASCADE,
+        help_text="Inventory Item software",
+        blank=True,
+        null=True,
     )
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
     run_type = models.CharField(max_length=CHARFIELD_MAX_LENGTH, choices=choices.ReportRunTypeChoices)
     valid_software = models.ManyToManyField(
-        to="ValidatedSoftwareLCM", related_name="inventory_item_software_validation_results"
+        to="ValidatedSoftwareLCM",
+        related_name="inventory_item_software_validation_results",
     )
 
     class Meta:
@@ -358,6 +373,7 @@ class ContractLCMQuerySet(RestrictedQuerySet):
     "graphql",
     "relationships",
     "webhooks",
+    "statuses",
 )
 class ContractLCM(PrimaryModel):
     """ContractLCM model for app."""
@@ -374,15 +390,33 @@ class ContractLCM(PrimaryModel):
     number = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True, default="")
     start = models.DateField(null=True, blank=True, verbose_name="Contract Start Date")
     end = models.DateField(null=True, blank=True, verbose_name="Contract End Date")
-    cost = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=15, verbose_name="Contract Cost")
+    cost = models.DecimalField(
+        null=True,
+        blank=True,
+        decimal_places=2,
+        max_digits=15,
+        verbose_name="Contract Cost",
+    )
     support_level = models.CharField(
-        verbose_name="Support Level", max_length=CHARFIELD_MAX_LENGTH, blank=True, default=""
+        verbose_name="Support Level",
+        max_length=CHARFIELD_MAX_LENGTH,
+        blank=True,
+        default="",
     )
     currency = models.CharField(verbose_name="Currency", max_length=4, blank=True, default="")
     contract_type = models.CharField(
-        verbose_name="Contract Type", max_length=CHARFIELD_MAX_LENGTH, blank=True, default=""
+        verbose_name="Contract Type",
+        max_length=CHARFIELD_MAX_LENGTH,
+        blank=True,
+        default="",
     )
     devices = models.ManyToManyField(to="dcim.Device", related_name="device_contracts", blank=True)
+    status = StatusField(
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        to="extras.status",
+    )
     comments = models.TextField(blank=True, default="")
 
     class Meta:
@@ -504,7 +538,9 @@ class CVELCM(PrimaryModel):
     )
     description = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True, default="")
     severity = models.CharField(
-        max_length=CHARFIELD_MAX_LENGTH, choices=choices.CVESeverityChoices, default=choices.CVESeverityChoices.NONE
+        max_length=CHARFIELD_MAX_LENGTH,
+        choices=choices.CVESeverityChoices,
+        default=choices.CVESeverityChoices.NONE,
     )
     cvss = models.FloatField(blank=True, null=True, verbose_name="CVSS Base Score")
     cvss_v2 = models.FloatField(blank=True, null=True, verbose_name="CVSSv2 Score")
