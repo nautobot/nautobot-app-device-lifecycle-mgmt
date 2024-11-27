@@ -3,6 +3,7 @@
 from datetime import datetime, date
 from os import getenv
 from time import sleep
+import re
 
 from urllib3.util import Retry
 from requests import Session
@@ -18,7 +19,7 @@ from django.db.utils import IntegrityError
 from nautobot.dcim.models import Device, InventoryItem
 from nautobot.dcim.models.devices import SoftwareVersion
 from nautobot.extras.jobs import BooleanVar, Job, StringVar
-
+from nautobot.extras.models import ExternalIntegration
 from nautobot_device_lifecycle_mgmt.models import CVELCM, VulnerabilityLCM
 
 name = "CVE Tracking"  # pylint: disable=invalid-name
@@ -89,22 +90,24 @@ class NistCveSyncSoftware(Job):
     def __init__(self):
         """Initializing job with extra options."""
         super().__init__()
-        self.nist_api_key = getenv("NAUTOBOT_DLM_NIST_API_KEY")
-        self.sleep_timer = 0.75
-        self.headers = {"ContentType": "application/json", "apiKey": self.nist_api_key}
+        self.integration = ExternalIntegration.objects.get(name="NAUTOBOT DLM NIST EXTERNAL INTEGRATION")
+
+        # Building the retries to use ExternalIntegration
+        # Setting sane values in case these get removed from the integration completely.
+        retries = Retry(
+            total=self.integration.extra_config.get("retries", {}).get("max_attempts", 3),
+            backoff_factor=self.integration.extra_config.get("retries", {}).get("backoff", 1),
+            status_forcelist=self.integration.extra_config.get("retries", {}).get("status_forcelist", [502, 503, 504]),
+            allowed_methods=self.integration.extra_config.get("retries", {}).get("allowed_methods", ["GET"]),
+        )
 
         # Set session attributes for retries
         self.session = Session()
-        retries = Retry(
-            total=3,
-            backoff_factor=10,
-            status_forcelist=[502, 503, 504],
-            allowed_methods={"GET"},
-        )
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
     def run(self, *args, **kwargs):
         """Check all software in DLC against NIST database and associate registered CVEs.  Update when necessary."""
+        
         cve_counter = 0
 
         for software in SoftwareVersion.objects.all():
@@ -151,7 +154,7 @@ class NistCveSyncSoftware(Job):
                     continue
 
             # API Rest Timer
-            sleep(6)
+            sleep(self.integration.extra_config.get("api_call_delay", 6))
 
         self.logger.info(
             "Performed discovery on all software. Created %s CVE.", cve_counter, extra={"grouping": "CVE Creation"}
@@ -173,8 +176,7 @@ class NistCveSyncSoftware(Job):
                 extra={"object": cve, "grouping": "CVE Association"},
             )
 
-    @staticmethod
-    def create_cpe_software_search_urls(vendor: str, platform: str, version: str) -> list:
+    def create_cpe_software_search_urls(self, vendor: str, platform: str, version: str) -> list:
         """Uses netutils.platform_mapper to construct proper search URLs.
 
         Args:
@@ -187,6 +189,9 @@ class NistCveSyncSoftware(Job):
         """
         cpe_urls = get_nist_vendor_platform_urls(vendor, platform, version)
 
+        # URLS are obtaind from netutils.nist method that includes the NIST URL.
+        # We need to remove the NIST URL and replace it with the one from the integration.
+        cpe_urls = [re.sub(r'^.*(?=\?)', self.integration.remote_url, cpe_url) for cpe_url in cpe_urls]
         return cpe_urls
 
     def create_dlc_cves(self, cpe_cves: dict) -> None:
@@ -266,7 +271,7 @@ class NistCveSyncSoftware(Job):
         return processed_cve_info
 
     def query_api(self, url):
-        """Establishes a session for use of retries and backoff.
+        """Uses established session to query the NIST API.
 
         Args:
             url (string): The API endpoint getting queried.
@@ -275,7 +280,7 @@ class NistCveSyncSoftware(Job):
             dict: Dictionary of returned results if successful.
         """
         try:
-            result = self.session.get(url, headers=self.headers)
+            result = self.session.get(url)
             result.raise_for_status()
         except HTTPError as err:
             code = err.response.status_code

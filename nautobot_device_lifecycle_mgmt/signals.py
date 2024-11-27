@@ -1,8 +1,9 @@
 """Custom signals for the Lifecycle Management app."""
 
 from django.apps import apps as global_apps
-from nautobot.extras.choices import RelationshipTypeChoices
-
+from django.db.models.signals import post_migrate
+from django.dispatch import receiver
+from nautobot.extras.choices import RelationshipTypeChoices, LogLevelChoices
 
 def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # pylint: disable=unused-argument
     """Callback function for post_migrate() -- create Relationship records."""
@@ -33,3 +34,71 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
     for contact_role in contact_roles:
         role, _ = Role.objects.get_or_create(name=contact_role)
         role.content_types.add(contact_association_ct)
+
+
+@receiver(post_migrate)
+def create_default_objects(sender, apps=global_apps, **kwargs):  # pylint: disable=unused-argument
+    """Create default objects after database migrations."""
+    
+    # Only run this for our app
+    if sender.name != "nautobot_device_lifecycle_mgmt":
+        return
+    
+    # Import models here to avoid circular imports; Only needed here
+    from nautobot.extras.models import ExternalIntegration, Secret, SecretsGroup
+
+    # Ensure a Secret exists for the NAUTOBOT_DLM_NIST_API_KEY
+    nist_api_key, _ = Secret.objects.get_or_create(
+        name="NAUTOBOT DLM NIST API KEY",
+        defaults={
+            "provider": "environment-variable",
+            "description": "API key for NIST CVE Database",
+            "parameters": {
+                "env_var": "NAUTOBOT_DLM_NIST_API_KEY",
+                "default": None,
+                "required": True,
+            }
+        }
+    )
+
+    # Ensure a SecretsGroup exists and is using the NAUTOBOT_DLM_NIST_API_KEY Secret
+    nist_secrets_group, _ = SecretsGroup.objects.get_or_create(
+        name="NAUTOBOT DLM NIST SECRETS GROUP",
+        defaults={
+            "description": "Secrets group for NIST API integration",
+        }
+    )
+
+    # Add secret with specific access type and secret type
+    nist_secrets_group.secrets.add(
+        nist_api_key,
+        through_defaults={
+            "access_type": "HTTP_HEADER",
+            "secret_type": "apiKey"  # Match the NIST expected header key
+        }
+    )
+
+    # Ensure an ExternalIntegration exists for NIST API Integration
+    ExternalIntegration.objects.get_or_create(
+        name="NAUTOBOT DLM NIST EXTERNAL INTEGRATION",  # Required
+        defaults={
+            "remote_url": "https://services.nvd.nist.gov/rest/json/cves/2.0",
+            "http_method": "GET",
+            "secrets_group": nist_secrets_group,
+            "verify_ssl": True,
+            "timeout": 30,
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "extra_config": {
+                "api_call_delay": 6,
+                "retries": {
+                    "max_attempts": 3,
+                    "delay": 1,
+                    "backoff": 2,
+                    "status_forcelist": [500, 502, 503, 504],
+                    "allowed_methods": ["GET"]
+                }    
+            },
+        }
+    )
