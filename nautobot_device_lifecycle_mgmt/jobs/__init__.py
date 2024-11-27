@@ -8,7 +8,6 @@ from .lifecycle_reporting import (
     DeviceSoftwareValidationFullReport,
     InventoryItemSoftwareValidationFullReport,
 )
-from .lifecycle_reporting import DeviceSoftwareValidationFullReport, InventoryItemSoftwareValidationFullReport
 
 jobs = [
     DeviceHardwareNoticeFullReport,
