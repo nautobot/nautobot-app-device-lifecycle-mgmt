@@ -3,7 +3,9 @@
 from django.apps import apps as global_apps
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
-from nautobot.extras.choices import RelationshipTypeChoices, LogLevelChoices
+from nautobot.extras.choices import RelationshipTypeChoices
+from nautobot.extras.models import ExternalIntegration, Secret, SecretsGroup
+
 
 def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # pylint: disable=unused-argument
     """Callback function for post_migrate() -- create Relationship records."""
@@ -44,14 +46,9 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
 @receiver(post_migrate)
 def create_default_objects(sender, apps=global_apps, **kwargs):  # pylint: disable=unused-argument
     """Create default objects after database migrations."""
-    
     # Only run this for our app
     if sender.name != "nautobot_device_lifecycle_mgmt":
         return
-    
-    # Import models here to avoid circular imports; Only needed here
-    from nautobot.extras.models import ExternalIntegration, Secret, SecretsGroup
-
     # Ensure a Secret exists for the NAUTOBOT_DLM_NIST_API_KEY
     nist_api_key, _ = Secret.objects.get_or_create(
         name="NAUTOBOT DLM NIST API KEY",
@@ -62,8 +59,8 @@ def create_default_objects(sender, apps=global_apps, **kwargs):  # pylint: disab
                 "env_var": "NAUTOBOT_DLM_NIST_API_KEY",
                 "default": None,
                 "required": True,
-            }
-        }
+            },
+        },
     )
 
     # Ensure a SecretsGroup exists and is using the NAUTOBOT_DLM_NIST_API_KEY Secret
@@ -71,7 +68,7 @@ def create_default_objects(sender, apps=global_apps, **kwargs):  # pylint: disab
         name="NAUTOBOT DLM NIST SECRETS GROUP",
         defaults={
             "description": "Secrets group for NIST API integration",
-        }
+        },
     )
 
     # Add secret with specific access type and secret type
@@ -79,8 +76,8 @@ def create_default_objects(sender, apps=global_apps, **kwargs):  # pylint: disab
         nist_api_key,
         through_defaults={
             "access_type": "HTTP_HEADER",
-            "secret_type": "apiKey"  # Match the NIST expected header key
-        }
+            "secret_type": "apiKey",  # Match the NIST expected header key
+        },
     )
 
     # Ensure an ExternalIntegration exists for NIST API Integration
@@ -92,9 +89,7 @@ def create_default_objects(sender, apps=global_apps, **kwargs):  # pylint: disab
             "secrets_group": nist_secrets_group,
             "verify_ssl": True,
             "timeout": 30,
-            "headers": {
-                "Content-Type": "application/json"
-            },
+            "headers": {"Content-Type": "application/json"},
             "extra_config": {
                 "api_call_delay": 6,
                 "retries": {
@@ -102,8 +97,8 @@ def create_default_objects(sender, apps=global_apps, **kwargs):  # pylint: disab
                     "delay": 1,
                     "backoff": 2,
                     "status_forcelist": [500, 502, 503, 504],
-                    "allowed_methods": ["GET"]
-                }    
+                    "allowed_methods": ["GET"],
+                },
             },
-        }
+        },
     )

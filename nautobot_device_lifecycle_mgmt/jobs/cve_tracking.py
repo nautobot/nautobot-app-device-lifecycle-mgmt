@@ -1,25 +1,23 @@
 # pylint: disable=logging-not-lazy, consider-using-f-string
 """Jobs for the CVE Tracking portion of the Device Lifecycle app."""
-from datetime import datetime, date
-from os import getenv
-from time import sleep
+
 import re
-
-from urllib3.util import Retry
-from requests import Session
-from requests.adapters import HTTPAdapter
-from requests.exceptions import HTTPError
-
-from netutils.lib_mapper import NIST_LIB_MAPPER_REVERSE
-from netutils.nist import get_nist_vendor_platform_urls
+from datetime import date, datetime
+from time import sleep
 
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
-
 from nautobot.dcim.models import Device, InventoryItem
 from nautobot.dcim.models.devices import SoftwareVersion
 from nautobot.extras.jobs import BooleanVar, Job, StringVar
 from nautobot.extras.models import ExternalIntegration
+from netutils.lib_mapper import NIST_LIB_MAPPER_REVERSE
+from netutils.nist import get_nist_vendor_platform_urls
+from requests import Session
+from requests.adapters import HTTPAdapter
+from requests.exceptions import HTTPError
+from urllib3.util import Retry
+
 from nautobot_device_lifecycle_mgmt.models import CVELCM, VulnerabilityLCM
 
 name = "CVE Tracking"  # pylint: disable=invalid-name
@@ -107,7 +105,6 @@ class NistCveSyncSoftware(Job):
 
     def run(self, *args, **kwargs):
         """Check all software in DLC against NIST database and associate registered CVEs.  Update when necessary."""
-        
         cve_counter = 0
 
         for software in SoftwareVersion.objects.all():
@@ -119,7 +116,7 @@ class NistCveSyncSoftware(Job):
                 platform = NIST_LIB_MAPPER_REVERSE[platform]
             except KeyError:
                 self.logger.warning(
-                    "OS Platform %s is not yet supported; Skipping.", 
+                    "OS Platform %s is not yet supported; Skipping.",
                     platform,
                     extra={"object": software.platform, "grouping": "CVE Information"},
                 )
@@ -135,7 +132,7 @@ class NistCveSyncSoftware(Job):
                 continue
 
             self.logger.info(
-                "Gathering CVE Information for Software Version: %s", 
+                "Gathering CVE Information for Software Version: %s",
                 version,
                 extra={"object": software.platform, "grouping": "CVE Information"},
             )
@@ -171,7 +168,7 @@ class NistCveSyncSoftware(Job):
 
         except IntegrityError as err:
             self.logger.error(
-                "Unable to create association between CVE and Software Version.  ERROR: %s", 
+                "Unable to create association between CVE and Software Version.  ERROR: %s",
                 err,
                 extra={"object": cve, "grouping": "CVE Association"},
             )
@@ -191,7 +188,7 @@ class NistCveSyncSoftware(Job):
 
         # URLS are obtaind from netutils.nist method that includes the NIST URL.
         # We need to remove the NIST URL and replace it with the one from the integration.
-        cpe_urls = [re.sub(r'^.*(?=\?)', self.integration.remote_url, cpe_url) for cpe_url in cpe_urls]
+        cpe_urls = [re.sub(r"^.*(?=\?)", self.integration.remote_url, cpe_url) for cpe_url in cpe_urls]
         return cpe_urls
 
     def create_dlc_cves(self, cpe_cves: dict) -> None:
