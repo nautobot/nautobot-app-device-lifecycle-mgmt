@@ -7,23 +7,21 @@ import urllib
 
 import matplotlib.pyplot as plt
 import numpy as np
-from django_tables2 import RequestConfig
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, ExpressionWrapper, F, FloatField, Q
+from django_tables2 import RequestConfig
 from matplotlib.ticker import MaxNLocator
 from nautobot.apps.choices import ColorChoices
 from nautobot.apps.views import NautobotUIViewSet
-
+from nautobot.core.models.querysets import count_related
 from nautobot.core.views import generic
 from nautobot.core.views.mixins import ContentTypePermissionRequiredMixin
 from nautobot.core.views.paginator import EnhancedPaginator, get_paginate_count
-from nautobot.core.models.querysets import count_related
 from nautobot.dcim.models import Device, SoftwareVersion
 
 from nautobot_device_lifecycle_mgmt import choices, filters, forms, models, tables
 from nautobot_device_lifecycle_mgmt.api import serializers
-
 
 PLUGIN_CFG = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]
 

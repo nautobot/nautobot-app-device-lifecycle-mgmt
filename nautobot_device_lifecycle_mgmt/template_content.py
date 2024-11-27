@@ -2,13 +2,15 @@
 
 from abc import ABCMeta
 
+<<<<<<< HEAD
 from django.conf import settings
+=======
+from django.core.exceptions import ObjectDoesNotExist
+>>>>>>> a81faf9 (Fixing things the tests yelled about.)
 from django.db.models import Q
 from django.urls import reverse
-from django.core.exceptions import ObjectDoesNotExist
-from nautobot.dcim.models import InventoryItem
 from nautobot.apps.ui import TemplateExtension
-from nautobot.extras.plugins import PluginTemplateExtension
+from nautobot.dcim.models import InventoryItem
 
 from nautobot_device_lifecycle_mgmt.models import ContractLCM, HardwareLCM, ValidatedSoftwareLCM
 from nautobot_device_lifecycle_mgmt.software import DeviceSoftware, InventoryItemSoftware
@@ -191,7 +193,7 @@ class DeviceContractLCM(
             "nautobot_device_lifecycle_mgmt/inc/contract_info.html",
             extra_context=extra_context,
         )
-    
+
 
 class SoftwareVersionRelatedCVELCMTab(TemplateExtension):  # pylint: disable=abstract-method
     """Class to add new tab with related CVE table to the SoftwareVersion display."""
