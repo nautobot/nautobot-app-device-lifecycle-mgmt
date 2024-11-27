@@ -15,10 +15,10 @@ from nautobot.dcim.models import (
 from nautobot.extras.models import Role, Status, Tag
 
 from nautobot_device_lifecycle_mgmt.forms import (
+    ContractLCMForm,
     CVELCMForm,
     HardwareLCMForm,
     ValidatedSoftwareLCMForm,
-    ContractLCMForm,
 )
 from nautobot_device_lifecycle_mgmt.models import CVELCM, ContractLCM, ProviderLCM
 
