@@ -63,14 +63,24 @@ After a Vulnerability object has been generated, the CVE, Software, Device and I
 As was stated previously, running the ``Generate Vulnerabilities`` Job will not modify (or delete) any existing Vulnerability objects - **even if the associations that existed previously no longer exist**. You do have the ability to delete one or more Vulnerability objects via the GUI or API. In addition to manually removing a Vulnerability, if any CVE, Software, Device or Inventory Item objects are removed, any Vulnerability objects that reference the deleted items will also be removed automatically.
 
 ## Automated CVE Discovery via NIST API 2.0
+We are pleased to announce that this app now supports automated CVE discovery via the NIST NVD API 2.0.  This feature is optional and can be enabled by creating the necessary objects and running the ``NIST - Software CVE Search`` Job. Continue reading for more information.
 
-### API Key
-In order to utilize the NIST CVE DB for automatic software CVE discovery, you will need to obtain a NIST API Key [here]('https://nvd.nist.gov/developers/request-an-api-key').
+### External Integration
+An External Integration must be created and configured in order to use the NIST NVD API for automatic software CVE discovery. On this note, the following is installed for you:
 
-Once received, this key will need to be added to your `creds.env`:
-```
-NAUTOBOT_DLM_NIST_API_KEY=your-key-will-go-here
-```
+- A new External Integration object named ``NAUTOBOT DLM NIST EXTERNAL INTEGRATION`` that allows you to control the following behaviors of the integration:
+    - ``api_call_delay``: A delay between API calls in seconds (default: 6).  NIST Recommends a value of 6 to prevent overloading resources.
+    - ``retries``: Even with using a delay, the NIST API may return a 500 error.  The settings in this dictionary allows you to control the number of retries and their behavior.
+        - ``max_attempts``: The maximum number of retry attempts (default: 3).
+        - ``delay``: The delay between retry attempts in seconds (default: 1).  This is the initial delay before the first retry.
+        - ``backoff``: The backoff factor for the retry attempts (default: 2).  This is the multiplier for the delay between retries.
+        - ``status_forcelist``: The status codes that force a retry (default: [500, 502, 503, 504]).
+        - ``allowed_methods``: The HTTP methods that are allowed (default: ["GET"]).
+- A new Secrets Group object named ``NAUTOBOT DLM NIST SECRETS GROUP`` used for access to the NIST API Key from the External Integration.
+- A new Secret object named ``NAUTOBOT DLM NIST API KEY`` that contains the NIST API Key acquired from [here]('https://nvd.nist.gov/developers/request-an-api-key').
+
+You may install these objects manually before the upgrade, or you can update them afterward if necessary.
+
 
 ### Run Job
 Automated discovery is used by running the ``NIST - Software CVE Search`` Job.
