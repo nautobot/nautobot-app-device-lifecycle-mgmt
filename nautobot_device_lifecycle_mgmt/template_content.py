@@ -2,11 +2,8 @@
 
 from abc import ABCMeta
 
-<<<<<<< HEAD
 from django.conf import settings
-=======
 from django.core.exceptions import ObjectDoesNotExist
->>>>>>> a81faf9 (Fixing things the tests yelled about.)
 from django.db.models import Q
 from django.urls import reverse
 from nautobot.apps.ui import TemplateExtension
