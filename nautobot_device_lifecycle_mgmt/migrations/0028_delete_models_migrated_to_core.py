@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
     dependencies = [
         ("dcim", "0058_controller_data_migration"),
-        ("nautobot_device_lifecycle_mgmt", "0029_migrate_soft_references_p5"),
+        ("nautobot_device_lifecycle_mgmt", "0027_migrate_soft_references_p4"),
     ]
 
     operations = [
