@@ -1,8 +1,6 @@
 """Custom signals for the Lifecycle Management app."""
 
 from django.apps import apps as global_apps
-from django.db.models.signals import post_migrate
-from django.dispatch import receiver
 from nautobot.extras.choices import RelationshipTypeChoices
 from nautobot.extras.models import ExternalIntegration, Secret, SecretsGroup
 
@@ -38,8 +36,7 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
         role.content_types.add(contact_association_ct)
 
 
-@receiver(post_migrate)
-def create_default_objects(sender, apps=global_apps, **kwargs):  # pylint: disable=unused-argument
+def post_migrate_create_nist_objects(sender, apps=global_apps, **kwargs):  # pylint: disable=unused-argument
     """Create default objects after database migrations."""
     # Only run this for our app
     if sender.name != "nautobot_device_lifecycle_mgmt":

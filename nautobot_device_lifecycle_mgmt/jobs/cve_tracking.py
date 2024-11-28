@@ -88,6 +88,12 @@ class NistCveSyncSoftware(Job):
     def __init__(self):
         """Initializing job with extra options."""
         super().__init__()
+        self.integration = None
+        self.session = None
+
+    def run(self, *args, **kwargs):
+        """Check all software in DLC against NIST database and associate registered CVEs.  Update when necessary."""
+        # Get the integration object
         self.integration = ExternalIntegration.objects.get(name="NAUTOBOT DLM NIST EXTERNAL INTEGRATION")
 
         # Building the retries to use ExternalIntegration
@@ -102,9 +108,6 @@ class NistCveSyncSoftware(Job):
         # Set session attributes for retries
         self.session = Session()
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
-
-    def run(self, *args, **kwargs):
-        """Check all software in DLC against NIST database and associate registered CVEs.  Update when necessary."""
         cve_counter = 0
 
         for software in SoftwareVersion.objects.all():
