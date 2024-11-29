@@ -180,7 +180,6 @@ class NistCveSyncSoftware(Job):
 
                 if str(cve_info["modified_date"][0:10]) != str(matching_dlc_cve.last_modified_date):
                     self.update_cve(matching_dlc_cve, cve_info)
-                    continue
 
             # API Rest Timer
             sleep(self.integration.extra_config.get("api_call_delay", 6))
