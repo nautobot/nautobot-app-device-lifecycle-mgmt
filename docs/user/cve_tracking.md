@@ -77,7 +77,7 @@ An External Integration must be created and configured in order to use the NIST 
         - ``status_forcelist``: The status codes that force a retry (default: [500, 502, 503, 504]).
         - ``allowed_methods``: The HTTP methods that are allowed (default: ["GET"]).
 - A new Secrets Group object named ``NAUTOBOT DLM NIST SECRETS GROUP`` used for access to the NIST API Key from the External Integration.
-- A new Secret object named ``NAUTOBOT DLM NIST API KEY`` that needs to be configured to contain your NIST API Key acquired from [here]('https://nvd.nist.gov/developers/request-an-api-key').
+- A new Secret object named ``NAUTOBOT DLM NIST API KEY`` that **IS REQUIRED** to be configured. To contain your NIST API Key acquired from [here]('https://nvd.nist.gov/developers/request-an-api-key').
 
 NOTE: You may change the name of the External Integration or create your own using other configuration settings, but the SecretsGroup and Secret objects must be named as above.  The External Integration is selected when starting the Job run.
 
@@ -85,9 +85,11 @@ NOTE: You may change the name of the External Integration or create your own usi
 ### Run Job
 Automated discovery is used by running the ``NIST - Software CVE Search`` Job.
 
-To run this job, use the "Jobs" menu dropdown and navigate to the **CVE Tracking** section. The jobs will appear here and all you will need to do is click the play button.[^1]  Here you will select the External Integration that you want to use.  As stated previously, the name of the External Integration does not matter, but the External Integration must contain a SecretsGroup and Secret named as above.
+To run this job, use the "Jobs" menu dropdown and navigate to the **CVE Tracking** section. The jobs will appear here and all you will need to do is click the play button in order to use the default External Integration[^1].  If you have configured additional Integrations, you may select the External Integration that you want to use.  **As stated previously, the name of the External Integration does not matter, but the External Integration must contain a SecretsGroup and Secret named as above**.
 
 ![](../images/lcm_cve_nist_job.png)
+
+![](../images/lcm_cve_nist_job_run.png)
 
 The job output should indicate the softwares checked and the amount of CVEs received for that software, as well as the amount of CVEs created.  These will not always be the same.  New CVE will be created for software with existing CVE, also software will share CVEs.
 
