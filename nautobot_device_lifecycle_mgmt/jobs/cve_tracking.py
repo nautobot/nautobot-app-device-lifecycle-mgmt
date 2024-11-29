@@ -262,18 +262,20 @@ class NistCveSyncSoftware(Job):
             dict: Dictionary of CVEs in either new or existing categories
         """
         processed_cve_info = {"new": {}, "existing": {}}
-        if cve_list:
-            for cve in cve_list:
-                cve_name = cve["id"]
-                if cve_name.startswith("CVE"):
-                    if cve_name not in dlc_cves:
-                        processed_cve_info["new"].update({cve_name: self.prep_cve_for_dlc(cve)})
-                    else:
-                        processed_cve_info["existing"].update({cve_name: self.prep_cve_for_dlc(cve)})
-            self.logger.info(
-                "Prepared %s CVE for creation." % len(processed_cve_info["new"]),
-                extra={"object": SoftwareVersion.objects.get(id=software_id), "grouping": "CVE Creation"},
-            )
+        if not cve_list:
+            return processed_cve_info
+        for cve in cve_list:
+            cve_name = cve["id"]
+            if not cve_name.startswith("CVE"):
+                continue
+            if cve_name not in dlc_cves:
+                processed_cve_info["new"].update({cve_name: self.prep_cve_for_dlc(cve)})
+            else:
+                processed_cve_info["existing"].update({cve_name: self.prep_cve_for_dlc(cve)})
+        self.logger.info(
+            "Prepared %s CVE for creation." % len(processed_cve_info["new"]),
+            extra={"object": SoftwareVersion.objects.get(id=software_id), "grouping": "CVE Creation"},
+        )
 
         return processed_cve_info
 
