@@ -134,7 +134,11 @@ class NistCveSyncSoftware(Job):
                 continue
 
             try:
-                cpe_software_search_urls = self.create_cpe_software_search_urls(manufacturer, platform, version)
+                cpe_software_search_urls = get_nist_vendor_platform_urls(manufacturer, platform, version)
+
+                # URLS are obtaind from netutils.nist method that includes the NIST URL.
+                # We need to remove the NIST URL and replace it with the one from the integration in order to allow customization if needed.
+                cpe_software_search_urls = [re.sub(r"^.*(?=\?)", self.integration.remote_url, cpe_url) for cpe_url in cpe_software_search_urls]
             except TypeError:
                 self.logger.error(
                     "There is an issue with the Software Version in Nautobot. Please check the version value.",
@@ -182,24 +186,6 @@ class NistCveSyncSoftware(Job):
                 err,
                 extra={"object": cve, "grouping": "CVE Association"},
             )
-
-    def create_cpe_software_search_urls(self, vendor: str, platform: str, version: str) -> list:
-        """Uses netutils.platform_mapper to construct proper search URLs.
-
-        Args:
-            vendor (str): Software Vendor (Examples: Cisco, Juniper, Arista)
-            platform (str): Software Platform (Examples: IOS, JunOS, EOS)
-            version (str): Software Version
-
-        Returns:
-            list: List of URLS that associated CVEs may be found
-        """
-        cpe_urls = get_nist_vendor_platform_urls(vendor, platform, version)
-
-        # URLS are obtaind from netutils.nist method that includes the NIST URL.
-        # We need to remove the NIST URL and replace it with the one from the integration.
-        cpe_urls = [re.sub(r"^.*(?=\?)", self.integration.remote_url, cpe_url) for cpe_url in cpe_urls]
-        return cpe_urls
 
     def create_dlc_cves(self, cpe_cves: dict) -> None:
         """Create the list of needed items and insert into to DLC CVEs."""
