@@ -78,9 +78,7 @@ def _verify_software_version_migrated(apps, dlm_software_version):
 
     # Ensure we are linked to one DLM Software only
     try:
-        TaggedItem.objects.get(
-            object_id=core_software_version.id, tag__name__istartswith="DLM_migration-SoftwareLCM__"
-        )
+        TaggedItem.objects.get(object_id=core_software_version.id, tag__name__istartswith="DLM_migration-SoftwareLCM__")
     except TaggedItem.MultipleObjectsReturned:
         raise ValidationError(
             f"DLM Migration Error: Found multiple DLM Software objects attached to Core SoftwareVersion: {core_software_version}"
