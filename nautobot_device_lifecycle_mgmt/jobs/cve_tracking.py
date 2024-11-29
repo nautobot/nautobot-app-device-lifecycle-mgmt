@@ -244,7 +244,7 @@ class NistCveSyncSoftware(Job):
                     extra={"object": SoftwareVersion.objects.get(id=software_id), "grouping": "CVE Creation"},
                 )
                 cve_list = [cve["cve"] for cve in result["vulnerabilities"]]
-                dlc_cves = [cve.name for cve in CVELCM.objects.all()]
+                dlc_cves = CVELCM.objects.values_list("name", flat=True)
 
                 all_cve_info = self.process_cves(cve_list, dlc_cves, software_id)
 
