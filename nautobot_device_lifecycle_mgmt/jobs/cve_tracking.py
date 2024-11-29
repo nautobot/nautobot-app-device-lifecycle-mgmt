@@ -159,7 +159,15 @@ class NistCveSyncSoftware(Job):
             self.create_dlc_cves(software_cve_info["new"])
 
             for software_cve, cve_info in all_software_cve_info.items():
-                matching_dlc_cve = CVELCM.objects.get(name=software_cve)
+                try:
+                    matching_dlc_cve = CVELCM.objects.get(name=software_cve)
+                except CVELCM.DoesNotExist:
+                    self.logger.warning(
+                        "CVE %s does not exist in the DLM DB. Skipping.",
+                        software_cve,
+                        extra={"object": software, "grouping": "CVE Association"},
+                    )
+                    continue
 
                 try:
                     matching_dlc_cve.affected_softwares.add(software)
@@ -193,7 +201,7 @@ class NistCveSyncSoftware(Job):
             except TypeError:
                 description = "No Description Provided from NIST DB."
 
-            create_cves, created = CVELCM.objects.get_or_create(  # pylint: disable=unused-variable
+            _, created = CVELCM.objects.get_or_create(
                 name=cve,
                 description=description,
                 published_date=date.fromisoformat(info.get("published_date", "1900-01-01")[0:10]),
