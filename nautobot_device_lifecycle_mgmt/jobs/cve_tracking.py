@@ -1,6 +1,7 @@
 # pylint: disable=logging-not-lazy, consider-using-f-string
 """Jobs for the CVE Tracking portion of the Device Lifecycle app."""
 
+import json
 import re
 from datetime import date, datetime
 from time import sleep
@@ -9,8 +10,9 @@ from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 from nautobot.dcim.models import Device, InventoryItem
 from nautobot.dcim.models.devices import SoftwareVersion
-from nautobot.extras.jobs import BooleanVar, Job, StringVar
-from nautobot.extras.models import ExternalIntegration
+from nautobot.extras.jobs import BooleanVar, Job, ObjectVar, StringVar
+from nautobot.extras.models import ExternalIntegration, Secret
+from nautobot.extras.secrets.exceptions import SecretError
 from netutils.lib_mapper import NIST_LIB_MAPPER_REVERSE
 from netutils.nist import get_nist_vendor_platform_urls
 from requests import Session
@@ -79,35 +81,41 @@ class NistCveSyncSoftware(Job):
     description = "Searches the NIST DBs for CVEs related to SoftwareVersion"
     read_only = False
 
+    nist_integration = ObjectVar(
+        model=ExternalIntegration,
+        query_params={
+            "name__contains": "NIST",
+        },
+        description="Select the NIST integration to use",
+        required=True,
+        default=lambda: ExternalIntegration.objects.get(name="NAUTOBOT DLM NIST EXTERNAL INTEGRATION"),
+    )
+
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta class for the job."""
 
         commit_default = True
         soft_time_limit = 3600
 
-    def __init__(self):
-        """Initializing job with extra options."""
-        super().__init__()
-        self.integration = None
-        self.session = None
-
-    def run(self, *args, **kwargs):
+    def run(self, *args, **kwargs):  # pylint: disable=too-many-locals
         """Check all software in DLC against NIST database and associate registered CVEs.  Update when necessary."""
+        # Ensure an acceptable value is stored in the NIST API key secret
+        try:
+            self.nist_api_key = Secret.objects.get(name="NAUTOBOT DLM NIST API KEY").get_value()  # pylint: disable=attribute-defined-outside-init
+        except SecretError as err:
+            self.logger.error(
+                "This job REQUIRES a fully configured Secret named 'NAUTOBOT DLM NIST API KEY'.  Please refer to the documentation to obtain an api key and complete configuration. %s",
+                err,
+            )
+            return
+
         # Get the integration object
-        self.integration = ExternalIntegration.objects.get(name="NAUTOBOT DLM NIST EXTERNAL INTEGRATION")
+        if kwargs.get("nist_integration"):
+            self.integration = kwargs["nist_integration"]  # pylint: disable=attribute-defined-outside-init
+        else:
+            self.logger.error("NIST ExternalIntegration object is required.")
+            return
 
-        # Building the retries to use ExternalIntegration
-        # Setting sane values in case these get removed from the integration completely.
-        retries = Retry(
-            total=self.integration.extra_config.get("retries", {}).get("max_attempts", 3),
-            backoff_factor=self.integration.extra_config.get("retries", {}).get("backoff", 1),
-            status_forcelist=self.integration.extra_config.get("retries", {}).get("status_forcelist", [502, 503, 504]),
-            allowed_methods=self.integration.extra_config.get("retries", {}).get("allowed_methods", ["GET"]),
-        )
-
-        # Set session attributes for retries
-        self.session = Session()
-        self.session.mount("https://", HTTPAdapter(max_retries=retries))
         cve_counter = 0
 
         for software in SoftwareVersion.objects.all():
@@ -159,7 +167,6 @@ class NistCveSyncSoftware(Job):
         self.logger.info(
             "Performed discovery on all software. Created %s CVE.", cve_counter, extra={"grouping": "CVE Creation"}
         )
-        self.session.close()
 
     def associate_software_to_cve(self, software_id, cve_id):
         """A function to associate software to a CVE."""
@@ -279,16 +286,34 @@ class NistCveSyncSoftware(Job):
         Returns:
             dict: Dictionary of returned results if successful.
         """
+        # Build retry configuration; Uses Integration settings but setting sane defaults in case they are removed
+        retries = Retry(
+            total=self.integration.extra_config.get("retries", {}).get("max_attempts", 3),
+            backoff_factor=self.integration.extra_config.get("retries", {}).get("backoff", 1),
+            status_forcelist=self.integration.extra_config.get("retries", {}).get("status_forcelist", [502, 503, 504]),
+            allowed_methods=self.integration.extra_config.get("retries", {}).get("allowed_methods", ["GET"]),
+        )
+
+        # Create and configure session
+        session = Session()
+        session.mount("https://", HTTPAdapter(max_retries=retries))
+        session.headers.update({"apiKey": self.nist_api_key})
+
         try:
-            result = self.session.get(url)
+            result = session.get(url)
             result.raise_for_status()
+            return result.json()
         except HTTPError as err:
             code = err.response.status_code
             self.logger.error(
                 "The NIST Service is currently unavailable. Status Code: %s. Try running the job again later.", code
             )
-
-        return result.json()
+            raise
+        except json.JSONDecodeError as err:
+            self.logger.error("Invalid JSON response from NIST Service: %s", err)
+            raise
+        finally:
+            session.close()
 
     @staticmethod
     def convert_v2_base_score_to_severity(score: float) -> str:

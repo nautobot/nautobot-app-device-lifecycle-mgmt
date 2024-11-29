@@ -63,7 +63,7 @@ After a Vulnerability object has been generated, the CVE, Software, Device and I
 As was stated previously, running the ``Generate Vulnerabilities`` Job will not modify (or delete) any existing Vulnerability objects - **even if the associations that existed previously no longer exist**. You do have the ability to delete one or more Vulnerability objects via the GUI or API. In addition to manually removing a Vulnerability, if any CVE, Software, Device or Inventory Item objects are removed, any Vulnerability objects that reference the deleted items will also be removed automatically.
 
 ## Automated CVE Discovery via NIST API 2.0
-We are pleased to announce that this app now supports automated CVE discovery via the NIST NVD API 2.0.  This feature is optional and can be enabled by creating the necessary objects and running the ``NIST - Software CVE Search`` Job. Continue reading for more information.
+The NTC Nautobot Device Lifecycle Management app now supports automated CVE discovery via the NIST NVD API 2.0.  This feature is optional and can be enabled by obtaining an API key, updating the necessary Secret, and running the ``NIST - Software CVE Search`` Job. Continue reading for more information.
 
 ### External Integration
 An External Integration must be created and configured in order to use the NIST NVD API for automatic software CVE discovery. On this note, the following is installed for you:
@@ -77,15 +77,15 @@ An External Integration must be created and configured in order to use the NIST 
         - ``status_forcelist``: The status codes that force a retry (default: [500, 502, 503, 504]).
         - ``allowed_methods``: The HTTP methods that are allowed (default: ["GET"]).
 - A new Secrets Group object named ``NAUTOBOT DLM NIST SECRETS GROUP`` used for access to the NIST API Key from the External Integration.
-- A new Secret object named ``NAUTOBOT DLM NIST API KEY`` that contains the NIST API Key acquired from [here]('https://nvd.nist.gov/developers/request-an-api-key').
+- A new Secret object named ``NAUTOBOT DLM NIST API KEY`` that needs to be configured to contain your NIST API Key acquired from [here]('https://nvd.nist.gov/developers/request-an-api-key').
 
-You may install these objects manually before the upgrade, or you can update them afterward if necessary.
+NOTE: You may change the name of the External Integration or create your own using other configuration settings, but the SecretsGroup and Secret objects must be named as above.  The External Integration is selected when starting the Job run.
 
 
 ### Run Job
 Automated discovery is used by running the ``NIST - Software CVE Search`` Job.
 
-To run this job, use the "Jobs" menu dropdown and navigate to the **CVE Tracking** section. The jobs will appear here and all you will need to do is click the play button.[^1]
+To run this job, use the "Jobs" menu dropdown and navigate to the **CVE Tracking** section. The jobs will appear here and all you will need to do is click the play button.[^1]  Here you will select the External Integration that you want to use.  As stated previously, the name of the External Integration does not matter, but the External Integration must contain a SecretsGroup and Secret named as above.
 
 ![](../images/lcm_cve_nist_job.png)
 

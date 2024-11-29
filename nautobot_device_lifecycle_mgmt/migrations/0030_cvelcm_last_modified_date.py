@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("nautobot_device_lifecycle_mgmt", "0029_devicehardwarenoticeresult"),
     ]
