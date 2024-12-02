@@ -120,7 +120,7 @@ class Migration(migrations.Migration):
         Tag.objects.filter(name="dlm-migration-manual-hash").delete()
 
     operations = [
-        migrations.RunPython(nullify_software_fields),
+        migrations.RunPython(code=nullify_software_fields, reverse_code=migrations.RunPython.noop),
         migrations.AlterField(
             model_name="cvelcm",
             name="affected_softwares",
@@ -156,6 +156,6 @@ class Migration(migrations.Migration):
                 blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="dcim.softwareversion"
             ),
         ),
-        migrations.RunPython(migrate_dlm_software_references),
-        migrations.RunPython(delete_migrated_dlm_objects),
+        migrations.RunPython(code=migrate_dlm_software_references, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(code=delete_migrated_dlm_objects, reverse_code=migrations.RunPython.noop),
     ]

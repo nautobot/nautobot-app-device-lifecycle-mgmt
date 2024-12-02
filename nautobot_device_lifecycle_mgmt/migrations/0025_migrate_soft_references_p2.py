@@ -43,5 +43,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(save_existing_softwarelcm_references),
+        migrations.RunPython(code=save_existing_softwarelcm_references, reverse_code=migrations.RunPython.noop),
     ]

@@ -591,5 +591,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(verify_dlm_models_migated_to_core, migrations.RunPython.noop),
+        migrations.RunPython(code=verify_dlm_models_migated_to_core, reverse_code=migrations.RunPython.noop),
     ]
