@@ -69,13 +69,10 @@ The NTC Nautobot Device Lifecycle Management app now supports automated CVE disc
 An External Integration must be created and configured in order to use the NIST NVD API for automatic software CVE discovery. On this note, the following is installed for you:
 
 - A new External Integration object named ``NAUTOBOT DLM NIST EXTERNAL INTEGRATION`` that allows you to control the following behaviors of the integration:
-    - ``api_call_delay``: A delay between API calls in seconds (default: 6).  NIST Recommends a value of 6 to prevent overloading resources.
-    - ``retries``: Even with using a delay, the NIST API may return a 500 error.  The settings in this dictionary allows you to control the number of retries and their behavior.
+    - ``api_call_delay``: A delay between API calls in seconds (default: 6).  NIST Recommends a minimum value of 6 to prevent overloading resources.
+    - ``retries``: Even with using a delay, the NIST API may return a 500 error.  The settings in this dictionary allows you to control the number of retries and backoff.
         - ``max_attempts``: The maximum number of retry attempts (default: 3).
-        - ``delay``: The delay between retry attempts in seconds (default: 1).  This is the initial delay before the first retry.
         - ``backoff``: The backoff factor for the retry attempts (default: 2).  This is the multiplier for the delay between retries.
-        - ``status_forcelist``: The status codes that force a retry (default: [500, 502, 503, 504]).
-        - ``allowed_methods``: The HTTP methods that are allowed (default: ["GET"]).
 - A new Secrets Group object named ``NAUTOBOT DLM NIST SECRETS GROUP`` used for access to the NIST API Key from the External Integration.
 - A new Secret object named ``NAUTOBOT DLM NIST API KEY``.  This object is created for you during setup with minimum defaults.  The Secret name must be exactly as above, but you will need to configure the Secret to properly access the NIST API Key.
     - To obtain your NIST API Key go [here]('https://nvd.nist.gov/developers/request-an-api-key').

@@ -86,16 +86,13 @@ def create_nist_objects(sender, apps=global_apps, **kwargs):  # pylint: disable=
             "http_method": "GET",
             "secrets_group": nist_secrets_group,
             "verify_ssl": True,
-            "timeout": 30,
+            "timeout": 60,
             "headers": {"Content-Type": "application/json"},
             "extra_config": {
                 "api_call_delay": 6,
                 "retries": {
                     "max_attempts": 3,
-                    "delay": 1,
                     "backoff": 2,
-                    "status_forcelist": [500, 502, 503, 504],
-                    "allowed_methods": ["GET"],
                 },
             },
         },
