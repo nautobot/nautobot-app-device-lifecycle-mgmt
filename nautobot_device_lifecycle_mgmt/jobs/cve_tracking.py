@@ -279,8 +279,8 @@ class NistCveSyncSoftware(Job):
         retries = Retry(
             total=self.integration.extra_config.get("retries", {}).get("max_attempts", 3),
             backoff_factor=self.integration.extra_config.get("retries", {}).get("backoff", 1),
-            status_forcelist=self.integration.extra_config.get("retries", {}).get("status_forcelist", [502, 503, 504]),
-            allowed_methods=self.integration.extra_config.get("retries", {}).get("allowed_methods", ["GET"]),
+            status_forcelist=[502, 503, 504],
+            allowed_methods=["GET"],
         )
 
         # Create and configure session

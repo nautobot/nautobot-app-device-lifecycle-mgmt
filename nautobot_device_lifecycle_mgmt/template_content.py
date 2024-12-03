@@ -7,8 +7,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.urls import reverse
 from nautobot.apps.ui import TemplateExtension
-from nautobot.dcim.models import InventoryItem
-
 from nautobot_device_lifecycle_mgmt.models import ContractLCM, HardwareLCM, ValidatedSoftwareLCM
 from nautobot_device_lifecycle_mgmt.software import DeviceSoftware, InventoryItemSoftware
 from nautobot_device_lifecycle_mgmt.tables import ContractLCMTable, ValidatedSoftwareLCMTable
