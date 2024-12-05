@@ -3,8 +3,8 @@
 
 from datetime import datetime
 
-from nautobot.dcim.models import Device, InventoryItem
-from nautobot.extras.jobs import Job
+from nautobot.dcim.models import Device, InventoryItem, Platform
+from nautobot.extras.jobs import Job, MultiObjectVar
 
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.models import (
@@ -80,21 +80,30 @@ class DeviceHardwareNoticeFullReport(Job):
 class DeviceSoftwareValidationFullReport(Job):
     """Checks if devices run validated software version."""
 
-    name = "Device Software Validation Report"
-    description = "Validates software version on devices."
-    read_only = False
+    platform = MultiObjectVar(model=Platform, required=False)
 
     class Meta:
         """Meta class for the job."""
 
+        name = "Device Software Validation Report"
+        description = "Validates software version on devices."
         has_sensitive_variables = False
+        read_only = False
 
-    def run(self) -> None:  # pylint: disable=arguments-differ
+    def run(self, platform) -> None:  # pylint: disable=arguments-differ
         """Check if software assigned to each device is valid. If no software is assigned return warning message."""
+        self.platform = platform
         job_run_time = datetime.now()
         validation_count = 0
 
-        for device in Device.objects.filter(software_version__isnull=True):
+        devs_wo_software = Device.objects.filter(software_version__isnull=True)
+        devs_w_software = Device.objects.filter(software_version__isnull=False)
+
+        if self.platform:
+            devs_wo_software = Device.objects.filter(software_version__isnull=True, platform=self.platform)
+            devs_w_software = Device.objects.filter(software_version__isnull=False, platform=self.platform)
+
+        for device in devs_wo_software:
             validate_obj, _ = DeviceSoftwareValidationResult.objects.get_or_create(device=device)
             validate_obj.is_validated = False
             validate_obj.valid_software.set(ValidatedSoftwareLCM.objects.get_for_object(device))
@@ -104,7 +113,7 @@ class DeviceSoftwareValidationFullReport(Job):
             validate_obj.validated_save()
             validation_count += 1
 
-        for device in Device.objects.filter(software_version__isnull=False):
+        for device in devs_w_software:
             device_software = DeviceSoftware(device)
             validate_obj, _ = DeviceSoftwareValidationResult.objects.get_or_create(device=device)
             validate_obj.is_validated = device_software.validate_software()
