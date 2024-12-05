@@ -135,15 +135,30 @@ class NistCveSyncSoftware(Job):
 
             try:
                 cpe_software_search_urls = get_nist_vendor_platform_urls(manufacturer, platform, version)
-
-                # URLS are obtaind from netutils.nist method that includes the NIST URL.
-                # We need to remove the NIST URL and replace it with the one from the integration in order to allow customization if needed.
-                cpe_software_search_urls = [
-                    re.sub(r"^.*(?=\?)", self.integration.remote_url, cpe_url) for cpe_url in cpe_software_search_urls
-                ]
-            except TypeError:
+                if not cpe_software_search_urls:
+                    self.logger.warning(
+                        "No CPE URLs found for %s %s %s. Please check the version value.",
+                        software.platform.manufacturer.name,
+                        software.platform.network_driver,
+                        software.version,
+                        extra={"grouping": "URL Creation"},
+                    )
+                    continue
+                else:
+                    # URLS are obtaind from netutils.nist method that includes the NIST URL.
+                    # We need to remove the NIST URL and replace it with the one from the integration in order to allow customization if needed.
+                    cpe_software_search_urls = [
+                        re.sub(r"^.*(?=\?)", self.integration.remote_url, cpe_url)
+                        for cpe_url in cpe_software_search_urls
+                    ]
+            # Known possible error from netutils.nist method
+            except ValueError as err:
                 self.logger.error(
-                    "There is an issue with the Software Version in Nautobot. Please check the version value.",
+                    "There was an error in creating URLs for this Software Version. Please check the version value for %s %s %s. ERROR: %s",
+                    software.platform.manufacturer.name,
+                    software.platform.network_driver,
+                    software.version,
+                    err,
                     extra={"grouping": "URL Creation"},
                 )
                 continue
