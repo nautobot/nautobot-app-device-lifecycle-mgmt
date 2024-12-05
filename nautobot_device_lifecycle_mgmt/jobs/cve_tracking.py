@@ -144,13 +144,11 @@ class NistCveSyncSoftware(Job):
                         extra={"grouping": "URL Creation"},
                     )
                     continue
-                else:
-                    # URLS are obtaind from netutils.nist method that includes the NIST URL.
-                    # We need to remove the NIST URL and replace it with the one from the integration in order to allow customization if needed.
-                    cpe_software_search_urls = [
-                        re.sub(r"^.*(?=\?)", self.integration.remote_url, cpe_url)
-                        for cpe_url in cpe_software_search_urls
-                    ]
+                # URLS are obtaind from netutils.nist method that includes the NIST URL.
+                # We need to remove the NIST URL and replace it with the one from the integration in order to allow customization if needed.
+                cpe_software_search_urls = [
+                    re.sub(r"^.*(?=\?)", self.integration.remote_url, cpe_url) for cpe_url in cpe_software_search_urls
+                ]
             # Known possible error from netutils.nist method
             except ValueError as err:
                 self.logger.error(
