@@ -293,6 +293,7 @@ class NistCveSyncSoftware(Job):
         try:
             result = session.get(url)
             result.raise_for_status()
+            session.close()
             return result.json()
         except HTTPError as err:
             code = err.response.status_code
