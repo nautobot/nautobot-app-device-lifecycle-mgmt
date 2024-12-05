@@ -136,8 +136,8 @@ class NistCveSyncSoftware(Job):
             try:
                 cpe_software_search_urls = get_nist_vendor_platform_urls(manufacturer, platform, version)
                 if not cpe_software_search_urls:
-                    self.logger.warning(
-                        "No CPE URLs found for %s %s %s. Please check the version value.",
+                    self.logger.error(
+                        "The URL generator was not able to create URLs for this Software Version. Please check the version value for %s %s %s.",
                         software.platform.manufacturer.name,
                         software.platform.network_driver,
                         software.version,
