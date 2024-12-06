@@ -13,7 +13,7 @@ try:
 except ImportError:
     CHARFIELD_MAX_LENGTH = 255
 
-from nautobot.core.models.generics import OrganizationalModel, PrimaryModel
+from nautobot.core.models.generics import PrimaryModel
 from nautobot.core.models.querysets import RestrictedQuerySet
 from nautobot.dcim.models import Device, DeviceType, InventoryItem
 from nautobot.extras.models.statuses import StatusField
@@ -51,7 +51,10 @@ class HardwareLCM(PrimaryModel):
         null=True,
     )
     inventory_item = models.CharField(  # pylint: disable=nb-string-field-blank-null
-        verbose_name="Inventory Item Part", max_length=CHARFIELD_MAX_LENGTH, blank=True, null=True
+        verbose_name="Inventory Item Part",
+        max_length=CHARFIELD_MAX_LENGTH,
+        blank=True,
+        null=True,
     )
     release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
     end_of_sale = models.DateField(null=True, blank=True, verbose_name="End of Sale")
@@ -220,7 +223,10 @@ class SoftwareImageLCM(PrimaryModel):
 
     image_file_name = models.CharField(blank=False, max_length=CHARFIELD_MAX_LENGTH, verbose_name="Image File Name")
     software = models.ForeignKey(
-        to="SoftwareLCM", on_delete=models.CASCADE, related_name="software_images", verbose_name="Software Version"
+        to="SoftwareLCM",
+        on_delete=models.CASCADE,
+        related_name="software_images",
+        verbose_name="Software Version",
     )
     device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="software_images", blank=True)
     inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="+", blank=True)
@@ -228,7 +234,10 @@ class SoftwareImageLCM(PrimaryModel):
     download_url = models.URLField(blank=True, verbose_name="Download URL")
     image_file_checksum = models.CharField(blank=True, max_length=256, verbose_name="Image File Checksum")
     hashing_algorithm = models.CharField(
-        default="", blank=True, max_length=CHARFIELD_MAX_LENGTH, verbose_name="Hashing Algorithm"
+        default="",
+        blank=True,
+        max_length=CHARFIELD_MAX_LENGTH,
+        verbose_name="Hashing Algorithm",
     )
     default_image = models.BooleanField(verbose_name="Default Image", default=False)
 
@@ -345,7 +354,12 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         related_name="device_software_validation",
     )
     software = models.ForeignKey(
-        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Device software", null=True, blank=True, related_name="+"
+        to="SoftwareLCM",
+        on_delete=models.CASCADE,
+        help_text="Device software",
+        null=True,
+        blank=True,
+        related_name="+",
     )
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
@@ -382,13 +396,18 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
         related_name="inventoryitem_software_validation",
     )
     software = models.ForeignKey(
-        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Inventory Item software", blank=True, null=True
+        to="SoftwareLCM",
+        on_delete=models.CASCADE,
+        help_text="Inventory Item software",
+        blank=True,
+        null=True,
     )
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
     run_type = models.CharField(max_length=CHARFIELD_MAX_LENGTH, choices=choices.ReportRunTypeChoices)
     valid_software = models.ManyToManyField(
-        to="ValidatedSoftwareLCM", related_name="inventory_item_software_validation_results"
+        to="ValidatedSoftwareLCM",
+        related_name="inventory_item_software_validation_results",
     )
 
     class Meta:
@@ -433,13 +452,25 @@ class ContractLCM(PrimaryModel):
     number = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True, default="")
     start = models.DateField(null=True, blank=True, verbose_name="Contract Start Date")
     end = models.DateField(null=True, blank=True, verbose_name="Contract End Date")
-    cost = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=15, verbose_name="Contract Cost")
+    cost = models.DecimalField(
+        null=True,
+        blank=True,
+        decimal_places=2,
+        max_digits=15,
+        verbose_name="Contract Cost",
+    )
     support_level = models.CharField(
-        verbose_name="Support Level", max_length=CHARFIELD_MAX_LENGTH, blank=True, default=""
+        verbose_name="Support Level",
+        max_length=CHARFIELD_MAX_LENGTH,
+        blank=True,
+        default="",
     )
     currency = models.CharField(verbose_name="Currency", max_length=4, blank=True, default="")
     contract_type = models.CharField(
-        verbose_name="Contract Type", max_length=CHARFIELD_MAX_LENGTH, blank=True, default=""
+        verbose_name="Contract Type",
+        max_length=CHARFIELD_MAX_LENGTH,
+        blank=True,
+        default="",
     )
     devices = models.ManyToManyField(to="dcim.Device", related_name="device_contracts", blank=True)
     comments = models.TextField(blank=True, default="")
@@ -485,7 +516,7 @@ class ContractLCM(PrimaryModel):
     "relationships",
     "webhooks",
 )
-class ProviderLCM(OrganizationalModel):
+class ProviderLCM(PrimaryModel):
     """ProviderLCM model for app."""
 
     # Set model columns
@@ -535,7 +566,10 @@ class ContactLCM(PrimaryModel):
     priority = models.PositiveIntegerField(default=100)
     type = models.CharField(max_length=CHARFIELD_MAX_LENGTH, default=choices.PoCTypeChoices.UNASSIGNED)
     contract = models.ForeignKey(
-        to="nautobot_device_lifecycle_mgmt.ContractLCM", on_delete=models.CASCADE, verbose_name="Contract", null=True
+        to="nautobot_device_lifecycle_mgmt.ContractLCM",
+        on_delete=models.CASCADE,
+        verbose_name="Contract",
+        null=True,
     )
 
     class Meta:
@@ -589,7 +623,9 @@ class CVELCM(PrimaryModel):
     )
     description = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True, default="")
     severity = models.CharField(
-        max_length=CHARFIELD_MAX_LENGTH, choices=choices.CVESeverityChoices, default=choices.CVESeverityChoices.NONE
+        max_length=CHARFIELD_MAX_LENGTH,
+        choices=choices.CVESeverityChoices,
+        default=choices.CVESeverityChoices.NONE,
     )
     cvss = models.FloatField(blank=True, null=True, verbose_name="CVSS Base Score")
     cvss_v2 = models.FloatField(blank=True, null=True, verbose_name="CVSSv2 Score")
