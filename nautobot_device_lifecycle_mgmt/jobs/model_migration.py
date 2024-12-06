@@ -56,6 +56,10 @@ class DLMToNautoboCoreModelMigration(Job):
         label="Update Core to match DLM",
         description="Forcibly update existing Core objects to match DLM objects.",
     )
+    remove_dangling_relationships = BooleanVar(
+        label="Remove dangling relationship associations",
+        description="Remove DLM relationship associations where one side refers to the object that is gone.",
+    )
     debug = BooleanVar(label="Show debug messages")
 
     class Meta:
@@ -67,12 +71,15 @@ class DLMToNautoboCoreModelMigration(Job):
         dryrun_default = True
         has_sensitive_variables = False
 
-    def run(self, dryrun, hide_changelog_migrations, update_core_to_match_dlm, debug) -> None:  # pylint: disable=arguments-differ
+    def run(
+        self, dryrun, hide_changelog_migrations, update_core_to_match_dlm, remove_dangling_relationships, debug
+    ) -> None:  # pylint: disable=arguments-differ
         """Migration logic."""
         self.dryrun = dryrun
         self.debug = debug
         self.update_core_to_match_dlm = update_core_to_match_dlm
         self.hide_changelog_migrations = hide_changelog_migrations
+        self.remove_corrupted_relationships = remove_dangling_relationships
 
         self.softlcm_ct_str = str(ContentType.objects.get_for_model(SoftwareLCM))
         self.softimglcm_ct_str = str(ContentType.objects.get_for_model(SoftwareImageLCM))
@@ -347,6 +354,14 @@ class DLMToNautoboCoreModelMigration(Job):
                     relationship_association.destination_id,
                     extra={"object": dlm_software_version},
                 )
+                if self.remove_dangling_relationships:
+                    relationship_association.delete()
+                    self.logger.info(
+                        "Deleted Software Relationship Association for DLM Software __%s__ that points to a non-existent Device with ID __%s__.",
+                        dlm_software_version,
+                        relationship_association.destination_id,
+                        extra={"object": dlm_software_version},
+                    )
                 continue
             existing_device_software = device.software_version
             if existing_device_software and existing_device_software != core_software_version:
@@ -393,6 +408,14 @@ class DLMToNautoboCoreModelMigration(Job):
                     relationship_association.destination_id,
                     extra={"object": dlm_software_version},
                 )
+                if self.remove_dangling_relationships:
+                    relationship_association.delete()
+                    self.logging.info(
+                        "Deleted Software Relationship Association for DLM Software __%s__ that points to a non-existent InventoryItem with ID __%s__.",
+                        dlm_software_version,
+                        relationship_association.destination_id,
+                        extra={"object": dlm_software_version},
+                    )
                 continue
             existing_invitem_software = inventory_item.software_version
             if existing_invitem_software and existing_invitem_software != core_software_version:
