@@ -78,9 +78,7 @@ def _verify_software_version_migrated(apps, dlm_software_version):
 
     # Ensure we are linked to one DLM Software only
     try:
-        TaggedItem.objects.get(
-            object_id=core_software_version.id, tag__name__istartswith="DLM_migration-SoftwareLCM__"
-        )
+        TaggedItem.objects.get(object_id=core_software_version.id, tag__name__istartswith="DLM_migration-SoftwareLCM__")
     except TaggedItem.MultipleObjectsReturned:
         raise ValidationError(
             f"DLM Migration Error: Found multiple DLM Software objects attached to Core SoftwareVersion: {core_software_version}"
@@ -127,7 +125,13 @@ def _verify_software_version_migrated(apps, dlm_software_version):
         source_id=dlm_software_version.id,
         destination_type=device_ct,
     ):
-        device = Device.objects.get(id=relationship_association.destination_id)
+        try:
+            device = Device.objects.get(id=relationship_association.destination_id)
+        except Device.DoesNotExist:
+            print(
+                f"Found corrupted 'device_soft' relationship association: {relationship_association}, device it refers to, {relationship_association.destination_id} does not exist"
+            )
+            continue
         existing_device_software = device.software_version
         if existing_device_software and existing_device_software != core_software_version:
             raise ValidationError(
@@ -144,7 +148,13 @@ def _verify_software_version_migrated(apps, dlm_software_version):
         source_id=dlm_software_version.id,
         destination_type=inventory_item_ct,
     ):
-        inventory_item = InventoryItem.objects.get(id=relationship_association.destination_id)
+        try:
+            inventory_item = InventoryItem.objects.get(id=relationship_association.destination_id)
+        except InventoryItem.DoesNotExist:
+            print(
+                f"Found corrupted 'inventory_item_soft' relationship association: {relationship_association}, inventory item it refers to, {relationship_association.destination_id} does not exist"
+            )
+            continue
         existing_invitem_software = inventory_item.software_version
         if existing_invitem_software and inventory_item.software_version != core_software_version:
             raise ValidationError(
