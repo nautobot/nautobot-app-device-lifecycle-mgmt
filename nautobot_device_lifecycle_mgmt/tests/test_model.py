@@ -25,7 +25,13 @@ from nautobot_device_lifecycle_mgmt.models import (
     VulnerabilityLCM,
 )
 
-from .conftest import create_cves, create_devices, create_inventory_items, create_softwares, create_validated_softwares
+from .conftest import (
+    create_cves,
+    create_devices,
+    create_inventory_items,
+    create_softwares,
+    create_validated_softwares,
+)
 
 
 class HardwareLCMTestCase(TestCase):
@@ -34,32 +40,47 @@ class HardwareLCMTestCase(TestCase):
     def setUp(self):
         """Set up base objects."""
         self.manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
-        self.device_type, _ = DeviceType.objects.get_or_create(model="c9300-24", manufacturer=self.manufacturer)
+        self.device_type, _ = DeviceType.objects.get_or_create(
+            model="c9300-24", manufacturer=self.manufacturer
+        )
 
     def test_create_hwlcm_success_eo_sale(self):
         """Successfully create basic notice with end_of_sale."""
-        hwlcm_obj = HardwareLCM.objects.create(device_type=self.device_type, end_of_sale=date(2023, 4, 1))
+        hwlcm_obj = HardwareLCM.objects.create(
+            device_type=self.device_type, end_of_sale=date(2023, 4, 1)
+        )
 
         self.assertEqual(hwlcm_obj.device_type, self.device_type)
         self.assertEqual(str(hwlcm_obj.end_of_sale), "2023-04-01")
-        self.assertEqual(str(hwlcm_obj), "Device Type: c9300-24 - End of sale: 2023-04-01")
+        self.assertEqual(
+            str(hwlcm_obj), "Device Type: c9300-24 - End of sale: 2023-04-01"
+        )
 
     def test_create_hwlcm_notice_success_eo_support(self):
         """Successfully create basic notice with end_of_support."""
-        hwlcm_obj = HardwareLCM.objects.create(device_type=self.device_type, end_of_support=date(2022, 4, 1))
+        hwlcm_obj = HardwareLCM.objects.create(
+            device_type=self.device_type, end_of_support=date(2022, 4, 1)
+        )
 
         self.assertEqual(hwlcm_obj.device_type, self.device_type)
         self.assertEqual(str(hwlcm_obj.end_of_support), "2022-04-01")
-        self.assertEqual(str(hwlcm_obj), "Device Type: c9300-24 - End of support: 2022-04-01")
+        self.assertEqual(
+            str(hwlcm_obj), "Device Type: c9300-24 - End of support: 2022-04-01"
+        )
 
     def test_create_hwlcm_success_eo_sale_inventory_item(self):
         """Successfully create basic notice with end_of_sale."""
         inventory_item = "WS-X6848-TX-2T"
-        hwlcm_obj = HardwareLCM.objects.create(inventory_item=inventory_item, end_of_sale=date(2023, 4, 1))
+        hwlcm_obj = HardwareLCM.objects.create(
+            inventory_item=inventory_item, end_of_sale=date(2023, 4, 1)
+        )
 
         self.assertEqual(hwlcm_obj.inventory_item, inventory_item)
         self.assertEqual(str(hwlcm_obj.end_of_sale), "2023-04-01")
-        self.assertEqual(str(hwlcm_obj), f"Inventory Part: {inventory_item} - End of sale: 2023-04-01")
+        self.assertEqual(
+            str(hwlcm_obj),
+            f"Inventory Part: {inventory_item} - End of sale: 2023-04-01",
+        )
 
     def test_create_hwlcm_notice_success_eo_all(self):
         """Successfully create basic notice."""
@@ -78,60 +99,88 @@ class HardwareLCMTestCase(TestCase):
         self.assertEqual(str(hwlcm_obj.end_of_sw_releases), "2024-04-01")
         self.assertEqual(str(hwlcm_obj.end_of_security_patches), "2025-04-01")
         self.assertEqual(hwlcm_obj.documentation_url, "https://test.com")
-        self.assertEqual(str(hwlcm_obj), "Device Type: c9300-24 - End of support: 2023-04-01")
+        self.assertEqual(
+            str(hwlcm_obj), "Device Type: c9300-24 - End of support: 2023-04-01"
+        )
 
     def test_create_hwlcm_notice_failed_missing_one_of(self):
         """Successfully create basic notice."""
         with self.assertRaises(ValidationError) as failure_exception:
             HardwareLCM.objects.create(device_type=self.device_type)
-        self.assertEqual(failure_exception.exception.messages[0], "End of Sale or End of Support must be specified.")
+        self.assertEqual(
+            failure_exception.exception.messages[0],
+            "End of Sale or End of Support must be specified.",
+        )
 
     def test_create_hwlcm_notice_failed_validation_documentation_url(self):
         """Successfully create basic notice."""
         with self.assertRaises(ValidationError) as failure_exception:
             HardwareLCM.objects.create(
-                device_type=self.device_type, end_of_support=date(2023, 4, 1), documentation_url="test.com"
+                device_type=self.device_type,
+                end_of_support=date(2023, 4, 1),
+                documentation_url="test.com",
             )
         self.assertEqual(failure_exception.exception.messages[0], "Enter a valid URL.")
 
     def test_create_hwlcm_notice_failed_validation_date(self):
         """Successfully create basic notice."""
         with self.assertRaises(ValidationError) as failure_exception:
-            HardwareLCM.objects.create(device_type=self.device_type, end_of_support="April 1st 2022")
-        self.assertIn("invalid date format. It must be in YYYY-MM-DD format.", failure_exception.exception.messages[0])
+            HardwareLCM.objects.create(
+                device_type=self.device_type, end_of_support="April 1st 2022"
+            )
+        self.assertIn(
+            "invalid date format. It must be in YYYY-MM-DD format.",
+            failure_exception.exception.messages[0],
+        )
 
     def test_expired_property_end_of_support_expired(self):
         """Test expired property is expired with end_of_support."""
-        hwlcm_obj = HardwareLCM.objects.create(device_type=self.device_type, end_of_support=date(2021, 4, 1))
+        hwlcm_obj = HardwareLCM.objects.create(
+            device_type=self.device_type, end_of_support=date(2021, 4, 1)
+        )
         self.assertTrue(hwlcm_obj.expired)
 
     def test_expired_property_end_of_support_not_expired(self):
         """Test expired property is NOT expired with end_of_support."""
-        hwlcm_obj = HardwareLCM.objects.create(device_type=self.device_type, end_of_support=date(2099, 4, 1))
+        hwlcm_obj = HardwareLCM.objects.create(
+            device_type=self.device_type, end_of_support=date(2099, 4, 1)
+        )
         self.assertFalse(hwlcm_obj.expired)
 
     def test_expired_property_end_of_sale_expired(self):
         """Test expired property is expired with end_of_sale."""
-        hwlcm_obj = HardwareLCM.objects.create(device_type=self.device_type, end_of_sale=date(2021, 4, 1))
+        hwlcm_obj = HardwareLCM.objects.create(
+            device_type=self.device_type, end_of_sale=date(2021, 4, 1)
+        )
         self.assertTrue(hwlcm_obj.expired)
 
     def test_expired_property_end_of_sale_not_expired(self):
         """Test expired property is NOT expired with end_of_sale."""
-        hwlcm_obj = HardwareLCM.objects.create(device_type=self.device_type, end_of_sale=date(2999, 4, 1))
+        hwlcm_obj = HardwareLCM.objects.create(
+            device_type=self.device_type, end_of_sale=date(2999, 4, 1)
+        )
         self.assertFalse(hwlcm_obj.expired)
 
     def test_expired_field_setting_end_of_sale_expired(self):
         """Test expired property is expired with end_of_sale when set within app settings."""
-        settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]["expired_field"] = "end_of_sale"
+        settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"][
+            "expired_field"
+        ] = "end_of_sale"
         hwlcm_obj = HardwareLCM.objects.create(
-            device_type=self.device_type, end_of_sale=date(2021, 4, 1), end_of_support=date(2999, 4, 1)
+            device_type=self.device_type,
+            end_of_sale=date(2021, 4, 1),
+            end_of_support=date(2999, 4, 1),
         )
         self.assertTrue(hwlcm_obj.expired)
 
     def test_expired_field_setting_end_of_sale_not_expired(self):
         """Test expired property is NOT expired with end_of_sale not existing but app setting set to end_of_sale."""
-        settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]["expired_field"] = "end_of_sale"
-        hwlcm_obj = HardwareLCM.objects.create(device_type=self.device_type, end_of_support=date(2999, 4, 1))
+        settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"][
+            "expired_field"
+        ] = "end_of_sale"
+        hwlcm_obj = HardwareLCM.objects.create(
+            device_type=self.device_type, end_of_support=date(2999, 4, 1)
+        )
         self.assertFalse(hwlcm_obj.expired)
 
 
@@ -144,7 +193,9 @@ class SoftwareLCMTestCase(TestCase):
 
     def test_create_softwarelcm_required_only(self):
         """Successfully create SoftwareLCM with required fields only."""
-        softwarelcm = SoftwareLCM.objects.create(device_platform=self.device_platform, version="4.21.3F")
+        softwarelcm = SoftwareLCM.objects.create(
+            device_platform=self.device_platform, version="4.21.3F"
+        )
 
         self.assertEqual(softwarelcm.device_platform, self.device_platform)
         self.assertEqual(softwarelcm.version, "4.21.3F")
@@ -173,10 +224,15 @@ class SoftwareLCMTestCase(TestCase):
         )
         self.assertEqual(softwarelcm_full.long_term_support, False)
         self.assertEqual(softwarelcm_full.pre_release, True)
-        self.assertEqual(str(softwarelcm_full), f"{self.device_platform.name} - {softwarelcm_full.version}")
+        self.assertEqual(
+            str(softwarelcm_full),
+            f"{self.device_platform.name} - {softwarelcm_full.version}",
+        )
 
 
-class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
+class ValidatedSoftwareLCMTestCase(
+    TestCase
+):  # pylint: disable=too-many-instance-attributes
     """Tests for the ValidatedSoftwareLCM model."""
 
     def setUp(self):
@@ -188,9 +244,15 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
             release_date=date(2019, 1, 10),
         )
         manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
-        self.device_type_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="ASR-1000")
-        self.device_type_2, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="CAT-3750")
-        self.content_type_devicetype = ContentType.objects.get(app_label="dcim", model="devicetype")
+        self.device_type_1, _ = DeviceType.objects.get_or_create(
+            manufacturer=manufacturer, model="ASR-1000"
+        )
+        self.device_type_2, _ = DeviceType.objects.get_or_create(
+            manufacturer=manufacturer, model="CAT-3750"
+        )
+        self.content_type_devicetype = ContentType.objects.get(
+            app_label="dcim", model="devicetype"
+        )
         self.device_1, self.device_2 = create_devices()[:2]
         self.inventoryitem_1, self.inventoryitem_2 = create_inventory_items()[:2]
 
@@ -206,7 +268,9 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
 
         self.assertEqual(validatedsoftwarelcm.software, self.software)
         self.assertEqual(str(validatedsoftwarelcm.start), "2019-01-10")
-        self.assertEqual(list(validatedsoftwarelcm.device_types.all()), [self.device_type_1])
+        self.assertEqual(
+            list(validatedsoftwarelcm.device_types.all()), [self.device_type_1]
+        )
 
     def test_create_validatedsoftwarelcm_all(self):
         """Successfully create ValidatedSoftwareLCM with all fields."""
@@ -222,9 +286,14 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         self.assertEqual(validatedsoftwarelcm.software, self.software)
         self.assertEqual(str(validatedsoftwarelcm.start), "2020-04-15")
         self.assertEqual(str(validatedsoftwarelcm.end), "2022-11-01")
-        self.assertEqual(list(validatedsoftwarelcm.device_types.all()), [self.device_type_1])
+        self.assertEqual(
+            list(validatedsoftwarelcm.device_types.all()), [self.device_type_1]
+        )
         self.assertEqual(validatedsoftwarelcm.preferred, False)
-        self.assertEqual(str(validatedsoftwarelcm), f"{self.software} - Valid since: {validatedsoftwarelcm.start}")
+        self.assertEqual(
+            str(validatedsoftwarelcm),
+            f"{self.software} - Valid since: {validatedsoftwarelcm.start}",
+        )
 
     def test_validatedsoftwarelcm_valid_property(self):
         """Test behavior of the 'valid' property."""
@@ -281,9 +350,13 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         validatedsoftwarelcm_2.devices.set([self.device_2])
         validatedsoftwarelcm_2.save()
 
-        validated_software_for_device = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
+        validated_software_for_device = ValidatedSoftwareLCM.objects.get_for_object(
+            self.device_1
+        )
         self.assertEqual(validated_software_for_device.count(), 1)
-        self.assertTrue(self.device_1 in validated_software_for_device.first().devices.all())
+        self.assertTrue(
+            self.device_1 in validated_software_for_device.first().devices.all()
+        )
 
     def test_get_for_object_devicetype(self):
         validatedsoftwarelcm_1 = ValidatedSoftwareLCM(
@@ -300,9 +373,14 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         validatedsoftwarelcm_2.device_types.set([self.device_type_2])
         validatedsoftwarelcm_2.save()
 
-        validated_software_for_device_type = ValidatedSoftwareLCM.objects.get_for_object(self.device_type_1)
+        validated_software_for_device_type = (
+            ValidatedSoftwareLCM.objects.get_for_object(self.device_type_1)
+        )
         self.assertEqual(validated_software_for_device_type.count(), 1)
-        self.assertTrue(self.device_type_1 in validated_software_for_device_type.first().device_types.all())
+        self.assertTrue(
+            self.device_type_1
+            in validated_software_for_device_type.first().device_types.all()
+        )
 
     def test_get_for_object_inventoryitem(self):
         validatedsoftwarelcm_1 = ValidatedSoftwareLCM(
@@ -319,12 +397,19 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         validatedsoftwarelcm_2.inventory_items.set([self.inventoryitem_2])
         validatedsoftwarelcm_2.save()
 
-        validated_software_for_inventoryitem = ValidatedSoftwareLCM.objects.get_for_object(self.inventoryitem_1)
+        validated_software_for_inventoryitem = (
+            ValidatedSoftwareLCM.objects.get_for_object(self.inventoryitem_1)
+        )
         self.assertEqual(validated_software_for_inventoryitem.count(), 1)
-        self.assertTrue(self.inventoryitem_1 in validated_software_for_inventoryitem.first().inventory_items.all())
+        self.assertTrue(
+            self.inventoryitem_1
+            in validated_software_for_inventoryitem.first().inventory_items.all()
+        )
 
 
-class DeviceSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
+class DeviceSoftwareValidationResultTestCase(
+    TestCase
+):  # pylint: disable=too-many-instance-attributes
     """Tests for the DeviceSoftwareValidationResult model."""
 
     def setUp(self):
@@ -337,8 +422,12 @@ class DeviceSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-m
             self.validatedsoftwarelcm,
             self.validatedsoftwarelcm_two,
         ) = create_validated_softwares()
-        self.validated_software_qs = ValidatedSoftwareLCM.objects.get_for_object(self.validatedsoftwarelcm)
-        self.validated_software_qs_two = ValidatedSoftwareLCM.objects.get_for_object(self.validatedsoftwarelcm_two)
+        self.validated_software_qs = ValidatedSoftwareLCM.objects.get_for_object(
+            self.validatedsoftwarelcm
+        )
+        self.validated_software_qs_two = ValidatedSoftwareLCM.objects.get_for_object(
+            self.validatedsoftwarelcm_two
+        )
 
     def test_create_devicesoftwarevalidationresult(self):
         """Successfully create SoftwareLCM with required fields only."""
@@ -360,7 +449,10 @@ class DeviceSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-m
             is_validated=True,
         )
         validation_result.valid_software.set(self.validated_software_qs)
-        self.assertEqual(validation_result.valid_software.values()[0]["software_id"], self.software_one.id)
+        self.assertEqual(
+            validation_result.valid_software.values()[0]["software_id"],
+            self.software_one.id,
+        )
 
     def test_create_devicesoftwarevalidationresult_two_valid_softwares(self):
         """Successfully create DeviceSoftwareValidationResult with two valid software."""
@@ -371,11 +463,19 @@ class DeviceSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-m
         )
         validation_result.valid_software.set(self.validated_software_qs)
         validation_result.valid_software.set(self.validated_software_qs_two)
-        self.assertEqual(validation_result.valid_software.values()[0]["software_id"], self.software_one.id)
-        self.assertEqual(validation_result.valid_software.values()[1]["software_id"], self.software_two.id)
+        self.assertEqual(
+            validation_result.valid_software.values()[0]["software_id"],
+            self.software_one.id,
+        )
+        self.assertEqual(
+            validation_result.valid_software.values()[1]["software_id"],
+            self.software_two.id,
+        )
 
 
-class InventoryItemSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
+class InventoryItemSoftwareValidationResultTestCase(
+    TestCase
+):  # pylint: disable=too-many-instance-attributes
     """Tests for the DeviceSoftwareValidationResult model."""
 
     def setUp(self):
@@ -389,8 +489,12 @@ class InventoryItemSoftwareValidationResultTestCase(TestCase):  # pylint: disabl
             self.validatedsoftwarelcm,
             self.validatedsoftwarelcm_two,
         ) = create_validated_softwares()
-        self.validated_software_qs = ValidatedSoftwareLCM.objects.get_for_object(self.validatedsoftwarelcm)
-        self.validated_software_qs_two = ValidatedSoftwareLCM.objects.get_for_object(self.validatedsoftwarelcm_two)
+        self.validated_software_qs = ValidatedSoftwareLCM.objects.get_for_object(
+            self.validatedsoftwarelcm
+        )
+        self.validated_software_qs_two = ValidatedSoftwareLCM.objects.get_for_object(
+            self.validatedsoftwarelcm_two
+        )
 
     def test_create_itemsoftwarevalidationresult(self):
         """Successfully create SoftwareLCM with required fields only."""
@@ -412,7 +516,10 @@ class InventoryItemSoftwareValidationResultTestCase(TestCase):  # pylint: disabl
             is_validated=True,
         )
         validation_result.valid_software.set(self.validated_software_qs)
-        self.assertEqual(validation_result.valid_software.values()[0]["software_id"], self.software_one.id)
+        self.assertEqual(
+            validation_result.valid_software.values()[0]["software_id"],
+            self.software_one.id,
+        )
 
     def test_create_itemsoftwarevalidationresult_two_valid_softwares(self):
         """Successfully create InventoryItemSoftwareValidationResult with two valid software."""
@@ -423,8 +530,14 @@ class InventoryItemSoftwareValidationResultTestCase(TestCase):  # pylint: disabl
         )
         validation_result.valid_software.set(self.validated_software_qs)
         validation_result.valid_software.set(self.validated_software_qs_two)
-        self.assertEqual(validation_result.valid_software.values()[0]["software_id"], self.software_one.id)
-        self.assertEqual(validation_result.valid_software.values()[1]["software_id"], self.software_two.id)
+        self.assertEqual(
+            validation_result.valid_software.values()[0]["software_id"],
+            self.software_one.id,
+        )
+        self.assertEqual(
+            validation_result.valid_software.values()[1]["software_id"],
+            self.software_two.id,
+        )
 
 
 class CVELCMTestCase(TestCase):
@@ -433,7 +546,9 @@ class CVELCMTestCase(TestCase):
     def setUp(self):
         """Set up the test objects."""
         self.device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
-        self.softwarelcm = SoftwareLCM.objects.create(device_platform=self.device_platform, version="15.2(5)e")
+        self.softwarelcm = SoftwareLCM.objects.create(
+            device_platform=self.device_platform, version="15.2(5)e"
+        )
         self.cve_ct = ContentType.objects.get_for_model(CVELCM)
         self.software_ct = ContentType.objects.get_for_model(SoftwareLCM)
         self.relationship = Relationship.objects.get_or_create(
@@ -448,13 +563,17 @@ class CVELCMTestCase(TestCase):
                 "destination_label": "Corresponding CVEs",
             },
         )[0]
-        self.status, _ = Status.objects.get_or_create(name="Fixed", color="4caf50", description="Unit has been fixed")
+        self.status, _ = Status.objects.get_or_create(
+            name="Fixed", color="4caf50", description="Unit has been fixed"
+        )
         self.status.content_types.set([self.cve_ct])
 
     def test_create_cvelcm_required_only(self):
         """Successfully create CVELCM with required fields only."""
         cvelcm = CVELCM.objects.create(
-            name="CVE-2021-1391", published_date="2021-03-24", link="https://www.cvedetails.com/cve/CVE-2021-1391/"
+            name="CVE-2021-1391",
+            published_date="2021-03-24",
+            link="https://www.cvedetails.com/cve/CVE-2021-1391/",
         )
 
         self.assertEqual(cvelcm.name, "CVE-2021-1391")
@@ -492,7 +611,9 @@ class CVELCMTestCase(TestCase):
     def test_create_cve_soft_relationship_association(self):
         """Successfully create a relationship between CVE and Software."""
         cvelcm = CVELCM.objects.create(
-            name="CVE-2021-1391", published_date="2021-03-24", link="https://www.cvedetails.com/cve/CVE-2021-1391/"
+            name="CVE-2021-1391",
+            published_date="2021-03-24",
+            link="https://www.cvedetails.com/cve/CVE-2021-1391/",
         )
 
         association = RelationshipAssociation.objects.create(
@@ -518,7 +639,9 @@ class VulnerabilityLCMTestCase(TestCase):
         self.cves = create_cves()
         self.softwares = create_softwares()
         vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
-        self.status = Status.objects.create(name="Exempt", color="4caf50", description="This unit is exempt.")
+        self.status = Status.objects.create(
+            name="Exempt", color="4caf50", description="This unit is exempt."
+        )
         self.status.content_types.set([vuln_ct])
 
     def test_create_vulnerabilitylcm_device_required_only(self):
@@ -527,7 +650,10 @@ class VulnerabilityLCMTestCase(TestCase):
             cve=self.cves[0], software=self.softwares[0], device=self.devices[0]
         )
 
-        self.assertEqual(str(vulnerability), "Device: sw1 - Software: cisco_ios - 15.1(2)M - CVE: CVE-2021-1391")
+        self.assertEqual(
+            str(vulnerability),
+            "Device: sw1 - Software: cisco_ios - 15.1(2)M - CVE: CVE-2021-1391",
+        )
         self.assertEqual(vulnerability.cve, self.cves[0])
         self.assertEqual(vulnerability.software, self.softwares[0])
         self.assertEqual(vulnerability.device, self.devices[0])
@@ -535,7 +661,9 @@ class VulnerabilityLCMTestCase(TestCase):
     def test_create_vulnerabilitylcm_inventory_item_required_only(self):
         """Successfully create VulnerabilityLCM for inventory item with required fields only."""
         vulnerability = VulnerabilityLCM.objects.create(
-            cve=self.cves[1], software=self.softwares[1], inventory_item=self.inv_items[1]
+            cve=self.cves[1],
+            software=self.softwares[1],
+            inventory_item=self.inv_items[1],
         )
 
         self.assertEqual(
@@ -549,10 +677,16 @@ class VulnerabilityLCMTestCase(TestCase):
     def test_create_vulnerabilitylcm_all(self):
         """Successfully create VulnerabilityLCM with all fields."""
         vulnerability = VulnerabilityLCM.objects.create(
-            cve=self.cves[2], software=self.softwares[2], device=self.devices[2], status=self.status
+            cve=self.cves[2],
+            software=self.softwares[2],
+            device=self.devices[2],
+            status=self.status,
         )
 
-        self.assertEqual(str(vulnerability), "Device: sw3 - Software: cisco_ios - 21.4R3 - CVE: CVE-2020-27134")
+        self.assertEqual(
+            str(vulnerability),
+            "Device: sw3 - Software: cisco_ios - 21.4R3 - CVE: CVE-2020-27134",
+        )
         self.assertEqual(vulnerability.cve, self.cves[2])
         self.assertEqual(vulnerability.software, self.softwares[2])
         self.assertEqual(vulnerability.device, self.devices[2])
@@ -571,14 +705,20 @@ class SoftwareImageLCMTestCase(TestCase):
             release_date=date(2019, 1, 10),
         )
         manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
-        self.device_type_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="ASR-1000")
-        self.device_type_2, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="CAT-3750")
+        self.device_type_1, _ = DeviceType.objects.get_or_create(
+            manufacturer=manufacturer, model="ASR-1000"
+        )
+        self.device_type_2, _ = DeviceType.objects.get_or_create(
+            manufacturer=manufacturer, model="CAT-3750"
+        )
         self.inventory_item = create_inventory_items()[0]
         self.tag = Tag.objects.create(name="asr")
 
     def test_create_softwareimage_required_only(self):
         """Successfully create SoftwareImageLCM with required fields only."""
-        softwareimage = SoftwareImageLCM(image_file_name="ios17.3.3md.img", software=self.software)
+        softwareimage = SoftwareImageLCM(
+            image_file_name="ios17.3.3md.img", software=self.software
+        )
         softwareimage.device_types.set([self.device_type_1])
         softwareimage.save()
 
@@ -602,11 +742,17 @@ class SoftwareImageLCMTestCase(TestCase):
 
         self.assertEqual(softwareimage.image_file_name, "ios17.3.3md.img")
         self.assertEqual(softwareimage.software, self.software)
-        self.assertEqual(softwareimage.download_url, "ftp://images.local/cisco/ios17.3.3md.img")
-        self.assertEqual(softwareimage.image_file_checksum, "441rfabd75b0512r7fde7a7a66faa596")
+        self.assertEqual(
+            softwareimage.download_url, "ftp://images.local/cisco/ios17.3.3md.img"
+        )
+        self.assertEqual(
+            softwareimage.image_file_checksum, "441rfabd75b0512r7fde7a7a66faa596"
+        )
         self.assertEqual(softwareimage.default_image, True)
         self.assertEqual(list(softwareimage.device_types.all()), [self.device_type_1])
-        self.assertEqual(list(softwareimage.inventory_items.all()), [self.inventory_item])
+        self.assertEqual(
+            list(softwareimage.inventory_items.all()), [self.inventory_item]
+        )
         self.assertEqual(list(softwareimage.object_tags.all()), [self.tag])
         self.assertEqual(str(softwareimage), f"{softwareimage.image_file_name}")
 
@@ -622,7 +768,9 @@ class SoftwareImageLCMTestCase(TestCase):
         softwareimage.device_types.set([self.device_type_1])
         softwareimage.save()
 
-        self.assertEqual(list(self.device_type_1.software_images.all()), [softwareimage])
+        self.assertEqual(
+            list(self.device_type_1.software_images.all()), [softwareimage]
+        )
 
 
 class ProviderLCMTestCase(TestCase):
@@ -638,7 +786,9 @@ class ProviderLCMTestCase(TestCase):
             email="email@cisco.com",
             portal_url="https://www.cisco.com/",
             comments="Test Comment",
+            tags="blue",
         )
+
         self.assertEqual(provider.name, "Cisco")
         self.assertEqual(provider.description, "Cisco Support")
         self.assertEqual(provider.physical_address, "123 Cisco Way, San Jose, CA")
@@ -647,6 +797,7 @@ class ProviderLCMTestCase(TestCase):
         self.assertEqual(provider.email, "email@cisco.com")
         self.assertEqual(provider.portal_url, "https://www.cisco.com/")
         self.assertEqual(provider.comments, "Test Comment")
+        self.assertEqual(provider.tags, "blue")
 
     def test_provider_assignment(self):
         ProviderLCM.objects.create(
