@@ -2,6 +2,7 @@
 """Jobs for the Lifecycle Management app."""
 
 from datetime import datetime
+from itertools import product
 
 from nautobot.dcim.models import Device, InventoryItem, Platform
 from nautobot.extras.jobs import Job, MultiObjectVar
@@ -122,18 +123,17 @@ class DeviceSoftwareValidationFullReport(Job):
         # If no platforms or tenants are provided, use all platforms and tenants
         if not platforms:
             platforms = Platform.objects.all()
+
         if not tenants:
             tenants = Tenant.objects.all()
 
-        # Get versioned and non-versioned devices for each platform
-        for platform in platforms:
-            versioned_devices.extend(Device.objects.filter(platform=platform, software_version__isnull=False))
-            non_versioned_devices.extend(Device.objects.filter(platform=platform, software_version__isnull=True))
+        # Get all combinations of platforms and tenants
+        filtered_products = product(platforms, tenants)
 
-        # Get versioned and non-versioned devices for each tenant
-        for tenant in tenants:
-            versioned_devices.extend(Device.objects.filter(tenant=tenant, software_version__isnull=False))
-            non_versioned_devices.extend(Device.objects.filter(tenant=tenant, software_version__isnull=True))
+        # Get versioned and non-versioned devices
+        for platform, tenant in filtered_products:
+            versioned_devices.extend(Device.objects.filter(platform=platform, tenant=tenant, software_version__isnull=False))
+            non_versioned_devices.extend(Device.objects.filter(platform=platform, tenant=tenant, software_version__isnull=True))
 
         # Validate devices without software version
         for device in non_versioned_devices:
