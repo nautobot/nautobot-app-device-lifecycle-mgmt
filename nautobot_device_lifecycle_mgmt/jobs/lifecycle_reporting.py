@@ -132,8 +132,12 @@ class DeviceSoftwareValidationFullReport(Job):
 
         # Get versioned and non-versioned devices
         for platform, tenant in filtered_products:
-            versioned_devices.extend(Device.objects.filter(platform=platform, tenant=tenant, software_version__isnull=False))
-            non_versioned_devices.extend(Device.objects.filter(platform=platform, tenant=tenant, software_version__isnull=True))
+            versioned_devices.extend(
+                Device.objects.filter(platform=platform, tenant=tenant, software_version__isnull=False)
+            )
+            non_versioned_devices.extend(
+                Device.objects.filter(platform=platform, tenant=tenant, software_version__isnull=True)
+            )
 
         # Validate devices without software version
         for device in non_versioned_devices:
