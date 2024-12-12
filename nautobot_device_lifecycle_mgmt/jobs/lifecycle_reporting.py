@@ -3,8 +3,9 @@
 
 from datetime import datetime
 
-from nautobot.dcim.models import Device, InventoryItem
-from nautobot.extras.jobs import Job
+from nautobot.dcim.models import Device, InventoryItem, Platform
+from nautobot.extras.jobs import Job, MultiObjectVar
+from nautobot.tenancy.models import Tenant
 
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.models import (
@@ -84,17 +85,58 @@ class DeviceSoftwareValidationFullReport(Job):
     description = "Validates software version on devices."
     read_only = False
 
+    # Add dropdowns for platform and tenant filters; Defaults to all platforms and tenants
+    platform = MultiObjectVar(
+        model=Platform,
+        label="Platform",
+        description="Filter by platform; defaults to all platforms",
+        required=False,
+    )
+    tenant = MultiObjectVar(
+        model=Tenant,
+        label="Tenant",
+        description="Filter by tenant; defaults to all tenants",
+        required=False,
+    )
+
+    filters = [platform, tenant]
+
     class Meta:
         """Meta class for the job."""
 
         has_sensitive_variables = False
 
-    def run(self) -> None:  # pylint: disable=arguments-differ
+    def run(self, **filters) -> None:  # pylint: disable=arguments-differ
         """Check if software assigned to each device is valid. If no software is assigned return warning message."""
         job_run_time = datetime.now()
         validation_count = 0
 
-        for device in Device.objects.filter(software_version__isnull=True):
+        # Create empty lists for versioned and non-versioned devices
+        versioned_devices = []  # Devices with software version
+        non_versioned_devices = []  # Devices without software version
+
+        # Get filters
+        platforms = filters.get("platform")
+        tenants = filters.get("tenant")
+
+        # If no platforms or tenants are provided, use all platforms and tenants
+        if not platforms:
+            platforms = Platform.objects.all()
+        if not tenants:
+            tenants = Tenant.objects.all()
+
+        # Get versioned and non-versioned devices for each platform
+        for platform in platforms:
+            versioned_devices.extend(Device.objects.filter(platform=platform, software_version__isnull=False))
+            non_versioned_devices.extend(Device.objects.filter(platform=platform, software_version__isnull=True))
+
+        # Get versioned and non-versioned devices for each tenant
+        for tenant in tenants:
+            versioned_devices.extend(Device.objects.filter(tenant=tenant, software_version__isnull=False))
+            non_versioned_devices.extend(Device.objects.filter(tenant=tenant, software_version__isnull=True))
+
+        # Validate devices without software version
+        for device in non_versioned_devices:
             validate_obj, _ = DeviceSoftwareValidationResult.objects.get_or_create(device=device)
             validate_obj.is_validated = False
             validate_obj.valid_software.set(ValidatedSoftwareLCM.objects.get_for_object(device))
@@ -104,7 +146,8 @@ class DeviceSoftwareValidationFullReport(Job):
             validate_obj.validated_save()
             validation_count += 1
 
-        for device in Device.objects.filter(software_version__isnull=False):
+        # Validate devices with software version
+        for device in versioned_devices:
             device_software = DeviceSoftware(device)
             validate_obj, _ = DeviceSoftwareValidationResult.objects.get_or_create(device=device)
             validate_obj.is_validated = device_software.validate_software()

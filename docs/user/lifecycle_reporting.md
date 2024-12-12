@@ -12,7 +12,7 @@ You can run these reports two ways:
 
 ![](../images/lcm_software_validation_report_run.png)
 
-- The "Jobs" dropdown and navigating to **Device/Sofware Lifecycle Reporting** section. The jobs will appear here and all you will need to do is click the play button.
+- The "Jobs" dropdown and navigating to **Device/Sofware Lifecycle Reporting** section. The jobs will appear here and all you will need to do is click the play button.  You'll then be able to select the platforms and tenants to run the report for, and click on **Run Job Now** execute button on right side of screen.
 
 ![](../images/lcm_software_validation_report_run_jobs.png)
 
