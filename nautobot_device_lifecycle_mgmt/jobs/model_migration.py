@@ -37,7 +37,17 @@ from nautobot.extras.models import (
 )
 from nautobot.users.models import ObjectPermission
 
-from nautobot_device_lifecycle_mgmt.models import ContactLCM, ContractLCM, SoftwareImageLCM, SoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import (
+    CVELCM,
+    ContactLCM,
+    ContractLCM,
+    DeviceSoftwareValidationResult,
+    InventoryItemSoftwareValidationResult,
+    SoftwareImageLCM,
+    SoftwareLCM,
+    ValidatedSoftwareLCM,
+    VulnerabilityLCM,
+)
 
 common_objectchange_request_id = uuid.uuid4()
 
@@ -134,6 +144,87 @@ class DLMToNautoboCoreModelMigration(Job):
                 custom_field.content_types.add(new_ct)
                 custom_field.validated_save()
 
+    def _migrate_software_references(self):
+        """Save references, using temporary attributes, to Core SoftwareVersion in objects that reference corresponding DLM SoftwareVersion."""
+        for valid_soft in ValidatedSoftwareLCM.objects.all():
+            dlm_soft = valid_soft.software
+            core_soft = self.dlm_to_core_id_map[self.softlcm_ct_str][str(dlm_soft.id)]
+            if str(valid_soft.software_tmp) == core_soft:
+                continue
+            if not self.dryrun:
+                valid_soft.software_tmp = uuid.UUID(core_soft)
+                valid_soft.validated_save()
+                self.logger.info(
+                    "Migrated DLM Software __%s__ reference in ValidatedSoftwareLCM __%s__.",
+                    dlm_soft,
+                    valid_soft,
+                    extra={"object": valid_soft},
+                )
+
+        for device_svr in DeviceSoftwareValidationResult.objects.filter(software__isnull=False):
+            dlm_soft = device_svr.software
+            core_soft = self.dlm_to_core_id_map[self.softlcm_ct_str][str(dlm_soft.id)]
+            if str(device_svr.software_tmp) == core_soft:
+                continue
+            if not self.dryrun:
+                device_svr.software_tmp = uuid.UUID(core_soft)
+                device_svr.validated_save()
+                self.logger.info(
+                    "Migrated DLM Software __%s__ reference in DeviceSoftwareValidationResult __%s__.",
+                    dlm_soft,
+                    device_svr,
+                    extra={"object": device_svr},
+                )
+
+        for invitem_svr in InventoryItemSoftwareValidationResult.objects.filter(software__isnull=False):
+            dlm_soft = invitem_svr.software
+            core_soft = self.dlm_to_core_id_map[self.softlcm_ct_str][str(dlm_soft.id)]
+            if str(invitem_svr.software_tmp) == core_soft:
+                continue
+            if not self.dryrun:
+                invitem_svr.software_tmp = uuid.UUID(core_soft)
+                invitem_svr.validated_save()
+                self.logger.info(
+                    "Migrated DLM Software __%s__ reference in InventoryItemSoftwareValidationResult __%s__.",
+                    dlm_soft,
+                    invitem_svr,
+                    extra={"object": invitem_svr},
+                )
+
+        for vuln in VulnerabilityLCM.objects.all():
+            dlm_soft = vuln.software
+            core_soft = self.dlm_to_core_id_map[self.softlcm_ct_str][str(dlm_soft.id)]
+            if str(vuln.software_tmp) == core_soft:
+                continue
+            if not self.dryrun:
+                vuln.software_tmp = uuid.UUID(core_soft)
+                vuln.validated_save()
+                self.logger.info(
+                    "Migrated DLM Software __%s__ reference in VulnerabilityLCM __%s__.",
+                    dlm_soft,
+                    vuln,
+                    extra={"object": vuln},
+                )
+
+        for cve in CVELCM.objects.all():
+            dlm_soft_refs = cve.affected_softwares.all()
+            if not dlm_soft_refs.exists():
+                continue
+            core_soft_refs = [
+                self.dlm_to_core_id_map[self.softlcm_ct_str][str(dlm_soft.id)] for dlm_soft in dlm_soft_refs
+            ]
+            if cve.affected_softwares_tmp == core_soft_refs:
+                continue
+            if not self.dryrun:
+                cve.affected_softwares_tmp = core_soft_refs
+                cve.validated_save()
+                self.logger.info(
+                    "Migrated DLM Software __%s__ references in CVELCM __%s__.",
+                    str(dlm_soft_refs),
+                    cve,
+                    extra={"object": cve},
+                )
+
     def migrate_dlm_models_to_core(self):
         """Migrates Software, SoftwareImage and Contact model instances to corresponding Core models."""
         dlm_software_version_ct = ContentType.objects.get_for_model(SoftwareLCM)
@@ -185,6 +276,8 @@ class DLMToNautoboCoreModelMigration(Job):
             dlm_contact_ct,
             core_contact_ct,
         )
+
+        self._migrate_software_references()
 
     def _migrate_software_version(self, dlm_software_version):
         """Migrate DLM Software to Core SoftwareVersion."""
@@ -736,7 +829,6 @@ class DLMToNautoboCoreModelMigration(Job):
         # Dry-run will not have populated mappings for not-yet-migrated Software Versions
         core_software_version_id = self.dlm_to_core_id_map[self.softlcm_ct_str].get(str(dlm_software_version), None)
         # Flag tracking whether hashing algorithm could be automatically migrated
-        manual_hashing_algorithm = False
 
         if dlm_software_image.hashing_algorithm != "":
             hashing_algorithm = self._migrate_hashing_algorithm(dlm_software_image.hashing_algorithm)
@@ -744,7 +836,6 @@ class DLMToNautoboCoreModelMigration(Job):
             hashing_algorithm = ""
 
         if dlm_software_image.hashing_algorithm != "" and hashing_algorithm == "":
-            manual_hashing_algorithm = True
             self.logger.warning(
                 f"\n\nUnable to map hashing algorithm '{dlm_software_image.hashing_algorithm}' for software image "
                 f"'{dlm_software_image.software.version} - {dlm_software_image.image_file_name}' ({dlm_software_image.id}). "
@@ -808,17 +899,6 @@ class DLMToNautoboCoreModelMigration(Job):
 
         # Map the DLM Software Version ID to the Core Software version ID. This is needed for SoftwareImage migrations.
         self.dlm_to_core_id_map[self.softimglcm_ct_str][str(dlm_software_image.id)] = str(core_software_image.id)
-
-        if not self.dryrun and manual_hashing_algorithm:
-            dlm_manual_hash_tag, _ = Tag.objects.get_or_create(
-                name="dlm-migration-manual-hash",
-                defaults={
-                    "description": "Hashing algorithm manually migrated from DLM SoftwareImage.",
-                },
-            )
-            dlm_manual_hash_tag.content_types.add(ContentType.objects.get_for_model(SoftwareImageFile))
-            if dlm_manual_hash_tag not in core_software_image.tags.all():
-                core_software_image.tags.add(dlm_manual_hash_tag)
 
         # Preserve ID of the DLM SoftwareImageLCM object. This is needed for migrations.
         csv_dlm_id_tag_name = f"DLM_migration-SoftwareImageLCM__{dlm_software_image.id}"
