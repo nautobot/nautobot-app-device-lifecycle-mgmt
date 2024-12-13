@@ -6,13 +6,13 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("nautobot_device_lifecycle_mgmt", "0026_migrate_soft_references_p3"),
+        ("nautobot_device_lifecycle_mgmt", "0025_migrate_soft_references_p1"),
     ]
 
     operations = [
         migrations.RemoveField(
             model_name="cvelcm",
-            name="software_tmp",
+            name="affected_softwares_tmp",
         ),
         migrations.RemoveField(
             model_name="devicesoftwarevalidationresult",
