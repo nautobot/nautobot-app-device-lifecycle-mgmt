@@ -115,6 +115,8 @@ class DeviceSoftwareValidationFullReport(Job):
         # Create empty lists for versioned and non-versioned devices
         versioned_devices = []  # Devices with software version
         non_versioned_devices = []  # Devices without software version
+        all_tenants = False
+        all_platforms = False
 
         # Get filters
         platforms = filters.get("platform")
@@ -123,9 +125,11 @@ class DeviceSoftwareValidationFullReport(Job):
         # If no platforms or tenants are provided, use all platforms and tenants
         if not platforms:
             platforms = Platform.objects.all()
+            all_platforms = True
 
         if not tenants:
             tenants = Tenant.objects.all()
+            all_tenants = True
 
         # Get all combinations of platforms and tenants
         filtered_products = product(platforms, tenants)
@@ -146,7 +150,10 @@ class DeviceSoftwareValidationFullReport(Job):
             validate_obj.valid_software.set(ValidatedSoftwareLCM.objects.get_for_object(device))
             validate_obj.software = None
             validate_obj.last_run = job_run_time
-            validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
+            if all_tenants and all_platforms:
+                validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
+            else:
+                validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FILTERED_RUN
             validate_obj.validated_save()
             validation_count += 1
 
@@ -158,7 +165,10 @@ class DeviceSoftwareValidationFullReport(Job):
             validate_obj.valid_software.set(ValidatedSoftwareLCM.objects.get_for_object(device))
             validate_obj.software = device.software_version
             validate_obj.last_run = job_run_time
-            validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
+            if all_tenants and all_platforms:
+                validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
+            else:
+                validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FILTERED_RUN
             validate_obj.validated_save()
             validation_count += 1
 
