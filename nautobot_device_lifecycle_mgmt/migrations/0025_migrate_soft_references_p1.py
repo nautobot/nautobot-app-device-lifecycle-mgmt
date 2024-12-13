@@ -132,6 +132,13 @@ class Migration(migrations.Migration):
         Tag.objects.filter(name__istartswith="DLM_migration-SoftwareImageLCM").delete()
 
     operations = [
+        migrations.AlterField(
+            model_name="validatedsoftwarelcm",
+            name="software",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.SET_NULL, to="nautobot_device_lifecycle_mgmt.softwarelcm"
+            ),
+        ),
         migrations.RunPython(nullify_software_fields),
         migrations.AlterField(
             model_name="cvelcm",

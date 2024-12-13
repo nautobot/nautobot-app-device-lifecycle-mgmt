@@ -1,4 +1,3 @@
-
 from django.core.exceptions import ValidationError
 from django.db import migrations
 from django.db.models import Q
