@@ -287,6 +287,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
     start = models.DateField(verbose_name="Valid Since")
     end = models.DateField(verbose_name="Valid Until", blank=True, null=True)
     preferred = models.BooleanField(verbose_name="Preferred Version", default=False)
+    software_tmp = models.UUIDField(blank=True, null=True)
 
     class Meta:
         """Meta attributes for ValidatedSoftwareLCM."""
@@ -353,6 +354,7 @@ class DeviceSoftwareValidationResult(PrimaryModel):
     valid_software = models.ManyToManyField(
         to="ValidatedSoftwareLCM", related_name="device_software_validation_results"
     )
+    software_tmp = models.UUIDField(blank=True, null=True)
 
     class Meta:
         """Meta attributes for DeviceSoftwareValidationResult."""
@@ -390,6 +392,7 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
     valid_software = models.ManyToManyField(
         to="ValidatedSoftwareLCM", related_name="inventory_item_software_validation_results"
     )
+    software_tmp = models.UUIDField(blank=True, null=True)
 
     class Meta:
         """Meta attributes for InventoryItemSoftwareValidationResult."""
@@ -597,6 +600,7 @@ class CVELCM(PrimaryModel):
     fix = models.CharField(max_length=255, blank=True, default="")
     comments = models.TextField(blank=True, default="")
     affected_softwares = models.ManyToManyField(to="SoftwareLCM", related_name="corresponding_cves", blank=True)
+    affected_softwares_tmp = models.JSONField(default=list)
 
     class Meta:
         """Meta attributes for the class."""
@@ -633,6 +637,7 @@ class VulnerabilityLCM(PrimaryModel):
         on_delete=models.PROTECT,
         to="extras.status",
     )
+    software_tmp = models.UUIDField(blank=True, null=True)
 
     class Meta:
         """Meta attributes for the class."""
