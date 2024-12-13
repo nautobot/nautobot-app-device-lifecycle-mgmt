@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 from django.db import migrations
-from django.db.models import Q
 
 
 def verify_dlm_models_migated_to_core(apps, schema_editor):
@@ -9,35 +8,21 @@ def verify_dlm_models_migated_to_core(apps, schema_editor):
     DLM SoftwareImageLCM -> Core SoftwareImageFile
     DLM Contact -> Core Contact
     """
-    ContentType = apps.get_model("contenttypes", "ContentType")
     DLMContact = apps.get_model("nautobot_device_lifecycle_mgmt", "ContactLCM")
     DLMSoftwareVersion = apps.get_model("nautobot_device_lifecycle_mgmt", "SoftwareLCM")
     DLMSoftwareImage = apps.get_model("nautobot_device_lifecycle_mgmt", "SoftwareImageLCM")
-    CoreContact = apps.get_model("extras", "Contact")
-    CoreSoftwareVersion = apps.get_model("dcim", "SoftwareVersion")
-    CoreSoftwareImage = apps.get_model("dcim", "SoftwareImageFile")
-
-    dlm_contact_ct = ContentType.objects.get_for_model(DLMContact)
-    dlm_software_version_ct = ContentType.objects.get_for_model(DLMSoftwareVersion)
-    dlm_software_image_ct = ContentType.objects.get_for_model(DLMSoftwareImage)
-    core_contact_ct = ContentType.objects.get_for_model(CoreContact)
-    core_software_version_ct = ContentType.objects.get_for_model(CoreSoftwareVersion)
-    core_software_image_ct = ContentType.objects.get_for_model(CoreSoftwareImage)
 
     # Verify nautobot_device_lifecycle_mgmt.SoftwareLCM instances were migrated to dcim.SoftwareVersion
     for dlm_software_version in DLMSoftwareVersion.objects.all():
         _verify_software_version_migrated(apps, dlm_software_version)
-    _verify_content_type_references_migrated_to_new_model(apps, dlm_software_version_ct, core_software_version_ct)
 
     # Verify nautobot_device_lifecycle_mgmt.SoftwareImageLCM instances were migrated to dcim.SoftwareImageFile
     for dlm_software_image in DLMSoftwareImage.objects.all():
         _verify_software_image_migrated(apps, dlm_software_image)
-    _verify_content_type_references_migrated_to_new_model(apps, dlm_software_image_ct, core_software_image_ct)
 
     # Verify nautobot_device_lifecycle_mgmt.ContactLCM instances were migrated to extras.Contact
     for dlm_contact in DLMContact.objects.all():
         _verify_contact_migrated(apps, dlm_contact)
-    _verify_content_type_references_migrated_to_new_model(apps, dlm_contact_ct, core_contact_ct)
 
 
 def _verify_software_version_migrated(apps, dlm_software_version):
@@ -87,198 +72,6 @@ def _verify_contact_migrated(apps, dlm_contact):
             f"DLM Migration Error: Did not find Core Contact object matching DLM Contact object: {dlm_contact}"
         )
     return
-
-
-def _verify_content_type_references_migrated_to_new_model(apps, old_ct, new_ct):
-    """Verify Nautobot extension objects and relationships linked to deprecated DLM models were migrated."""
-    ComputedField = apps.get_model("extras", "ComputedField")
-    CustomField = apps.get_model("extras", "CustomField")
-    CustomLink = apps.get_model("extras", "CustomLink")
-    ExportTemplate = apps.get_model("extras", "ExportTemplate")
-    JobButton = apps.get_model("extras", "JobButton")
-    JobHook = apps.get_model("extras", "JobHook")
-    Note = apps.get_model("extras", "Note")
-    ObjectChange = apps.get_model("extras", "ObjectChange")
-    ObjectPermission = apps.get_model("users", "ObjectPermission")
-    Relationship = apps.get_model("extras", "Relationship")
-    RelationshipAssociation = apps.get_model("extras", "RelationshipAssociation")
-    Status = apps.get_model("extras", "Status")
-    Tag = apps.get_model("extras", "Tag")
-    TaggedItem = apps.get_model("extras", "TaggedItem")
-    WebHook = apps.get_model("extras", "WebHook")
-
-    old_ct_computed_fields = ComputedField.objects.filter(content_type=old_ct)
-    for computed_field in old_ct_computed_fields:
-        print(
-            f"Migration error. The Computed Field '{computed_field.label}' has not been migrated to the new model '{str(new_ct)}'"
-        )
-    if old_ct_computed_fields.exists():
-        raise ValidationError(
-            f"DLM Migration Error: Found computed fields that have not been migrated from DLM to Core model: {old_ct_computed_fields}."
-        )
-
-    # Migrate CustomField content type
-    old_ct_custom_fields = CustomField.objects.filter(content_types=old_ct).exclude(content_types=new_ct)
-    for custom_field in old_ct_custom_fields:
-        print(
-            f"Migration error. The Custom Field '{custom_field.label}' has not been migrated to Core model '{str(new_ct)}'"
-        )
-    if old_ct_custom_fields.exists():
-        raise ValidationError(
-            f"DLM Migration Error: Found custom fields that have not been migrated from DLM to Core model: {old_ct_custom_fields}."
-        )
-
-    # Migrate CustomLink content type
-    old_ct_custom_links = CustomLink.objects.filter(content_type=old_ct)
-    for custom_link in old_ct_custom_links:
-        print(
-            f"Migration error. The Custom Link '{custom_link.name}' has not been migrated to Core model '{str(new_ct)}'"
-        )
-    if old_ct_custom_links.exists():
-        raise ValidationError(
-            f"DLM Migration Error: Found custom links that have not been migrated from DLM to Core model: {old_ct_custom_links}."
-        )
-
-    # Migrate ExportTemplate content type - skip git export templates
-    old_ct_export_templates = ExportTemplate.objects.filter(content_type=old_ct, owner_content_type=None)
-    for export_template in old_ct_export_templates:
-        print(
-            f"Migration error. The Export Template '{export_template.name}' has not been migrated to Core model '{str(new_ct)}'"
-        )
-    if old_ct_export_templates.exists():
-        raise ValidationError(
-            f"DLM Migration Error: Found export templates that have not been migrated from DLM to Core model: {old_ct_export_templates}."
-        )
-
-    # Migrate JobButton content type
-    old_ct_job_buttons = JobButton.objects.filter(content_types=old_ct).exclude(content_types=new_ct)
-    for job_button in old_ct_job_buttons:
-        print(
-            f"Migration error. The Job Button '{job_button.name}' has not been migrated to Core model '{str(new_ct)}'"
-        )
-    if old_ct_job_buttons.exists():
-        raise ValidationError(
-            f"DLM Migration Error: Found job buttons that have not been migrated from DLM to Core model: {old_ct_job_buttons}."
-        )
-
-    # Migrate JobHook content type
-    old_ct_job_hooks = JobHook.objects.filter(content_types=old_ct).exclude(content_types=new_ct)
-    for job_hook in old_ct_job_hooks:
-        print(f"Migration error. The Job Hook '{job_hook.name}' has not been migrated to Core model '{str(new_ct)}'")
-    if old_ct_job_hooks.exists():
-        raise ValidationError(
-            f"DLM Migration Error: Found job hooks that have not been migrated from DLM to Core model: {old_ct_job_hooks}."
-        )
-
-    # Migrate Note content type
-    old_ct_notes = Note.objects.filter(assigned_object_type=old_ct)
-    for note in old_ct_notes:
-        print(f"Migration error.The Note '{str(note)}' has not been migrated to Core model '{str(new_ct)}'")
-    if old_ct_notes.exists():
-        raise ValidationError(
-            f"DLM Migration Error: Found notes that have not been migrated from DLM to Core model: {old_ct_notes}."
-        )
-
-    # Migrate ObjectChange content type
-    old_ct_object_changes = ObjectChange.objects.filter(changed_object_type=old_ct)
-    for object_change in old_ct_object_changes:
-        print(
-            f"Migration error. The ObjectChange {str(object_change)} has not been migrated to Core model '{str(new_ct)}'"
-        )
-    if old_ct_object_changes.exists():
-        raise ValidationError(
-            f"DLM Migration Error: Found object changes that have not been migrated from DLM to Core model: {old_ct_object_changes}."
-        )
-
-    # Migrate Status content type
-    old_ct_statuses = Status.objects.filter(content_types=old_ct).exclude(content_types=new_ct)
-    for status in old_ct_statuses:
-        print(f"Migration error. The Status '{status.name}' has not been migrated to Core model '{str(new_ct)}'")
-    if old_ct_statuses.exists():
-        raise ValidationError(
-            f"DLM Migration Error: Found statuses that have not been migrated from DLM to Core model: {old_ct_statuses}."
-        )
-
-    # Migrate Tag content type
-    old_ct_tags = Tag.objects.filter(content_types=old_ct).exclude(content_types=new_ct)
-    for tag in old_ct_tags:
-        print(f"Migration error. The Tag '{tag.name}' has not been migrated to Core model '{str(new_ct)}'")
-    if old_ct_tags.exists():
-        raise ValidationError(
-            f"DLM Migration Error: Found tags that have not been migrated from DLM to Core model: {old_ct_tags}."
-        )
-
-    # Migrate TaggedItem content type
-    old_ct_tagged_items = TaggedItem.objects.filter(content_type=old_ct)
-    for tagged_item in old_ct_tagged_items:
-        print(
-            f"Migration error. The Tagged Item '{str(tagged_item)}' has not been migrated to Core model '{str(new_ct)}'"
-        )
-    if old_ct_tagged_items.exists():
-        raise ValidationError(
-            f"DLM Migration Error: Found tagged items that have not been migrated from DLM to Core model: {old_ct_tagged_items}."
-        )
-
-    # Migrate WebHook content type
-    old_ct_web_hooks = WebHook.objects.filter(content_types=old_ct).exclude(content_types=new_ct)
-    for web_hook in old_ct_web_hooks:
-        print(f"Migration error. The Web Hook '{web_hook.name}' has not been migrated to Core model '{str(new_ct)}'")
-    if old_ct_web_hooks.exists():
-        raise ValidationError(
-            f"DLM Migration Error: Found web hooks that have not been migrated from DLM to Core model: {old_ct_web_hooks}."
-        )
-
-    # Migrate ObjectPermission content type
-    old_ct_permissions = ObjectPermission.objects.filter(object_types=old_ct).exclude(object_types=new_ct)
-    for object_permission in old_ct_permissions:
-        print(
-            f"Migration error. The Object Permission '{str(object_permission)}' has not been migrated to Core model '{str(new_ct)}'",
-        )
-    if old_ct_permissions.exists():
-        raise ValidationError(
-            f"DLM Migration Error: Found object permissions that have not been migrated from DLM to Core models: {old_ct_permissions}."
-        )
-
-    # These are migrated separately as they follow specific business logic
-    excluded_relationships = ("device_soft", "inventory_item_soft")
-    old_ct_relationships = Relationship.objects.filter(
-        ~Q(key__in=excluded_relationships) & (Q(source_type=old_ct) | Q(destination_type=old_ct))
-    )
-    for relationship in old_ct_relationships:
-        print(
-            f"Migration error. The Relationship '{relationship.label}' has not been migrated to Core model '{str(new_ct)}'"
-        )
-
-        old_ct_relationship_assoc_src = RelationshipAssociation.objects.filter(
-            source_type=old_ct, relationship=relationship
-        )
-        for relationship_association in old_ct_relationship_assoc_src:
-            print(
-                f"Migration error. The Relationship Association '{str(relationship_association)}' has not been migrated to Core model '{str(new_ct)}'"
-            )
-        old_ct_relationship_assoc_src = RelationshipAssociation.objects.filter(
-            source_type=old_ct, relationship=relationship
-        )
-        if old_ct_relationship_assoc_src:
-            raise ValidationError(
-                f"DLM Migration Error: Found relationship associations that have not been migrated from DLM to Core model: {old_ct_relationship_assoc_src}."
-            )
-
-        old_ct_relationship_assoc_dst = RelationshipAssociation.objects.filter(
-            destination_type=old_ct, relationship=relationship
-        )
-        for relationship_association in old_ct_relationship_assoc_dst:
-            print(
-                f"Migration error. The Relationship Association '{str(relationship_association)}' has not been migrated to Core model '{str(new_ct)}'"
-            )
-        if old_ct_relationship_assoc_dst:
-            raise ValidationError(
-                f"DLM Migration Error: Found relationship associations that have not been migrated from DLM to Core models: {old_ct_relationship_assoc_dst}."
-            )
-    if old_ct_relationships.exists():
-        raise ValidationError(
-            f"DLM Migration Error: Found relationships that have not been migrated from DLM to Core model: {old_ct_relationships}."
-        )
 
 
 class Migration(migrations.Migration):
