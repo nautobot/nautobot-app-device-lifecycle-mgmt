@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("extras", "0106_populate_default_statuses_and_roles_for_contact_associations"),
         ("dcim", "0058_controller_data_migration"),
-        ("nautobot_device_lifecycle_mgmt", "0027_delete_models_migrated_to_core"),
+        ("nautobot_device_lifecycle_mgmt", "0022_alter_softwareimagelcm_inventory_items_and_more"),
     ]
 
     operations = [
