@@ -139,7 +139,7 @@ class Migration(migrations.Migration):
                 null=True, on_delete=django.db.models.deletion.SET_NULL, to="nautobot_device_lifecycle_mgmt.softwarelcm"
             ),
         ),
-        migrations.RunPython(nullify_software_fields),
+        migrations.RunPython(nullify_software_fields, reverse_code=migrations.RunPython.noop),
         migrations.AlterField(
             model_name="cvelcm",
             name="affected_softwares",
@@ -175,6 +175,6 @@ class Migration(migrations.Migration):
                 blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="dcim.softwareversion"
             ),
         ),
-        migrations.RunPython(migrate_dlm_software_references),
-        migrations.RunPython(delete_migrated_dlm_objects),
+        migrations.RunPython(migrate_dlm_software_references, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(delete_migrated_dlm_objects, reverse_code=migrations.RunPython.noop),
     ]
