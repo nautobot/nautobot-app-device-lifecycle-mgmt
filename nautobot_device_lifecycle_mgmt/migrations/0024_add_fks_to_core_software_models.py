@@ -6,6 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
+        ("extras", "0114_computedfield_grouping"),
         ("dcim", "0062_module_data_migration"),
         ("nautobot_device_lifecycle_mgmt", "0023_devicehardwarenoticeresult"),
     ]
@@ -86,5 +87,41 @@ class Migration(migrations.Migration):
         migrations.AlterUniqueTogether(
             name="vulnerabilitylcm",
             unique_together={("cve", "software", "inventory_item"), ("cve", "software", "device")},
+        ),
+        migrations.AddField(
+            model_name="contactlcm",
+            name="migrated_to_core_model",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="extras.contact"
+            ),
+        ),
+        migrations.AddField(
+            model_name="contactlcm",
+            name="migrated_to_core_model_flag",
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name="softwareimagelcm",
+            name="migrated_to_core_model",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="dcim.softwareimagefile"
+            ),
+        ),
+        migrations.AddField(
+            model_name="softwareimagelcm",
+            name="migrated_to_core_model_flag",
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name="softwarelcm",
+            name="migrated_to_core_model",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="dcim.softwareversion"
+            ),
+        ),
+        migrations.AddField(
+            model_name="softwarelcm",
+            name="migrated_to_core_model_flag",
+            field=models.BooleanField(default=False),
         ),
     ]

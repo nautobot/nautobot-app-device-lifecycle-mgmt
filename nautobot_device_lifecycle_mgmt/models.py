@@ -168,6 +168,12 @@ class SoftwareLCM(PrimaryModel):
     documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
     long_term_support = models.BooleanField(verbose_name="Long Term Support", default=False)
     pre_release = models.BooleanField(verbose_name="Pre-Release", default=False)
+    migrated_to_core_model_flag = models.BooleanField(
+        default=False, help_text="Flag to indicate this instance was migrated to dcim.SoftwareVersion"
+    )
+    migrated_to_core_model = models.ForeignKey(
+        to="dcim.SoftwareVersion", on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     class Meta:
         """Meta attributes for SoftwareLCM."""
@@ -229,6 +235,12 @@ class SoftwareImageLCM(PrimaryModel):
         default="", blank=True, max_length=CHARFIELD_MAX_LENGTH, verbose_name="Hashing Algorithm"
     )
     default_image = models.BooleanField(verbose_name="Default Image", default=False)
+    migrated_to_core_model_flag = models.BooleanField(
+        default=False, help_text="Flag to indicate this instance was migrated to dcim.SoftwareImageFile"
+    )
+    migrated_to_core_model = models.ForeignKey(
+        to="dcim.SoftwareImageFile", on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     class Meta:
         """Meta attributes for SoftwareImageLCM."""
@@ -630,6 +642,10 @@ class ContactLCM(PrimaryModel):
     contract = models.ForeignKey(
         to="nautobot_device_lifecycle_mgmt.ContractLCM", on_delete=models.CASCADE, verbose_name="Contract", null=True
     )
+    migrated_to_core_model_flag = models.BooleanField(
+        default=False, help_text="Flag to indicate this instance was migrated to extras.Contact"
+    )
+    migrated_to_core_model = models.ForeignKey(to="extras.Contact", on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         """Meta attributes for the class."""
