@@ -1,35 +1,11 @@
-"""API URLs for the Lifecycle Management app."""
+"""Django API urlpatterns declaration for nautobot_device_lifecycle_mgmt app."""
 
-from rest_framework import routers
+from nautobot.apps.api import OrderedDefaultRouter
 
-from nautobot_device_lifecycle_mgmt.api.views import (
-    ContactLCMView,
-    ContractLCMView,
-    CVELCMViewSet,
-    DeviceSoftwareValidationResultListViewSet,
-    HardwareLCMView,
-    InventoryItemSoftwareValidationResultListViewSet,
-    ProviderLCMView,
-    SoftwareImageLCMViewSet,
-    SoftwareLCMViewSet,
-    ValidatedSoftwareLCMViewSet,
-    VulnerabilityLCMViewSet,
-)
+from nautobot_device_lifecycle_mgmt.api import views
 
-router = routers.DefaultRouter()
-
-router.register("hardware", HardwareLCMView)
-router.register("contract", ContractLCMView)
-router.register("provider", ProviderLCMView)
-router.register("contact", ContactLCMView)
-router.register("software", SoftwareLCMViewSet)
-router.register("software-image", SoftwareImageLCMViewSet)
-router.register("validated-software", ValidatedSoftwareLCMViewSet)
-router.register("cve", CVELCMViewSet)
-router.register("vulnerability", VulnerabilityLCMViewSet)
-router.register("device-validated-software-result", DeviceSoftwareValidationResultListViewSet)
-router.register("inventory-item-validated-software-result", InventoryItemSoftwareValidationResultListViewSet)
-
-app_name = "nautobot_device_lifecycle_mgmt"  # pylint: disable=invalid-name
+router = OrderedDefaultRouter()
+# add the name of your api endpoint, usually hyphenated model name in plural, e.g. "my-model-classes"
+router.register("hardwarelcm", views.HardwareLCMViewSet)
 
 urlpatterns = router.urls
