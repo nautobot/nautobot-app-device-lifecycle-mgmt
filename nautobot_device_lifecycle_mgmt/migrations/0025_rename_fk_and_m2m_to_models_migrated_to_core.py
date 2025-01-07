@@ -30,6 +30,11 @@ class FixRenamedM2MFieldIndexes(Operation):
             schema_editor.connection.cursor(), through_model_db_table
         )
         for constraint_name, constraint in through_model_db_table_constraints.items():
+            # Skip primary key constraints
+            if constraint.get("primary_key", False):
+                continue
+
+            # Change index names
             if constraint.get("index", False):
                 new_index_name = schema_editor._create_index_name(through_model_db_table, constraint["columns"])
                 # This is ANOTHER workaround since Django does not render the indexes for an auto-created M2M table. We SHOULD be able to use schema_editor.rename_index() but it doesn't work.
@@ -37,6 +42,13 @@ class FixRenamedM2MFieldIndexes(Operation):
                     schema_editor._rename_index_sql(through_model, constraint_name, new_index_name),
                     params=None,
                 )
+
+            # Change foreign key constraint names
+            if constraint.get("foreign_key", None):
+                constraint_suffix = "_fk_%(to_table)s_%(to_column)s"
+                field = through_model._meta.get_field(constraint["columns"][0])
+                schema_editor.execute(schema_editor._delete_fk_sql(through_model, constraint_name))
+                schema_editor.execute(schema_editor._create_fk_sql(through_model, field, constraint_suffix))
 
     def database_backwards(self, app_label, schema_editor, from_state, to_state):
         """
