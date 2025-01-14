@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("dcim", "0058_controller_data_migration"),
-        ("extras", "0114_computedfield_grouping"),
+        ("extras", "0106_populate_default_statuses_and_roles_for_contact_associations"),
         ("nautobot_device_lifecycle_mgmt", "0023_devicehardwarenoticeresult"),
     ]
 
