@@ -55,7 +55,7 @@ class DeviceHardwareNoticeFullReport(Job):
                         device_count += 1
                         devices_with_hw_notices_count += 1
                     except Exception as err:  # pylint: disable=broad-exception-caught
-                        self.logger.error(f"Error creating hardware notice result {err}")
+                        self.logger.error("Error creating hardware notice result %s", err)
                 notice_count += 1
         self.logger.info("%s devices are affected by a hardware notice.", devices_with_hw_notices_count)
         # Process all devices skipping devices already processed in the previous step

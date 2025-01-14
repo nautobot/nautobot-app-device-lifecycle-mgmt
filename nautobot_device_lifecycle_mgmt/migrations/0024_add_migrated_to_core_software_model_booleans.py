@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("dcim", "0062_module_data_migration"),
+        ("dcim", "0058_controller_data_migration"),
         ("extras", "0114_computedfield_grouping"),
         ("nautobot_device_lifecycle_mgmt", "0023_devicehardwarenoticeresult"),
     ]
