@@ -291,7 +291,9 @@ class ValidatedSoftwareLCM(PrimaryModel):
     software = models.ForeignKey(
         to="dcim.SoftwareVersion", on_delete=models.CASCADE, verbose_name="Software Version", null=True
     )
-    old_software = models.ForeignKey(to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Software Version")
+    old_software = models.ForeignKey(
+        to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Software Version", blank=True, null=True
+    )
     devices = models.ManyToManyField(to="dcim.Device", related_name="+", blank=True)
     device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
     device_roles = models.ManyToManyField(to="extras.Role", related_name="+", blank=True)

@@ -245,8 +245,9 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
             "preferred": False,
         }
         form = self.form_class(data)
-        with self.assertRaises(SoftwareVersion.DoesNotExist):  # pylint: disable=no-member
-            form.is_valid()
+        self.assertFalse(form.is_valid())
+        self.assertIn("software", form.errors)
+        self.assertSequenceEqual(["This field is required."], form.errors["software"])
 
     def test_validation_error_start(self):
         data = {

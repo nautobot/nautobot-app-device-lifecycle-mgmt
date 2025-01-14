@@ -83,7 +83,10 @@ class Migration(migrations.Migration):
             model_name="validatedsoftwarelcm",
             name="old_software",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="nautobot_device_lifecycle_mgmt.softwarelcm"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="nautobot_device_lifecycle_mgmt.softwarelcm",
             ),
         ),
         migrations.AlterField(
