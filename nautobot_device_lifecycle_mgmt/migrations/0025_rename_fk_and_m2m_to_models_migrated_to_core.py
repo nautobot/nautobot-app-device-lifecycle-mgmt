@@ -22,6 +22,12 @@ class FixRenamedM2MFieldIndexes(Operation):
         """
 
     def database_forwards(self, app_label, schema_editor, from_state, to_state):
+        # Database-specific SQL queries are required in Django 3.2, thus required for Nautobot v2.2. These are built-in to Django 4.0's schema editor.
+        sql_rename_index = {
+            "postgresql": "ALTER INDEX %s RENAME TO %s",
+            "mysql": "ALTER TABLE %s RENAME INDEX %s TO %s",
+        }
+
         model = from_state.apps.get_model(app_label, self.model_name)
         field = model._meta.get_field(self.field_name)
         through_model = field.remote_field.through
@@ -37,11 +43,25 @@ class FixRenamedM2MFieldIndexes(Operation):
             # Change index names
             if constraint.get("index", False):
                 new_index_name = schema_editor._create_index_name(through_model_db_table, constraint["columns"])
-                # This is ANOTHER workaround since Django does not render the indexes for an auto-created M2M table. We SHOULD be able to use schema_editor.rename_index() but it doesn't work.
-                schema_editor.execute(
-                    schema_editor._rename_index_sql(through_model, constraint_name, new_index_name),
-                    params=None,
-                )
+                if schema_editor.connection.vendor == "mysql":
+                    sql = sql_rename_index["mysql"] % (
+                        schema_editor.quote_name(through_model_db_table),
+                        schema_editor.quote_name(constraint_name),
+                        schema_editor.quote_name(new_index_name),
+                    )
+                    schema_editor.execute(sql)
+
+                elif schema_editor.connection.vendor == "postgresql":
+                    sql = sql_rename_index["postgresql"] % (
+                        schema_editor.quote_name(constraint_name),
+                        schema_editor.quote_name(new_index_name),
+                    )
+                    schema_editor.execute(sql)
+
+                else:
+                    raise NotImplementedError(
+                        f"Database {schema_editor.connection.vendor} is not supported for this migration."
+                    )
 
             # Change foreign key constraint names
             if constraint.get("foreign_key", None):
