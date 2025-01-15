@@ -18,7 +18,7 @@ class HardwareLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin)
         # read_only_fields = []
 
 
-class ProviderLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+class ProviderLCMSerializer(NautobotModelSerializer):  # pylint: disable=too-many-ancestors
     """ProviderLCM Serializer."""
 
     class Meta:
