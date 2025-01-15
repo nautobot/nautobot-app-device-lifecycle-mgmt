@@ -16,3 +16,93 @@ class HardwareLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin)
 
         # Option for disabling write for certain fields:
         # read_only_fields = []
+
+
+class ProviderLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """ProviderLCM Serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = models.ProviderLCM
+        fields = "__all__"
+
+
+class ContractLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """ContractLCM Serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = models.ContractLCM
+        fields = "__all__"
+
+
+class ContactLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """ContactLCM Serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = models.ContactLCM
+        fields = "__all__"
+
+
+class SoftwareLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """SoftwareLCM Serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = models.SoftwareLCM
+        fields = "__all__"
+
+
+class SoftwareImageLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """SoftwareImageLCM Serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = models.SoftwareImageLCM
+        fields = "__all__"
+
+
+class ValidatedSoftwareLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """ValidatedSoftwareLCM Serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = models.ValidatedSoftwareLCM
+        fields = "__all__"
+
+
+class VulnerabilityLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """VulnerabilityLCM Serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = models.VulnerabilityLCM
+        fields = "__all__"
+
+
+class DeviceSoftwareValidationResultSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """DeviceSoftwareValidationResult Serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = models.DeviceSoftwareValidationResult
+        fields = "__all__"
+
+
+class InventoryItemSoftwareValidationResultSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """InventoryItemSoftwareValidationResult Serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = models.InventoryItemSoftwareValidationResult
+        fields = "__all__"

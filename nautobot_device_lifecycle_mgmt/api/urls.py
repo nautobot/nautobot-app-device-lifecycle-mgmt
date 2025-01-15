@@ -6,6 +6,16 @@ from nautobot_device_lifecycle_mgmt.api import views
 
 router = OrderedDefaultRouter()
 # add the name of your api endpoint, usually hyphenated model name in plural, e.g. "my-model-classes"
-router.register("hardwarelcm", views.HardwareLCMViewSet)
+router.register("hardware", views.HardwareLCMView)
+router.register("contract", views.ContractLCMView)
+router.register("provider", views.ProviderLCMView)
+router.register("contact", views.ContactLCMView)
+router.register("software", views.SoftwareLCMViewSet)
+router.register("software-image", views.SoftwareImageLCMViewSet)
+router.register("validated-software", views.ValidatedSoftwareLCMViewSet)
+router.register("cve", views.CVELCMViewSet)
+router.register("vulnerability", views.VulnerabilityLCMViewSet)
+router.register("device-validated-software-result", views.DeviceSoftwareValidationResultListViewSet)
+router.register("inventory-item-validated-software-result", views.InventoryItemSoftwareValidationResultListViewSet)
 
 urlpatterns = router.urls
