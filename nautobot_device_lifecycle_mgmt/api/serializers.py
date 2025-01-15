@@ -78,6 +78,16 @@ class ValidatedSoftwareLCMSerializer(NautobotModelSerializer, TaggedModelSeriali
         fields = "__all__"
 
 
+class CVELCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """CVELCM Serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = models.CVELCM
+        fields = "__all__"
+
+
 class VulnerabilityLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
     """VulnerabilityLCM Serializer."""
 
