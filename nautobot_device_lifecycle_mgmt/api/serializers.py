@@ -96,6 +96,15 @@ class VulnerabilityLCMSerializer(NautobotModelSerializer, TaggedModelSerializerM
 
         model = models.VulnerabilityLCM
         fields = "__all__"
+        read_only_fields = [
+            "id",
+            "display",
+            "url",
+            "cve",
+            "software",
+            "device",
+            "inventory_item",
+        ]
 
 
 class DeviceSoftwareValidationResultSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
