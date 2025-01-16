@@ -9,6 +9,7 @@ from nautobot_device_lifecycle_mgmt import views
 
 router = NautobotUIViewSetRouter()
 router.register("hardware", viewset=views.HardwareLCMUIViewSet)
+router.register("software-notice", viewset=views.SoftwareNoticeUIViewSet)
 router.register("validated-software", viewset=views.ValidatedSoftwareLCMUIViewSet)
 router.register("contract", viewset=views.ContractLCMUIViewSet)
 router.register("provider", viewset=views.ProviderLCMUIViewSet)

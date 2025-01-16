@@ -47,6 +47,31 @@ menu_items = (
                 weight=100,
                 items=(
                     NavMenuItem(
+                        link="plugins:nautobot_device_lifecycle_mgmt:softwarenotice_list",
+                        name="Software Notices",
+                        buttons=(
+                            NavMenuButton(
+                                link="plugins:nautobot_device_lifecycle_mgmt:softwarenotice_add",
+                                title="Add",
+                                icon_class="mdi mdi-plus-thick",
+                                button_class=ButtonColorChoices.GREEN,
+                                permissions=[
+                                    "nautobot_device_lifecycle_mgmt.add_softwarenotice",
+                                ],
+                            ),
+                            NavMenuButton(
+                                link="plugins:nautobot_device_lifecycle_mgmt:softwarenotice_import",
+                                title="Import",
+                                icon_class="mdi mdi-database-import-outline",
+                                button_class=ButtonColorChoices.BLUE,
+                                permissions=["nautobot_device_lifecycle_mgmt.add_softwarenotice"],
+                            ),
+                        ),
+                        permissions=[
+                            "nautobot_device_lifecycle_mgmt.view_softwarenotice",
+                        ],
+                    ),
+                    NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_list",
                         name="Validated Software",
                         buttons=(

@@ -36,6 +36,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
     ProviderLCM,
+    SoftwareNotice,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
@@ -155,6 +156,80 @@ class HardwareLCMFilterForm(NautobotFilterForm):
         widget=StaticSelect2Multiple(),
     )
     release_date = NullableDateField(required=False, widget=DatePicker(), label="Release date")
+    end_of_sale = NullableDateField(required=False, widget=DatePicker(), label="End of sale")
+    end_of_support = NullableDateField(required=False, widget=DatePicker(), label="End of support")
+    end_of_sw_releases = NullableDateField(required=False, widget=DatePicker(), label="End of software releases")
+    end_of_security_patches = NullableDateField(required=False, widget=DatePicker(), label="End of security patches")
+    documentation_url = forms.CharField(required=False, label="Documentation URL")
+
+
+class SoftwareNoticeForm(NautobotModelForm):
+    """SoftwareNotice Device Lifecycle creation/edit form."""
+
+    software_version = DynamicModelChoiceField(queryset=SoftwareVersion.objects.all(), required=True)
+    device_type = DynamicModelChoiceField(queryset=DeviceType.objects.all(), required=False)
+
+    class Meta:
+        """Meta attributes for the HardwareLCMForm class."""
+
+        model = SoftwareNotice
+        fields = "__all__"
+
+        widgets = {
+            "end_of_sale": DatePicker(),
+            "end_of_support": DatePicker(),
+            "end_of_sw_releases": DatePicker(),
+            "end_of_security_patches": DatePicker(),
+        }
+
+
+class SoftwareNoticeBulkEditForm(NautobotBulkEditForm):
+    """SoftwareNotice Device Lifecycle bulk edit form."""
+
+    pk = forms.ModelMultipleChoiceField(queryset=SoftwareNotice.objects.all(), widget=forms.MultipleHiddenInput)
+    end_of_sale = forms.DateField(widget=DatePicker(), required=False)
+    end_of_support = forms.DateField(widget=DatePicker(), required=False)
+    end_of_sw_releases = forms.DateField(widget=DatePicker(), required=False)
+    end_of_security_patches = forms.DateField(widget=DatePicker(), required=False)
+    documentation_url = forms.URLField(required=False)
+    comments = forms.CharField(required=False)
+
+    class Meta:
+        """Meta attributes for the SoftwareNoticeBulkEditForm class."""
+
+        nullable_fields = [
+            "end_of_sale",
+            "end_of_support",
+            "end_of_sw_releases",
+            "end_of_security_patches",
+            "documentation_url",
+            "comments",
+        ]
+
+
+class SoftwareNoticeFilterForm(NautobotFilterForm):
+    """Filter form for filtering SoftwareNotice objects."""
+
+    model = SoftwareNotice
+    field_order = [
+        "q",
+        "expired",
+        "software_version",
+        "device_type",
+        "end_of_sale",
+        "end_of_support",
+        "end_of_sw_releases",
+        "end_of_security_patches",
+        "documentation_url",
+    ]
+    q = forms.CharField(required=False, label="Search")
+    expired = forms.BooleanField(
+        required=False,
+        label="Support Expired",
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+    )
+    software_version = DynamicModelMultipleChoiceField(required=False, queryset=SoftwareVersion.objects.all())
+    device_type = DynamicModelMultipleChoiceField(required=False, queryset=DeviceType.objects.all())
     end_of_sale = NullableDateField(required=False, widget=DatePicker(), label="End of sale")
     end_of_support = NullableDateField(required=False, widget=DatePicker(), label="End of support")
     end_of_sw_releases = NullableDateField(required=False, widget=DatePicker(), label="End of software releases")

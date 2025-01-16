@@ -13,6 +13,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
     ProviderLCM,
+    SoftwareNotice,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
@@ -70,6 +71,62 @@ class HardwareLCMTable(BaseTable):
             "end_of_support",
             "end_of_sw_releases",
             "end_of_security_patches",
+            "documentation_url",
+            "actions",
+        )
+
+
+class SoftwareNoticeTable(BaseTable):
+    """Table for SoftwareNotice list view."""
+
+    pk = ToggleColumn()
+    id = tables.LinkColumn(
+        "plugins:nautobot_device_lifecycle_mgmt:softwarenotice",
+        text=lambda record: str(record.pk)[:8],
+        args=[A("pk")],
+        orderable=False,
+        verbose_name="Notice ID",
+    )
+    platform = tables.LinkColumn(
+        "dcim:platform",
+        text=lambda record: record.software_version.platform.name,
+        args=[A("software_version.platform.pk")],
+        orderable=True,
+    )
+    software_version = tables.LinkColumn(
+        text=lambda record: record.software_version.version, verbose_name="Software Version"
+    )
+    device_type = tables.LinkColumn(verbose_name="Device Type")
+
+    release_date = tables.DateColumn(accessor="software_version.release_date")
+
+    documentation_url = tables.TemplateColumn(
+        template_code="""{% if record.documentation_url %}
+                    <a href="{{ record.documentation_url }}" target="_blank" data-toggle="tooltip" data-placement="left" title="{{ record.documentation_url }}">
+                        <span class="mdi mdi-open-in-new"></span>
+                    </a>
+                    {% else %}
+                    —
+                    {% endif %}""",
+        verbose_name="Documentation",
+    )
+    actions = ButtonsColumn(SoftwareNotice, buttons=("changelog", "edit", "delete"))
+
+    class Meta(BaseTable.Meta):
+        """Meta attributes."""
+
+        model = SoftwareNotice
+        fields = (
+            "pk",
+            "id",
+            "platform",
+            "software_version",
+            "device_type",
+            "release_date",
+            "end_of_sale",
+            "end_of_sw_releases",
+            "end_of_security_patches",
+            "end_of_support",
             "documentation_url",
             "actions",
         )

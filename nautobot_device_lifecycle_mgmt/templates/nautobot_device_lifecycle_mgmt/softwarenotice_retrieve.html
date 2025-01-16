@@ -1,0 +1,68 @@
+{% extends 'generic/object_detail.html' %}
+
+{% block masthead %}
+    <h2>Software Notice: {% block title %}{{ object }}{% endblock %}</h2>
+{% endblock masthead %}
+
+{% block content_left_page %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Software Notice</strong>
+        </div>
+        <table class="table table-hover panel-body attr-table">
+            <tr>
+                <td>Software Version</td>
+                <td><a href="{% url 'dcim:softwareversion' pk=object.software_version.pk %}">{{ object.software_version }}</a></td>
+            </tr>
+            <tr>
+                <td>Device Type</td>
+                <td>{% if object.device_type %}<a href="{% url 'dcim:devicetype' pk=object.device_type.pk %}">{{ object.device_type }}</a>{% else %} &mdash; {% endif %}</td>
+            </tr>
+            <tr>
+                <td>Devices</td>
+                <td><a href="{% url 'dcim:device_list' %}?software_version={{ object.software_version.pk }}{% if object.device_type %}&device_type={{ object.device_type.pk }}{% endif %}">{{ device_count }}</a></td>
+            </tr>
+
+            <tr>
+                <td>Release Date</td>
+                <td>{% if object.software_version.release_date %} {{ object.software_version.release_date }} {% else %} &mdash; {% endif %}</td>
+            </tr>
+            <tr>
+                <td>End of Sale</td>
+                <td>{% if object.end_of_sale %} {{ object.end_of_sale }} {% else %} &mdash; {% endif %}</td>
+            </tr>
+            <tr>
+                <td>End of Software Releases</td>
+                <td>{% if object.end_of_sw_releases %} {{ object.end_of_sw_releases }} {% else %} &mdash; {% endif %}</td>
+            </tr>
+            <tr>
+                <td>End of Security Patches</td>
+                <td>
+                    {% if object.end_of_security_patches %} {{ object.end_of_security_patches }} {% else %} &mdash; {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>End of Support</td>
+                <td>{% if object.end_of_support %} {{ object.end_of_support }} {% else %} &mdash; {% endif %}</td>
+            </tr>
+            <tr>
+                <td>Documentation URL</td>
+                <td>
+                {% if object.documentation_url %}
+                    <a href="{{ object.documentation_url }}" target="_blank">{{ object.documentation_url }}</a>
+                {% else %}
+                    &mdash;
+                {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Comments</td>
+                <td>
+                    {% if object.comments %}
+                    <pre>{{ object.comments }}</pre>
+                    {% else %} &mdash; {% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+{% endblock %}

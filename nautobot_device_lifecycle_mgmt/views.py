@@ -57,6 +57,31 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
         return {"devices": []}
 
 
+class SoftwareNoticeUIViewSet(NautobotUIViewSet):
+    """SoftwareNotice UI ViewSet."""
+
+    bulk_update_form_class = forms.SoftwareNoticeBulkEditForm
+    filterset_class = filters.SoftwareNoticeFilterSet
+    filterset_form_class = forms.SoftwareNoticeFilterForm
+    form_class = forms.SoftwareNoticeForm
+    queryset = models.SoftwareNotice.objects.prefetch_related("software_version", "device_type")
+    serializer_class = serializers.SoftwareNoticeSerializer
+    table_class = tables.SoftwareNoticeTable
+
+    def get_extra_context(self, request, instance):  # pylint: disable=signature-differs
+        """Return any additional context data for the template.
+
+        request: The current request
+        instance: The object being viewed
+        """
+        if not instance:
+            return {}
+        attrs = Q(software_version=instance.software_version)
+        if instance.device_type:
+            attrs = attrs & Q(device_type=instance.device_type)
+        return {"device_count": Device.objects.restrict(request.user, "view").filter(attrs).count()}
+
+
 class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
     """ValidatedSoftwareLCM UI ViewSet."""
 

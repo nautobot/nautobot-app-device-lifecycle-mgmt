@@ -126,6 +126,85 @@ class HardwareLCM(PrimaryModel):
             )
 
 
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "graphql",
+    "relationships",
+    "webhooks",
+)
+class SoftwareNotice(PrimaryModel):
+    """SoftwareNotice model for app."""
+
+    # Set model columns
+    software_version = models.ForeignKey(
+        to="dcim.SoftwareVersion",
+        on_delete=models.CASCADE,
+        verbose_name="Software Notice",
+        blank=True,
+        null=True,
+    )
+    device_type = models.ForeignKey(
+        to="dcim.DeviceType",
+        on_delete=models.CASCADE,
+        verbose_name="Device Type",
+        blank=True,
+        null=True,
+    )
+    end_of_sale = models.DateField(null=True, blank=True, verbose_name="End of Sale")
+    end_of_support = models.DateField(null=True, blank=True, verbose_name="End of Support")
+    end_of_sw_releases = models.DateField(null=True, blank=True, verbose_name="End of Software Releases")
+    end_of_security_patches = models.DateField(null=True, blank=True, verbose_name="End of Security Patches")
+    documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
+    comments = models.TextField(blank=True, default="", verbose_name="Comments")
+
+    class Meta:
+        """Meta attributes for the SoftwareNotice class."""
+
+        verbose_name = "Software Notice"
+        ordering = ("end_of_sale",)
+        unique_together = ["software_version", "device_type"]
+
+    def __str__(self):
+        """String representation of SoftwareNotice."""
+        if self.device_type:
+            msg = f"{self.software_version} - {self.device_type}"
+        else:
+            msg = f"{self.software_version} - All Device Types"
+        return msg
+
+    @property
+    def expired(self):
+        """
+        Return True if the current date is greater than the end of support date.
+
+        If the end of support date has not been provided, return False.
+        If the current date is less than or equal to the end of support date, return False.
+        """
+        today = datetime.today().date()
+        if not getattr(self, "end_of_support"):
+            return False
+        return today > getattr(self, "end_of_support")
+
+    def save(self, *args, **kwargs):
+        """Override save to assert a full clean."""
+        # Full clean to assert custom validation in clean() for ORM, etc.
+        super().full_clean()
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        """Override clean to do custom validation."""
+        super().clean()
+
+        if not self.device_type:
+            if SoftwareNotice.objects.filter(software_version=self.software_version, device_type__isnull=True).exclude(
+                pk=self.pk
+            ):
+                raise ValidationError("Software Notice with this Software Version and Device Type already exists.")
+
+
 class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):
     """Queryset for `ValidatedSoftwareLCM` objects."""
 
