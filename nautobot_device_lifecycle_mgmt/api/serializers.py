@@ -35,6 +35,13 @@ class SoftwareNoticeSerializer(NautobotModelSerializer):  # pylint: disable=R090
         model = SoftwareNotice
         fields = "__all__"
 
+        extra_kwargs = {
+            "device_type": {
+                "required": False,
+                "default": None,
+            },
+        }
+
 
 class ProviderLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
     """API serializer."""
