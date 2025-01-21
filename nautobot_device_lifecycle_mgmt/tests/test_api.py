@@ -24,6 +24,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContractLCM,
     HardwareLCM,
     ProviderLCM,
+    SoftwareNotice,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
@@ -76,6 +77,84 @@ class HardwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             {"device_type": device_types[0].id, "end_of_sale": datetime.date(2021, 4, 1)},
             {"device_type": device_types[1].id, "end_of_sale": datetime.date(2021, 4, 1)},
             {"device_type": device_types[2].id, "end_of_sale": datetime.date(2021, 4, 1)},
+        ]
+
+    @skip("Not implemented")
+    def test_bulk_delete_objects(self):
+        pass
+
+    @skip("Not implemented")
+    def test_bulk_update_objects(self):
+        pass
+
+
+class SoftwareNoticeAPITest(APIViewTestCases.APIViewTestCase):
+    """Test the SoftwareNotice API."""
+
+    model = SoftwareNotice
+    bulk_update_data = {"documentation_url": "https://cisco.com/eox"}
+    brief_fields = [
+        "custom_fields",
+        "software_version",
+        "device_type",
+        "display",
+        "documentation_url",
+        "end_of_sale",
+        "end_of_security_patches",
+        "end_of_support",
+        "end_of_sw_releases",
+        "expired",
+        "id",
+        "tags",
+        "url",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):  # pylint: disable=invalid-name
+        """Create a superuser and token for API calls."""
+
+        device_platform_ios, _ = Platform.objects.get_or_create(name="cisco_ios")
+        active_status, _ = Status.objects.get_or_create(name="Active")
+        active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
+
+        software_version_1, _ = SoftwareVersion.objects.get_or_create(
+            platform=device_platform_ios, version="15.1(2)M", status=active_status
+        )
+        software_version_2, _ = SoftwareVersion.objects.get_or_create(
+            platform=device_platform_ios, version="4.22.9M", status=active_status
+        )
+
+        manufacturer = Manufacturer.objects.create(name="Cisco")
+        device_types = (
+            DeviceType.objects.get_or_create(model="c9300-24", manufacturer=manufacturer)[0],
+            DeviceType.objects.get_or_create(model="c9300-48", manufacturer=manufacturer)[0],
+            DeviceType.objects.get_or_create(model="c9500-24", manufacturer=manufacturer)[0],
+            DeviceType.objects.get_or_create(model="c9500-48", manufacturer=manufacturer)[0],
+            DeviceType.objects.get_or_create(model="c9407", manufacturer=manufacturer)[0],
+            DeviceType.objects.get_or_create(model="c9410", manufacturer=manufacturer)[0],
+        )
+
+        SoftwareNotice.objects.create(software_version=software_version_1, end_of_sale=datetime.date(2021, 4, 1))
+        SoftwareNotice.objects.create(
+            software_version=software_version_1, device_type=device_types[4], end_of_sale=datetime.date(2021, 4, 1)
+        )
+        SoftwareNotice.objects.create(
+            software_version=software_version_1, device_type=device_types[5], end_of_sale=datetime.date(2021, 4, 1)
+        )
+        SoftwareNotice.objects.create(software_version=software_version_2, end_of_sale=datetime.date(2021, 4, 1))
+
+        cls.create_data = [
+            # Setting end_of_sale as datetime.date for proper comparison
+            {
+                "software_version": software_version_1.id,
+                "device_type": device_types[0].id,
+                "end_of_sale": datetime.date(2021, 4, 1),
+            },
+            {
+                "software_version": software_version_1.id,
+                "device_type": device_types[1].id,
+                "end_of_sale": datetime.date(2021, 4, 1),
+            },
         ]
 
     @skip("Not implemented")

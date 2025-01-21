@@ -19,6 +19,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
     ProviderLCM,
+    SoftwareNotice,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
@@ -114,6 +115,83 @@ class HardwareLCMTestCase(TestCase):
         """Test expired property is NOT expired with end_of_support."""
         hwlcm_obj = HardwareLCM.objects.create(device_type=self.device_type, end_of_support=date(2099, 4, 1))
         self.assertFalse(hwlcm_obj.expired)
+
+
+class SoftwareNoticeTestCase(TestCase):
+    """Tests for the SoftwareNotice models."""
+
+    def setUp(self):
+        """Set up base objects."""
+        self.manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+        self.device_type, _ = DeviceType.objects.get_or_create(model="c9300-24", manufacturer=self.manufacturer)
+
+        device_platform_ios, _ = Platform.objects.get_or_create(name="cisco_ios")
+        active_status, _ = Status.objects.get_or_create(name="Active")
+        active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
+
+        self.software_version, _ = SoftwareVersion.objects.get_or_create(
+            platform=device_platform_ios, version="15.1(2)M", status=active_status
+        )
+
+    def test_create_software_notice_success_eo_all(self):
+        """Successfully create basic notice."""
+        software_notice_obj = SoftwareNotice.objects.create(
+            software_version=self.software_version,
+            device_type=self.device_type,
+            end_of_sale=date(2022, 4, 1),
+            end_of_support=date(2023, 4, 1),
+            end_of_sw_releases=date(2024, 4, 1),
+            end_of_security_patches=date(2025, 4, 1),
+            documentation_url="https://test.com",
+        )
+
+        self.assertEqual(software_notice_obj.software_version, self.software_version)
+        self.assertEqual(software_notice_obj.device_type, self.device_type)
+        self.assertEqual(str(software_notice_obj.end_of_sale), "2022-04-01")
+        self.assertEqual(str(software_notice_obj.end_of_support), "2023-04-01")
+        self.assertEqual(str(software_notice_obj.end_of_sw_releases), "2024-04-01")
+        self.assertEqual(str(software_notice_obj.end_of_security_patches), "2025-04-01")
+        self.assertEqual(software_notice_obj.documentation_url, "https://test.com")
+        self.assertEqual(str(software_notice_obj), "cisco_ios - 15.1(2)M - c9300-24")
+
+    def test_create_software_notice_failed_missing_one_of(self):
+        """Failed to create basic notice - missing required field."""
+        with self.assertRaises(ValidationError) as failure_exception:
+            SoftwareNotice.objects.create(device_type=self.device_type)
+        self.assertEqual(failure_exception.exception.messages[0], "This field cannot be null.")
+
+    def test_create_software_notice_failed_validation_documentation_url(self):
+        """Failed to create basic notice - invalid URL."""
+        with self.assertRaises(ValidationError) as failure_exception:
+            SoftwareNotice.objects.create(
+                software_version=self.software_version,
+                device_type=self.device_type,
+                end_of_support=date(2023, 4, 1),
+                documentation_url="test.com",
+            )
+        self.assertEqual(failure_exception.exception.messages[0], "Enter a valid URL.")
+
+    def test_create_software_notice_failed_validation_date(self):
+        """Failed to create basic notice - invalid Date."""
+        with self.assertRaises(ValidationError) as failure_exception:
+            SoftwareNotice.objects.create(
+                software_version=self.software_version, device_type=self.device_type, end_of_support="April 1st 2022"
+            )
+        self.assertIn("invalid date format. It must be in YYYY-MM-DD format.", failure_exception.exception.messages[0])
+
+    def test_expired_property_end_of_support_expired(self):
+        """Test expired property is expired with end_of_support."""
+        software_notice_obj = SoftwareNotice.objects.create(
+            software_version=self.software_version, device_type=self.device_type, end_of_support=date(2021, 4, 1)
+        )
+        self.assertTrue(software_notice_obj.expired)
+
+    def test_expired_property_end_of_support_not_expired(self):
+        """Test expired property is NOT expired with end_of_support."""
+        software_notice_obj = SoftwareNotice.objects.create(
+            software_version=self.software_version, device_type=self.device_type, end_of_support=date(2099, 4, 1)
+        )
+        self.assertFalse(software_notice_obj.expired)
 
 
 class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
