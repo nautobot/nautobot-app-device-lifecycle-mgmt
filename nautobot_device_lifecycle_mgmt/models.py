@@ -292,7 +292,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
         to="dcim.SoftwareVersion", on_delete=models.CASCADE, verbose_name="Software Version", null=True
     )
     old_software = models.ForeignKey(
-        to="SoftwareLCM", on_delete=models.CASCADE, verbose_name="Software Version", blank=True, null=True
+        to="SoftwareLCM", on_delete=models.SET_NULL, verbose_name="Software Version", blank=True, null=True
     )
     devices = models.ManyToManyField(to="dcim.Device", related_name="+", blank=True)
     device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
@@ -408,7 +408,12 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         related_name="+",
     )
     old_software = models.ForeignKey(
-        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Device software", null=True, blank=True, related_name="+"
+        to="SoftwareLCM",
+        on_delete=models.SET_NULL,
+        help_text="Device software",
+        null=True,
+        blank=True,
+        related_name="+",
     )
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
@@ -448,7 +453,7 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
         to="dcim.SoftwareVersion", on_delete=models.CASCADE, help_text="Inventory Item software", blank=True, null=True
     )
     old_software = models.ForeignKey(
-        to="SoftwareLCM", on_delete=models.CASCADE, help_text="Inventory Item software", blank=True, null=True
+        to="SoftwareLCM", on_delete=models.SET_NULL, help_text="Inventory Item software", blank=True, null=True
     )
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
@@ -739,7 +744,7 @@ class VulnerabilityLCM(PrimaryModel):
 
     cve = models.ForeignKey(CVELCM, on_delete=models.CASCADE, blank=True, null=True)
     software = models.ForeignKey(to="dcim.SoftwareVersion", on_delete=models.CASCADE, blank=True, null=True)
-    old_software = models.ForeignKey(SoftwareLCM, on_delete=models.CASCADE, blank=True, null=True)
+    old_software = models.ForeignKey(SoftwareLCM, on_delete=models.SET_NULL, blank=True, null=True)
     device = models.ForeignKey(Device, on_delete=models.CASCADE, blank=True, null=True)
     inventory_item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, blank=True, null=True)
     status = StatusField(
