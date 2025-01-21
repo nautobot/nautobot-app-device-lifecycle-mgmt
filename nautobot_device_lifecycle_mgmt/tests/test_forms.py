@@ -444,10 +444,10 @@ class SoftwareImageLCMFormTest(TestCase):  # pylint: disable=no-member,too-many-
             software=self.software_1,
             default_image=False,
         )
+        soft_image.save()
         soft_image.device_types.set([self.devicetype_3.pk])
         soft_image.inventory_items.set([self.inventoryitem_2.pk])
         soft_image.object_tags.set([self.tag_2.pk])
-        soft_image.save()
 
     def test_specifying_all_fields_w_device_type(self):
         data = {

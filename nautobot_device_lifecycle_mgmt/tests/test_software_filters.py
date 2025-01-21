@@ -104,16 +104,16 @@ class DeviceSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too-many-i
             software=self.software,
             default_image=False,
         )
-        self.soft_image_ot.object_tags.set([self.tag_1.pk])
         self.soft_image_ot.save()
+        self.soft_image_ot.object_tags.set([self.tag_1.pk])
 
         self.soft_image_dt = SoftwareImageLCM(
             image_file_name="eos4.25dt.swi",
             software=self.software,
             default_image=False,
         )
-        self.soft_image_dt.device_types.set([self.devicetype_2.pk])
         self.soft_image_dt.save()
+        self.soft_image_dt.device_types.set([self.devicetype_2.pk])
 
         self.soft_image_def = SoftwareImageLCM(
             image_file_name="eos4.25def.swi",
@@ -127,16 +127,16 @@ class DeviceSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too-many-i
             software=self.software,
             default_image=False,
         )
-        self.soft_image_ot_win.object_tags.set([self.tag_2.pk])
         self.soft_image_ot_win.save()
+        self.soft_image_ot_win.object_tags.set([self.tag_2.pk])
 
         self.soft_image_dt_lose = SoftwareImageLCM(
             image_file_name="eos4.25dt_lose.swi",
             software=self.software,
             default_image=False,
         )
-        self.soft_image_dt_lose.device_types.set([self.devicetype_3.pk])
         self.soft_image_dt_lose.save()
+        self.soft_image_dt_lose.device_types.set([self.devicetype_3.pk])
 
     def test_soft_image_for_device_match_tag(self):
         software_image_qs = SoftwareImageLCM.objects.all()
@@ -241,16 +241,16 @@ class InventoryItemSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too
             software=self.software,
             default_image=False,
         )
-        self.soft_image_ot.object_tags.set([self.tag_1.pk])
         self.soft_image_ot.save()
+        self.soft_image_ot.object_tags.set([self.tag_1.pk])
 
         self.soft_image_invitem = SoftwareImageLCM(
             image_file_name="eos4.25invitem.swi",
             software=self.software,
             default_image=False,
         )
-        self.soft_image_invitem.inventory_items.set([self.inventoryitem_2.pk])
         self.soft_image_invitem.save()
+        self.soft_image_invitem.inventory_items.set([self.inventoryitem_2.pk])
 
         self.soft_image_def = SoftwareImageLCM(
             image_file_name="eos4.25def.swi",
@@ -264,16 +264,16 @@ class InventoryItemSoftwareImageFilterTestCase(TestCase):  # pylint: disable=too
             software=self.software,
             default_image=False,
         )
-        self.soft_image_ot_win.object_tags.set([self.tag_2.pk])
         self.soft_image_ot_win.save()
+        self.soft_image_ot_win.object_tags.set([self.tag_2.pk])
 
         self.soft_image_spec_assgmt_lose = SoftwareImageLCM(
             image_file_name="eos4.25dt_lose.swi",
             software=self.software,
             default_image=False,
         )
-        self.soft_image_spec_assgmt_lose.inventory_items.set([self.inventoryitem_4.pk])
         self.soft_image_spec_assgmt_lose.save()
+        self.soft_image_spec_assgmt_lose.inventory_items.set([self.inventoryitem_4.pk])
 
     def test_soft_image_for_invitem_match_tag(self):
         software_image_qs = SoftwareImageLCM.objects.all()
