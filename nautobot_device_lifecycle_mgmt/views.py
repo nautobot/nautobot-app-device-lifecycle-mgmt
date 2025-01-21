@@ -76,7 +76,9 @@ class SoftwareNoticeUIViewSet(NautobotUIViewSet):
         """
         if not instance:
             return {}
-        attrs = Q(software_version=instance.software_version)
+        attrs = Q()
+        if hasattr(instance, "software_version") and instance.software_version:
+            attrs = attrs & Q(software_version=instance.software_version)
         if instance.device_type:
             attrs = attrs & Q(device_type=instance.device_type)
         return {"device_count": Device.objects.restrict(request.user, "view").filter(attrs).count()}
