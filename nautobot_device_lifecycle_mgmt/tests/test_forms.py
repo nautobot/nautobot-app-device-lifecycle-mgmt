@@ -14,12 +14,17 @@ from nautobot.dcim.models import (
 )
 from nautobot.extras.models import Role, Status
 
-from nautobot_device_lifecycle_mgmt.forms import CVELCMForm, HardwareLCMForm, ValidatedSoftwareLCMForm
+from nautobot_device_lifecycle_mgmt.forms import (
+    CVELCMForm,
+    HardwareLCMForm,
+    SoftwareNoticeForm,
+    ValidatedSoftwareLCMForm,
+)
 from nautobot_device_lifecycle_mgmt.models import CVELCM
 
 
 class HardwareLCMFormTest(TestCase):
-    """Test class for Device Lifecycle forms."""
+    """Test class for HardwareLCMF Device Lifecycle forms."""
 
     def setUp(self):
         """Create necessary objects."""
@@ -150,6 +155,127 @@ class HardwareLCMFormTest(TestCase):
     def test_validation_error_documentation_url(self):
         form = HardwareLCMForm(
             data={
+                "device_type": self.device_type,
+                "end_of_sale": "2021-04-01",
+                "end_of_support": "2022-04-01",
+                "end_of_sw_releases": "2023-04-01",
+                "end_of_security_patches": "2024-04-01",
+                "documentation_url": "htttps://cisco.com",
+            }
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("documentation_url", form.errors)
+        self.assertIn("Enter a valid URL.", form.errors["documentation_url"])
+
+
+class SoftwareNoticeFormTest(TestCase):
+    """Test class for SoftwareNotice Device Lifecycle forms."""
+
+    def setUp(self):
+        """Create necessary objects."""
+        self.manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+        self.device_type, _ = DeviceType.objects.get_or_create(model="c9300-24", manufacturer=self.manufacturer)
+
+        device_platform_ios, _ = Platform.objects.get_or_create(name="cisco_ios")
+        active_status, _ = Status.objects.get_or_create(name="Active")
+        active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
+
+        self.software_version, _ = SoftwareVersion.objects.get_or_create(
+            platform=device_platform_ios, version="15.1(2)M", status=active_status
+        )
+
+    def test_specifying_all_fields(self):
+        form = SoftwareNoticeForm(
+            data={
+                "software_version": self.software_version,
+                "device_type": self.device_type,
+                "end_of_sale": "2021-04-01",
+                "end_of_support": "2022-04-01",
+                "end_of_sw_releases": "2023-04-01",
+                "end_of_security_patches": "2024-04-01",
+                "documentation_url": "https://cisco.com",
+            }
+        )
+        self.assertTrue(form.is_valid())
+        self.assertTrue(form.save())
+
+    def test_required_fields_missing(self):
+        form = SoftwareNoticeForm(
+            data={
+                "device_type": self.device_type,
+                "end_of_sale": "2021-04-01",
+                "end_of_support": "2022-04-01",
+                "end_of_sw_releases": "2023-04-01",
+                "end_of_security_patches": "2024-04-01",
+                "documentation_url": "https://cisco.com",
+            }
+        )
+        self.assertFalse(form.is_valid())
+        self.assertDictEqual(
+            {
+                "software_version": ["This field is required."],
+            },
+            form.errors,
+        )
+
+    def test_validation_error_end_of_sale(self):
+        form = SoftwareNoticeForm(
+            data={
+                "software_version": self.software_version,
+                "device_type": self.device_type,
+                "end_of_sale": "April 1st, 2021",
+            }
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("end_of_sale", form.errors)
+        self.assertIn("Enter a valid date.", form.errors["end_of_sale"])
+
+    def test_validation_error_end_of_support(self):
+        form = SoftwareNoticeForm(
+            data={
+                "software_version": self.software_version,
+                "device_type": self.device_type,
+                "end_of_sale": "2021-04-01",
+                "end_of_support": "April 1st, 2022",
+            }
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("end_of_support", form.errors)
+        self.assertIn("Enter a valid date.", form.errors["end_of_support"])
+
+    def test_validation_error_end_of_sw_releases(self):
+        form = SoftwareNoticeForm(
+            data={
+                "software_version": self.software_version,
+                "device_type": self.device_type,
+                "end_of_sale": "2021-04-01",
+                "end_of_support": "2021-04-01",
+                "end_of_sw_releases": "April 1st, 2022",
+            }
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("end_of_sw_releases", form.errors)
+        self.assertIn("Enter a valid date.", form.errors["end_of_sw_releases"])
+
+    def test_validation_error_end_of_security_patches(self):
+        form = SoftwareNoticeForm(
+            data={
+                "software_version": self.software_version,
+                "device_type": self.device_type,
+                "end_of_sale": "2021-04-01",
+                "end_of_support": "2022-04-01",
+                "end_of_sw_releases": "2023-04-01",
+                "end_of_security_patches": "April 1st, 2022",
+            }
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("end_of_security_patches", form.errors)
+        self.assertIn("Enter a valid date.", form.errors["end_of_security_patches"])
+
+    def test_validation_error_documentation_url(self):
+        form = SoftwareNoticeForm(
+            data={
+                "software_version": self.software_version,
                 "device_type": self.device_type,
                 "end_of_sale": "2021-04-01",
                 "end_of_support": "2022-04-01",

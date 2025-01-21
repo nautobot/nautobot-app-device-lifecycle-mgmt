@@ -10,6 +10,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
     ProviderLCM,
+    SoftwareNotice,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
@@ -23,6 +24,23 @@ class HardwareLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,t
 
         model = HardwareLCM
         fields = "__all__"
+
+
+class SoftwareNoticeSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
+    """SoftwareNotice API serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = SoftwareNotice
+        fields = "__all__"
+
+        extra_kwargs = {
+            "device_type": {
+                "required": False,
+                "default": None,
+            },
+        }
 
 
 class ProviderLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods

@@ -10,6 +10,7 @@ from nautobot_device_lifecycle_mgmt.api.views import (
     HardwareLCMView,
     InventoryItemSoftwareValidationResultListViewSet,
     ProviderLCMView,
+    SoftwareNoticeView,
     ValidatedSoftwareLCMViewSet,
     VulnerabilityLCMViewSet,
 )
@@ -17,6 +18,7 @@ from nautobot_device_lifecycle_mgmt.api.views import (
 router = routers.DefaultRouter()
 
 router.register("hardware", HardwareLCMView)
+router.register("software-notice", SoftwareNoticeView)
 router.register("contract", ContractLCMView)
 router.register("provider", ProviderLCMView)
 router.register("validated-software", ValidatedSoftwareLCMViewSet)

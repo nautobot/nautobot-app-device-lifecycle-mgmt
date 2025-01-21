@@ -15,7 +15,7 @@ from nautobot.dcim.models import (
 )
 from nautobot.extras.models import Role, Status
 
-from nautobot_device_lifecycle_mgmt.models import CVELCM, HardwareLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import CVELCM, HardwareLCM, SoftwareNotice, ValidatedSoftwareLCM
 
 
 def create_devices():
@@ -252,4 +252,79 @@ def create_inventory_item_hardware_notices():
             end_of_security_patches=date(2025, 4, 1),
             documentation_url="https://test.com",
         ),
+    )
+
+
+def create_software_notices():
+    """Create software notices for tests."""
+
+    device_platform_ios, _ = Platform.objects.get_or_create(name="cisco_ios")
+    active_status, _ = Status.objects.get_or_create(name="Active")
+    active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
+
+    software_version_1 = (
+        SoftwareVersion.objects.create(platform=device_platform_ios, version="15.1(2)M", status=active_status),
+    )
+    software_version_2 = (
+        SoftwareVersion.objects.create(platform=device_platform_ios, version="4.22.9M", status=active_status),
+    )
+
+    manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+    device_type_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="C9300-24H")
+    device_type_2, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="C9500-40X")
+    device_type_3, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="CSR1000V")
+
+    return (
+        SoftwareNotice.objects.get_or_create(
+            software_version=software_version_1,
+            device_type=device_type_1,
+            end_of_sale=date(2022, 4, 1),
+            end_of_support=date(2023, 4, 1),
+            end_of_sw_releases=date(2024, 4, 1),
+            end_of_security_patches=date(2025, 4, 1),
+            documentation_url="https://test.com",
+        )[0],
+        SoftwareNotice.objects.get_or_create(
+            software_version=software_version_1,
+            device_type=device_type_2,
+            end_of_sale=date(2022, 4, 1),
+            end_of_support=date(2024, 1, 1),
+            end_of_sw_releases=date(2024, 4, 1),
+            end_of_security_patches=date(2025, 4, 1),
+            documentation_url="https://test.com",
+        )[0],
+        SoftwareNotice.objects.get_or_create(
+            software_version=software_version_1,
+            device_type=device_type_3,
+            end_of_sale=date(2022, 4, 1),
+            end_of_support=date(2999, 1, 1),
+            end_of_sw_releases=date(2024, 4, 1),
+            end_of_security_patches=date(2025, 4, 1),
+            documentation_url="https://test.com",
+        )[0],
+        SoftwareNotice.objects.get_or_create(
+            software_version=software_version_1,
+            end_of_sale=date(2022, 4, 1),
+            end_of_support=date(2999, 1, 1),
+            end_of_sw_releases=date(2024, 4, 1),
+            end_of_security_patches=date(2025, 4, 1),
+            documentation_url="https://test.com",
+        )[0],
+        SoftwareNotice.objects.get_or_create(
+            software_version=software_version_2,
+            device_type=device_type_1,
+            end_of_sale=date(2022, 4, 1),
+            end_of_support=date(2023, 4, 1),
+            end_of_sw_releases=date(2024, 4, 1),
+            end_of_security_patches=date(2025, 4, 1),
+            documentation_url="https://test.com",
+        )[0],
+        SoftwareNotice.objects.get_or_create(
+            software_version=software_version_2,
+            end_of_sale=date(2022, 4, 1),
+            end_of_support=date(2023, 4, 1),
+            end_of_sw_releases=date(2024, 4, 1),
+            end_of_security_patches=date(2025, 4, 1),
+            documentation_url="https://test.com",
+        )[0],
     )

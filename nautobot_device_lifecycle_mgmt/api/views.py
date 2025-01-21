@@ -10,6 +10,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
     InventoryItemSoftwareValidationResultFilterSet,
     ProviderLCMFilterSet,
+    SoftwareNoticeFilterSet,
     ValidatedSoftwareLCMFilterSet,
     VulnerabilityLCMFilterSet,
 )
@@ -21,6 +22,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
     ProviderLCM,
+    SoftwareNotice,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
@@ -33,6 +35,7 @@ from .serializers import (
     HardwareLCMSerializer,
     InventoryItemSoftwareValidationResultSerializer,
     ProviderLCMSerializer,
+    SoftwareNoticeSerializer,
     ValidatedSoftwareLCMSerializer,
     VulnerabilityLCMSerializer,
 )
@@ -44,6 +47,14 @@ class HardwareLCMView(NautobotModelViewSet):
     queryset = HardwareLCM.objects.all()
     filterset_class = HardwareLCMFilterSet
     serializer_class = HardwareLCMSerializer
+
+
+class SoftwareNoticeView(NautobotModelViewSet):
+    """CRUD operations set for the Software Notice Lifecycle Management view."""
+
+    queryset = SoftwareNotice.objects.all()
+    filterset_class = SoftwareNoticeFilterSet
+    serializer_class = SoftwareNoticeSerializer
 
 
 class ContractLCMView(NautobotModelViewSet):

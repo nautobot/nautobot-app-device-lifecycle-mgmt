@@ -18,6 +18,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
     ProviderLCM,
+    SoftwareNotice,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
@@ -119,6 +120,132 @@ class HardwareLCMFilterSet(NautobotFilterSet):
         """Meta attributes for filter."""
 
         model = HardwareLCM
+
+        fields = "__all__"
+
+    def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument
+        """Perform the filtered search."""
+        today = datetime.datetime.today().date()
+        # End of support dates less than today are expired.
+        # End of support dates greater than or equal to today are not expired.
+        # If the end of support date is null, the notice will never be expired.
+        qs_filter = None
+        if value:
+            qs_filter = Q(**{"end_of_support__lt": today})
+        if not value:
+            qs_filter = Q(**{"end_of_support__gte": today}) | Q(**{"end_of_support__isnull": True})
+        return queryset.filter(qs_filter)
+
+
+class SoftwareNoticeFilterSet(NautobotFilterSet):
+    """Filter for SoftwareNotice."""
+
+    q = SearchFilter(
+        filter_predicates={
+            "software_version__version": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "software_version__alias": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "device_type__model": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "device_type__part_number": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "comments": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "documentation_url": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "end_of_sale": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "end_of_support": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "end_of_sw_releases": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "end_of_security_patches": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+        }
+    )
+    software_version_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="software_version",
+        queryset=SoftwareVersion.objects.all(),
+        label="Software Version",
+    )
+    software_version = django_filters.ModelMultipleChoiceFilter(
+        field_name="software_version", queryset=SoftwareVersion.objects.all(), label="Software Version"
+    )
+    software_version_version = django_filters.ModelMultipleChoiceFilter(
+        field_name="software_version__version",
+        queryset=SoftwareVersion.objects.all(),
+        to_field_name="version",
+        label="Software Version (String)",
+    )
+
+    device_type_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_type",
+        queryset=DeviceType.objects.all(),
+        label="Device Type",
+    )
+    device_type = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_type", queryset=DeviceType.objects.all(), label="Device Type"
+    )
+    device_type_model = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_type__model",
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        label="Device Type (Model)",
+    )
+
+    documentation_url = django_filters.CharFilter(
+        lookup_expr="contains",
+    )
+
+    end_of_support = django_filters.DateFilter()
+    end_of_support__gte = django_filters.DateFilter(field_name="end_of_support", lookup_expr="gte")
+    end_of_support__lte = django_filters.DateFilter(field_name="end_of_support", lookup_expr="lte")
+    end_of_support__isnull = django_filters.BooleanFilter(field_name="end_of_support", lookup_expr="isnull")
+
+    end_of_sale = django_filters.DateFilter()
+    end_of_sale__gte = django_filters.DateFilter(field_name="end_of_sale", lookup_expr="gte")
+    end_of_sale__lte = django_filters.DateFilter(field_name="end_of_sale", lookup_expr="lte")
+    end_of_sale__isnull = django_filters.BooleanFilter(field_name="end_of_sale", lookup_expr="isnull")
+
+    end_of_security_patches = django_filters.DateFilter()
+    end_of_security_patches__gte = django_filters.DateFilter(field_name="end_of_security_patches", lookup_expr="gte")
+    end_of_security_patches__lte = django_filters.DateFilter(field_name="end_of_security_patches", lookup_expr="lte")
+    end_of_security_patches__isnull = django_filters.BooleanFilter(
+        field_name="end_of_security_patches", lookup_expr="isnull"
+    )
+
+    end_of_sw_releases = django_filters.DateFilter()
+    end_of_sw_releases__gte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="gte")
+    end_of_sw_releases__lte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="lte")
+    end_of_sw_releases__isnull = django_filters.BooleanFilter(field_name="end_of_sw_releases", lookup_expr="isnull")
+
+    expired = django_filters.BooleanFilter(method="_expired_search", label="Support Expired")
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = SoftwareNotice
 
         fields = "__all__"
 

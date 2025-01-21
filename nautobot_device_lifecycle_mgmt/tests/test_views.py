@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from nautobot.apps.testing import ViewTestCases
-from nautobot.dcim.models import DeviceType, Manufacturer
+from nautobot.dcim.models import DeviceType, Manufacturer, Platform, SoftwareVersion
 from nautobot.extras.models import Status
 from nautobot.users.models import ObjectPermission
 
@@ -17,6 +17,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
+    SoftwareNotice,
     VulnerabilityLCM,
 )
 
@@ -60,6 +61,59 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
             f"{device_types[3].composite_key},2021-10-06,2022-10-06,2025-10-06,2026-10-06,https://cisco.com/eox",
             f"{device_types[4].composite_key},2022-10-06,2023-10-06,2025-10-06,2026-10-06,https://cisco.com/eox",
             f"{device_types[5].composite_key},2023-10-06,2024-10-06,2025-10-06,2026-10-06,https://cisco.com/eox",
+        )
+
+
+class SoftwareNoticeViewTest(ViewTestCases.PrimaryObjectViewTestCase):
+    """Test the SoftwareNotice views."""
+
+    model = SoftwareNotice
+    bulk_edit_data = {"documentation_url": "https://cisco.com/eox"}
+
+    def _get_base_url(self):
+        return "plugins:{}:{}_{{}}".format(  # pylint: disable=consider-using-f-string
+            self.model._meta.app_label,
+            self.model._meta.model_name,  # pylint: disable=protected-access
+        )
+
+    @classmethod
+    def setUpTestData(cls):  # pylint: disable=invalid-name
+        """Create a superuser and token for API calls."""
+        manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+        device_types = tuple(
+            DeviceType.objects.get_or_create(model=model, manufacturer=manufacturer)[0]
+            for model in ["c9300-24", "c9300-48", "c9500-24", "c9500-48", "c9200-24", "c9200-48"]
+        )
+
+        device_platform_ios, _ = Platform.objects.get_or_create(name="cisco_ios")
+        active_status, _ = Status.objects.get_or_create(name="Active")
+        active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
+
+        software_version, _ = SoftwareVersion.objects.get_or_create(
+            platform=device_platform_ios, version="15.1(2)M", status=active_status
+        )
+
+        SoftwareNotice.objects.create(
+            software_version=software_version, device_type=device_types[0], end_of_sale=datetime.date(2021, 4, 1)
+        )
+        SoftwareNotice.objects.create(
+            software_version=software_version, device_type=device_types[1], end_of_sale=datetime.date(2021, 4, 1)
+        )
+        SoftwareNotice.objects.create(
+            software_version=software_version, device_type=device_types[2], end_of_sale=datetime.date(2021, 4, 1)
+        )
+
+        cls.form_data = {
+            "software_version": software_version.id,
+            "device_type": device_types[3].id,
+            "end_of_sale": datetime.date(2021, 4, 1),
+            "end_of_support": datetime.date(2024, 4, 1),
+        }
+        cls.csv_data = (
+            "software_version,device_type,end_of_sale,end_of_support,end_of_sw_releases,end_of_security_patches,documentation_url",
+            f"{software_version.composite_key},{device_types[3].composite_key},2021-10-06,2022-10-06,2025-10-06,2026-10-06,https://cisco.com/eox",
+            f"{software_version.composite_key},{device_types[4].composite_key},2022-10-06,2023-10-06,2025-10-06,2026-10-06,https://cisco.com/eox",
+            f"{software_version.composite_key},{device_types[5].composite_key},2023-10-06,2024-10-06,2025-10-06,2026-10-06,https://cisco.com/eox",
         )
 
 
