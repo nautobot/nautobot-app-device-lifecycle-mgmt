@@ -142,9 +142,7 @@ class SoftwareNotice(PrimaryModel):
     software_version = models.ForeignKey(
         to="dcim.SoftwareVersion",
         on_delete=models.CASCADE,
-        verbose_name="Software Notice",
-        blank=True,
-        null=True,
+        verbose_name="Software Version",
     )
     device_type = models.ForeignKey(
         to="dcim.DeviceType",
