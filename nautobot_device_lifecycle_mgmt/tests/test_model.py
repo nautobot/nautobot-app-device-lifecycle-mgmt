@@ -201,8 +201,8 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
             software=self.software,
             start=date(2019, 1, 10),
         )
-        validatedsoftwarelcm.device_types.set([self.device_type_1])
         validatedsoftwarelcm.save()
+        validatedsoftwarelcm.device_types.set([self.device_type_1])
 
         self.assertEqual(validatedsoftwarelcm.software, self.software)
         self.assertEqual(str(validatedsoftwarelcm.start), "2019-01-10")
@@ -216,8 +216,8 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
             end=date(2022, 11, 1),
             preferred=False,
         )
-        validatedsoftwarelcm.device_types.set([self.device_type_1])
         validatedsoftwarelcm.save()
+        validatedsoftwarelcm.device_types.set([self.device_type_1])
 
         self.assertEqual(validatedsoftwarelcm.software, self.software)
         self.assertEqual(str(validatedsoftwarelcm.start), "2020-04-15")
@@ -233,8 +233,8 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
             start=date(2020, 4, 15),
             preferred=False,
         )
-        validatedsoftwarelcm_start_only.device_types.set([self.device_type_1])
         validatedsoftwarelcm_start_only.save()
+        validatedsoftwarelcm_start_only.device_types.set([self.device_type_1])
 
         validatedsoftwarelcm_start_end = ValidatedSoftwareLCM(
             software=self.software,
@@ -242,8 +242,8 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
             end=date(2022, 11, 1),
             preferred=False,
         )
-        validatedsoftwarelcm_start_end.device_types.set([self.device_type_2])
         validatedsoftwarelcm_start_end.save()
+        validatedsoftwarelcm_start_end.device_types.set([self.device_type_2])
 
         date_valid = date(2021, 6, 11)
         date_before_valid_start = date(2018, 9, 26)
@@ -271,15 +271,15 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
             software=self.software,
             start=date(2019, 1, 10),
         )
-        validatedsoftwarelcm_1.devices.set([self.device_1])
         validatedsoftwarelcm_1.save()
+        validatedsoftwarelcm_1.devices.set([self.device_1])
 
         validatedsoftwarelcm_2 = ValidatedSoftwareLCM(
             software=self.software,
             start=date(2018, 1, 10),
         )
-        validatedsoftwarelcm_2.devices.set([self.device_2])
         validatedsoftwarelcm_2.save()
+        validatedsoftwarelcm_2.devices.set([self.device_2])
 
         validated_software_for_device = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
         self.assertEqual(validated_software_for_device.count(), 1)
@@ -290,15 +290,15 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
             software=self.software,
             start=date(2019, 1, 10),
         )
-        validatedsoftwarelcm_1.device_types.set([self.device_type_1])
         validatedsoftwarelcm_1.save()
+        validatedsoftwarelcm_1.device_types.set([self.device_type_1])
 
         validatedsoftwarelcm_2 = ValidatedSoftwareLCM(
             software=self.software,
             start=date(2018, 1, 10),
         )
-        validatedsoftwarelcm_2.device_types.set([self.device_type_2])
         validatedsoftwarelcm_2.save()
+        validatedsoftwarelcm_2.device_types.set([self.device_type_2])
 
         validated_software_for_device_type = ValidatedSoftwareLCM.objects.get_for_object(self.device_type_1)
         self.assertEqual(validated_software_for_device_type.count(), 1)
@@ -309,15 +309,15 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
             software=self.software,
             start=date(2019, 1, 10),
         )
-        validatedsoftwarelcm_1.inventory_items.set([self.inventoryitem_1])
         validatedsoftwarelcm_1.save()
+        validatedsoftwarelcm_1.inventory_items.set([self.inventoryitem_1])
 
         validatedsoftwarelcm_2 = ValidatedSoftwareLCM(
             software=self.software,
             start=date(2018, 1, 10),
         )
-        validatedsoftwarelcm_2.inventory_items.set([self.inventoryitem_2])
         validatedsoftwarelcm_2.save()
+        validatedsoftwarelcm_2.inventory_items.set([self.inventoryitem_2])
 
         validated_software_for_inventoryitem = ValidatedSoftwareLCM.objects.get_for_object(self.inventoryitem_1)
         self.assertEqual(validated_software_for_inventoryitem.count(), 1)
@@ -579,8 +579,8 @@ class SoftwareImageLCMTestCase(TestCase):
     def test_create_softwareimage_required_only(self):
         """Successfully create SoftwareImageLCM with required fields only."""
         softwareimage = SoftwareImageLCM(image_file_name="ios17.3.3md.img", software=self.software)
-        softwareimage.device_types.set([self.device_type_1])
         softwareimage.save()
+        softwareimage.device_types.set([self.device_type_1])
 
         self.assertEqual(softwareimage.image_file_name, "ios17.3.3md.img")
         self.assertEqual(softwareimage.software, self.software)
@@ -595,10 +595,10 @@ class SoftwareImageLCMTestCase(TestCase):
             image_file_checksum="441rfabd75b0512r7fde7a7a66faa596",
             default_image=True,
         )
+        softwareimage.save()
         softwareimage.device_types.set([self.device_type_1])
         softwareimage.inventory_items.set([self.inventory_item])
         softwareimage.object_tags.set([self.tag])
-        softwareimage.save()
 
         self.assertEqual(softwareimage.image_file_name, "ios17.3.3md.img")
         self.assertEqual(softwareimage.software, self.software)
@@ -619,8 +619,8 @@ class SoftwareImageLCMTestCase(TestCase):
             image_file_checksum="441rfabd75b0512r7fde7a7a66faa596",
             default_image=False,
         )
-        softwareimage.device_types.set([self.device_type_1])
         softwareimage.save()
+        softwareimage.device_types.set([self.device_type_1])
 
         self.assertEqual(list(self.device_type_1.software_images.all()), [softwareimage])
 

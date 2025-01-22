@@ -148,8 +148,8 @@ def create_validated_softwares():
         software=software_one,
         start=date(2019, 1, 10),
     )
-    validatedsoftwarelcm.device_types.set([device_type])  # pylint: disable=no-member
     validatedsoftwarelcm.save()
+    validatedsoftwarelcm.device_types.set([device_type])  # pylint: disable=no-member
     software_two = SoftwareLCM.objects.create(
         device_platform=device_platform_ios,
         version="20.0.0 MD",
@@ -159,8 +159,8 @@ def create_validated_softwares():
         software=software_two,
         start=date(2019, 1, 10),
     )
-    validatedsoftwarelcm_two.device_types.set([device_type])  # pylint: disable=no-member
     validatedsoftwarelcm_two.save()
+    validatedsoftwarelcm_two.device_types.set([device_type])  # pylint: disable=no-member
 
     validated_items = (
         software_one,
