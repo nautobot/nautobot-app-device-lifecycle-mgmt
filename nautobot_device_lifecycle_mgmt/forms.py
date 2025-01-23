@@ -74,7 +74,10 @@ class HardwareLCMForm(NautobotModelForm):
     device_type = DynamicModelChoiceField(queryset=DeviceType.objects.all(), required=False)
     inventory_item = HardwareLCMDynamicModelChoiceField(
         queryset=InventoryItem.objects.without_tree_fields().order_by().distinct("part_id"),
-        query_params={"part_id__nre": "^$", "nautobot_device_lifecycle_mgmt_distinct_part_id": "true"},
+        query_params={
+            "part_id__nre": "^$",
+            "nautobot_device_lifecycle_mgmt_distinct_part_id": "true",
+        },
         label="Inventory Part ID",
         display_field="part_id",
         to_field_name="part_id",
@@ -468,7 +471,10 @@ class DeviceSoftwareValidationResultFilterForm(NautobotFilterForm):
         required=False,
     )
     device_role = DynamicModelMultipleChoiceField(
-        queryset=Role.objects.all(), query_params={"content_types": "dcim.device"}, to_field_name="name", required=False
+        queryset=Role.objects.all(),
+        query_params={"content_types": "dcim.device"},
+        to_field_name="name",
+        required=False,
     )
     exclude_sw_missing = forms.BooleanField(
         required=False,
@@ -547,7 +553,10 @@ class InventoryItemSoftwareValidationResultFilterForm(NautobotFilterForm):
         required=False,
     )
     device_role = DynamicModelMultipleChoiceField(
-        queryset=Role.objects.all(), query_params={"content_types": "dcim.device"}, to_field_name="name", required=False
+        queryset=Role.objects.all(),
+        query_params={"content_types": "dcim.device"},
+        to_field_name="name",
+        required=False,
     )
     exclude_sw_missing = forms.BooleanField(
         required=False,
@@ -610,7 +619,7 @@ class ContractLCMForm(NautobotModelForm):
         return {"provider": self.request.GET.get("provider")}  # pylint: disable=E1101
 
 
-class ContractLCMBulkEditForm(NautobotBulkEditForm):
+class ContractLCMBulkEditForm(NautobotBulkEditForm, StatusModelBulkEditFormMixin):
     """Device Lifecycle Contrcts bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=ContractLCM.objects.all(), widget=forms.MultipleHiddenInput)
@@ -796,7 +805,9 @@ class CVELCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin
     comments = CommentField(required=False)
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     status = DynamicModelChoiceField(
-        queryset=Status.objects.all(), required=False, query_params={"content_types": model._meta.label_lower}
+        queryset=Status.objects.all(),
+        required=False,
+        query_params={"content_types": model._meta.label_lower},
     )
 
     class Meta:
