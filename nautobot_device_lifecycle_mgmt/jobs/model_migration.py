@@ -354,6 +354,11 @@ class DLMToNautoboCoreModelMigration(Job):
         # Map the DLM Software Version ID to the Core Software version ID. This is needed for SoftwareImage migrations.
         self.dlm_to_core_id_map[self.softlcm_ct_str][str(dlm_software_version.id)] = str(core_software_version.id)
 
+        # Set migrated_to_core_model field on DLM Software object
+        dlm_software_version.migrated_to_core_model = core_software_version
+        dlm_software_version.migrated_to_core_model_flag = True
+        dlm_software_version.validated_save()
+
         # Preserve ID of the DLM SoftwareLCM object. This is needed to rewrite references in DLM models that referenced this software.
         dlm_id_tag_name = f"DLM_migration-SoftwareLCM__{dlm_software_version.id}"
         dlm_id_tag, _ = Tag.objects.get_or_create(
@@ -638,6 +643,11 @@ class DLMToNautoboCoreModelMigration(Job):
         # Map the DLM Contact ID to Core Contact ID.
         self.dlm_to_core_id_map[self.contactlcm_ct_str][str(dlm_contact.id)] = str(core_contact.id)
 
+        # Set migrated_to_core_model field on DLM Contact object
+        dlm_contact.migrated_to_core_model = core_contact
+        dlm_contact.migrated_to_core_model_flag = True
+        dlm_contact.validated_save()
+
         # Preserve ID of the DLM Contact object.
         dlm_id_tag_name = f"DLM_migration-ContactLCM__{dlm_contact.id}"
         dlm_id_tag, _ = Tag.objects.get_or_create(
@@ -890,6 +900,11 @@ class DLMToNautoboCoreModelMigration(Job):
 
         # Map the DLM Software Version ID to the Core Software version ID. This is needed for SoftwareImage migrations.
         self.dlm_to_core_id_map[self.softimglcm_ct_str][str(dlm_software_image.id)] = str(core_software_image.id)
+
+        # Set migrated_to_core_model field on DLM SoftwareImage object
+        dlm_software_image.migrated_to_core_model = core_software_image
+        dlm_software_image.migrated_to_core_model_flag = True
+        dlm_software_image.validated_save()
 
         # Preserve ID of the DLM SoftwareImageLCM object. This is needed for migrations.
         csv_dlm_id_tag_name = f"DLM_migration-SoftwareImageLCM__{dlm_software_image.id}"
