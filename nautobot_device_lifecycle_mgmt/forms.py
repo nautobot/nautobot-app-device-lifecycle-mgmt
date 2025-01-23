@@ -17,8 +17,20 @@ from nautobot.apps.forms import (
     add_blank_choice,
 )
 from nautobot.core.forms.constants import BOOLEAN_WITH_BLANK_CHOICES
-from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform
-from nautobot.extras.forms import CustomFieldModelBulkEditFormMixin, NautobotFilterForm
+from nautobot.dcim.models import (
+    Device,
+    DeviceType,
+    InventoryItem,
+    Location,
+    Manufacturer,
+    Platform,
+)
+from nautobot.extras.forms import (
+    CustomFieldModelBulkEditFormMixin,
+    NautobotFilterForm,
+    StatusModelBulkEditFormMixin,
+    StatusModelFilterFormMixin,
+)
 from nautobot.extras.models import Role, Status, Tag
 
 from nautobot_device_lifecycle_mgmt.choices import (
@@ -75,7 +87,10 @@ class HardwareLCMForm(NautobotModelForm):
     device_type = DynamicModelChoiceField(queryset=DeviceType.objects.all(), required=False)
     inventory_item = HardwareLCMDynamicModelChoiceField(
         queryset=InventoryItem.objects.without_tree_fields().order_by().distinct("part_id"),
-        query_params={"part_id__nre": "^$", "nautobot_device_lifecycle_mgmt_distinct_part_id": "true"},
+        query_params={
+            "part_id__nre": "^$",
+            "nautobot_device_lifecycle_mgmt_distinct_part_id": "true",
+        },
         label="Inventory Part ID",
         display_field="part_id",
         to_field_name="part_id",
@@ -354,7 +369,9 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
     devices = DynamicModelMultipleChoiceField(queryset=Device.objects.all(), required=False)
     device_types = DynamicModelMultipleChoiceField(queryset=DeviceType.objects.all(), required=False)
     device_roles = DynamicModelMultipleChoiceField(
-        queryset=Role.objects.all(), query_params={"content_types": "dcim.device"}, required=False
+        queryset=Role.objects.all(),
+        query_params={"content_types": "dcim.device"},
+        required=False,
     )
 
     inventory_items = DynamicModelMultipleChoiceField(queryset=InventoryItem.objects.all(), required=False)
@@ -383,7 +400,19 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
         inventory_items = self.cleaned_data.get("inventory_items")
         object_tags = self.cleaned_data.get("object_tags")
 
-        if sum(obj.count() for obj in (devices, device_types, device_roles, inventory_items, object_tags)) == 0:
+        if (
+            sum(
+                obj.count()
+                for obj in (
+                    devices,
+                    device_types,
+                    device_roles,
+                    inventory_items,
+                    object_tags,
+                )
+            )
+            == 0
+        ):
             msg = "You need to assign to at least one object."
             self.add_error(None, msg)
 
@@ -482,7 +511,10 @@ class DeviceSoftwareValidationResultFilterForm(NautobotFilterForm):
         required=False,
     )
     device_role = DynamicModelMultipleChoiceField(
-        queryset=Role.objects.all(), query_params={"content_types": "dcim.device"}, to_field_name="name", required=False
+        queryset=Role.objects.all(),
+        query_params={"content_types": "dcim.device"},
+        to_field_name="name",
+        required=False,
     )
     exclude_sw_missing = forms.BooleanField(
         required=False,
@@ -561,7 +593,10 @@ class InventoryItemSoftwareValidationResultFilterForm(NautobotFilterForm):
         required=False,
     )
     device_role = DynamicModelMultipleChoiceField(
-        queryset=Role.objects.all(), query_params={"content_types": "dcim.device"}, to_field_name="name", required=False
+        queryset=Role.objects.all(),
+        query_params={"content_types": "dcim.device"},
+        to_field_name="name",
+        required=False,
     )
     exclude_sw_missing = forms.BooleanField(
         required=False,
@@ -624,7 +659,7 @@ class ContractLCMForm(NautobotModelForm):
         return {"provider": self.request.GET.get("provider")}  # pylint: disable=E1101
 
 
-class ContractLCMBulkEditForm(NautobotBulkEditForm):
+class ContractLCMBulkEditForm(NautobotBulkEditForm, StatusModelBulkEditFormMixin):
     """Device Lifecycle Contrcts bulk edit form."""
 
     model = ContractLCM
@@ -636,17 +671,22 @@ class ContractLCMBulkEditForm(NautobotBulkEditForm):
     currency = forms.ChoiceField(required=False, choices=CurrencyChoices.CHOICES)
     contract_type = forms.ChoiceField(choices=ContractTypeChoices.CHOICES, required=False)
     support_level = forms.CharField(required=False)
-    status = DynamicModelChoiceField(
-        queryset=Status.objects.all(), required=False, query_params={"content_types": model._meta.label_lower}
-    )
 
     class Meta:
         """Meta attributes for the ContractLCMBulkEditForm class."""
 
-        nullable_fields = ["start", "end", "cost", "currency", "support_level", "contract_type", "status"]
+        nullable_fields = [
+            "start",
+            "end",
+            "cost",
+            "currency",
+            "support_level",
+            "contract_type",
+            "status",
+        ]
 
 
-class ContractLCMFilterForm(NautobotFilterForm):
+class ContractLCMFilterForm(NautobotFilterForm, StatusModelFilterFormMixin):
     """Filter form to filter searches."""
 
     model = ContractLCM
@@ -656,16 +696,12 @@ class ContractLCMFilterForm(NautobotFilterForm):
         required=False, choices=CurrencyChoices.CHOICES, widget=StaticSelect2Multiple()
     )
     contract_type = forms.ChoiceField(
-        required=False, widget=StaticSelect2, choices=add_blank_choice(ContractTypeChoices.CHOICES)
+        required=False,
+        widget=StaticSelect2,
+        choices=add_blank_choice(ContractTypeChoices.CHOICES),
     )
     name = forms.CharField(required=False)
     tags = TagFilterField(model)
-    status = DynamicModelMultipleChoiceField(
-        queryset=Status.objects.all(),
-        required=False,
-        query_params={"content_types": model._meta.label_lower},
-        to_field_name="name",
-    )
 
     class Meta:
         """Meta attributes for the ContractLCMFilterForm class."""
@@ -793,7 +829,14 @@ class ContactLCMBulkEditForm(NautobotBulkEditForm):
     class Meta:
         """Meta attributes for the ContactLCMBulkEditForm class."""
 
-        nullable_fields = ["address", "phone", "email", "comments", "priority", "contract"]
+        nullable_fields = [
+            "address",
+            "phone",
+            "email",
+            "comments",
+            "priority",
+            "contract",
+        ]
 
 
 class ContactLCMFilterForm(NautobotFilterForm):
@@ -850,7 +893,9 @@ class CVELCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin
     comments = forms.CharField(required=False)
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     status = DynamicModelChoiceField(
-        queryset=Status.objects.all(), required=False, query_params={"content_types": model._meta.label_lower}
+        queryset=Status.objects.all(),
+        required=False,
+        query_params={"content_types": model._meta.label_lower},
     )
 
     class Meta:
