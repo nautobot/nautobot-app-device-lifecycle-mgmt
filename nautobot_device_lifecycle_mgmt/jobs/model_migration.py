@@ -9,6 +9,7 @@ from string import ascii_letters, digits
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import Count
+from django.urls import reverse
 from django.utils.text import slugify
 from nautobot.apps.choices import (
     ObjectChangeActionChoices,
@@ -16,6 +17,7 @@ from nautobot.apps.choices import (
     SoftwareImageFileHashingAlgorithmChoices,
 )
 from nautobot.apps.models import serialize_object, serialize_object_v2
+from nautobot.apps.utils import get_route_for_model
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, SoftwareImageFile, SoftwareVersion
 from nautobot.extras.constants import CHANGELOG_MAX_OBJECT_REPR
 from nautobot.extras.jobs import BooleanVar, DryRunVar, Job
@@ -274,10 +276,12 @@ class DLMToNautoboCoreModelMigration(Job):
             .annotate(count_migrated_to_core_model=Count("migrated_to_core_model"))
             .filter(count_migrated_to_core_model__gt=1)
         )
+        api_url = reverse(get_route_for_model(dlm_model, "list", api=True))
         for instance in qs:
             self.logger.warning(
-                "Multiple (%s) DLM %s objects migrated to the same Core %s object __%s__.",
+                "Multiple [(%s)](%s) DLM %s objects migrated to the same Core %s object __%s__.",
                 html.escape(str(instance["count_migrated_to_core_model"])),
+                html.escape(f"{api_url}?migrated_to_core_model={instance['migrated_to_core_model']}"),
                 html.escape(str(dlm_model.__name__)),
                 html.escape(str(core_model.__name__)),
                 html.escape(str(core_model.objects.get(id=instance["migrated_to_core_model"]))),
