@@ -1,4 +1,4 @@
-# pylint: disable=logging-not-lazy, consider-using-f-string
+# pylint: disable=too-many-lines
 """Jobs for the Lifecycle Management app."""
 
 import html
@@ -6,6 +6,7 @@ import uuid
 from difflib import SequenceMatcher
 from string import ascii_letters, digits
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import Count
@@ -63,7 +64,7 @@ class RollbackTransaction(Exception):
     """Exception to rollback database transaction."""
 
 
-class DLMToNautoboCoreModelMigration(Job):
+class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance-attributes
     """Utility migrating DLM models ContactLCM, SoftwareLCM and SoftwareImageLCM to Nautobot Core (2.2.0+)."""
 
     dryrun = DryRunVar(description="Enable for reporting mode.")
@@ -90,60 +91,24 @@ class DLMToNautoboCoreModelMigration(Job):
         dryrun_default = True
         has_sensitive_variables = False
 
+    # pylint: disable=arguments-differ, too-many-arguments
     def run(
         self, dryrun, hide_changelog_migrations, update_core_to_match_dlm, remove_dangling_relationships, debug
-    ) -> None:  # pylint: disable=arguments-differ
+    ) -> None:
         """Migration logic."""
-        self.debug = debug
-        self.update_core_to_match_dlm = update_core_to_match_dlm
-        self.hide_changelog_migrations = hide_changelog_migrations
-        self.remove_corrupted_relationships = remove_dangling_relationships
-
-        self.softlcm_ct_str = str(ContentType.objects.get_for_model(SoftwareLCM))
-        self.softimglcm_ct_str = str(ContentType.objects.get_for_model(SoftwareImageLCM))
-        self.contactlcm_ct_str = str(ContentType.objects.get_for_model(ContactLCM))
-        self.dlm_to_core_id_map = {
-            self.softlcm_ct_str: {},
-            self.softimglcm_ct_str: {},
-            self.contactlcm_ct_str: {},
-        }
+        # Fail if running on nautobot < 2.2.0
+        if settings.VERSION_MAJOR < 2 or (settings.VERSION_MAJOR == 2 and settings.VERSION_MINOR < 2):
+            raise ValueError("This job requires Nautobot 2.2.0 or later.")
 
         try:
             with transaction.atomic():
-                self.migrate_dlm_models_to_core()
+                self.migrate_dlm_models_to_core(
+                    debug, hide_changelog_migrations, update_core_to_match_dlm, remove_dangling_relationships
+                )
                 if dryrun:
                     raise RollbackTransaction("Dryrun mode. Rolling back changes.")
         except RollbackTransaction:
             self.logger.info("Transaction rolled back.")
-
-    def _update_migrated_dlm_object_ids(self):
-        """Updates DLM object ID to Core object ID mappings for already migrated objects."""
-        for contact in Contact.objects.filter(tags__name__istartswith="DLM_migration-ContactLCM__"):
-            dlm_contact_id = (
-                contact.tags.filter(name__istartswith="DLM_migration-ContactLCM__")
-                .first()
-                .name.strip("DLM_migration-ContactLCM__")
-            )
-            if dlm_contact_id not in self.dlm_to_core_id_map[self.contactlcm_ct_str]:
-                self.dlm_to_core_id_map[self.contactlcm_ct_str][dlm_contact_id] = str(contact.id)
-        for software_version in SoftwareVersion.objects.filter(tags__name__istartswith="DLM_migration-SoftwareLCM__"):
-            dlm_software_id = (
-                software_version.tags.filter(name__istartswith="DLM_migration-SoftwareLCM__")
-                .first()
-                .name.strip("DLM_migration-SoftwareLCM__")
-            )
-            if dlm_software_id not in self.dlm_to_core_id_map[self.softlcm_ct_str]:
-                self.dlm_to_core_id_map[self.softlcm_ct_str][dlm_software_id] = str(software_version.id)
-        for software_image in SoftwareImageFile.objects.filter(
-            tags__name__istartswith="DLM_migration-SoftwareImageLCM__"
-        ):
-            dlm_software_image_id = (
-                software_image.tags.filter(name__istartswith="DLM_migration-SoftwareImageLCM__")
-                .first()
-                .name.strip("DLM_migration-SoftwareImageLCM__")
-            )
-            if dlm_software_image_id not in self.dlm_to_core_id_map[self.softimglcm_ct_str]:
-                self.dlm_to_core_id_map[self.softimglcm_ct_str][dlm_software_image_id] = str(software_image.id)
 
     def _migrate_custom_fields(self, old_ct, new_ct):
         """Migrate custom fields."""
@@ -199,7 +164,9 @@ class DLMToNautoboCoreModelMigration(Job):
                 extra={"object": cve},
             )
 
-    def migrate_dlm_models_to_core(self):
+    def migrate_dlm_models_to_core(
+        self, debug, hide_changelog_migrations, update_core_to_match_dlm, remove_dangling_relationships
+    ):
         """Migrates Software, SoftwareImage and Contact model instances to corresponding Core models."""
         dlm_software_version_ct = ContentType.objects.get_for_model(SoftwareLCM)
         core_software_version_ct = ContentType.objects.get_for_model(SoftwareVersion)
@@ -207,9 +174,6 @@ class DLMToNautoboCoreModelMigration(Job):
         core_software_image_ct = ContentType.objects.get_for_model(SoftwareImageFile)
         dlm_contact_ct = ContentType.objects.get_for_model(ContactLCM)
         core_contact_ct = ContentType.objects.get_for_model(Contact)
-
-        # Need to update DLM to Core references for already migrated objects
-        self._update_migrated_dlm_object_ids()
 
         # Need to add Core content type to custom fields before we can copy over values from the DLM Software custom fields.
         self._migrate_custom_fields(dlm_software_version_ct, core_software_version_ct)
@@ -220,10 +184,13 @@ class DLMToNautoboCoreModelMigration(Job):
                 html.escape(str(dlm_software_version)),
                 extra={"object": dlm_software_version},
             )
-            self._migrate_software_version(dlm_software_version)
+            self._migrate_software_version(
+                dlm_software_version, update_core_to_match_dlm, remove_dangling_relationships, debug
+            )
         self.migrate_content_type_references_to_new_model(
             dlm_software_version_ct,
             core_software_version_ct,
+            hide_changelog_migrations,
         )
 
         # Need to add Core content type to custom fields before we can copy over values from the DLM Software Image custom fields.
@@ -235,10 +202,11 @@ class DLMToNautoboCoreModelMigration(Job):
                 html.escape(str(dlm_software_image)),
                 extra={"object": dlm_software_image},
             )
-            self._migrate_software_image(dlm_software_image)
+            self._migrate_software_image(dlm_software_image, update_core_to_match_dlm, debug)
         self.migrate_content_type_references_to_new_model(
             dlm_software_image_ct,
             core_software_image_ct,
+            hide_changelog_migrations,
         )
         # Create placeholder software image files for (software, device type) pairs that don't currently have image files
         # This is to satisfy Nautobot's 2.2 requirement that device can only have software assigned if there is a matching image
@@ -253,10 +221,11 @@ class DLMToNautoboCoreModelMigration(Job):
                 html.escape(str(dlm_contact)),
                 extra={"object": dlm_contact},
             )
-            self._migrate_contact(dlm_contact)
+            self._migrate_contact(dlm_contact, update_core_to_match_dlm, debug)
         self.migrate_content_type_references_to_new_model(
             dlm_contact_ct,
             core_contact_ct,
+            hide_changelog_migrations,
         )
 
         self._migrate_software_references()
@@ -287,7 +256,9 @@ class DLMToNautoboCoreModelMigration(Job):
                 html.escape(str(core_model.objects.get(id=instance["migrated_to_core_model"]))),
             )
 
-    def _migrate_software_version(self, dlm_software_version):
+    def _migrate_software_version(
+        self, dlm_software_version, update_core_to_match_dlm, remove_dangling_relationships, debug
+    ):  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
         """Migrate DLM Software to Core SoftwareVersion."""
         core_software_version_ct = ContentType.objects.get_for_model(SoftwareVersion)
         device_ct = ContentType.objects.get_for_model(Device)
@@ -305,7 +276,7 @@ class DLMToNautoboCoreModelMigration(Job):
             "documentation_url": dlm_software_version.documentation_url,
             "long_term_support": dlm_software_version.long_term_support,
             "pre_release": dlm_software_version.pre_release,
-            "_custom_field_data": dlm_software_version._custom_field_data,
+            "_custom_field_data": dlm_software_version.cf,
         }
 
         attrs_diff = {}
@@ -327,9 +298,9 @@ class DLMToNautoboCoreModelMigration(Job):
                     "dlm_value": dlm_attr_value,
                     "core_value": core_attr_value,
                 }
-                if self.update_core_to_match_dlm:
+                if update_core_to_match_dlm:
                     setattr(core_software_version, attr_name, dlm_attr_value)
-            if self.update_core_to_match_dlm and attrs_diff:
+            if update_core_to_match_dlm and attrs_diff:
                 self.logger.info(
                     "Updated existing Core SoftwareVersion __%s__ to match DLM Software __%s__. Diff before update __%s__.",
                     html.escape(str(core_software_version)),
@@ -351,9 +322,6 @@ class DLMToNautoboCoreModelMigration(Job):
         if core_software_version is None:
             return
 
-        # Map the DLM Software Version ID to the Core Software version ID. This is needed for SoftwareImage migrations.
-        self.dlm_to_core_id_map[self.softlcm_ct_str][str(dlm_software_version.id)] = str(core_software_version.id)
-
         # Set migrated_to_core_model field on DLM Software object
         dlm_software_version.migrated_to_core_model = core_software_version
         dlm_software_version.migrated_to_core_model_flag = True
@@ -369,7 +337,7 @@ class DLMToNautoboCoreModelMigration(Job):
             )
 
         # Match the creation date of the Core Software with the DLM Software
-        if core_software_version.created != dlm_software_version.created and self.update_core_to_match_dlm:
+        if core_software_version.created != dlm_software_version.created and update_core_to_match_dlm:
             core_software_version.created = dlm_software_version.created
             core_software_version.validated_save()
             core_software_version.refresh_from_db()
@@ -395,7 +363,7 @@ class DLMToNautoboCoreModelMigration(Job):
                     html.escape(str(relationship_association.destination_id)),
                     extra={"object": dlm_software_version},
                 )
-                if self.remove_dangling_relationships:
+                if remove_dangling_relationships:
                     relationship_association.delete()
                     self.logger.info(
                         "Deleted Software Relationship Association for DLM Software __%s__ that points to a non-existent Device with ID __%s__.",
@@ -413,7 +381,7 @@ class DLMToNautoboCoreModelMigration(Job):
                     html.escape(str(core_software_version)),
                     extra={"object": device},
                 )
-                if self.update_core_to_match_dlm:
+                if update_core_to_match_dlm:
                     device.software_version = core_software_version
                     device.validated_save()
                     self.logger.info(
@@ -449,9 +417,9 @@ class DLMToNautoboCoreModelMigration(Job):
                     html.escape(str(relationship_association.destination_id)),
                     extra={"object": dlm_software_version},
                 )
-                if self.remove_dangling_relationships:
+                if remove_dangling_relationships:
                     relationship_association.delete()
-                    self.logging.info(
+                    self.logger.info(
                         "Deleted Software Relationship Association for DLM Software __%s__ that points to a non-existent InventoryItem with ID __%s__.",
                         html.escape(str(dlm_software_version)),
                         html.escape(str(relationship_association.destination_id)),
@@ -467,7 +435,7 @@ class DLMToNautoboCoreModelMigration(Job):
                     html.escape(str(core_software_version)),
                     extra={"object": inventory_item},
                 )
-                if self.update_core_to_match_dlm:
+                if update_core_to_match_dlm:
                     inventory_item.software_version = core_software_version
                     inventory_item.validated_save()
                     self.logger.info(
@@ -494,7 +462,7 @@ class DLMToNautoboCoreModelMigration(Job):
             changed_object_id=core_software_version.id,
             related_object_id=dlm_software_version.id,
         ).exists():
-            if self.debug:
+            if debug:
                 self.logger.debug(
                     "DLM Software __%s__ to Core SoftwareVersion __%s__ migration change log already in place. Skipping.",
                     html.escape(str(dlm_software_version)),
@@ -525,7 +493,7 @@ class DLMToNautoboCoreModelMigration(Job):
             html.escape(str(core_software_version)),
         )
 
-    def _migrate_contact(self, dlm_contact: ContactLCM):
+    def _migrate_contact(self, dlm_contact: ContactLCM, update_core_to_match_dlm, debug):  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
         """Migrates DLM Contact object to Core Contact."""
         dlm_contact_ct = ContentType.objects.get_for_model(ContactLCM)
         dlm_contract_ct = ContentType.objects.get_for_model(ContractLCM)
@@ -537,7 +505,7 @@ class DLMToNautoboCoreModelMigration(Job):
         dlm_contact_attrs = {
             "address": dlm_contact.address,
             "comments": dlm_contact.comments,
-            "_custom_field_data": dlm_contact._custom_field_data,
+            "_custom_field_data": dlm_contact.cf,
         }
 
         attrs_diff = {}
@@ -559,9 +527,9 @@ class DLMToNautoboCoreModelMigration(Job):
                     "dlm_value": dlm_attr_value,
                     "core_value": core_attr_value,
                 }
-                if self.update_core_to_match_dlm:
+                if update_core_to_match_dlm:
                     setattr(core_contact, attr_name, dlm_attr_value)
-            if self.update_core_to_match_dlm and attrs_diff:
+            if update_core_to_match_dlm and attrs_diff:
                 self.logger.info(
                     "Updated existing Core Contact __%s__ to match DLM Contact __%s__. Diff before update __%s__.",
                     html.escape(str(core_contact)),
@@ -581,9 +549,6 @@ class DLMToNautoboCoreModelMigration(Job):
 
         if core_contact is None:
             return
-
-        # Map the DLM Contact ID to Core Contact ID.
-        self.dlm_to_core_id_map[self.contactlcm_ct_str][str(dlm_contact.id)] = str(core_contact.id)
 
         # Set migrated_to_core_model field on DLM Contact object
         dlm_contact.migrated_to_core_model = core_contact
@@ -611,84 +576,65 @@ class DLMToNautoboCoreModelMigration(Job):
             )
 
         # Migrate ContactLCM types to Core Roles
-        try:
-            contact_association_role = Role.objects.get(name=dlm_contact.type)
-        except Role.DoesNotExist:
+        contact_association_role, created = Role.objects.get_or_create(name=dlm_contact.type)
+        contact_association_role.content_types.add(contact_association_ct)
+        if created:
             self.logger.info(
-                "Contact Association Role __%s__ will be created to match the DLM Contact Type.",
+                "Role __%s__ created to match the DLM Contact Type.",
                 html.escape(str(dlm_contact.type)),
             )
-            contact_association_role = Role.objects.create(name=dlm_contact.type)
-        finally:
-            contact_association_role.content_types.add(contact_association_ct)
 
         # Recreate the DLM Contact -> Contract association with Core Contact -> Contract
-        try:
-            ContactAssociation.objects.get(
-                contact=core_contact,
-                associated_object_id=dlm_contact.contract.id,
-                associated_object_type=dlm_contract_ct,
-                role=contact_association_role,
-            )
-        except ContactAssociation.DoesNotExist:
+        _, created = ContactAssociation.objects.get_or_create(
+            contact=core_contact,
+            associated_object_id=dlm_contact.contract.id,
+            associated_object_type=dlm_contract_ct,
+            role=contact_association_role,
+            defaults={"status": status_active},
+        )
+        if created:
             self.logger.info(
-                "Contact Association between Core Contact __%s__ and DLM Contract __%s__ will be created.",
+                "Contact Association between Core Contact __%s__ and DLM Contract __%s__ created.",
                 html.escape(str(core_contact)),
                 html.escape(str(dlm_contact.contract)),
             )
-            ContactAssociation.objects.create(
-                contact=core_contact,
-                associated_object_id=dlm_contact.contract.id,
-                associated_object_type=dlm_contract_ct,
-                role=contact_association_role,
-                status=status_active,
-            )
-
-        def contact_repr(contact):
-            result = contact.name
-            if contact.phone:
-                result += f" ({contact.phone})"
-            if contact.email:
-                result += f" ({contact.email})"
-            return result
 
         # Create an object change to document migration
-        if ObjectChange.objects.filter(
-            changed_object_id=core_contact.id,
-            related_object_id=dlm_contact.id,
-        ).exists():
-            if self.debug:
-                self.logger.debug(
-                    "DLM Contact __%s__ to Core Contact __%s__ migration change log already in place. Skipping.",
-                    html.escape(str(dlm_contact)),
-                    html.escape(str(core_contact)),
-                )
-            return
-
-        # Create an object change to document migration
-        ObjectChange.objects.create(
-            action=ObjectChangeActionChoices.ACTION_UPDATE,
-            change_context=ObjectChangeEventContextChoices.CONTEXT_ORM,
-            change_context_detail="Migrated from Nautobot App Device Lifecycle Management",
+        _, created = ObjectChange.objects.get_or_create(
             changed_object_id=core_contact.id,
             changed_object_type=core_contact_ct,
-            object_data=serialize_object(core_contact),
-            object_data_v2=serialize_object_v2(core_contact),
-            object_repr=contact_repr(core_contact)[:CHANGELOG_MAX_OBJECT_REPR],
             related_object_id=dlm_contact.id,
             related_object_type=dlm_contact_ct,
-            request_id=common_objectchange_request_id,
-            user=None,
-            user_name="Undefined",
+            defaults={
+                "action": ObjectChangeActionChoices.ACTION_UPDATE,
+                "change_context": ObjectChangeEventContextChoices.CONTEXT_ORM,
+                "change_context_detail": "Migrated from Nautobot App Device Lifecycle Management",
+                "object_data": serialize_object(core_contact),
+                "object_data_v2": serialize_object_v2(core_contact),
+                "object_repr": str(core_contact)[:CHANGELOG_MAX_OBJECT_REPR],
+                "request_id": common_objectchange_request_id,
+                "user": None,
+                "user_name": "Undefined",
+            },
         )
-        self.logger.info(
-            "DLM Contact __%s__ to Core Contact __%s__ migration change log created.",
-            html.escape(str(dlm_contact)),
-            html.escape(str(core_contact)),
-        )
+        if created:
+            self.logger.info(
+                "DLM Contact __%s__ to Core Contact __%s__ migration change log created.",
+                html.escape(str(dlm_contact)),
+                html.escape(str(core_contact)),
+            )
+        elif debug:
+            self.logger.debug(
+                "DLM Contact __%s__ to Core Contact __%s__ migration change log already in place. Skipping.",
+                html.escape(str(dlm_contact)),
+                html.escape(str(core_contact)),
+            )
 
     def _migrate_hashing_algorithm(self, value):
         """Migrate DLM SoftwareImage hashing algorithm from free-text field to Core SoftwareImageFile choice."""
+        if value == "":
+            return value
+
         # Attempt to map the hashing algorithm to one of the valid choices for dcim.SoftwareImageFile
         similarity = {}
         for choice in SoftwareImageFileHashingAlgorithmChoices.values():
@@ -703,7 +649,7 @@ class DLMToNautoboCoreModelMigration(Job):
             return similarity[max_similarity][0]
         return ""
 
-    def _migrate_software_image(self, dlm_software_image):
+    def _migrate_software_image(self, dlm_software_image, update_core_to_match_dlm, debug):  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
         """Migrate DLM SoftwareImage to Core SoftwareImageFile."""
         core_software_image_ct = ContentType.objects.get_for_model(SoftwareImageFile)
         dlm_software_image_ct = ContentType.objects.get_for_model(SoftwareImageLCM)
@@ -714,13 +660,10 @@ class DLMToNautoboCoreModelMigration(Job):
         image_file_name = dlm_software_image.image_file_name
         dlm_software_version = dlm_software_image.software.id
         # Dry-run will not have populated mappings for not-yet-migrated Software Versions
-        core_software_version_id = self.dlm_to_core_id_map[self.softlcm_ct_str].get(str(dlm_software_version), None)
+        core_software_version_id = dlm_software_version.migrated_to_core_model
         # Flag tracking whether hashing algorithm could be automatically migrated
 
-        if dlm_software_image.hashing_algorithm != "":
-            hashing_algorithm = self._migrate_hashing_algorithm(dlm_software_image.hashing_algorithm)
-        else:
-            hashing_algorithm = ""
+        hashing_algorithm = self._migrate_hashing_algorithm(dlm_software_image.hashing_algorithm)
 
         if dlm_software_image.hashing_algorithm != "" and hashing_algorithm == "":
             self.logger.warning(
@@ -736,7 +679,7 @@ class DLMToNautoboCoreModelMigration(Job):
             "hashing_algorithm": hashing_algorithm,
             "download_url": dlm_software_image.download_url,
             "default_image": dlm_software_image.default_image,
-            "_custom_field_data": dlm_software_image._custom_field_data or {},
+            "_custom_field_data": dlm_software_image.cf or {},
         }
 
         attrs_diff = {}
@@ -760,9 +703,9 @@ class DLMToNautoboCoreModelMigration(Job):
                     "dlm_value": dlm_attr_value,
                     "core_value": core_attr_value,
                 }
-                if self.update_core_to_match_dlm:
+                if update_core_to_match_dlm:
                     setattr(core_software_image, attr_name, dlm_attr_value)
-            if self.update_core_to_match_dlm and attrs_diff:
+            if update_core_to_match_dlm and attrs_diff:
                 self.logger.info(
                     "Updated existing Core SoftwareImageFile __%s__ to match DLM SoftwareImage __%s__. Diff before update __%s__.",
                     html.escape(str(core_software_image)),
@@ -783,9 +726,6 @@ class DLMToNautoboCoreModelMigration(Job):
         # Dry-run and no existing Core SoftwareImageFile found
         if core_software_image is None:
             return
-
-        # Map the DLM Software Version ID to the Core Software version ID. This is needed for SoftwareImage migrations.
-        self.dlm_to_core_id_map[self.softimglcm_ct_str][str(dlm_software_image.id)] = str(core_software_image.id)
 
         # Set migrated_to_core_model field on DLM SoftwareImage object
         dlm_software_image.migrated_to_core_model = core_software_image
@@ -815,7 +755,7 @@ class DLMToNautoboCoreModelMigration(Job):
                 core_software_image.device_types.add(dtype)
 
         # Work around created field's auto_now_add behavior
-        if core_software_image.created != dlm_software_image.created and self.update_core_to_match_dlm:
+        if core_software_image.created != dlm_software_image.created and update_core_to_match_dlm:
             core_software_image.created = dlm_software_image.created
             core_software_image.validated_save()
             core_software_image.refresh_from_db()
@@ -879,7 +819,7 @@ class DLMToNautoboCoreModelMigration(Job):
             changed_object_id=core_software_image.id,
             related_object_id=dlm_software_image.id,
         ).exists():
-            if self.debug:
+            if debug:
                 self.logger.debug(
                     "DLM SoftwareImage __%s__ to Core SoftwareImageFile __%s__ migration change log already in place. Skipping.",
                     html.escape(str(dlm_software_image)),
@@ -910,7 +850,7 @@ class DLMToNautoboCoreModelMigration(Job):
             html.escape(str(core_software_image)),
         )
 
-    def migrate_content_type_references_to_new_model(self, old_ct, new_ct):
+    def migrate_content_type_references_to_new_model(self, old_ct, new_ct, hide_changelog_migrations):  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
         """When replacing a model, this will update references to the content type on related models such as tags and object changes.
 
         This also updates the primary key references.
@@ -944,6 +884,7 @@ class DLMToNautoboCoreModelMigration(Job):
             apps (obj): An instance of the Django 'apps' object.
             old_ct (obj): An instance of ContentType for the old model.
             new_ct (obj): An instance of ContentType for the new model.
+            hide_changelog_migrations (bool): If True, do not log migrations of ObjectChange objects.
 
         """
         # Migrate ComputedField content type
@@ -1001,31 +942,33 @@ class DLMToNautoboCoreModelMigration(Job):
                 html.escape(str(note)),
                 html.escape(str(new_ct)),
             )
-            note.assigned_object_type = new_ct
-            note.assigned_object_id = self.dlm_to_core_id_map[str(old_ct)][str(note.assigned_object_id)]
-            note.validated_save()
+            old_assigned_object = note.assigned_object
+            if getattr(old_assigned_object, "migrated_to_core_model", None):
+                note.assigned_object = old_assigned_object.migrated_to_core_model
+                note.validated_save()
 
         # Migrate ObjectChange content type
         for object_change in ObjectChange.objects.filter(changed_object_type=old_ct):
-            if not self.hide_changelog_migrations:
+            if not hide_changelog_migrations:
                 self.logger.info(
                     "The Object Change __%s__ will be migrated to Core model __%s__",
                     html.escape(str(object_change)),
                     html.escape(str(new_ct)),
                 )
-            object_change.changed_object_type = new_ct
             # We might have a reference to deleted object so need to check if it exists
+            object_change.changed_object_type = new_ct
             if not old_ct.model_class().objects.filter(id=object_change.changed_object_id).exists():
-                if not self.hide_changelog_migrations:
+                if not hide_changelog_migrations:
                     self.logger.warning(
                         "The DLM Software object __%s__ referenced in Object Change __%s__ is gone. Updating content type only to __%s__",
                         html.escape(str(object_change.changed_object_id)),
                         html.escape(str(object_change)),
                         html.escape(str(new_ct)),
                     )
-                object_change.validated_save()
-                continue
-            object_change.changed_object_id = self.dlm_to_core_id_map[str(old_ct)][str(object_change.changed_object_id)]
+            else:
+                old_changed_object = old_ct.model_class().objects.filter(id=object_change.changed_object_id).first()
+                if getattr(old_changed_object, "migrated_to_core_model", None):
+                    object_change.changed_object_id = old_changed_object.migrated_to_core_model_id
             object_change.validated_save()
 
         # Migrate Status content type
@@ -1053,8 +996,10 @@ class DLMToNautoboCoreModelMigration(Job):
                 html.escape(str(tagged_item)),
                 html.escape(str(new_ct)),
             )
+            old_object = tagged_item.content_object
+            if getattr(old_object, "migrated_to_core_model", None):
+                tagged_item.content_object_id = old_object.migrated_to_core_model_id
             tagged_item.content_type = new_ct
-            tagged_item.object_id = self.dlm_to_core_id_map[str(old_ct)][str(tagged_item.object_id)]
             tagged_item.validated_save()
 
         # Fix tags that were implemented incorrectly and didn't enforce content type
@@ -1123,19 +1068,23 @@ class DLMToNautoboCoreModelMigration(Job):
                 )
                 for relationship_attrs in relationship_associations_dlm_source:
                     RelationshipAssociation.objects.get_or_create(**relationship_attrs)
-                raise Exception("Error while migrating relationships. Review your relationships and try again.")
+                raise Exception(  # pylint: disable=broad-exception-raised
+                    "Error while migrating relationships. Review your relationships and try again."
+                ) from err
 
             try:
                 relationship.source_type = new_ct
                 relationship.validated_save()
                 new_relationship_associations = []
                 for relationship_attrs in relationship_associations_dlm_source:
+                    old_object = old_ct.model_class().objects.get(id=relationship_attrs["source_id"])
+                    new_object_id = getattr(old_object, "migrated_to_core_model_id", None)
                     new_relationship_association = RelationshipAssociation(
                         relationship_id=relationship_attrs["relationship_id"],
                         destination_type_id=relationship_attrs["destination_type_id"],
                         destination_id=relationship_attrs["destination_id"],
                         source_type=new_ct,
-                        source_id=self.dlm_to_core_id_map[str(old_ct)][str(relationship_attrs["source_id"])],
+                        source_id=new_object_id,
                     )
                     new_relationship_association.validated_save()
                     new_relationship_associations.append(new_relationship_association)
@@ -1152,7 +1101,9 @@ class DLMToNautoboCoreModelMigration(Job):
 
                 for relationship_attrs in relationship_associations_dlm_source:
                     RelationshipAssociation.objects.get_or_create(**relationship_attrs)
-                raise Exception("Error while migrating relationships. Review your relationships and try again.")
+                raise Exception(  # pylint: disable=broad-exception-raised
+                    "Error while migrating relationships. Review your relationships and try again."
+                ) from err
 
         relationship_associations_dlm_destination = []
         for relationship in Relationship.objects.filter(destination_type=old_ct).exclude(
@@ -1191,19 +1142,23 @@ class DLMToNautoboCoreModelMigration(Job):
                 )
                 for relationship_attrs in relationship_associations_dlm_destination:
                     RelationshipAssociation.objects.get_or_create(**relationship_attrs)
-                raise Exception("Error while migrating relationships. Review your relationships and try again.")
+                raise Exception(  # pylint: disable=broad-exception-raised
+                    "Error while migrating relationships. Review your relationships and try again."
+                ) from err
 
             try:
                 relationship.destination_type = new_ct
                 relationship.validated_save()
                 new_relationship_associations = []
                 for relationship_attrs in relationship_associations_dlm_destination:
+                    old_object = old_ct.model_class().objects.get(id=relationship_attrs["destination_id"])
+                    new_object_id = getattr(old_object, "migrated_to_core_model_id", None)
                     new_relationship_association = RelationshipAssociation(
                         relationship_id=relationship_attrs["relationship_id"],
                         source_type_id=relationship_attrs["source_type_id"],
                         source_id=relationship_attrs["source_id"],
                         destination_type=new_ct,
-                        destination_id=self.dlm_to_core_id_map[str(old_ct)][str(relationship_attrs["destination_id"])],
+                        destination_id=new_object_id,
                     )
                     new_relationship_association.validated_save()
                     new_relationship_associations.append(new_relationship_association)
@@ -1220,7 +1175,9 @@ class DLMToNautoboCoreModelMigration(Job):
 
                 for relationship_attrs in relationship_associations_dlm_destination:
                     RelationshipAssociation.objects.get_or_create(**relationship_attrs)
-                raise Exception("Error while migrating relationships. Review your relationships and try again.")
+                raise Exception(  # pylint: disable=broad-exception-raised
+                    "Error while migrating relationships. Review your relationships and try again."
+                ) from err
 
     def _create_placeholder_software_images(self):
         """Create placeholder software image files for software that is used by devices but no image currently exists."""
@@ -1260,7 +1217,7 @@ class DLMToNautoboCoreModelMigration(Job):
                 status=status_active,
             )
             software_image.validated_save()
-            software_image.device_types.add(device_type)
+            device_type.software_image_files.add(software_image)
             self.logger.warning(
                 "Created placeholder SoftwareImageFile __%s__ assigned to DeviceType __%s__.",
                 html.escape(str(software_image)),
