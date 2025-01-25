@@ -12,12 +12,15 @@ from nautobot.extras.models import Role, Status, Tag
 from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
+    ContactLCM,
     ContractLCM,
     DeviceHardwareNoticeResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
     ProviderLCM,
+    SoftwareImageLCM,
+    SoftwareLCM,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
@@ -134,6 +137,148 @@ class HardwareLCMFilterSet(NautobotFilterSet):
         if not value:
             qs_filter = Q(**{"end_of_support__gte": today}) | Q(**{"end_of_support__isnull": True})
         return queryset.filter(qs_filter)
+
+
+class SoftwareLCMFilterSet(NautobotFilterSet):
+    """Filter for SoftwareLCM."""
+
+    q = django_filters.CharFilter(method="search", label="Search")
+
+    device_platform = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_platform__name",
+        queryset=Platform.objects.all(),
+        to_field_name="name",
+        label="Device Platform (Name)",
+    )
+
+    documentation_url = django_filters.CharFilter(
+        lookup_expr="contains",
+    )
+    release_date = django_filters.DateTimeFromToRangeFilter()
+    end_of_support = django_filters.DateTimeFromToRangeFilter()
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = SoftwareLCM
+
+        fields = "__all__"
+
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+
+        qs_filter = (
+            Q(version__icontains=value)
+            | Q(alias__icontains=value)
+            | Q(release_date__icontains=value)
+            | Q(end_of_support__icontains=value)
+        )
+        return queryset.filter(qs_filter)
+
+
+class SoftwareImageLCMFilterSet(NautobotFilterSet):
+    """Filter for SoftwareImageLCM."""
+
+    q = django_filters.CharFilter(method="search", label="Search")
+
+    software = django_filters.ModelMultipleChoiceFilter(
+        queryset=SoftwareLCM.objects.all(),
+        label="Software",
+    )
+    software_version = django_filters.ModelMultipleChoiceFilter(
+        field_name="software__version",
+        queryset=SoftwareLCM.objects.all(),
+        to_field_name="version",
+        label="Software (version)",
+    )
+    device_types_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_types",
+        queryset=DeviceType.objects.all(),
+        label="Device Types",
+    )
+    device_types = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_types__model",
+        queryset=DeviceType.objects.all(),
+        to_field_name="model",
+        label="Device Types (model)",
+    )
+    inventory_items_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_items",
+        queryset=InventoryItem.objects.all(),
+        label="Inventory Items",
+    )
+    inventory_items = django_filters.ModelMultipleChoiceFilter(
+        field_name="inventory_items__id",
+        queryset=InventoryItem.objects.all(),
+        to_field_name="id",
+        label="Inventory Items (name)",
+    )
+    object_tags_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="object_tags",
+        queryset=Tag.objects.all(),
+        label="Object Tags",
+    )
+    object_tags = django_filters.ModelMultipleChoiceFilter(
+        field_name="object_tags__name",
+        queryset=Tag.objects.all(),
+        to_field_name="name",
+        label="Object Tags (name)",
+    )
+    device_name = django_filters.CharFilter(method="device", label="Device Name")
+    device_id = django_filters.CharFilter(method="device", label="Device ID")
+    inventory_item_id = django_filters.CharFilter(method="inventory_item", label="InventoryItem ID")
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = SoftwareImageLCM
+
+        fields = "__all__"
+
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+
+        qs_filter = Q(image_file_name__icontains=value) | Q(software__version__icontains=value)
+        return queryset.filter(qs_filter)
+
+    def device(self, queryset, name, value):
+        """Search for software image for a given device."""
+        value = value.strip()
+        if not value:
+            return queryset
+
+        if name == "device_name":
+            devices = Device.objects.filter(name=value)
+        elif name == "device_id":
+            devices = Device.objects.filter(id=value)
+        else:
+            devices = Device.objects.none()
+
+        if devices.count() != 1:
+            return queryset.none()
+
+        device = devices.first()
+
+        return queryset.filter(id__in=SoftwareImageLCM.objects.get_for_object(device).values("id"))
+
+    def inventory_item(self, queryset, name, value):  # pylint: disable=unused-argument
+        """Search for software image for a given inventory item."""
+        value = value.strip()
+        if not value:
+            return queryset
+
+        inventory_items = InventoryItem.objects.filter(id=value)
+
+        if inventory_items.count() != 1:
+            return queryset.none()
+
+        inventory_item = inventory_items.first()
+
+        return queryset.filter(id__in=SoftwareImageLCM.objects.get_for_object(inventory_item).values("id"))
 
 
 class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
@@ -739,6 +884,32 @@ class ProviderLCMFilterSet(NautobotFilterSet):
         model = ProviderLCM
 
         fields = "__all__"
+
+
+class ContactLCMFilterSet(NautobotFilterSet):
+    """Filter for ContactLCMFilterSet."""
+
+    q = django_filters.CharFilter(method="search", label="Search")
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = ContactLCM
+
+        fields = "__all__"
+
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+
+        qs_filter = (
+            Q(name__icontains=value)
+            | Q(email__icontains=value)
+            | Q(phone__icontains=value)
+            | Q(address__icontains=value)
+        )
+        return queryset.filter(qs_filter)
 
 
 class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , CustomFieldModelFilterSet):

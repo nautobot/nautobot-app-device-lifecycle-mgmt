@@ -3,6 +3,7 @@
 from nautobot.apps.api import NautobotModelViewSet
 
 from nautobot_device_lifecycle_mgmt.filters import (
+    ContactLCMFilterSet,
     ContractLCMFilterSet,
     CVELCMFilterSet,
     DeviceHardwareNoticeResultFilterSet,
@@ -10,22 +11,28 @@ from nautobot_device_lifecycle_mgmt.filters import (
     HardwareLCMFilterSet,
     InventoryItemSoftwareValidationResultFilterSet,
     ProviderLCMFilterSet,
+    SoftwareImageLCMFilterSet,
+    SoftwareLCMFilterSet,
     ValidatedSoftwareLCMFilterSet,
     VulnerabilityLCMFilterSet,
 )
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
+    ContactLCM,
     ContractLCM,
     DeviceHardwareNoticeResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
     ProviderLCM,
+    SoftwareImageLCM,
+    SoftwareLCM,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
 
 from .serializers import (
+    ContactLCMSerializer,
     ContractLCMSerializer,
     CVELCMSerializer,
     DeviceHardwareNoticeResultSerializer,
@@ -33,6 +40,8 @@ from .serializers import (
     HardwareLCMSerializer,
     InventoryItemSoftwareValidationResultSerializer,
     ProviderLCMSerializer,
+    SoftwareImageLCMSerializer,
+    SoftwareLCMSerializer,
     ValidatedSoftwareLCMSerializer,
     VulnerabilityLCMSerializer,
 )
@@ -60,6 +69,30 @@ class ProviderLCMView(NautobotModelViewSet):
     queryset = ProviderLCM.objects.all()
     filterset_class = ProviderLCMFilterSet
     serializer_class = ProviderLCMSerializer
+
+
+class ContactLCMView(NautobotModelViewSet):
+    """CRUD operations set for the Contact Lifecycle Management view."""
+
+    queryset = ContactLCM.objects.all()
+    filterset_class = ContactLCMFilterSet
+    serializer_class = ContactLCMSerializer
+
+
+class SoftwareLCMViewSet(NautobotModelViewSet):
+    """REST API viewset for SoftwareLCM records."""
+
+    queryset = SoftwareLCM.objects.prefetch_related("software_images")
+    serializer_class = SoftwareLCMSerializer
+    filterset_class = SoftwareLCMFilterSet
+
+
+class SoftwareImageLCMViewSet(NautobotModelViewSet):
+    """REST API viewset for SoftwareImageLCM records."""
+
+    queryset = SoftwareImageLCM.objects.prefetch_related("software")
+    serializer_class = SoftwareImageLCMSerializer
+    filterset_class = SoftwareImageLCMFilterSet
 
 
 class ValidatedSoftwareLCMViewSet(NautobotModelViewSet):
