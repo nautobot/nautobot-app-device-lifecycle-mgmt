@@ -6,6 +6,25 @@ This document describes all new features and changes in the release `2.2`. The f
 
 This release adds support for Python 3.12 and Django 4.
 
+## [v2.2.1 (2025-01-29)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v2.2.1)
+
+### Changed
+
+- [#261](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/261) - Updated template extensions to align with standard Nautobot UI views.
+
+### Fixed
+
+- [#255](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/255) - Add status to bulk update for CVE. Fix CVE status filter.
+
+### Housekeeping
+
+- [#0](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/0) - Rebaked from the cookie `nautobot-app-v2.4.0`.
+- [#1](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/1) - Rebaked from the cookie `nautobot-app-v2.4.1`.
+- [#261](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/261) - Added management command `generate_app_test_data` to generate sample data for development environments.
+- [#375](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/375) - Main to Develop post 2.2.0 release.
+- [#385](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/385) - Changed model_class_name in .cookiecutter.json to a valid model to help with drift management.
+- [#410](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/410) - Fixed mysql tests and reenabled mysql tests in CI.
+
 ## [v2.2.0 (2024-09-07)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v2.2.0)
 
 ### Added
