@@ -265,8 +265,8 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
             end="2023-05-14",
             preferred=True,
         )
-        validated_software.device_types.set([device_type.pk])
         validated_software.save()
+        validated_software.device_types.set([device_type.pk])
 
         validated_software = ValidatedSoftwareLCM(
             software=self.softwares[1],
@@ -274,8 +274,8 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
             end="2022-11-01",
             preferred=False,
         )
-        validated_software.device_types.set([device_type.pk])
         validated_software.save()
+        validated_software.device_types.set([device_type.pk])
 
         validated_software = ValidatedSoftwareLCM(
             software=self.softwares[1],
@@ -283,8 +283,8 @@ class ValidatedSoftwareLCMFilterSetTestCase(TestCase):
             end="2025-11-01",
             preferred=False,
         )
-        validated_software.device_roles.set([device_role_router.pk])
         validated_software.save()
+        validated_software.device_roles.set([device_role_router.pk])
 
     def test_q_one_start(self):
         """Test q filter to find single record based on start date."""
@@ -776,16 +776,16 @@ class SoftwareImageLCMFilterSetTestCase(TestCase):
             software=self.softwares[0],
             default_image=False,
         )
-        soft_image.device_types.set([devicetype_1.pk])
         soft_image.save()
+        soft_image.device_types.set([devicetype_1.pk])
 
         soft_image = SoftwareImageLCM(
             image_file_name="eos4.25.m.swi",
             software=self.softwares[1],
             default_image=True,
         )
-        soft_image.device_types.set([self.devicetype_2.pk])
         soft_image.save()
+        soft_image.device_types.set([self.devicetype_2.pk])
 
     def test_q_image_name(self):
         """Test q filter to find single record based on the image name."""

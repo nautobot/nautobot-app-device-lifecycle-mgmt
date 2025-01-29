@@ -1,11 +1,10 @@
 {% load helpers %}
 {% if perms.nautobot_device_lifecycle_mgmt.view_hardwarelcm and hw_notices %}
 {% for notice in hw_notices %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="panel {% if notice.expired %}panel-danger{% else %}panel-warning{% endif %}">
+        <div class="panel panel-default">
             <div class="panel-heading">
                 <strong>Hardware {% if notice.inventory_item %}Inventory Part {% endif %}Notice</strong>
+                {% if notice.expired %}<span class="label label-danger">Expired</span>{% endif %}
             </div>
             <table class="table table-hover panel-body attr-table">
                 <tr>
@@ -16,19 +15,19 @@
                 </tr>
                 <tr>
                     <td>End of Sale</td>
-                    <td>{{ notice.end_of_sale }}</td>
+                    <td>{{ notice.end_of_sale|placeholder }}</td>
                 </tr>
                 <tr>
                     <td>End of Support</td>
-                    <td>{{ notice.end_of_support }}</td>
+                    <td>{{ notice.end_of_support|placeholder }}</td>
                 </tr>
                 <tr>
                     <td>End of Software Releases</td>
-                    <td>{{ notice.end_of_sw_releases }}</td>
+                    <td>{{ notice.end_of_sw_releases|placeholder }}</td>
                 </tr>
                 <tr>
                     <td>End of Security Patches</td>
-                    <td>{{ notice.end_of_security_patches }}</td>
+                    <td>{{ notice.end_of_security_patches|placeholder }}</td>
                 </tr>
                 <tr>
                     <td>Documentation URL</td>
@@ -42,17 +41,9 @@
                 </tr>
                 <tr>
                     <td>Comments</td>
-                    <td>
-                        {% if notice.comments %}
-                        {{ notice.comments }}
-                        {% else %}
-                        &mdash;
-                        {% endif %}
-                    </td>
+                    <td>{{ notice.comments|placeholder }}</td>
                 </tr>
             </table>
         </div>
-    </div>
-</div>
 {% endfor %}
 {% endif %}

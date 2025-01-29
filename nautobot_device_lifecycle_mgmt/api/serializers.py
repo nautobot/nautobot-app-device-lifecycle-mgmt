@@ -1,109 +1,100 @@
-"""API serializers implementation for the LifeCycle Management app."""
+"""API serializers for nautobot_device_lifecycle_mgmt."""
 
 from nautobot.apps.api import NautobotModelSerializer, TaggedModelSerializerMixin
 
-from nautobot_device_lifecycle_mgmt.models import (
-    CVELCM,
-    ContactLCM,
-    ContractLCM,
-    DeviceSoftwareValidationResult,
-    HardwareLCM,
-    InventoryItemSoftwareValidationResult,
-    ProviderLCM,
-    SoftwareImageLCM,
-    SoftwareLCM,
-    ValidatedSoftwareLCM,
-    VulnerabilityLCM,
-)
+from nautobot_device_lifecycle_mgmt import models
 
 
-class HardwareLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
-    """API serializer."""
+class HardwareLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """HardwareLCM Serializer."""
 
     class Meta:
         """Meta attributes."""
 
-        model = HardwareLCM
+        model = models.HardwareLCM
+        fields = "__all__"
+
+        # Option for disabling write for certain fields:
+        # read_only_fields = []
+
+
+class ProviderLCMSerializer(NautobotModelSerializer):  # pylint: disable=too-many-ancestors
+    """ProviderLCM Serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = models.ProviderLCM
         fields = "__all__"
 
 
-class ProviderLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
-    """API serializer."""
+class ContractLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """ContractLCM Serializer."""
 
     class Meta:
         """Meta attributes."""
 
-        model = ProviderLCM
+        model = models.ContractLCM
         fields = "__all__"
 
 
-class ContractLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=R0901,too-few-public-methods
-    """API serializer."""
+class ContactLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """ContactLCM Serializer."""
 
     class Meta:
         """Meta attributes."""
 
-        model = ContractLCM
+        model = models.ContactLCM
         fields = "__all__"
 
 
-class ContactLCMSerializer(NautobotModelSerializer):  # pylint: disable=R0901,too-few-public-methods
-    """API serializer."""
+class SoftwareLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """SoftwareLCM Serializer."""
 
     class Meta:
         """Meta attributes."""
 
-        model = ContactLCM
+        model = models.SoftwareLCM
         fields = "__all__"
 
 
-class SoftwareLCMSerializer(NautobotModelSerializer):
-    """REST API serializer for SoftwareLCM records."""
+class SoftwareImageLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """SoftwareImageLCM Serializer."""
 
     class Meta:
         """Meta attributes."""
 
-        model = SoftwareLCM
+        model = models.SoftwareImageLCM
         fields = "__all__"
 
 
-class SoftwareImageLCMSerializer(NautobotModelSerializer):
-    """REST API serializer for SoftwareImageLCM records."""
+class ValidatedSoftwareLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """ValidatedSoftwareLCM Serializer."""
 
     class Meta:
         """Meta attributes."""
 
-        model = SoftwareImageLCM
+        model = models.ValidatedSoftwareLCM
         fields = "__all__"
 
 
-class ValidatedSoftwareLCMSerializer(NautobotModelSerializer):
-    """REST API serializer for ValidatedSoftwareLCM records."""
+class CVELCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """CVELCM Serializer."""
 
     class Meta:
         """Meta attributes."""
 
-        model = ValidatedSoftwareLCM
+        model = models.CVELCM
         fields = "__all__"
 
 
-class CVELCMSerializer(NautobotModelSerializer):  # pylint: disable=abstract-method,too-few-public-methods
-    """REST API serializer for CVELCM records."""
+class VulnerabilityLCMSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """VulnerabilityLCM Serializer."""
 
     class Meta:
         """Meta attributes."""
 
-        model = CVELCM
-        fields = "__all__"
-
-
-class VulnerabilityLCMSerializer(NautobotModelSerializer):  # pylint: disable=abstract-method,too-few-public-methods
-    """REST API serializer for VulnerabilityLCM records."""
-
-    class Meta:
-        """Meta attributes."""
-
-        model = VulnerabilityLCM
+        model = models.VulnerabilityLCM
         fields = "__all__"
         read_only_fields = [
             "id",
@@ -116,21 +107,21 @@ class VulnerabilityLCMSerializer(NautobotModelSerializer):  # pylint: disable=ab
         ]
 
 
-class DeviceSoftwareValidationResultSerializer(NautobotModelSerializer):
-    """REST API serializer for DeviceSoftwareValidationResult records."""
+class DeviceSoftwareValidationResultSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """DeviceSoftwareValidationResult Serializer."""
 
     class Meta:
         """Meta attributes."""
 
-        model = DeviceSoftwareValidationResult
+        model = models.DeviceSoftwareValidationResult
         fields = "__all__"
 
 
-class InventoryItemSoftwareValidationResultSerializer(NautobotModelSerializer):
-    """REST API serializer for InventoryItemSoftwareValidationResult records."""
+class InventoryItemSoftwareValidationResultSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """InventoryItemSoftwareValidationResult Serializer."""
 
     class Meta:
         """Meta attributes."""
 
-        model = InventoryItemSoftwareValidationResult
+        model = models.InventoryItemSoftwareValidationResult
         fields = "__all__"

@@ -85,7 +85,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(rename_relationship_keys),
-        migrations.RunPython(migrate_cve_affected_software),
-        migrations.RunPython(migrate_contract_devices),
+        migrations.RunPython(code=rename_relationship_keys, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(code=migrate_cve_affected_software, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(code=migrate_contract_devices, reverse_code=migrations.RunPython.noop),
     ]

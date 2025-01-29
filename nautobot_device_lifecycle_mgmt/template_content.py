@@ -2,8 +2,8 @@
 
 from abc import ABCMeta
 
+from django.conf import settings
 from django.db.models import Q
-from nautobot.dcim.models import InventoryItem
 from nautobot.extras.plugins import PluginTemplateExtension
 
 from nautobot_device_lifecycle_mgmt.models import HardwareLCM, ValidatedSoftwareLCM
@@ -67,18 +67,21 @@ class DeviceHWLCM(PluginTemplateExtension, metaclass=ABCMeta):
     def right_page(self):
         """Display table on right side of page."""
         dev_obj = self.context["object"]
+        part_ids = dev_obj.inventory_items.exclude(part_id=None).values_list("part_id", flat=True)
+        # order HardwareLCM queryset by field configured in expired_field setting first
+        order_fields = ["end_of_security_patches", "end_of_sw_releases", "end_of_support", "end_of_sale"]
+        expired_field = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"].get("expired_field", "end_of_support")
+        order_fields.remove(expired_field)
+        order_fields.insert(0, expired_field)
+
+        hw_notices = HardwareLCM.objects.filter(
+            Q(device_type=dev_obj.device_type) | Q(inventory_item__in=part_ids)
+        ).order_by("device_type", *order_fields)
 
         return self.render(
             "nautobot_device_lifecycle_mgmt/inc/device_notice.html",
             extra_context={
-                "hw_notices": HardwareLCM.objects.filter(
-                    Q(device_type=dev_obj.device_type)
-                    | Q(
-                        inventory_item__in=[
-                            i.part_id for i in InventoryItem.objects.filter(device__pk=dev_obj.pk) if i.part_id
-                        ]
-                    )
-                )
+                "hw_notices": hw_notices,
             },
         )
 
