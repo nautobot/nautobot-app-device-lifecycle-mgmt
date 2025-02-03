@@ -5,7 +5,14 @@ import datetime
 import django_filters
 from django.db.models import Q
 from nautobot.apps.filters import NautobotFilterSet, StatusModelFilterSetMixin
-from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform
+from nautobot.dcim.models import (
+    Device,
+    DeviceType,
+    InventoryItem,
+    Location,
+    Manufacturer,
+    Platform,
+)
 from nautobot.extras.filters.mixins import StatusFilter
 from nautobot.extras.models import Role, Tag
 
@@ -52,20 +59,36 @@ class HardwareLCMFilterSet(NautobotFilterSet):
     )
 
     end_of_support = django_filters.DateFilter()
-    end_of_support__gte = django_filters.DateFilter(field_name="end_of_support", lookup_expr="gte")
-    end_of_support__lte = django_filters.DateFilter(field_name="end_of_support", lookup_expr="lte")
+    end_of_support__gte = django_filters.DateFilter(
+        field_name="end_of_support", lookup_expr="gte"
+    )
+    end_of_support__lte = django_filters.DateFilter(
+        field_name="end_of_support", lookup_expr="lte"
+    )
 
     end_of_sale = django_filters.DateFilter()
-    end_of_sale__gte = django_filters.DateFilter(field_name="end_of_sale", lookup_expr="gte")
-    end_of_sale__lte = django_filters.DateFilter(field_name="end_of_sale", lookup_expr="lte")
+    end_of_sale__gte = django_filters.DateFilter(
+        field_name="end_of_sale", lookup_expr="gte"
+    )
+    end_of_sale__lte = django_filters.DateFilter(
+        field_name="end_of_sale", lookup_expr="lte"
+    )
 
     end_of_security_patches = django_filters.DateFilter()
-    end_of_security_patches__gte = django_filters.DateFilter(field_name="end_of_security_patches", lookup_expr="gte")
-    end_of_security_patches__lte = django_filters.DateFilter(field_name="end_of_security_patches", lookup_expr="lte")
+    end_of_security_patches__gte = django_filters.DateFilter(
+        field_name="end_of_security_patches", lookup_expr="gte"
+    )
+    end_of_security_patches__lte = django_filters.DateFilter(
+        field_name="end_of_security_patches", lookup_expr="lte"
+    )
 
     end_of_sw_releases = django_filters.DateFilter()
-    end_of_sw_releases__gte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="gte")
-    end_of_sw_releases__lte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="lte")
+    end_of_sw_releases__gte = django_filters.DateFilter(
+        field_name="end_of_sw_releases", lookup_expr="gte"
+    )
+    end_of_sw_releases__lte = django_filters.DateFilter(
+        field_name="end_of_sw_releases", lookup_expr="lte"
+    )
 
     expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
 
@@ -89,7 +112,9 @@ class HardwareLCMFilterSet(NautobotFilterSet):
         today = datetime.datetime.today().date()
         lookup = "gte" if not value else "lt"
 
-        qs_filter = Q(**{f"end_of_sale__{lookup}": today}) | Q(**{f"end_of_support__{lookup}": today})
+        qs_filter = Q(**{f"end_of_sale__{lookup}": today}) | Q(
+            **{f"end_of_support__{lookup}": today}
+        )
         return queryset.filter(qs_filter)
 
 
@@ -182,7 +207,9 @@ class SoftwareImageLCMFilterSet(NautobotFilterSet):
     )
     device_name = django_filters.CharFilter(method="device", label="Device Name")
     device_id = django_filters.CharFilter(method="device", label="Device ID")
-    inventory_item_id = django_filters.CharFilter(method="inventory_item", label="InventoryItem ID")
+    inventory_item_id = django_filters.CharFilter(
+        method="inventory_item", label="InventoryItem ID"
+    )
 
     class Meta:
         """Meta attributes for filter."""
@@ -196,7 +223,9 @@ class SoftwareImageLCMFilterSet(NautobotFilterSet):
         if not value.strip():
             return queryset
 
-        qs_filter = Q(image_file_name__icontains=value) | Q(software__version__icontains=value)
+        qs_filter = Q(image_file_name__icontains=value) | Q(
+            software__version__icontains=value
+        )
         return queryset.filter(qs_filter)
 
     def device(self, queryset, name, value):
@@ -217,7 +246,9 @@ class SoftwareImageLCMFilterSet(NautobotFilterSet):
 
         device = devices.first()
 
-        return queryset.filter(id__in=SoftwareImageLCM.objects.get_for_object(device).values("id"))
+        return queryset.filter(
+            id__in=SoftwareImageLCM.objects.get_for_object(device).values("id")
+        )
 
     def inventory_item(self, queryset, name, value):  # pylint: disable=unused-argument
         """Search for software image for a given inventory item."""
@@ -232,7 +263,9 @@ class SoftwareImageLCMFilterSet(NautobotFilterSet):
 
         inventory_item = inventory_items.first()
 
-        return queryset.filter(id__in=SoftwareImageLCM.objects.get_for_object(inventory_item).values("id"))
+        return queryset.filter(
+            id__in=SoftwareImageLCM.objects.get_for_object(inventory_item).values("id")
+        )
 
 
 class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
@@ -301,7 +334,9 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
     )
     device_name = django_filters.CharFilter(method="device", label="Device Name")
     device_id = django_filters.CharFilter(method="device", label="Device ID")
-    inventory_item_id = django_filters.CharFilter(method="inventory_item", label="InventoryItem ID")
+    inventory_item_id = django_filters.CharFilter(
+        method="inventory_item", label="InventoryItem ID"
+    )
     start = django_filters.DateTimeFromToRangeFilter()
     end = django_filters.DateTimeFromToRangeFilter()
     valid = django_filters.BooleanFilter(method="valid_search", label="Currently valid")
@@ -325,7 +360,9 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         """Perform the valid_search search."""
         today = datetime.date.today()
         if value is True:
-            qs_filter = Q(start__lte=today, end=None) | Q(start__lte=today, end__gte=today)
+            qs_filter = Q(start__lte=today, end=None) | Q(
+                start__lte=today, end__gte=today
+            )
         else:
             qs_filter = Q(start__gt=today) | Q(end__lt=today)
         return queryset.filter(qs_filter)
@@ -450,17 +487,23 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         """Perform the filtered search."""
         if not value.strip():
             return queryset
-        qs_filter = Q(device__name__icontains=value) | Q(software__version__icontains=value)
+        qs_filter = Q(device__name__icontains=value) | Q(
+            software__version__icontains=value
+        )
         return queryset.filter(qs_filter)
 
-    def _exclude_sw_missing(self, queryset, name, value):  # pylint: disable=unused-argument
+    def _exclude_sw_missing(
+        self, queryset, name, value
+    ):  # pylint: disable=unused-argument
         """Exclude devices with missing software."""
         if value:
             return queryset.filter(~Q(software=None))
 
         return queryset
 
-    def _sw_missing_only(self, queryset, name, value):  # pylint: disable=unused-argument
+    def _sw_missing_only(
+        self, queryset, name, value
+    ):  # pylint: disable=unused-argument
         """Only show devices with missing software."""
         if value:
             return queryset.filter(Q(software=None))
@@ -578,14 +621,18 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         qs_filter = Q(inventory_item__part_id__icontains=value)
         return queryset.filter(qs_filter)
 
-    def _exclude_sw_missing(self, queryset, name, value):  # pylint: disable=unused-argument
+    def _exclude_sw_missing(
+        self, queryset, name, value
+    ):  # pylint: disable=unused-argument
         """Exclude devices with missing software."""
         if value:
             return queryset.filter(~Q(software=None))
 
         return queryset
 
-    def _sw_missing_only(self, queryset, name, value):  # pylint: disable=unused-argument
+    def _sw_missing_only(
+        self, queryset, name, value
+    ):  # pylint: disable=unused-argument
         """Only show devices with missing software."""
         if value:
             return queryset.filter(Q(software=None))
@@ -605,11 +652,9 @@ class ContractLCMFilterSet(NautobotFilterSet):
 
     expired = django_filters.BooleanFilter(method="expired_search", label="Expired")
 
-    start = django_filters.DateFilter()
     start__gte = django_filters.DateFilter(field_name="start", lookup_expr="gte")
     start__lte = django_filters.DateFilter(field_name="start", lookup_expr="lte")
 
-    end = django_filters.DateFilter()
     end__gte = django_filters.DateFilter(field_name="end", lookup_expr="gte")
     end__lte = django_filters.DateFilter(field_name="end", lookup_expr="lte")
 
@@ -695,14 +740,20 @@ class ContactLCMFilterSet(NautobotFilterSet):
         return queryset.filter(qs_filter)
 
 
-class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , CustomFieldModelFilterSet):
+class CVELCMFilterSet(
+    NautobotFilterSet, StatusModelFilterSetMixin
+):  # , CustomFieldModelFilterSet):
     """Filter for CVELCMFilterSet."""
 
     q = django_filters.CharFilter(method="search", label="Search")
 
     published_date = django_filters.DateTimeFromToRangeFilter()
-    published_date__gte = django_filters.DateFilter(field_name="published_date", lookup_expr="gte")
-    published_date__lte = django_filters.DateFilter(field_name="published_date", lookup_expr="lte")
+    published_date__gte = django_filters.DateFilter(
+        field_name="published_date", lookup_expr="gte"
+    )
+    published_date__lte = django_filters.DateFilter(
+        field_name="published_date", lookup_expr="lte"
+    )
 
     cvss__gte = django_filters.NumberFilter(field_name="cvss", lookup_expr="gte")
     cvss__lte = django_filters.NumberFilter(field_name="cvss", lookup_expr="lte")
@@ -730,15 +781,23 @@ class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , Custom
         return queryset.filter(qs_filter)
 
 
-class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , CustomFieldModelFilterSet):
+class VulnerabilityLCMFilterSet(
+    NautobotFilterSet, StatusModelFilterSetMixin
+):  # , CustomFieldModelFilterSet):
     """Filter for VulnerabilityLCMFilterSet."""
 
     q = django_filters.CharFilter(method="search", label="Search")
 
     cve__published_date = django_filters.DateTimeFromToRangeFilter()
-    cve__published_date__gte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="gte")
-    cve__published_date__lte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="lte")
-    cve__severity = django_filters.ChoiceFilter(field_name="cve__severity", choices=CVESeverityChoices)
+    cve__published_date__gte = django_filters.DateFilter(
+        field_name="cve__published_date", lookup_expr="gte"
+    )
+    cve__published_date__lte = django_filters.DateFilter(
+        field_name="cve__published_date", lookup_expr="lte"
+    )
+    cve__severity = django_filters.ChoiceFilter(
+        field_name="cve__severity", choices=CVESeverityChoices
+    )
 
     class Meta:
         """Meta attributes for filter."""
