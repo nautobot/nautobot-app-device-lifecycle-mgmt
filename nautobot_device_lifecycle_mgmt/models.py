@@ -11,11 +11,8 @@ try:
 except ImportError:
     CHARFIELD_MAX_LENGTH = 255
 
-from nautobot.core.models.generics import OrganizationalModel, PrimaryModel
-from nautobot.core.models.querysets import RestrictedQuerySet
+from nautobot.apps.models import OrganizationalModel, PrimaryModel, RestrictedQuerySet, StatusField, extras_features
 from nautobot.dcim.models import Device, DeviceType, InventoryItem
-from nautobot.extras.models import StatusField
-from nautobot.extras.utils import extras_features
 
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.contract_filters import DeviceContractFilter, InventoryItemContractFilter

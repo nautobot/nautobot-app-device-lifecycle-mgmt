@@ -8,11 +8,13 @@ from .lifecycle_reporting import (
     DeviceSoftwareValidationFullReport,
     InventoryItemSoftwareValidationFullReport,
 )
+from .model_migration import DLMToNautobotCoreModelMigration
 
 jobs = [
     DeviceHardwareNoticeFullReport,
     DeviceSoftwareValidationFullReport,
     InventoryItemSoftwareValidationFullReport,
     GenerateVulnerabilities,
+    DLMToNautobotCoreModelMigration,
 ]
 register_jobs(*jobs)
