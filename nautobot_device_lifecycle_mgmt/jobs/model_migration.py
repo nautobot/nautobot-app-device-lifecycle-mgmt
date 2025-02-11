@@ -185,9 +185,7 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
                 html.escape(str(dlm_software_version)),
                 extra={"object": dlm_software_version},
             )
-            self._migrate_software_version(
-                dlm_software_version, update_core_to_match_dlm, remove_dangling_relationships, debug
-            )
+            self._migrate_software_version(dlm_software_version, update_core_to_match_dlm, debug)
         self.migrate_content_type_references_to_new_model(
             dlm_software_version_ct,
             core_software_version_ct,
@@ -260,16 +258,13 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
                 html.escape(str(core_model.objects.get(id=instance["migrated_to_core_model"]))),
             )
 
-    def _migrate_software_version(
-        self, dlm_software_version, update_core_to_match_dlm, remove_dangling_relationships, debug
-    ):  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+    def _migrate_software_version(self, dlm_software_version, update_core_to_match_dlm, debug):
         """Migrate DLM Software to Core SoftwareVersion."""
         core_software_version_ct = ContentType.objects.get_for_model(SoftwareVersion)
         dlm_software_version_ct = ContentType.objects.get_for_model(SoftwareLCM)
         status_active = Status.objects.get(name="Active")
 
         platform = dlm_software_version.device_platform
-        version = dlm_software_version.version
 
         dlm_soft_attrs = {
             "alias": dlm_software_version.alias,
@@ -283,7 +278,9 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
 
         attrs_diff = {}
         core_software_version = None
-        core_software_version_q = SoftwareVersion.objects.filter(platform=platform, version=version)
+        core_software_version_q = SoftwareVersion.objects.filter(
+            platform=platform, version=dlm_software_version.version
+        )
         if core_software_version_q.exists():
             core_software_version = core_software_version_q.first()
             self.logger.info(
@@ -530,7 +527,7 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
                     extra={"object": inventory_item},
                 )
 
-    def _migrate_contact(self, dlm_contact: ContactLCM, update_core_to_match_dlm, debug):  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+    def _migrate_contact(self, dlm_contact: ContactLCM, update_core_to_match_dlm, debug):  # pylint: disable=too-many-locals, too-many-branches
         """Migrates DLM Contact object to Core Contact."""
         dlm_contact_ct = ContentType.objects.get_for_model(ContactLCM)
         dlm_contract_ct = ContentType.objects.get_for_model(ContractLCM)
