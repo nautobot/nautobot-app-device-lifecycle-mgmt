@@ -209,7 +209,7 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
         )
         # Create placeholder software image files for (software, device type) pairs that don't currently have image files
         # This is to satisfy Nautobot's 2.2 requirement that device can only have software assigned if there is a matching image
-        self._create_placeholder_software_images()
+        self._create_placeholder_software_images(debug)
 
         # Need to add Core content type to custom fields before we can copy over values from the DLM Contact custom fields.
         self._migrate_custom_fields(dlm_contact_ct, core_contact_ct)
@@ -1213,22 +1213,25 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
                     "Error while migrating relationships. Review your relationships and try again."
                 ) from err
 
-    def _create_placeholder_software_images(self):
+    def _create_placeholder_software_images(self, debug):
         """Create placeholder software image files for software that is used by devices but no image currently exists."""
         if version.parse(settings.VERSION) >= version.parse("2.3.1"):
-            self.logger.info("Skipping placeholder SoftwareImageFile creation. Nautobot version is 2.3.1 or later.")
+            if debug:
+                self.logger.debug(
+                    "Skipping placeholder SoftwareImageFile creation. Nautobot version is 2.3.1 or later."
+                )
             return
 
-        self.logger.info(
-            "Creating placeholder SoftwareImageFiles for SoftwareVersions used by Devices without SoftwareImageFiles."
-        )
+        if debug:
+            self.logger.debug(
+                "Creating placeholder SoftwareImageFiles for SoftwareVersions used by Devices without SoftwareImageFiles."
+            )
 
         status_active, _ = Status.objects.get_or_create(name="Active")
 
         device_ct = ContentType.objects.get_for_model(Device)
         dlm_software_version_ct = ContentType.objects.get_for_model(SoftwareLCM)
 
-        # Get all (software_version, device_type) pairs where software_version is in use by a device with given device_type
         for relationship_association in RelationshipAssociation.objects.filter(
             relationship__key="device_soft",
             source_type=dlm_software_version_ct,
