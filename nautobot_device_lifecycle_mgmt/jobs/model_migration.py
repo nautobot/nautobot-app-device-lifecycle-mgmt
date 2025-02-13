@@ -19,7 +19,7 @@ from nautobot.apps.choices import (
 )
 from nautobot.apps.models import serialize_object, serialize_object_v2
 from nautobot.apps.utils import get_route_for_model
-from nautobot.dcim.models import Device, DeviceType, InventoryItem, SoftwareImageFile, SoftwareVersion
+from nautobot.dcim.models import Device, InventoryItem, SoftwareImageFile, SoftwareVersion
 from nautobot.extras.constants import CHANGELOG_MAX_OBJECT_REPR
 from nautobot.extras.jobs import BooleanVar, DryRunVar, Job
 from nautobot.extras.models import (
@@ -42,6 +42,7 @@ from nautobot.extras.models import (
     Webhook,
 )
 from nautobot.users.models import ObjectPermission
+from packaging import version
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -97,7 +98,7 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
     ) -> None:
         """Migration logic."""
         # Fail if running on nautobot < 2.2.0
-        if settings.VERSION_MAJOR < 2 or (settings.VERSION_MAJOR == 2 and settings.VERSION_MINOR < 2):
+        if version.parse(settings.VERSION) < version.parse("2.2.0"):
             raise ValueError("This job requires Nautobot 2.2.0 or later.")
 
         try:
@@ -184,9 +185,7 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
                 html.escape(str(dlm_software_version)),
                 extra={"object": dlm_software_version},
             )
-            self._migrate_software_version(
-                dlm_software_version, update_core_to_match_dlm, remove_dangling_relationships, debug
-            )
+            self._migrate_software_version(dlm_software_version, update_core_to_match_dlm, debug)
         self.migrate_content_type_references_to_new_model(
             dlm_software_version_ct,
             core_software_version_ct,
@@ -210,7 +209,7 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
         )
         # Create placeholder software image files for (software, device type) pairs that don't currently have image files
         # This is to satisfy Nautobot's 2.2 requirement that device can only have software assigned if there is a matching image
-        self._create_placeholder_software_images()
+        self._create_placeholder_software_images(debug)
 
         # Need to add Core content type to custom fields before we can copy over values from the DLM Contact custom fields.
         self._migrate_custom_fields(dlm_contact_ct, core_contact_ct)
@@ -229,6 +228,9 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
         )
 
         self._migrate_software_references()
+
+        self._migrate_devices(update_core_to_match_dlm, remove_dangling_relationships)
+        self._migrate_inventory_items(update_core_to_match_dlm, remove_dangling_relationships)
 
         # Emit warning if there are multiple DLM SoftwareLCM objects that migrated to the same Core SoftwareVersion object
         self._warn_on_duplicate_migrated_objects(SoftwareLCM, SoftwareVersion)
@@ -256,18 +258,13 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
                 html.escape(str(core_model.objects.get(id=instance["migrated_to_core_model"]))),
             )
 
-    def _migrate_software_version(
-        self, dlm_software_version, update_core_to_match_dlm, remove_dangling_relationships, debug
-    ):  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+    def _migrate_software_version(self, dlm_software_version, update_core_to_match_dlm, debug):
         """Migrate DLM Software to Core SoftwareVersion."""
         core_software_version_ct = ContentType.objects.get_for_model(SoftwareVersion)
-        device_ct = ContentType.objects.get_for_model(Device)
         dlm_software_version_ct = ContentType.objects.get_for_model(SoftwareLCM)
-        inventory_item_ct = ContentType.objects.get_for_model(InventoryItem)
         status_active = Status.objects.get(name="Active")
 
         platform = dlm_software_version.device_platform
-        version = dlm_software_version.version
 
         dlm_soft_attrs = {
             "alias": dlm_software_version.alias,
@@ -281,7 +278,9 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
 
         attrs_diff = {}
         core_software_version = None
-        core_software_version_q = SoftwareVersion.objects.filter(platform=platform, version=version)
+        core_software_version_q = SoftwareVersion.objects.filter(
+            platform=platform, version=dlm_software_version.version
+        )
         if core_software_version_q.exists():
             core_software_version = core_software_version_q.first()
             self.logger.info(
@@ -347,114 +346,6 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
                 extra={"object": core_software_version},
             )
 
-        # Migrate "Software on Device" relationships to the Device.software_version foreign key
-        for relationship_association in RelationshipAssociation.objects.filter(
-            relationship__key="device_soft",
-            source_type=dlm_software_version_ct,
-            source_id=dlm_software_version.id,
-            destination_type=device_ct,
-        ):
-            try:
-                device = Device.objects.get(id=relationship_association.destination_id)
-            except Device.DoesNotExist:
-                self.logger.error(
-                    "Found Software Relationship Association for DLM Software __%s__ that points to a non-existent Device with ID __%s__.",
-                    html.escape(str(dlm_software_version)),
-                    html.escape(str(relationship_association.destination_id)),
-                    extra={"object": dlm_software_version},
-                )
-                if remove_dangling_relationships:
-                    relationship_association.delete()
-                    self.logger.info(
-                        "Deleted Software Relationship Association for DLM Software __%s__ that points to a non-existent Device with ID __%s__.",
-                        html.escape(str(dlm_software_version)),
-                        html.escape(str(relationship_association.destination_id)),
-                        extra={"object": dlm_software_version},
-                    )
-                continue
-            existing_device_software = device.software_version
-            if existing_device_software and existing_device_software != core_software_version:
-                self.logger.warning(
-                    "Device __%s__ is already assigned to Core SoftwareVersion __%s__ but DLM software relationship implies it should be assigned to __%s__.",
-                    html.escape(str(device)),
-                    html.escape(str(existing_device_software)),
-                    html.escape(str(core_software_version)),
-                    extra={"object": device},
-                )
-                if update_core_to_match_dlm:
-                    device.software_version = core_software_version
-                    device.validated_save()
-                    self.logger.info(
-                        "Updated SoftwareVersion assignment for device __%s__. Old SoftwareVersion: __%s__. New SoftwareVersion: __%s__.",
-                        html.escape(str(device)),
-                        html.escape(str(core_software_version)),
-                        html.escape(str(existing_device_software)),
-                        extra={"object": device},
-                    )
-            elif not existing_device_software:
-                device.software_version = core_software_version
-                device.validated_save()
-                self.logger.info(
-                    "Assigned SoftwareVersion __%s__ to device __%s__",
-                    html.escape(str(core_software_version)),
-                    html.escape(str(device)),
-                    extra={"object": device},
-                )
-
-        # Migrate "Software on InventoryItem" relationships to the InventoryItem.software_version foreign key
-        for relationship_association in RelationshipAssociation.objects.filter(
-            relationship__key="inventory_item_soft",
-            source_type=dlm_software_version_ct,
-            source_id=dlm_software_version.id,
-            destination_type=inventory_item_ct,
-        ):
-            try:
-                inventory_item = InventoryItem.objects.get(id=relationship_association.destination_id)
-            except InventoryItem.DoesNotExist:
-                self.logger.error(
-                    "Found Software Relationship Association for DLM Software __%s__ that points to a non-existent InventoryItem with ID __%s__.",
-                    html.escape(str(dlm_software_version)),
-                    html.escape(str(relationship_association.destination_id)),
-                    extra={"object": dlm_software_version},
-                )
-                if remove_dangling_relationships:
-                    relationship_association.delete()
-                    self.logger.info(
-                        "Deleted Software Relationship Association for DLM Software __%s__ that points to a non-existent InventoryItem with ID __%s__.",
-                        html.escape(str(dlm_software_version)),
-                        html.escape(str(relationship_association.destination_id)),
-                        extra={"object": dlm_software_version},
-                    )
-                continue
-            existing_invitem_software = inventory_item.software_version
-            if existing_invitem_software and existing_invitem_software != core_software_version:
-                self.logger.warning(
-                    "Inventory Item __%s__ is already assigned to Core SoftwareVersion __%s__ but DLM software relationship implies it should be assigned to __%s__.",
-                    html.escape(str(inventory_item)),
-                    html.escape(str(existing_invitem_software)),
-                    html.escape(str(core_software_version)),
-                    extra={"object": inventory_item},
-                )
-                if update_core_to_match_dlm:
-                    inventory_item.software_version = core_software_version
-                    inventory_item.validated_save()
-                    self.logger.info(
-                        "Updated SoftwareVersion assignment for inventory item __%s__. Old SoftwareVersion: __%s__. New SoftwareVersion: __%s__.",
-                        html.escape(str(inventory_item)),
-                        html.escape(str(core_software_version)),
-                        html.escape(str(existing_invitem_software)),
-                        extra={"object": inventory_item},
-                    )
-            elif not existing_invitem_software:
-                inventory_item.software_version = core_software_version
-                inventory_item.validated_save()
-                self.logger.info(
-                    "Assigned SoftwareVersion __%s__ to inventory item __%s__",
-                    html.escape(str(core_software_version)),
-                    html.escape(str(inventory_item)),
-                    extra={"object": inventory_item},
-                )
-
         core_software_version.refresh_from_db()
 
         # Create an object change to document migration
@@ -493,7 +384,150 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
             html.escape(str(core_software_version)),
         )
 
-    def _migrate_contact(self, dlm_contact: ContactLCM, update_core_to_match_dlm, debug):  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+    def _migrate_devices(self, update_core_to_match_dlm, remove_dangling_relationships):
+        device_ct = ContentType.objects.get_for_model(Device)
+        dlm_software_version_ct = ContentType.objects.get_for_model(SoftwareLCM)
+
+        # Migrate "Software on Device" relationships to the Device.software_version foreign key
+        for relationship_association in RelationshipAssociation.objects.filter(
+            relationship__key="device_soft",
+            source_type=dlm_software_version_ct,
+            destination_type=device_ct,
+        ):
+            try:
+                dlm_software_version = SoftwareLCM.objects.get(id=relationship_association.source_id)
+            except SoftwareLCM.DoesNotExist:
+                self.logger.error(
+                    "Found Software Relationship Association for DLM Software with ID __%s__ that points to a non-existent SoftwareLCM object.",
+                    html.escape(str(relationship_association.source_id)),
+                )
+                if remove_dangling_relationships:
+                    relationship_association.delete()
+                    self.logger.info(
+                        "Deleted Software Relationship Association for DLM Software with ID __%s__ that points to a non-existent SoftwareLCM object.",
+                        html.escape(str(relationship_association.source_id)),
+                    )
+                continue
+            try:
+                device = Device.objects.get(id=relationship_association.destination_id)
+            except Device.DoesNotExist:
+                self.logger.error(
+                    "Found Software Relationship Association for DLM Software __%s__ that points to a non-existent Device with ID __%s__.",
+                    html.escape(str(dlm_software_version)),
+                    html.escape(str(relationship_association.destination_id)),
+                    extra={"object": dlm_software_version},
+                )
+                if remove_dangling_relationships:
+                    relationship_association.delete()
+                    self.logger.info(
+                        "Deleted Software Relationship Association for DLM Software __%s__ that points to a non-existent Device with ID __%s__.",
+                        html.escape(str(dlm_software_version)),
+                        html.escape(str(relationship_association.destination_id)),
+                        extra={"object": dlm_software_version},
+                    )
+                continue
+            existing_device_software = device.software_version
+            if existing_device_software and existing_device_software != dlm_software_version.migrated_to_core_model:
+                self.logger.warning(
+                    "Device __%s__ is already assigned to Core SoftwareVersion __%s__ but DLM software relationship implies it should be assigned to __%s__.",
+                    html.escape(str(device)),
+                    html.escape(str(existing_device_software)),
+                    html.escape(str(dlm_software_version.migrated_to_core_model)),
+                    extra={"object": device},
+                )
+                if update_core_to_match_dlm:
+                    device.software_version = dlm_software_version.migrated_to_core_model
+                    device.validated_save()
+                    self.logger.info(
+                        "Updated SoftwareVersion assignment for device __%s__. Old SoftwareVersion: __%s__. New SoftwareVersion: __%s__.",
+                        html.escape(str(device)),
+                        html.escape(str(dlm_software_version.migrated_to_core_model)),
+                        html.escape(str(existing_device_software)),
+                        extra={"object": device},
+                    )
+            elif not existing_device_software:
+                device.software_version = dlm_software_version.migrated_to_core_model
+                device.validated_save()
+                self.logger.info(
+                    "Assigned SoftwareVersion __%s__ to device __%s__",
+                    html.escape(str(dlm_software_version.migrated_to_core_model)),
+                    html.escape(str(device)),
+                    extra={"object": device},
+                )
+
+    def _migrate_inventory_items(self, update_core_to_match_dlm, remove_dangling_relationships):
+        inventory_item_ct = ContentType.objects.get_for_model(InventoryItem)
+        dlm_software_version_ct = ContentType.objects.get_for_model(SoftwareLCM)
+
+        # Migrate "Software on InventoryItem" relationships to the InventoryItem.software_version foreign key
+        for relationship_association in RelationshipAssociation.objects.filter(
+            relationship__key="inventory_item_soft",
+            source_type=dlm_software_version_ct,
+            destination_type=inventory_item_ct,
+        ):
+            try:
+                dlm_software_version = SoftwareLCM.objects.get(id=relationship_association.source_id)
+            except SoftwareLCM.DoesNotExist:
+                self.logger.error(
+                    "Found Software Relationship Association for DLM Software with ID __%s__ that points to a non-existent SoftwareLCM object.",
+                    html.escape(str(relationship_association.source_id)),
+                )
+                if remove_dangling_relationships:
+                    relationship_association.delete()
+                    self.logger.info(
+                        "Deleted Software Relationship Association for DLM Software with ID __%s__ that points to a non-existent SoftwareLCM object.",
+                        html.escape(str(relationship_association.source_id)),
+                    )
+                continue
+
+            try:
+                inventory_item = InventoryItem.objects.get(id=relationship_association.destination_id)
+            except InventoryItem.DoesNotExist:
+                self.logger.error(
+                    "Found Software Relationship Association for DLM Software __%s__ that points to a non-existent InventoryItem with ID __%s__.",
+                    html.escape(str(dlm_software_version)),
+                    html.escape(str(relationship_association.destination_id)),
+                    extra={"object": dlm_software_version},
+                )
+                if remove_dangling_relationships:
+                    relationship_association.delete()
+                    self.logger.info(
+                        "Deleted Software Relationship Association for DLM Software __%s__ that points to a non-existent InventoryItem with ID __%s__.",
+                        html.escape(str(dlm_software_version)),
+                        html.escape(str(relationship_association.destination_id)),
+                        extra={"object": dlm_software_version},
+                    )
+                continue
+            existing_invitem_software = inventory_item.software_version
+            if existing_invitem_software and existing_invitem_software != dlm_software_version.migrated_to_core_model:
+                self.logger.warning(
+                    "Inventory Item __%s__ is already assigned to Core SoftwareVersion __%s__ but DLM software relationship implies it should be assigned to __%s__.",
+                    html.escape(str(inventory_item)),
+                    html.escape(str(existing_invitem_software)),
+                    html.escape(str(dlm_software_version.migrated_to_core_model)),
+                    extra={"object": inventory_item},
+                )
+                if update_core_to_match_dlm:
+                    inventory_item.software_version = dlm_software_version.migrated_to_core_model
+                    inventory_item.validated_save()
+                    self.logger.info(
+                        "Updated SoftwareVersion assignment for inventory item __%s__. Old SoftwareVersion: __%s__. New SoftwareVersion: __%s__.",
+                        html.escape(str(inventory_item)),
+                        html.escape(str(dlm_software_version.migrated_to_core_model)),
+                        html.escape(str(existing_invitem_software)),
+                        extra={"object": inventory_item},
+                    )
+            elif not existing_invitem_software:
+                inventory_item.software_version = dlm_software_version.migrated_to_core_model
+                inventory_item.validated_save()
+                self.logger.info(
+                    "Assigned SoftwareVersion __%s__ to inventory item __%s__",
+                    html.escape(str(dlm_software_version.migrated_to_core_model)),
+                    html.escape(str(inventory_item)),
+                    extra={"object": inventory_item},
+                )
+
+    def _migrate_contact(self, dlm_contact: ContactLCM, update_core_to_match_dlm, debug):  # pylint: disable=too-many-locals, too-many-branches
         """Migrates DLM Contact object to Core Contact."""
         dlm_contact_ct = ContentType.objects.get_for_model(ContactLCM)
         dlm_contract_ct = ContentType.objects.get_for_model(ContractLCM)
@@ -1179,21 +1213,43 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
                     "Error while migrating relationships. Review your relationships and try again."
                 ) from err
 
-    def _create_placeholder_software_images(self):
+    def _create_placeholder_software_images(self, debug):
         """Create placeholder software image files for software that is used by devices but no image currently exists."""
+        if version.parse(settings.VERSION) >= version.parse("2.3.1"):
+            if debug:
+                self.logger.debug(
+                    "Skipping placeholder SoftwareImageFile creation. Nautobot version is 2.3.1 or later."
+                )
+            return
+
+        if debug:
+            self.logger.debug(
+                "Creating placeholder SoftwareImageFiles for SoftwareVersions used by Devices without SoftwareImageFiles."
+            )
+
         status_active, _ = Status.objects.get_or_create(name="Active")
 
-        # Get all (software_version, device_type) pairs where software_version is in use by a device with given device_type
-        for software, device_type in (
-            Device.objects.filter(software_version__isnull=False)
-            .order_by()
-            .values_list("software_version", "device_type")
-            .distinct()
+        device_ct = ContentType.objects.get_for_model(Device)
+        dlm_software_version_ct = ContentType.objects.get_for_model(SoftwareLCM)
+
+        for relationship_association in RelationshipAssociation.objects.filter(
+            relationship__key="device_soft",
+            source_type=dlm_software_version_ct,
+            destination_type=device_ct,
         ):
-            if SoftwareImageFile.objects.filter(software_version=software, device_types=device_type).exists():
+            try:
+                old_software = relationship_association.source
+                software_version = old_software.migrated_to_core_model
+            except SoftwareLCM.DoesNotExist:
                 continue
-            software_version = SoftwareVersion.objects.get(id=software)
-            device_type = DeviceType.objects.get(id=device_type)
+            try:
+                device = relationship_association.destination
+                device_type = device.device_type
+            except Device.DoesNotExist:
+                continue
+
+            if SoftwareImageFile.objects.filter(software_version=software_version, device_types=device_type).exists():
+                continue
             image_soft_and_dt = f"{slugify(software_version.version)}-{slugify(device_type.model)}"[:227]
             image_file_name = f"{image_soft_and_dt}-dlm-migrations-placeholder"
             if SoftwareImageFile.objects.filter(image_file_name=image_file_name).exists():
@@ -1217,6 +1273,16 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
                 status=status_active,
             )
             software_image.validated_save()
+            note = (
+                "This SoftwareImageFile was created as a placeholder. In Nautobot v2.2.0 - v2.3.0, a SoftwareImageFile "
+                "associated with a DeviceType is required before any Devices of that DeviceType can be associated with a SoftwareVersion. "
+                "This placeholder can be deleted after upgrading to Nautobot v2.3.1 or later."
+            )
+            Note.objects.create(
+                assigned_object=software_image,
+                user=None,
+                note=note,
+            )
             device_type.software_image_files.add(software_image)
             self.logger.warning(
                 "Created placeholder SoftwareImageFile __%s__ assigned to DeviceType __%s__.",

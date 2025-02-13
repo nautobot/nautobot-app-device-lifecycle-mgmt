@@ -15,6 +15,11 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
 
     ContractLCM = sender.get_model("ContractLCM")
 
+    # Hide obsolete device_soft and inventory_item_soft relationships
+    Relationship.objects.filter(key__in=("device_soft", "inventory_item_soft")).update(
+        destination_hidden=True, source_hidden=True
+    )
+
     Relationship.objects.get_or_create(
         label="Contract to dcim.InventoryItem",
         defaults={
