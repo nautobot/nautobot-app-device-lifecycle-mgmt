@@ -29,6 +29,7 @@ class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
     }
     caching_config = {}
     docs_view_name = "plugins:nautobot_device_lifecycle_mgmt:docs"
+    banner_function = "banner.models_migrated_to_core_banner"
 
     def ready(self):
         """Register custom signals."""

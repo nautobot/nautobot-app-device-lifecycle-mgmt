@@ -1,0 +1,1 @@
+Added a banner to all device lifecycle management views if any of the SoftwareLCM, SoftwareImageLCM or ContactLCM models have not been migrated to core models.
