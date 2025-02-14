@@ -26,7 +26,7 @@ def models_migrated_to_core_banner(context):
     app_name = resolve(context.request.path).app_name
     if app_name != "plugins:nautobot_device_lifecycle_mgmt":
         return None
-    elif all_models_migrated_to_core():
+    if all_models_migrated_to_core():
         return None
 
     migration_job = Job.objects.filter(
