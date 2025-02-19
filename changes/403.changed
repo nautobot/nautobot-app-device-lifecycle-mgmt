@@ -1,0 +1,1 @@
+Updated the migration job to duplicate relationships instead of directly migrating them.

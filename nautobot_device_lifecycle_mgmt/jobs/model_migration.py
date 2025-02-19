@@ -9,7 +9,7 @@ from string import ascii_letters, digits
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.urls import reverse
 from django.utils.text import slugify
 from nautobot.apps.choices import (
@@ -895,10 +895,6 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
             - ExportTemplate.content_type
             - Note.assigned_object_type
             - ObjectChange.changed_object_type
-            - Relationship.source_type
-            - Relationship.destination_type
-            - RelationshipAssociation.source_type
-            - RelationshipAssociation.destination_type
             - TaggedItem.content_type
 
         For these one-to-many and many-to-many relationships, the new content type is added
@@ -910,6 +906,10 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
             - Status.content_types
             - Tag.content_types
             - WebHook.content_types
+
+        Relationships will be renamed to `{foo}_old` and a new relationship called `{foo}` will be created
+        with the same data and the `source_type`/`destination_type` will be updated with the new model's content type.
+        RelationshipAssociations will be duplicated and the content types updated as well.
 
         This will also fix tags that were not properly enforced by adding the new model's content type to the tag's
         content types if an instance of the new model is using the tag.
@@ -1064,154 +1064,71 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
             )
             object_permission.object_types.add(new_ct)
 
-        # These are migrated separately as they follow specific business logic
+        # These relationships are migrated separately as they follow specific business logic
         excluded_relationships = ("device_soft", "inventory_item_soft")
         # Migrate Relationship content type
-        relationship_associations_dlm_source = []
-        for relationship in Relationship.objects.filter(source_type=old_ct).exclude(key__in=excluded_relationships):
-            self.logger.info(
-                "The Relationship __%s__ will be migrated to Core model __%s__",
-                html.escape(str(relationship.label)),
-                html.escape(str(new_ct)),
-            )
-            # We can't migrate relationships in place
-            try:
-                for relationship_association in RelationshipAssociation.objects.filter(
-                    source_type=old_ct, relationship=relationship
-                ).exclude(relationship__key__in=excluded_relationships):
-                    self.logger.info(
-                        "The Relationship Association __%s__ will be migrated to Core model __%s__",
-                        html.escape(str(relationship_association)),
-                        html.escape(str(new_ct)),
-                    )
-                    relationship_associations_dlm_source.append(
-                        {
-                            "relationship_id": relationship_association.relationship_id,
-                            "source_type_id": relationship_association.source_type_id,
-                            "source_id": relationship_association.source_id,
-                            "destination_type_id": relationship_association.destination_type_id,
-                            "destination_id": relationship_association.destination_id,
-                        }
-                    )
-                    relationship_association.delete()
-            except Exception as err:
-                self.logger.error(
-                    "Encountered exception __%s__ while disassociating Relationship __%s__. Rolling back relationship updates.",
-                    html.escape(str(err)),
-                    html.escape(str(relationship.label)),
-                )
-                for relationship_attrs in relationship_associations_dlm_source:
-                    RelationshipAssociation.objects.get_or_create(**relationship_attrs)
-                raise Exception(  # pylint: disable=broad-exception-raised
-                    "Error while migrating relationships. Review your relationships and try again."
-                ) from err
-
-            try:
-                relationship.source_type = new_ct
-                relationship.validated_save()
-                new_relationship_associations = []
-                for relationship_attrs in relationship_associations_dlm_source:
-                    old_object = old_ct.model_class().objects.get(id=relationship_attrs["source_id"])
-                    new_object_id = getattr(old_object, "migrated_to_core_model_id", None)
-                    new_relationship_association = RelationshipAssociation(
-                        relationship_id=relationship_attrs["relationship_id"],
-                        destination_type_id=relationship_attrs["destination_type_id"],
-                        destination_id=relationship_attrs["destination_id"],
-                        source_type=new_ct,
-                        source_id=new_object_id,
-                    )
-                    new_relationship_association.validated_save()
-                    new_relationship_associations.append(new_relationship_association)
-            except Exception as err:
-                self.logger.warning(
-                    "Encountered exception __%s__ while migrating Relationship __%s__. Rolling back relationship updates.",
-                    html.escape(str(err)),
-                    html.escape(str(relationship.label)),
-                )
-                for new_relationship_association in new_relationship_associations:
-                    new_relationship_association.delete()
-                relationship.source_type = old_ct
-                relationship.validated_save()
-
-                for relationship_attrs in relationship_associations_dlm_source:
-                    RelationshipAssociation.objects.get_or_create(**relationship_attrs)
-                raise Exception(  # pylint: disable=broad-exception-raised
-                    "Error while migrating relationships. Review your relationships and try again."
-                ) from err
-
-        relationship_associations_dlm_destination = []
-        for relationship in Relationship.objects.filter(destination_type=old_ct).exclude(
+        for old_relationship in Relationship.objects.filter(Q(source_type=old_ct) | Q(destination_type=old_ct)).exclude(
             key__in=excluded_relationships
         ):
             self.logger.info(
                 "The Relationship __%s__ will be migrated to Core model __%s__",
-                html.escape(str(relationship.label)),
+                html.escape(str(old_relationship.label)),
                 html.escape(str(new_ct)),
             )
-            # We can't migrate relationships in place
-            try:
-                for relationship_association in RelationshipAssociation.objects.filter(
-                    destination_type=old_ct, relationship=relationship
-                ).exclude(relationship__key__in=excluded_relationships):
-                    self.logger.info(
-                        "The Relationship Association __%s__ will be migrated to Core model __%s__",
-                        html.escape(str(relationship_association)),
-                        html.escape(str(new_ct)),
-                    )
-                    relationship_associations_dlm_destination.append(
-                        {
-                            "relationship_id": relationship_association.relationship_id,
-                            "source_type_id": relationship_association.source_type_id,
-                            "source_id": relationship_association.source_id,
-                            "destination_type_id": relationship_association.destination_type_id,
-                            "destination_id": relationship_association.destination_id,
-                        }
-                    )
-                    relationship_association.delete()
-            except Exception as err:
-                self.logger.warning(
-                    "Encountered exception __%s__ while disassociating instance of Relationship __%s__. Rolling back relationship updates.",
-                    html.escape(str(err)),
-                    html.escape(str(relationship.label)),
-                )
-                for relationship_attrs in relationship_associations_dlm_destination:
-                    RelationshipAssociation.objects.get_or_create(**relationship_attrs)
-                raise Exception(  # pylint: disable=broad-exception-raised
-                    "Error while migrating relationships. Review your relationships and try again."
-                ) from err
 
-            try:
-                relationship.destination_type = new_ct
-                relationship.validated_save()
-                new_relationship_associations = []
-                for relationship_attrs in relationship_associations_dlm_destination:
-                    old_object = old_ct.model_class().objects.get(id=relationship_attrs["destination_id"])
-                    new_object_id = getattr(old_object, "migrated_to_core_model_id", None)
-                    new_relationship_association = RelationshipAssociation(
-                        relationship_id=relationship_attrs["relationship_id"],
-                        source_type_id=relationship_attrs["source_type_id"],
-                        source_id=relationship_attrs["source_id"],
-                        destination_type=new_ct,
-                        destination_id=new_object_id,
-                    )
-                    new_relationship_association.validated_save()
-                    new_relationship_associations.append(new_relationship_association)
-            except Exception as err:
-                self.logger.warning(
-                    "Encountered exception __%s__ while migrating Relationship __%s__. Rolling back relationship updates.",
-                    html.escape(str(err)),
-                    html.escape(str(relationship.label)),
-                )
-                for new_relationship_association in new_relationship_associations:
-                    new_relationship_association.delete()
-                relationship.destination_type = old_ct
-                relationship.validated_save()
+            # Duplicate the relationship with the new content type
+            new_relationship = Relationship(
+                key=old_relationship.key,
+                label=old_relationship.label,
+                description=old_relationship.description,
+                type=old_relationship.type,
+                required_on=old_relationship.required_on,
+                source_type=old_relationship.source_type if old_relationship.source_type != old_ct else new_ct,
+                source_label=old_relationship.source_label,
+                source_filter=old_relationship.source_filter,
+                source_hidden=old_relationship.source_hidden,
+                destination_type=old_relationship.destination_type
+                if old_relationship.destination_type != old_ct
+                else new_ct,
+                destination_label=old_relationship.destination_label,
+                destination_filter=old_relationship.destination_filter,
+                destination_hidden=old_relationship.destination_hidden,
+                advanced_ui=old_relationship.advanced_ui,
+            )
 
-                for relationship_attrs in relationship_associations_dlm_destination:
-                    RelationshipAssociation.objects.get_or_create(**relationship_attrs)
-                raise Exception(  # pylint: disable=broad-exception-raised
-                    "Error while migrating relationships. Review your relationships and try again."
-                ) from err
+            # Rename relationship key to {key}_old, rename label to "{label} (old)" and hide the old relationship in the ui
+            while Relationship.objects.filter(key=old_relationship.key).exists():
+                old_relationship.key = f"{old_relationship.key}_old"
+            while Relationship.objects.filter(label=old_relationship.label).exists():
+                old_relationship.label = f"{old_relationship.label} (old)"
+            old_relationship.source_hidden = True
+            old_relationship.destination_hidden = True
+            old_relationship.validated_save()
+            new_relationship.validated_save()
+
+            # Create duplicate relationshipassociations with new content type
+            for relationship_association in RelationshipAssociation.objects.filter(
+                relationship=old_relationship
+            ).exclude(relationship__key__in=excluded_relationships):
+                self.logger.info(
+                    "The Relationship Association __%s__ will be migrated to Core model __%s__",
+                    html.escape(str(relationship_association)),
+                    html.escape(str(new_ct)),
+                )
+
+                new_source = relationship_association.source
+                if relationship_association.source_type == old_ct:
+                    new_source = relationship_association.source.migrated_to_core_model
+
+                new_destination = relationship_association.destination
+                if relationship_association.destination_type == old_ct:
+                    new_destination = new_destination.migrated_to_core_model
+
+                RelationshipAssociation.objects.create(
+                    relationship=new_relationship,
+                    source=new_source,
+                    destination=new_destination,
+                )
 
     def _create_placeholder_software_images(self, debug):
         """Create placeholder software image files for software that is used by devices but no image currently exists."""
