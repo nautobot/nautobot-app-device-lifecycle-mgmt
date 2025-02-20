@@ -227,6 +227,15 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
             hide_changelog_migrations,
         )
 
+        self.migrate_relationships(
+            content_types={
+                dlm_software_version_ct: core_software_version_ct,
+                dlm_software_image_ct: core_software_image_ct,
+                dlm_contact_ct: core_contact_ct,
+            },
+            debug=debug,
+        )
+
         self._migrate_software_references()
 
         self._migrate_devices(update_core_to_match_dlm, remove_dangling_relationships)
@@ -385,10 +394,10 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
         )
 
     def _migrate_devices(self, update_core_to_match_dlm, remove_dangling_relationships):
+        """Migrate "Software on Device" relationships to the Device.software_version foreign key."""
         device_ct = ContentType.objects.get_for_model(Device)
         dlm_software_version_ct = ContentType.objects.get_for_model(SoftwareLCM)
 
-        # Migrate "Software on Device" relationships to the Device.software_version foreign key
         for relationship_association in RelationshipAssociation.objects.filter(
             relationship__key="device_soft",
             source_type=dlm_software_version_ct,
@@ -456,10 +465,10 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
                 )
 
     def _migrate_inventory_items(self, update_core_to_match_dlm, remove_dangling_relationships):
+        """Migrate "Software on InventoryItem" relationships to the InventoryItem.software_version foreign key."""
         inventory_item_ct = ContentType.objects.get_for_model(InventoryItem)
         dlm_software_version_ct = ContentType.objects.get_for_model(SoftwareLCM)
 
-        # Migrate "Software on InventoryItem" relationships to the InventoryItem.software_version foreign key
         for relationship_association in RelationshipAssociation.objects.filter(
             relationship__key="inventory_item_soft",
             source_type=dlm_software_version_ct,
@@ -907,10 +916,6 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
             - Tag.content_types
             - WebHook.content_types
 
-        Relationships will be renamed to `{foo}_old` and a new relationship called `{foo}` will be created
-        with the same data and the `source_type`/`destination_type` will be updated with the new model's content type.
-        RelationshipAssociations will be duplicated and the content types updated as well.
-
         This will also fix tags that were not properly enforced by adding the new model's content type to the tag's
         content types if an instance of the new model is using the tag.
 
@@ -1064,12 +1069,37 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
             )
             object_permission.object_types.add(new_ct)
 
+    def migrate_relationships(self, content_types, debug):
+        """Migrate Relationships and RelationshipAssociations from the old models to the new models.
+
+        Relationships will be renamed to `{foo}_old` and a new relationship called `{foo}` will be created
+        with the same data and the `source_type`/`destination_type` will be updated with the new model's content type.
+        RelationshipAssociations will be duplicated and the content types updated as well.
+
+        """
         # These relationships are migrated separately as they follow specific business logic
         excluded_relationships = ("device_soft", "inventory_item_soft")
         # Migrate Relationship content type
-        for old_relationship in Relationship.objects.filter(Q(source_type=old_ct) | Q(destination_type=old_ct)).exclude(
-            key__in=excluded_relationships
-        ):
+        for old_relationship in Relationship.objects.filter(
+            Q(source_type__in=content_types.keys()) | Q(destination_type__in=content_types.keys())
+        ).exclude(key__in=excluded_relationships):
+            if (
+                old_relationship.key.endswith("_old")
+                and Relationship.objects.filter(key=old_relationship.key[:-4]).exists()
+            ) or (
+                old_relationship.label.endswith(" (old)")
+                and Relationship.objects.filter(label=old_relationship.label[:-6]).exists()
+            ):
+                if debug:
+                    self.logger.debug(
+                        "The Relationship __%s__ has already been migrated. Skipping migration of this Relationship.",
+                        html.escape(str(old_relationship.label)),
+                    )
+                continue
+
+            new_ct = content_types.get(
+                old_relationship.source_type, content_types.get(old_relationship.destination_type)
+            )
             self.logger.info(
                 "The Relationship __%s__ will be migrated to Core model __%s__",
                 html.escape(str(old_relationship.label)),
@@ -1083,13 +1113,13 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
                 description=old_relationship.description,
                 type=old_relationship.type,
                 required_on=old_relationship.required_on,
-                source_type=old_relationship.source_type if old_relationship.source_type != old_ct else new_ct,
+                source_type=content_types.get(old_relationship.source_type, old_relationship.source_type),
                 source_label=old_relationship.source_label,
                 source_filter=old_relationship.source_filter,
                 source_hidden=old_relationship.source_hidden,
-                destination_type=old_relationship.destination_type
-                if old_relationship.destination_type != old_ct
-                else new_ct,
+                destination_type=content_types.get(
+                    old_relationship.destination_type, old_relationship.destination_type
+                ),
                 destination_label=old_relationship.destination_label,
                 destination_filter=old_relationship.destination_filter,
                 destination_hidden=old_relationship.destination_hidden,
@@ -1097,10 +1127,8 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
             )
 
             # Rename relationship key to {key}_old, rename label to "{label} (old)" and hide the old relationship in the ui
-            while Relationship.objects.filter(key=old_relationship.key).exists():
-                old_relationship.key = f"{old_relationship.key}_old"
-            while Relationship.objects.filter(label=old_relationship.label).exists():
-                old_relationship.label = f"{old_relationship.label} (old)"
+            old_relationship.key = f"{old_relationship.key}_old"
+            old_relationship.label = f"{old_relationship.label} (old)"
             old_relationship.source_hidden = True
             old_relationship.destination_hidden = True
             old_relationship.validated_save()
@@ -1116,18 +1144,18 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
                     html.escape(str(new_ct)),
                 )
 
-                new_source = relationship_association.source
-                if relationship_association.source_type == old_ct:
-                    new_source = relationship_association.source.migrated_to_core_model
-
-                new_destination = relationship_association.destination
-                if relationship_association.destination_type == old_ct:
-                    new_destination = new_destination.migrated_to_core_model
-
                 RelationshipAssociation.objects.create(
                     relationship=new_relationship,
-                    source=new_source,
-                    destination=new_destination,
+                    source=getattr(
+                        relationship_association.source,
+                        "migrated_to_core_model",
+                        relationship_association.source,
+                    ),
+                    destination=getattr(
+                        relationship_association.destination,
+                        "migrated_to_core_model",
+                        relationship_association.destination,
+                    ),
                 )
 
     def _create_placeholder_software_images(self, debug):
