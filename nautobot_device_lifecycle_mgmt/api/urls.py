@@ -19,4 +19,5 @@ router.register("vulnerability", views.VulnerabilityLCMViewSet)
 router.register("device-validated-software-result", views.DeviceSoftwareValidationResultListViewSet)
 router.register("inventory-item-validated-software-result", views.InventoryItemSoftwareValidationResultListViewSet)
 
+app_name = "nautobot_device_lifecycle_mgmt-api"
 urlpatterns = router.urls
