@@ -9,6 +9,7 @@ from nautobot.apps.urls import NautobotUIViewSetRouter
 from nautobot_device_lifecycle_mgmt import views
 
 
+app_name = "nautobot_device_lifecycle_mgmt"
 router = NautobotUIViewSetRouter()
 
 router.register("hardwarelcm", views.HardwareLCMUIViewSet)
