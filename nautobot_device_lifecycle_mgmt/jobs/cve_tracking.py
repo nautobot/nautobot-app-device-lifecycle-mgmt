@@ -97,9 +97,13 @@ class NistCveSyncSoftware(Job):
         commit_default = True
         soft_time_limit = 3600
 
-    def run(self, *args, **kwargs):  # pylint: disable=too-many-locals
-        """Check all software in DLC against NIST database and associate registered CVEs.  Update when necessary."""
-        # Ensure an acceptable value is stored in the NIST API key secret
+    def run(self, *args, **kwargs: dict):  # pylint: disable=too-many-locals
+        """Check all software in DLC against NIST database and associate registered CVEs.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
         try:
             self.nist_api_key = Secret.objects.get(name="NAUTOBOT DLM NIST API KEY").get_value()  # pylint: disable=attribute-defined-outside-init
         except SecretError as err:
@@ -109,7 +113,6 @@ class NistCveSyncSoftware(Job):
             )
             return
 
-        # Get the integration object
         if kwargs.get("nist_integration"):
             self.integration = kwargs["nist_integration"]  # pylint: disable=attribute-defined-outside-init
         else:
@@ -204,7 +207,11 @@ class NistCveSyncSoftware(Job):
         )
 
     def create_dlc_cves(self, cpe_cves: dict) -> None:
-        """Create the list of needed items and insert into to DLC CVEs."""
+        """Create CVE entries in the DLC database.
+
+        Args:
+            cpe_cves (dict): Dictionary of CVEs to be created.
+        """
         created_count = 0
 
         for cve, info in cpe_cves.items():
@@ -233,8 +240,16 @@ class NistCveSyncSoftware(Job):
 
         self.logger.info("Created New CVEs.", extra={"grouping": "CVE Creation"})
 
-    def get_cve_info(self, cpe_software_search_urls: list, software) -> dict:
-        """Search NIST for software and related CVEs."""
+    def get_cve_info(self, cpe_software_search_urls: list, software: SoftwareVersion) -> dict:
+        """Search NIST for software and related CVEs.
+
+        Args:
+            cpe_software_search_urls (list): List of URLs to query for CVE information.
+            software (object): Software object being queried.
+
+        Returns:
+            dict: Dictionary containing new and existing CVE information.
+        """
         for cpe_software_search_url in cpe_software_search_urls:
             result = self.query_api(cpe_software_search_url)
 
@@ -252,16 +267,16 @@ class NistCveSyncSoftware(Job):
 
         return all_cve_info
 
-    def process_cves(self, cve_list, dlc_cves, software):
-        """Method to return processed CVE info.
+    def process_cves(self, cve_list: list, dlc_cves: list, software: SoftwareVersion) -> dict:
+        """Return processed CVE info categorized as new or existing.
 
         Args:
-            cve_list (list): List of CVE returned from CPE search
-            dlc_cves (list): List of all DLM CVE objects
-            software (object): UUID of the Software being queried
+            cve_list (list): List of CVEs returned from CPE search.
+            dlc_cves (list): List of all DLM CVE objects.
+            software (object): Software object being queried.
 
         Returns:
-            dict: Dictionary of CVEs in either new or existing categories
+            dict: Dictionary of CVEs categorized as new or existing.
         """
         processed_cve_info = {"new": {}, "existing": {}}
         if not cve_list:
@@ -281,11 +296,11 @@ class NistCveSyncSoftware(Job):
 
         return processed_cve_info
 
-    def query_api(self, url):
-        """Uses established session to query the NIST API.
+    def query_api(self, url: str) -> dict:
+        """Query the NIST API using an established session.
 
         Args:
-            url (string): The API endpoint getting queried.
+            url (str): The API endpoint being queried.
 
         Returns:
             dict: Dictionary of returned results if successful.
@@ -338,8 +353,15 @@ class NistCveSyncSoftware(Job):
             return "HIGH"
         return "UNDEFINED"
 
-    def prep_cve_for_dlc(self, cve_json):  # pylint: disable=too-many-locals
-        """Converts CVE info into DLC Model compatibility."""
+    def prep_cve_for_dlc(self, cve_json: dict) -> dict:  # pylint: disable=too-many-locals
+        """Convert CVE info into a format compatible with the DLC model.
+
+        Args:
+            cve_json (dict): JSON object containing CVE information.
+
+        Returns:
+            dict: Dictionary of CVE information formatted for DLC.
+        """
         cve_name = cve_json["id"]
         for desc in cve_json["descriptions"]:
             if desc["lang"] == "en":
@@ -397,11 +419,11 @@ class NistCveSyncSoftware(Job):
         return all_cve_info
 
     def update_cve(self, current_dlc_cve: CVELCM, updated_cve: dict) -> None:
-        """Determine if the last modified date from the latest info is newer than the existing info and update.
+        """Update CVE information if the latest info is newer than existing info.
 
         Args:
-            current_dlc_cve (dict): Dictionary from the current DLM CVE DB.
-            updated_cve (dict): Dictionary from the latest software pull for CVE.
+            current_dlc_cve (CVELCM): Current CVE object from the DLM database.
+            updated_cve (dict): Latest CVE information from the software pull.
         """
         try:
             current_dlc_cve.description = (
