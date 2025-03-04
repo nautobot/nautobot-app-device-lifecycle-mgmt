@@ -701,9 +701,9 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
         status_active, _ = Status.objects.get_or_create(name="Active")
 
         image_file_name = dlm_software_image.image_file_name
-        dlm_software_version = dlm_software_image.software.id
+        dlm_software_version = dlm_software_image.software
         # Dry-run will not have populated mappings for not-yet-migrated Software Versions
-        core_software_version_id = dlm_software_version.migrated_to_core_model
+        core_software_version_id = dlm_software_version.migrated_to_core_model.id
         # Flag tracking whether hashing algorithm could be automatically migrated
 
         hashing_algorithm = self._migrate_hashing_algorithm(dlm_software_image.hashing_algorithm)
