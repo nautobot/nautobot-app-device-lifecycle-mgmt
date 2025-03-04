@@ -1,8 +1,13 @@
 # Compatibility Matrix
 
+Current train is denoted with (*).
+
+Future releases are denoted with (^).
+
 | Device Lifecycle Management Version | Nautobot First Support Version | Nautobot Last Support Version |
 | ------------- | -------------------- | ------------- |
-| 3.0.X         | 2.2.0                | 2.99.99       |
+| 4.0.0  (^)    | 3.0.0             | 3.99.99          |
+| 3.0.X  (*)    | 2.2.0                | 3.1.99       |
 | 2.2.X         | 2.0.0                | 2.99.99       |
 | 2.1.X         | 2.0.0                | 2.99.99       |
 | 2.0.X         | 2.0.0                | 2.99.99       |

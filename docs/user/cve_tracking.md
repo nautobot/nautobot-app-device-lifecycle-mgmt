@@ -4,7 +4,7 @@ The CVE Tracking portion of the app provides two additional objects - CVE object
 
 ## CVE objects
 
-A CVE object can be used to record Common Vulnerabilities and Exposures as well as any detailed information that is useful to track about them such as publish date, severity, CVSS scores and more. CVE objects can be used individually, but they can then be [associated](#software-association) to one or many Software objects via a [Relationship](https://docs.nautobot.com/projects/core/en/stable/models/extras/relationship/).
+A CVE object can be used to record Common Vulnerabilities and Exposures as well as any detailed information that is useful to track about them such as publish date, severity, CVSS scores and more. CVE objects can be used individually, but they can then be [associated](#software-association) to one or many Software objects via `Affected Softwares` field.
 
 When creating a CVE object, the following fields are available. Fields in **bold** are mandatory.
 
@@ -19,6 +19,7 @@ When creating a CVE object, the following fields are available. Fields in **bold
 | CVSS Base Score | The Base (v1) Common Vulnerability Scoring System of the CVE |
 | CVSSv2 Score | The CVSSv2 Score |
 | CVSSv3 Score | The CVSSv3 Score |
+| Affected Softwares | Software versions affected by this CVE |
 | Fix | The software fix (if available) for the CVE |
 | Comments | Any additional comments or details about the CVE |
 | Tags | Arbitrary [tag objects](https://docs.nautobot.com/projects/core/en/stable/models/extras/tag/) that can be applied to this CVE |
@@ -26,17 +27,6 @@ When creating a CVE object, the following fields are available. Fields in **bold
 !!! note
     In addition to these standard fields, you can also add one or more [Custom Fields](https://docs.nautobot.com/projects/core/en/stable/models/extras/customfield/) to the model.
 
-### Software Association
-
-As stated previously, you can associate a CVE to one or many [Software objects](./software_lifecycle.md#software-objects). These relationships will present themselves as breadcrumb links on each item's detail view.
-
-Example of a breadcrumb link on a CVE item's view:
-
-![](../images/lcm_cve_breadcrumb.png)
-
-Example of a breadcrumb link on a Software item's view:
-
-![](../images/lcm_software_breadcrumb.png)
 
 ## Vulnerability objects
 
