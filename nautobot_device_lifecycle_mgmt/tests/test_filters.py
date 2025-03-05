@@ -11,6 +11,7 @@ from nautobot.extras.models import Role, Status
 
 from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.filters import (
+    ContractLCMFilterSet,
     CVELCMFilterSet,
     DeviceSoftwareValidationResultFilterSet,
     HardwareLCMFilterSet,
@@ -22,6 +23,7 @@ from nautobot_device_lifecycle_mgmt.filters import (
 )
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
+    ContractLCM,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -31,7 +33,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     VulnerabilityLCM,
 )
 
-from .conftest import create_cves, create_devices, create_inventory_items, create_softwares
+from .conftest import create_contracts, create_cves, create_devices, create_inventory_items, create_softwares
 
 
 class HardwareLCMTestCase(TestCase):
@@ -811,3 +813,90 @@ class SoftwareImageLCMFilterSetTestCase(TestCase):
         """Test device_types filter."""
         params = {"device_types": [self.devicetype_2.model]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+
+class ContractLCMFilterSetTest(TestCase):
+    """Tests for ContractLCMFilterSet."""
+
+    queryset = ContractLCM.objects.all()
+    filterset = ContractLCMFilterSet
+
+    def setUp(self):
+        self.ch1, self.ch2, self.cv1, self.cv2 = create_contracts()
+
+    # Test Q
+    def test_q_multiple_records(self):
+        """Test q filter to find multiple records based on name."""
+        params = {"q": ""}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 4)
+
+    def test_q_name(self):
+        """Test q filter to find single record based on name."""
+        params = {"q": "Hero Discounts"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_q_cost(self):
+        """Test q filter to find multiple records based on name."""
+        params = {"q": "5000"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_q_support_level(self):
+        """Test q filter to find multiple records based on name."""
+        params = {"q": "Gold"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_q_contract_type(self):
+        """Test q filter to find multiple records based on name."""
+        params = {"q": "Hardware"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 4)
+
+    # Test Queries
+    def test_provider(self):
+        """Test provider filter to find two records."""
+        params = {"provider": [self.ch1.provider]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"provider": [self.cv1.provider]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_contract_expiration(self):
+        """Test expired filter to find two records based on year."""
+        params = {"expired": True}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"expired": False}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_contract_start_gte(self):
+        """Test start date range filter gte to find records based on year."""
+        params = {"start__gte": "2022-01-01"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"start__gte": "2021-01-01"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 4)
+        params = {"start__gte": "2060-12-31"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+
+    def test_contract_start_lte(self):
+        """Test start date range filter lte to find records based on year."""
+        params = {"start__lte": "2022-01-01"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 4)
+        params = {"start__lte": "2021-01-01"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"start__lte": "2020-01-01"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+
+    def test_contract_end_gte(self):
+        """Test end date range filter gte to find records based on year."""
+        params = {"end__gte": "2022-12-31"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 4)
+        params = {"end__gte": "2060-12-31"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"end__gte": "2070-12-31"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
+
+    def test_contract_end_lte(self):
+        """Test end date range filter lte to find records based on year."""
+        params = {"end__lte": "2060-12-31"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 4)
+        params = {"end__lte": "2022-12-31"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"end__lte": "2020-12-31"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 0)
