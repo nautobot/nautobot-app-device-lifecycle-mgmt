@@ -311,8 +311,8 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             end=datetime.date(2025, 1, 8),
             preferred=True,
         )
-        validated_software.devices.set([device.pk for device in devices])
         validated_software.save()
+        validated_software.devices.set([device.pk for device in devices])
 
         validated_software = ValidatedSoftwareLCM(
             software=softwares[1],
@@ -320,8 +320,8 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             end=datetime.date(2019, 6, 12),
             preferred=False,
         )
-        validated_software.device_types.set([devicetype.pk for devicetype in devicetypes])
         validated_software.save()
+        validated_software.device_types.set([devicetype.pk for devicetype in devicetypes])
 
         validated_software = ValidatedSoftwareLCM(
             software=softwares[1],
@@ -329,8 +329,8 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             end=datetime.date(2030, 7, 30),
             preferred=False,
         )
-        validated_software.device_roles.set([devicerole.pk for devicerole in deviceroles])
         validated_software.save()
+        validated_software.device_roles.set([devicerole.pk for devicerole in deviceroles])
 
         ValidatedSoftwareLCM(
             software=softwares[1],
@@ -338,8 +338,8 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
             end=datetime.date(2025, 1, 16),
             preferred=False,
         )
-        validated_software.inventory_items.set([inventoryitem.pk for inventoryitem in inventoryitems])
         validated_software.save()
+        validated_software.inventory_items.set([inventoryitem.pk for inventoryitem in inventoryitems])
 
     @skip("Not implemented")
     def test_bulk_delete_objects(self):
