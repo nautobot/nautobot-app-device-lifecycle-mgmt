@@ -4,14 +4,14 @@ Table of Contents
     - [Extensibility Objects Referencing Deprecated Objects](#extensibility-objects-referencing-deprecated-objects)
     - [Relationships Migrations](#relationships-migrations)
     - [Software Image Hashing Algorithm](#software-image-hashing-algorithm)
-    - [Software objects migration in Nautobot 2.2.0 - 2.3.0](#software-objects-migration-in-nautobot-220---230)
+    - [Software objects migration in Nautobot 2.2.0 to 2.3.0](#software-objects-migration-in-nautobot-220-to-230)
     - [DLM models that now refer to the Core models](#dlm-models-that-now-refer-to-the-core-models)
     - [Migration Banner](#migration-banner)
     - [Accessing Deprecated Models](#accessing-deprecated-models)
   - [Running the Migration Job](#running-the-migration-job)
     - [Migration Job options](#migration-job-options)
 - [FAQ](#faq)
-    - [I can no longer see Software, Software Image, or POC in the  Device Lifecycle UI menu](#i-can-no-longer-see-software-software-image-or-poc-in-the--device-lifecycle-ui-menu)
+    - [I can no longer see Software, Software Image, or POC in the Device Lifecycle UI menu](#i-can-no-longer-see-software-software-image-or-poc-in-the-device-lifecycle-ui-menu)
     - [Will the reporting functionality of Validated Software still work with the deprecated models?](#will-the-reporting-functionality-of-validated-software-still-work-with-the-deprecated-models)
     - [The automation I use targets deprecated DLM models. Are these models still usable for the time being?](#the-automation-i-use-targets-deprecated-dlm-models-are-these-models-still-usable-for-the-time-being)
     - [I’m seeing a banner with the message \`Some Device Lifecycle Management models have not been migrated to Nautobot core models…\`](#im-seeing-a-banner-with-the-message-some-device-lifecycle-management-models-have-not-been-migrated-to-nautobot-core-models)
@@ -65,7 +65,7 @@ The DLM app no longer requires the Software on Device and Software on InventoryI
 
 The DLM app previously allowed unrestricted text input for the hashing algorithm specified within SoftwareImageLCM instances. However, core SoftwareImageFile now limits hashing algorithm options. The migration job will attempt to map the existing free-form text algorithm onto one of the newly permitted choices. If a match cannot be found, a warning message will be generated, requiring a manual update of the hashing algorithm.
 
-### Software objects migration in Nautobot 2.2.0 \- 2.3.0 
+### Software objects migration in Nautobot 2.2.0 to 2.3.0
 
 Nautobot versions 2.2.0-2.3.0 require that at least one software image exists for any software that is assigned to a device. DLM did not have this requirement. In order to migrate SoftwareLCM objects that don’t have corresponding SoftwareImageLCM objects a placeholder software images are created in the core. These images follow the format “{software\_version}-{device\_model}--dlm-migrations-placeholder”. Additionally, a note is added to the placeholder SoftwareImageFile object explaining why it was created. The migration job automatically detects if the Nautobot version you are running is affected and won’t create placeholder images for the newer versions. 
 
@@ -124,7 +124,7 @@ This is recommended if there are numerous ChangeLogs associated with the DLM obj
 
 # FAQ
 
-### I can no longer see Software, Software Image, or POC in the  Device Lifecycle UI menu
+### I can no longer see Software, Software Image, or POC in the Device Lifecycle UI menu
 
 Access to the deprecated DLM models through the UI has been disabled to prevent confusion with the core models. However, the old DLM objects remain accessible via API and Django ORM.
 

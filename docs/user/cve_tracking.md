@@ -4,7 +4,7 @@ The CVE Tracking portion of the app provides two additional objects - CVE object
 
 ## CVE objects
 
-A CVE object can be used to record Common Vulnerabilities and Exposures as well as any detailed information that is useful to track about them such as publish date, severity, CVSS scores and more. CVE objects can be used individually, but they can then be [associated](#software-association) to one or many Software objects via `Affected Softwares` field.
+A CVE object can be used to record Common Vulnerabilities and Exposures as well as any detailed information that is useful to track about them such as publish date, severity, CVSS scores and more. CVE objects can be used individually, but they can then be associated to one or many Software objects via `Affected Softwares` field.
 
 When creating a CVE object, the following fields are available. Fields in **bold** are mandatory.
 
