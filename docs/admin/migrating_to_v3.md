@@ -36,7 +36,7 @@ The DLM models and their instances will remain in place to ensure a smooth migra
 After installing app version 3.0, all existing instances of these models must be moved to the core models. This will enable full DLM app functionality. The migration process is outlined in the following sections.
 
 !!! warning
-    Ensure that the DLM app is at least version 2.0.0 and Nautobot is version 2.2.0 or later before starting migration.
+    Ensure that the DLM app is at least version 3.0.0 and Nautobot is version 2.2.0 or later before starting migration.
 
 ## Process of Migration
 
@@ -67,7 +67,7 @@ The DLM app previously allowed unrestricted text input for the hashing algorithm
 
 ### Software objects migration in Nautobot 2.2.0 to 2.3.0
 
-Nautobot versions 2.2.0-2.3.0 require that at least one software image exists for any software that is assigned to a device. DLM did not have this requirement. In order to migrate SoftwareLCM objects that don’t have corresponding SoftwareImageLCM objects a placeholder software images are created in the core. These images follow the format “{software\_version}-{device\_model}--dlm-migrations-placeholder”. Additionally, a note is added to the placeholder SoftwareImageFile object explaining why it was created. The migration job automatically detects if the Nautobot version you are running is affected and won’t create placeholder images for the newer versions. 
+Nautobot versions 2.2.0-2.3.0 require that at least one software image exists for any software that is assigned to a device. DLM did not have this requirement. In order to migrate SoftwareLCM objects that don't have corresponding SoftwareImageLCM objects, the migration job will create a placeholder SoftwareImageFile in Nautobot core. These images follow the format "{software\_version}-{device\_model}--dlm-migrations-placeholder". Additionally, a note is added to the placeholder SoftwareImageFile object explaining why it was created. The migration job automatically detects if the Nautobot version you are running is affected and won’t create placeholder images for the newer versions. 
 
 ### DLM models that now refer to the Core models
 
@@ -89,7 +89,7 @@ The following jobs rely on deprecated DLM objects and must be migrated using the
 
 ### Migration Banner
 
-DLM views will display a warning banner at the top of the page if any DLM model instances have not yet been migrated to the core models. This is to ensure that functionality, such as reporting, works correctly.
+DLM views will display a warning banner at the top of the page if any DLM model instances have not yet been migrated to the core models. Please run this migration job as soon as possible before continuing to use the DLM app.
 
 ### Accessing Deprecated Models
 
@@ -101,7 +101,7 @@ Deprecated DLM models will be hidden from the GUI, but will remain accessible vi
 !!! warning
     This job requires Nautobot 2.2.0 or later.
 
-To execute the Device Lifecycle Management to Nautobot Core Model Migration job, go to the Jobs page and locate it under "DLM Models \-\> Nautobot Core Models Migration" section.
+To execute the Device Lifecycle Management to Nautobot Core Model Migration job, go to the Jobs page and locate it under "DLM Models \-\> Nautobot Core Models Migration" section. The job will need to be enabled before running it the first time.
 
 ![](../images/lcm_v3_migration_job_location.png)
 
@@ -126,7 +126,7 @@ This is recommended if there are numerous ChangeLogs associated with the DLM obj
 
 ### I can no longer see Software, Software Image, or POC in the Device Lifecycle UI menu
 
-Access to the deprecated DLM models through the UI has been disabled to prevent confusion with the core models. However, the old DLM objects remain accessible via API and Django ORM.
+Access to the deprecated DLM models through the UI has been disabled to prevent confusion with the core models. However, the old DLM objects remain accessible via API and Django ORM. The core software models can be accessed under the `Devices` menu. The core contact model is accessed through the `Organization` menu.
 
 ### Will the reporting functionality of Validated Software still work with the deprecated models?
 
@@ -136,9 +136,9 @@ The Validated Software reporting previously used DLM objects, but now utilizes c
 
 While the deprecated DLM models can still be used to create objects, it's important to note that models referencing SoftwareLCM (like ValidatedSoftwareLCM) will require either the creation of a core SoftwareVersion object first or targeting the attribute referencing the deprecated model. Please refer to the provided table for specific model and attribute names.
 
-### I’m seeing a banner with the message \`Some Device Lifecycle Management models have not been migrated to Nautobot core models…\`
+### I'm seeing a banner with the message \`Some Device Lifecycle Management models have not been migrated to Nautobot core models…\`
 
-Deprecated DLM objects that have not yet been migrated to their corresponding core models indicate that:
+Deprecated DLM objects that have not yet been migrated to their corresponding core models indicate that either:
 
 * The migration job has not been run.  
 * The migration job encountered errors, preventing the migration of all objects.  
