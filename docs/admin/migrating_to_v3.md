@@ -14,7 +14,7 @@ Table of Contents
     - [I can no longer see Software, Software Image, or POC in the Device Lifecycle UI menu](#i-can-no-longer-see-software-software-image-or-poc-in-the-device-lifecycle-ui-menu)
     - [Will the reporting functionality of Validated Software still work with the deprecated models?](#will-the-reporting-functionality-of-validated-software-still-work-with-the-deprecated-models)
     - [The automation I use targets deprecated DLM models. Are these models still usable for the time being?](#the-automation-i-use-targets-deprecated-dlm-models-are-these-models-still-usable-for-the-time-being)
-    - [I’m seeing a banner with the message \`Some Device Lifecycle Management models have not been migrated to Nautobot core models…\`](#im-seeing-a-banner-with-the-message-some-device-lifecycle-management-models-have-not-been-migrated-to-nautobot-core-models)
+    - [I'm seeing a banner with the message \`Some Device Lifecycle Management models have not been migrated to Nautobot core models…\`](#im-seeing-a-banner-with-the-message-some-device-lifecycle-management-models-have-not-been-migrated-to-nautobot-core-models)
     - [This job is taking a long time.](#this-job-is-taking-a-long-time)
 
   
@@ -47,7 +47,7 @@ The DLM objects will be marked as migrated by setting a boolean value to true af
 * **migrated\_to\_core\_model** \- Foreign Key to the core model instance  
 * **migrated\_to\_core\_model\_flag** \- Boolean set to True when the instance is migrated to the core
 
-The migration job generates new core objects that replace the deprecated DLM objects. If the job encounters an error, it will not rollback any created objects. If an error occurs, check the job logs to identify and resolve the issue, then restart the job. The job will revalidate any objects that have already been migrated and retry the migration for those objects that failed during previous runs.
+The migration job generates new core objects that replace the deprecated DLM objects. If a core object already exists that matches the existing DLM object, that may be used instead. If the job encounters an error, it will not rollback any created objects. If an error occurs, check the job logs to identify and resolve the issue, then restart the job. The job will revalidate any objects that have already been migrated and retry the migration for those objects that failed during previous runs. The tool also includes a dry run mode which produces a report that details which objects would be migrated, without making any changes to the system.
 
 If at any point two DLM objects are migrated to the same core object, a warning message will be displayed during the migration. If the initial DLM object was altered between runs of the migration job, the DLM object may need to be manually updated to resolve this issue.
 
@@ -81,7 +81,7 @@ The models that previously referenced the deprecated DLM models now reference th
 | **ValidatedSoftwareLCM** | software | old\_software |
 | **VulnerabilityLCM** | software | old\_software |
 
-The following jobs rely on deprecated DLM objects and must be migrated using the migration job. Going forward, please use only core Software Version and Contact models:
+Before continuing to use the following jobs and any associated reports, you must first run the migration job. These jobs previously relied on deprecated DLM objects and now utilize core objects. In the future, please exclusively use the core Software Version and Contact models:
 
 - CVE Tracking \- \> Generate Vulnerabilities  
 - Device/Software Lifecycle Reporting \- \> Device Software Validation Report  
@@ -116,7 +116,30 @@ The screenshot shows several options that are available for the migration job. T
 **Hide ChangeLog migration messages** \- Suppress ChangeLog object migration log messages.  
 This is recommended if there are numerous ChangeLogs associated with the DLM objects being migrated.
 
-**Update Core to match DLM** \- If this option is enabled, the Job will automatically update the attributes of any existing core object to match those of the DLM object, provided the primary fields of both objects match. If this option is disabled, you must manually update the core object attributes or the DLM object attributes so that they match.
+**Update Core to match DLM** \- If this option is enabled, the Job will automatically update the attributes of any existing core object to match those of the DLM object, provided the primary fields of both objects match. If this option is disabled, you must manually update the core object attributes or the DLM object attributes so that they match. The tables below display the attributes that are compared and updated in the event of a discrepancy.
+
+| DLM SoftwareLCM | Core SoftwareVersion |
+| ---- | ---- |
+| alias | alias |
+| release\_date | release\_date |
+| end\_of\_support | end\_of\_support\_date |
+| documentation\_url | documentation\_url |
+| long\_term\_support | long\_term\_support |
+| pre\_release | pre\_release |
+| \_custom\_field\_data | \_custom\_field\_data |
+
+| DLM SoftwareImageLCM | Core SoftwareImageFile |
+| ---- | ---- |
+| image\_file\_checksum | image\_file\_checksum |
+| hashing\_algorithm | hashing\_algorithm |
+| default\_image | default\_image |
+| \_custom\_field\_data | \_custom\_field\_data |
+
+| DLM ContactLCM | Core Contact |
+| ---- | ---- |
+| address | address |
+| comments | comments |
+| \_custom\_field\_data | \_custom\_field\_data |
 
 **Remove dangling relationship associations** \- Delete relationship associations if the job indicates that the object referenced by the relationship association has been deleted. Relationships modified through ORM or API may sometimes experience this.
 
