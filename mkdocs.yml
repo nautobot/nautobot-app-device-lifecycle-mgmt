@@ -118,6 +118,7 @@ nav:
       - Upgrade: "admin/upgrade.md"
       - Uninstall: "admin/uninstall.md"
       - Compatibility Matrix: "admin/compatibility_matrix.md"
+      - Migrating To v3: "admin/migrating_to_v3.md"
       - Release Notes:
           - "admin/release_notes/index.md"
           - v2.2: "admin/release_notes/version_2.2.md"

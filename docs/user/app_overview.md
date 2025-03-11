@@ -14,8 +14,8 @@ Devices and their components, both hardware, and software, have fixed-period ven
 With the Device Lifecycle Management app, you can capture the processes related to the device's lifecycle in Nautobot, alongside existing device data. Lifecycle information that you can record includes:
 
 - Hardware EOL and end-of-support dates
-- Software and software image information
-- Software version present on the device
+- Software and software image information - deprecated in 3.0, will be removed in 4.0. This functionality is present natively in Nautobot as of version 2.2.0.
+- Software version present on the device - deprecated in 3.0, will be removed in 4.0. This functionality is present natively in Nautobot as of version 2.2.0.
 - Organizationally approved software versions
 - Software and hardware support contracts
 - Common Vulnerabilities and Exposures (CVEs)
@@ -30,7 +30,6 @@ Additionally, you can run jobs allowing you to:
 
 ## Audience (User Personas) - Who should use this App?
 
-- Organizations that want to track software running on their device.
 - Organizations that want to have a centralized place for managing device and software End of Life and End Of Support notices.
 - Organizations that want to manage vulnerabilities affecting their networking estate.
 
@@ -42,8 +41,8 @@ Nautobot Device Lifecycle App is maintained by Network to Code and members of th
 
 The following custom relationships are automatically created by the app:
 
-- **Software on Device** - links Software version to Device
-- **Software on InventoryItem** - links Software version to Inventory Item
+- **Software on Device** - links Software version to Device - deprecated in 3.0, will be removed in 4.0. This functionality is present natively in Nautobot as of version 2.2.0.
+- **Software on InventoryItem** - links Software version to Inventory Item - deprecated in 3.0, will be removed in 4.0. This functionality is present natively in Nautobot as of version 2.2.0.
 - **Contract to dcim.Device** - links contract to Device
 - **Contract to dcim.InventoryItem** - links contract to Inventory Item
 - **Software to CVE** - links Software to CVE
