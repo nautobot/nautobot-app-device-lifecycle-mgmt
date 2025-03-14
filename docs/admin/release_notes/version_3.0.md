@@ -18,7 +18,8 @@ These models were introduced in Nautobot 2.2.0 as functional equivalents to the 
 
 The DLM models and their instances will remain in place to ensure a smooth migration and prevent data loss.
 
-!!! note After installing app version 3.0, all existing instances of these models must be moved to the core models. This will enable full DLM app functionality. The migration process is outlined in the [Migrating to DLM app version 3.0](../migrating_to_v3.md) guide.
+!!! note
+    After installing app version 3.0, all existing instances of these models must be moved to the core models. This will enable full DLM app functionality. The migration process is outlined in the [Migrating to DLM app version 3.0](../migrating_to_v3.md) guide.
 
 !!! warning
     Ensure that the DLM app is at least version 3.0.0 and Nautobot is version 2.2.0 or later before starting migration.

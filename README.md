@@ -31,12 +31,6 @@ You can also click a Hardware/Software Notice and see the detail view. This view
 
 ![](https://raw.githubusercontent.com/nautobot/nautobot-app-device-lifecycle-mgmt/develop/docs/images/lcm_hardware_detail_view.png)
 
-**Software Lifecycle Management List View**
-
-You can view the list of Software versions as well as filter the table.
-
-![](https://raw.githubusercontent.com/nautobot/nautobot-app-device-lifecycle-mgmt/develop/docs/images/lcm_software_list_view.png)
-
 **Software Lifecycle Reporting**
 
 Reports can be created from the Nautobot's software validation jobs **Device Software Validation - Report** or **Inventory Item Software Validation - Report**.
