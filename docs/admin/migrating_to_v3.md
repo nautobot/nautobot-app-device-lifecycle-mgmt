@@ -1,4 +1,6 @@
-Table of Contents
+# Table of Contents
+
+- [Table of Contents](#table-of-contents)
 - [Migrating to DLM app version 3.0](#migrating-to-dlm-app-version-30)
   - [Process of Migration](#process-of-migration)
     - [Extensibility Objects Referencing Deprecated Objects](#extensibility-objects-referencing-deprecated-objects)
