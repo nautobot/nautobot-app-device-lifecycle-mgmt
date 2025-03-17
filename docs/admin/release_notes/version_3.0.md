@@ -44,22 +44,12 @@ The device detail page will display up to five contracts, sorted by end date (la
 - [#404](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/404) - Added a note to the placeholder software image files for Nautobot v2.2.0-v2.3.0.
 - [#405](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/405) - Added a banner to all device lifecycle management views if any of the SoftwareLCM, SoftwareImageLCM or ContactLCM models have not been migrated to core models.
 
-### Changed
-
-- [#261](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/261) - Updated template extensions to align with standard Nautobot UI views.
-- [#403](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/403) - Updated the migration job to duplicate relationships instead of directly migrating them.
-- [#404](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/404) - Updated the DLM to core migration job to only create placeholder software image files for Nautoobot v2.2.0-v2.3.0.
-- [#404](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/404) - Changed the post_migrate_create_relationships signal to hide the device_soft and inventory_item_soft relationships to prevent 500 errors on Device and InventoryItem urls.
-
 ### Fixed
 
 - [#290](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/290) - Updated HardwareLCMFilterSet filter field names for compatibility with nautobot-ansible plugin module.
 
 ### Housekeeping
 
-- [#261](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/261) - Added management command `generate_app_test_data` to generate sample data for development environments.
-- [#385](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/385) - Changed model_class_name in .cookiecutter.json to a valid model to help with drift management.
-- [#410](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/410) - Fixed mysql tests and reenabled mysql tests in CI.
 - [#430](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/430) - The CHANGELOG.md file has been deprecated in favor of project release notes located in /docs.
 - [#423](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/423) - Rebaked from the cookie `nautobot-app-v2.4.0`.
 - [#401](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/401) - Rebaked from the cookie `nautobot-app-v2.4.1`.
