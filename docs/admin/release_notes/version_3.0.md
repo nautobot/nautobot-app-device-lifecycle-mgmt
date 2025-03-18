@@ -37,7 +37,7 @@ The device detail page will display up to five contracts, sorted by end date (la
 
 <!-- towncrier release notes start -->
 
-## [v3.0.0-beta.1 (2025-03-18)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v3.0.0-beta.1)
+## [v3.0.0b1 (2025-03-18)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v3.0.0b1)
 
 ### Added
 
