@@ -497,13 +497,25 @@ class InventoryItemSoftwareValidationResultFilterForm(NautobotFilterForm):
 class ContractLCMForm(NautobotModelForm):
     """Device Lifecycle Contracts creation/edit form."""
 
+    def get_contract_types(choices) -> tuple[tuple[None|str]]:
+        """Get distinct contract types from ContractLCM."""
+        return (
+            (None, "---------"),
+            *tuple(choices),
+            *tuple((value, value) for value in list(
+                ContractLCM.objects.distinct('contract_type')
+                .values_list('contract_type', flat=True)
+                .order_by('contract_type')
+            ) if value not in {choice[0] for choice in choices}),
+        )
+
     provider = forms.ModelChoiceField(
         queryset=ProviderLCM.objects.all(),
         label="Vendor",
         to_field_name="pk",
         required=True,
     )
-    contract_type = forms.ChoiceField(choices=add_blank_choice(ContractTypeChoices.CHOICES), label="Contract Type")
+    contract_type = forms.ChoiceField(choices=get_contract_types(ContractTypeChoices.CHOICES), label="Contract Type")
     currency = forms.ChoiceField(required=False, choices=add_blank_choice(CurrencyChoices.CHOICES))
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     devices = DynamicModelMultipleChoiceField(queryset=Device.objects.all(), required=False)
