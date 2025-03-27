@@ -11,16 +11,17 @@ try:
 except ImportError:
     CHARFIELD_MAX_LENGTH = 255
 
-from nautobot.core.models.generics import OrganizationalModel, PrimaryModel
-from nautobot.core.models.querysets import RestrictedQuerySet
+from nautobot.apps.models import OrganizationalModel, PrimaryModel, RestrictedQuerySet, StatusField, extras_features
 from nautobot.dcim.models import Device, DeviceType, InventoryItem
-from nautobot.extras.models.statuses import StatusField
-from nautobot.extras.utils import extras_features
 
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.contract_filters import DeviceContractFilter, InventoryItemContractFilter
 from nautobot_device_lifecycle_mgmt.software_filters import (
+    DeviceSoftwareFilter,
+    DeviceSoftwareImageFilter,
     DeviceValidatedSoftwareFilter,
+    InventoryItemSoftwareFilter,
+    InventoryItemSoftwareImageFilter,
     InventoryItemValidatedSoftwareFilter,
 )
 
@@ -126,6 +127,133 @@ class HardwareLCM(PrimaryModel):
             )
 
 
+class SoftwareLCMQuerySet(RestrictedQuerySet):
+    """Queryset for `SoftwareLCM` objects."""
+
+    def get_for_object(self, obj):
+        """Return all `SoftwareLCM` assigned to the given object."""
+        if not isinstance(obj, models.Model):
+            raise TypeError(f"{obj} is not an instance of Django Model class")
+        if isinstance(obj, Device):
+            qs = DeviceSoftwareFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
+        elif isinstance(obj, InventoryItem):
+            qs = InventoryItemSoftwareFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
+        else:
+            qs = self  # pylint: disable=invalid-name
+
+        return qs
+
+
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "graphql",
+    "relationships",
+    "statuses",
+    "webhooks",
+)
+class SoftwareLCM(PrimaryModel):
+    """Software Life-Cycle Management model."""
+
+    device_platform = models.ForeignKey(to="dcim.Platform", on_delete=models.CASCADE, verbose_name="Device Platform")
+    version = models.CharField(max_length=CHARFIELD_MAX_LENGTH)
+    alias = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True, default="")
+    release_date = models.DateField(null=True, blank=True, verbose_name="Release Date")
+    end_of_support = models.DateField(null=True, blank=True, verbose_name="End of Software Support")
+    documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
+    long_term_support = models.BooleanField(verbose_name="Long Term Support", default=False)
+    pre_release = models.BooleanField(verbose_name="Pre-Release", default=False)
+    migrated_to_core_model_flag = models.BooleanField(
+        default=False, help_text="Flag to indicate this instance was migrated to dcim.SoftwareVersion"
+    )
+    migrated_to_core_model = models.ForeignKey(
+        to="dcim.SoftwareVersion", on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    class Meta:
+        """Meta attributes for SoftwareLCM."""
+
+        verbose_name = "Software"
+        ordering = ("device_platform", "version", "end_of_support", "release_date")
+        unique_together = (
+            "device_platform",
+            "version",
+        )
+
+    def __str__(self):
+        """String representation of SoftwareLCM."""
+        return f"{self.device_platform} - {self.version}"
+
+    objects = SoftwareLCMQuerySet.as_manager()
+
+
+class SoftwareImageLCMQuerySet(RestrictedQuerySet):
+    """Queryset for `SoftwareImageLCM` objects."""
+
+    def get_for_object(self, obj):
+        """Return all `SoftwareImageLCM` assigned to the given object."""
+        if not isinstance(obj, models.Model):
+            raise TypeError(f"{obj} is not an instance of Django Model class")
+        if isinstance(obj, Device):
+            qs = DeviceSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
+        elif isinstance(obj, InventoryItem):
+            qs = InventoryItemSoftwareImageFilter(qs=self, item_obj=obj).filter_qs()  # pylint: disable=invalid-name
+        else:
+            qs = self  # pylint: disable=invalid-name
+
+        return qs
+
+
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "graphql",
+    "relationships",
+    "statuses",
+    "webhooks",
+)
+class SoftwareImageLCM(PrimaryModel):
+    """SoftwareImageLCM model."""
+
+    image_file_name = models.CharField(blank=False, max_length=CHARFIELD_MAX_LENGTH, verbose_name="Image File Name")
+    software = models.ForeignKey(
+        to="SoftwareLCM", on_delete=models.CASCADE, related_name="software_images", verbose_name="Software Version"
+    )
+    device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="software_images", blank=True)
+    inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="+", blank=True)
+    object_tags = models.ManyToManyField(to="extras.Tag", related_name="+", blank=True)
+    download_url = models.URLField(blank=True, verbose_name="Download URL")
+    image_file_checksum = models.CharField(blank=True, max_length=256, verbose_name="Image File Checksum")
+    hashing_algorithm = models.CharField(
+        default="", blank=True, max_length=CHARFIELD_MAX_LENGTH, verbose_name="Hashing Algorithm"
+    )
+    default_image = models.BooleanField(verbose_name="Default Image", default=False)
+    migrated_to_core_model_flag = models.BooleanField(
+        default=False, help_text="Flag to indicate this instance was migrated to dcim.SoftwareImageFile"
+    )
+    migrated_to_core_model = models.ForeignKey(
+        to="dcim.SoftwareImageFile", on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    class Meta:
+        """Meta attributes for SoftwareImageLCM."""
+
+        verbose_name = "Software Image"
+        ordering = ("software", "default_image", "image_file_name")
+        unique_together = ("image_file_name", "software")
+
+    def __str__(self):
+        """String representation of SoftwareImageLCM."""
+        msg = f"{self.image_file_name}"
+        return msg
+
+    objects = SoftwareImageLCMQuerySet.as_manager()
+
+
 class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):
     """Queryset for `ValidatedSoftwareLCM` objects."""
 
@@ -157,7 +285,12 @@ class ValidatedSoftwareLCMQuerySet(RestrictedQuerySet):
 class ValidatedSoftwareLCM(PrimaryModel):
     """ValidatedSoftwareLCM model."""
 
-    software = models.ForeignKey(to="dcim.SoftwareVersion", on_delete=models.CASCADE, verbose_name="Software Version")
+    software = models.ForeignKey(
+        to="dcim.SoftwareVersion", on_delete=models.CASCADE, verbose_name="Software Version", null=True
+    )
+    old_software = models.ForeignKey(
+        to="SoftwareLCM", on_delete=models.SET_NULL, verbose_name="Software Version", blank=True, null=True
+    )
     devices = models.ManyToManyField(to="dcim.Device", related_name="+", blank=True)
     device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
     device_roles = models.ManyToManyField(to="extras.Role", related_name="+", blank=True)
@@ -271,6 +404,14 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         blank=True,
         related_name="+",
     )
+    old_software = models.ForeignKey(
+        to="SoftwareLCM",
+        on_delete=models.SET_NULL,
+        help_text="Device software",
+        null=True,
+        blank=True,
+        related_name="+",
+    )
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
     run_type = models.CharField(max_length=CHARFIELD_MAX_LENGTH, choices=choices.ReportRunTypeChoices)
@@ -307,6 +448,9 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
     )
     software = models.ForeignKey(
         to="dcim.SoftwareVersion", on_delete=models.CASCADE, help_text="Inventory Item software", blank=True, null=True
+    )
+    old_software = models.ForeignKey(
+        to="SoftwareLCM", on_delete=models.SET_NULL, help_text="Inventory Item software", blank=True, null=True
     )
     is_validated = models.BooleanField(null=True, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
@@ -488,6 +632,60 @@ class ProviderLCM(OrganizationalModel):
     "graphql",
     "relationships",
     "webhooks",
+)
+class ContactLCM(PrimaryModel):
+    """ContactLCM is a model representation of a contact used in Contracts."""
+
+    name = models.CharField(max_length=CHARFIELD_MAX_LENGTH, null=True)
+    address = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True)
+    phone = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True)
+    email = models.EmailField(blank=True, verbose_name="Contact E-mail")
+    comments = models.TextField(blank=True, default="")
+    priority = models.PositiveIntegerField(default=100)
+    type = models.CharField(max_length=CHARFIELD_MAX_LENGTH, default=choices.PoCTypeChoices.UNASSIGNED)
+    contract = models.ForeignKey(
+        to="nautobot_device_lifecycle_mgmt.ContractLCM", on_delete=models.CASCADE, verbose_name="Contract", null=True
+    )
+    migrated_to_core_model_flag = models.BooleanField(
+        default=False, help_text="Flag to indicate this instance was migrated to extras.Contact"
+    )
+    migrated_to_core_model = models.ForeignKey(to="extras.Contact", on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        """Meta attributes for the class."""
+
+        verbose_name = "Contract POC"
+
+        unique_together = ("contract", "name")
+
+        ordering = ("contract", "priority", "name")
+
+    def clean(self):
+        """Override clean to do custom validation."""
+        super().clean()
+        if not any([self.phone, self.email]):
+            raise ValidationError("Must specify at least one of phone or email for contact.")
+
+        # Would to an exist() here, but we need to compare the pk in the event we are editing an
+        # existing record.
+        primary = ContactLCM.objects.filter(contract=self.contract, type=choices.PoCTypeChoices.PRIMARY).first()
+        if primary:
+            if self.pk != primary.pk and self.type == choices.PoCTypeChoices.PRIMARY:
+                raise ValidationError(f"A primary contact already exist for contract {self.contract.name}.")
+
+    def __str__(self):
+        """String representation of the model."""
+        return f"{self.name}"
+
+
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "graphql",
+    "relationships",
+    "webhooks",
     "statuses",
 )
 class CVELCM(PrimaryModel):
@@ -514,6 +712,7 @@ class CVELCM(PrimaryModel):
     affected_softwares = models.ManyToManyField(
         to="dcim.SoftwareVersion", related_name="corresponding_cves", blank=True
     )
+    old_affected_softwares = models.ManyToManyField(to="SoftwareLCM", related_name="corresponding_cves", blank=True)
 
     class Meta:
         """Meta attributes for the class."""
@@ -542,6 +741,7 @@ class VulnerabilityLCM(PrimaryModel):
 
     cve = models.ForeignKey(CVELCM, on_delete=models.CASCADE, blank=True, null=True)
     software = models.ForeignKey(to="dcim.SoftwareVersion", on_delete=models.CASCADE, blank=True, null=True)
+    old_software = models.ForeignKey(SoftwareLCM, on_delete=models.SET_NULL, blank=True, null=True)
     device = models.ForeignKey(Device, on_delete=models.CASCADE, blank=True, null=True)
     inventory_item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, blank=True, null=True)
     status = StatusField(
