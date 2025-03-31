@@ -28,11 +28,9 @@ When creating a CVE object, the following fields are available. Fields in **bold
 !!! note
     In addition to these standard fields, you can also add one or more [Custom Fields](https://docs.nautobot.com/projects/core/en/stable/models/extras/customfield/) to the model.
 
-<<<<<<< HEAD
-=======
 ### Software Association
 
-As stated previously, you can associate a CVE to one or many [Software objects](./software_lifecycle.md#software-objects). These relationships will present themselves as breadcrumb links on the CVE item's detail view, and as the "Related CVEs" tab on the Software item's detail view.
+As stated previously, you can associate a CVE to one or many software versions. These relationships will present themselves as breadcrumb links on the CVE item's detail view, and as the "Related CVEs" tab on the Software item's detail view.
 
 Example of a breadcrumb link on a CVE item's view:
 
@@ -41,7 +39,6 @@ Example of a breadcrumb link on a CVE item's view:
 Example of the "Related CVEs" tab on a Software item's view:
 
 ![](../images/lcm_software_breadcrumb.png)
->>>>>>> a54d358 (Adding the new NIST CVE Tracking feature for 3.x release.)
 
 ## Vulnerability objects
 
@@ -80,6 +77,7 @@ An External Integration must be created and configured in order to use the NIST 
 - A new Secrets Group object named ``NAUTOBOT DLM NIST SECRETS GROUP`` used for access to the NIST API Key from the External Integration.
 - A new Secret object named ``NAUTOBOT DLM NIST API KEY``.  This object is created for you during setup with minimum defaults.  The Secret name must be exactly as above, but you will need to configure the Secret to properly access the NIST API Key.
     - To obtain your NIST API Key go [here]('https://nvd.nist.gov/developers/request-an-api-key').
+    - This key will be made invalid if not used for a seven day period and a request for a new key will be necessary to use this function.
 
 NOTE: You may change the name of the External Integration or create your own using other configuration settings, but the SecretsGroup and Secret objects must be named as above.  The External Integration is selected when starting the Job run.
 
