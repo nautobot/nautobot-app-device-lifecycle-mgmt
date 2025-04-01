@@ -202,7 +202,7 @@ class ValidatedSoftwareLCMTab(TemplateExtension):
         device_count = self.context["object"].devices.count()
         device_type_count = self.context["object"].device_types.count()
         device_role_count = self.context["object"].device_roles.count()
-        device_inventory_item_count = self.context["object"].inventory_items.count()
+        inventory_item_count = self.context["object"].inventory_items.count()
         object_tags_count = self.context["object"].object_tags.count()
         return [
             {
@@ -250,10 +250,10 @@ class ValidatedSoftwareLCMTab(TemplateExtension):
             {
                 "title": (
                     "Inventory Items"
-                    if not device_inventory_item_count
+                    if not inventory_item_count
                     else format_html(
                         'Inventory Items <span class="badge">{count}</span>',
-                        count=device_inventory_item_count,
+                        count=inventory_item_count,
                     )
                 ),
                 "url": reverse(
