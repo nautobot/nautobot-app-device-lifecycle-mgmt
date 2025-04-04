@@ -37,6 +37,10 @@ The device detail page will display up to five contracts, sorted by end date (la
 
 <!-- towncrier release notes start -->
 
+## [v3.0.0 (2025-04-03)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v3.0.0)
+
+No changes from the beta. DLM app v3.0.0 is now considered stable.
+
 ## [v3.0.0b1 (2025-03-18)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v3.0.0b1)
 
 ### Added
