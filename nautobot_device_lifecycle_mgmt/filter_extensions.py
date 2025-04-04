@@ -1,7 +1,10 @@
 """Extensions to core filters."""
 
 from django_filters import BooleanFilter
-from nautobot.apps.filters import FilterExtension
+from nautobot.apps.filters import FilterExtension, NaturalKeyOrPKMultipleChoiceFilter
+from nautobot.apps.forms import DynamicModelMultipleChoiceField
+
+from nautobot_device_lifecycle_mgmt.models import ContractLCM
 
 
 def distinct_filter(queryset, _, value):
@@ -23,4 +26,26 @@ class InventoryItemFilterExtension(FilterExtension):
     }
 
 
-filter_extensions = [InventoryItemFilterExtension]
+class DeviceFilterExtension(FilterExtension):
+    """Extends Device Filters."""
+
+    model = "dcim.device"
+
+    filterset_fields = {
+        "nautobot_device_lifecycle_mgmt_device_contracts": NaturalKeyOrPKMultipleChoiceFilter(
+            field_name="device_contracts",
+            queryset=ContractLCM.objects.all(),
+            label="Contracts",
+        )
+    }
+
+    filterform_fields = {
+        "nautobot_device_lifecycle_mgmt_device_contracts": DynamicModelMultipleChoiceField(
+            queryset=ContractLCM.objects.all(),
+            label="Contracts",
+            required=False,
+        )
+    }
+
+
+filter_extensions = [InventoryItemFilterExtension, DeviceFilterExtension]
