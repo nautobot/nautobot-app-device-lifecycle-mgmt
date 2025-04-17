@@ -18,11 +18,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name="validatedsoftwarelcm",
-            unique_together={("start", "end")},
+            unique_together=set(),
         ),
         migrations.AlterUniqueTogether(
             name="vulnerabilitylcm",
-            unique_together={("cve", "inventory_item"), ("cve", "device")},
+            unique_together=set(),
         ),
         migrations.AddField(
             model_name="contactlcm",

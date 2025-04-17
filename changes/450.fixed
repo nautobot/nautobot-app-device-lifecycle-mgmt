@@ -1,0 +1,1 @@
+Fixed invalid uniqueness constraints on ValidatedSoftwareLCM and VulnerabilityLCM models in 3.0 database migrations.
