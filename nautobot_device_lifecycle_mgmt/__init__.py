@@ -19,8 +19,8 @@ class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
     description = "Manages device lifecycle of Nautobot Devices and Components."
     base_url = "nautobot-device-lifecycle-mgmt"
     required_settings = []
-    min_version = "2.2.0"
-    max_version = "2.9999"
+    min_version = "3.0.0a1"  # TODO: Update to 3.0.0 when Nautobot v3.0.0 is released
+    max_version = "3.9999"
     default_settings = {
         "barchart_bar_width": 0.1,
         "barchart_width": 12,
