@@ -16,7 +16,9 @@ router.register("provider", viewset=views.ProviderLCMUIViewSet)
 router.register("cve", viewset=views.CVELCMUIViewSet)
 router.register("vulnerability", viewset=views.VulnerabilityLCMUIViewSet)
 
-urlpatterns = router.urls
+# The standard is for the route to be the hyphenated version of the model class name plural.
+# for example, ExampleModel would be example-models.
+router.register("hardware-lcms", views.HardwareLCMUIViewSet)
 
 urlpatterns += [
     path(
