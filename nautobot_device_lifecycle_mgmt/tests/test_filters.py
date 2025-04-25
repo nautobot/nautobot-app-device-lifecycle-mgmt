@@ -1,16 +1,22 @@
 """Test HardwareLCM Filter."""
 
-from django.test import TestCase
+from nautobot.apps.testing import FilterTestCases
 
 from nautobot_device_lifecycle_mgmt import filters, models
 from nautobot_device_lifecycle_mgmt.tests import fixtures
 
 
-class HardwareLCMFilterTestCase(TestCase):
+class HardwareLCMFilterTestCase(FilterTestCases.FilterTestCase):
     """HardwareLCM Filter Test Case."""
 
     queryset = models.HardwareLCM.objects.all()
     filterset = filters.HardwareLCMFilterSet
+    generic_filter_tests = (
+        ("id",),
+        ("created",),
+        ("last_updated",),
+        ("name",),
+    )
 
     @classmethod
     def setUpTestData(cls):

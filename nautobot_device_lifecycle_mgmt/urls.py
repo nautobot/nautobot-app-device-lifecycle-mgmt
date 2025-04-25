@@ -12,7 +12,9 @@ from nautobot_device_lifecycle_mgmt import views
 app_name = "nautobot_device_lifecycle_mgmt"
 router = NautobotUIViewSetRouter()
 
-router.register("hardwarelcm", views.HardwareLCMUIViewSet)
+# The standard is for the route to be the hyphenated version of the model class name plural.
+# for example, ExampleModel would be example-models.
+router.register("hardware-lcms", views.HardwareLCMUIViewSet)
 
 
 urlpatterns = [
