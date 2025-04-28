@@ -1,0 +1,26 @@
+{% extends 'generic/object_retrieve.html' %}
+{% load helpers %}
+{% load static %}
+
+{% block content %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Object Tags</strong>
+    </div>
+    <table class="table table-hover panel-body attr-table">
+        <tr>
+            <td>
+                {% if object.object_tags.all %}
+                <ul>
+                    {% for object_tag in object.object_tags.all %}
+                        <li>{{ object_tag | hyperlinked_object_with_color }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                    <span class="text-muted">None</span>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+</div>
+{% endblock %}

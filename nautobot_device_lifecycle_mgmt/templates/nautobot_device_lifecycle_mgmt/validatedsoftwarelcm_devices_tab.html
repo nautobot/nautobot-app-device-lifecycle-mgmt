@@ -1,0 +1,26 @@
+{% extends 'generic/object_retrieve.html' %}
+{% load helpers %}
+{% load static %}
+
+{% block content %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Devices</strong>
+    </div>
+    <table class="table table-hover panel-body attr-table">
+        <tr>
+            <td>
+                {% if object.devices.all %}
+                <ul>
+                    {% for device in object.devices.all %}
+                        <li>{{ device | hyperlinked_object }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                    <span class="text-muted">None</span>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+</div>
+{% endblock %}
