@@ -15,14 +15,6 @@ class Migration(migrations.Migration):
             name="validatedsoftwarelcm",
             options={"ordering": ("software", "preferred", "start"), "verbose_name": "Validated Software"},
         ),
-        migrations.AlterUniqueTogether(
-            name="validatedsoftwarelcm",
-            unique_together=set(),
-        ),
-        migrations.AlterUniqueTogether(
-            name="vulnerabilitylcm",
-            unique_together=set(),
-        ),
         migrations.AddField(
             model_name="cvelcm",
             name="affected_softwares",

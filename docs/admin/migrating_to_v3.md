@@ -38,7 +38,10 @@ The DLM models and their instances will remain in place to ensure a smooth migra
 After installing app version 3.0, all existing instances of these models must be moved to the core models. This will enable full DLM app functionality. The migration process is outlined in the following sections.
 
 !!! warning
-    Ensure that the DLM app is at least version 3.0.0 and Nautobot is version 2.2.0 or later before starting migration.
+    Please do not install version 3.0.0 and instead upgrade directly to version 3.0.1. Version 3.0.1 fixes a bug in the migrations introduced in version 3.0.0 that could prevent Nautobot from starting for certain combinations of DLM objects.
+
+!!! warning
+    Ensure that the DLM app is at least version 3.0.1 and Nautobot is version 2.2.0 or later before starting migration.
 
 ## Process of Migration
 

@@ -4,6 +4,9 @@ This document describes all new features and changes in the release. The format 
 Changelog](https://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic
 Versioning](https://semver.org/spec/v2.0.0.html).
 
+!!! warning
+    Please do not install version 3.0.0 and instead upgrade directly to version 3.0.1. Version 3.0.1 fixes a bug in the migrations introduced in version 3.0.0 that could prevent Nautobot from starting for certain combinations of DLM objects.
+
 ## Release Overview
 
 **Device Lifecycle Management App** version 3.0 now supports these core Nautobot models: SoftwareVersion, SoftwareImageFile, and Contact.
@@ -22,7 +25,7 @@ The DLM models and their instances will remain in place to ensure a smooth migra
     After installing app version 3.0, all existing instances of these models must be moved to the core models. This will enable full DLM app functionality. The migration process is outlined in the [Migrating to DLM app version 3.0](../migrating_to_v3.md) guide.
 
 !!! warning
-    Ensure that the DLM app is at least version 3.0.0 and Nautobot is version 2.2.0 or later before starting migration.
+    Ensure that the DLM app is at least version 3.0.1 and Nautobot is version 2.2.0 or later before starting migration.
 
 
 ### Added
@@ -36,6 +39,13 @@ A new reporting type, **Device Hardware Notice Report**, has been introduced. Th
 The device detail page will display up to five contracts, sorted by end date (latest first). Inventory item detail pages will also display contract information for associated items.
 
 <!-- towncrier release notes start -->
+
+## [v3.0.1 (2025-04-24)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v3.0.1)
+
+### Fixed
+
+- [#450](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/450) - Fixed invalid uniqueness constraints on ValidatedSoftwareLCM and VulnerabilityLCM models in 3.0 database migrations.
+
 
 ## [v3.0.0 (2025-04-03)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v3.0.0)
 
