@@ -6,16 +6,37 @@ from datetime import date, datetime
 from django.core.exceptions import ValidationError
 from django.db import models
 
-# Nautobot imports
-from nautobot.apps.models import PrimaryModel, extras_features
+try:
+    from nautobot.apps.constants import CHARFIELD_MAX_LENGTH
+except ImportError:
+    CHARFIELD_MAX_LENGTH = 255
 
-# If you want to choose a specific model to overload in your class declaration, please reference the following documentation:
-# how to chose a database model: https://docs.nautobot.com/projects/core/en/stable/plugins/development/#database-models
-# If you want to use the extras_features decorator please reference the following documentation
-# https://docs.nautobot.com/projects/core/en/stable/development/core/model-checklist/#extras-features
-@extras_features("custom_links", "custom_validators", "export_templates", "graphql", "webhooks")
-class HardwareLCM(PrimaryModel):  # pylint: disable=too-many-ancestors
-    """Base model for Device Lifecycle Management app."""
+from nautobot.apps.models import OrganizationalModel, PrimaryModel, RestrictedQuerySet, StatusField, extras_features
+from nautobot.dcim.models import Device, DeviceType, InventoryItem
+
+from nautobot_device_lifecycle_mgmt import choices
+from nautobot_device_lifecycle_mgmt.contract_filters import DeviceContractFilter, InventoryItemContractFilter
+from nautobot_device_lifecycle_mgmt.software_filters import (
+    DeviceSoftwareFilter,
+    DeviceSoftwareImageFilter,
+    DeviceValidatedSoftwareFilter,
+    InventoryItemSoftwareFilter,
+    InventoryItemSoftwareImageFilter,
+    InventoryItemValidatedSoftwareFilter,
+)
+
+
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "graphql",
+    "relationships",
+    "webhooks",
+)
+class HardwareLCM(PrimaryModel):
+    """HardwareLCM model for app."""
 
     # Set model columns
     device_type = models.ForeignKey(

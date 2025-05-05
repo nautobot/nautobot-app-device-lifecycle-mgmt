@@ -28,17 +28,14 @@ User = get_user_model()
 class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the HardwareLCM views."""
 
-    model = models.HardwareLCM
-    bulk_edit_data = {"description": "Bulk edit views"}
-    form_data = {
-        "name": "Test 1",
-        "description": "Initial model",
-    }
+    model = HardwareLCM
+    bulk_edit_data = {"documentation_url": "https://cisco.com/eox"}
 
-    update_data = {
-        "name": "Test 2",
-        "description": "Updated model",
-    }
+    def _get_base_url(self):
+        return "plugins:{}:{}_{{}}".format(  # pylint: disable=consider-using-f-string
+            self.model._meta.app_label,
+            self.model._meta.model_name,  # pylint: disable=protected-access
+        )
 
     @classmethod
     def setUpTestData(cls):  # pylint: disable=invalid-name
