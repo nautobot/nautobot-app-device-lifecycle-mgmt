@@ -5,13 +5,13 @@ This document describes all new features and changes in the release `1.2.X`. The
 ## Release Overview
 This release includes some of the following highlights:
 
- - Adds progress log messages to the Generate Vulnerabilities job.
- - Defines columns visible by default in the Software list view. The custom relationships columns are now hidden by the default.
- - Changes plural form used Software and Validated Software models.
- - Improves documentation and updates the documentation layout to the latest Nautobot standard.
- - Changes base template used by detail templates to the template provided by the core Nautobot.
- - Adds compatibility testing with the latest Nautobot releases.
- - Updates development environment to the latest Nautobot standard.
+- Adds progress log messages to the Generate Vulnerabilities job.
+- Defines columns visible by default in the Software list view. The custom relationships columns are now hidden by the default.
+- Changes plural form used Software and Validated Software models.
+- Improves documentation and updates the documentation layout to the latest Nautobot standard.
+- Changes base template used by detail templates to the template provided by the core Nautobot.
+- Adds compatibility testing with the latest Nautobot releases.
+- Updates development environment to the latest Nautobot standard.
 
 
 ## [v1.2.0] - 2023-04-18
