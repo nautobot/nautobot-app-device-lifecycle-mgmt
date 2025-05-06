@@ -5,13 +5,13 @@ This document describes all new features and changes in the release `1.3.X`. The
 ## Release Overview
 This release includes some of the following highlights:
 
- - improved software reporting with new functional summary page and links
- - Application level prometheus metrics
- - Nautobot "Notes" feature added to all models
- - Removed unused admin interface
- - Updates to development env standards
- - Adds table for matching ValidatedSoftware objects
- - Removes compatibility code for Nautobot versions <1.4
+- improved software reporting with new functional summary page and links
+- Application level prometheus metrics
+- Nautobot "Notes" feature added to all models
+- Removed unused admin interface
+- Updates to development env standards
+- Adds table for matching ValidatedSoftware objects
+- Removes compatibility code for Nautobot versions <1.4
 
 ## [v1.3.2] - 2023-08-02
 ### Changed

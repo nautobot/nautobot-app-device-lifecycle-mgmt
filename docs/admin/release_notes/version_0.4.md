@@ -4,10 +4,11 @@ This document describes all new features and changes in the release `0.4.X`. The
 
 ## Release Overview
 This release includes some of the following highlights:
- - Fixed buttons for non-superuser for many model views
- - Add App upgrade guide
- - Fixed vew permissions for Device Notices
- - Add CVE Tracking model and Vulnerability model
+
+- Fixed buttons for non-superuser for many model views
+- Add App upgrade guide
+- Fixed vew permissions for Device Notices
+- Add CVE Tracking model and Vulnerability model
 
 ## [v0.4.1] - 2022-02-18
 

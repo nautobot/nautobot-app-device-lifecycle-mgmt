@@ -5,10 +5,10 @@ This document describes all new features and changes in the release `1.1.X`. The
 ## Release Overview
 This release includes some of the following highlights:
 
- - New mixin name from Nautobot version 1.5.2 that can cause issues with post_upgrade tasks (related to CustomFieldModelFilterSet).  Additionally, the testing of permissions on the app were modified slightly for features not in use.
- - Modifies the barchart dimension default behavior and removes the requirement for barchart details to be included in the `nautobot_config.py` file.
- - Addresses some CI issues with the latest version of Nautobot Core around tests for bulk CSV.
- - Addresses a new mixin name from Nautobot version 1.5.2 that can cause issues with post_upgrade tasks (related to CustomFieldModelFilterSet).  Additionally, the testing of permissions on the app were modified slightly for features not in use.
+- New mixin name from Nautobot version 1.5.2 that can cause issues with post_upgrade tasks (related to CustomFieldModelFilterSet).  Additionally, the testing of permissions on the app were modified slightly for features not in use.
+- Modifies the barchart dimension default behavior and removes the requirement for barchart details to be included in the `nautobot_config.py` file.
+- Addresses some CI issues with the latest version of Nautobot Core around tests for bulk CSV.
+- Addresses a new mixin name from Nautobot version 1.5.2 that can cause issues with post_upgrade tasks (related to CustomFieldModelFilterSet).  Additionally, the testing of permissions on the app were modified slightly for features not in use.
 
 
 ## [v1.1.2] - 2022-12-07
@@ -31,7 +31,7 @@ This release includes some of the following highlights:
 ### Added
 
 ### Changed
- - [#119](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/119) remove requirement for `["barchart_bar_width", "barchart_width", "barchart_height"]` settings to be in `nautobot_config.py` (honoring sane defaults from [#83](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/83))
+- [#119](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/119) remove requirement for `["barchart_bar_width", "barchart_width", "barchart_height"]` settings to be in `nautobot_config.py` (honoring sane defaults from [#83](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/83))
 
 ### Fixed
 
