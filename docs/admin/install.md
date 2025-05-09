@@ -4,7 +4,7 @@ Here you will find detailed instructions on how to **install** and **configure**
 
 ## Prerequisites
 
-- The app is compatible with Nautobot 2.0.0 and higher.
+- The app is compatible with Nautobot 2.2.0 and higher.
 - Databases supported: PostgreSQL, MySQL
 
 !!! note
@@ -70,6 +70,7 @@ sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
 ## App Configuration
 
 The app behavior can be controlled with the following list of settings:
+
 | Key                  | Example                                                             | Default            | Description                                                          |
 | -------------------- | ------------------------------------------------------------------- | ------------------ | -------------------------------------------------------------------- |
 | `barchart_bar_width` | `0.1`                                                               | `0.15`             | The width of the table bar within the overview report.               |

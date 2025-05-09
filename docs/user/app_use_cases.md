@@ -19,14 +19,13 @@ When running Nautobot 1.1.0 or later, there is a separate menu added named `Devi
 !!! note
     In order for a hardware notice to be created, there must be either an existing Device Type or Inventory Item that can be found in the database. Without these data points, the data cannot be added, as a relationship is built to the particular items.
 
-#### Software Lifecycle
-
-Software follows the same methodology. First you add Software that is applicable for a particular platform. Then fill in the required fields of Version and add the corresponding relationships.
-
 #### Maintenance Contracts
 
-The maintenance contracts has a similar feel as the Circuit Providers as part of the core of Nautobot. There is a `Vendor` that provides the particular maintenance contract. Then individual `Contracts` are associated with the vendor. As an optional add on a Point of Contact can be made to associate with the contract and named escalation tree if required.
+The maintenance contracts has a similar feel as the Circuit Providers as part of the core of Nautobot. There is a `Vendor` that provides the particular maintenance contract. Then individual `Contracts` are associated with the vendor.
 
+#### Validated Software
+
+To track software for organizationally approved devices or inventory items in Nautobot, you can utilize the Validated Software feature. Begin by adding the Software Version applicable to the specific platform within the core Nautobot framework. Subsequently, create a Validated Software entry linked to the Software Version, specifying the conditions that determine software approval within your operational environment..
 
 ### CVE Tracking
 
@@ -80,29 +79,6 @@ Contracts associated with devices will appear on the device detail page. Five co
 
 ![](../images/lcm_contract_device_view.png)
 
-### Software: Software Lifecycle Management List View
-
-You can view the list of Software versions as well as filter the table.
-
-![](../images/lcm_software_list_view.png)
-
-### Software: Software Lifecycle Detail View
-
-You can also click a Software version and see the detail view. This view provides link to the list of devices and inventory items that are associated with this software object.
-
-![](../images/lcm_software_detail_view.png)
-
-### Software: Software Image Lifecycle List View
-
-You can view the list of Software Images as well as filter the table.
-
-![](../images/lcm_software_image_list_view.png)
-
-### Software: Software Image Lifecycle Detail View
-
-You can also click a Software Images image name and see the detail view. This view provides view of the device types and inventory item attributes this software image applies to.
-
-![](../images/lcm_software_image_detail_view.png)
 
 ### Software: Validated Software Lifecycle Management List View
 
