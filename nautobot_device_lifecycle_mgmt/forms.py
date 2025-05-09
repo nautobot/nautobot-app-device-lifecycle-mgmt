@@ -497,16 +497,20 @@ class InventoryItemSoftwareValidationResultFilterForm(NautobotFilterForm):
 class ContractLCMForm(NautobotModelForm):
     """Device Lifecycle Contracts creation/edit form."""
 
-    def get_contract_types(choices) -> tuple[tuple[None|str]]:
+    def get_contract_types(choices) -> tuple[tuple[None | str]]:
         """Get distinct contract types from ContractLCM."""
         return (
             (None, "---------"),
             *tuple(choices),
-            *tuple((value, value) for value in list(
-                ContractLCM.objects.distinct('contract_type')
-                .values_list('contract_type', flat=True)
-                .order_by('contract_type')
-            ) if value not in {choice[0] for choice in choices}),
+            *tuple(
+                (value, value)
+                for value in list(
+                    ContractLCM.objects.distinct("contract_type")
+                    .values_list("contract_type", flat=True)
+                    .order_by("contract_type")
+                )
+                if value not in {choice[0] for choice in choices}
+            ),
         )
 
     provider = forms.ModelChoiceField(
