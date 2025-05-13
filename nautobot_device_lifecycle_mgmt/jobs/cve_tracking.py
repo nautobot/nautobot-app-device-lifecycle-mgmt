@@ -251,17 +251,15 @@ class NistCveSyncSoftware(Job):
             dict: Dictionary containing new and existing CVE information.
         """
         cve_list = []
-        received_results = 0
 
         for cpe_software_search_url in cpe_software_search_urls:
             result = self.query_api(cpe_software_search_url)
             if result["totalResults"] > 0:
                 cve_list.extend([cve["cve"] for cve in result["vulnerabilities"]])
-                received_results += result["totalResults"]
         if cve_list:
             self.logger.info(
                 "Received %s results.",
-                received_results,
+                len(cve_list),
                 extra={"object": software, "grouping": "CVE Creation"},
             )
             all_cve_info = self.process_cves(cve_list, software)
