@@ -125,7 +125,7 @@ class NistCveSyncSoftware(Job):
             manufacturer = software.platform.manufacturer.name.lower()
             platform = software.platform.network_driver.lower()
             version = software.version.replace(" ", "")
-
+            self.logger.info(platform)
             try:
                 platform = NIST_LIB_MAPPER_REVERSE[platform]
             except KeyError:
@@ -217,7 +217,7 @@ class NistCveSyncSoftware(Job):
         for cve, info in cpe_cves.items():
             try:
                 description = (
-                    f"{info['description'][0:251]}..." if len(info["description"]) > 255 else info["description"]
+                    f"{info['description'][0:252]}..." if len(info["description"]) > 255 else info["description"]
                 )
             except TypeError:
                 description = "No Description Provided from NIST DB."
@@ -250,37 +250,37 @@ class NistCveSyncSoftware(Job):
         Returns:
             dict: Dictionary containing new and existing CVE information.
         """
+        cve_list = []
+        received_results = 0
+
         for cpe_software_search_url in cpe_software_search_urls:
             result = self.query_api(cpe_software_search_url)
-
-            all_cve_info = {"new": {}, "existing": {}}
             if result["totalResults"] > 0:
-                self.logger.info(
-                    "Received %s results.",
-                    result["totalResults"],
-                    extra={"object": software, "grouping": "CVE Creation"},
-                )
-                cve_list = [cve["cve"] for cve in result["vulnerabilities"]]
-                dlc_cves = CVELCM.objects.values_list("name", flat=True)
-
-                all_cve_info = self.process_cves(cve_list, dlc_cves, software)
+                cve_list.extend([cve["cve"] for cve in result["vulnerabilities"]])
+                received_results += result["totalResults"]
+        if cve_list:
+            self.logger.info(
+                "Received %s results.",
+                received_results,
+                extra={"object": software, "grouping": "CVE Creation"},
+            )
+            all_cve_info = self.process_cves(cve_list, software)
 
         return all_cve_info
 
-    def process_cves(self, cve_list: list, dlc_cves: list, software: SoftwareVersion) -> dict:
+    def process_cves(self, cve_list: list[dict], software: SoftwareVersion) -> dict:
         """Return processed CVE info categorized as new or existing.
 
         Args:
             cve_list (list): List of CVEs returned from CPE search.
-            dlc_cves (list): List of all DLM CVE objects.
             software (object): Software object being queried.
 
         Returns:
             dict: Dictionary of CVEs categorized as new or existing.
         """
         processed_cve_info = {"new": {}, "existing": {}}
-        if not cve_list:
-            return processed_cve_info
+        dlc_cves = CVELCM.objects.values_list("name", flat=True)
+
         for cve in cve_list:
             cve_name = cve["id"]
             if not cve_name.startswith("CVE"):
@@ -362,14 +362,13 @@ class NistCveSyncSoftware(Job):
             dict: Dictionary of CVE information formatted for DLC.
         """
         cve_name = cve_json["id"]
-        for desc in cve_json["descriptions"]:
-            if desc["lang"] == "en":
-                cve_description = desc["value"]
-            else:
-                cve_description = "No description provided."
+        cve_description = next(
+            (desc["value"] for desc in cve_json["descriptions"] if desc["lang"] == "en"),
+            "No English description provided.",
+        )
         cve_published_date = cve_json.get("published")
         cve_modified_date = cve_json.get("lastModified")
-        cve_impact = cve_json["metrics"]
+        cve_impact = cve_json.get("metrics", {})
 
         # Determine URL
         if len(cve_json["references"]) > 0:
@@ -426,7 +425,7 @@ class NistCveSyncSoftware(Job):
         """
         try:
             current_dlc_cve.description = (
-                f"{updated_cve['description'][0:251]}..."
+                f"{updated_cve['description'][0:252]}..."
                 if len(updated_cve["description"]) > 255
                 else updated_cve["description"]
             )
