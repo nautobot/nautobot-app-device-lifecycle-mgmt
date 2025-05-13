@@ -268,7 +268,7 @@ class NistCveSyncSoftware(Job):
 
         return all_cve_info
 
-    def process_cves(self, cve_list: list[dict], software: SoftwareVersion) -> dict:
+    def process_cves(self, cve_list: list, software: SoftwareVersion) -> dict:
         """Return processed CVE info categorized as new or existing.
 
         Args:
