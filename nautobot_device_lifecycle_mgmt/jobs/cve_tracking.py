@@ -363,7 +363,7 @@ class NistCveSyncSoftware(Job):
         cve_name = cve_json["id"]
         cve_description = next(
             (desc["value"] for desc in cve_json["descriptions"] if desc["lang"] == "en"),
-            "No English description provided."
+            "No English description provided.",
         )
 
         cve_published_date = cve_json["published"]
@@ -433,11 +433,7 @@ class NistCveSyncSoftware(Job):
         """
         update_message = "ENTRY HAS BEEN UPDATED BY NAUTOBOT NIST JOB"
         description = updated_cve.get("description", "No description provided from NIST DB")
-        current_dlc_cve.description = (
-            f"{description[0:252]}..."
-            if len(description) > 255
-            else description
-        )
+        current_dlc_cve.description = f"{description[0:252]}..." if len(description) > 255 else description
 
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         current_dlc_cve.last_modified_date = f"{updated_cve['modified_date'][0:10]}"
