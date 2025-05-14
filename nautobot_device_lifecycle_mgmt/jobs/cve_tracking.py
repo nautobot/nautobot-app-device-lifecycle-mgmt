@@ -255,7 +255,7 @@ class NistCveSyncSoftware(Job):
         for cpe_software_search_url in cpe_software_search_urls:
             result = self.query_api(cpe_software_search_url)
             if result["totalResults"] > 0:
-                cve_list.extend([cve["cve"] for cve in result["vulnerabilities"]])
+                cve_list.extend([cve["cve"] for cve in result["vulnerabilities"] if cve["cve"] not in cve_list])
         if cve_list:
             self.logger.info(
                 "Received %s results.",
@@ -366,7 +366,7 @@ class NistCveSyncSoftware(Job):
         )
         cve_published_date = cve_json.get("published")
         cve_modified_date = cve_json.get("lastModified")
-        cve_impact = cve_json.get("metrics", {})
+        cve_impact = cve_json.get("metrics")
 
         # Determine URL
         if len(cve_json["references"]) > 0:
@@ -375,43 +375,51 @@ class NistCveSyncSoftware(Job):
             cve_url = f"https://www.cvedetails.com/cve/{cve_name}/"
 
         # Determine if V3 exists and set all params based on found version info
-        if cve_impact.get("cvssMetricV31"):
-            cvss_base_score = cve_impact["cvssMetricV31"][0]["cvssData"]["baseScore"]
-            cvss_severity = cve_impact["cvssMetricV31"][0]["cvssData"]["baseSeverity"]
-            if cve_impact.get("cvssMetricV2"):
-                cvssv2_score = cve_impact["cvssMetricV2"][0].get("exploitabilityScore", 10)
-            else:
-                cvssv2_score = 10
-            cvssv3_score = cve_impact["cvssMetricV31"][0].get("exploitabilityScore", 10)
+        if cve_impact:
+            if cve_impact.get("cvssMetricV31"):
+                cvss_base_score = cve_impact["cvssMetricV31"][0]["cvssData"]["baseScore"]
+                cvss_severity = cve_impact["cvssMetricV31"][0]["cvssData"]["baseSeverity"]
+                if cve_impact.get("cvssMetricV2"):
+                    cvssv2_score = cve_impact["cvssMetricV2"][0].get("exploitabilityScore", 10)
+                else:
+                    cvssv2_score = 10
+                cvssv3_score = cve_impact["cvssMetricV31"][0].get("exploitabilityScore", 10)
 
-        elif cve_impact.get("cvssMetricV30"):
-            cvss_base_score = cve_impact["cvssMetricV30"][0]["cvssData"]["baseScore"]
-            cvss_severity = cve_impact["cvssMetricV30"][0]["cvssData"]["baseSeverity"]
-            if cve_impact.get("cvssMetricV2"):
-                cvssv2_score = cve_impact["cvssMetricV2"][0].get("exploitabilityScore", 10)
+            elif cve_impact.get("cvssMetricV30"):
+                cvss_base_score = cve_impact["cvssMetricV30"][0]["cvssData"]["baseScore"]
+                cvss_severity = cve_impact["cvssMetricV30"][0]["cvssData"]["baseSeverity"]
+                if cve_impact.get("cvssMetricV2"):
+                    cvssv2_score = cve_impact["cvssMetricV2"][0].get("exploitabilityScore", 10)
+                else:
+                    cvssv2_score = 10
+                cvssv3_score = cve_impact["cvssMetricV30"][0].get("exploitabilityScore", 10)
+
             else:
-                cvssv2_score = 10
-            cvssv3_score = cve_impact["cvssMetricV30"][0].get("exploitabilityScore", 10)
+                cvss_base_score = cve_impact["cvssMetricV2"][0]["cvssData"]["baseScore"]
+                cvss_severity = cve_impact["cvssMetricV2"][0]["baseSeverity"] or self.convert_v2_base_score_to_severity(
+                    cvss_base_score
+                )
+                cvssv2_score = cve_impact["cvssMetricV2"][0].get("exploitabilityScore", 10)
+                cvssv3_score = 0
+
+            all_cve_info = {
+                "url": cve_url,
+                "description": cve_description,
+                "published_date": cve_published_date,
+                "modified_date": cve_modified_date,
+                "cvss_base_score": cvss_base_score,
+                "cvss_severity": cvss_severity,
+                "cvssv2_score": cvssv2_score,
+                "cvssv3_score": cvssv3_score,
+            }
 
         else:
-            cvss_base_score = cve_impact["cvssMetricV2"][0]["cvssData"]["baseScore"]
-            cvss_severity = cve_impact["cvssMetricV2"][0]["baseSeverity"] or self.convert_v2_base_score_to_severity(
-                cvss_base_score
-            )
-            cvssv2_score = cve_impact["cvssMetricV2"][0].get("exploitabilityScore", 10)
-            cvssv3_score = 0
-
-        all_cve_info = {
-            "url": cve_url,
-            "description": cve_description,
-            "published_date": cve_published_date,
-            "modified_date": cve_modified_date,
-            "cvss_base_score": cvss_base_score,
-            "cvss_severity": cvss_severity,
-            "cvssv2_score": cvssv2_score,
-            "cvssv3_score": cvssv3_score,
-        }
-
+            all_cve_info = {
+                "url": cve_url,
+                "description": cve_description,
+                "published_date": cve_published_date,
+                "modified_date": cve_modified_date,
+            }
         return all_cve_info
 
     def update_cve(self, current_dlc_cve: CVELCM, updated_cve: dict) -> None:
