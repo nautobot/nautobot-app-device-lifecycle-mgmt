@@ -28,6 +28,7 @@ When creating a CVE object, the following fields are available. Fields in **bold
 !!! note
     In addition to these standard fields, you can also add one or more [Custom Fields](https://docs.nautobot.com/projects/core/en/stable/models/extras/customfield/) to the model.
 
+
 ### Software Association
 
 As stated previously, you can associate a CVE to one or many software versions. These relationships will present themselves as breadcrumb links on the CVE item's detail view, and as the "Related CVEs" tab on the Software item's detail view.
@@ -65,6 +66,13 @@ As was stated previously, running the ``Generate Vulnerabilities`` Job will not 
 
 ## Automated CVE Discovery via NIST API 2.0
 The NTC Nautobot Device Lifecycle Management app now supports automated CVE discovery via the NIST NVD API 2.0.  This feature is optional and can be enabled by obtaining an API key, updating the necessary Secret, and running the ``NIST - Software CVE Search`` Job. Continue reading for more information.
+
+!!! note
+    If a manual CVE entry exists with a Name that differs from the NIST CVE Name, a new CVE record will be created and associated.  If the manual Name
+    matches, any updates pulled from NIST will be made to the existing record and the association will be ensured.
+
+!!! note
+    If a record is updated due to a mismatched Modified Date against NIST, a comment will be added to the TOP of the comments section notifying of an update and the timestamp that the record was locally modified.  The record's Last Modifed Date will be updated to show when the record itself was modifed in NIST.
 
 ### External Integration
 An External Integration must be created and configured in order to use the NIST NVD API for automatic software CVE discovery. On this note, the following is installed for you:

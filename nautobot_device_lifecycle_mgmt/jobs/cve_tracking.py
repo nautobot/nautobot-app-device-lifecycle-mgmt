@@ -250,27 +250,28 @@ class NistCveSyncSoftware(Job):
         Returns:
             dict: Dictionary containing new and existing CVE information.
         """
-        cve_list = []
+        cve_set = set()
+        all_cve_info = {"new": {}, "existing": {}}
 
         for cpe_software_search_url in cpe_software_search_urls:
             result = self.query_api(cpe_software_search_url)
             if result["totalResults"] > 0:
-                cve_list.extend([cve["cve"] for cve in result["vulnerabilities"] if cve["cve"] not in cve_list])
-        if cve_list:
+                cve_set.union({cve["cve"] for cve in result["vulnerabilities"]})
+        if cve_set:
             self.logger.info(
                 "Received %s results.",
-                len(cve_list),
+                len(cve_set),
                 extra={"object": software, "grouping": "CVE Creation"},
             )
-            all_cve_info = self.process_cves(cve_list, software)
+            all_cve_info = self.process_cves(cve_set, software)
 
         return all_cve_info
 
-    def process_cves(self, cve_list: list, software: SoftwareVersion) -> dict:
+    def process_cves(self, cve_set: set, software: SoftwareVersion) -> dict:
         """Return processed CVE info categorized as new or existing.
 
         Args:
-            cve_list (list): List of CVEs returned from CPE search.
+            cve_set (set): Set of CVEs returned from CPE search.
             software (object): Software object being queried.
 
         Returns:
@@ -279,7 +280,7 @@ class NistCveSyncSoftware(Job):
         processed_cve_info = {"new": {}, "existing": {}}
         dlc_cves = CVELCM.objects.values_list("name", flat=True)
 
-        for cve in cve_list:
+        for cve in cve_set:
             cve_name = cve["id"]
             if not cve_name.startswith("CVE"):
                 continue
@@ -362,10 +363,11 @@ class NistCveSyncSoftware(Job):
         cve_name = cve_json["id"]
         cve_description = next(
             (desc["value"] for desc in cve_json["descriptions"] if desc["lang"] == "en"),
-            "No English description provided.",
+            "No English description provided."
         )
-        cve_published_date = cve_json.get("published")
-        cve_modified_date = cve_json.get("lastModified")
+
+        cve_published_date = cve_json["published"]
+        cve_modified_date = cve_json["lastModified"]
         cve_impact = cve_json.get("metrics")
 
         # Determine URL
@@ -429,26 +431,26 @@ class NistCveSyncSoftware(Job):
             current_dlc_cve (CVELCM): Current CVE object from the DLM database.
             updated_cve (dict): Latest CVE information from the software pull.
         """
-        try:
-            current_dlc_cve.description = (
-                f"{updated_cve['description'][0:252]}..."
-                if len(updated_cve["description"]) > 255
-                else updated_cve["description"]
-            )
-        except TypeError:
-            current_dlc_cve.description = "No Description Provided from NIST DB."
+        update_message = "ENTRY HAS BEEN UPDATED BY NAUTOBOT NIST JOB"
+        description = updated_cve.get("description", "No description provided from NIST DB")
+        current_dlc_cve.description = (
+            f"{description[0:252]}..."
+            if len(description) > 255
+            else description
+        )
+
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         current_dlc_cve.last_modified_date = f"{updated_cve['modified_date'][0:10]}"
         current_dlc_cve.link = updated_cve["url"]
         current_dlc_cve.cvss = updated_cve["cvss_base_score"]
         current_dlc_cve.severity = updated_cve["cvss_severity"].title()
         current_dlc_cve.cvss_v2 = updated_cve["cvssv2_score"]
         current_dlc_cve.cvss_v3 = updated_cve["cvssv3_score"]
-        current_dlc_cve.comments = "ENTRY UPDATED BY NAUTOBOT NIST JOB"
+        current_dlc_cve.comments = f"{update_message} - {timestamp}\n\n{current_dlc_cve.comments}"
 
         try:
             current_dlc_cve.validated_save()
             self.logger.info("Modified CVE.", extra={"object": current_dlc_cve, "grouping": "CVE Updates"})
-
         except ValidationError as err:
             self.logger.error(
                 "Unable to update CVE. ERROR: %s", err, extra={"object": current_dlc_cve, "grouping": "CVE Updates"}
