@@ -11,10 +11,9 @@ from django.db.utils import IntegrityError
 from nautobot.dcim.models import Device, InventoryItem
 from nautobot.dcim.models.devices import SoftwareVersion
 from nautobot.extras.jobs import BooleanVar, Job, ObjectVar, StringVar
-from nautobot.extras.models import ExternalIntegration, Secret
+from nautobot.extras.models import ExternalIntegration
 from nautobot.extras.secrets.exceptions import SecretError
-from netutils.lib_mapper import NIST_LIB_MAPPER_REVERSE
-from netutils.nist import get_nist_vendor_platform_urls
+from netutils.nist import get_nist_urls
 from requests import Session
 from requests.adapters import HTTPAdapter
 from requests.exceptions import HTTPError
@@ -105,7 +104,9 @@ class NistCveSyncSoftware(Job):
             **kwargs: Arbitrary keyword arguments.
         """
         try:
-            self.nist_api_key = Secret.objects.get(name="NAUTOBOT DLM NIST API KEY").get_value()  # pylint: disable=attribute-defined-outside-init
+            self.nist_api_key = (
+                kwargs.get("nist_integration").secrets_group.secrets.get(name="NAUTOBOT DLM NIST API KEY").get_value()
+            )  # pylint: disable=attribute-defined-outside-init
         except SecretError as err:
             self.logger.error(
                 "This job REQUIRES a fully configured Secret named 'NAUTOBOT DLM NIST API KEY'.  Please refer to the documentation to obtain an api key and complete configuration. %s",
@@ -122,22 +123,12 @@ class NistCveSyncSoftware(Job):
         cve_counter = 0
 
         for software in SoftwareVersion.objects.all():
-            manufacturer = software.platform.manufacturer.name.lower()
             platform = software.platform.network_driver.lower()
             version = software.version.replace(" ", "")
             self.logger.info(platform)
-            try:
-                platform = NIST_LIB_MAPPER_REVERSE[platform]
-            except KeyError:
-                self.logger.warning(
-                    "OS Platform %s is not yet supported; Skipping.",
-                    platform,
-                    extra={"object": software.platform, "grouping": "CVE Information"},
-                )
-                continue
 
             try:
-                cpe_software_search_urls = get_nist_vendor_platform_urls(manufacturer, platform, version)
+                cpe_software_search_urls = get_nist_urls(platform, version)
                 if not cpe_software_search_urls:
                     self.logger.error(
                         "The URL generator was not able to create URLs for this Software Version. Please check the version value for %s %s %s.",
@@ -152,6 +143,13 @@ class NistCveSyncSoftware(Job):
                 cpe_software_search_urls = [
                     re.sub(r"^.*(?=\?)", self.integration.remote_url, cpe_url) for cpe_url in cpe_software_search_urls
                 ]
+            except KeyError:
+                self.logger.warning(
+                    "OS Platform %s is not yet supported; Skipping.",
+                    platform,
+                    extra={"object": software.platform, "grouping": "CVE Information"},
+                )
+                continue
             # Known possible error from netutils.nist method
             except ValueError as err:
                 self.logger.error(
@@ -250,28 +248,28 @@ class NistCveSyncSoftware(Job):
         Returns:
             dict: Dictionary containing new and existing CVE information.
         """
-        cve_set = set()
+        cve_list = []
         all_cve_info = {"new": {}, "existing": {}}
 
         for cpe_software_search_url in cpe_software_search_urls:
             result = self.query_api(cpe_software_search_url)
             if result["totalResults"] > 0:
-                cve_set.union({cve["cve"] for cve in result["vulnerabilities"]})
-        if cve_set:
+                cve_list.extend([cve for cve in result["vulnerabilities"] if cve not in cve_list])
+        if cve_list:
             self.logger.info(
                 "Received %s results.",
-                len(cve_set),
+                len(cve_list),
                 extra={"object": software, "grouping": "CVE Creation"},
             )
-            all_cve_info = self.process_cves(cve_set, software)
+            all_cve_info = self.process_cves(cve_list, software)
 
         return all_cve_info
 
-    def process_cves(self, cve_set: set, software: SoftwareVersion) -> dict:
+    def process_cves(self, cve_list: list, software: SoftwareVersion) -> dict:
         """Return processed CVE info categorized as new or existing.
 
         Args:
-            cve_set (set): Set of CVEs returned from CPE search.
+            cve_list (list): List of CVEs returned from CPE search.
             software (object): Software object being queried.
 
         Returns:
@@ -280,14 +278,13 @@ class NistCveSyncSoftware(Job):
         processed_cve_info = {"new": {}, "existing": {}}
         dlc_cves = CVELCM.objects.values_list("name", flat=True)
 
-        for cve in cve_set:
-            cve_name = cve["id"]
-            if not cve_name.startswith("CVE"):
+        for cve in cve_list:
+            if not cve["cve"]["id"].startswith("CVE"):
                 continue
-            if cve_name not in dlc_cves:
-                processed_cve_info["new"].update({cve_name: self.prep_cve_for_dlc(cve)})
+            if cve["cve"]["id"] not in dlc_cves:
+                processed_cve_info["new"].update({cve["cve"]["id"]: self.prep_cve_for_dlc(cve["cve"])})
             else:
-                processed_cve_info["existing"].update({cve_name: self.prep_cve_for_dlc(cve)})
+                processed_cve_info["existing"].update({cve["cve"]["id"]: self.prep_cve_for_dlc(cve["cve"])})
         self.logger.info(
             "Prepared %s CVE for creation." % len(processed_cve_info["new"]),
             extra={"object": software, "grouping": "CVE Creation"},
@@ -431,18 +428,24 @@ class NistCveSyncSoftware(Job):
             current_dlc_cve (CVELCM): Current CVE object from the DLM database.
             updated_cve (dict): Latest CVE information from the software pull.
         """
-        update_message = "ENTRY HAS BEEN UPDATED BY NAUTOBOT NIST JOB"
+        update_message = "LAST AUTOMATED UPDATE BY NAUTOBOT NIST JOB"
         description = updated_cve.get("description", "No description provided from NIST DB")
         current_dlc_cve.description = f"{description[0:252]}..." if len(description) > 255 else description
 
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.now().strftime("%Y-%b-%d %H:%M:%S")
         current_dlc_cve.last_modified_date = f"{updated_cve['modified_date'][0:10]}"
         current_dlc_cve.link = updated_cve["url"]
         current_dlc_cve.cvss = updated_cve["cvss_base_score"]
         current_dlc_cve.severity = updated_cve["cvss_severity"].title()
         current_dlc_cve.cvss_v2 = updated_cve["cvssv2_score"]
         current_dlc_cve.cvss_v3 = updated_cve["cvssv3_score"]
-        current_dlc_cve.comments = f"{update_message} - {timestamp}\n\n{current_dlc_cve.comments}"
+
+        if update_message not in current_dlc_cve.comments:
+            current_dlc_cve.comments = f"{update_message} - {timestamp}\nPlace any other comments below this line.\n\n{current_dlc_cve.comments}"
+        else:
+            lines = current_dlc_cve.comments.split("\n")
+            lines[0] = f"{update_message} - {timestamp}\n"
+            current_dlc_cve.comments = "\n".join(lines)
 
         try:
             current_dlc_cve.validated_save()
