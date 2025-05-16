@@ -96,6 +96,10 @@ class NistCveSyncSoftware(Job):
         commit_default = True
         soft_time_limit = 3600
 
+    def __init__(self):
+        """Initialize the job for use with the NIST API Key."""
+        self.nist_api_key = None
+
     def run(self, *args, **kwargs: dict):  # pylint: disable=too-many-locals
         """Check all software in DLC against NIST database and associate registered CVEs.
 
