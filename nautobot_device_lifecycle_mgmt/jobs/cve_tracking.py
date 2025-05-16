@@ -219,9 +219,7 @@ class NistCveSyncSoftware(Job):
 
         for cve, info in cpe_cves.items():
             try:
-                description = (
-                    f"{info['description'][0:252]}..." if len(info["description"]) > 255 else info["description"]
-                )
+                description = info["description"]
             except TypeError:
                 description = "No Description Provided from NIST DB."
 
