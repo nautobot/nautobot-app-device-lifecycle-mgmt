@@ -96,8 +96,9 @@ class NistCveSyncSoftware(Job):
         commit_default = True
         soft_time_limit = 3600
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """Initialize the job for use with the NIST API Key."""
+        super().__init__(*args, **kwargs)
         self.nist_api_key = None
 
     def run(self, *args, **kwargs: dict):  # pylint: disable=too-many-locals
