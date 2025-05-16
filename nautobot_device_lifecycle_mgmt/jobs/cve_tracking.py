@@ -298,7 +298,7 @@ class NistCveSyncSoftware(Job):
         return processed_cve_info
 
     def query_api(self, url: str) -> dict:
-        """Query the NIST API using an established session.
+        """Query the NIST API for the requested CVE.
 
         Args:
             url (str): The API endpoint being queried.
@@ -435,7 +435,7 @@ class NistCveSyncSoftware(Job):
         """
         update_message = "LAST AUTOMATED UPDATE BY NAUTOBOT NIST JOB"
         description = updated_cve.get("description", "No description provided from NIST DB")
-        current_dlc_cve.description = f"{description[0:252]}..." if len(description) > 255 else description
+        current_dlc_cve.description = description
 
         timestamp = datetime.now().strftime("%Y-%b-%d %H:%M:%S")
         current_dlc_cve.last_modified_date = f"{updated_cve['modified_date'][0:10]}"

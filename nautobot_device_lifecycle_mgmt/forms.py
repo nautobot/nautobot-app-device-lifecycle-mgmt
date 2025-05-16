@@ -4,6 +4,7 @@ import logging
 
 from django import forms
 from nautobot.apps.forms import (
+    CommentField,
     CustomFieldModelBulkEditFormMixin,
     DatePicker,
     DynamicModelChoiceField,
@@ -670,6 +671,7 @@ class CVELCMForm(NautobotModelForm):
     severity = forms.ChoiceField(choices=CVESeverityChoices.CHOICES, label="Severity", required=False)
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     affected_softwares = DynamicModelMultipleChoiceField(queryset=SoftwareVersion.objects.all(), required=False)
+    comments = CommentField(required=False)
 
     class Meta:
         """Meta attributes for the CVELCMForm class."""
@@ -689,8 +691,8 @@ class CVELCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin
 
     model = CVELCM
     pk = forms.ModelMultipleChoiceField(queryset=CVELCM.objects.all(), widget=forms.MultipleHiddenInput)
-    description = forms.CharField(required=False)
-    comments = forms.CharField(required=False)
+    description = forms.CharField(required=False, widget=forms.Textarea)
+    comments = CommentField(required=False)
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     status = DynamicModelChoiceField(
         queryset=Status.objects.all(), required=False, query_params={"content_types": model._meta.label_lower}
