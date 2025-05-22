@@ -220,6 +220,8 @@ class NistCveSyncSoftware(Job):
             # API Rest Timer
             sleep(self.integration.extra_config.get("api_call_delay", 6))
 
+        self.nist_session.close()
+
         self.logger.info(
             "Performed discovery on all software. Created %s CVE.", cve_counter, extra={"grouping": "CVE Creation"}
         )
