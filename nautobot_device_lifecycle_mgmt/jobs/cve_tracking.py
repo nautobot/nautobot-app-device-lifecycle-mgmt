@@ -100,6 +100,20 @@ class NistCveSyncSoftware(Job):
         """Initialize the job for use with the NIST API Key."""
         super().__init__(*args, **kwargs)
         self.nist_api_key = None
+        self.nist_session = None
+
+    def nist_session_init(self):
+        """Initialize the NIST session."""
+        retries = Retry(
+            total=self.integration.extra_config.get("retries", {}).get("max_attempts", 3),
+            backoff_factor=self.integration.extra_config.get("retries", {}).get("backoff", 1),
+            status_forcelist=[502, 503, 504],
+            allowed_methods=["GET"],
+        )
+        session = Session()
+        session.mount("https://", HTTPAdapter(max_retries=retries))
+        session.headers.update({"apiKey": self.nist_api_key})
+        return session
 
     def run(self, *args, **kwargs: dict):  # pylint: disable=too-many-locals
         """Check all software in DLC against NIST database and associate registered CVEs.
@@ -108,6 +122,13 @@ class NistCveSyncSoftware(Job):
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
         """
+
+        if kwargs.get("nist_integration"):
+            self.integration = kwargs["nist_integration"]  # pylint: disable=attribute-defined-outside-init
+        else:
+            self.logger.error("NIST ExternalIntegration object is required.")
+            return
+        
         try:
             self.nist_api_key = (
                 kwargs.get("nist_integration").secrets_group.secrets.get(name="NAUTOBOT DLM NIST API KEY").get_value()
@@ -119,18 +140,13 @@ class NistCveSyncSoftware(Job):
             )
             return
 
-        if kwargs.get("nist_integration"):
-            self.integration = kwargs["nist_integration"]  # pylint: disable=attribute-defined-outside-init
-        else:
-            self.logger.error("NIST ExternalIntegration object is required.")
-            return
-
         cve_counter = 0
+        
+        self.nist_session = self.nist_session_init()
 
         for software in SoftwareVersion.objects.all():
             platform = software.platform.network_driver.lower()
             version = software.version.replace(" ", "")
-            self.logger.info(platform)
 
             try:
                 cpe_software_search_urls = get_nist_urls(platform, version)
@@ -177,7 +193,7 @@ class NistCveSyncSoftware(Job):
             all_software_cve_info = {**software_cve_info["new"], **software_cve_info["existing"]}
 
             cve_counter += len(software_cve_info["new"])
-            self.create_dlc_cves(software_cve_info["new"])
+            self.create_dlc_cves(software_cve_info["new"], software)
 
             for software_cve, cve_info in all_software_cve_info.items():
                 try:
@@ -209,7 +225,7 @@ class NistCveSyncSoftware(Job):
             "Performed discovery on all software. Created %s CVE.", cve_counter, extra={"grouping": "CVE Creation"}
         )
 
-    def create_dlc_cves(self, cpe_cves: dict) -> None:
+    def create_dlc_cves(self, cpe_cves: dict, software: SoftwareVersion) -> None:
         """Create CVE entries in the DLC database.
 
         Args:
@@ -239,7 +255,7 @@ class NistCveSyncSoftware(Job):
             if created:
                 created_count += 1
 
-        self.logger.info("Created New CVEs.", extra={"grouping": "CVE Creation"})
+        self.logger.info(f"Created {created_count} new CVEs.", extra={"object": software, "grouping": "CVE Creation"})
 
     def get_cve_info(self, cpe_software_search_urls: list, software: SoftwareVersion) -> dict:
         """Search NIST for software and related CVEs.
@@ -304,21 +320,8 @@ class NistCveSyncSoftware(Job):
         Returns:
             dict: Dictionary of returned results if successful.
         """
-        # Build retry configuration; Uses Integration settings but setting sane defaults in case they are removed
-        retries = Retry(
-            total=self.integration.extra_config.get("retries", {}).get("max_attempts", 3),
-            backoff_factor=self.integration.extra_config.get("retries", {}).get("backoff", 1),
-            status_forcelist=[502, 503, 504],
-            allowed_methods=["GET"],
-        )
-
-        # Create and configure session
-        session = Session()
-        session.mount("https://", HTTPAdapter(max_retries=retries))
-        session.headers.update({"apiKey": self.nist_api_key})
-
         try:
-            result = session.get(url)
+            result = self.nist_session.get(url)
             result.raise_for_status()
             return result.json()
         except HTTPError as err:
@@ -330,8 +333,6 @@ class NistCveSyncSoftware(Job):
         except json.JSONDecodeError as err:
             self.logger.error("Invalid JSON response from NIST Service: %s", err)
             raise
-        finally:
-            session.close()
 
     @staticmethod
     def convert_v2_base_score_to_severity(score: float) -> str:
