@@ -255,7 +255,7 @@ class NistCveSyncSoftware(Job):
             if created:
                 created_count += 1
 
-        self.logger.info(f"Created {created_count} new CVEs.", extra={"object": software, "grouping": "CVE Creation"})
+        self.logger.info("Created %s new CVEs.", created_count, extra={"object": software, "grouping": "CVE Creation"})
 
     def get_cve_info(self, cpe_software_search_urls: list, software: SoftwareVersion) -> dict:
         """Search NIST for software and related CVEs.
