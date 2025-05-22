@@ -122,13 +122,12 @@ class NistCveSyncSoftware(Job):
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
         """
-
         if kwargs.get("nist_integration"):
             self.integration = kwargs["nist_integration"]  # pylint: disable=attribute-defined-outside-init
         else:
             self.logger.error("NIST ExternalIntegration object is required.")
             return
-        
+
         try:
             self.nist_api_key = (
                 kwargs.get("nist_integration").secrets_group.secrets.get(name="NAUTOBOT DLM NIST API KEY").get_value()
@@ -141,7 +140,7 @@ class NistCveSyncSoftware(Job):
             return
 
         cve_counter = 0
-        
+
         self.nist_session = self.nist_session_init()
 
         for software in SoftwareVersion.objects.all():
@@ -230,6 +229,7 @@ class NistCveSyncSoftware(Job):
 
         Args:
             cpe_cves (dict): Dictionary of CVEs to be created.
+            software (SoftwareVersion): SoftwareVersion object to associate with the CVE.
         """
         created_count = 0
 
