@@ -182,6 +182,17 @@ class NistCveSyncSoftware(Job):
                 )
                 continue
 
+            except TypeError as err:
+                self.logger.error(
+                    "There was an error in creating URLs for this Software Version. Please check the version value for %s %s %s. ERROR: %s",
+                    software.platform.manufacturer.name,
+                    software.platform.network_driver,
+                    software.version,
+                    err,
+                    extra={"grouping": "URL Creation"},
+                )
+                continue
+
             self.logger.info(
                 "Gathering CVE Information for Software Version: %s",
                 version,
@@ -189,6 +200,7 @@ class NistCveSyncSoftware(Job):
             )
 
             software_cve_info = self.get_cve_info(cpe_software_search_urls, software)
+
             all_software_cve_info = {**software_cve_info["new"], **software_cve_info["existing"]}
 
             cve_counter += len(software_cve_info["new"])
