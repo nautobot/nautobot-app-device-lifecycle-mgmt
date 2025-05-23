@@ -3,6 +3,7 @@
 from abc import ABCMeta
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.urls import reverse
 from django.utils.html import format_html
@@ -191,6 +192,32 @@ class DeviceContractLCM(
         )
 
 
+class SoftwareVersionRelatedCVELCMTab(TemplateExtension):  # pylint: disable=abstract-method
+    """Class to add new tab with related CVE table to the SoftwareVersion display."""
+
+    model = "dcim.softwareversion"
+
+    @property
+    def software(self):
+        """Set software as the referenced variable."""
+        return self.context["object"]
+
+    def detail_tabs(self):
+        """Create new detail tab on SoftwareVersion for Related CVEs."""
+        try:
+            return [
+                {
+                    "title": "Related CVEs",
+                    "url": reverse(
+                        "plugins:nautobot_device_lifecycle_mgmt:softwareversion_related_cves",
+                        kwargs={"pk": self.software.pk},
+                    ),
+                },
+            ]
+        except ObjectDoesNotExist:
+            return []
+
+
 # pylint: disable=abstract-method
 class ValidatedSoftwareLCMTab(TemplateExtension):
     """Template extension to add tabs to the Validated Software detail view."""
@@ -286,5 +313,6 @@ template_extensions = [
     InventoryItemHWLCM,
     DeviceValidatedSoftwareLCM,
     InventoryItemValidatedSoftwareLCM,
+    SoftwareVersionRelatedCVELCMTab,
     ValidatedSoftwareLCMTab,
 ]

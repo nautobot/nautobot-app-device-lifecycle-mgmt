@@ -693,6 +693,7 @@ class CVELCM(PrimaryModel):
 
     name = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=False, unique=True)
     published_date = models.DateField(verbose_name="Published Date")
+    last_modified_date = models.DateField(null=True, blank=True, verbose_name="Last Modified Date")
     link = models.URLField()
     status = StatusField(
         null=True,
@@ -700,7 +701,7 @@ class CVELCM(PrimaryModel):
         on_delete=models.PROTECT,
         to="extras.status",
     )
-    description = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True, default="")
+    description = models.TextField(blank=True, default="")
     severity = models.CharField(
         max_length=CHARFIELD_MAX_LENGTH, choices=choices.CVESeverityChoices, default=choices.CVESeverityChoices.NONE
     )
