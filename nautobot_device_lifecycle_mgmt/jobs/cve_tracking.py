@@ -192,7 +192,7 @@ class NistCveSyncSoftware(Job):
                     extra={"grouping": "URL Creation"},
                 )
                 continue
-            
+
             self.logger.info(
                 "Gathering CVE Information for Software Version: %s",
                 version,
