@@ -4,6 +4,8 @@ from abc import ABCMeta
 
 from django.conf import settings
 from django.db.models import Q
+from django.urls import reverse
+from django.utils.html import format_html
 from nautobot.apps.ui import TemplateExtension
 
 from nautobot_device_lifecycle_mgmt.models import ContractLCM, HardwareLCM, ValidatedSoftwareLCM
@@ -189,6 +191,93 @@ class DeviceContractLCM(
         )
 
 
+# pylint: disable=abstract-method
+class ValidatedSoftwareLCMTab(TemplateExtension):
+    """Template extension to add tabs to the Validated Software detail view."""
+
+    model = "nautobot_device_lifecycle_mgmt.validatedsoftwarelcm"
+
+    def detail_tabs(self):
+        """Add tabs to the Validated Software detail view."""
+        device_count = self.context["object"].devices.count()
+        device_type_count = self.context["object"].device_types.count()
+        device_role_count = self.context["object"].device_roles.count()
+        inventory_item_count = self.context["object"].inventory_items.count()
+        object_tags_count = self.context["object"].object_tags.count()
+        return [
+            {
+                "title": (
+                    "Devices"
+                    if not device_count
+                    else format_html(
+                        'Devices <span class="badge">{count}</span>',
+                        count=device_count,
+                    )
+                ),
+                "url": reverse(
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_devices_tab",
+                    args=[self.context["object"].pk],
+                ),
+            },
+            {
+                "title": (
+                    "Device Types"
+                    if not device_type_count
+                    else format_html(
+                        'Device Types <span class="badge">{count}</span>',
+                        count=device_type_count,
+                    )
+                ),
+                "url": reverse(
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_types_tab",
+                    args=[self.context["object"].pk],
+                ),
+            },
+            {
+                "title": (
+                    "Device Roles"
+                    if not device_role_count
+                    else format_html(
+                        'Device Roles <span class="badge">{count}</span>',
+                        count=device_role_count,
+                    )
+                ),
+                "url": reverse(
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_roles_tab",
+                    args=[self.context["object"].pk],
+                ),
+            },
+            {
+                "title": (
+                    "Inventory Items"
+                    if not inventory_item_count
+                    else format_html(
+                        'Inventory Items <span class="badge">{count}</span>',
+                        count=inventory_item_count,
+                    )
+                ),
+                "url": reverse(
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventory_items_tab",
+                    args=[self.context["object"].pk],
+                ),
+            },
+            {
+                "title": (
+                    "Object Tags"
+                    if not object_tags_count
+                    else format_html(
+                        'Object Tags <span class="badge">{count}</span>',
+                        count=object_tags_count,
+                    )
+                ),
+                "url": reverse(
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_object_tags_tab",
+                    args=[self.context["object"].pk],
+                ),
+            },
+        ]
+
+
 template_extensions = [
     DeviceContractLCM,
     DeviceTypeHWLCM,
@@ -197,4 +286,5 @@ template_extensions = [
     InventoryItemHWLCM,
     DeviceValidatedSoftwareLCM,
     InventoryItemValidatedSoftwareLCM,
+    ValidatedSoftwareLCMTab,
 ]
