@@ -55,9 +55,7 @@
             <tr>
                 <td>Devices</td>
                 <td>
-                    {% for device in object.devices.all %}
-                    <a href="{% url 'dcim:device' pk=device.pk %}">{{ device }}</a>{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
+                    <a href="{% url 'dcim:device_list'  %}?nautobot_device_lifecycle_mgmt_device_contracts={{ object.id }}">{{ object.devices.count }}</a>
                 </td>
             </tr>
             <tr>

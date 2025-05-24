@@ -10,12 +10,15 @@ import numpy as np
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, ExpressionWrapper, F, FloatField, Q
+from django_tables2 import RequestConfig
 from matplotlib.ticker import MaxNLocator
 from nautobot.apps.choices import ColorChoices
-from nautobot.apps.views import NautobotUIViewSet
+from nautobot.apps.views import NautobotUIViewSet, ObjectView
+from nautobot.core.models.querysets import count_related
 from nautobot.core.views import generic
 from nautobot.core.views.mixins import ContentTypePermissionRequiredMixin
-from nautobot.dcim.models import Device
+from nautobot.core.views.paginator import EnhancedPaginator, get_paginate_count
+from nautobot.dcim.models import Device, SoftwareVersion
 
 from nautobot_device_lifecycle_mgmt import choices, filters, forms, models, tables
 from nautobot_device_lifecycle_mgmt.api import serializers
@@ -68,6 +71,42 @@ class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
     queryset = models.ValidatedSoftwareLCM.objects.all()
     serializer_class = serializers.ValidatedSoftwareLCMSerializer
     table_class = tables.ValidatedSoftwareLCMTable
+
+
+# TODO: These should probably move to a StatsPanel using the Component UI Framework in 2.4+
+class ValidatedSoftwareDeviceTabView(ObjectView):
+    """Tab for Validated Software Devices."""
+
+    queryset = models.ValidatedSoftwareLCM.objects.all()
+    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_devices_tab.html"
+
+
+class ValidatedSoftwareDeviceTypeTabView(ObjectView):
+    """Tab for Validated Software Device Types."""
+
+    queryset = models.ValidatedSoftwareLCM.objects.all()
+    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_device_types_tab.html"
+
+
+class ValidatedSoftwareDeviceRoleTabView(ObjectView):
+    """Tab for Validated Software Device Roles."""
+
+    queryset = models.ValidatedSoftwareLCM.objects.all()
+    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_device_roles_tab.html"
+
+
+class ValidatedSoftwareInventoryItemTabView(ObjectView):
+    """Tab for Validated Software Inventory Items."""
+
+    queryset = models.ValidatedSoftwareLCM.objects.all()
+    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_inventory_items_tab.html"
+
+
+class ValidatedSoftwareObjectTagTabView(ObjectView):
+    """Tab for Validated Software Object Tags."""
+
+    queryset = models.ValidatedSoftwareLCM.objects.all()
+    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_object_tags_tab.html"
 
 
 class ContractLCMUIViewSet(NautobotUIViewSet):
@@ -726,3 +765,29 @@ class InventoryItemSoftwareValidationResultListView(generic.ObjectListView):
     table = tables.InventoryItemSoftwareValidationResultListTable
     action_buttons = ("export",)
     template_name = "nautobot_device_lifecycle_mgmt/inventoryitemsoftwarevalidationresult_list.html"
+
+
+class SoftwareVersionRelatedCveView(generic.ObjectView):
+    """Related CVEs tab view for SoftwareVersion."""
+
+    queryset = SoftwareVersion.objects.all()
+    template_name = "nautobot_device_lifecycle_mgmt/softwareversion_related_cves.html"
+
+    def get_extra_context(self, request, instance):
+        """Adds Relative CVEs table."""
+        relatedcves = instance.corresponding_cves.annotate(
+            related_cves_count=count_related(SoftwareVersion, "corresponding_cves")
+        ).restrict(request.user, "view")
+
+        relatedcves_table = tables.CVELCMTable(data=relatedcves, user=request.user, orderable=False)
+
+        paginate = {
+            "paginator_class": EnhancedPaginator,
+            "per_page": get_paginate_count(request),
+        }
+        RequestConfig(request, paginate).configure(relatedcves_table)
+
+        return {
+            "relatedcves_table": relatedcves_table,
+            "active_tab": request.GET.get("tab", "main"),
+        }

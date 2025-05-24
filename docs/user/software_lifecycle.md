@@ -80,9 +80,9 @@ For example, in the below case **Validated Software 4.21M** will apply to **Devi
     - software: 4.21M
 
 - Validated Software - 4.21M:
-  - device types: 7150-S64
-  - device roles: leaf
-  - software: 4.21M
+    - device types: 7150-S64
+    - device roles: leaf
+    - software: 4.21M
 
 ### Behavior when using API to retrieve Validated Software list for devices and inventory items
 

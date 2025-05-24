@@ -2,7 +2,7 @@
 
 from nautobot.core.celery import register_jobs
 
-from .cve_tracking import GenerateVulnerabilities
+from .cve_tracking import GenerateVulnerabilities, NistCveSyncSoftware
 from .lifecycle_reporting import (
     DeviceHardwareNoticeFullReport,
     DeviceSoftwareValidationFullReport,
@@ -16,5 +16,6 @@ jobs = [
     InventoryItemSoftwareValidationFullReport,
     GenerateVulnerabilities,
     DLMToNautobotCoreModelMigration,
+    NistCveSyncSoftware,
 ]
 register_jobs(*jobs)

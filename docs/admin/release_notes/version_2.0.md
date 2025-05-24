@@ -9,6 +9,7 @@ This release adds support for [Nautobot v2.0.0](https://github.com/nautobot/naut
 ## [v2.0.4] - 2023-12-15
 
 ### Fixed
+
 - [#265](https://github.com/nautobot/nautobot-plugin-device-lifecycle-mgmt/pull/265) - Fixes incorrect query used to generate `nautobot_lcm_hw_end_of_support_per_part_number` metric.
 
 ## [v2.0.3] - 2023-11-08
@@ -21,18 +22,21 @@ This release adds support for [Nautobot v2.0.0](https://github.com/nautobot/naut
 Note: This release fixes an issue with upgrading this app from 1.x version to 2.x versions.
 
 ### Fixed
+
 - [#250](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/250) - Fix issue with migrations in 2.0.1 causing issues with upgrading app from 1.x versions.
 
 
 ## [v2.0.1] - 2023-10-31
+
 Note: This release fixes an issue with clean installations of this app on Nautobot 2.0.X environments.
 
 ### Added
+
 - [240](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/240) - Add Network to Code Drift Management to keep development environment up to code standards.
 
 ### Fixed
-- [#236](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/236) - Fix circular dependencies which result in installation issues.
 
+- [#236](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/236) - Fix circular dependencies which result in installation issues.
 
 ## [v2.0.0] - 2023-09-29
 

@@ -4,10 +4,11 @@ This document describes all new features and changes in the release `1.0.X`. The
 
 ## Release Overview
 This release includes some of the following highlights:
- - Fixes a data migration bug when upgrading from versions older than 1.0.0
- - Fixes tab rendering for software details pages when no software images are linked
- - Fixes intermittent post migrate signal failure
- - Removed image related fields from software model (back compatibility references listed below)
+
+- Fixes a data migration bug when upgrading from versions older than 1.0.0
+- Fixes tab rendering for software details pages when no software images are linked
+- Fixes intermittent post migrate signal failure
+- Removed image related fields from software model (back compatibility references listed below)
 
 ## [v1.0.2] - 2022-03-10
 
