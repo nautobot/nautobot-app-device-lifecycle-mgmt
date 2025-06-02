@@ -1,1 +1,0 @@
-Added job that will automatically obtain and associate CVEs to all software versions in Nautobot that are known to NIST.

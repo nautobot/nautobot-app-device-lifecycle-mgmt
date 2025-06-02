@@ -1,1 +1,0 @@
-Fixed large traceback being generated in the logs when a 404 was raised.
