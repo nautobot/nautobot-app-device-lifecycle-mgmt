@@ -1,6 +1,6 @@
 """Banners for the Device Lifecycle Management app."""
 
-from django.urls import resolve, reverse
+from django.urls import NoReverseMatch, Resolver404, resolve, reverse
 from django.utils.html import format_html
 from nautobot.apps.ui import Banner, BannerClassChoices
 from nautobot.extras.models import Job
@@ -23,7 +23,10 @@ def all_models_migrated_to_core():
 
 def models_migrated_to_core_banner(context):
     """Emit a banner on DLM views if models are not migrated to core."""
-    app_name = resolve(context.request.path).app_name
+    try:
+        app_name = resolve(context.request.path).app_name
+    except (AttributeError, NoReverseMatch, Resolver404):
+        return None
     if app_name != "plugins:nautobot_device_lifecycle_mgmt":
         return None
     if all_models_migrated_to_core():
