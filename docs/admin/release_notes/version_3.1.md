@@ -11,7 +11,7 @@ Device Lifecycle Management App version 3.1.0 introduces automated CVE discovery
 - The new NIST integration allows you to automatically discover and associate CVEs to all software versions in Nautobot that are known to NIST.
 - No special upgrade steps are required from 3.0.X, but it is recommended to review the [upgrade guide](../upgrade.md) for general instructions if you are coming from earlier versions.
 
-## [v3.1.1 (2025-06-02)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v3.1.1)
+## [v3.1.1 (2025-06-03)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v3.1.1)
 
 ### Fixed
 
