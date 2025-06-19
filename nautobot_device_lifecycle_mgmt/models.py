@@ -434,6 +434,26 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         return msg
 
 
+class DeviceSoftwareValidationHistoricResult(PrimaryModel):
+    """Device Software validation history result model."""
+
+    date = models.DateField()
+    filters = models.JSONField(default=dict, blank=True)
+    run_type = models.CharField(max_length=CHARFIELD_MAX_LENGTH, choices=choices.ReportRunTypeChoices)
+    device_validation_results = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        """Meta attributes for DeviceSoftwareValidationHistory."""
+
+        verbose_name = "Device Software Validation History"
+        ordering = ("date", "run_type", "filters")
+
+    def __str__(self):
+        """String representation of DeviceSoftwareValidationHistory."""
+        return f"{self.date} - {self.run_type} - {self.filters} - {len(self.device_validation_results)} devices"
+
+
+
 @extras_features(
     "graphql",
 )

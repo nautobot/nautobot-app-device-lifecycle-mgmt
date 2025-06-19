@@ -2,6 +2,7 @@
 """Jobs for the Lifecycle Management app."""
 
 from datetime import datetime
+from time import sleep
 from itertools import product
 
 from nautobot.dcim.models import Device, InventoryItem, Platform
@@ -11,7 +12,8 @@ from nautobot.tenancy.models import Tenant
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.models import (
     DeviceHardwareNoticeResult,
-    DeviceSoftwareValidationResult,
+        DeviceSoftwareValidationResult,
+        DeviceSoftwareValidationHistoricResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
     ValidatedSoftwareLCM,
@@ -79,7 +81,7 @@ class DeviceHardwareNoticeFullReport(Job):
     # TODO: Create Inventory Item Report job (and related table, view, forms, filters etc.)
 
 
-class DeviceSoftwareValidationFullReport(Job):
+class DeviceSoftwareValidationReport(Job):
     """Checks if devices run validated software version."""
 
     name = "Device Software Validation Report"
@@ -131,48 +133,90 @@ class DeviceSoftwareValidationFullReport(Job):
             tenants = Tenant.objects.all()
             all_tenants = True
 
+        if all_tenants and all_platforms:
+            run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
+        else:
+            run_type = choices.ReportRunTypeChoices.REPORT_FILTERED_RUN
+
+        # Create history result
+        history_result = DeviceSoftwareValidationHistoricResult.objects.create(
+            date=job_run_time,
+            filters={
+                "platforms": [str(platform.id) for platform in platforms],
+                "tenants": [str(tenant.id) for tenant in tenants],
+            },
+            run_type=run_type,
+        )
+
         # Get all combinations of platforms and tenants
         filtered_products = product(platforms, tenants)
-
         # Get versioned and non-versioned devices
         for platform, tenant in filtered_products:
             versioned_devices.extend(
-                Device.objects.filter(platform=platform, tenant=tenant, software_version__isnull=False)
+                Device.objects.filter(platform_id=platform.id, tenant_id=tenant.id, software_version__isnull=False)
             )
             non_versioned_devices.extend(
-                Device.objects.filter(platform=platform, tenant=tenant, software_version__isnull=True)
+                Device.objects.filter(platform_id=platform.id, tenant_id=tenant.id, software_version__isnull=True)
             )
+        self.logger.info("Found %d versioned devices and %d non-versioned devices.", len(versioned_devices), len(non_versioned_devices))
 
         # Validate devices without software version
         for device in non_versioned_devices:
-            validate_obj, _ = DeviceSoftwareValidationResult.objects.get_or_create(device=device)
+            validate_obj, _ = DeviceSoftwareValidationResult.objects.update_or_create(
+                device=device,
+                defaults={
+                    'is_validated': False,
+                    'software': None,
+                    'run_type': run_type
+                }
+            )
             validate_obj.is_validated = False
-            validate_obj.valid_software.set(ValidatedSoftwareLCM.objects.get_for_object(device))
             validate_obj.software = None
             validate_obj.last_run = job_run_time
-            if all_tenants and all_platforms:
-                validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
-            else:
-                validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FILTERED_RUN
+            validate_obj.valid_software.set(ValidatedSoftwareLCM.objects.get_for_object(device))
             validate_obj.validated_save()
             validation_count += 1
+            
+            # Add the current validation result to the historic results
+            history_result.device_validation_results.append({
+                "device": str(validate_obj.device.id),
+                "is_validated": validate_obj.is_validated,
+                "software": str(validate_obj.software.id) if validate_obj.software else None,
+            })
+            history_result.save()
 
         # Validate devices with software version
         for device in versioned_devices:
             device_software = DeviceSoftware(device)
-            validate_obj, _ = DeviceSoftwareValidationResult.objects.get_or_create(device=device)
+            validate_obj, _ = DeviceSoftwareValidationResult.objects.update_or_create(
+                device=device,
+                defaults={
+                    'is_validated': device_software.validate_software(),
+                    'software': device.software_version,
+                    'run_type': run_type
+                }
+            )
             validate_obj.is_validated = device_software.validate_software()
-            validate_obj.valid_software.set(ValidatedSoftwareLCM.objects.get_for_object(device))
             validate_obj.software = device.software_version
             validate_obj.last_run = job_run_time
-            if all_tenants and all_platforms:
-                validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
-            else:
-                validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FILTERED_RUN
+            validate_obj.valid_software.set(ValidatedSoftwareLCM.objects.get_for_object(device))
             validate_obj.validated_save()
             validation_count += 1
 
+            # Add the current validation result to the historic results
+            history_result.device_validation_results.append({
+                "device": str(validate_obj.device.id),
+                "is_validated": validate_obj.is_validated,
+                "software": str(validate_obj.software.id) if validate_obj.software else None,
+            })
+            history_result.save()
+
+
         self.logger.info("Performed validation on: %d devices.", validation_count)
+
+        history_result.validated_save()
+        self.logger.info("Created historic result.")
+
 
 
 class InventoryItemSoftwareValidationFullReport(Job):
