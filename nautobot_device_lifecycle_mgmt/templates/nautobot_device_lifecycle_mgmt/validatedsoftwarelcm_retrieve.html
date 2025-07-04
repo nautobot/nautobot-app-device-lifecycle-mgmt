@@ -1,4 +1,4 @@
-{% extends 'generic/object_detail.html' %}
+{% extends 'generic/object_retrieve.html' %}
 
 {% block masthead %}
     <h2>{% block title %}{{ object }}{% endblock %}</h2>
@@ -55,106 +55,53 @@
             </tr>
         </table>
     </div>
-{% endblock %}
-
-{% block content_right_page %}
     <div class="panel panel-default">
         <div class="panel-heading">
             <strong>Device assignments</strong>
         </div>
         <table class="table table-hover panel-body attr-table">
             <tr>
+                <td>Devices</td>
                 <td>
-                    Devices
-                </td>
-                <td>
-                    {% if object.devices.all %}
-                    <ul>
-                        {% for device in object.devices.all %}
-                            <li><a href="{{ device.get_absolute_url }}">{{ device }}</a></li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                        <span class="text-muted">None</span>
-                    {% endif %}
+                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_devices_tab' object.pk %}?tab=nautobot_device_lifecycle_mgmt:1">{{ object.devices.count }}</a>
                 </td>
             </tr>
             <tr>
+                <td>Device Types</td>
                 <td>
-                    Device Types
-                </td>
-                <td>
-                    {% if object.device_types.all %}
-                    <ul>
-                        {% for device_type in object.device_types.all %}
-                            <li><a href="{{ device_type.get_absolute_url }}">{{ device_type }}</a></li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                        <span class="text-muted">None</span>
-                    {% endif %}
+                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_types_tab' object.pk %}?tab=nautobot_device_lifecycle_mgmt:2">{{ object.device_types.count }}</a>
                 </td>
             </tr>
             <tr>
+                <td>Device Roles</td>
                 <td>
-                    Device Roles
-                </td>
-                <td>
-                    {% if object.device_roles.all %}
-                    <ul>
-                        {% for role in object.device_roles.all %}
-                            <li><a href="{{ role.get_absolute_url }}">{{ role }}</a></li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                        <span class="text-muted">None</span>
-                    {% endif %}
+                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_roles_tab' object.pk %}?tab=nautobot_device_lifecycle_mgmt:3">{{ object.device_roles.count }}</a>
                 </td>
             </tr>
         </table>
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">
-            <strong>Inventory Items assignments</strong>
+            <strong>Inventory Item assignments</strong>
         </div>
         <table class="table table-hover panel-body attr-table">
             <tr>
+                <td>Inventory Items</td>
                 <td>
-                    Inventory Items
-                </td>
-                <td>
-                    {% if object.inventory_items.all %}
-                    <ul>
-                        {% for inventory_item in object.inventory_items.all %}
-                            <li><a href="{{ inventory_item.get_absolute_url }}">{{ inventory_item }}</a></li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                        <span class="text-muted">None</span>
-                    {% endif %}
+                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventory_items_tab' object.pk %}?tab=nautobot_device_lifecycle_mgmt:4">{{ object.inventory_items.count }}</a>
                 </td>
             </tr>
         </table>
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">
-            <strong>Object Tags assignments</strong>
+            <strong>Object Tag assignments</strong>
         </div>
         <table class="table table-hover panel-body attr-table">
             <tr>
+                <td>Object Tags</td>
                 <td>
-                    Object Tags
-                </td>
-                <td>
-                    {% if object.object_tags.all %}
-                    <ul>
-                        {% for object_tag in object.object_tags.all %}
-                            <li><a href="{{ object_tag.get_absolute_url }}">{{ object_tag }}</a></li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                        <span class="text-muted">None</span>
-                    {% endif %}
+                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_object_tags_tab' object.pk %}?tab=nautobot_device_lifecycle_mgmt:5">{{ object.object_tags.count }}</a>
                 </td>
             </tr>
         </table>

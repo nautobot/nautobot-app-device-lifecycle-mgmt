@@ -4,6 +4,7 @@ This document describes all new features and changes in the release `0.2.X`. The
 
 ## Release Overview
 This release includes some of the following highlights:
+
 - Documentation updates for initial release
 - Case update for `Lifecycle`
 - Visual reresntation of providers to be vendors
@@ -19,6 +20,7 @@ This release includes some of the following highlights:
 ### Added
 
 ### Changed
+
 - [#30](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/30) Documentation updates for initial release.
 - [#29](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/29) Updates case on LifeCycle to be Lifecycle.
 - [#29](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/29) Changes visual representation of Providers to be Vendors.
@@ -30,6 +32,7 @@ This release includes some of the following highlights:
 ## [v0.2.1] - 2021-10-24
 
 ### Added
+
 - [#26](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/26) Sets view permissions on all models in the navigation menu.
 - [#25](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/25) Add documentation for use-cases and app info to repo.
 - [#20](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/20) Adds `valid` property to the validated software serializers.
@@ -38,10 +41,12 @@ This release includes some of the following highlights:
 ### Changed
 
 ### Fixed
+
 - [#26](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/26) Fixes navigation menu for Contract Imports.
 
 
 ## [v0.2.0] - 2021-09-22
+
 - Adds Maintenance/Service Contracts to the Lifecycle App.
 - Adds Software and Validated Software tracking to the Lifecycle App.
 
