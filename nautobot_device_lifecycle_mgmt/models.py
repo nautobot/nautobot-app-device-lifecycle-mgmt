@@ -457,8 +457,8 @@ class DeviceSoftwareValidationHistoricResult(PrimaryModel):
         """Meta attributes for DeviceSoftwareValidationHistory."""
 
         verbose_name = "Device Software Validation History"
-        unique_together = ("date", "run_type", "filters")
-        ordering = ("date", "run_type", "filters")
+        unique_together = ("date", "run_type")
+        ordering = ("date", "run_type")
 
     def __str__(self):
         """String representation of DeviceSoftwareValidationHistory."""
