@@ -10,7 +10,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("extras", "0114_computedfield_grouping"),
         ("nautobot_device_lifecycle_mgmt", "0027_cvelcm_last_modified_date_alter_cvelcm_description"),
     ]
 
