@@ -1,0 +1,60 @@
+{% extends 'generic/object_detail.html' %}
+{% load render_table from django_tables2 %}
+
+{% block title %}Device Software Validation Historic Result: {{ object.date }}{% endblock title %}
+
+{% block content_left_page %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Historic Validation Details</strong>
+        </div>
+        <table class="table table-hover panel-body attr-table">
+            <tr>
+                <td>Date</td>
+                <td>{{ object.date }}</td>
+            </tr>
+            <tr>
+                <td>Run Type</td>
+                <td>{{ object.run_type }}</td>
+            </tr>
+            <tr>
+                <td>All Platforms</td>
+                <td>{{ object.all_platforms|yesno:"Yes,No" }}</td>
+            </tr>
+            <tr>
+                <td>All Tenants</td>
+                <td>{{ object.all_tenants|yesno:"Yes,No" }}</td>
+            </tr>
+            {% if object.all_platforms == False or object.all_tenants == False %}
+            <tr>
+                <td>Filters</td>
+                {% if object.all_platforms == False %}
+                    <td>Platforms: {% for platform in object.filters.platforms %}
+                        <br>&nbsp;&nbsp;{{ platform.name }}
+                    {% endfor %}</td>
+                {% endif %}
+                {% if object.all_tenants == False %}
+                    <td>Tenants: {% for tenant in object.filters.tenants %}
+                        <br>&nbsp;&nbsp;{{ tenant.name }}
+                    {% endfor %}</td>
+                {% endif %}
+
+            </tr>
+            {% endif %}
+                <td>Number of Devices</td>
+                <td>{{ object.device_validation_results|length }}</td>
+            </tr>
+        </table>
+    </div>
+{% endblock %}
+
+{% block content_full_width_page %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Device Validation Results</strong>
+        </div>
+        <div class="table-responsive">
+            {% render_table table %}
+        </div>
+    </div>
+{% endblock %} 

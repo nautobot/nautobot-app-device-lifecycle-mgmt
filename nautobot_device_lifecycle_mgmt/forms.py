@@ -33,6 +33,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
     DeviceHardwareNoticeResult,
+    DeviceSoftwareValidationHistoricResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -412,6 +413,18 @@ class DeviceSoftwareValidationResultFilterForm(NautobotFilterForm):
             "exclude_sw_missing",
             "sw_missing_only",
         ]
+
+
+class DeviceSoftwareValidationHistoricResultFilterForm(NautobotFilterForm):
+    """Filter form to filter searches for DeviceSoftwareValidationHistoricResult."""
+
+    model = DeviceSoftwareValidationHistoricResult
+
+    class Meta:
+        """Meta attributes."""
+
+        model = DeviceSoftwareValidationHistoricResult
+        fields = "__all__"
 
 
 class InventoryItemSoftwareValidationResultFilterForm(NautobotFilterForm):

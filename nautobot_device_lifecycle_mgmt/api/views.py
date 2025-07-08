@@ -62,6 +62,17 @@ class ValidatedSoftwareLCMViewSet(NautobotModelViewSet):
     filterset_class = filters.ValidatedSoftwareLCMFilterSet
 
 
+class DeviceSoftwareValidationHistoricResultListViewSet(NautobotModelViewSet):
+    """REST API viewset for DeviceSoftwareValidationHistoricResult records."""
+
+    queryset = models.DeviceSoftwareValidationHistoricResult.objects.all()
+    serializer_class = serializers.DeviceSoftwareValidationHistoricResultSerializer
+    filterset_class = filters.DeviceSoftwareValidationHistoricResultFilterSet
+
+    # Disabling POST as these should only be created via Job.
+    http_method_names = ["get", "head", "options"]
+
+
 class CVELCMViewSet(NautobotModelViewSet):
     """REST API viewset for CVELCM records."""
 

@@ -15,6 +15,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContactLCM,
     ContractLCM,
     DeviceHardwareNoticeResult,
+    DeviceSoftwareValidationHistoricResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -410,6 +411,17 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         inventory_item = inventory_items.first()
 
         return ValidatedSoftwareLCM.objects.get_for_object(inventory_item)
+
+
+class DeviceSoftwareValidationHistoricResultFilterSet(NautobotFilterSet):
+    """Filter for DeviceSoftwareValidationHistoricResult."""
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = DeviceSoftwareValidationHistoricResult
+
+        fields = "__all__"
 
 
 class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):

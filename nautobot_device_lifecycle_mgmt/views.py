@@ -478,15 +478,17 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
         """Using request object to perform filtering based on query params."""
         super().setup(request, *args, **kwargs)
         try:
-            report_last_run = (
+            report_last_full_run = (
                 models.DeviceSoftwareValidationResult.objects.filter(
                     run_type=choices.ReportRunTypeChoices.REPORT_FULL_RUN
                 )
                 .latest("last_updated")
                 .last_run
             )
+            report_last_run_type = models.DeviceSoftwareValidationHistoricResult.objects.last().run_type
         except models.DeviceSoftwareValidationResult.DoesNotExist:  # pylint: disable=no-member
-            report_last_run = None
+            report_last_full_run = None
+            report_last_run_type = None
 
         device_aggr = self.get_global_aggr(request)
         _platform_qs = (
@@ -519,7 +521,8 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
             "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
             "device_aggr": device_aggr,
             "device_visual": ReportOverviewHelper.plot_piechart_visual(device_aggr, pie_chart_attrs),
-            "report_last_run": report_last_run,
+            "report_last_full_run": report_last_full_run,
+            "report_last_run_type": report_last_run_type,
         }
 
     def get_global_aggr(self, request):
@@ -605,6 +608,81 @@ class DeviceSoftwareValidationResultListView(generic.ObjectListView):
     table = tables.DeviceSoftwareValidationResultListTable
     action_buttons = ("export",)
     template_name = "nautobot_device_lifecycle_mgmt/devicesoftwarevalidationresult_list.html"
+
+
+class DeviceSoftwareValidationHistoricResultListView(generic.ObjectListView):
+    """DeviceSoftwareValidationHistoricResultListView view."""
+
+    queryset = models.DeviceSoftwareValidationHistoricResult.objects.all()
+    filterset = filters.DeviceSoftwareValidationHistoricResultFilterSet
+    filterset_form = forms.DeviceSoftwareValidationResultFilterForm
+    table = tables.DeviceSoftwareValidationHistoricResultTable
+    action_buttons = ("export",)
+    template_name = "nautobot_device_lifecycle_mgmt/devicesoftwarevalidationresult_historic_list.html"
+
+
+class DeviceSoftwareValidationHistoricResultDetailView(generic.ObjectView):
+    """DeviceSoftwareValidationHistoricResultDetailView Detail view."""
+
+    queryset = models.DeviceSoftwareValidationHistoricResult.objects.all()
+    table = tables.DeviceSoftwareValidationHistoricResultDetailTable
+    template_name = "nautobot_device_lifecycle_mgmt/devicesoftwarevalidationresult_historic_detail.html"
+
+    def get_extra_context(self, request, instance):
+        """Return any additional context data for the template."""
+        # Create table data from the device_validation_results JSON field
+        table_data = []
+        for device_result in instance.device_validation_results:
+            # Get the actual device and software objects
+            device = None
+            software = None
+            valid_software_objects = []
+
+            device_id = device_result.get("device")
+            try:
+                device = Device.objects.get(id=device_id)
+            except (Device.DoesNotExist, ValueError):
+                pass
+
+            software_id = device_result.get("software")
+            if software_id and isinstance(software_id, str):
+                try:
+                    software = SoftwareVersion.objects.get(id=software_id)
+                except (SoftwareVersion.DoesNotExist, ValueError):
+                    pass
+
+            valid_software_data = device_result.get("valid_software", [])
+            for software_id in valid_software_data:
+                try:
+                    sw_obj = models.ValidatedSoftwareLCM.objects.get(id=software_id)
+                    valid_software_objects.append(sw_obj)
+                except (models.ValidatedSoftwareLCM.DoesNotExist, ValueError):
+                    # If not found, try SoftwareVersion as fallback
+                    try:
+                        sw_obj = SoftwareVersion.objects.get(id=software_id)
+                        valid_software_objects.append(sw_obj)
+                    except (SoftwareVersion.DoesNotExist, ValueError):
+                        logger.warning("Invalid valid_software ID: %s", software_id)
+
+            table_data.append(
+                {
+                    "device": device,
+                    "software": software,
+                    "is_validated": device_result.get("is_validated"),
+                    "valid_software": valid_software_objects,
+                }
+            )
+
+        # Sort table_data by device name
+        table_data.sort(key=lambda x: str(x["device"]) if x["device"] else "")
+
+        # Create and configure the table
+        table = self.table(data=table_data, user=request.user)
+        RequestConfig(request, paginate={"per_page": 25}).configure(table)
+
+        return {
+            "table": table,
+        }
 
 
 class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):

@@ -10,7 +10,7 @@
         <span class="mdi mdi-plus-thick" aria-hidden="true"></span>Execute<span class="caret"></span>
     </button>
     <ul class="dropdown-menu">
-            <li><a href="{% url 'extras:job_run_by_class_path' class_path='nautobot_device_lifecycle_mgmt.jobs.lifecycle_reporting.DeviceSoftwareValidationFullReport' %}">Run Software Validation</a></li>
+            <li><a href="{% url 'extras:job_run_by_class_path' class_path='nautobot_device_lifecycle_mgmt.jobs.lifecycle_reporting.DeviceSoftwareValidationReport' %}">Run Software Validation</a></li>
     </ul>
 </div>
 {% if request.user.is_authenticated and table_config_form %}
@@ -20,14 +20,17 @@
     {% export_button content_type %}
 {% endif %}
 </div>
-    <h1>{% block title %}Device Software Validation Reports{% endblock %}</h1>
+    <h1>{% block title %}Device Software Validation Reports {{run_type}}{% endblock %}</h1>
     <div class="row">
         <div class="col-md-9">
             <!-- VISUAL BLOCK -->
-            {% if report_last_run is None %}
+            {% if report_last_full_run is None %}
                 <h4 class="text-center alert-danger p-4 m-4">-- No validation results found, you need to run the report at least once before seeing the results! --</h4>
             {% else %}
-            <h4 class="text-left alert-info p-4 m-4">Last full run of the report: {{ report_last_run }} - {{ report_last_run|timesince }} ago </h4>
+            <h4 class="text-left alert-info p-4 m-4">Last full run of the report: {{ report_last_full_run }} - {{ report_last_full_run|timesince }} ago </h4>
+            {% endif %}
+            {% if report_last_run_type is not None and report_last_run_type == 'filtered-report-run' %}
+                <h4 class="text-left alert-danger p-4 m-4">NOTE: The last validation was on a filtered set.  Any validation changes to devices since the last full run that are not in the filtered set will not be included in this report.</h4>
             {% endif %}
             {% if bar_chart is not None %}
                 {% block graphic  %}
