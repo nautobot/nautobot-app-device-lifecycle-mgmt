@@ -142,6 +142,7 @@ class ValidatedSoftwareDeviceReportViewTest(ViewTestCases.ListObjectsViewTestCas
     def test_list_objects_anonymous_with_exempt_permission_for_one_view_only(self):
         pass
 
+
 class ValidatedSoftwareInventoryItemReportViewTest(ViewTestCases.ListObjectsViewTestCase):
     """Test ValidatedSoftwareInventoryItemReportView"""
 
