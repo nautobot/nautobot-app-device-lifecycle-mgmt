@@ -1,0 +1,27 @@
+{% if perms.dcim.view_softwareversion %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Software</strong> {% if obj_soft_valid %}<span class="label label-success">Valid{% else %}<span class="label label-danger">Invalid{% endif %}</span>
+            </div>
+            <table class="table table-hover panel-body attr-table">
+                <tr>
+                    <td>Name</td>
+                    <td>
+                        <a href="{% url 'dcim:softwareversion' pk=object.software_version.id %}">{{ object.software_version }}</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Device Platform</td>
+                    <td>
+                        {{ object.software_version.platform }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Version</td>
+                    <td>
+                        {{ object.software_version.version }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+{% endif %}
