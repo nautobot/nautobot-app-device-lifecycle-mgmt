@@ -1,0 +1,1 @@
+Restore the Software valid/invalid panel for Device and InventoryItem objects with an assigned Software version, which was erroneously removed in version 3.0.
