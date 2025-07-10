@@ -1,4 +1,5 @@
 {% if perms.dcim.view_softwareversion %}
+{% if object.software_version %}
         <div class="panel panel-default">
             <div class="panel-heading">
                 <strong>Software</strong> {% if obj_soft_valid %}<span class="label label-success">Valid{% else %}<span class="label label-danger">Invalid{% endif %}</span>
@@ -24,4 +25,5 @@
                 </tr>
             </table>
         </div>
+{% endif %}
 {% endif %}
