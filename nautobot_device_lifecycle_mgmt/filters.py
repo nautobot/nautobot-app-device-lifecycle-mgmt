@@ -358,6 +358,7 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         model = ValidatedSoftwareLCM
 
         fields = "__all__"
+        exclude = ("old_software",)
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
@@ -613,6 +614,7 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         model = DeviceSoftwareValidationResult
 
         fields = "__all__"
+        exclude = ("old_software",)
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
@@ -727,6 +729,7 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         model = InventoryItemSoftwareValidationResult
 
         fields = "__all__"
+        exclude = ("old_software",)
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
@@ -939,6 +942,7 @@ class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , Custom
         """Meta attributes for filter."""
 
         model = CVELCM
+        exclude = ("old_affected_softwares",)
 
         fields = "__all__"
 
@@ -967,6 +971,7 @@ class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  
         model = VulnerabilityLCM
 
         fields = "__all__"
+        exclude = ("old_software",)
 
     def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
