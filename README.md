@@ -22,7 +22,7 @@ An app for [Nautobot](https://github.com/nautobot/nautobot) to manage device lif
 - **Automated CVE Discovery and NIST Integration:**
     - Automatically discover and associate CVEs to software versions in Nautobot using the NIST NVD API 2.0 ([#440](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/440)).
     - Configure an External Integration and Secret for your NIST API key, then run the "NIST - Software CVE Search" job to keep your CVE data up to date.
-    - See the [CVE Tracking documentation](docs/user/cve_tracking.md) for setup and usage details.
+    - See the [CVE Tracking documentation](https://docs.nautobot.com/projects/device-lifecycle/en/latest/user/cve_tracking/) for setup and usage details.
 
 ### Screenshots
 
