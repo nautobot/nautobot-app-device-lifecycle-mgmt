@@ -15,6 +15,7 @@ router.register("contract", viewset=views.ContractLCMUIViewSet)
 router.register("provider", viewset=views.ProviderLCMUIViewSet)
 router.register("cve", viewset=views.CVELCMUIViewSet)
 router.register("vulnerability", viewset=views.VulnerabilityLCMUIViewSet)
+router.register("device-hardware-notice-result", viewset=views.DeviceHardwareNoticeResultUIViewSet)
 
 urlpatterns = router.urls
 
@@ -58,12 +59,6 @@ urlpatterns += [
         "validated-software-inventoryitem-report/",
         views.ValidatedSoftwareInventoryItemReportView.as_view(),
         name="validatedsoftware_inventoryitem_report",
-    ),
-    # DeviceHardwareNoticeResult
-    path(
-        "device-hardware-notice-result/",
-        views.DeviceHardwareNoticeResultListView.as_view(),
-        name="devicehardwarenoticeresult_list",
     ),
     # DeviceValidatedSoftwareResult
     path(

@@ -585,15 +585,16 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
         return "\n".join(csv_data)
 
 
-class DeviceHardwareNoticeResultListView(generic.ObjectListView):
-    """DeviceHardwareNoticeResultListView List view."""
+class DeviceHardwareNoticeResultUIViewSet(NautobotUIViewSet):
+    """DeviceHardwareNoticeResult UI ViewSet."""
 
+    bulk_update_form_class = forms.HardwareLCMBulkEditForm
+    filterset_class = filters.DeviceHardwareNoticeResultFilterSet
+    filterset_form_class = forms.DeviceHardwareNoticeResultFilterForm
+    form_class = forms.HardwareLCMForm
     queryset = models.DeviceHardwareNoticeResult.objects.all()
-    filterset = filters.DeviceHardwareNoticeResultFilterSet
-    filterset_form = forms.DeviceHardwareNoticeResultFilterForm
-    table = tables.DeviceHardwareNoticeResultListTable
-    action_buttons = ("export",)
-    template_name = "nautobot_device_lifecycle_mgmt/deviceshardwarenoticeresult_list.html"
+    serializer_class = serializers.DeviceHardwareNoticeResultSerializer
+    table_class = tables.DeviceHardwareNoticeResultTable
 
 
 class DeviceSoftwareValidationResultListView(generic.ObjectListView):
