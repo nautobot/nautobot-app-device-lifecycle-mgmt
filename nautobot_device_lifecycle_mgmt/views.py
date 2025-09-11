@@ -6,6 +6,7 @@ import logging
 import urllib
 
 import matplotlib.pyplot as plt
+import nautobot.apps.views
 import numpy as np
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -585,16 +586,30 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
         return "\n".join(csv_data)
 
 
-class DeviceHardwareNoticeResultUIViewSet(NautobotUIViewSet):
-    """DeviceHardwareNoticeResult UI ViewSet."""
+class DeviceHardwareNoticeResultUIViewSet(nautobot.apps.views.ObjectListViewMixin):
+    """DeviceHardwareNoticeResult List view."""
 
-    bulk_update_form_class = forms.HardwareLCMBulkEditForm
     filterset_class = filters.DeviceHardwareNoticeResultFilterSet
     filterset_form_class = forms.DeviceHardwareNoticeResultFilterForm
-    form_class = forms.HardwareLCMForm
     queryset = models.DeviceHardwareNoticeResult.objects.all()
     serializer_class = serializers.DeviceHardwareNoticeResultSerializer
-    table_class = tables.DeviceHardwareNoticeResultTable
+    table_class = tables.DeviceHardwareNoticeResultListTable
+    action_buttons = ("export",)
+
+    def _process_bulk_create_form(self, form):
+        pass
+
+    def _process_bulk_destroy_form(self, form):
+        pass
+
+    def _process_bulk_update_form(self, form):
+        pass
+
+    def _process_create_or_update_form(self, form):
+        pass
+
+    def _process_destroy_form(self, form):
+        pass
 
 
 class DeviceSoftwareValidationResultListView(generic.ObjectListView):
