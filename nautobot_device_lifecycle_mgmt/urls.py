@@ -16,6 +16,10 @@ router.register("provider", viewset=views.ProviderLCMUIViewSet)
 router.register("cve", viewset=views.CVELCMUIViewSet)
 router.register("vulnerability", viewset=views.VulnerabilityLCMUIViewSet)
 router.register("device-hardware-notice-result", viewset=views.DeviceHardwareNoticeResultUIViewSet)
+router.register("device-validated-software-result", viewset=views.DeviceSoftwareValidationResultUIViewSet)
+router.register(
+    "inventory-item-validated-software-result", viewset=views.InventoryItemSoftwareValidationResultUIViewSet
+)
 
 urlpatterns = router.urls
 
@@ -59,18 +63,6 @@ urlpatterns += [
         "validated-software-inventoryitem-report/",
         views.ValidatedSoftwareInventoryItemReportView.as_view(),
         name="validatedsoftware_inventoryitem_report",
-    ),
-    # DeviceValidatedSoftwareResult
-    path(
-        "device-validated-software-result/",
-        views.DeviceSoftwareValidationResultListView.as_view(),
-        name="devicesoftwarevalidationresult_list",
-    ),
-    # InventoryItemValidatedSoftwareResult
-    path(
-        "inventory-item-validated-software-result/",
-        views.InventoryItemSoftwareValidationResultListView.as_view(),
-        name="inventoryitemsoftwarevalidationresult_list",
     ),
     path(
         "docs/",

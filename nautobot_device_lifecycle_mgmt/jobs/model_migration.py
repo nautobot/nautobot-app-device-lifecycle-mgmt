@@ -94,7 +94,13 @@ class DLMToNautobotCoreModelMigration(Job):  # pylint: disable=too-many-instance
 
     # pylint: disable=arguments-differ, too-many-arguments
     def run(
-        self, dryrun, hide_changelog_migrations, update_core_to_match_dlm, remove_dangling_relationships, debug
+        self,
+        *,
+        dryrun,
+        hide_changelog_migrations,
+        update_core_to_match_dlm,
+        remove_dangling_relationships,
+        debug,
     ) -> None:
         """Migration logic."""
         # Fail if running on nautobot < 2.2.0

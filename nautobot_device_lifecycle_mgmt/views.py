@@ -612,15 +612,30 @@ class DeviceHardwareNoticeResultUIViewSet(nautobot.apps.views.ObjectListViewMixi
         pass
 
 
-class DeviceSoftwareValidationResultListView(generic.ObjectListView):
+class DeviceSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectListViewMixin):
     """DeviceSoftawareValidationResult List view."""
 
+    filterset_class = filters.DeviceSoftwareValidationResultFilterSet
+    filterset_form_class = forms.DeviceSoftwareValidationResultFilterForm
     queryset = models.DeviceSoftwareValidationResult.objects.all()
-    filterset = filters.DeviceSoftwareValidationResultFilterSet
-    filterset_form = forms.DeviceSoftwareValidationResultFilterForm
-    table = tables.DeviceSoftwareValidationResultListTable
+    serializer_class = serializers.DeviceSoftwareValidationResultSerializer
+    table_class = tables.DeviceSoftwareValidationResultListTable
     action_buttons = ("export",)
-    template_name = "nautobot_device_lifecycle_mgmt/devicesoftwarevalidationresult_list.html"
+
+    def _process_bulk_create_form(self, form):
+        pass
+
+    def _process_bulk_destroy_form(self, form):
+        pass
+
+    def _process_bulk_update_form(self, form):
+        pass
+
+    def _process_create_or_update_form(self, form):
+        pass
+
+    def _process_destroy_form(self, form):
+        pass
 
 
 class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
@@ -772,15 +787,30 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
         return "\n".join(csv_data)
 
 
-class InventoryItemSoftwareValidationResultListView(generic.ObjectListView):
+class InventoryItemSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectListViewMixin):
     """InvenotryItemSoftawareValidationResult List view."""
 
+    filterset_class = filters.InventoryItemSoftwareValidationResultFilterSet
+    filterset_form_class = forms.InventoryItemSoftwareValidationResultFilterForm
     queryset = models.InventoryItemSoftwareValidationResult.objects.all()
-    filterset = filters.InventoryItemSoftwareValidationResultFilterSet
-    filterset_form = forms.InventoryItemSoftwareValidationResultFilterForm
-    table = tables.InventoryItemSoftwareValidationResultListTable
+    serializer_class = serializers.InventoryItemSoftwareValidationResultSerializer
+    table_class = tables.InventoryItemSoftwareValidationResultListTable
     action_buttons = ("export",)
-    template_name = "nautobot_device_lifecycle_mgmt/inventoryitemsoftwarevalidationresult_list.html"
+
+    def _process_bulk_create_form(self, form):
+        pass
+
+    def _process_bulk_destroy_form(self, form):
+        pass
+
+    def _process_bulk_update_form(self, form):
+        pass
+
+    def _process_create_or_update_form(self, form):
+        pass
+
+    def _process_destroy_form(self, form):
+        pass
 
 
 class SoftwareVersionRelatedCveView(generic.ObjectView):
