@@ -101,20 +101,20 @@ class HardwareLCMFilterSet(NautobotFilterSet):
     )
 
     end_of_support = django_filters.DateFilter()
-    end_of_support__gte = django_filters.DateFilter(field_name="end_of_support", lookup_expr="gte")
-    end_of_support__lte = django_filters.DateFilter(field_name="end_of_support", lookup_expr="lte")
+    end_of_support__gte = django_filters.DateFilter(field_name="end_of_support", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field
+    end_of_support__lte = django_filters.DateFilter(field_name="end_of_support", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field
 
     end_of_sale = django_filters.DateFilter()
-    end_of_sale__gte = django_filters.DateFilter(field_name="end_of_sale", lookup_expr="gte")
-    end_of_sale__lte = django_filters.DateFilter(field_name="end_of_sale", lookup_expr="lte")
+    end_of_sale__gte = django_filters.DateFilter(field_name="end_of_sale", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field
+    end_of_sale__lte = django_filters.DateFilter(field_name="end_of_sale", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field
 
     end_of_security_patches = django_filters.DateFilter()
-    end_of_security_patches__gte = django_filters.DateFilter(field_name="end_of_security_patches", lookup_expr="gte")
-    end_of_security_patches__lte = django_filters.DateFilter(field_name="end_of_security_patches", lookup_expr="lte")
+    end_of_security_patches__gte = django_filters.DateFilter(field_name="end_of_security_patches", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field
+    end_of_security_patches__lte = django_filters.DateFilter(field_name="end_of_security_patches", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field
 
     end_of_sw_releases = django_filters.DateFilter()
-    end_of_sw_releases__gte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="gte")
-    end_of_sw_releases__lte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="lte")
+    end_of_sw_releases__gte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field
+    end_of_sw_releases__lte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field
 
     expired = django_filters.BooleanFilter(method="_expired_search", label="Support Expired")
 
@@ -142,7 +142,7 @@ class HardwareLCMFilterSet(NautobotFilterSet):
 class SoftwareLCMFilterSet(NautobotFilterSet):
     """Filter for SoftwareLCM."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = django_filters.CharFilter(method="search", label="Search")  # pylint: disable=nb-no-char-filter-q
 
     device_platform = django_filters.ModelMultipleChoiceFilter(
         field_name="device_platform__name",
@@ -164,7 +164,7 @@ class SoftwareLCMFilterSet(NautobotFilterSet):
 
         fields = "__all__"
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument,nb-no-search-function
         """Perform the filtered search."""
         if not value.strip():
             return queryset
@@ -181,7 +181,7 @@ class SoftwareLCMFilterSet(NautobotFilterSet):
 class SoftwareImageLCMFilterSet(NautobotFilterSet):
     """Filter for SoftwareImageLCM."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = django_filters.CharFilter(method="search", label="Search")  # pylint: disable=nb-no-char-filter-q
 
     software = django_filters.ModelMultipleChoiceFilter(
         queryset=SoftwareLCM.objects.all(),
@@ -237,7 +237,7 @@ class SoftwareImageLCMFilterSet(NautobotFilterSet):
 
         fields = "__all__"
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument,nb-no-search-function
         """Perform the filtered search."""
         if not value.strip():
             return queryset
@@ -284,7 +284,7 @@ class SoftwareImageLCMFilterSet(NautobotFilterSet):
 class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
     """Filter for ValidatedSoftwareLCM."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = django_filters.CharFilter(method="search", label="Search")  # pylint: disable=nb-no-char-filter-q
 
     software = django_filters.ModelMultipleChoiceFilter(
         queryset=SoftwareVersion.objects.all(),
@@ -360,7 +360,7 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         fields = "__all__"
         exclude = ("old_software",)
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument,nb-no-search-function
         """Perform the filtered search."""
         if not value.strip():
             return queryset
@@ -538,7 +538,7 @@ class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):
 class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
     """Filter for DeviceSoftwareValidationResult."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = django_filters.CharFilter(method="search", label="Search")  # pylint: disable=nb-no-char-filter-q
 
     software = django_filters.ModelMultipleChoiceFilter(
         field_name="software__version",
@@ -616,7 +616,7 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         fields = "__all__"
         exclude = ("old_software",)
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument,nb-no-search-function
         """Perform the filtered search."""
         if not value.strip():
             return queryset
@@ -641,7 +641,7 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
 class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
     """Filter for InventoryItemSoftwareValidationResult."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = django_filters.CharFilter(method="search", label="Search")  # pylint: disable=nb-no-char-filter-q
 
     software = django_filters.ModelMultipleChoiceFilter(
         field_name="software__version",
@@ -731,7 +731,7 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         fields = "__all__"
         exclude = ("old_software",)
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument,nb-no-search-function
         """Perform the filtered search."""
         if not value.strip():
             return queryset
@@ -892,7 +892,7 @@ class ProviderLCMFilterSet(NautobotFilterSet):
 class ContactLCMFilterSet(NautobotFilterSet):
     """Filter for ContactLCMFilterSet."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = django_filters.CharFilter(method="search", label="Search")  # pylint: disable=nb-no-char-filter-q
 
     class Meta:
         """Meta attributes for filter."""
@@ -901,7 +901,7 @@ class ContactLCMFilterSet(NautobotFilterSet):
 
         fields = "__all__"
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument,nb-no-search-function
         """Perform the filtered search."""
         if not value.strip():
             return queryset
@@ -918,24 +918,24 @@ class ContactLCMFilterSet(NautobotFilterSet):
 class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , CustomFieldModelFilterSet):
     """Filter for CVELCMFilterSet."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = django_filters.CharFilter(method="search", label="Search")  # pylint: disable=nb-no-char-filter-q
 
     published_date = django_filters.DateTimeFromToRangeFilter()
-    published_date__gte = django_filters.DateFilter(field_name="published_date", lookup_expr="gte")
-    published_date__lte = django_filters.DateFilter(field_name="published_date", lookup_expr="lte")
+    published_date__gte = django_filters.DateFilter(field_name="published_date", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field
+    published_date__lte = django_filters.DateFilter(field_name="published_date", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field
 
     last_modified_date = django_filters.DateTimeFromToRangeFilter()
-    last_modified_date__gte = django_filters.DateFilter(field_name="last_modified_date", lookup_expr="gte")
-    last_modified_date__lte = django_filters.DateFilter(field_name="last_modified_date", lookup_expr="lte")
+    last_modified_date__gte = django_filters.DateFilter(field_name="last_modified_date", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field
+    last_modified_date__lte = django_filters.DateFilter(field_name="last_modified_date", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field
 
-    cvss__gte = django_filters.NumberFilter(field_name="cvss", lookup_expr="gte")
-    cvss__lte = django_filters.NumberFilter(field_name="cvss", lookup_expr="lte")
+    cvss__gte = django_filters.NumberFilter(field_name="cvss", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field
+    cvss__lte = django_filters.NumberFilter(field_name="cvss", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field
 
-    cvss_v2__gte = django_filters.NumberFilter(field_name="cvss_v2", lookup_expr="gte")
-    cvss_v2__lte = django_filters.NumberFilter(field_name="cvss_v2", lookup_expr="lte")
+    cvss_v2__gte = django_filters.NumberFilter(field_name="cvss_v2", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field
+    cvss_v2__lte = django_filters.NumberFilter(field_name="cvss_v2", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field
 
-    cvss_v3__gte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="gte")
-    cvss_v3__lte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="lte")
+    cvss_v3__gte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field
+    cvss_v3__lte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field
     exclude_status = StatusFilter(field_name="status", exclude=True)
 
     class Meta:
@@ -946,7 +946,7 @@ class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , Custom
 
         fields = "__all__"
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument,nb-no-search-function
         """Perform the filtered search."""
         if not value.strip():
             return queryset
@@ -958,12 +958,12 @@ class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , Custom
 class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , CustomFieldModelFilterSet):
     """Filter for VulnerabilityLCMFilterSet."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = django_filters.CharFilter(method="search", label="Search")  # pylint: disable=nb-no-char-filter-q
 
-    cve__published_date = django_filters.DateTimeFromToRangeFilter()
-    cve__published_date__gte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="gte")
-    cve__published_date__lte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="lte")
-    cve__severity = django_filters.ChoiceFilter(field_name="cve__severity", choices=CVESeverityChoices)
+    cve__published_date = django_filters.DateTimeFromToRangeFilter()  # pylint: disable=nb-warn-dunder-filter-field
+    cve__published_date__gte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field
+    cve__published_date__lte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field
+    cve__severity = django_filters.ChoiceFilter(field_name="cve__severity", choices=CVESeverityChoices)  # pylint: disable=nb-warn-dunder-filter-field
 
     class Meta:
         """Meta attributes for filter."""
@@ -973,7 +973,7 @@ class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  
         fields = "__all__"
         exclude = ("old_software",)
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument,nb-no-search-function
         """Perform the filtered search."""
         if not value.strip():
             return queryset
