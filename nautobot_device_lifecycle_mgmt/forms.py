@@ -182,7 +182,19 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
         """Meta attributes."""
 
         model = ValidatedSoftwareLCM
-        fields = "__all__"
+        # Explicitly specifying fields to avoid including deprecated fields
+        # TODO: Switch to "__all__" once the deprecated DLM models are fully removed
+        fields = [  # pylint: disable=E4271
+            "software",
+            "devices",
+            "device_types",
+            "device_roles",
+            "inventory_items",
+            "object_tags",
+            "start",
+            "end",
+            "preferred",
+        ]
 
         widgets = {
             "start": DatePicker(),
@@ -205,7 +217,7 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
 
 
 class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
-    """Filter form to filter searches for SoftwareLCM."""
+    """Filter form to filter searches for ValidatedSoftwareLCM."""
 
     model = ValidatedSoftwareLCM
     q = forms.CharField(
@@ -687,14 +699,30 @@ class CVELCMForm(NautobotModelForm):
     severity = forms.ChoiceField(choices=CVESeverityChoices.CHOICES, label="Severity", required=False)
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     affected_softwares = DynamicModelMultipleChoiceField(queryset=SoftwareVersion.objects.all(), required=False)
-    comments = CommentField(required=False)
+    comments = CommentField(label="Comments", required=False)
 
     class Meta:
         """Meta attributes for the CVELCMForm class."""
 
         model = CVELCM
 
-        fields = "__all__"
+        # Explicitly specifying fields to avoid including deprecated fields
+        # TODO: Switch to "__all__" once the deprecated DLM models are fully removed
+        fields = [  # pylint: disable=E4271
+            "name",
+            "published_date",
+            "last_modified_date",
+            "link",
+            "status",
+            "description",
+            "severity",
+            "cvss",
+            "cvss_v2",
+            "cvss_v3",
+            "fix",
+            "comments",
+            "affected_softwares",
+        ]
 
         widgets = {
             "published_date": DatePicker(),
@@ -796,7 +824,15 @@ class VulnerabilityLCMForm(NautobotModelForm):
 
         model = VulnerabilityLCM
 
-        fields = "__all__"
+        # Explicitly specifying fields to avoid including deprecated fields
+        # TODO: Switch to "__all__" once the deprecated DLM models are fully removed
+        fields = [  # pylint: disable=E4271
+            "cve",
+            "software",
+            "device",
+            "inventory_item",
+            "status",
+        ]
 
 
 class VulnerabilityLCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):

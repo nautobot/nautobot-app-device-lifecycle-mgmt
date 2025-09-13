@@ -38,7 +38,7 @@ numpy = [
     {version = "^1.26", python = ">=3.9"},
     {version = "<1.25", python = "==3.8"}
 ]
-netutils = ">=1.9.0"
+netutils = ">=1.14.1"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "*"
