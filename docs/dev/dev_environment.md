@@ -408,7 +408,7 @@ namespace.configure(
     {
         "nautobot_device_lifecycle_mgmt": {
             ...
-            "nautobot_ver": "2.4.2",
+            "nautobot_ver": "2.4.16",
 	    ...
         }
     }

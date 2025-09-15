@@ -106,7 +106,7 @@ jobs:
       fail-fast: true
       matrix:
         python-version: ["3.12"]
-        nautobot-version: ["2.4.2"]
+        nautobot-version: ["2.4.16"]
     env:
       INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_PYTHON_VER: "${{ matrix.python-version }}"
       INVOKE_NAUTOBOT_DEVICE_LIFECYCLE_MGMT_NAUTOBOT_VER: "${{ matrix.nautobot-version }}"
@@ -157,7 +157,7 @@ jobs:
         include:
           - python-version: "3.11"
             db-backend: "postgresql"
-            nautobot-version: "2.4.2"
+            nautobot-version: "2.4.16"
           - python-version: "3.12"
             db-backend: "mysql"
             nautobot-version: "stable"
