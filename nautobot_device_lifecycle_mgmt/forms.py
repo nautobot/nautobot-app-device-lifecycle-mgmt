@@ -4,6 +4,7 @@ import logging
 
 from django import forms
 from nautobot.apps.forms import (
+    CommentField,
     CustomFieldModelBulkEditFormMixin,
     DatePicker,
     DynamicModelChoiceField,
@@ -181,7 +182,19 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
         """Meta attributes."""
 
         model = ValidatedSoftwareLCM
-        fields = "__all__"
+        # Explicitly specifying fields to avoid including deprecated fields
+        # TODO: Switch to "__all__" once the deprecated DLM models are fully removed
+        fields = [  # pylint: disable=E4271
+            "software",
+            "devices",
+            "device_types",
+            "device_roles",
+            "inventory_items",
+            "object_tags",
+            "start",
+            "end",
+            "preferred",
+        ]
 
         widgets = {
             "start": DatePicker(),
@@ -204,7 +217,7 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
 
 
 class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
-    """Filter form to filter searches for SoftwareLCM."""
+    """Filter form to filter searches for ValidatedSoftwareLCM."""
 
     model = ValidatedSoftwareLCM
     q = forms.CharField(
@@ -666,19 +679,38 @@ class CVELCMForm(NautobotModelForm):
     """CVE Lifecycle Management creation/edit form."""
 
     published_date = forms.DateField(widget=DatePicker())
+    last_modified_date = forms.DateField(widget=DatePicker(), required=False)
     severity = forms.ChoiceField(choices=CVESeverityChoices.CHOICES, label="Severity", required=False)
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     affected_softwares = DynamicModelMultipleChoiceField(queryset=SoftwareVersion.objects.all(), required=False)
+    comments = CommentField(label="Comments", required=False)
 
     class Meta:
         """Meta attributes for the CVELCMForm class."""
 
         model = CVELCM
 
-        fields = "__all__"
+        # Explicitly specifying fields to avoid including deprecated fields
+        # TODO: Switch to "__all__" once the deprecated DLM models are fully removed
+        fields = [  # pylint: disable=E4271
+            "name",
+            "published_date",
+            "last_modified_date",
+            "link",
+            "status",
+            "description",
+            "severity",
+            "cvss",
+            "cvss_v2",
+            "cvss_v3",
+            "fix",
+            "comments",
+            "affected_softwares",
+        ]
 
         widgets = {
             "published_date": DatePicker(),
+            "last_modified_date": DatePicker(),
         }
 
 
@@ -687,8 +719,8 @@ class CVELCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin
 
     model = CVELCM
     pk = forms.ModelMultipleChoiceField(queryset=CVELCM.objects.all(), widget=forms.MultipleHiddenInput)
-    description = forms.CharField(required=False)
-    comments = forms.CharField(required=False)
+    description = forms.CharField(required=False, widget=forms.Textarea)
+    comments = CommentField(required=False)
     tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     status = DynamicModelChoiceField(
         queryset=Status.objects.all(), required=False, query_params={"content_types": model._meta.label_lower}
@@ -721,6 +753,9 @@ class CVELCMFilterForm(NautobotFilterForm):
 
     published_date_before = forms.DateField(label="Published Date Before", required=False, widget=DatePicker())
     published_date_after = forms.DateField(label="Published Date After", required=False, widget=DatePicker())
+
+    last_modified_date_before = forms.DateField(label="Last Modified Date Before", required=False, widget=DatePicker())
+    last_modified_date_after = forms.DateField(label="Last Modified Date After", required=False, widget=DatePicker())
 
     cvss__gte = forms.FloatField(label="CVSS Score Above", required=False)
     cvss__lte = forms.FloatField(label="CVSS Score Below", required=False)
@@ -755,6 +790,8 @@ class CVELCMFilterForm(NautobotFilterForm):
             "q",
             "published_date_before",
             "published_date_after",
+            "last_modified_date_before",
+            "last_modified_date_after",
             "severity",
             "status",
             "affected_softwares",
@@ -771,7 +808,15 @@ class VulnerabilityLCMForm(NautobotModelForm):
 
         model = VulnerabilityLCM
 
-        fields = "__all__"
+        # Explicitly specifying fields to avoid including deprecated fields
+        # TODO: Switch to "__all__" once the deprecated DLM models are fully removed
+        fields = [  # pylint: disable=E4271
+            "cve",
+            "software",
+            "device",
+            "inventory_item",
+            "status",
+        ]
 
 
 class VulnerabilityLCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):
