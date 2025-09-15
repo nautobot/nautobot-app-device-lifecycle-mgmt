@@ -54,7 +54,7 @@ namespace.configure(
         "nautobot_device_lifecycle_mgmt": {
             "nautobot_ver": "next",  # TODO: Change to 3.0.0 after v3.0.0 is released
             "project_name": "nautobot-device-lifecycle-mgmt",
-            "python_ver": "3.11",
+            "python_ver": "3.13",
             "local": False,
             "compose_dir": os.path.join(os.path.dirname(__file__), "development"),
             "compose_files": [
