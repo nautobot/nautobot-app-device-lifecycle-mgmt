@@ -6,14 +6,21 @@ from datetime import date, datetime
 from django.core.exceptions import ValidationError
 from django.db import models
 
+<<<<<<< HEAD
 try:
     from nautobot.apps.constants import CHARFIELD_MAX_LENGTH
 except ImportError:
     CHARFIELD_MAX_LENGTH = 255
+=======
+# Nautobot imports
+from nautobot.apps.constants import CHARFIELD_MAX_LENGTH
+from nautobot.apps.models import PrimaryModel, extras_features
+>>>>>>> a6d7767 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
 
 from nautobot.apps.models import OrganizationalModel, PrimaryModel, RestrictedQuerySet, StatusField, extras_features
 from nautobot.dcim.models import Device, DeviceType, InventoryItem
 
+<<<<<<< HEAD
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.contract_filters import DeviceContractFilter, InventoryItemContractFilter
 from nautobot_device_lifecycle_mgmt.software_filters import (
@@ -56,6 +63,11 @@ class HardwareLCM(PrimaryModel):
     end_of_security_patches = models.DateField(null=True, blank=True, verbose_name="End of Security Patches")
     documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
     comments = models.TextField(blank=True, default="", verbose_name="Comments")
+=======
+    name = models.CharField(max_length=CHARFIELD_MAX_LENGTH, unique=True)
+    description = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True)
+    # additional model fields
+>>>>>>> a6d7767 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
 
     class Meta:
         """Meta attributes for the HardwareLCM class."""

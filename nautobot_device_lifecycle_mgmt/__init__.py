@@ -19,6 +19,7 @@ class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
     description = "Manages device lifecycle of Nautobot Devices and Components."
     base_url = "nautobot-device-lifecycle-mgmt"
     required_settings = []
+<<<<<<< HEAD
     min_version = "2.2.0"
     max_version = "2.9999"
     default_settings = {
@@ -38,6 +39,12 @@ class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
         nautobot_database_ready.connect(post_migrate_create_relationships, sender=self)
 
         super().ready()
+=======
+    default_settings = {}
+    caching_config = {}
+    docs_view_name = "plugins:nautobot_device_lifecycle_mgmt:docs"
+    searchable_models = ["hardwarelcm"]
+>>>>>>> a6d7767 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
 
 
 config = NautobotDeviceLifecycleManagementConfig  # pylint:disable=invalid-name

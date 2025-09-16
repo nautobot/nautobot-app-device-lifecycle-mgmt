@@ -3,6 +3,7 @@
 import logging
 
 from django import forms
+<<<<<<< HEAD
 from nautobot.apps.forms import (
     CommentField,
     CustomFieldModelBulkEditFormMixin,
@@ -22,6 +23,10 @@ from nautobot.apps.forms import (
 from nautobot.core.forms.constants import BOOLEAN_WITH_BLANK_CHOICES
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform, SoftwareVersion
 from nautobot.extras.models import Role, Status, Tag
+=======
+from nautobot.apps.constants import CHARFIELD_MAX_LENGTH
+from nautobot.apps.forms import NautobotBulkEditForm, NautobotFilterForm, NautobotModelForm, TagsBulkEditFormMixin
+>>>>>>> a6d7767 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
 
 from nautobot_device_lifecycle_mgmt.choices import (
     ContractTypeChoices,
@@ -96,6 +101,7 @@ class HardwareLCMForm(NautobotModelForm):
         }
 
 
+<<<<<<< HEAD
 class HardwareLCMBulkEditForm(NautobotBulkEditForm):
     """Hardware Device Lifecycle bulk edit form."""
 
@@ -107,6 +113,10 @@ class HardwareLCMBulkEditForm(NautobotBulkEditForm):
     end_of_security_patches = forms.DateField(widget=DatePicker(), required=False)
     documentation_url = forms.URLField(required=False)
     comments = forms.CharField(required=False)
+=======
+    pk = forms.ModelMultipleChoiceField(queryset=models.HardwareLCM.objects.all(), widget=forms.MultipleHiddenInput)
+    description = forms.CharField(required=False, max_length=CHARFIELD_MAX_LENGTH)
+>>>>>>> a6d7767 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
 
     class Meta:
         """Meta attributes for the HardwareLCMBulkEditForm class."""

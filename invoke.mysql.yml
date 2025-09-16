@@ -1,7 +1,11 @@
 ---
 nautobot_device_lifecycle_mgmt:
   project_name: "nautobot-device-lifecycle-mgmt"
+<<<<<<< HEAD
   nautobot_ver: "2.3.0"
+=======
+  nautobot_ver: "2.4.2"
+>>>>>>> a6d7767 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
   local: false
   python_ver: "3.12"
   compose_dir: "development"
