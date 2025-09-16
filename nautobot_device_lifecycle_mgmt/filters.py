@@ -737,6 +737,13 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         fields = "__all__"
         exclude = ("old_software",)
 
+    def search_part_id(self, queryset, name, value):  # pylint: disable=unused-argument
+        """Filter on the inventory item part ID."""
+        if not value.strip():
+            return queryset
+        qs_filter = Q(inventory_item__part_id__icontains=value)
+        return queryset.filter(qs_filter)
+
     def _exclude_sw_missing(self, queryset, name, value):  # pylint: disable=unused-argument
         """Exclude devices with missing software."""
         if value:
@@ -945,6 +952,10 @@ class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  
 
     q = SearchFilter(
         filter_predicates={
+            "cve__name": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
             "software__platform__name": {
                 "lookup_expr": "icontains",
                 "preprocessor": str.strip,
