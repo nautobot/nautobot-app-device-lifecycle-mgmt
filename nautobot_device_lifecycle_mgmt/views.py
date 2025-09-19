@@ -638,7 +638,7 @@ class DeviceSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectListView
         pass
 
 
-class ValidatedSoftwareInventoryItemReportUIViewSet(NautobotUIViewSet):  # pylint: disable=nb-sub-class-name
+class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectListViewMixin):
     """View for executive report on inventory item software validation."""
 
     filterset_class = filters.InventoryItemSoftwareValidationResultFilterSet
@@ -664,6 +664,22 @@ class ValidatedSoftwareInventoryItemReportUIViewSet(NautobotUIViewSet):  # pylin
     )
     serializer_class = serializers.InventoryItemSoftwareValidationResultSerializer
     action_buttons = ("export",)
+
+    def _process_bulk_create_form(self, form):
+        pass
+
+    def _process_bulk_destroy_form(self, form):
+        pass
+
+    def _process_bulk_update_form(self, form):
+        pass
+
+    def _process_create_or_update_form(self, form):
+        pass
+
+    def _process_destroy_form(self, form):
+        pass
+
     # extra content dict to be returned by self.extra_context() method
     extra_content = {}
 
@@ -693,7 +709,10 @@ class ValidatedSoftwareInventoryItemReportUIViewSet(NautobotUIViewSet):  # pylin
             )
             .order_by("-total")
         )
-        platform_qs = self.filterset(request.GET, _platform_qs).qs
+        platform_qs = _platform_qs
+        if self.filterset_class is not None:
+            platform_filterset = self.filterset_class(request.GET, queryset=_platform_qs)
+            platform_qs = platform_filterset.qs
 
         pie_chart_attrs = {
             "aggr_labels": ["valid", "invalid", "no_software"],
@@ -726,8 +745,9 @@ class ValidatedSoftwareInventoryItemReportUIViewSet(NautobotUIViewSet):  # pylin
         inventory_item_qs = models.InventoryItemSoftwareValidationResult.objects
 
         inventory_aggr = {}
-        if self.filterset is not None:
-            inventory_aggr = self.filterset(request.GET, inventory_item_qs).qs.aggregate(
+        if self.filterset_class is not None:
+            inventory_filterset = self.filterset_class(request.GET, queryset=inventory_item_qs)
+            inventory_aggr = inventory_filterset.qs.aggregate(
                 total=Count("inventory_item"),
                 valid=Count("inventory_item", filter=Q(is_validated=True)),
                 invalid=Count("inventory_item", filter=Q(is_validated=False) & ~Q(software=None)),
