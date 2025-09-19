@@ -198,7 +198,7 @@ menu_items = (
                         ],
                     ),
                     NavMenuItem(
-                        link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
+                        link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report_list",
                         name="Inventory Item Software Validation - Report",
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",

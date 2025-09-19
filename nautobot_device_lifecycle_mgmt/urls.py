@@ -20,7 +20,11 @@ router.register("device-validated-software-result", viewset=views.DeviceSoftware
 router.register(
     "inventory-item-validated-software-result", viewset=views.InventoryItemSoftwareValidationResultUIViewSet
 )
-
+router.register(
+    "validated-software-inventoryitem-report",
+    views.ValidatedSoftwareInventoryItemReportUIViewSet,
+    basename="validatedsoftware_inventoryitem_report",
+)
 urlpatterns = router.urls
 
 urlpatterns += [
@@ -58,11 +62,6 @@ urlpatterns += [
         "validated-software-device-report/",
         views.ValidatedSoftwareDeviceReportView.as_view(),
         name="validatedsoftware_device_report",
-    ),
-    path(
-        "validated-software-inventoryitem-report/",
-        views.ValidatedSoftwareInventoryItemReportView.as_view(),
-        name="validatedsoftware_inventoryitem_report",
     ),
     path(
         "docs/",

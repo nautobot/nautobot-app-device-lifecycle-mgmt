@@ -638,13 +638,12 @@ class DeviceSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectListView
         pass
 
 
-class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
+class ValidatedSoftwareInventoryItemReportUIViewSet(NautobotUIViewSet):  # pylint: disable=nb-sub-class-name
     """View for executive report on inventory item software validation."""
 
-    filterset = filters.InventoryItemSoftwareValidationResultFilterSet
-    filterset_form = forms.InventoryItemSoftwareValidationResultFilterForm
-    table = tables.InventoryItemSoftwareValidationResultTable
-    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftware_inventoryitem_report.html"
+    filterset_class = filters.InventoryItemSoftwareValidationResultFilterSet
+    filterset_form_class = forms.InventoryItemSoftwareValidationResultFilterForm
+    table_class = tables.InventoryItemSoftwareValidationResultTable
     queryset = (
         models.InventoryItemSoftwareValidationResult.objects.values(
             "inventory_item__part_id",
@@ -663,6 +662,7 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
         )
         .order_by("-valid_percent")
     )
+    serializer_class = serializers.InventoryItemSoftwareValidationResultSerializer
     action_buttons = ("export",)
     # extra content dict to be returned by self.extra_context() method
     extra_content = {}
