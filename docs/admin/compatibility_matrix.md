@@ -7,7 +7,7 @@ Future releases are denoted with (^).
 | Device Lifecycle Management Version | Nautobot First Support Version | Nautobot Last Support Version |
 |-------------------------------------| ----------------- | ------------- |
 | 4.0.0  (^)                          | 3.0.0             | 3.99.99          |
-| 3.1.2                               | 2.4.2             | 2.99.99        |
+| 3.2.X  (*)                          | 2.4.2             | 3.2.99           |
 | 3.1.0  (*)                          | 2.2.0             | 3.1.99           |
 | 3.0.X                               | 2.2.0             | 3.1.99           |
 | 2.2.X                               | 2.0.0             | 2.99.99          |
