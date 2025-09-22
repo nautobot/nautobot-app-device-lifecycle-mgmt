@@ -4,11 +4,7 @@ Here you will find detailed instructions on how to **install** and **configure**
 
 ## Prerequisites
 
-<<<<<<< HEAD
-- The app is compatible with Nautobot 2.2.0 and higher.
-=======
 - The app is compatible with Nautobot 2.4.2 and higher.
->>>>>>> a6d7767 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
 - Databases supported: PostgreSQL, MySQL
 
 !!! note

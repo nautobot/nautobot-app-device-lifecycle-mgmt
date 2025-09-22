@@ -29,19 +29,15 @@ include = [
 [tool.poetry.dependencies]
 python = ">=3.9.2,<3.13"
 # Used for local development
-<<<<<<< HEAD
 pycountry = "^22.3.5"
 matplotlib = "^3.3.4"
-nautobot = "^2.0.0"
+nautobot = ">=2.4.2,<3.0.0"
 # Numpy is not a direct dependency, but we are assisting Poetry version resolution by providing constraints.
 numpy = [
     {version = "^1.26", python = ">=3.9"},
     {version = "<1.25", python = "==3.8"}
 ]
 netutils = ">=1.14.1"
-=======
-nautobot = ">=2.4.2,<3.0.0"
->>>>>>> a6d7767 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
 
 [tool.poetry.group.dev.dependencies]
 coverage = "*"
@@ -55,17 +51,15 @@ ruff = "0.5.5"
 yamllint = "*"
 toml = "*"
 # Python implementation of markdownlint
-<<<<<<< HEAD
-pymarkdownlnt = "~0.9.29"
-=======
 pymarkdownlnt = "~0.9.30"
->>>>>>> a6d7767 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
 Markdown = "*"
 towncrier = ">=23.6.0,<=24.8.0"
 to-json-schema = "*"
 jsonschema = "*"
 djlint = ">=1.36.4,<2.0.0"
 djhtml = ">=3.0.8,<4.0.0"
+sentry-sdk = "*"
+time-machine = "*"
 
 [tool.poetry.group.docs.dependencies]
 # Render custom markdown for version added/changed/remove notes
@@ -79,14 +73,6 @@ mkdocstrings = "0.25.2"
 mkdocstrings-python = "1.10.8"
 mkdocs-autorefs = "1.2.0"
 griffe = "1.1.1"
-<<<<<<< HEAD
-sentry-sdk = "*"
-time-machine = "*"
-towncrier = ">=23.6.0,<=24.8.0"
-to-json-schema = "*"
-jsonschema = "*"
-=======
->>>>>>> a6d7767 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
 
 [tool.poetry.extras]
 all = [
@@ -103,18 +89,14 @@ no-docstring-rgx = "^(_|test_|Meta$)"
 
 [tool.pylint.messages_control]
 disable = """,
-<<<<<<< HEAD
     duplicate-code,
     line-too-long,
     too-few-public-methods,
-    too-many-ancestors
-=======
-    line-too-long,
+    too-many-ancestors,
     too-many-positional-arguments,
     nb-warn-dunder-filter-field,
     nb-no-search-function,
     nb-no-char-filter-q,
->>>>>>> a6d7767 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
 """
 
 [tool.pylint.miscellaneous]
@@ -126,11 +108,7 @@ notes = """,
 
 [tool.pylint-nautobot]
 supported_nautobot_versions = [
-<<<<<<< HEAD
-    "2.2.0"
-=======
     "2"
->>>>>>> a6d7767 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
 ]
 
 [tool.ruff]
