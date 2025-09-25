@@ -468,12 +468,9 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
     def __str__(self):
         """String representation of InventoryItemSoftwareValidationResult."""
         if self.is_validated:
-            msg = f"Inventory Item: {self.inventory_item.name} - " f"Device: {self.inventory_item.device.name} - Valid"
+            msg = f"Inventory Item: {self.inventory_item.name} - Device: {self.inventory_item.device.name} - Valid"
         else:
-            msg = (
-                f"Inventory Item: {self.inventory_item.name} - "
-                f"Device: {self.inventory_item.device.name} - Not Valid"
-            )
+            msg = f"Inventory Item: {self.inventory_item.name} - Device: {self.inventory_item.device.name} - Not Valid"
         return msg
 
 
@@ -751,6 +748,8 @@ class VulnerabilityLCM(PrimaryModel):
         on_delete=models.PROTECT,
         to="extras.status",
     )
+
+    natural_key_field_lookups = ["pk"]
 
     class Meta:
         """Meta attributes for the class."""
