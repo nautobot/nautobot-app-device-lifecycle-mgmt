@@ -89,7 +89,11 @@ disable = """,
     duplicate-code,
     line-too-long,
     too-few-public-methods,
-    too-many-ancestors
+    too-many-ancestors,
+    too-many-positional-arguments,
+    nb-warn-dunder-filter-field,
+    nb-no-search-function,
+    nb-no-char-filter-q,
 """
 
 [tool.pylint.miscellaneous]
