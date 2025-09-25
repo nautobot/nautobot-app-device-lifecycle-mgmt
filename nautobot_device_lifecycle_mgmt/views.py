@@ -658,7 +658,7 @@ class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectLi
             valid=Count("inventory_item__part_id", filter=Q(is_validated=True)),
             invalid=Count("inventory_item__part_id", filter=Q(is_validated=False) & ~Q(software=None)),
             no_software=Count("inventory_item__part_id", filter=Q(software=None)),
-            valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
+            valid_percent=ExpressionWrapper(100 * F("valid") / F("total"), output_field=FloatField()),
         )
         .order_by("-valid_percent")
     )
@@ -680,12 +680,36 @@ class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectLi
     def _process_destroy_form(self, form):
         pass
 
-    # extra content dict to be returned by self.extra_context() method
-    extra_content = {}
+    def get_template_name(self):
+        """Return the template name for rendering the list view only."""
+        if self.action != "list":
+            raise ValueError(f"Action {self.action} is not supported")
+        return "nautobot_device_lifecycle_mgmt/validatedsoftware_inventoryitem_report.html"
 
-    def setup(self, request, *args, **kwargs):
-        """Using request object to perform filtering based on query params."""
-        super().setup(request, *args, **kwargs)
+    def get_global_aggr(self, request):
+        """Get device and inventory global reports.
+
+        Returns:
+            inventory_aggr: inventory item global report dict
+        """
+        qs = models.InventoryItemSoftwareValidationResult.objects
+        if self.filterset_class is not None:
+            filtered_qs = self.filterset_class(request.GET, queryset=qs).qs
+        else:
+            filtered_qs = qs
+
+        inventory_aggr = filtered_qs.aggregate(
+            total=Count("inventory_item"),
+            valid=Count("inventory_item", filter=Q(is_validated=True)),
+            invalid=Count("inventory_item", filter=Q(is_validated=False) & ~Q(software=None)),
+            no_software=Count("inventory_item", filter=Q(software=None)),
+        )
+        inventory_aggr["name"] = "Inventory Items"
+        return ReportOverviewHelper.calculate_aggr_percentage(inventory_aggr)
+
+    def get_extra_context(self, request, instance=None):
+        """Prepare extra context for template rendering."""
+        # Get the last full report run
         try:
             report_last_run = (
                 models.InventoryItemSoftwareValidationResult.objects.filter(
@@ -694,11 +718,13 @@ class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectLi
                 .latest("last_updated")
                 .last_run
             )
-        except models.InventoryItemSoftwareValidationResult.DoesNotExist:  # pylint: disable=no-member
+        except models.InventoryItemSoftwareValidationResult.DoesNotExist:
             report_last_run = None
 
         inventory_aggr = self.get_global_aggr(request)
-        _platform_qs = (
+
+        # Prepare platform-level aggregation for bar chart
+        platform_qs = (
             models.InventoryItemSoftwareValidationResult.objects.values("inventory_item__manufacturer__name")
             .distinct()
             .annotate(
@@ -709,10 +735,9 @@ class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectLi
             )
             .order_by("-total")
         )
-        platform_qs = _platform_qs
+
         if self.filterset_class is not None:
-            platform_filterset = self.filterset_class(request.GET, queryset=_platform_qs)
-            platform_qs = platform_filterset.qs
+            platform_qs = self.filterset_class(request.GET, queryset=platform_qs).qs
 
         pie_chart_attrs = {
             "aggr_labels": ["valid", "invalid", "no_software"],
@@ -729,58 +754,31 @@ class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectLi
             ],
         }
 
-        self.extra_content = {
-            "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
+        return {
             "inventory_aggr": inventory_aggr,
             "inventory_visual": ReportOverviewHelper.plot_piechart_visual(inventory_aggr, pie_chart_attrs),
+            "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
             "report_last_run": report_last_run,
         }
 
-    def get_global_aggr(self, request):
-        """Get device and inventory global reports.
-
-        Returns:
-            inventory_aggr: inventory item global report dict
-        """
-        inventory_item_qs = models.InventoryItemSoftwareValidationResult.objects
-
-        inventory_aggr = {}
-        if self.filterset_class is not None:
-            inventory_filterset = self.filterset_class(request.GET, queryset=inventory_item_qs)
-            inventory_aggr = inventory_filterset.qs.aggregate(
-                total=Count("inventory_item"),
-                valid=Count("inventory_item", filter=Q(is_validated=True)),
-                invalid=Count("inventory_item", filter=Q(is_validated=False) & ~Q(software=None)),
-                no_software=Count("inventory_item", filter=Q(software=None)),
-            )
-            inventory_aggr["name"] = "Inventory Items"
-
-        return ReportOverviewHelper.calculate_aggr_percentage(inventory_aggr)
-
-    def extra_context(self):
-        """Extra content method on."""
-        # add global aggregations to extra context.
-
-        return self.extra_content
-
+    # CSV export logic remains unchanged
     def queryset_to_csv(self):
         """Export queryset of objects as comma-separated value (CSV)."""
         csv_data = []
-
         csv_data.append(",".join(["Type", "Total", "Valid", "Invalid", "No Software", "Compliance"]))
         csv_data.append(
             ",".join(
                 ["Inventory Items"]
                 + [
                     f"{str(val)} %" if key == "valid_percent" else str(val)
-                    for key, val in self.extra_content["inventory_aggr"].items()
+                    for key, val in self.get_extra_context(self.request).get("inventory_aggr", {}).items()
                     if key != "name"
                 ]
             )
         )
         csv_data.append(",".join([]))
 
-        qs = self.queryset.values(  # pylint: disable=invalid-name
+        qs = self.queryset.values(
             "inventory_item__part_id",
             "inventory_item__name",
             "inventory_item__device__name",
@@ -791,18 +789,19 @@ class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectLi
             "no_software",
             "valid_percent",
         )
-        csv_data.append(
-            ",".join(
-                [
-                    "Part ID" if item == "inventory_item__part_id" else item.replace("_", " ").title()
-                    for item in qs[0].keys()
-                ]
-            )
-        )
-        for obj in qs:
+        if qs:
             csv_data.append(
-                ",".join([f"{str(val)} %" if key == "valid_percent" else str(val) for key, val in obj.items()])
+                ",".join(
+                    [
+                        "Part ID" if item == "inventory_item__part_id" else item.replace("_", " ").title()
+                        for item in qs[0].keys()
+                    ]
+                )
             )
+            for obj in qs:
+                csv_data.append(
+                    ",".join([f"{str(val)} %" if key == "valid_percent" else str(val) for key, val in obj.items()])
+                )
 
         return "\n".join(csv_data)
 
