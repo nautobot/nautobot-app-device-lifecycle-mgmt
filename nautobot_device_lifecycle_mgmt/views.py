@@ -539,7 +539,11 @@ class ValidatedSoftwareDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewM
     def get_global_aggr(self, request):
         """Get device global software validation aggregation."""
         qs = models.DeviceSoftwareValidationResult.objects
-        filtered_qs = self.filterset_class(request.GET, queryset=qs).qs if self.filterset_class else qs
+
+        if self.filterset_class is not None:
+            filtered_qs = self.filterset_class(request.GET, queryset=qs).qs
+        else:
+            filtered_qs = qs
 
         device_aggr = filtered_qs.aggregate(
             total=Count("device"),
@@ -578,7 +582,7 @@ class ValidatedSoftwareDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewM
             .order_by("-total")
         )
 
-        if self.filterset_class:
+        if self.filterset_class is not None:
             platform_qs = self.filterset_class(request.GET, queryset=platform_qs).qs
 
         pie_chart_attrs = {
@@ -628,7 +632,8 @@ class ValidatedSoftwareDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewM
         qs = self.queryset.values(
             "device__device_type__model", "total", "valid", "invalid", "no_software", "valid_percent"
         )
-        if qs:
+
+        if qs is not None and len(qs) > 0:
             csv_data.append(
                 ",".join(
                     [
