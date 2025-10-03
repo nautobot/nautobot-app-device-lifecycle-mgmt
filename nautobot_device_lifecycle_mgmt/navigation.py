@@ -198,6 +198,13 @@ menu_items = (
                         ],
                     ),
                     NavMenuItem(
+                        link="plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_historic_list",
+                        name="Device Software Validation - Historic List",
+                        permissions=[
+                            "nautobot_device_lifecycle_mgmt.view_devicesoftwarevalidationhistoricresult",
+                        ],
+                    ),
+                    NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
                         name="Inventory Item Software Validation - Report",
                         permissions=[

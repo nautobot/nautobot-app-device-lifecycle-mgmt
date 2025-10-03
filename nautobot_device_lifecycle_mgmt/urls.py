@@ -71,6 +71,17 @@ urlpatterns += [
         views.DeviceSoftwareValidationResultListView.as_view(),
         name="devicesoftwarevalidationresult_list",
     ),
+    # DeviceValidatedSoftwareHistoricResult
+    path(
+        "device-validated-software-historic-result/",
+        views.DeviceSoftwareValidationHistoricResultListView.as_view(),
+        name="devicesoftwarevalidationresult_historic_list",
+    ),
+    path(
+        "device-validated-software-historic-result/<uuid:pk>/detail/",
+        views.DeviceSoftwareValidationHistoricResultDetailView.as_view(),
+        name="devicesoftwarevalidationresult_historic_detail",
+    ),
     # InventoryItemValidatedSoftwareResult
     path(
         "inventory-item-validated-software-result/",

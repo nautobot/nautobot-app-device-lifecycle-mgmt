@@ -2,9 +2,9 @@
 
 from datetime import date, datetime
 
-# from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.urls import reverse
 
 try:
     from nautobot.apps.constants import CHARFIELD_MAX_LENGTH
@@ -432,6 +432,49 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         else:
             msg = f"Device: {self.device} - Not Valid"
         return msg
+
+
+@extras_features(
+    "custom_fields",
+    "custom_links",
+    "custom_validators",
+    "export_templates",
+    "graphql",
+    "relationships",
+    "webhooks",
+)
+class DeviceSoftwareValidationHistoricResult(PrimaryModel):
+    """Device Software validation history result model."""
+
+    date = models.DateTimeField()
+    filters = models.JSONField(default=dict, blank=True)
+    all_tenants = models.BooleanField(default=False)
+    all_platforms = models.BooleanField(default=False)
+    run_type = models.CharField(max_length=CHARFIELD_MAX_LENGTH, choices=choices.ReportRunTypeChoices)
+    device_validation_results = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        """Meta attributes for DeviceSoftwareValidationHistory."""
+
+        verbose_name = "Device Software Validation History"
+        unique_together = ("date", "run_type")
+        ordering = ("date", "run_type")
+
+    def __str__(self):
+        """String representation of DeviceSoftwareValidationHistory."""
+        return f"{self.date} - {self.run_type} - {self.filters} - {len(self.device_validation_results)} devices"
+
+    @property
+    def display(self):
+        """Display representation of DeviceSoftwareValidationHistory."""
+        return f"Device Software Validation Historic Result: {self.date}"
+
+    def get_absolute_url(self, api=False):
+        """Return the absolute URL for this object."""
+        return reverse(
+            "plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_historic_detail",
+            kwargs={"pk": self.pk},
+        )
 
 
 @extras_features(

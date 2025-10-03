@@ -9,6 +9,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
     DeviceHardwareNoticeResult,
+    DeviceSoftwareValidationHistoricResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -256,6 +257,70 @@ class DeviceSoftwareValidationResultListTable(BaseTable):  # pylint: disable='nb
             "run_type",
             "valid_software",
         ]
+
+
+class DeviceSoftwareValidationHistoricResultTable(BaseTable):
+    """Table for device software validation historic report."""
+
+    date = tables.TemplateColumn(
+        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-historic-result/{{ record.pk }}/detail/">{{ record.date }}</a>',
+        verbose_name="Date",
+        orderable=True,
+    )
+    platforms = tables.TemplateColumn(
+        template_code="""{% if record.all_platforms %}
+                    {{"All Platforms"}}
+                    {% else %}
+                    {% for platform in record.filters.platforms %}
+                    {{ platform.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                    {% endif %}""",
+        verbose_name="Platforms",
+    )
+    tenants = tables.TemplateColumn(
+        template_code="""{% if record.all_tenants %}
+                    {{"All Tenants"}}
+                    {% else %}
+                    {% for tenant in record.filters.tenants %}
+                    {{ tenant.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                    {% endif %}""",
+        verbose_name="Tenants",
+    )
+    run_type = tables.Column(accessor="run_type", verbose_name="Run Type")
+
+    class Meta(BaseTable.Meta):
+        """Metaclass attributes of DeviceSoftwareValidationHistoricResultTable."""
+
+        model = DeviceSoftwareValidationHistoricResult
+        fields = ["date", "platforms", "tenants", "run_type"]
+        default_columns = ["date", "platforms", "tenants", "run_type"]
+
+
+class DeviceSoftwareValidationHistoricResultDetailTable(BaseTable):  # pylint: disable=nb-sub-class-name
+    """Table for device software validation historic report detail."""
+
+    device = tables.Column(accessor="device", verbose_name="Device", linkify=True)
+    software = tables.Column(accessor="software", verbose_name="Software")
+    is_validated = tables.Column(accessor="is_validated", verbose_name="Valid")
+    valid_software = tables.TemplateColumn(
+        template_code="""{% for valid_software in record.valid_software %}
+                    <a href="/plugins/nautobot-device-lifecycle-mgmt/validated-software/{{ valid_software }}"
+                         %}">{{ valid_software }}
+                    </a>
+                    <br>
+                    {% endfor %}""",
+        verbose_name="Valid Software",
+        orderable=True,
+    )
+
+    class Meta(BaseTable.Meta):
+        """Metaclass attributes of DeviceSoftwareValidationHistoricResultDetailTable."""
+
+        model = DeviceSoftwareValidationHistoricResult
+        fields = ["device", "software", "is_validated", "valid_software"]
+        default_columns = ["device", "software", "is_validated", "valid_software"]
+        order_by = ["device"]
 
 
 class InventoryItemSoftwareValidationResultTable(BaseTable):
