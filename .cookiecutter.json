@@ -10,8 +10,6 @@
         "project_slug": "nautobot-app-device-lifecycle-mgmt",
         "repo_url": "https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt",
         "base_url": "nautobot-device-lifecycle-mgmt",
-        "min_nautobot_version": "3.0.0",
-        "max_nautobot_version": "3.9999",
         "camel_name": "NautobotDeviceLifecycleManagement",
         "project_short_description": "Device Lifecycle Management",
         "model_class_name": "HardwareLCM",
@@ -21,16 +19,13 @@
         "_drift_manager": {
             "template": "https://github.com/nautobot/cookiecutter-nautobot-app.git",
             "template_dir": "nautobot-app",
-            "template_ref": "refs/tags/nautobot-app-v2.5.0",
+            "template_ref": "nautobot-app-v2.6.0",
             "cookie_dir": "",
             "branch_prefix": "drift-manager",
-            "pull_request_strategy": "create",
-            "post_actions": [
-                "ruff",
-                "poetry"
-            ],
+            "pull_request_strategy": "update-or-create",
+            "post_actions": [],
             "draft": false,
-            "baked_commit_ref": "db3403fc057e9d8a7001ffe5b8884a5575fbd880"
+            "baked_commit_ref": "164656f6cc32e5ba9c2677c36ee07a786a15d208"
         }
     }
 }
