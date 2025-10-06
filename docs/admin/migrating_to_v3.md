@@ -1,26 +1,3 @@
-# Table of Contents
-
-- [Table of Contents](#table-of-contents)
-- [Migrating to DLM app version 3.0](#migrating-to-dlm-app-version-30)
-  - [Process of Migration](#process-of-migration)
-    - [Extensibility Objects Referencing Deprecated Objects](#extensibility-objects-referencing-deprecated-objects)
-    - [Relationships Migrations](#relationships-migrations)
-    - [Software Image Hashing Algorithm](#software-image-hashing-algorithm)
-    - [Software objects migration in Nautobot 2.2.0 to 2.3.0](#software-objects-migration-in-nautobot-220-to-230)
-    - [DLM models that now refer to the Core models](#dlm-models-that-now-refer-to-the-core-models)
-    - [Migration Banner](#migration-banner)
-    - [Accessing Deprecated Models](#accessing-deprecated-models)
-  - [Running the Migration Job](#running-the-migration-job)
-    - [Migration Job options](#migration-job-options)
-- [FAQ](#faq)
-    - [I can no longer see Software, Software Image, or POC in the Device Lifecycle UI menu](#i-can-no-longer-see-software-software-image-or-poc-in-the-device-lifecycle-ui-menu)
-    - [Will the reporting functionality of Validated Software still work with the deprecated models?](#will-the-reporting-functionality-of-validated-software-still-work-with-the-deprecated-models)
-    - [The automation I use targets deprecated DLM models. Are these models still usable for the time being?](#the-automation-i-use-targets-deprecated-dlm-models-are-these-models-still-usable-for-the-time-being)
-    - [I'm seeing a banner with the message \`Some Device Lifecycle Management models have not been migrated to Nautobot core models…\`](#im-seeing-a-banner-with-the-message-some-device-lifecycle-management-models-have-not-been-migrated-to-nautobot-core-models)
-    - [This job is taking a long time.](#this-job-is-taking-a-long-time)
-
-  
-
 # Migrating to DLM app version 3.0
 
 **Device Lifecycle Management App** version 3.0 now supports these core Nautobot models: SoftwareVersion, SoftwareImageFile, and Contact.
@@ -38,7 +15,10 @@ The DLM models and their instances will remain in place to ensure a smooth migra
 After installing app version 3.0, all existing instances of these models must be moved to the core models. This will enable full DLM app functionality. The migration process is outlined in the following sections.
 
 !!! warning
-    Ensure that the DLM app is at least version 3.0.0 and Nautobot is version 2.2.0 or later before starting migration.
+    Please do not install version 3.0.0 and instead upgrade directly to version 3.0.1. Version 3.0.1 fixes a bug in the migrations introduced in version 3.0.0 that could prevent Nautobot from starting for certain combinations of DLM objects.
+
+!!! warning
+    Ensure that the DLM app is at least version 3.0.1 and Nautobot is version 2.2.0 or later before starting migration.
 
 ## Process of Migration
 
@@ -147,7 +127,21 @@ This is recommended if there are numerous ChangeLogs associated with the DLM obj
 
 **Show debug messages** \- Activate verbose mode for detailed logging.
 
-# FAQ
+## FAQ
+
+### `AttributeError` when accessing Device or Inventory Item list
+
+If you get an error, with a traceback similar to the one below, while accessing the Device or Inventory Item list, you should check user preferences for the Device and Inventory Item tables.
+
+```
+May 12 09:08:56 nautobot-server[1]:   File "/opt/nautobot/lib64/python3.11/site-packages/nautobot/core/models/__init__.py", line 88, in get_absolute_url
+May 12 09:08:56 nautobot-server[1]:     raise AttributeError(f"Cannot find a URL for {self} ({self._meta.app_label}.{self._meta.model_name})")
+May 12 09:08:56 nautobot-server[1]: AttributeError: Cannot find a URL for arista - 4.21M (nautobot_device_lifecycle_mgmt.softwarelcm)
+```
+
+This issue only affects DLM version 3.0.x and customized list views for Device and Inventory Item models. If you previously added Software Version to the visible columns in the list view for either of these models, you will encounter the `AttributeError` mentioned above.
+
+To resolve this, navigate to your user profile (`/user/preferences/ -> preferences`) and clear the preferences for `tables.DeviceTable.columns` and `tables.InventoryItemTable.columns`.
 
 ### I can no longer see Software, Software Image, or POC in the Device Lifecycle UI menu
 

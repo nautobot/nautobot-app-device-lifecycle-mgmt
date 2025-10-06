@@ -468,12 +468,9 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
     def __str__(self):
         """String representation of InventoryItemSoftwareValidationResult."""
         if self.is_validated:
-            msg = f"Inventory Item: {self.inventory_item.name} - " f"Device: {self.inventory_item.device.name} - Valid"
+            msg = f"Inventory Item: {self.inventory_item.name} - Device: {self.inventory_item.device.name} - Valid"
         else:
-            msg = (
-                f"Inventory Item: {self.inventory_item.name} - "
-                f"Device: {self.inventory_item.device.name} - Not Valid"
-            )
+            msg = f"Inventory Item: {self.inventory_item.name} - Device: {self.inventory_item.device.name} - Not Valid"
         return msg
 
 
@@ -693,6 +690,7 @@ class CVELCM(PrimaryModel):
 
     name = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=False, unique=True)
     published_date = models.DateField(verbose_name="Published Date")
+    last_modified_date = models.DateField(null=True, blank=True, verbose_name="Last Modified Date")
     link = models.URLField()
     status = StatusField(
         null=True,
@@ -700,7 +698,7 @@ class CVELCM(PrimaryModel):
         on_delete=models.PROTECT,
         to="extras.status",
     )
-    description = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True, default="")
+    description = models.TextField(blank=True, default="")
     severity = models.CharField(
         max_length=CHARFIELD_MAX_LENGTH, choices=choices.CVESeverityChoices, default=choices.CVESeverityChoices.NONE
     )
@@ -750,6 +748,8 @@ class VulnerabilityLCM(PrimaryModel):
         on_delete=models.PROTECT,
         to="extras.status",
     )
+
+    natural_key_field_lookups = ["pk"]
 
     class Meta:
         """Meta attributes for the class."""

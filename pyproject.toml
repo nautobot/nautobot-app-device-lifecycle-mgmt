@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-lifecycle-mgmt"
-version = "3.0.0"
+version = "3.2.0a0"
 description = "Manages device lifecycles for platforms and software."
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
@@ -13,26 +13,29 @@ classifiers = [
     "Intended Audience :: Developers",
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 packages = [
     { include = "nautobot_device_lifecycle_mgmt" },
 ]
 include = [
     # Poetry by default will exclude files that are in .gitignore
-    "nautobot_device_lifecycle_mgmt/static/nautobot_device_lifecycle_mgmt/docs/**/*",
+    { path = "nautobot_device_lifecycle_mgmt/static/nautobot_device_lifecycle_mgmt/docs/**/*", format = ["sdist", "wheel"] }
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.9.2,<3.13"
+python = ">=3.10,<3.14"
 # Used for local development
 pycountry = "^22.3.5"
 matplotlib = "^3.3.4"
 nautobot = {git = "https://github.com/nautobot/nautobot.git", rev = "next"}
 # nautobot = "^3.0.0"  # TODO: Uncomment after v3.0.0 is released
+# Numpy is not a direct dependency, but we are assisting Poetry version resolution by providing constraints.
+numpy = "^1.26"
+netutils = ">=1.14.1"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "*"
@@ -45,7 +48,18 @@ pylint-nautobot = "*"
 ruff = "0.5.5"
 yamllint = "*"
 toml = "*"
+# Python implementation of markdownlint
+pymarkdownlnt = "~0.9.30"
 Markdown = "*"
+towncrier = ">=23.6.0,<=24.8.0"
+to-json-schema = "*"
+jsonschema = "*"
+djlint = ">=1.36.4,<2.0.0"
+djhtml = ">=3.0.8,<4.0.0"
+sentry-sdk = "*"
+time-machine = "*"
+
+[tool.poetry.group.docs.dependencies]
 # Render custom markdown for version added/changed/remove notes
 markdown-version-annotations = "1.0.1"
 # Rendering docs to HTML
@@ -57,11 +71,6 @@ mkdocstrings = "0.25.2"
 mkdocstrings-python = "1.10.8"
 mkdocs-autorefs = "1.2.0"
 griffe = "1.1.1"
-sentry-sdk = "*"
-time-machine = "*"
-towncrier = "~23.6.0"
-to-json-schema = "*"
-jsonschema = "*"
 
 [tool.poetry.extras]
 all = [
@@ -81,7 +90,11 @@ disable = """,
     duplicate-code,
     line-too-long,
     too-few-public-methods,
-    too-many-ancestors
+    too-many-ancestors,
+    too-many-positional-arguments,
+    nb-warn-dunder-filter-field,
+    nb-no-search-function,
+    nb-no-char-filter-q,
 """
 
 [tool.pylint.miscellaneous]
@@ -93,7 +106,7 @@ notes = """,
 
 [tool.pylint-nautobot]
 supported_nautobot_versions = [
-    "3.0.0"
+    "3"
 ]
 
 [tool.ruff]
@@ -138,14 +151,31 @@ convention = "google"
     "S"
 ]
 
+[tool.coverage.run]
+disable_warnings = ["already-imported"]
+relative_files = true
+omit = [
+    # Skip Tests
+    "*/tests/*",
+]
+include = [
+    "nautobot_device_lifecycle_mgmt/*",
+]
+
+[tool.pymarkdown]
+plugins.selectively_enable_rules = true
+plugins.blanks-around-lists.enabled = true
+plugins.list-anchored-indent.enabled = true
+extensions.front-matter.enabled = true
+
 [build-system]
-requires = ["poetry_core>=1.0.0"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.towncrier]
 package = "nautobot_device_lifecycle_mgmt"
 directory = "changes"
-filename = "docs/admin/release_notes/version_3.0.md"
+filename = "docs/admin/release_notes/version_X.Y.md"
 template = "development/towncrier_template.j2"
 start_string = "<!-- towncrier release notes start -->"
 issue_format = "[#{issue}](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/{issue})"
@@ -194,3 +224,8 @@ showcontent = true
 directory = "housekeeping"
 name = "Housekeeping"
 showcontent = true
+
+[tool.djlint]
+ignore = "H005,H006,H008,H011,H012,H013,H014,H015,H016,H019,H020,H021,H022,H023,H025,H026,H030,H031,H037"
+profile="django"
+extend_exclude = "docs/,nautobot_device_lifecycle_mgmt/static/"
