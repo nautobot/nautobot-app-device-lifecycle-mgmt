@@ -217,6 +217,21 @@ plugins.pml101.enabled = false # list-anchored-indent
 plugins.pml102.enabled = false
 plugins.pml103.enabled = false
 
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = { version = "1.6.0" }
+mkdocs-material = { version = "9.5.32" }
+mkdocstrings = { version = "0.25.2" }
+mkdocstrings-python = { version = "1.10.8" }
+mkdocs-autorefs = { version = "1.2.0" }
+griffe = { version = "1.1.1" }
+markdown-version-annotations = { version = "1.0.1" }
+Markdown = "*"
+
+ 
 [build-system]
 requires = ["poetry_core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
