@@ -10,3 +10,4 @@ nautobot_device_lifecycle_mgmt:
     - "docker-compose.redis.yml"
     - "docker-compose.mysql.yml"
     - "docker-compose.dev.yml"
+    
