@@ -1,8 +1,8 @@
-{% extends 'generic/object_detail.html' %}
+{% extends "generic/object_detail.html" %}
 {% load helpers %}
 
 {% block masthead %}
-    <h2>Provider: {% block title %}{{ object }}{% endblock %}</h2>
+    <h2>Provider: {% block title %}{{ object }}{% endblock title %}</h2>
 {% endblock masthead %}
 
 {% block content_left_page %}
@@ -57,7 +57,7 @@
             </tr>
         </table>
     </div>
-{% endblock %}
+{% endblock content_left_page %}
 
 {% block content_right_page %}
     {% if contracts.count > 0 %}
@@ -90,4 +90,4 @@
         </div>
     </div>
     {% endif %}
-{% endblock %}
+{% endblock content_right_page %}
