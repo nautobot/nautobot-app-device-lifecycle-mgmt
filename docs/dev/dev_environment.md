@@ -389,7 +389,7 @@ namespace.configure(
     {
         "nautobot_device_lifecycle_mgmt": {
             ...
-            "python_ver": "3.11",
+            "python_ver": "3.12",
 	    ...
         }
     }
@@ -408,7 +408,7 @@ namespace.configure(
     {
         "nautobot_device_lifecycle_mgmt": {
             ...
-            "nautobot_ver": "2.0.0",
+            "nautobot_ver": "2.4.16",
 	    ...
         }
     }

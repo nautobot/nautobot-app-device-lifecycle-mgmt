@@ -37,6 +37,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
     ProviderLCM,
+    SoftwareLCM,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
@@ -214,6 +215,85 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
         if sum(obj.count() for obj in (devices, device_types, device_roles, inventory_items, object_tags)) == 0:
             msg = "You need to assign to at least one object."
             self.add_error(None, msg)
+
+
+class ValidatedSoftwareLCMBulkEditForm(NautobotBulkEditForm):
+    """Validated Software Lifecycle bulk edit form."""
+
+    model = ValidatedSoftwareLCM
+
+    pk = forms.ModelMultipleChoiceField(
+        queryset=ValidatedSoftwareLCM.objects.all(),
+        widget=forms.MultipleHiddenInput,
+    )
+
+    software = DynamicModelChoiceField(
+        queryset=SoftwareVersion.objects.all(),
+        required=False,
+        label="Software Version",
+    )
+    old_software = DynamicModelChoiceField(
+        queryset=SoftwareLCM.objects.all(),
+        required=False,
+        label="Old Software Version",
+    )
+
+    devices = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        required=False,
+        label="Devices",
+    )
+    device_types = DynamicModelMultipleChoiceField(
+        queryset=DeviceType.objects.all(),
+        required=False,
+        label="Device Types",
+    )
+    device_roles = DynamicModelMultipleChoiceField(
+        queryset=Role.objects.all(),
+        required=False,
+        label="Device Roles",
+    )
+    inventory_items = DynamicModelMultipleChoiceField(
+        queryset=InventoryItem.objects.all(),
+        required=False,
+        label="Inventory Items",
+    )
+    object_tags = DynamicModelMultipleChoiceField(
+        queryset=Tag.objects.all(),
+        required=False,
+        label="Object Tags",
+    )
+
+    start = forms.DateField(
+        widget=DatePicker(),
+        label="Valid Since",
+    )
+    end = forms.DateField(
+        widget=DatePicker(),
+        required=False,
+        label="Valid Until",
+    )
+
+    preferred = forms.BooleanField(
+        required=False,
+        label="Preferred Version",
+    )
+
+    comments = forms.CharField(required=False)
+
+    class Meta:
+        """Meta attributes for the ValidatedSoftwareLCMBulkEditForm class."""
+
+        nullable_fields = [
+            "old_software",
+            "devices",
+            "device_types",
+            "device_roles",
+            "inventory_items",
+            "object_tags",
+            "end",
+            "comments",
+        ]
 
 
 class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
