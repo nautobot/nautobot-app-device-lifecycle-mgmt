@@ -23,7 +23,8 @@ from nautobot.core.views import generic
 from nautobot.core.views.mixins import ContentTypePermissionRequiredMixin
 from nautobot.core.views.paginator import EnhancedPaginator, get_paginate_count
 from nautobot.core.views.utils import get_obj_from_context
-from nautobot.dcim.models import Device, SoftwareVersion
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, SoftwareVersion
+from nautobot.extras.models import Role, Tag
 
 from nautobot_device_lifecycle_mgmt import choices, filters, forms, helpers, models, tables
 from nautobot_device_lifecycle_mgmt.api import serializers
@@ -45,15 +46,15 @@ class HardwareLCMFieldsPanel(object_detail.ObjectFieldsPanel):
         """Render special fields with custom formatting."""
         instance = context.get("object")
 
-        # Render related devices
+        # Render related devices as clickable links
         if key == "devices":
             devices = getattr(instance, "devices", [])
             if not devices:
                 return "—"
             return format_html_join(
                 ", ",
-                '<a href="{}">{}</a>',
-                [(f"/dcim/devices/{device.pk}/", device) for device in devices],
+                '<a href="/dcim/devices/{}/">{}</a>',
+                ((device.pk, device) for device in devices),
             )
 
         # Default rendering for all other fields
@@ -74,7 +75,6 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.HardwareLCMSerializer
     table_class = tables.HardwareLCMTable
 
-    # Define how the object detail page should render
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
             HardwareLCMFieldsPanel(
@@ -92,6 +92,11 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
                     "documentation_url",
                 ],
                 value_transforms={
+                    "device_type": [
+                        lambda dt: (
+                            format_html('<a href="/dcim/device-types/{}/">{}</a>', dt.pk, dt.model) if dt else "—"
+                        )
+                    ],
                     "documentation_url": [helpers.hyperlink_url_new_tab],
                 },
             ),
@@ -124,7 +129,6 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
 class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
     """ValidatedSoftwareLCM UI ViewSet."""
 
-    # TODO: Add bulk edit form
     bulk_update_form_class = forms.ValidatedSoftwareLCMBulkEditForm
     filterset_class = filters.ValidatedSoftwareLCMFilterSet
     filterset_form_class = forms.ValidatedSoftwareLCMFilterForm
@@ -132,6 +136,29 @@ class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
     queryset = models.ValidatedSoftwareLCM.objects.all()
     serializer_class = serializers.ValidatedSoftwareLCMSerializer
     table_class = tables.ValidatedSoftwareLCMTable
+
+    object_detail_content = object_detail.ObjectDetailContent(
+        panels=(
+            object_detail.ObjectFieldsPanel(
+                weight=100,
+                section=SectionChoices.LEFT_HALF,
+                fields=["software", "start", "end", "valid", "preferred"],
+            ),
+            object_detail.StatsPanel(
+                weight=200,
+                label="Assignments",
+                section=SectionChoices.RIGHT_HALF,
+                related_models=[
+                    (Device, "validatedsoftware_devices_tab__in"),
+                    (DeviceType, "validatedsoftware_device_types_tab__in"),
+                    (Role, "validatedsoftware_device_roles_tab__in"),
+                    (InventoryItem, "validatedsoftware_inventory_items_tab__in"),
+                    (Tag, "validatedsoftware_object_tags_tab__in"),
+                ],
+                filter_name="id",  # <-- currently None
+            ),
+        ),
+    )
 
 
 # TODO: These should probably move to a StatsPanel using the Component UI Framework in 2.4+
@@ -204,23 +231,7 @@ class ContractLCMUIViewSet(NautobotUIViewSet):
 
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
-            ContractLCMFieldsPanel(
-                label="Contract",
-                weight=100,
-                section=SectionChoices.LEFT_HALF,
-                fields=[
-                    "name",
-                    "provider",
-                    "number",
-                    "start",
-                    "end",
-                    "cost",
-                    "currency",
-                    "support_level",
-                    "contract_type",
-                    "devices",
-                ],
-            ),
+            ContractLCMFieldsPanel(label="Contract", weight=100, section=SectionChoices.LEFT_HALF, fields="__all__"),
         ),
     )
 
@@ -236,7 +247,6 @@ class ProviderLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.ProviderLCMSerializer
     table_class = tables.ProviderLCMTable
 
-    # Define the object detail layout
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
             object_detail.ObjectFieldsPanel(
@@ -314,19 +324,7 @@ class CVELCMUIViewSet(NautobotUIViewSet):
             CVEObjectFieldsPanel(
                 weight=100,
                 section=SectionChoices.LEFT_HALF,
-                fields=[
-                    "name",
-                    "published_date",
-                    "link",
-                    "status",
-                    "description",
-                    "severity",
-                    "cvss",
-                    "cvss_v2",
-                    "cvss_v3",
-                    "affected_softwares",
-                    "fix",
-                ],
+                fields="__all__",
                 exclude_fields=["last_modified_date"],
                 value_transforms={"link": [helpers.hyperlink_url_new_tab]},
             ),
