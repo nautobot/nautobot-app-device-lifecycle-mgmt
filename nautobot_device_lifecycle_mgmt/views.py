@@ -145,8 +145,8 @@ class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
                 fields=["software", "start", "end", "valid", "preferred"],
             ),
             object_detail.StatsPanel(
-                weight=200,
-                label="Assignments",
+                weight=100,
+                label="Stats",
                 section=SectionChoices.RIGHT_HALF,
                 related_models=[
                     (Device, "validatedsoftware_devices_tab__in"),
@@ -155,7 +155,7 @@ class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
                     (InventoryItem, "validatedsoftware_inventory_items_tab__in"),
                     (Tag, "validatedsoftware_object_tags_tab__in"),
                 ],
-                filter_name="id",  # <-- currently None
+                filter_name="id",
             ),
         ),
     )
