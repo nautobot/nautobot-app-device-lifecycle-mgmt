@@ -231,7 +231,23 @@ class ContractLCMUIViewSet(NautobotUIViewSet):
 
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
-            ContractLCMFieldsPanel(label="Contract", weight=100, section=SectionChoices.LEFT_HALF, fields="__all__"),
+            ContractLCMFieldsPanel(
+                label="Contract",
+                weight=100,
+                section=SectionChoices.LEFT_HALF,
+                fields=[
+                    "name",
+                    "provider",
+                    "number",
+                    "start",
+                    "end",
+                    "cost",
+                    "currency",
+                    "support_level",
+                    "contract_type",
+                    "devices",
+                ],
+            ),
         ),
     )
 

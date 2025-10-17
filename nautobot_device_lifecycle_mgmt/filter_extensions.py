@@ -26,7 +26,7 @@ class InventoryItemFilterExtension(FilterExtension):
         "nautobot_device_lifecycle_mgmt_distinct_part_id": BooleanFilter(
             method=distinct_filter, label="_dpid_dlm_app_internal_use_only"
         ),
-        "nautobot_device_lifecycle_mgmt_validatedsoftware_inventory_items": NaturalKeyOrPKMultipleChoiceFilter(
+        "nautobot_device_lifecycle_mgmt_validatedsoftware_inventory_items_tab": NaturalKeyOrPKMultipleChoiceFilter(
             field_name="validatedsoftware_inventory_items_tab",
             queryset=ValidatedSoftwareLCM.objects.all(),
             label="Validated Software",
@@ -34,7 +34,7 @@ class InventoryItemFilterExtension(FilterExtension):
     }
 
     filterform_fields = {
-        "nautobot_device_lifecycle_mgmt_validatedsoftware_inventory_items": DynamicModelMultipleChoiceField(
+        "nautobot_device_lifecycle_mgmt_validatedsoftware_inventory_items_tab": DynamicModelMultipleChoiceField(
             queryset=ValidatedSoftwareLCM.objects.all(),
             label="Validated Software",
             required=False,
@@ -56,9 +56,10 @@ class DeviceFilterExtension(FilterExtension):
             queryset=ContractLCM.objects.all(),
             label="Contracts",
         ),
-        "nautobot_device_lifecycle_mgmt_validatedsoftware_devices": NaturalKeyOrPKMultipleChoiceFilter(
+        "nautobot_device_lifecycle_mgmt_validatedsoftware_devices_tab": NaturalKeyOrPKMultipleChoiceFilter(
             field_name="validatedsoftware_devices_tab",
             queryset=ValidatedSoftwareLCM.objects.all(),
+            to_field_name="pk",
             label="Validated Software",
         ),
     }
@@ -69,7 +70,7 @@ class DeviceFilterExtension(FilterExtension):
             label="Contracts",
             required=False,
         ),
-        "nautobot_device_lifecycle_mgmt_validatedsoftware_devices": DynamicModelMultipleChoiceField(
+        "nautobot_device_lifecycle_mgmt_validatedsoftware_devices_tab": DynamicModelMultipleChoiceField(
             queryset=ValidatedSoftwareLCM.objects.all(),
             label="Validated Software",
             required=False,
@@ -86,7 +87,7 @@ class RoleFilterExtension(FilterExtension):
     model = "extras.role"
 
     filterset_fields = {
-        "nautobot_device_lifecycle_mgmt_validatedsoftware_device_roles": NaturalKeyOrPKMultipleChoiceFilter(
+        "nautobot_device_lifecycle_mgmt_validatedsoftware_device_roles_tab": NaturalKeyOrPKMultipleChoiceFilter(
             field_name="validatedsoftware_device_roles_tab",
             queryset=ValidatedSoftwareLCM.objects.all(),
             label="Validated Software",
@@ -94,7 +95,7 @@ class RoleFilterExtension(FilterExtension):
     }
 
     filterform_fields = {
-        "nautobot_device_lifecycle_mgmt_validatedsoftware_device_roles": DynamicModelMultipleChoiceField(
+        "nautobot_device_lifecycle_mgmt_validatedsoftware_device_roles_tab": DynamicModelMultipleChoiceField(
             queryset=ValidatedSoftwareLCM.objects.all(),
             label="Validated Software",
             required=False,
@@ -111,7 +112,7 @@ class DeviceTypeFilterExtension(FilterExtension):
     model = "dcim.devicetype"
 
     filterset_fields = {
-        "nautobot_device_lifecycle_mgmt_validatedsoftware_device_types": NaturalKeyOrPKMultipleChoiceFilter(
+        "nautobot_device_lifecycle_mgmt_validatedsoftware_device_types_tab": NaturalKeyOrPKMultipleChoiceFilter(
             field_name="validatedsoftware_device_types_tab",
             queryset=ValidatedSoftwareLCM.objects.all(),
             label="Validated Software",
@@ -119,7 +120,7 @@ class DeviceTypeFilterExtension(FilterExtension):
     }
 
     filterform_fields = {
-        "nautobot_device_lifecycle_mgmt_validatedsoftware_device_types": DynamicModelMultipleChoiceField(
+        "nautobot_device_lifecycle_mgmt_validatedsoftware_device_types_tab": DynamicModelMultipleChoiceField(
             queryset=ValidatedSoftwareLCM.objects.all(),
             label="Validated Software",
             required=False,
@@ -136,7 +137,7 @@ class TagFilterExtension(FilterExtension):
     model = "extras.tag"
 
     filterset_fields = {
-        "nautobot_device_lifecycle_mgmt_validatedsoftware_tags": NaturalKeyOrPKMultipleChoiceFilter(
+        "nautobot_device_lifecycle_mgmt_validatedsoftware_object_tags_tab": NaturalKeyOrPKMultipleChoiceFilter(
             field_name="validatedsoftware_object_tags_tab",
             queryset=ValidatedSoftwareLCM.objects.all(),
             label="Validated Software",
@@ -144,7 +145,7 @@ class TagFilterExtension(FilterExtension):
     }
 
     filterform_fields = {
-        "nautobot_device_lifecycle_mgmt_validatedsoftware_tags": DynamicModelMultipleChoiceField(
+        "nautobot_device_lifecycle_mgmt_validatedsoftware_object_tags_tab": DynamicModelMultipleChoiceField(
             queryset=ValidatedSoftwareLCM.objects.all(),
             label="Validated Software",
             required=False,
