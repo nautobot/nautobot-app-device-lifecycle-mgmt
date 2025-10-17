@@ -1,9 +1,9 @@
-{% extends 'generic/object_detail.html' %}
+{% extends "generic/object_detail.html" %}
 {% load helpers %}
 {% load humanize %}
 
 {% block masthead %}
-    <h2>Contract: {% block title %}{{ object }}{% endblock %}</h2>
+    <h2>Contract: {% block title %}{{ object }}{% endblock title %}</h2>
 {% endblock masthead %}
 
 {% block content_left_page %}
@@ -55,7 +55,7 @@
             <tr>
                 <td>Devices</td>
                 <td>
-                    <a href="{% url 'dcim:device_list'  %}?nautobot_device_lifecycle_mgmt_device_contracts={{ object.id }}">{{ object.devices.count }}</a>
+                    <a href="{% url 'dcim:device_list' %}?nautobot_device_lifecycle_mgmt_device_contracts={{ object.id }}">{{ object.devices.count }}</a>
                 </td>
             </tr>
             <tr>
@@ -64,4 +64,4 @@
             </tr>
         </table>
     </div>
-{% endblock %}
+{% endblock content_left_page %}
