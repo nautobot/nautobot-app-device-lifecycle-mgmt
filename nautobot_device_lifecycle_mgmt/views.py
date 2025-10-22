@@ -579,7 +579,7 @@ class ValidatedSoftwareDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewM
         csv_data = []
 
         # Get extra context for aggregation values
-        extra_content = self.get_extra_context(request or None)
+        extra_content = self.get_extra_context(self.request)
 
         # Add summary row
         csv_data.append(",".join(["Type", "Total", "Valid", "Invalid", "No Software", "Compliance"]))
@@ -595,12 +595,12 @@ class ValidatedSoftwareDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewM
         )
         csv_data.append("")
 
-        # Add header row for device model details
         qs = self.queryset.values(
             "device__device_type__model", "total", "valid", "invalid", "no_software", "valid_percent"
         )
 
         if qs is not None and len(qs) > 0:
+            # Add header row for device model details
             csv_data.append(
                 ",".join(
                     [
@@ -749,7 +749,6 @@ class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectLi
             "report_last_run": report_last_run,
         }
 
-    # CSV export logic remains unchanged
     def queryset_to_csv(self):
         """Export queryset of objects as comma-separated value (CSV)."""
         csv_data = []
@@ -758,7 +757,7 @@ class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectLi
             ",".join(
                 ["Inventory Items"]
                 + [
-                    f"{str(val)} %" if key == "valid_percent" else str(val)
+                    f"{val:.2f} %" if key == "valid_percent" else str(val)
                     for key, val in self.get_extra_context(self.request).get("inventory_aggr", {}).items()
                     if key != "name"
                 ]
@@ -788,7 +787,7 @@ class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectLi
             )
             for obj in qs:
                 csv_data.append(
-                    ",".join([f"{str(val)} %" if key == "valid_percent" else str(val) for key, val in obj.items()])
+                    ",".join([f"{val:.2f} %" if key == "valid_percent" else str(val) for key, val in obj.items()])
                 )
 
         return "\n".join(csv_data)

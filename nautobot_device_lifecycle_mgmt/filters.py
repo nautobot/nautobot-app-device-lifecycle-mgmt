@@ -182,7 +182,6 @@ class SoftwareImageLCMFilterSet(NautobotFilterSet):
             "device_types__model": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "inventory_items__id": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "object_tags__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
-            "devices__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
         }
     )
 
