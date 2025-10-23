@@ -19,7 +19,6 @@ class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
     base_url = "nautobot-device-lifecycle-mgmt"
     required_settings = []
     default_settings = {}
-    caching_config = {}
     docs_view_name = "plugins:nautobot_device_lifecycle_mgmt:docs"
     searchable_models = ["hardwarelcm"]
 
