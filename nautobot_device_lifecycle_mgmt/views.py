@@ -1,9 +1,15 @@
 """Views implementation for the Lifecycle Management app."""
 
+<<<<<<< HEAD
 import base64
 import io
 import logging
 import urllib
+=======
+from nautobot.apps.views import NautobotUIViewSet
+from nautobot.apps.ui import ObjectDetailContent, ObjectFieldsPanel, ObjectsTablePanel, SectionChoices
+from nautobot.core.templatetags import helpers
+>>>>>>> 5e69385 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -41,6 +47,7 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.HardwareLCMSerializer
     table_class = tables.HardwareLCMTable
 
+<<<<<<< HEAD
     def get_extra_context(self, request, instance):  # pylint: disable=signature-differs
         """Return any additional context data for the template.
 
@@ -372,6 +379,37 @@ class HardwareNoticeDeviceReportView(generic.ObjectListView):
             valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
         )
         .order_by("-valid_percent")
+=======
+    # Here is an example of using the UI  Component Framework for the detail view.
+    # More information can be found in the Nautobot documentation:
+    # https://docs.nautobot.com/projects/core/en/stable/development/core/ui-component-framework/
+    object_detail_content = ObjectDetailContent(
+        panels=[
+            ObjectFieldsPanel(
+                weight=100,
+                section=SectionChoices.LEFT_HALF,
+                fields="__all__",
+                # Alternatively, you can specify a list of field names:
+                # fields=[
+                #     "name",
+                #     "description",
+                # ],
+                # Some fields may require additional configuration, we can use value_transforms
+                # value_transforms={
+                #     "name": [helpers.bettertitle]
+                # },
+            ),
+            # If there is a ForeignKey or M2M with this model we can use ObjectsTablePanel
+            # to display them in a table format.
+            # ObjectsTablePanel(
+                # weight=200,
+                # section=SectionChoices.RIGHT_HALF,
+                # table_class=tables.HardwareLCMTable,
+                # You will want to filter the table using the related_name
+                # filter="hardwarelcms",
+            # ),
+        ],
+>>>>>>> 5e69385 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
     )
     action_buttons = ("export",)
     # extra content dict to be returned by self.extra_context() method
