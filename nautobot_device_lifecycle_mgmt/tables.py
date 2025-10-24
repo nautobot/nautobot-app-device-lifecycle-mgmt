@@ -112,23 +112,23 @@ class DeviceHardwareNoticeResultTable(BaseTable):
     """Table for device hardware notice report."""
 
     name = tables.TemplateColumn(
-        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/hardware-notice-device-report/'
-        '?&device_type={{ record.device__device_type__model }}">{{ record.device__device_type__model }}</a>',
+        template_code='<a href={% url "plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report_list" %}'
+        "?&device_type={{ record.device__device_type__model }}>{{ record.device__device_type__model }}</a>",
         orderable=True,
         accessor="device__device_type__model",
     )
     total = tables.TemplateColumn(
-        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/hardware-notice-device-report/'
-        '?&device_type={{ record.device__device_type__model }}">{{ record.total }}</a>'
+        template_code='<a href={% url "plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report_list" %}'
+        "?&device_type={{ record.device__device_type__model }}>{{ record.total }}</a>"
     )
     valid = tables.TemplateColumn(
-        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/hardware-notice-device-report/'
-        '?&device_type={{ record.device__device_type__model }}&supported=True">{{ record.valid }}</a>',
+        template_code='<a href={% url "plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report_list" %}'
+        "?&device_type={{ record.device__device_type__model }}&supported=True>{{ record.valid }}</a>",
         verbose_name="Supported",
     )
     invalid = tables.TemplateColumn(
-        template_code='<a href="/plugins/nautobot-device-lifecycle-mgmt/hardware-notice-device-report/'
-        '?&device_type={{ record.device__device_type__model }}&supported=False">{{ record.invalid }}</a>',
+        template_code='<a href={% url "plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report_list" %}'
+        "?&device_type={{ record.device__device_type__model }}&supported=False>{{ record.invalid }}</a>",
         verbose_name="Unsupported",
     )
     valid_percent = PercentageColumn(accessor="valid_percent", verbose_name="Support (%)")

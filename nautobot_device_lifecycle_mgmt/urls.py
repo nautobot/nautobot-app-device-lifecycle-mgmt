@@ -16,6 +16,28 @@ router.register("provider", viewset=views.ProviderLCMUIViewSet)
 router.register("cve", viewset=views.CVELCMUIViewSet)
 router.register("vulnerability", viewset=views.VulnerabilityLCMUIViewSet)
 
+router.register(
+    "hardware-notice-device-report",
+    views.HardwareNoticeDeviceReportUIViewSet,
+    basename="hardwarenotice_device_report",
+)
+router.register(
+    "validated-software-device-report",
+    views.ValidatedSoftwareDeviceReportUIViewSet,
+    basename="validatedsoftware_device_report",
+)
+router.register(
+    "validated-software-inventoryitem-report",
+    views.ValidatedSoftwareInventoryItemReportUIViewSet,
+    basename="validatedsoftware_inventoryitem_report",
+)
+router.register("device-hardware-notice-result", viewset=views.DeviceHardwareNoticeResultUIViewSet)
+router.register("device-validated-software-result", viewset=views.DeviceSoftwareValidationResultUIViewSet)
+router.register(
+    "inventory-item-validated-software-result", viewset=views.InventoryItemSoftwareValidationResultUIViewSet
+)
+
+
 urlpatterns = router.urls
 
 urlpatterns += [
@@ -43,39 +65,6 @@ urlpatterns += [
         "validated-software/<uuid:pk>/object-tags/",
         views.ValidatedSoftwareObjectTagTabView.as_view(),
         name="validatedsoftware_object_tags_tab",
-    ),
-    path(
-        "hardware-notice-device-report/",
-        views.HardwareNoticeDeviceReportView.as_view(),
-        name="hardwarenotice_device_report",
-    ),
-    path(
-        "validated-software-device-report/",
-        views.ValidatedSoftwareDeviceReportView.as_view(),
-        name="validatedsoftware_device_report",
-    ),
-    path(
-        "validated-software-inventoryitem-report/",
-        views.ValidatedSoftwareInventoryItemReportView.as_view(),
-        name="validatedsoftware_inventoryitem_report",
-    ),
-    # DeviceHardwareNoticeResult
-    path(
-        "device-hardware-notice-result/",
-        views.DeviceHardwareNoticeResultListView.as_view(),
-        name="devicehardwarenoticeresult_list",
-    ),
-    # DeviceValidatedSoftwareResult
-    path(
-        "device-validated-software-result/",
-        views.DeviceSoftwareValidationResultListView.as_view(),
-        name="devicesoftwarevalidationresult_list",
-    ),
-    # InventoryItemValidatedSoftwareResult
-    path(
-        "inventory-item-validated-software-result/",
-        views.InventoryItemSoftwareValidationResultListView.as_view(),
-        name="inventoryitemsoftwarevalidationresult_list",
     ),
     path(
         "docs/",

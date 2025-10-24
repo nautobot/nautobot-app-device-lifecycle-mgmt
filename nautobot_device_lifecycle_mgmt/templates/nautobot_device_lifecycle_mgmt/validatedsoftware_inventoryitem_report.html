@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load buttons %}
 {% load static %}
 {% load helpers %}
@@ -21,7 +21,7 @@
     {% export_button content_type %}
 {% endif %}
 </div>
-    <h1>{% block title %}Inventory Item Software Validation Reports{% endblock %}</h1>    
+    <h1>{% block title %}Inventory Item Software Validation Reports{% endblock title %}</h1>
     <div class="row">
         <div class="col-md-9">
             <!-- VISUAL BLOCK -->
@@ -31,11 +31,11 @@
             <h4 class="text-left alert-info p-4 m-4">Last full run of the report: {{ report_last_run }} - {{ report_last_run|timesince }} ago </h4>
             {% endif %}
             {% if bar_chart is not None %}
-                {% block graphic  %}
+                {% block graphic %}
                     <div id="content">
                         <img src="data:image/png;base64,{{ bar_chart|safe }}" style="width:100%" alt="Platform Bar Chart">
                     </div>
-                {% endblock %}
+                {% endblock graphic %}
             {% else %}
                     <span class=" text-center alert-danger p-4 m-4 ">-- Can't generate visualization, no config validation found. --</span>
             {% endif %}
@@ -57,27 +57,27 @@
                 <tbody>
                     <tr class="even">
                         <td>
-                            <a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/">
+                            <a href='{% url "plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list" %}'>
                                 Inventory Items
                             </a>
                         </td>
                         <td>
-                            <a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/">
+                            <a href='{% url "plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list" %}'>
                                 {% if inventory_aggr.total is not None %} {{ inventory_aggr.total }} {% else %} -- {% endif %}
                             </a>
                         </td>
                         <td>
-                            <a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/?&valid=True">
+                            <a href='{% url "plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list" %}?valid=True'>
                                 {% if inventory_aggr.valid is not None %} {{ inventory_aggr.valid }} {% else %} -- {% endif %}
                             </a>
                         </td>
                         <td>
-                            <a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/?&valid=False">
+                            <a href='{% url "plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list" %}?valid=False'>
                                 {% if inventory_aggr.invalid is not None %} {{ inventory_aggr.invalid }} {% else %} -- {% endif %}
                             </a>
                         </td>
                         <td>
-                            <a href="/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/?&sw_missing_only=True">
+                            <a href='{% url "plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list" %}?sw_missing_only=True'>
                                 {% if inventory_aggr.no_software is not None %} {{ inventory_aggr.no_software }} {% else %} -- {% endif %}
                             </a>
                         </td>
@@ -87,7 +87,7 @@
                             </a>
                         </td>
                         <td>
-                            <a href="/api/plugins/nautobot-device-lifecycle-mgmt/inventory-item-validated-software-result/?format=csv"
+                            <a href='{% url "plugins-api:nautobot_device_lifecycle_mgmt-api:inventoryitemsoftwarevalidationresult-list" %}?format=csv'
                                 class="btn btn-default btn-xs" title="Export data for all inventory items" aria-hidden="true"> 
                                 <i class="mdi mdi-download"></i>
                             </a>
@@ -96,14 +96,14 @@
                 </tbody>
             </table>
             <h3 class="text-center m-2 p-3">Inventory Item Part ID Summary</h3>
-            {% include 'utilities/obj_table.html' %}
+            {% include "utilities/obj_table.html" %}
             </div>
         <div class="col-md-3 noprint">
-        {% include 'inc/search_panel.html' %}
+        {% include "inc/search_panel.html" %}
     </div>
 </div>
 {% table_config_form table table_name="ObjectTable" %}
-{% endblock %}
+{% endblock content %}
 {% block javascript %}
 <script src="{% static 'js/tableconfig.js' %}"></script>
-{% endblock %}
+{% endblock javascript %}

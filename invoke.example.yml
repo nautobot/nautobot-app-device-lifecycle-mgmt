@@ -1,6 +1,6 @@
 ---
 nautobot_device_lifecycle_mgmt:
-  nautobot_ver: "2.4.16"
+  nautobot_ver: "2.4.20"
   python_ver: "3.12"
   # local: false
   # compose_dir: "/full/path/to/nautobot-app-device-lifecycle-mgmt/development"

@@ -6,6 +6,7 @@ import logging
 import urllib
 
 import matplotlib.pyplot as plt
+import nautobot.apps.views
 import numpy as np
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -561,31 +562,66 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
         return ReportOverviewHelper.url_encode_figure(fig)
 
 
-class HardwareNoticeDeviceReportView(generic.ObjectListView):
+class HardwareNoticeDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
     """View for executive report on device hardware notices."""
 
-    filterset = filters.DeviceHardwareNoticeResultFilterSet
-    filterset_form = forms.DeviceHardwareNoticeResultFilterForm
-    table = tables.DeviceHardwareNoticeResultTable
-    template_name = "nautobot_device_lifecycle_mgmt/hardwarenotice_device_report.html"
+    filterset_class = filters.DeviceHardwareNoticeResultFilterSet
+    filterset_form_class = forms.DeviceHardwareNoticeResultFilterForm
+    table_class = tables.DeviceHardwareNoticeResultTable
+    serializer_class = serializers.DeviceHardwareNoticeResultSerializer
+    action_buttons = ("export",)
+
     queryset = (
-        models.DeviceHardwareNoticeResult.objects.values("device__device_type__model", "device__device_type__pk")
+        models.DeviceHardwareNoticeResult.objects.values(
+            "device__device_type__model",
+            "device__device_type__pk",
+        )
         .distinct()
         .annotate(
             total=Count("device__device_type__model"),
             valid=Count("device__device_type__model", filter=Q(is_supported=True)),
             invalid=Count("device__device_type__model", filter=Q(is_supported=False)),
-            valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
+            valid_percent=ExpressionWrapper(
+                100 * F("valid") / F("total"),
+                output_field=FloatField(),
+            ),
         )
         .order_by("-valid_percent")
     )
-    action_buttons = ("export",)
-    # extra content dict to be returned by self.extra_context() method
-    extra_content = {}
 
-    def setup(self, request, *args, **kwargs):
-        """Using request object to perform filtering based on query params."""
-        super().setup(request, *args, **kwargs)  #
+    #
+    # Template
+    #
+    def get_template_name(self, action=None):
+        """Return the template name for the list view."""
+        if action not in (None, "list"):
+            raise ValueError(f"Action {action} is not supported for this viewset.")
+        return "nautobot_device_lifecycle_mgmt/hardwarenotice_device_report.html"
+
+    #
+    # Aggregation
+    #
+    def get_global_aggr(self, request):
+        """Get global aggregation of device hardware notices."""
+        qs = models.DeviceHardwareNoticeResult.objects
+
+        if self.filterset_class is not None:
+            qs = self.filterset_class(request.GET, queryset=qs).qs
+
+        device_aggr = qs.aggregate(
+            total=Count("device"),
+            valid=Count("device", filter=Q(is_supported=True)),
+            invalid=Count("device", filter=Q(is_supported=False)),
+        )
+        device_aggr["name"] = "Devices"
+
+        return ReportOverviewHelper.calculate_aggr_percentage(device_aggr)
+
+    #
+    # Extra context for template rendering
+    #
+    def get_extra_context(self, request, instance=None):
+        """Return extra context for template rendering."""
         try:
             report_last_run = (
                 models.DeviceHardwareNoticeResult.objects.filter(run_type=choices.ReportRunTypeChoices.REPORT_FULL_RUN)
@@ -596,93 +632,103 @@ class HardwareNoticeDeviceReportView(generic.ObjectListView):
             report_last_run = None
 
         device_aggr = self.get_global_aggr(request)
-        _device_type_qs = (
-            models.DeviceHardwareNoticeResult.objects.values("device__device_type__model", "device__device_type__id")
+
+        device_type_qs = (
+            models.DeviceHardwareNoticeResult.objects.values(
+                "device__device_type__model",
+                "device__device_type__id",
+            )
             .distinct()
             .annotate(
                 total=Count("device__device_type__model"),
                 valid=Count("device__device_type__model", filter=Q(is_supported=True)),
                 invalid=Count("device__device_type__model", filter=Q(is_supported=False)),
-                valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
+                valid_percent=ExpressionWrapper(
+                    100 * F("valid") / F("total"),
+                    output_field=FloatField(),
+                ),
             )
             .order_by("-hardware_notice__end_of_support")
         )
-        device_type_qs = self.filterset(request.GET, _device_type_qs).qs
+
+        if self.filterset_class is not None:
+            device_type_qs = self.filterset_class(request.GET, queryset=device_type_qs).qs
+
         pie_chart_attrs = {
             "aggr_labels": ["valid", "invalid"],
             "chart_labels": ["Supported", "Unsupported"],
         }
+
         bar_chart_attrs = {
             "device_type_id": "device__device_type__id",
             "label_accessor": "device__device_type__model",
             "xlabel": "Devices",
             "ylabel": "Device Types",
-            "title": "Devices per device type",
+            "title": "Devices per Device Type",
             "chart_bars": [
                 {"label": "Supported", "data_attr": "valid", "color": GREEN},
                 {"label": "Unsupported", "data_attr": "invalid", "color": RED},
             ],
         }
-        self.extra_content = {
-            "bar_chart": ReportOverviewHelper.plot_barchart_visual_hardware_notice(device_type_qs, bar_chart_attrs),
+
+        return {
             "device_aggr": device_aggr,
             "device_visual": ReportOverviewHelper.plot_piechart_visual(device_aggr, pie_chart_attrs),
+            "bar_chart": ReportOverviewHelper.plot_barchart_visual_hardware_notice(device_type_qs, bar_chart_attrs),
             "report_last_run": report_last_run,
         }
 
-    def get_global_aggr(self, request):
-        """Get device and inventory global reports.
 
-        Returns:
-            device_aggr: device global report dict
-        """
-        device_qs = models.DeviceHardwareNoticeResult.objects
+class ValidatedSoftwareDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
+    """View for executive report on device software validation."""
 
-        device_aggr = {}
-        if self.filterset is not None:
-            device_aggr = self.filterset(request.GET, device_qs).qs.aggregate(
-                total=Count("device"),
-                valid=Count("device", filter=Q(is_supported=True)),
-                invalid=Count("device", filter=Q(is_supported=False)),
-            )
-
-            device_aggr["name"] = "Devices"
-
-        return ReportOverviewHelper.calculate_aggr_percentage(device_aggr)
-
-    def extra_context(self):
-        """Extra content method on."""
-        # add global aggregations to extra context.
-
-        return self.extra_content
-
-
-class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
-    """View for executive report on software Validation."""
-
-    filterset = filters.DeviceSoftwareValidationResultFilterSet
-    filterset_form = forms.DeviceSoftwareValidationResultFilterForm
-    table = tables.DeviceSoftwareValidationResultTable
-    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftware_device_report.html"
+    filterset_class = filters.DeviceSoftwareValidationResultFilterSet
+    filterset_form_class = forms.DeviceSoftwareValidationResultFilterForm
+    table_class = tables.DeviceSoftwareValidationResultTable
     queryset = (
-        models.DeviceSoftwareValidationResult.objects.values("device__device_type__model", "device__device_type__pk")
+        models.DeviceSoftwareValidationResult.objects.values(
+            "device__device_type__model",
+            "device__device_type__pk",
+        )
         .distinct()
         .annotate(
             total=Count("device__device_type__model"),
             valid=Count("device__device_type__model", filter=Q(is_validated=True)),
             invalid=Count("device__device_type__model", filter=Q(is_validated=False) & ~Q(software=None)),
             no_software=Count("device__device_type__model", filter=Q(software=None)),
-            valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
+            valid_percent=ExpressionWrapper(100 * F("valid") / F("total"), output_field=FloatField()),
         )
         .order_by("-valid_percent")
     )
+    serializer_class = serializers.DeviceSoftwareValidationResultSerializer
     action_buttons = ("export",)
-    # extra content dict to be returned by self.extra_context() method
-    extra_content = {}
 
-    def setup(self, request, *args, **kwargs):
-        """Using request object to perform filtering based on query params."""
-        super().setup(request, *args, **kwargs)
+    def get_template_name(self):
+        """Return the template name for rendering the list view only."""
+        if self.action != "list":
+            raise ValueError(f"Action {self.action} is not supported")
+        return "nautobot_device_lifecycle_mgmt/validatedsoftware_device_report.html"
+
+    def get_global_aggr(self, request):
+        """Get device global software validation aggregation."""
+        qs = models.DeviceSoftwareValidationResult.objects
+
+        if self.filterset_class is not None:
+            filtered_qs = self.filterset_class(request.GET, queryset=qs).qs
+        else:
+            filtered_qs = qs
+
+        device_aggr = filtered_qs.aggregate(
+            total=Count("device"),
+            valid=Count("device", filter=Q(is_validated=True)),
+            invalid=Count("device", filter=Q(is_validated=False) & ~Q(software=None)),
+            no_software=Count("device", filter=Q(software=None)),
+        )
+        device_aggr["name"] = "Devices"
+        return ReportOverviewHelper.calculate_aggr_percentage(device_aggr)
+
+    def get_extra_context(self, request, instance=None):
+        """Prepare extra context for template rendering."""
         try:
             report_last_run = (
                 models.DeviceSoftwareValidationResult.objects.filter(
@@ -695,7 +741,9 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
             report_last_run = None
 
         device_aggr = self.get_global_aggr(request)
-        _platform_qs = (
+
+        # Platform-level aggregation for bar chart
+        platform_qs = (
             models.DeviceSoftwareValidationResult.objects.values("device__platform__name")
             .distinct()
             .annotate(
@@ -706,7 +754,10 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
             )
             .order_by("-total")
         )
-        platform_qs = self.filterset(request.GET, _platform_qs).qs
+
+        if self.filterset_class is not None:
+            platform_qs = self.filterset_class(request.GET, queryset=platform_qs).qs
+
         pie_chart_attrs = {
             "aggr_labels": ["valid", "invalid", "no_software"],
             "chart_labels": ["Valid", "Invalid", "No Software"],
@@ -721,105 +772,87 @@ class ValidatedSoftwareDeviceReportView(generic.ObjectListView):
                 {"label": "No Software", "data_attr": "no_software", "color": GREY},
             ],
         }
-        self.extra_content = {
-            "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
+
+        return {
             "device_aggr": device_aggr,
             "device_visual": ReportOverviewHelper.plot_piechart_visual(device_aggr, pie_chart_attrs),
+            "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
             "report_last_run": report_last_run,
         }
 
-    def get_global_aggr(self, request):
-        """Get device and inventory global reports.
-
-        Returns:
-            device_aggr: device global report dict
-        """
-        device_qs = models.DeviceSoftwareValidationResult.objects
-
-        device_aggr = {}
-        if self.filterset is not None:
-            device_aggr = self.filterset(request.GET, device_qs).qs.aggregate(
-                total=Count("device"),
-                valid=Count("device", filter=Q(is_validated=True)),
-                invalid=Count("device", filter=Q(is_validated=False) & ~Q(software=None)),
-                no_software=Count("device", filter=Q(software=None)),
-            )
-
-            device_aggr["name"] = "Devices"
-
-        return ReportOverviewHelper.calculate_aggr_percentage(device_aggr)
-
-    def extra_context(self):
-        """Extra content method on."""
-        # add global aggregations to extra context.
-
-        return self.extra_content
-
-    def queryset_to_csv(self):
+    def queryset_to_csv(self, request=None):
         """Export queryset of objects as comma-separated value (CSV)."""
         csv_data = []
 
+        # Get extra context for aggregation values
+        extra_content = self.get_extra_context(self.request)
+
+        # Add summary row
         csv_data.append(",".join(["Type", "Total", "Valid", "Invalid", "No Software", "Compliance"]))
         csv_data.append(
             ",".join(
                 ["Devices"]
                 + [
-                    f"{str(val)} %" if key == "valid_percent" else str(val)
-                    for key, val in self.extra_content["device_aggr"].items()
+                    f"{val:.2f} %" if key == "valid_percent" else str(val)
+                    for key, val in extra_content["device_aggr"].items()
                     if key != "name"
                 ]
             )
         )
-        csv_data.append(",".join([]))
+        csv_data.append("")
 
-        qs = self.queryset.values(  # pylint: disable=invalid-name
+        qs = self.queryset.values(
             "device__device_type__model", "total", "valid", "invalid", "no_software", "valid_percent"
         )
-        csv_data.append(
-            ",".join(
-                [
-                    "Device Model" if item == "device__device_type__model" else item.replace("_", " ").title()
-                    for item in qs[0].keys()
-                ]
-            )
-        )
-        for obj in qs:
+
+        if qs is not None and len(qs) > 0:
+            # Add header row for device model details
             csv_data.append(
-                ",".join([f"{str(val)} %" if key == "valid_percent" else str(val) for key, val in obj.items()])
+                ",".join(
+                    [
+                        "Device Model" if item == "device__device_type__model" else item.replace("_", " ").title()
+                        for item in qs[0].keys()
+                    ]
+                )
             )
+
+            # Add each row
+            for obj in qs:
+                csv_data.append(
+                    ",".join([f"{val:.2f} %" if key == "valid_percent" else str(val) for key, val in obj.items()])
+                )
 
         return "\n".join(csv_data)
 
 
-class DeviceHardwareNoticeResultListView(generic.ObjectListView):
-    """DeviceHardwareNoticeResultListView List view."""
+class DeviceHardwareNoticeResultUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
+    """DeviceHardwareNoticeResult List view."""
 
+    filterset_class = filters.DeviceHardwareNoticeResultFilterSet
+    filterset_form_class = forms.DeviceHardwareNoticeResultFilterForm
     queryset = models.DeviceHardwareNoticeResult.objects.all()
-    filterset = filters.DeviceHardwareNoticeResultFilterSet
-    filterset_form = forms.DeviceHardwareNoticeResultFilterForm
-    table = tables.DeviceHardwareNoticeResultListTable
+    serializer_class = serializers.DeviceHardwareNoticeResultSerializer
+    table_class = tables.DeviceHardwareNoticeResultListTable
     action_buttons = ("export",)
-    template_name = "nautobot_device_lifecycle_mgmt/deviceshardwarenoticeresult_list.html"
 
 
-class DeviceSoftwareValidationResultListView(generic.ObjectListView):
+class DeviceSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
     """DeviceSoftawareValidationResult List view."""
 
+    filterset_class = filters.DeviceSoftwareValidationResultFilterSet
+    filterset_form_class = forms.DeviceSoftwareValidationResultFilterForm
     queryset = models.DeviceSoftwareValidationResult.objects.all()
-    filterset = filters.DeviceSoftwareValidationResultFilterSet
-    filterset_form = forms.DeviceSoftwareValidationResultFilterForm
-    table = tables.DeviceSoftwareValidationResultListTable
+    serializer_class = serializers.DeviceSoftwareValidationResultSerializer
+    table_class = tables.DeviceSoftwareValidationResultListTable
     action_buttons = ("export",)
-    template_name = "nautobot_device_lifecycle_mgmt/devicesoftwarevalidationresult_list.html"
 
 
-class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
+class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
     """View for executive report on inventory item software validation."""
 
-    filterset = filters.InventoryItemSoftwareValidationResultFilterSet
-    filterset_form = forms.InventoryItemSoftwareValidationResultFilterForm
-    table = tables.InventoryItemSoftwareValidationResultTable
-    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftware_inventoryitem_report.html"
+    filterset_class = filters.InventoryItemSoftwareValidationResultFilterSet
+    filterset_form_class = forms.InventoryItemSoftwareValidationResultFilterForm
+    table_class = tables.InventoryItemSoftwareValidationResultTable
     queryset = (
         models.InventoryItemSoftwareValidationResult.objects.values(
             "inventory_item__part_id",
@@ -834,17 +867,43 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
             valid=Count("inventory_item__part_id", filter=Q(is_validated=True)),
             invalid=Count("inventory_item__part_id", filter=Q(is_validated=False) & ~Q(software=None)),
             no_software=Count("inventory_item__part_id", filter=Q(software=None)),
-            valid_percent=ExpressionWrapper(100 * F("valid") / (F("total")), output_field=FloatField()),
+            valid_percent=ExpressionWrapper(100 * F("valid") / F("total"), output_field=FloatField()),
         )
         .order_by("-valid_percent")
     )
+    serializer_class = serializers.InventoryItemSoftwareValidationResultSerializer
     action_buttons = ("export",)
-    # extra content dict to be returned by self.extra_context() method
-    extra_content = {}
 
-    def setup(self, request, *args, **kwargs):
-        """Using request object to perform filtering based on query params."""
-        super().setup(request, *args, **kwargs)
+    def get_template_name(self):
+        """Return the template name for rendering the list view only."""
+        if self.action != "list":
+            raise ValueError(f"Action {self.action} is not supported")
+        return "nautobot_device_lifecycle_mgmt/validatedsoftware_inventoryitem_report.html"
+
+    def get_global_aggr(self, request):
+        """Get device and inventory global reports.
+
+        Returns:
+            inventory_aggr: inventory item global report dict
+        """
+        qs = models.InventoryItemSoftwareValidationResult.objects
+        if self.filterset_class is not None:
+            filtered_qs = self.filterset_class(request.GET, queryset=qs).qs
+        else:
+            filtered_qs = qs
+
+        inventory_aggr = filtered_qs.aggregate(
+            total=Count("inventory_item"),
+            valid=Count("inventory_item", filter=Q(is_validated=True)),
+            invalid=Count("inventory_item", filter=Q(is_validated=False) & ~Q(software=None)),
+            no_software=Count("inventory_item", filter=Q(software=None)),
+        )
+        inventory_aggr["name"] = "Inventory Items"
+        return ReportOverviewHelper.calculate_aggr_percentage(inventory_aggr)
+
+    def get_extra_context(self, request, instance=None):
+        """Prepare extra context for template rendering."""
+        # Get the last full report run
         try:
             report_last_run = (
                 models.InventoryItemSoftwareValidationResult.objects.filter(
@@ -853,11 +912,13 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
                 .latest("last_updated")
                 .last_run
             )
-        except models.InventoryItemSoftwareValidationResult.DoesNotExist:  # pylint: disable=no-member
+        except models.InventoryItemSoftwareValidationResult.DoesNotExist:
             report_last_run = None
 
         inventory_aggr = self.get_global_aggr(request)
-        _platform_qs = (
+
+        # Prepare platform-level aggregation for bar chart
+        platform_qs = (
             models.InventoryItemSoftwareValidationResult.objects.values("inventory_item__manufacturer__name")
             .distinct()
             .annotate(
@@ -868,7 +929,9 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
             )
             .order_by("-total")
         )
-        platform_qs = self.filterset(request.GET, _platform_qs).qs
+
+        if self.filterset_class is not None:
+            platform_qs = self.filterset_class(request.GET, queryset=platform_qs).qs
 
         pie_chart_attrs = {
             "aggr_labels": ["valid", "invalid", "no_software"],
@@ -885,57 +948,30 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
             ],
         }
 
-        self.extra_content = {
-            "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
+        return {
             "inventory_aggr": inventory_aggr,
             "inventory_visual": ReportOverviewHelper.plot_piechart_visual(inventory_aggr, pie_chart_attrs),
+            "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
             "report_last_run": report_last_run,
         }
-
-    def get_global_aggr(self, request):
-        """Get device and inventory global reports.
-
-        Returns:
-            inventory_aggr: inventory item global report dict
-        """
-        inventory_item_qs = models.InventoryItemSoftwareValidationResult.objects
-
-        inventory_aggr = {}
-        if self.filterset is not None:
-            inventory_aggr = self.filterset(request.GET, inventory_item_qs).qs.aggregate(
-                total=Count("inventory_item"),
-                valid=Count("inventory_item", filter=Q(is_validated=True)),
-                invalid=Count("inventory_item", filter=Q(is_validated=False) & ~Q(software=None)),
-                no_software=Count("inventory_item", filter=Q(software=None)),
-            )
-            inventory_aggr["name"] = "Inventory Items"
-
-        return ReportOverviewHelper.calculate_aggr_percentage(inventory_aggr)
-
-    def extra_context(self):
-        """Extra content method on."""
-        # add global aggregations to extra context.
-
-        return self.extra_content
 
     def queryset_to_csv(self):
         """Export queryset of objects as comma-separated value (CSV)."""
         csv_data = []
-
         csv_data.append(",".join(["Type", "Total", "Valid", "Invalid", "No Software", "Compliance"]))
         csv_data.append(
             ",".join(
                 ["Inventory Items"]
                 + [
-                    f"{str(val)} %" if key == "valid_percent" else str(val)
-                    for key, val in self.extra_content["inventory_aggr"].items()
+                    f"{val:.2f} %" if key == "valid_percent" else str(val)
+                    for key, val in self.get_extra_context(self.request).get("inventory_aggr", {}).items()
                     if key != "name"
                 ]
             )
         )
         csv_data.append(",".join([]))
 
-        qs = self.queryset.values(  # pylint: disable=invalid-name
+        qs = self.queryset.values(
             "inventory_item__part_id",
             "inventory_item__name",
             "inventory_item__device__name",
@@ -946,31 +982,32 @@ class ValidatedSoftwareInventoryItemReportView(generic.ObjectListView):
             "no_software",
             "valid_percent",
         )
-        csv_data.append(
-            ",".join(
-                [
-                    "Part ID" if item == "inventory_item__part_id" else item.replace("_", " ").title()
-                    for item in qs[0].keys()
-                ]
-            )
-        )
-        for obj in qs:
+        if qs:
             csv_data.append(
-                ",".join([f"{str(val)} %" if key == "valid_percent" else str(val) for key, val in obj.items()])
+                ",".join(
+                    [
+                        "Part ID" if item == "inventory_item__part_id" else item.replace("_", " ").title()
+                        for item in qs[0].keys()
+                    ]
+                )
             )
+            for obj in qs:
+                csv_data.append(
+                    ",".join([f"{val:.2f} %" if key == "valid_percent" else str(val) for key, val in obj.items()])
+                )
 
         return "\n".join(csv_data)
 
 
-class InventoryItemSoftwareValidationResultListView(generic.ObjectListView):
+class InventoryItemSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
     """InvenotryItemSoftawareValidationResult List view."""
 
+    filterset_class = filters.InventoryItemSoftwareValidationResultFilterSet
+    filterset_form_class = forms.InventoryItemSoftwareValidationResultFilterForm
     queryset = models.InventoryItemSoftwareValidationResult.objects.all()
-    filterset = filters.InventoryItemSoftwareValidationResultFilterSet
-    filterset_form = forms.InventoryItemSoftwareValidationResultFilterForm
-    table = tables.InventoryItemSoftwareValidationResultListTable
+    serializer_class = serializers.InventoryItemSoftwareValidationResultSerializer
+    table_class = tables.InventoryItemSoftwareValidationResultListTable
     action_buttons = ("export",)
-    template_name = "nautobot_device_lifecycle_mgmt/inventoryitemsoftwarevalidationresult_list.html"
 
 
 class SoftwareVersionRelatedCveView(generic.ObjectView):
