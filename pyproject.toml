@@ -28,19 +28,15 @@ include = [
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
 # Used for local development
-<<<<<<< HEAD
 pycountry = "^22.3.5"
 matplotlib = "^3.3.4"
-nautobot = ">=2.4.2,<3.0.0"
+nautobot = ">=2.4.20,<3.0.0"
 # Numpy is not a direct dependency, but we are assisting Poetry version resolution by providing constraints.
 numpy = [
     {version = "^1.26", python = ">=3.9"},
     {version = "<1.25", python = "==3.8"}
 ]
 netutils = ">=1.14.1"
-=======
-nautobot = ">=2.4.20,<3.0.0"
->>>>>>> 5e69385 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
 
 [tool.poetry.group.dev.dependencies]
 coverage = "*"
@@ -61,12 +57,9 @@ to-json-schema = "*"
 jsonschema = "*"
 djlint = ">=1.36.4,<2.0.0"
 djhtml = ">=3.0.8,<4.0.0"
-<<<<<<< HEAD
 sentry-sdk = "*"
 time-machine = "*"
-=======
 tomli = { version = "*", markers = "python_version < '3.11'" }  # tomli is included in the stdlib as of Python 3.11
->>>>>>> 5e69385 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
 
 [tool.poetry.group.docs.dependencies]
 # Render custom markdown for version added/changed/remove notes

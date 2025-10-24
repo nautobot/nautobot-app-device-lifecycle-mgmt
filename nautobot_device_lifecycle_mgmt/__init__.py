@@ -19,17 +19,12 @@ class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
     description = "Manages device lifecycle of Nautobot Devices and Components."
     base_url = "nautobot-device-lifecycle-mgmt"
     required_settings = []
-<<<<<<< HEAD
     default_settings = {
         "barchart_bar_width": 0.1,
         "barchart_width": 12,
         "barchart_height": 5,
         "enabled_metrics": [],
     }
-    caching_config = {}
-=======
-    default_settings = {}
->>>>>>> 5e69385 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
     docs_view_name = "plugins:nautobot_device_lifecycle_mgmt:docs"
     banner_function = "banner.models_migrated_to_core_banner"
     searchable_models = ["hardwarelcm"]
