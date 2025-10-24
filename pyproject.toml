@@ -27,11 +27,11 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.9.2,<3.13"
+python = ">=3.10,<3.13"
 # Used for local development
 pycountry = "^22.3.5"
 matplotlib = "^3.3.4"
-nautobot = ">=2.4.2,<3.0.0"
+nautobot = ">=2.4.20,<3.0.0"
 # Numpy is not a direct dependency, but we are assisting Poetry version resolution by providing constraints.
 numpy = [
     {version = "^1.26", python = ">=3.9"},
