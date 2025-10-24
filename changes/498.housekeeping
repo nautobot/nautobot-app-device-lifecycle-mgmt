@@ -1,0 +1,3 @@
+Updated generate_dlm_test_data management command for DLM v3.
+Added --flush argument to generate_dlm_test_data management command.
+Added change logging to generate_dlm_test_data management command.

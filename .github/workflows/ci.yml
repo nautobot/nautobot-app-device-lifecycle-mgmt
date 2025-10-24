@@ -154,7 +154,7 @@ jobs:
         db-backend: ["postgresql"]
         nautobot-version: ["stable"]
         include:
-          - python-version: "3.11"
+          - python-version: "3.12"
             db-backend: "postgresql"
             nautobot-version: "2.4.20"
           - python-version: "3.12"

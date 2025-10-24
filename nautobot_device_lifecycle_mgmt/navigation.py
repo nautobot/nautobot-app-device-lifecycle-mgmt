@@ -170,7 +170,7 @@ menu_items = (
                 weight=100,
                 items=(
                     NavMenuItem(
-                        link="plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report",
+                        link="plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report_list",
                         name="Device Hardware Notice - Report",
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_devicehardwarenoticeresult",
@@ -184,7 +184,7 @@ menu_items = (
                         ],
                     ),
                     NavMenuItem(
-                        link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
+                        link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report_list",
                         name="Device Software Validation - Report",
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
@@ -198,7 +198,7 @@ menu_items = (
                         ],
                     ),
                     NavMenuItem(
-                        link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
+                        link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report_list",
                         name="Inventory Item Software Validation - Report",
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
