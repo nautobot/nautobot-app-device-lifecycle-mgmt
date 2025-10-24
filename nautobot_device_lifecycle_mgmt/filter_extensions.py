@@ -29,6 +29,7 @@ class InventoryItemFilterExtension(FilterExtension):
         "nautobot_device_lifecycle_mgmt_validatedsoftware_inventory_items_tab": NaturalKeyOrPKMultipleChoiceFilter(
             field_name="validatedsoftware_inventory_items_tab",
             queryset=ValidatedSoftwareLCM.objects.all(),
+            to_field_name="pk",
             label="Validated Software",
         ),
     }
@@ -90,6 +91,7 @@ class RoleFilterExtension(FilterExtension):
         "nautobot_device_lifecycle_mgmt_validatedsoftware_device_roles_tab": NaturalKeyOrPKMultipleChoiceFilter(
             field_name="validatedsoftware_device_roles_tab",
             queryset=ValidatedSoftwareLCM.objects.all(),
+            to_field_name="pk",
             label="Validated Software",
         ),
     }
@@ -115,6 +117,7 @@ class DeviceTypeFilterExtension(FilterExtension):
         "nautobot_device_lifecycle_mgmt_validatedsoftware_device_types_tab": NaturalKeyOrPKMultipleChoiceFilter(
             field_name="validatedsoftware_device_types_tab",
             queryset=ValidatedSoftwareLCM.objects.all(),
+            to_field_name="pk",
             label="Validated Software",
         ),
     }
@@ -140,6 +143,7 @@ class TagFilterExtension(FilterExtension):
         "nautobot_device_lifecycle_mgmt_validatedsoftware_object_tags_tab": NaturalKeyOrPKMultipleChoiceFilter(
             field_name="validatedsoftware_object_tags_tab",
             queryset=ValidatedSoftwareLCM.objects.all(),
+            to_field_name="pk",
             label="Validated Software",
         ),
     }
