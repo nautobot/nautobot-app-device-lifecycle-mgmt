@@ -1,8 +1,8 @@
-{% extends 'generic/object_detail.html' %}
+{% extends "generic/object_detail.html" %}
 {% load helpers %}
 
 {% block masthead %}
-    <h2>CVE: {% block title %}{{ object }}{% endblock %}</h2>
+    <h2>CVE: {% block title %}{{ object }}{% endblock title %}</h2>
 {% endblock masthead %}
 
 {% block content_left_page %}
@@ -65,4 +65,4 @@
             </tr>
         </table>
     </div>
-{% endblock %}
+{% endblock content_left_page %}

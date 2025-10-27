@@ -138,6 +138,10 @@ class ValidatedSoftwareDeviceReportViewTest(ViewTestCases.ListObjectsViewTestCas
     def test_list_objects_anonymous(self):
         pass
 
+    @skip("not implemented")
+    def test_list_objects_anonymous_with_exempt_permission_for_one_view_only(self):
+        pass
+
 
 class ValidatedSoftwareInventoryItemReportViewTest(ViewTestCases.ListObjectsViewTestCase):
     """Test ValidatedSoftwareInventoryItemReportView"""
@@ -262,6 +266,7 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the VulnerabilityLCM views."""
 
     model = VulnerabilityLCM
+    allowed_number_of_tree_queries_per_view_type = {"retrieve": 1}
 
     @classmethod
     def setUpTestData(cls):  # pylint: disable=invalid-name

@@ -1,11 +1,10 @@
 {% load helpers %}
 {% if perms.nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm %}
+{% if validsoft_table %}
 <div class="row">
-    {% if validsoft_table %}
     <div class="col-md-12">
-        {% include 'panel_table.html' with table=validsoft_table heading='Validated Software matching this object' panel_class="panel panel-default" %}
+        {% include "panel_table.html" with table=validsoft_table heading="Validated Software matching this object" panel_class="panel panel-default" %}
     </div>
-    {% endif %}
 </div>
 {% endif %}
-
+{% endif %}

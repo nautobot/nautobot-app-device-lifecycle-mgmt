@@ -1,7 +1,7 @@
-{% extends 'generic/object_retrieve.html' %}
+{% extends "generic/object_retrieve.html" %}
 
 {% block masthead %}
-    <h2>{% block title %}{{ object }}{% endblock %}</h2>
+    <h2>{% block title %}{{ object }}{% endblock title %}</h2>
 {% endblock masthead %}
 
 {% block content_left_page %}
@@ -106,4 +106,4 @@
             </tr>
         </table>
     </div>
-{% endblock %}
+{% endblock content_left_page %}

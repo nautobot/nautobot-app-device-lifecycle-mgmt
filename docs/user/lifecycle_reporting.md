@@ -23,17 +23,17 @@ You can run these reports two ways:
 
 Once the jobs are ran you can nagivate to the Device Software Validation Reports by selecting **Device Software Validation - Report** or **Inventory Item Software Validation - Report** from the "Device Lifecycle" dropdown menu.
 
-- ** Summary Graph ** - This will have your validated job results per platform
+- **Summary Graph** - This will have your validated job results per platform
 
 ![](../images/lcm_software_validation_report_run_graph.png)
 
 !!! warning "If graph has too many platforms it will not render very well. You can filter it down to only a few with the right side search form. This issue is currenlty being worked on."
 
-- ** Executive Summary ** - Quick summary of all objects found with the report run.
+- **Executive Summary** - Quick summary of all objects found with the report run.
 
 ![](../images/lcm_software_validation_report_run_executive_summary.png)
 
-- ** Device Type/Inventory Item Summary ** - Summery of each Device Type or Inventory Item objects found with the report run.
+- **Device Type/Inventory Item Summary** - Summery of each Device Type or Inventory Item objects found with the report run.
 
 ![](../images/lcm_software_validation_report_run_detailed_summary.png)
 

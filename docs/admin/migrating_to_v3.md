@@ -129,6 +129,20 @@ This is recommended if there are numerous ChangeLogs associated with the DLM obj
 
 ## FAQ
 
+### `AttributeError` when accessing Device or Inventory Item list
+
+If you get an error, with a traceback similar to the one below, while accessing the Device or Inventory Item list, you should check user preferences for the Device and Inventory Item tables.
+
+```
+May 12 09:08:56 nautobot-server[1]:   File "/opt/nautobot/lib64/python3.11/site-packages/nautobot/core/models/__init__.py", line 88, in get_absolute_url
+May 12 09:08:56 nautobot-server[1]:     raise AttributeError(f"Cannot find a URL for {self} ({self._meta.app_label}.{self._meta.model_name})")
+May 12 09:08:56 nautobot-server[1]: AttributeError: Cannot find a URL for arista - 4.21M (nautobot_device_lifecycle_mgmt.softwarelcm)
+```
+
+This issue only affects DLM version 3.0.x and customized list views for Device and Inventory Item models. If you previously added Software Version to the visible columns in the list view for either of these models, you will encounter the `AttributeError` mentioned above.
+
+To resolve this, navigate to your user profile (`/user/preferences/ -> preferences`) and clear the preferences for `tables.DeviceTable.columns` and `tables.InventoryItemTable.columns`.
+
 ### I can no longer see Software, Software Image, or POC in the Device Lifecycle UI menu
 
 Access to the deprecated DLM models through the UI has been disabled to prevent confusion with the core models. However, the old DLM objects remain accessible via API and Django ORM. The core software models can be accessed under the `Devices` menu. The core contact model is accessed through the `Organization` menu.
