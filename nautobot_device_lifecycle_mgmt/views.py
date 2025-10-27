@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 """Views implementation for the Lifecycle Management app."""
 
 import base64
