@@ -37,7 +37,6 @@ from nautobot_device_lifecycle_mgmt.models import (
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
     ProviderLCM,
-    SoftwareLCM,
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
@@ -232,11 +231,6 @@ class ValidatedSoftwareLCMBulkEditForm(NautobotBulkEditForm):
         required=False,
         label="Software Version",
     )
-    old_software = DynamicModelChoiceField(
-        queryset=SoftwareLCM.objects.all(),
-        required=False,
-        label="Old Software Version",
-    )
 
     devices = DynamicModelMultipleChoiceField(
         queryset=Device.objects.all(),
@@ -285,7 +279,6 @@ class ValidatedSoftwareLCMBulkEditForm(NautobotBulkEditForm):
         """Meta attributes for the ValidatedSoftwareLCMBulkEditForm class."""
 
         nullable_fields = [
-            "old_software",
             "devices",
             "device_types",
             "device_roles",

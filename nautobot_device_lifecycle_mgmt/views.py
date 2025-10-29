@@ -24,7 +24,6 @@ from nautobot.core.ui.choices import SectionChoices
 from nautobot.core.views import generic
 from nautobot.core.views.mixins import ContentTypePermissionRequiredMixin
 from nautobot.core.views.paginator import EnhancedPaginator, get_paginate_count
-from nautobot.core.views.utils import get_obj_from_context
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, SoftwareVersion
 from nautobot.extras.models import Role, Tag
 
@@ -36,31 +35,6 @@ PLUGIN_CFG = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 
 GREEN, RED, GREY = (f"#{ColorChoices.COLOR_LIGHT_GREEN}", f"#{ColorChoices.COLOR_RED}", f"#{ColorChoices.COLOR_GREY}")
-
-
-#
-# Custom ObjectFieldsPanel for HardwareLCM
-#
-class HardwareLCMFieldsPanel(object_detail.ObjectFieldsPanel):
-    """Custom panel for rendering HardwareLCM attributes."""
-
-    def render_value(self, key, value, context):
-        """Render special fields with custom formatting."""
-        instance = context.get("object")
-
-        # Render related devices as clickable links
-        if key == "devices":
-            devices = getattr(instance, "devices", [])
-            if not devices:
-                return "—"
-            return format_html_join(
-                ", ",
-                '<a href="/dcim/devices/{}/">{}</a>',
-                ((device.pk, device) for device in devices),
-            )
-
-        # Default rendering for all other fields
-        return super().render_value(key, value, context)
 
 
 #
@@ -79,7 +53,7 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
 
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
-            HardwareLCMFieldsPanel(
+            object_detail.ObjectFieldsPanel(
                 label="Hardware Notice",
                 weight=100,
                 section=SectionChoices.LEFT_HALF,
@@ -94,11 +68,6 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
                     "documentation_url",
                 ],
                 value_transforms={
-                    "device_type": [
-                        lambda dt: (
-                            format_html('<a href="/dcim/device-types/{}/">{}</a>', dt.pk, dt.model) if dt else "—"
-                        )
-                    ],
                     "documentation_url": [helpers.hyperlink_url_new_tab],
                 },
             ),
@@ -151,11 +120,11 @@ class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
                 label="Stats",
                 section=SectionChoices.RIGHT_HALF,
                 related_models=[
-                    (Device, "validatedsoftware_devices_tab__in"),
-                    (DeviceType, "validatedsoftware_device_types_tab__in"),
-                    (Role, "validatedsoftware_device_roles_tab__in"),
-                    (InventoryItem, "validatedsoftware_inventory_items_tab__in"),
-                    (Tag, "validatedsoftware_object_tags_tab__in"),
+                    (Device, "validated_software__in"),
+                    (DeviceType, "validated_software__in"),
+                    (Role, "validated_software__in"),
+                    (InventoryItem, "validated_software__in"),
+                    (Tag, "validated_software__in"),
                 ],
                 filter_name="id",
             ),
@@ -212,7 +181,8 @@ class ContractLCMFieldsPanel(object_detail.ObjectFieldsPanel):
             device_count = device_qs.count()
 
             return format_html(
-                '<a href="/dcim/devices/?nautobot_device_lifecycle_mgmt_device_contracts={}">{}</a>',
+                '<a href="{}?nautobot_device_lifecycle_mgmt_device_contracts={}">{}</a>',
+                reverse("dcim:device_list"),
                 instance.id,
                 device_count,
             )
@@ -303,25 +273,19 @@ class ProviderLCMUIViewSet(NautobotUIViewSet):
 class CVEObjectFieldsPanel(object_detail.ObjectFieldsPanel):
     """Custom fields panel for CVELCM."""
 
-    def get_data(self, context):
-        """Return context data including affected software versions."""
-        data = super().get_data(context)
-        instance = get_obj_from_context(context)
-        if instance:
-            data["affected_softwares"] = getattr(instance, "affected_softwares", []).all()
-        return data
-
     def render_value(self, key, value, context):
-        """Return context data including affected software versions."""
+        """Render affected software as clickable links."""
         if key == "affected_softwares":
-            if not value:
+            queryset = value.all() if hasattr(value, "all") else value
+
+            if not queryset or not queryset.exists():
                 return format_html("&mdash;")
-            links = format_html_join(
+
+            return format_html_join(
                 ", ",
                 '<a href="{}">{}</a>',
-                ((reverse("dcim:softwareversion", args=[obj.pk]), str(obj)) for obj in value),
+                ((reverse("dcim:softwareversion", args=[obj.pk]), str(obj)) for obj in queryset),
             )
-            return links
 
         return super().render_value(key, value, context)
 
@@ -342,8 +306,19 @@ class CVELCMUIViewSet(NautobotUIViewSet):
             CVEObjectFieldsPanel(
                 weight=100,
                 section=SectionChoices.LEFT_HALF,
-                fields="__all__",
-                exclude_fields=["last_modified_date"],
+                fields=[
+                    "name",
+                    "published_date",
+                    "link",
+                    "status",
+                    "description",
+                    "severity",
+                    "cvss",
+                    "cvss_v2",
+                    "cvss_v3",
+                    "affected_softwares",
+                    "fix",
+                ],
                 value_transforms={"link": [helpers.hyperlink_url_new_tab]},
             ),
         ),
