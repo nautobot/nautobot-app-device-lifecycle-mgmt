@@ -4,37 +4,36 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('dcim', '0074_alter_rack_u_height'),
-        ('extras', '0125_jobresult_date_started'),
-        ('nautobot_device_lifecycle_mgmt', '0028_alter_validatedsoftwarelcm_device_roles_and_more'),
+        ("dcim", "0074_alter_rack_u_height"),
+        ("extras", "0125_jobresult_date_started"),
+        ("nautobot_device_lifecycle_mgmt", "0028_alter_validatedsoftwarelcm_device_roles_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='validatedsoftwarelcm',
-            name='device_roles',
-            field=models.ManyToManyField(blank=True, related_name='validated_software', to='extras.role'),
+            model_name="validatedsoftwarelcm",
+            name="device_roles",
+            field=models.ManyToManyField(blank=True, related_name="validated_software", to="extras.role"),
         ),
         migrations.AlterField(
-            model_name='validatedsoftwarelcm',
-            name='device_types',
-            field=models.ManyToManyField(blank=True, related_name='validated_software', to='dcim.devicetype'),
+            model_name="validatedsoftwarelcm",
+            name="device_types",
+            field=models.ManyToManyField(blank=True, related_name="validated_software", to="dcim.devicetype"),
         ),
         migrations.AlterField(
-            model_name='validatedsoftwarelcm',
-            name='devices',
-            field=models.ManyToManyField(blank=True, related_name='validated_software', to='dcim.device'),
+            model_name="validatedsoftwarelcm",
+            name="devices",
+            field=models.ManyToManyField(blank=True, related_name="validated_software", to="dcim.device"),
         ),
         migrations.AlterField(
-            model_name='validatedsoftwarelcm',
-            name='inventory_items',
-            field=models.ManyToManyField(blank=True, related_name='validated_software', to='dcim.inventoryitem'),
+            model_name="validatedsoftwarelcm",
+            name="inventory_items",
+            field=models.ManyToManyField(blank=True, related_name="validated_software", to="dcim.inventoryitem"),
         ),
         migrations.AlterField(
-            model_name='validatedsoftwarelcm',
-            name='object_tags',
-            field=models.ManyToManyField(blank=True, related_name='validated_software', to='extras.tag'),
+            model_name="validatedsoftwarelcm",
+            name="object_tags",
+            field=models.ManyToManyField(blank=True, related_name="validated_software", to="extras.tag"),
         ),
     ]
