@@ -100,20 +100,20 @@ class HardwareLCMFilterSet(NautobotFilterSet):
     )
 
     end_of_support = django_filters.DateFilter()
-    end_of_support__gte = django_filters.DateFilter(field_name="end_of_support", lookup_expr="gte")
-    end_of_support__lte = django_filters.DateFilter(field_name="end_of_support", lookup_expr="lte")
+    end_of_support__gte = django_filters.DateFilter(field_name="end_of_support", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
+    end_of_support__lte = django_filters.DateFilter(field_name="end_of_support", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
 
     end_of_sale = django_filters.DateFilter()
-    end_of_sale__gte = django_filters.DateFilter(field_name="end_of_sale", lookup_expr="gte")
-    end_of_sale__lte = django_filters.DateFilter(field_name="end_of_sale", lookup_expr="lte")
+    end_of_sale__gte = django_filters.DateFilter(field_name="end_of_sale", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
+    end_of_sale__lte = django_filters.DateFilter(field_name="end_of_sale", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
 
     end_of_security_patches = django_filters.DateFilter()
-    end_of_security_patches__gte = django_filters.DateFilter(field_name="end_of_security_patches", lookup_expr="gte")
-    end_of_security_patches__lte = django_filters.DateFilter(field_name="end_of_security_patches", lookup_expr="lte")
+    end_of_security_patches__gte = django_filters.DateFilter(field_name="end_of_security_patches", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
+    end_of_security_patches__lte = django_filters.DateFilter(field_name="end_of_security_patches", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
 
     end_of_sw_releases = django_filters.DateFilter()
-    end_of_sw_releases__gte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="gte")
-    end_of_sw_releases__lte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="lte")
+    end_of_sw_releases__gte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
+    end_of_sw_releases__lte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field  # TODO 3.0: Remove this filter when Nautobot adds it automatically
 
     expired = django_filters.BooleanFilter(method="_expired_search", label="Support Expired")
 
@@ -141,7 +141,14 @@ class HardwareLCMFilterSet(NautobotFilterSet):
 class SoftwareLCMFilterSet(NautobotFilterSet):
     """Filter for SoftwareLCM."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = SearchFilter(
+        filter_predicates={
+            "version": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "alias": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "release_date": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "end_of_support": {"lookup_expr": "icontains", "preprocessor": str.strip},
+        }
+    )
 
     device_platform = django_filters.ModelMultipleChoiceFilter(
         field_name="device_platform__name",
@@ -163,24 +170,19 @@ class SoftwareLCMFilterSet(NautobotFilterSet):
 
         fields = "__all__"
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument
-        """Perform the filtered search."""
-        if not value.strip():
-            return queryset
-
-        qs_filter = (
-            Q(version__icontains=value)
-            | Q(alias__icontains=value)
-            | Q(release_date__icontains=value)
-            | Q(end_of_support__icontains=value)
-        )
-        return queryset.filter(qs_filter)
-
 
 class SoftwareImageLCMFilterSet(NautobotFilterSet):
     """Filter for SoftwareImageLCM."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = SearchFilter(
+        filter_predicates={
+            "image_file_name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "software__version": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "device_types__model": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "inventory_items__id": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "object_tags__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+        }
+    )
 
     software = django_filters.ModelMultipleChoiceFilter(
         queryset=SoftwareLCM.objects.all(),
@@ -236,14 +238,6 @@ class SoftwareImageLCMFilterSet(NautobotFilterSet):
 
         fields = "__all__"
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument
-        """Perform the filtered search."""
-        if not value.strip():
-            return queryset
-
-        qs_filter = Q(image_file_name__icontains=value) | Q(software__version__icontains=value)
-        return queryset.filter(qs_filter)
-
     def device(self, queryset, name, value):
         """Search for software image for a given device."""
         value = value.strip()
@@ -283,7 +277,17 @@ class SoftwareImageLCMFilterSet(NautobotFilterSet):
 class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
     """Filter for ValidatedSoftwareLCM."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = SearchFilter(
+        filter_predicates={
+            "start": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "end": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "devices__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "device_types__model": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "device_roles__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "inventory_items__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "object_tags__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+        }
+    )
 
     software = django_filters.ModelMultipleChoiceFilter(
         queryset=SoftwareVersion.objects.all(),
@@ -358,14 +362,6 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
 
         fields = "__all__"
         exclude = ("old_software",)
-
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument
-        """Perform the filtered search."""
-        if not value.strip():
-            return queryset
-
-        qs_filter = Q(start__icontains=value) | Q(end__icontains=value)
-        return queryset.filter(qs_filter)
 
     def valid_search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the valid_search search."""
@@ -537,7 +533,16 @@ class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):
 class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
     """Filter for DeviceSoftwareValidationResult."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = SearchFilter(
+        filter_predicates={
+            "device__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "software__version": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "device__platform__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "device__location__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "device__device_type__model": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "device__role__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+        }
+    )
 
     software = django_filters.ModelMultipleChoiceFilter(
         field_name="software__version",
@@ -615,13 +620,6 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         fields = "__all__"
         exclude = ("old_software",)
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument
-        """Perform the filtered search."""
-        if not value.strip():
-            return queryset
-        qs_filter = Q(device__name__icontains=value) | Q(software__version__icontains=value)
-        return queryset.filter(qs_filter)
-
     def _exclude_sw_missing(self, queryset, name, value):  # pylint: disable=unused-argument
         """Exclude devices with missing software."""
         if value:
@@ -640,7 +638,14 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
 class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
     """Filter for InventoryItemSoftwareValidationResult."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = SearchFilter(
+        filter_predicates={
+            "inventory_item__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "inventory_item__device__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "software__version": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "inventory_item__part_id": {"lookup_expr": "icontains", "preprocessor": str.strip},
+        }
+    )
 
     software = django_filters.ModelMultipleChoiceFilter(
         field_name="software__version",
@@ -729,17 +734,6 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
 
         fields = "__all__"
         exclude = ("old_software",)
-
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument
-        """Perform the filtered search."""
-        if not value.strip():
-            return queryset
-        qs_filter = (
-            Q(inventory_item__name__icontains=value)
-            | Q(inventory_item__device__name__icontains=value)
-            | Q(software__version__icontains=value)
-        )
-        return queryset.filter(qs_filter)
 
     def search_part_id(self, queryset, name, value):  # pylint: disable=unused-argument
         """Filter on the inventory item part ID."""
@@ -891,7 +885,14 @@ class ProviderLCMFilterSet(NautobotFilterSet):
 class ContactLCMFilterSet(NautobotFilterSet):
     """Filter for ContactLCMFilterSet."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = SearchFilter(
+        filter_predicates={
+            "name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "email": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "phone": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "address": {"lookup_expr": "icontains", "preprocessor": str.strip},
+        }
+    )
 
     class Meta:
         """Meta attributes for filter."""
@@ -900,41 +901,39 @@ class ContactLCMFilterSet(NautobotFilterSet):
 
         fields = "__all__"
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument
-        """Perform the filtered search."""
-        if not value.strip():
-            return queryset
-
-        qs_filter = (
-            Q(name__icontains=value)
-            | Q(email__icontains=value)
-            | Q(phone__icontains=value)
-            | Q(address__icontains=value)
-        )
-        return queryset.filter(qs_filter)
-
 
 class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , CustomFieldModelFilterSet):
     """Filter for CVELCMFilterSet."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = SearchFilter(
+        filter_predicates={
+            "name": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "link": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+        }
+    )
 
     published_date = django_filters.DateTimeFromToRangeFilter()
-    published_date__gte = django_filters.DateFilter(field_name="published_date", lookup_expr="gte")
-    published_date__lte = django_filters.DateFilter(field_name="published_date", lookup_expr="lte")
+    published_date__gte = django_filters.DateFilter(field_name="published_date", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
+    published_date__lte = django_filters.DateFilter(field_name="published_date", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
 
     last_modified_date = django_filters.DateTimeFromToRangeFilter()
-    last_modified_date__gte = django_filters.DateFilter(field_name="last_modified_date", lookup_expr="gte")
-    last_modified_date__lte = django_filters.DateFilter(field_name="last_modified_date", lookup_expr="lte")
+    last_modified_date__gte = django_filters.DateFilter(field_name="last_modified_date", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
+    last_modified_date__lte = django_filters.DateFilter(field_name="last_modified_date", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
 
-    cvss__gte = django_filters.NumberFilter(field_name="cvss", lookup_expr="gte")
-    cvss__lte = django_filters.NumberFilter(field_name="cvss", lookup_expr="lte")
+    cvss__gte = django_filters.NumberFilter(field_name="cvss", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
+    cvss__lte = django_filters.NumberFilter(field_name="cvss", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
 
-    cvss_v2__gte = django_filters.NumberFilter(field_name="cvss_v2", lookup_expr="gte")
-    cvss_v2__lte = django_filters.NumberFilter(field_name="cvss_v2", lookup_expr="lte")
+    cvss_v2__gte = django_filters.NumberFilter(field_name="cvss_v2", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
+    cvss_v2__lte = django_filters.NumberFilter(field_name="cvss_v2", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
 
-    cvss_v3__gte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="gte")
-    cvss_v3__lte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="lte")
+    cvss_v3__gte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
+    cvss_v3__lte = django_filters.NumberFilter(field_name="cvss_v3", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
     exclude_status = StatusFilter(field_name="status", exclude=True)
 
     class Meta:
@@ -945,24 +944,39 @@ class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , Custom
 
         fields = "__all__"
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument
-        """Perform the filtered search."""
-        if not value.strip():
-            return queryset
-
-        qs_filter = Q(name__icontains=value) | Q(link__icontains=value)
-        return queryset.filter(qs_filter)
-
 
 class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , CustomFieldModelFilterSet):
     """Filter for VulnerabilityLCMFilterSet."""
 
-    q = django_filters.CharFilter(method="search", label="Search")
+    q = SearchFilter(
+        filter_predicates={
+            "cve__name": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "software__platform__name": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "software__version": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "device__name": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+            "inventory_item__name": {
+                "lookup_expr": "icontains",
+                "preprocessor": str.strip,
+            },
+        }
+    )
 
-    cve__published_date = django_filters.DateTimeFromToRangeFilter()
-    cve__published_date__gte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="gte")
-    cve__published_date__lte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="lte")
-    cve__severity = django_filters.ChoiceFilter(field_name="cve__severity", choices=CVESeverityChoices)
+    cve__published_date = django_filters.DateTimeFromToRangeFilter()  # pylint: disable=nb-warn-dunder-filter-field
+    cve__published_date__gte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
+    cve__published_date__lte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
+    cve__severity = django_filters.ChoiceFilter(field_name="cve__severity", choices=CVESeverityChoices)  # pylint: disable=nb-warn-dunder-filter-field
 
     class Meta:
         """Meta attributes for filter."""
@@ -971,18 +985,3 @@ class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  
 
         fields = "__all__"
         exclude = ("old_software",)
-
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument
-        """Perform the filtered search."""
-        if not value.strip():
-            return queryset
-
-        # Searching all of the items that make up the __str__ method.
-        qs_filter = (
-            Q(cve__name__icontains=value)
-            | Q(software__platform__name__icontains=value)
-            | Q(software__version__icontains=value)
-            | Q(device__name__icontains=value)
-            | Q(inventory_item__name__icontains=value)
-        )
-        return queryset.filter(qs_filter)
