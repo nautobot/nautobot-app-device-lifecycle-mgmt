@@ -94,7 +94,8 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
             devices = []
 
         # Attach devices to the instance so ObjectFieldsPanel can access it
-        context["devices"] = instance.devices
+        instance.devices = devices
+        context["devices"] = devices
         return context
 
 
@@ -651,7 +652,9 @@ class HardwareNoticeDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewMixi
 
         context["device_aggr"] = device_aggr
         context["device_visual"] = ReportOverviewHelper.plot_piechart_visual(device_aggr, pie_chart_attrs)
-        context["bar_chart"] = ReportOverviewHelper.plot_barchart_visual_hardware_notice(device_type_qs, bar_chart_attrs)
+        context["bar_chart"] = ReportOverviewHelper.plot_barchart_visual_hardware_notice(
+            device_type_qs, bar_chart_attrs
+        )
         context["report_last_run"] = report_last_run
         return context
 
@@ -756,7 +759,6 @@ class ValidatedSoftwareDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewM
         context["bar_chart"] = ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs)
         context["report_last_run"] = report_last_run
         return context
-
 
     def queryset_to_csv(self, request=None):
         """Export queryset of objects as comma-separated value (CSV)."""
