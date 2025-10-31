@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 """Views implementation for the Lifecycle Management app."""
 
 import base64
@@ -11,17 +12,22 @@ import numpy as np
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, ExpressionWrapper, F, FloatField, Q
+from django.urls import reverse
+from django.utils.html import format_html, format_html_join
 from django_tables2 import RequestConfig
 from matplotlib.ticker import MaxNLocator
 from nautobot.apps.choices import ColorChoices
 from nautobot.apps.views import NautobotUIViewSet, ObjectView
 from nautobot.core.models.querysets import count_related
+from nautobot.core.ui import object_detail
+from nautobot.core.ui.choices import SectionChoices
 from nautobot.core.views import generic
 from nautobot.core.views.mixins import ContentTypePermissionRequiredMixin
 from nautobot.core.views.paginator import EnhancedPaginator, get_paginate_count
-from nautobot.dcim.models import Device, SoftwareVersion
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, SoftwareVersion
+from nautobot.extras.models import Role, Tag
 
-from nautobot_device_lifecycle_mgmt import choices, filters, forms, models, tables
+from nautobot_device_lifecycle_mgmt import choices, filters, forms, helpers, models, tables
 from nautobot_device_lifecycle_mgmt.api import serializers
 
 PLUGIN_CFG = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]
@@ -31,6 +37,9 @@ logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 GREEN, RED, GREY = (f"#{ColorChoices.COLOR_LIGHT_GREEN}", f"#{ColorChoices.COLOR_RED}", f"#{ColorChoices.COLOR_GREY}")
 
 
+#
+# HardwareLCM UIViewSet
+#
 class HardwareLCMUIViewSet(NautobotUIViewSet):
     """HardwareLCM UI ViewSet."""
 
@@ -42,6 +51,29 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.HardwareLCMSerializer
     table_class = tables.HardwareLCMTable
 
+    object_detail_content = object_detail.ObjectDetailContent(
+        panels=(
+            object_detail.ObjectFieldsPanel(
+                label="Hardware Notice",
+                weight=100,
+                section=SectionChoices.LEFT_HALF,
+                fields=[
+                    "devices",
+                    "device_type",
+                    "inventory_item",
+                    "end_of_sale",
+                    "end_of_support",
+                    "end_of_sw_releases",
+                    "end_of_security_patches",
+                    "documentation_url",
+                ],
+                value_transforms={
+                    "documentation_url": [helpers.hyperlink_url_new_tab],
+                },
+            ),
+        ),
+    )
+
     def get_extra_context(self, request, instance):  # pylint: disable=signature-differs
         """Return any additional context data for the template.
 
@@ -50,28 +82,54 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
         """
         if not instance:
             return {}
+
         if instance.device_type:
-            return {"devices": Device.objects.restrict(request.user, "view").filter(device_type=instance.device_type)}
-        if instance.inventory_item:
-            return {
-                "devices": Device.objects.restrict(request.user, "view").filter(
-                    inventory_items__part_id=instance.inventory_item
-                )
-            }
-        return {"devices": []}
+            devices = Device.objects.restrict(request.user, "view").filter(device_type=instance.device_type)
+        elif instance.inventory_item:
+            devices = Device.objects.restrict(request.user, "view").filter(
+                inventory_items__part_id=instance.inventory_item
+            )
+        else:
+            devices = []
+
+        # Attach devices to the instance so ObjectFieldsPanel can access it
+        instance.devices = devices
+        return {"devices": devices}
 
 
 class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
     """ValidatedSoftwareLCM UI ViewSet."""
 
-    # TODO: Add bulk edit form
-    # bulk_update_form_class = forms.ValidatedSoftwareLCMBulkEditForm
+    bulk_update_form_class = forms.ValidatedSoftwareLCMBulkEditForm
     filterset_class = filters.ValidatedSoftwareLCMFilterSet
     filterset_form_class = forms.ValidatedSoftwareLCMFilterForm
     form_class = forms.ValidatedSoftwareLCMForm
     queryset = models.ValidatedSoftwareLCM.objects.all()
     serializer_class = serializers.ValidatedSoftwareLCMSerializer
     table_class = tables.ValidatedSoftwareLCMTable
+
+    object_detail_content = object_detail.ObjectDetailContent(
+        panels=(
+            object_detail.ObjectFieldsPanel(
+                weight=100,
+                section=SectionChoices.LEFT_HALF,
+                fields=["software", "start", "end", "valid", "preferred"],
+            ),
+            object_detail.StatsPanel(
+                weight=100,
+                label="Stats",
+                section=SectionChoices.RIGHT_HALF,
+                related_models=[
+                    (Device, "validated_software__in"),
+                    (DeviceType, "validated_software__in"),
+                    (Role, "validated_software__in"),
+                    (InventoryItem, "validated_software__in"),
+                    (Tag, "validated_software__in"),
+                ],
+                filter_name="id",
+            ),
+        ),
+    )
 
 
 # TODO: These should probably move to a StatsPanel using the Component UI Framework in 2.4+
@@ -110,6 +168,28 @@ class ValidatedSoftwareObjectTagTabView(ObjectView):
     template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_object_tags_tab.html"
 
 
+class ContractLCMFieldsPanel(object_detail.ObjectFieldsPanel):
+    """Custom fields panel for ContractLCM."""
+
+    def render_value(self, key, value, context):
+        """Render custom fields for ContractLCM."""
+        instance = context.get("object")
+
+        # Render Devices count as a link to filtered Device list
+        if key == "devices":
+            device_qs = Device.objects.restrict(context["request"].user, "view").filter(device_contracts=instance)
+            device_count = device_qs.count()
+
+            return format_html(
+                '<a href="{}?nautobot_device_lifecycle_mgmt_device_contracts={}">{}</a>',
+                reverse("dcim:device_list"),
+                instance.id,
+                device_count,
+            )
+
+        return super().render_value(key, value, context)
+
+
 class ContractLCMUIViewSet(NautobotUIViewSet):
     """ContractLCM UI ViewSet."""
 
@@ -120,6 +200,28 @@ class ContractLCMUIViewSet(NautobotUIViewSet):
     queryset = models.ContractLCM.objects.all()
     serializer_class = serializers.ContractLCMSerializer
     table_class = tables.ContractLCMTable
+
+    object_detail_content = object_detail.ObjectDetailContent(
+        panels=(
+            ContractLCMFieldsPanel(
+                label="Contract",
+                weight=100,
+                section=SectionChoices.LEFT_HALF,
+                fields=[
+                    "name",
+                    "provider",
+                    "number",
+                    "start",
+                    "end",
+                    "cost",
+                    "currency",
+                    "support_level",
+                    "contract_type",
+                    "devices",
+                ],
+            ),
+        ),
+    )
 
 
 class ProviderLCMUIViewSet(NautobotUIViewSet):
@@ -133,13 +235,59 @@ class ProviderLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.ProviderLCMSerializer
     table_class = tables.ProviderLCMTable
 
-    def get_extra_context(self, request, instance):  # pylint: disable=signature-differs
-        """Return any additional context data for the template.
+    object_detail_content = object_detail.ObjectDetailContent(
+        panels=(
+            object_detail.ObjectFieldsPanel(
+                weight=100,
+                section=SectionChoices.LEFT_HALF,
+                fields=(
+                    "name",
+                    "description",
+                    "email",
+                    "phone",
+                    "physical_address",
+                    "country",
+                    "portal_url",
+                ),
+                value_transforms={
+                    "physical_address": [helpers.render_address],
+                    "phone": [helpers.hyperlinked_phone_number],
+                    "email": [helpers.hyperlinked_email],
+                },
+            ),
+            object_detail.ObjectsTablePanel(
+                weight=200,
+                section=SectionChoices.RIGHT_HALF,
+                table_class=tables.ContractLCMTable,
+                table_filter="provider",
+                related_field_name="provider_id",
+                exclude_columns=["pk", "cost", "devices", "provider", "expired", "active", "tags", "actions"],
+                order_by_fields=["name"],
+                table_title="Service Contracts",
+                show_table_config_button=None,
+            ),
+        ),
+    )
 
-        request: The current request
-        instance: The object being viewed
-        """
-        return {"contracts": models.ContractLCM.objects.restrict(request.user, "view").filter(provider=instance)}
+
+class CVEObjectFieldsPanel(object_detail.ObjectFieldsPanel):
+    """Custom fields panel for CVELCM."""
+
+    def render_value(self, key, value, context):
+        """Render affected software as clickable links."""
+        if key == "affected_softwares":
+            queryset = value.all() if hasattr(value, "all") else value
+
+            if not queryset or not queryset.exists():
+                return format_html("&mdash;")
+
+            return format_html_join(
+                ", ",
+                '<a href="{}">{}</a>',
+                ((reverse("dcim:softwareversion", args=[obj.pk]), str(obj)) for obj in queryset),
+            )
+
+        return super().render_value(key, value, context)
 
 
 class CVELCMUIViewSet(NautobotUIViewSet):
@@ -153,6 +301,29 @@ class CVELCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.CVELCMSerializer
     table_class = tables.CVELCMTable
 
+    object_detail_content = object_detail.ObjectDetailContent(
+        panels=(
+            CVEObjectFieldsPanel(
+                weight=100,
+                section=SectionChoices.LEFT_HALF,
+                fields=[
+                    "name",
+                    "published_date",
+                    "link",
+                    "status",
+                    "description",
+                    "severity",
+                    "cvss",
+                    "cvss_v2",
+                    "cvss_v3",
+                    "affected_softwares",
+                    "fix",
+                ],
+                value_transforms={"link": [helpers.hyperlink_url_new_tab]},
+            ),
+        ),
+    )
+
 
 class VulnerabilityLCMUIViewSet(NautobotUIViewSet):
     """VulnerabilityLCM UI ViewSet."""
@@ -164,6 +335,17 @@ class VulnerabilityLCMUIViewSet(NautobotUIViewSet):
     queryset = models.VulnerabilityLCM.objects.all()
     serializer_class = serializers.VulnerabilityLCMSerializer
     table_class = tables.VulnerabilityLCMTable
+
+    object_detail_content = object_detail.ObjectDetailContent(
+        panels=(
+            object_detail.ObjectFieldsPanel(
+                weight=100,
+                section=SectionChoices.LEFT_HALF,
+                fields="__all__",
+                exclude_fields=["old_software"],
+            ),
+        ),
+    )
 
 
 class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
