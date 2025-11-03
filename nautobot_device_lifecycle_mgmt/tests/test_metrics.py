@@ -1,7 +1,7 @@
 """nautobot_device_lifecycle_mgmt test class for metrics."""
 
 from django.db import ProgrammingError
-from nautobot.core.testing import TestCase
+from nautobot.apps.testing import TestCase
 
 from nautobot_device_lifecycle_mgmt.metrics import (
     metrics_lcm_hw_end_of_support_location,
@@ -10,19 +10,19 @@ from nautobot_device_lifecycle_mgmt.metrics import (
     metrics_lcm_validation_report_inventory_item,
 )
 
-from .conftest import create_devices, create_inventory_item_hardware_notices, create_inventory_items
+from .conftest import create_inventory_item_hardware_notices, create_inventory_items
 
 
 class MetricsTest(TestCase):
     """Test class for Device Lifecycle metrics."""
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         create_inventory_items()
         create_inventory_item_hardware_notices()
 
     def test_metrics_lcm_validation_report_device_type(self):
         """Test metric device_software_compliance_gauge."""
-        create_devices()
         # TODO: Generate DeviceSoftwareValidationResult
         metric_gen = metrics_lcm_validation_report_device_type()
         metric = next(metric_gen)

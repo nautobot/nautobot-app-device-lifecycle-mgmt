@@ -4,11 +4,11 @@
 {% load helpers %}
 
 {% block form %}
-    {% block pre_form %}{% endblock %}
+    {% block pre_form %}{% endblock pre_form %}
     <div class="panel panel-default">
         <div class="panel-heading"><strong>Attributes</strong></div>
         <div class="panel-body">
-            {% render_field form.software %}            
+            {% render_field form.software %}
             {% render_field form.start %}
             {% render_field form.end %}
             {% render_field form.preferred %}
@@ -43,5 +43,5 @@
             </div>
         </div>
     </div>
-    {% include 'inc/extras_features_edit_form_fields.html' %}
-{% endblock %}
+    {% include "inc/extras_features_edit_form_fields.html" %}
+{% endblock form %}

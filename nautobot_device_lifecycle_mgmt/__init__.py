@@ -25,7 +25,6 @@ class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
         "barchart_height": 5,
         "enabled_metrics": [],
     }
-    caching_config = {}
     docs_view_name = "plugins:nautobot_device_lifecycle_mgmt:docs"
     banner_function = "banner.models_migrated_to_core_banner"
     searchable_models = ["hardwarelcm"]

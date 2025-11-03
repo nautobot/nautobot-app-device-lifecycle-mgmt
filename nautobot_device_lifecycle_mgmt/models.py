@@ -291,11 +291,11 @@ class ValidatedSoftwareLCM(PrimaryModel):
     old_software = models.ForeignKey(
         to="SoftwareLCM", on_delete=models.SET_NULL, verbose_name="Software Version", blank=True, null=True
     )
-    devices = models.ManyToManyField(to="dcim.Device", related_name="+", blank=True)
-    device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
-    device_roles = models.ManyToManyField(to="extras.Role", related_name="+", blank=True)
-    inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="+", blank=True)
-    object_tags = models.ManyToManyField(to="extras.Tag", related_name="+", blank=True)
+    devices = models.ManyToManyField(to="dcim.Device", related_name="validated_software", blank=True)
+    device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="validated_software", blank=True)
+    device_roles = models.ManyToManyField(to="extras.Role", related_name="validated_software", blank=True)
+    inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="validated_software", blank=True)
+    object_tags = models.ManyToManyField(to="extras.Tag", related_name="validated_software", blank=True)
     start = models.DateField(verbose_name="Valid Since")
     end = models.DateField(verbose_name="Valid Until", blank=True, null=True)
     preferred = models.BooleanField(verbose_name="Preferred Version", default=False)

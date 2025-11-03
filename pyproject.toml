@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-lifecycle-mgmt"
-version = "3.2.0a0"
+version = "3.2.1a0"
 description = "Manages device lifecycles for platforms and software."
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
@@ -43,8 +43,8 @@ django-debug-toolbar = "<4.4"
 invoke = "*"
 ipython = "*"
 pylint = "*"
-pylint-django = "*"
-pylint-nautobot = "*"
+pylint-django = ">=2.5.4"
+pylint-nautobot = ">=0.3.1"
 ruff = "0.5.5"
 yamllint = "*"
 toml = "*"
@@ -58,6 +58,7 @@ djlint = ">=1.36.4,<2.0.0"
 djhtml = ">=3.0.8,<4.0.0"
 sentry-sdk = "*"
 time-machine = "*"
+tomli = { version = "*", markers = "python_version < '3.11'" }  # tomli is included in the stdlib as of Python 3.11
 
 [tool.poetry.group.docs.dependencies]
 # Render custom markdown for version added/changed/remove notes
@@ -94,7 +95,7 @@ disable = """,
     too-many-positional-arguments,
     nb-warn-dunder-filter-field,
     nb-no-search-function,
-    nb-no-char-filter-q,
+    nb-no-char-filter-q
 """
 
 [tool.pylint.miscellaneous]
@@ -103,11 +104,6 @@ notes = """,
     FIXME,
     XXX,
     """
-
-[tool.pylint-nautobot]
-supported_nautobot_versions = [
-    "3"
-]
 
 [tool.ruff]
 line-length = 120
@@ -179,6 +175,11 @@ filename = "docs/admin/release_notes/version_X.Y.md"
 template = "development/towncrier_template.j2"
 start_string = "<!-- towncrier release notes start -->"
 issue_format = "[#{issue}](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/{issue})"
+
+[[tool.towncrier.type]]
+directory = "breaking"
+name = "Breaking Changes"
+showcontent = true
 
 [[tool.towncrier.type]]
 directory = "security"

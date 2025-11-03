@@ -1,8 +1,8 @@
-{% extends 'utilities/confirmation_form.html' %}
+{% extends "utilities/confirmation_form.html" %}
 {% load form_helpers %}
 
-{% block title %}Delete ValidatedSoftware Object?{% endblock %}
+{% block title %}Delete ValidatedSoftware Object?{% endblock title %}
 
 {% block message %}
     <p>Are you sure you want to delete ValidatedSoftware Object <strong>{{ obj }}</strong>?</p>
-{% endblock %}
+{% endblock message %}
