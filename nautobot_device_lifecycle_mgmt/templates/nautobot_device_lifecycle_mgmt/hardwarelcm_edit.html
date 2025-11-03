@@ -5,15 +5,15 @@
 
 {% block form %}
 {% block pre_form %}{% endblock pre_form %}
-<div class="panel panel-default">
-    <div class="panel-heading"><strong>Assign To</strong></div>
-    <div class="panel-body">
+<div class="card">
+    <div class="card-header"><strong>Assign To</strong></div>
+    <div class="card-body">
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active">
-                <a href="#device_type" role="tab" data-toggle="tab">Device Type</a>
+            <li role="presentation" class="nav-item">
+                <a class="nav-link active" href="#device_type" role="tab" data-bs-toggle="tab">Device Type</a>
             </li>
-            <li role="presentation">
-                <a href="#inventory_item" role="tab" data-toggle="tab">Inventory Item</a>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" href="#inventory_item" role="tab" data-bs-toggle="tab">Inventory Item</a>
             </li>
         </ul>
         <div class="tab-content">
@@ -26,9 +26,9 @@
         </div>
     </div>
 </div>
-<div class="panel panel-default">
-    <div class="panel-heading"><strong>Attributes</strong></div>
-    <div class="panel-body">
+<div class="card">
+    <div class="card-header"><strong>Attributes</strong></div>
+    <div class="card-body">
         {% render_field form.release_date %}
         {% render_field form.end_of_sale %}
         {% render_field form.end_of_support %}

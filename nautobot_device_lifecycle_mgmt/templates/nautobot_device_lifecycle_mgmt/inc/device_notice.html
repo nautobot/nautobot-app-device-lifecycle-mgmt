@@ -8,22 +8,22 @@
             </style>
 
             <!-- Defines all hardware notice logic within this tab-panel. -->
-            <div class="panel panel-default">
-                <div class="panel-heading">
+            <div class="card">
+                <div class="card-header">
                     <strong>Hardware Lifecycle Notices {% badge hw_notices.count show_empty=True %}</strong>
                 </div>
-                <table id="accordion" class="table table-hover panel-body attr-table">
+                <table id="accordion" class="table table-hover card-body attr-table">
                     {% for notice in hw_notices|slice:":5" %}
                     <tbody>
                         <tr>
                             <th colspan="2">
-                                <button type="button" class="btn-link accordion-toggle mdi mdi-chevron-right"
-                                        name="hardware-notices-accordion-{{ forloop.counter }}" data-toggle="collapse"
-                                        data-target=".collapseme-hardware-notices-accordion-{{ forloop.counter }}">
+                                <button type="button" class="btn-link nb-collapse-toggle mdi mdi-chevron-right"
+                                        name="hardware-notices-accordion-{{ forloop.counter }}" data-bs-toggle="collapse"
+                                        data-bs-target=".collapseme-hardware-notices-accordion-{{ forloop.counter }}">
                                     {{ notice }}
                                 </button>
                                 {% if notice.expired %}
-                                    <span class="label label-danger pull-right">Expired</span>
+                                    <span class="badge bg-danger float-end">Expired</span>
                                 {% endif %}
                             </th>
                         </tr>
@@ -61,8 +61,8 @@
                     {% endfor %}
                 </table>
                 {% if hw_notices|length > 5 %}
-                <div class="panel-footer text-right noprint">
-                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list' %}?q={% for inv in object.inventory_items.all %}{% if inv.part_id %}&inventory_item={{ inv.part_id|urlencode }}{% endif %}{% endfor %}" target="_blank" class="btn btn-primary btn-xs">
+                <div class="card-footer text-end d-print-none">
+                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list' %}?q={% for inv in object.inventory_items.all %}{% if inv.part_id %}&inventory_item={{ inv.part_id|urlencode }}{% endif %}{% endfor %}" target="_blank" class="btn btn-primary btn-sm">
                         <span class="mdi mdi-open-in-new" aria-hidden="true"></span>
                         See More Notices
                     </a>

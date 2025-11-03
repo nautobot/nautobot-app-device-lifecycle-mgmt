@@ -3,11 +3,11 @@
 {% load static %}
 
 {% block content %}
-<div class="panel panel-default">
-    <div class="panel-heading">
+<div class="card">
+    <div class="card-header">
         <strong>Object Tags</strong>
     </div>
-    <table class="table table-hover panel-body attr-table">
+    <table class="table table-hover card-body attr-table">
         <tr>
             <td>
                 {% if object.object_tags.all %}
@@ -17,7 +17,7 @@
                     {% endfor %}
                 </ul>
                 {% else %}
-                    <span class="text-muted">None</span>
+                    <span class="text-secondary">None</span>
                 {% endif %}
             </td>
         </tr>
