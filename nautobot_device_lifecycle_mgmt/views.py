@@ -74,14 +74,15 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
         ),
     )
 
-    def get_extra_context(self, request, instance):  # pylint: disable=signature-differs
+    def get_extra_context(self, request, instance=None):
         """Return any additional context data for the template.
 
         request: The current request
         instance: The object being viewed
         """
+        context = super().get_extra_context(request, instance)
         if not instance:
-            return {}
+            return context
 
         if instance.device_type:
             devices = Device.objects.restrict(request.user, "view").filter(device_type=instance.device_type)
@@ -94,7 +95,8 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
 
         # Attach devices to the instance so ObjectFieldsPanel can access it
         instance.devices = devices
-        return {"devices": devices}
+        context["devices"] = devices
+        return context
 
 
 class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
@@ -598,6 +600,7 @@ class HardwareNoticeDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewMixi
     #
     def get_extra_context(self, request, instance=None):
         """Return extra context for template rendering."""
+        context = super().get_extra_context(request, instance)
         try:
             report_last_run = (
                 models.DeviceHardwareNoticeResult.objects.filter(run_type=choices.ReportRunTypeChoices.REPORT_FULL_RUN)
@@ -647,12 +650,13 @@ class HardwareNoticeDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewMixi
             ],
         }
 
-        return {
-            "device_aggr": device_aggr,
-            "device_visual": ReportOverviewHelper.plot_piechart_visual(device_aggr, pie_chart_attrs),
-            "bar_chart": ReportOverviewHelper.plot_barchart_visual_hardware_notice(device_type_qs, bar_chart_attrs),
-            "report_last_run": report_last_run,
-        }
+        context["device_aggr"] = device_aggr
+        context["device_visual"] = ReportOverviewHelper.plot_piechart_visual(device_aggr, pie_chart_attrs)
+        context["bar_chart"] = ReportOverviewHelper.plot_barchart_visual_hardware_notice(
+            device_type_qs, bar_chart_attrs
+        )
+        context["report_last_run"] = report_last_run
+        return context
 
 
 class ValidatedSoftwareDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
@@ -705,6 +709,7 @@ class ValidatedSoftwareDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewM
 
     def get_extra_context(self, request, instance=None):
         """Prepare extra context for template rendering."""
+        context = super().get_extra_context(request, instance)
         try:
             report_last_run = (
                 models.DeviceSoftwareValidationResult.objects.filter(
@@ -749,12 +754,11 @@ class ValidatedSoftwareDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewM
             ],
         }
 
-        return {
-            "device_aggr": device_aggr,
-            "device_visual": ReportOverviewHelper.plot_piechart_visual(device_aggr, pie_chart_attrs),
-            "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
-            "report_last_run": report_last_run,
-        }
+        context["device_aggr"] = device_aggr
+        context["device_visual"] = ReportOverviewHelper.plot_piechart_visual(device_aggr, pie_chart_attrs)
+        context["bar_chart"] = ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs)
+        context["report_last_run"] = report_last_run
+        return context
 
     def queryset_to_csv(self, request=None):
         """Export queryset of objects as comma-separated value (CSV)."""
@@ -879,6 +883,7 @@ class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectLi
 
     def get_extra_context(self, request, instance=None):
         """Prepare extra context for template rendering."""
+        context = super().get_extra_context(request, instance)
         # Get the last full report run
         try:
             report_last_run = (
@@ -924,12 +929,11 @@ class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectLi
             ],
         }
 
-        return {
-            "inventory_aggr": inventory_aggr,
-            "inventory_visual": ReportOverviewHelper.plot_piechart_visual(inventory_aggr, pie_chart_attrs),
-            "bar_chart": ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs),
-            "report_last_run": report_last_run,
-        }
+        context["inventory_aggr"] = inventory_aggr
+        context["inventory_visual"] = ReportOverviewHelper.plot_piechart_visual(inventory_aggr, pie_chart_attrs)
+        context["bar_chart"] = ReportOverviewHelper.plot_barchart_visual(platform_qs, bar_chart_attrs)
+        context["report_last_run"] = report_last_run
+        return context
 
     def queryset_to_csv(self):
         """Export queryset of objects as comma-separated value (CSV)."""
