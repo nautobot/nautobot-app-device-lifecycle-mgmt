@@ -42,31 +42,6 @@ urlpatterns = router.urls
 
 urlpatterns += [
     path(
-        "validated-software/<uuid:pk>/devices/",
-        views.ValidatedSoftwareDeviceTabView.as_view(),
-        name="validatedsoftware_devices_tab",
-    ),
-    path(
-        "validated-software/<uuid:pk>/device-types/",
-        views.ValidatedSoftwareDeviceTypeTabView.as_view(),
-        name="validatedsoftware_device_types_tab",
-    ),
-    path(
-        "validated-software/<uuid:pk>/device-roles/",
-        views.ValidatedSoftwareDeviceRoleTabView.as_view(),
-        name="validatedsoftware_device_roles_tab",
-    ),
-    path(
-        "validated-software/<uuid:pk>/inventory-items/",
-        views.ValidatedSoftwareInventoryItemTabView.as_view(),
-        name="validatedsoftware_inventory_items_tab",
-    ),
-    path(
-        "validated-software/<uuid:pk>/object-tags/",
-        views.ValidatedSoftwareObjectTagTabView.as_view(),
-        name="validatedsoftware_object_tags_tab",
-    ),
-    path(
         "docs/",
         RedirectView.as_view(url=static("nautobot_device_lifecycle_mgmt/docs/index.html")),
         name="docs",

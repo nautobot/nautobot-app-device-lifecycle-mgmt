@@ -137,46 +137,10 @@ class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
                     (InventoryItem, "validated_software__in"),
                     (Tag, "validated_software__in"),
                 ],
-                filter_name="id",
+                filter_name="nautobot_device_lifecycle_mgmt_validated_software",
             ),
         ),
     )
-
-
-# TODO: These should probably move to a StatsPanel using the Component UI Framework in 2.4+
-class ValidatedSoftwareDeviceTabView(ObjectView):
-    """Tab for Validated Software Devices."""
-
-    queryset = models.ValidatedSoftwareLCM.objects.all()
-    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_devices_tab.html"
-
-
-class ValidatedSoftwareDeviceTypeTabView(ObjectView):
-    """Tab for Validated Software Device Types."""
-
-    queryset = models.ValidatedSoftwareLCM.objects.all()
-    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_device_types_tab.html"
-
-
-class ValidatedSoftwareDeviceRoleTabView(ObjectView):
-    """Tab for Validated Software Device Roles."""
-
-    queryset = models.ValidatedSoftwareLCM.objects.all()
-    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_device_roles_tab.html"
-
-
-class ValidatedSoftwareInventoryItemTabView(ObjectView):
-    """Tab for Validated Software Inventory Items."""
-
-    queryset = models.ValidatedSoftwareLCM.objects.all()
-    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_inventory_items_tab.html"
-
-
-class ValidatedSoftwareObjectTagTabView(ObjectView):
-    """Tab for Validated Software Object Tags."""
-
-    queryset = models.ValidatedSoftwareLCM.objects.all()
-    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_object_tags_tab.html"
 
 
 class ContractLCMFieldsPanel(object_detail.ObjectFieldsPanel):
