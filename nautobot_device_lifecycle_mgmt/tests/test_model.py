@@ -48,7 +48,8 @@ class HardwareLCMTestCase(TestCase):
 
         self.assertEqual(hwlcm_obj.device_type, self.device_type)
         self.assertEqual(str(hwlcm_obj.end_of_sale), "2023-04-01")
-        self.assertEqual(str(hwlcm_obj), "Device Type: c9300-24 - End of sale: 2023-04-01")
+        self.assertEqual(str(hwlcm_obj), "c9300-24 (Device Type)")
+        self.assertEqual(hwlcm_obj.display, "Hardware Notice: c9300-24 (Device Type) - End of sale: 2023-04-01")
 
     def test_create_hwlcm_notice_success_eo_support(self):
         """Successfully create basic notice with end_of_support."""
@@ -56,7 +57,8 @@ class HardwareLCMTestCase(TestCase):
 
         self.assertEqual(hwlcm_obj.device_type, self.device_type)
         self.assertEqual(str(hwlcm_obj.end_of_support), "2022-04-01")
-        self.assertEqual(str(hwlcm_obj), "Device Type: c9300-24 - End of support: 2022-04-01")
+        self.assertEqual(str(hwlcm_obj), "c9300-24 (Device Type)")
+        self.assertEqual(hwlcm_obj.display, "Hardware Notice: c9300-24 (Device Type) - End of support: 2022-04-01")
 
     def test_create_hwlcm_success_eo_sale_inventory_item(self):
         """Successfully create basic notice with end_of_sale."""
@@ -65,7 +67,10 @@ class HardwareLCMTestCase(TestCase):
 
         self.assertEqual(hwlcm_obj.inventory_item, inventory_item)
         self.assertEqual(str(hwlcm_obj.end_of_sale), "2023-04-01")
-        self.assertEqual(str(hwlcm_obj), f"Inventory Part: {inventory_item} - End of sale: 2023-04-01")
+        self.assertEqual(str(hwlcm_obj), f"{inventory_item} (Inventory Item)")
+        self.assertEqual(
+            hwlcm_obj.display, f"Hardware Notice: {inventory_item} (Inventory Item) - End of sale: 2023-04-01"
+        )
 
     def test_create_hwlcm_notice_success_eo_all(self):
         """Successfully create basic notice."""
@@ -84,7 +89,8 @@ class HardwareLCMTestCase(TestCase):
         self.assertEqual(str(hwlcm_obj.end_of_sw_releases), "2024-04-01")
         self.assertEqual(str(hwlcm_obj.end_of_security_patches), "2025-04-01")
         self.assertEqual(hwlcm_obj.documentation_url, "https://test.com")
-        self.assertEqual(str(hwlcm_obj), "Device Type: c9300-24 - End of support: 2023-04-01")
+        self.assertEqual(str(hwlcm_obj), "c9300-24 (Device Type)")
+        self.assertEqual(hwlcm_obj.display, "Hardware Notice: c9300-24 (Device Type) - End of support: 2023-04-01")
 
     def test_create_hwlcm_notice_failed_missing_one_of(self):
         """Successfully create basic notice."""
@@ -169,7 +175,9 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         self.assertEqual(str(validatedsoftwarelcm.end), "2022-11-01")
         self.assertEqual(list(validatedsoftwarelcm.device_types.all()), [self.device_type_1])
         self.assertEqual(validatedsoftwarelcm.preferred, False)
-        self.assertEqual(str(validatedsoftwarelcm), f"{self.software} - Valid since: {validatedsoftwarelcm.start}")
+        self.assertEqual(
+            str(validatedsoftwarelcm), f"{self.software.version} - Valid since: {validatedsoftwarelcm.start}"
+        )
 
     def test_validatedsoftwarelcm_valid_property(self):
         """Test behavior of the 'valid' property."""

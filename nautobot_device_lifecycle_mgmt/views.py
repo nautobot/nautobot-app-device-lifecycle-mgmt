@@ -51,7 +51,6 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
     queryset = models.HardwareLCM.objects.prefetch_related("device_type")
     serializer_class = serializers.HardwareLCMSerializer
     table_class = tables.HardwareLCMTable
-    view_titles = Titles(titles={"retrieve": "Hardware Notice: {{ object }}"})
 
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
@@ -111,7 +110,7 @@ class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
     queryset = models.ValidatedSoftwareLCM.objects.all()
     serializer_class = serializers.ValidatedSoftwareLCMSerializer
     table_class = tables.ValidatedSoftwareLCMTable
-    view_titles = Titles(titles={"list": "Validated Software List", "retrieve": "Validated Software: {{ object }}"})
+    view_titles = Titles(titles={"list": "Validated Software List"})
     breadcrumbs = Breadcrumbs(
         items={
             "list": [ModelBreadcrumbItem(label="Validated Software List", model=models.ValidatedSoftwareLCM)],
@@ -175,7 +174,6 @@ class ContractLCMUIViewSet(NautobotUIViewSet):
     queryset = models.ContractLCM.objects.all()
     serializer_class = serializers.ContractLCMSerializer
     table_class = tables.ContractLCMTable
-    view_titles = Titles(titles={"retrieve": "Contract: {{ object }}"})
 
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
@@ -210,7 +208,6 @@ class ProviderLCMUIViewSet(NautobotUIViewSet):
     queryset = models.ProviderLCM.objects.all()
     serializer_class = serializers.ProviderLCMSerializer
     table_class = tables.ProviderLCMTable
-    view_titles = Titles(titles={"retrieve": "Provider: {{ object }}"})
 
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
@@ -277,7 +274,6 @@ class CVELCMUIViewSet(NautobotUIViewSet):
     queryset = models.CVELCM.objects.all()
     serializer_class = serializers.CVELCMSerializer
     table_class = tables.CVELCMTable
-    view_titles = Titles(titles={"retrieve": "CVE: {{ object }}"})
 
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
