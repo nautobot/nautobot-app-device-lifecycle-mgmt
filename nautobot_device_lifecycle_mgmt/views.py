@@ -17,8 +17,8 @@ from django.utils.html import format_html, format_html_join
 from django_tables2 import RequestConfig
 from matplotlib.ticker import MaxNLocator
 from nautobot.apps.choices import ColorChoices
-from nautobot.apps.ui import Breadcrumbs, Titles, InstanceBreadcrumbItem, ModelBreadcrumbItem, ViewNameBreadcrumbItem
-from nautobot.apps.views import NautobotUIViewSet, ObjectView
+from nautobot.apps.ui import Breadcrumbs, ModelBreadcrumbItem, Titles, ViewNameBreadcrumbItem
+from nautobot.apps.views import NautobotUIViewSet
 from nautobot.core.models.querysets import count_related
 from nautobot.core.ui import object_detail
 from nautobot.core.ui.choices import SectionChoices
@@ -792,7 +792,12 @@ class DeviceHardwareNoticeResultUIViewSet(nautobot.apps.views.ObjectListViewMixi
     action_buttons = ("export",)
     breadcrumbs = Breadcrumbs(
         items={
-            "list": [ViewNameBreadcrumbItem(label="Device Hardware Notice Reports", view_name="plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report_list")],
+            "list": [
+                ViewNameBreadcrumbItem(
+                    label="Device Hardware Notice Reports",
+                    view_name="plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report_list",
+                )
+            ],
         }
     )
     view_titles = Titles(titles={"list": "Device Hardware Notice List"})
@@ -809,7 +814,12 @@ class DeviceSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectListView
     action_buttons = ("export",)
     breadcrumbs = Breadcrumbs(
         items={
-            "list": [ViewNameBreadcrumbItem(label="Device Software Validation Reports", view_name="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report_list")],
+            "list": [
+                ViewNameBreadcrumbItem(
+                    label="Device Software Validation Reports",
+                    view_name="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report_list",
+                )
+            ],
         }
     )
     view_titles = Titles(titles={"list": "Device Software Validation List"})
@@ -978,10 +988,16 @@ class InventoryItemSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectL
     action_buttons = ("export",)
     breadcrumbs = Breadcrumbs(
         items={
-            "list": [ViewNameBreadcrumbItem(label="Inventory Software Validation Reports", view_name="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report_list")],
+            "list": [
+                ViewNameBreadcrumbItem(
+                    label="Inventory Software Validation Reports",
+                    view_name="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report_list",
+                )
+            ],
         }
     )
     view_titles = Titles(titles={"list": "Inventory Software Validation List"})
+
 
 class SoftwareVersionRelatedCveView(generic.ObjectView):
     """Related CVEs tab view for SoftwareVersion."""
