@@ -1,14 +1,14 @@
 {% if record %}
     {% if record.device__device_type__model %}
         <a href='{% url "plugins-api:nautobot_device_lifecycle_mgmt-api:devicehardwarenoticeresult-list" %}?device_type={{ record.device__device_type__model }}&format=csv'
-        class="btn btn-default btn-xs" title="Export data for device type" aria-hidden="true"> 
+        class="btn btn-secondary btn-sm" title="Export data for device type" aria-hidden="true"> 
         <i class="mdi mdi-download"></i>
         </a>
 {% comment %}
     This section is disabled because Inventory Item HW Notice reporting is not implemented yet
     {% elif record.inventory_item__part_id %}
         <a href='{% url "plugins-api:nautobot_device_lifecycle_mgmt-api:inventoryitemhardwarenoticeresult-list" %}?device_type={{ record.inventory_item__part_id }}&format=csv'
-        class="btn btn-default btn-xs" title="Export data for device type" aria-hidden="true"> 
+        class="btn btn-secondary btn-sm" title="Export data for device type" aria-hidden="true"> 
         <i class="mdi mdi-download"></i>
         </a>
 {% endcomment %}

@@ -2,8 +2,8 @@
 {% if perms.nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm %}
 {% if validsoft_table %}
 <div class="row">
-    <div class="col-md-12">
-        {% include "panel_table.html" with table=validsoft_table heading="Validated Software matching this object" panel_class="panel panel-default" %}
+    <div class="col-lg-12">
+        {% include "panel_table.html" with table=validsoft_table heading="Validated Software matching this object" %}
     </div>
 </div>
 {% endif %}
