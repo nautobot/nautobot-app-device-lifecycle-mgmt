@@ -17,6 +17,7 @@ from django.utils.html import format_html, format_html_join
 from django_tables2 import RequestConfig
 from matplotlib.ticker import MaxNLocator
 from nautobot.apps.choices import ColorChoices
+from nautobot.apps.ui import Breadcrumbs, Titles, InstanceBreadcrumbItem, ModelBreadcrumbItem, ViewNameBreadcrumbItem
 from nautobot.apps.views import NautobotUIViewSet, ObjectView
 from nautobot.core.models.querysets import count_related
 from nautobot.core.ui import object_detail
@@ -50,6 +51,7 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
     queryset = models.HardwareLCM.objects.prefetch_related("device_type")
     serializer_class = serializers.HardwareLCMSerializer
     table_class = tables.HardwareLCMTable
+    view_titles = Titles(titles={"retrieve": "Hardware Notice: {{ object }}"})
 
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
@@ -109,6 +111,13 @@ class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
     queryset = models.ValidatedSoftwareLCM.objects.all()
     serializer_class = serializers.ValidatedSoftwareLCMSerializer
     table_class = tables.ValidatedSoftwareLCMTable
+    view_titles = Titles(titles={"list": "Validated Software List", "retrieve": "Validated Software: {{ object }}"})
+    breadcrumbs = Breadcrumbs(
+        items={
+            "list": [ModelBreadcrumbItem(label="Validated Software List", model=models.ValidatedSoftwareLCM)],
+            "retrieve": [ModelBreadcrumbItem(label="Validated Software List")],
+        }
+    )
 
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
@@ -202,6 +211,7 @@ class ContractLCMUIViewSet(NautobotUIViewSet):
     queryset = models.ContractLCM.objects.all()
     serializer_class = serializers.ContractLCMSerializer
     table_class = tables.ContractLCMTable
+    view_titles = Titles(titles={"retrieve": "Contract: {{ object }}"})
 
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
@@ -236,6 +246,7 @@ class ProviderLCMUIViewSet(NautobotUIViewSet):
     queryset = models.ProviderLCM.objects.all()
     serializer_class = serializers.ProviderLCMSerializer
     table_class = tables.ProviderLCMTable
+    view_titles = Titles(titles={"retrieve": "Provider: {{ object }}"})
 
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
@@ -302,6 +313,7 @@ class CVELCMUIViewSet(NautobotUIViewSet):
     queryset = models.CVELCM.objects.all()
     serializer_class = serializers.CVELCMSerializer
     table_class = tables.CVELCMTable
+    view_titles = Titles(titles={"retrieve": "CVE: {{ object }}"})
 
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
@@ -814,6 +826,12 @@ class DeviceHardwareNoticeResultUIViewSet(nautobot.apps.views.ObjectListViewMixi
     serializer_class = serializers.DeviceHardwareNoticeResultSerializer
     table_class = tables.DeviceHardwareNoticeResultListTable
     action_buttons = ("export",)
+    breadcrumbs = Breadcrumbs(
+        items={
+            "list": [ViewNameBreadcrumbItem(label="Device Hardware Notice Reports", view_name="plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report_list")],
+        }
+    )
+    view_titles = Titles(titles={"list": "Device Hardware Notice List"})
 
 
 class DeviceSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
@@ -825,6 +843,12 @@ class DeviceSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectListView
     serializer_class = serializers.DeviceSoftwareValidationResultSerializer
     table_class = tables.DeviceSoftwareValidationResultListTable
     action_buttons = ("export",)
+    breadcrumbs = Breadcrumbs(
+        items={
+            "list": [ViewNameBreadcrumbItem(label="Device Software Validation Reports", view_name="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report_list")],
+        }
+    )
+    view_titles = Titles(titles={"list": "Device Software Validation List"})
 
 
 class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
@@ -988,7 +1012,12 @@ class InventoryItemSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectL
     serializer_class = serializers.InventoryItemSoftwareValidationResultSerializer
     table_class = tables.InventoryItemSoftwareValidationResultListTable
     action_buttons = ("export",)
-
+    breadcrumbs = Breadcrumbs(
+        items={
+            "list": [ViewNameBreadcrumbItem(label="Inventory Software Validation Reports", view_name="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report_list")],
+        }
+    )
+    view_titles = Titles(titles={"list": "Inventory Software Validation List"})
 
 class SoftwareVersionRelatedCveView(generic.ObjectView):
     """Related CVEs tab view for SoftwareVersion."""
