@@ -1,11 +1,18 @@
 """Menu items for the Lifecycle Management app."""
 
-from nautobot.apps.ui import NavigationWeightChoices, NavMenuGroup, NavMenuItem, NavMenuTab
+from nautobot.apps.ui import (
+    NavigationIconChoices,
+    NavigationWeightChoices,
+    NavMenuGroup,
+    NavMenuItem,
+    NavMenuTab,
+)
 
 menu_items = (
     NavMenuTab(
         name="Device Lifecycle",
-        weight=NavigationWeightChoices.DESIGN + 50,
+        icon=NavigationIconChoices.DEVICE_LIFECYCLE,
+        weight=NavigationWeightChoices.DEVICE_LIFECYCLE,
         groups=(
             NavMenuGroup(
                 name="Hardware Notices",
