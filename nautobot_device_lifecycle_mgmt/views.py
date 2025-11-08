@@ -179,7 +179,7 @@ class ContractLCMFieldsPanel(object_detail.ObjectFieldsPanel):
                 instance.id,
                 device_count,
             )
-        elif key == "provider":
+        if key == "provider":
             return hyperlinked_object(value, field="name")
 
         return super().render_value(key, value, context)
