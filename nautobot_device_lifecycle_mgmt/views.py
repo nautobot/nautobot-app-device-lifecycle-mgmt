@@ -10,16 +10,24 @@ import matplotlib.pyplot as plt
 import nautobot.apps.views
 import numpy as np
 from django.conf import settings
+from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, ExpressionWrapper, F, FloatField, Q
+from django.template import Context
 from django.urls import reverse
 from django.utils.html import format_html, format_html_join
 from django_tables2 import RequestConfig
 from matplotlib.ticker import MaxNLocator
 from nautobot.apps.choices import ColorChoices
 from nautobot.apps.ui import Breadcrumbs, ModelBreadcrumbItem, Titles, ViewNameBreadcrumbItem
-from nautobot.apps.views import NautobotUIViewSet
+from nautobot.apps.views import NautobotUIViewSet, get_obj_from_context
 from nautobot.core.models.querysets import count_related
+from nautobot.core.templatetags.helpers import (
+    hyperlinked_email,
+    hyperlinked_object,
+    hyperlinked_phone_number,
+    render_address,
+)
 from nautobot.core.ui import object_detail
 from nautobot.core.ui.choices import SectionChoices
 from nautobot.core.views import generic
@@ -41,6 +49,17 @@ GREEN, RED, GREY = (f"#{ColorChoices.COLOR_LIGHT_GREEN}", f"#{ColorChoices.COLOR
 #
 # HardwareLCM UIViewSet
 #
+class HardwareLCMObjectFieldsPanel(object_detail.ObjectFieldsPanel):
+    """Add queryset_list_url_filter to ObjectFieldsPanel."""
+
+    def queryset_list_url_filter(self, key, value, context: Context):
+        """Filter the devices list URL."""
+        if key == "devices":
+            obj = get_obj_from_context(context)
+            return f"nautobot_device_lifecycle_mgmt_hardware_reports={obj.pk}"
+        return super().queryset_list_url_filter(key, value, context)
+
+
 class HardwareLCMUIViewSet(NautobotUIViewSet):
     """HardwareLCM UI ViewSet."""
 
@@ -54,7 +73,7 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
 
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
-            object_detail.ObjectFieldsPanel(
+            HardwareLCMObjectFieldsPanel(
                 label="Hardware Notice",
                 weight=100,
                 section=SectionChoices.LEFT_HALF,
@@ -160,6 +179,8 @@ class ContractLCMFieldsPanel(object_detail.ObjectFieldsPanel):
                 instance.id,
                 device_count,
             )
+        elif key == "provider":
+            return hyperlinked_object(value, field="name")
 
         return super().render_value(key, value, context)
 
@@ -193,6 +214,7 @@ class ContractLCMUIViewSet(NautobotUIViewSet):
                     "contract_type",
                     "devices",
                 ],
+                value_transforms={"cost": [intcomma]},
             ),
         ),
     )
@@ -224,9 +246,9 @@ class ProviderLCMUIViewSet(NautobotUIViewSet):
                     "portal_url",
                 ),
                 value_transforms={
-                    "physical_address": [helpers.render_address],
-                    "phone": [helpers.hyperlinked_phone_number],
-                    "email": [helpers.hyperlinked_email],
+                    "physical_address": [render_address],
+                    "phone": [hyperlinked_phone_number],
+                    "email": [hyperlinked_email],
                 },
             ),
             object_detail.ObjectsTablePanel(
@@ -317,6 +339,7 @@ class VulnerabilityLCMUIViewSet(NautobotUIViewSet):
                 section=SectionChoices.LEFT_HALF,
                 fields="__all__",
                 exclude_fields=["old_software"],
+                key_transforms={"cve": "CVE"},
             ),
         ),
     )

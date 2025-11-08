@@ -1,10 +1,10 @@
 """Extensions to core filters."""
 
-from django_filters import BooleanFilter
+from django_filters import BooleanFilter, ModelMultipleChoiceFilter
 from nautobot.apps.filters import FilterExtension, NaturalKeyOrPKMultipleChoiceFilter
 from nautobot.apps.forms import DynamicModelMultipleChoiceField
 
-from nautobot_device_lifecycle_mgmt.models import ContractLCM, ValidatedSoftwareLCM
+from nautobot_device_lifecycle_mgmt.models import ContractLCM, HardwareLCM, ValidatedSoftwareLCM
 
 
 def distinct_filter(queryset, _, value):
@@ -63,6 +63,11 @@ class DeviceFilterExtension(FilterExtension):
             to_field_name="pk",
             label="Validated Software",
         ),
+        "nautobot_device_lifecycle_mgmt_hardware_reports": ModelMultipleChoiceFilter(
+            field_name="device_type__hardwarelcm",
+            queryset=HardwareLCM.objects.all(),
+            label="Hardware Reports",
+        ),
     }
 
     filterform_fields = {
@@ -74,6 +79,11 @@ class DeviceFilterExtension(FilterExtension):
         "nautobot_device_lifecycle_mgmt_validated_software": DynamicModelMultipleChoiceField(
             queryset=ValidatedSoftwareLCM.objects.all(),
             label="Validated Software",
+            required=False,
+        ),
+        "nautobot_device_lifecycle_mgmt_hardware_reports": DynamicModelMultipleChoiceField(
+            queryset=HardwareLCM.objects.all(),
+            label="Hardware Reports",
             required=False,
         ),
     }
