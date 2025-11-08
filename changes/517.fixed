@@ -1,0 +1,8 @@
+Added a link to a filtered list view of the associated devices on the Hardware Notice detail page.
+Fixed the styling of the Generate button on the vulnerability list view.
+Fixed the vulnerability detail view Cve label - changed to CVE.
+Changed the Contract detail view vendor field to remove the prepended "Provider:" string.
+Fixed Contract detail view cost field to render commas in numbers >999.
+Fixed the ProviderLCM.physical_address field rendering on the detail view.
+Converted the 3 report views to standard object_list templates, updating the filter form from the v1 style to the v3 style, fixing the execute button dropdown and fixing the table configure button.
+Fixed the Device Hardware Notice List view pointing to the wrong model.
