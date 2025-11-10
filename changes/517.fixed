@@ -6,3 +6,4 @@ Fixed Contract detail view cost field to render commas in numbers >999.
 Fixed the ProviderLCM.physical_address field rendering on the detail view.
 Converted the 3 report views to standard object_list templates, updating the filter form from the v1 style to the v3 style, fixing the execute button dropdown and fixing the table configure button.
 Fixed the Device Hardware Notice List view pointing to the wrong model.
+Fixed the hardware notices table not rendering on the device page.
