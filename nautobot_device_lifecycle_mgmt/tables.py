@@ -26,6 +26,16 @@ class PercentageColumn(tables.Column):
         return f"{value} %"
 
 
+class ReportButtonsColumn(tables.TemplateColumn):
+    """Custom ButtonsColumn for tables in the report views."""
+
+    attrs = {
+        "td": {"class": "d-print-none text-end text-nowrap nb-actions nb-w-0"},
+        "tf": {"class": "nb-w-0"},
+        "th": {"class": "nb-actionable nb-w-0"},
+    }
+
+
 class HardwareLCMTable(BaseTable):
     """Table for list view."""
 
@@ -132,7 +142,7 @@ class DeviceHardwareNoticeResultTable(BaseTable):
         verbose_name="Unsupported",
     )
     valid_percent = PercentageColumn(accessor="valid_percent", verbose_name="Support (%)")
-    actions = tables.TemplateColumn(
+    actions = ReportButtonsColumn(
         template_name="nautobot_device_lifecycle_mgmt/inc/validated_hw_notice_report_actions.html",
         orderable=False,
         verbose_name="Export Data",
@@ -165,7 +175,7 @@ class DeviceHardwareNoticeResultListTable(BaseTable):  # pylint: disable=nb-sub-
     class Meta(BaseTable.Meta):
         """Metaclass attributes of DeviceHardwareNoticeResultListTable."""
 
-        model = DeviceSoftwareValidationResult
+        model = DeviceHardwareNoticeResult
         fields = ["device", "hardware_notice", "valid", "last_run", "run_type"]
         default_columns = [
             "device",
@@ -202,7 +212,7 @@ class DeviceSoftwareValidationResultTable(BaseTable):
         '?&device_type={{ record.device__device_type__model }}&sw_missing_only=True">{{ record.no_software }}</a>'
     )
     valid_percent = PercentageColumn(accessor="valid_percent", verbose_name="Compliance (%)")
-    actions = tables.TemplateColumn(
+    actions = ReportButtonsColumn(
         template_name="nautobot_device_lifecycle_mgmt/inc/validated_report_actions.html",
         orderable=False,
         verbose_name="Export Data",
@@ -300,7 +310,7 @@ class InventoryItemSoftwareValidationResultTable(BaseTable):
         '?&part_id={{ record.inventory_item__part_id }}&sw_missing_only=True">{{ record.no_software }}</a>'
     )
     valid_percent = PercentageColumn(accessor="valid_percent", verbose_name="Compliance (%)")
-    actions = tables.TemplateColumn(
+    actions = ReportButtonsColumn(
         template_name="nautobot_device_lifecycle_mgmt/inc/validated_report_actions.html",
         orderable=False,
         verbose_name="Export Data",
