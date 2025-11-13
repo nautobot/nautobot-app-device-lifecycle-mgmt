@@ -1,10 +1,6 @@
 {% load helpers %}
 {% if perms.nautobot_device_lifecycle_mgmt.view_contractlcm %}
-<div class="row">
     {% if contracts_table %}
-    <div class="col-lg-12">
         {% include "panel_table.html" with table=contracts_table heading="Contracts" %}
-    </div>
     {% endif %}
-</div>
 {% endif %}
