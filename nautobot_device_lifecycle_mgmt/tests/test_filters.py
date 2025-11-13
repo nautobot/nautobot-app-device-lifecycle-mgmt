@@ -1,4 +1,4 @@
-# pylint: disable=no-member,too-many-lines
+# pylint: disable=no-member,too-many-lines,too-many-public-methods
 """Test filters for lifecycle management."""
 
 from datetime import date, datetime, timedelta
@@ -38,8 +38,11 @@ from .conftest import create_cves, create_devices, create_inventory_items, creat
 
 
 class CommonTestDataMixin:
+    """Mixin to add common test data to the TestCase classes."""
+
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):  # pylint: disable=invalid-name
+        """Class method to set up the test data."""
         cls.manufacturer1, _ = Manufacturer.objects.get_or_create(name="Cisco")
         cls.manufacturer2, _ = Manufacturer.objects.get_or_create(name="mfr2")
         cls.manufacturer3, _ = Manufacturer.objects.get_or_create(name="mfr3")
