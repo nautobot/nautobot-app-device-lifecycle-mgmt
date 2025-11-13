@@ -132,7 +132,6 @@ class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
     view_titles = Titles(titles={"list": "Validated Software List"})
     breadcrumbs = Breadcrumbs(
         items={
-            "list": [ModelBreadcrumbItem(label="Validated Software List", model=models.ValidatedSoftwareLCM)],
             "retrieve": [ModelBreadcrumbItem(label="Validated Software List")],
         }
     )
