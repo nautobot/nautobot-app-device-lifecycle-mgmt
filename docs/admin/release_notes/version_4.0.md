@@ -5,18 +5,23 @@ This document describes all new features and changes in the release. The format 
 
 ## Release Overview
 
-- Added support for Nautobot 3.0.
-- Added support for Python 3.13.
+This major release marks the compatibility of the Device Lifecycle Management App with Nautobot v3.0.0. Check out the [full details](https://docs.nautobot.com/projects/core/en/stable/release-notes/version-3.0/) of the major changes included in this new major release of Nautobot. Highlights:
 
-## [v4.0.0a2 (2025-11-06)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v4.0.0a2)
+* Added support for Python 3.13.
 
-### Changed
+The minimum version of Nautobot required for this app is Nautobot 3.0. We will continue to support the previous major release for users of Nautobot LTM 2.4 only with bug and security fixes as per the LTM Policy. (Add note about previous major version compatible with LTM with link to website LTM policy.)
 
-- [#514](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/514) - Updated navigation menu icon and weights to match Nautobot standard.
-
-## [v4.0.0a1 (2025-11-04)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v4.0.0a1)
+## [v4.0.0 (2025-11-17)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v4.0.0)
 
 ### Added
 
 - Added support for Python 3.13.
 - Added support for Nautobot 3.0.
+
+### Changed
+
+- [#514](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/514) - Updated navigation menu icon and weights to match Nautobot standard.
+
+## [v4.0.0a2 (2025-11-06)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v4.0.0a2)
+
+## [v4.0.0a1 (2025-11-04)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v4.0.0a1)
