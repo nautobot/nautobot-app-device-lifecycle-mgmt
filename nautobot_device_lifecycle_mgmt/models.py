@@ -312,6 +312,18 @@ class ValidatedSoftwareLCM(PrimaryModel):
         ordering = ("software", "preferred", "start")
         unique_together = ("software", "start", "end")
 
+    clone_fields = (
+        "software",
+        "devices",
+        "device_types",
+        "device_roles",
+        "inventory_items",
+        "object_tags",
+        "start",
+        "end",
+        "preferred",
+    )
+
     def __str__(self):
         """String representation of ValidatedSoftwareLCM."""
         return f"{self.software.version} - Valid since: {self.start}"
