@@ -52,7 +52,7 @@ namespace = Collection("nautobot_device_lifecycle_mgmt")
 namespace.configure(
     {
         "nautobot_device_lifecycle_mgmt": {
-            "nautobot_ver": "next",  # TODO: Change to 3.0.0 after v3.0.0 is released
+            "nautobot_ver": "3.0.0",
             "project_name": "nautobot-device-lifecycle-mgmt",
             "python_ver": "3.13",
             "local": False,
