@@ -10,15 +10,24 @@ import matplotlib.pyplot as plt
 import nautobot.apps.views
 import numpy as np
 from django.conf import settings
+from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, ExpressionWrapper, F, FloatField, Q
+from django.template import Context
 from django.urls import reverse
 from django.utils.html import format_html, format_html_join
 from django_tables2 import RequestConfig
 from matplotlib.ticker import MaxNLocator
 from nautobot.apps.choices import ColorChoices
-from nautobot.apps.views import NautobotUIViewSet, ObjectView
+from nautobot.apps.ui import Breadcrumbs, ModelBreadcrumbItem, Titles, ViewNameBreadcrumbItem
+from nautobot.apps.views import NautobotUIViewSet, get_obj_from_context
 from nautobot.core.models.querysets import count_related
+from nautobot.core.templatetags.helpers import (
+    hyperlinked_email,
+    hyperlinked_object,
+    hyperlinked_phone_number,
+    render_address,
+)
 from nautobot.core.ui import object_detail
 from nautobot.core.ui.choices import SectionChoices
 from nautobot.core.views import generic
@@ -40,6 +49,17 @@ GREEN, RED, GREY = (f"#{ColorChoices.COLOR_LIGHT_GREEN}", f"#{ColorChoices.COLOR
 #
 # HardwareLCM UIViewSet
 #
+class HardwareLCMObjectFieldsPanel(object_detail.ObjectFieldsPanel):
+    """Add queryset_list_url_filter to ObjectFieldsPanel."""
+
+    def queryset_list_url_filter(self, key, value, context: Context):
+        """Filter the devices list URL."""
+        if key == "devices":
+            obj = get_obj_from_context(context)
+            return f"nautobot_device_lifecycle_mgmt_hardware_reports={obj.pk}"
+        return super().queryset_list_url_filter(key, value, context)
+
+
 class HardwareLCMUIViewSet(NautobotUIViewSet):
     """HardwareLCM UI ViewSet."""
 
@@ -53,7 +73,7 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
 
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
-            object_detail.ObjectFieldsPanel(
+            HardwareLCMObjectFieldsPanel(
                 label="Hardware Notice",
                 weight=100,
                 section=SectionChoices.LEFT_HALF,
@@ -109,6 +129,12 @@ class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
     queryset = models.ValidatedSoftwareLCM.objects.all()
     serializer_class = serializers.ValidatedSoftwareLCMSerializer
     table_class = tables.ValidatedSoftwareLCMTable
+    view_titles = Titles(titles={"list": "Validated Software List"})
+    breadcrumbs = Breadcrumbs(
+        items={
+            "retrieve": [ModelBreadcrumbItem(label="Validated Software List")],
+        }
+    )
 
     object_detail_content = object_detail.ObjectDetailContent(
         panels=(
@@ -128,46 +154,10 @@ class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
                     (InventoryItem, "validated_software__in"),
                     (Tag, "validated_software__in"),
                 ],
-                filter_name="id",
+                filter_name="nautobot_device_lifecycle_mgmt_validated_software",
             ),
         ),
     )
-
-
-# TODO: These should probably move to a StatsPanel using the Component UI Framework in 2.4+
-class ValidatedSoftwareDeviceTabView(ObjectView):
-    """Tab for Validated Software Devices."""
-
-    queryset = models.ValidatedSoftwareLCM.objects.all()
-    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_devices_tab.html"
-
-
-class ValidatedSoftwareDeviceTypeTabView(ObjectView):
-    """Tab for Validated Software Device Types."""
-
-    queryset = models.ValidatedSoftwareLCM.objects.all()
-    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_device_types_tab.html"
-
-
-class ValidatedSoftwareDeviceRoleTabView(ObjectView):
-    """Tab for Validated Software Device Roles."""
-
-    queryset = models.ValidatedSoftwareLCM.objects.all()
-    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_device_roles_tab.html"
-
-
-class ValidatedSoftwareInventoryItemTabView(ObjectView):
-    """Tab for Validated Software Inventory Items."""
-
-    queryset = models.ValidatedSoftwareLCM.objects.all()
-    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_inventory_items_tab.html"
-
-
-class ValidatedSoftwareObjectTagTabView(ObjectView):
-    """Tab for Validated Software Object Tags."""
-
-    queryset = models.ValidatedSoftwareLCM.objects.all()
-    template_name = "nautobot_device_lifecycle_mgmt/validatedsoftwarelcm_object_tags_tab.html"
 
 
 class ContractLCMFieldsPanel(object_detail.ObjectFieldsPanel):
@@ -188,6 +178,8 @@ class ContractLCMFieldsPanel(object_detail.ObjectFieldsPanel):
                 instance.id,
                 device_count,
             )
+        if key == "provider":
+            return hyperlinked_object(value, field="name")
 
         return super().render_value(key, value, context)
 
@@ -221,6 +213,7 @@ class ContractLCMUIViewSet(NautobotUIViewSet):
                     "contract_type",
                     "devices",
                 ],
+                value_transforms={"cost": [intcomma]},
             ),
         ),
     )
@@ -252,9 +245,9 @@ class ProviderLCMUIViewSet(NautobotUIViewSet):
                     "portal_url",
                 ),
                 value_transforms={
-                    "physical_address": [helpers.render_address],
-                    "phone": [helpers.hyperlinked_phone_number],
-                    "email": [helpers.hyperlinked_email],
+                    "physical_address": [render_address],
+                    "phone": [hyperlinked_phone_number],
+                    "email": [hyperlinked_email],
                 },
             ),
             object_detail.ObjectsTablePanel(
@@ -345,6 +338,7 @@ class VulnerabilityLCMUIViewSet(NautobotUIViewSet):
                 section=SectionChoices.LEFT_HALF,
                 fields="__all__",
                 exclude_fields=["old_software"],
+                key_transforms={"cve": "CVE"},
             ),
         ),
     )
@@ -814,6 +808,17 @@ class DeviceHardwareNoticeResultUIViewSet(nautobot.apps.views.ObjectListViewMixi
     serializer_class = serializers.DeviceHardwareNoticeResultSerializer
     table_class = tables.DeviceHardwareNoticeResultListTable
     action_buttons = ("export",)
+    breadcrumbs = Breadcrumbs(
+        items={
+            "list": [
+                ViewNameBreadcrumbItem(
+                    label="Device Hardware Notice Reports",
+                    view_name="plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report_list",
+                )
+            ],
+        }
+    )
+    view_titles = Titles(titles={"list": "Device Hardware Notice List"})
 
 
 class DeviceSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
@@ -825,6 +830,17 @@ class DeviceSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectListView
     serializer_class = serializers.DeviceSoftwareValidationResultSerializer
     table_class = tables.DeviceSoftwareValidationResultListTable
     action_buttons = ("export",)
+    breadcrumbs = Breadcrumbs(
+        items={
+            "list": [
+                ViewNameBreadcrumbItem(
+                    label="Device Software Validation Reports",
+                    view_name="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report_list",
+                )
+            ],
+        }
+    )
+    view_titles = Titles(titles={"list": "Device Software Validation List"})
 
 
 class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
@@ -988,6 +1004,17 @@ class InventoryItemSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectL
     serializer_class = serializers.InventoryItemSoftwareValidationResultSerializer
     table_class = tables.InventoryItemSoftwareValidationResultListTable
     action_buttons = ("export",)
+    breadcrumbs = Breadcrumbs(
+        items={
+            "list": [
+                ViewNameBreadcrumbItem(
+                    label="Inventory Software Validation Reports",
+                    view_name="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report_list",
+                )
+            ],
+        }
+    )
+    view_titles = Titles(titles={"list": "Inventory Software Validation List"})
 
 
 class SoftwareVersionRelatedCveView(generic.ObjectView):

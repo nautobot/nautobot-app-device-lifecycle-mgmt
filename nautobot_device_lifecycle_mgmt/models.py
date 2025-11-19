@@ -80,12 +80,17 @@ class HardwareLCM(PrimaryModel):
 
     def __str__(self):
         """String representation of HardwareLCMs."""
-        name = f"Device Type: {self.device_type}" if self.device_type else f"Inventory Part: {self.inventory_item}"
+        return f"{self.device_type} (Device Type)" if self.device_type else f"{self.inventory_item} (Inventory Item)"
+
+    @property
+    def display(self):
+        """Return a display name for the HardwareLCM."""
+        name = str(self)
         if self.end_of_support:
             msg = f"{name} - End of support: {self.end_of_support}"
         else:
             msg = f"{name} - End of sale: {self.end_of_sale}"
-        return msg
+        return f"Hardware Notice: {msg}"
 
     @property
     def expired(self):
@@ -321,8 +326,12 @@ class ValidatedSoftwareLCM(PrimaryModel):
 
     def __str__(self):
         """String representation of ValidatedSoftwareLCM."""
-        msg = f"{self.software} - Valid since: {self.start}"
-        return msg
+        return f"{self.software.version} - Valid since: {self.start}"
+
+    @property
+    def display(self):
+        """Return a display name for the ValidatedSoftwareLCM."""
+        return f"Validated Software: {str(self)}"
 
     @property
     def valid(self):
@@ -480,12 +489,9 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
     def __str__(self):
         """String representation of InventoryItemSoftwareValidationResult."""
         if self.is_validated:
-            msg = f"Inventory Item: {self.inventory_item.name} - " f"Device: {self.inventory_item.device.name} - Valid"
+            msg = f"Inventory Item: {self.inventory_item.name} - Device: {self.inventory_item.device.name} - Valid"
         else:
-            msg = (
-                f"Inventory Item: {self.inventory_item.name} - "
-                f"Device: {self.inventory_item.device.name} - Not Valid"
-            )
+            msg = f"Inventory Item: {self.inventory_item.name} - Device: {self.inventory_item.device.name} - Not Valid"
         return msg
 
 
@@ -550,6 +556,11 @@ class ContractLCM(PrimaryModel):
     def __str__(self):
         """String representation of ContractLCM."""
         return f"{self.name}"
+
+    @property
+    def display(self):
+        """Return a display name for the ContractLCM."""
+        return f"Contract: {str(self)}"
 
     @property
     def expired(self):
@@ -628,6 +639,11 @@ class ProviderLCM(OrganizationalModel):
     def __str__(self):
         """String representation of ProviderLCM."""
         return f"{self.name}"
+
+    @property
+    def display(self):
+        """Return a display name for the ProviderLCM."""
+        return f"Provider: {str(self)}"
 
     def save(self, *args, **kwargs):
         """Override save to assert a full clean."""
@@ -738,6 +754,11 @@ class CVELCM(PrimaryModel):
         """String representation of the model."""
         return f"{self.name}"
 
+    @property
+    def display(self):
+        """Return a display name for the CVELCM."""
+        return f"CVE: {str(self)}"
+
 
 @extras_features(
     "custom_fields",
@@ -763,6 +784,8 @@ class VulnerabilityLCM(PrimaryModel):
         on_delete=models.PROTECT,
         to="extras.status",
     )
+
+    natural_key_field_lookups = ["pk"]
 
     class Meta:
         """Meta attributes for the class."""

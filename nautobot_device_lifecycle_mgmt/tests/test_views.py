@@ -266,7 +266,6 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the VulnerabilityLCM views."""
 
     model = VulnerabilityLCM
-    allowed_number_of_tree_queries_per_view_type = {"retrieve": 1}
 
     @classmethod
     def setUpTestData(cls):  # pylint: disable=invalid-name

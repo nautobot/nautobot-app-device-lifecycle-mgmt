@@ -6,7 +6,7 @@ from datetime import date
 import time_machine
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from nautobot.apps.testing import TestCase
 from nautobot.dcim.models import DeviceType, Manufacturer, Platform, SoftwareVersion
 from nautobot.extras.models import Status
 
@@ -36,10 +36,11 @@ from .conftest import (
 class HardwareLCMTestCase(TestCase):
     """Tests for the HardwareLCM models."""
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         """Set up base objects."""
-        self.manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
-        self.device_type, _ = DeviceType.objects.get_or_create(model="c9300-24", manufacturer=self.manufacturer)
+        cls.manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+        cls.device_type, _ = DeviceType.objects.get_or_create(model="c9300-24", manufacturer=cls.manufacturer)
 
     def test_create_hwlcm_success_eo_sale(self):
         """Successfully create basic notice with end_of_sale."""
@@ -47,7 +48,8 @@ class HardwareLCMTestCase(TestCase):
 
         self.assertEqual(hwlcm_obj.device_type, self.device_type)
         self.assertEqual(str(hwlcm_obj.end_of_sale), "2023-04-01")
-        self.assertEqual(str(hwlcm_obj), "Device Type: c9300-24 - End of sale: 2023-04-01")
+        self.assertEqual(str(hwlcm_obj), "c9300-24 (Device Type)")
+        self.assertEqual(hwlcm_obj.display, "Hardware Notice: c9300-24 (Device Type) - End of sale: 2023-04-01")
 
     def test_create_hwlcm_notice_success_eo_support(self):
         """Successfully create basic notice with end_of_support."""
@@ -55,7 +57,8 @@ class HardwareLCMTestCase(TestCase):
 
         self.assertEqual(hwlcm_obj.device_type, self.device_type)
         self.assertEqual(str(hwlcm_obj.end_of_support), "2022-04-01")
-        self.assertEqual(str(hwlcm_obj), "Device Type: c9300-24 - End of support: 2022-04-01")
+        self.assertEqual(str(hwlcm_obj), "c9300-24 (Device Type)")
+        self.assertEqual(hwlcm_obj.display, "Hardware Notice: c9300-24 (Device Type) - End of support: 2022-04-01")
 
     def test_create_hwlcm_success_eo_sale_inventory_item(self):
         """Successfully create basic notice with end_of_sale."""
@@ -64,7 +67,10 @@ class HardwareLCMTestCase(TestCase):
 
         self.assertEqual(hwlcm_obj.inventory_item, inventory_item)
         self.assertEqual(str(hwlcm_obj.end_of_sale), "2023-04-01")
-        self.assertEqual(str(hwlcm_obj), f"Inventory Part: {inventory_item} - End of sale: 2023-04-01")
+        self.assertEqual(str(hwlcm_obj), f"{inventory_item} (Inventory Item)")
+        self.assertEqual(
+            hwlcm_obj.display, f"Hardware Notice: {inventory_item} (Inventory Item) - End of sale: 2023-04-01"
+        )
 
     def test_create_hwlcm_notice_success_eo_all(self):
         """Successfully create basic notice."""
@@ -83,7 +89,8 @@ class HardwareLCMTestCase(TestCase):
         self.assertEqual(str(hwlcm_obj.end_of_sw_releases), "2024-04-01")
         self.assertEqual(str(hwlcm_obj.end_of_security_patches), "2025-04-01")
         self.assertEqual(hwlcm_obj.documentation_url, "https://test.com")
-        self.assertEqual(str(hwlcm_obj), "Device Type: c9300-24 - End of support: 2023-04-01")
+        self.assertEqual(str(hwlcm_obj), "c9300-24 (Device Type)")
+        self.assertEqual(hwlcm_obj.display, "Hardware Notice: c9300-24 (Device Type) - End of support: 2023-04-01")
 
     def test_create_hwlcm_notice_failed_missing_one_of(self):
         """Successfully create basic notice."""
@@ -119,23 +126,24 @@ class HardwareLCMTestCase(TestCase):
 class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
     """Tests for the ValidatedSoftwareLCM model."""
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         """Set up base objects."""
         device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
         active_status, _ = Status.objects.get_or_create(name="Active")
         active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
-        self.software = SoftwareVersion.objects.create(
+        cls.software = SoftwareVersion.objects.create(
             platform=device_platform,
             version="17.3.3 MD",
             release_date=date(2019, 1, 10),
             status=active_status,
         )
         manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
-        self.device_type_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="ASR-1000")
-        self.device_type_2, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="CAT-3750")
-        self.content_type_devicetype = ContentType.objects.get(app_label="dcim", model="devicetype")
-        self.device_1, self.device_2 = create_devices()[:2]
-        self.inventoryitem_1, self.inventoryitem_2 = create_inventory_items()[:2]
+        cls.device_type_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="ASR-1000")
+        cls.device_type_2, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="CAT-3750")
+        cls.content_type_devicetype = ContentType.objects.get(app_label="dcim", model="devicetype")
+        cls.inventoryitem_1, cls.inventoryitem_2 = create_inventory_items()[:2]
+        cls.device_1, cls.device_2 = cls.inventoryitem_1.device, cls.inventoryitem_2.device
 
     def test_create_validatedsoftwarelcm_required_only(self):
         """Successfully create ValidatedSoftwareLCM with required fields only."""
@@ -167,7 +175,9 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         self.assertEqual(str(validatedsoftwarelcm.end), "2022-11-01")
         self.assertEqual(list(validatedsoftwarelcm.device_types.all()), [self.device_type_1])
         self.assertEqual(validatedsoftwarelcm.preferred, False)
-        self.assertEqual(str(validatedsoftwarelcm), f"{self.software} - Valid since: {validatedsoftwarelcm.start}")
+        self.assertEqual(
+            str(validatedsoftwarelcm), f"{self.software.version} - Valid since: {validatedsoftwarelcm.start}"
+        )
 
     def test_validatedsoftwarelcm_valid_property(self):
         """Test behavior of the 'valid' property."""
@@ -270,18 +280,19 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
 class DeviceSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
     """Tests for the DeviceSoftwareValidationResult model."""
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         """Set up test objects."""
-        self.device = create_devices()[0]
-        self.platform = Platform.objects.all().first()
+        cls.device = create_devices()[0]
+        cls.platform = Platform.objects.all().first()
         (
-            self.software_one,
-            self.software_two,
-            self.validatedsoftwarelcm,
-            self.validatedsoftwarelcm_two,
+            cls.software_one,
+            cls.software_two,
+            cls.validatedsoftwarelcm,
+            cls.validatedsoftwarelcm_two,
         ) = create_validated_softwares()
-        self.validated_software_qs = ValidatedSoftwareLCM.objects.get_for_object(self.validatedsoftwarelcm)
-        self.validated_software_qs_two = ValidatedSoftwareLCM.objects.get_for_object(self.validatedsoftwarelcm_two)
+        cls.validated_software_qs = ValidatedSoftwareLCM.objects.get_for_object(cls.validatedsoftwarelcm)
+        cls.validated_software_qs_two = ValidatedSoftwareLCM.objects.get_for_object(cls.validatedsoftwarelcm_two)
 
     def test_create_devicesoftwarevalidationresult(self):
         """Successfully create SoftwareLCM with required fields only."""
@@ -321,10 +332,11 @@ class DeviceSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-m
 class DeviceHardwareNoticeResultTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
     """Tests for the DeviceHardwareNoticeResult model."""
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         """Set up test objects."""
-        self.devices = create_devices()
-        self.hardware_notices = create_device_type_hardware_notices()
+        cls.devices = create_devices()
+        cls.hardware_notices = create_device_type_hardware_notices()
 
     def test_create_devicehardwarenoticeresult(self):
         """Successfully create DeviceHardwareNoticeResult with required fields only."""
@@ -344,19 +356,20 @@ class DeviceHardwareNoticeResultTestCase(TestCase):  # pylint: disable=too-many-
 class InventoryItemSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
     """Tests for the DeviceSoftwareValidationResult model."""
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         """Set up test objects."""
-        self.inventory_item = create_inventory_items()[0]
-        self.platform = Platform.objects.all().first()
-        self.platform = Platform.objects.all().first()
+        cls.inventory_item = create_inventory_items()[0]
+        cls.platform = Platform.objects.all().first()
+        cls.platform = Platform.objects.all().first()
         (
-            self.software_one,
-            self.software_two,
-            self.validatedsoftwarelcm,
-            self.validatedsoftwarelcm_two,
+            cls.software_one,
+            cls.software_two,
+            cls.validatedsoftwarelcm,
+            cls.validatedsoftwarelcm_two,
         ) = create_validated_softwares()
-        self.validated_software_qs = ValidatedSoftwareLCM.objects.get_for_object(self.validatedsoftwarelcm)
-        self.validated_software_qs_two = ValidatedSoftwareLCM.objects.get_for_object(self.validatedsoftwarelcm_two)
+        cls.validated_software_qs = ValidatedSoftwareLCM.objects.get_for_object(cls.validatedsoftwarelcm)
+        cls.validated_software_qs_two = ValidatedSoftwareLCM.objects.get_for_object(cls.validatedsoftwarelcm_two)
 
     def test_create_itemsoftwarevalidationresult(self):
         """Successfully create SoftwareLCM with required fields only."""
@@ -396,17 +409,18 @@ class InventoryItemSoftwareValidationResultTestCase(TestCase):  # pylint: disabl
 class CVELCMTestCase(TestCase):
     """Tests for the CVELCM model."""
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         """Set up the test objects."""
-        self.device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
+        cls.device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
         active_status, _ = Status.objects.get_or_create(name="Active")
         active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
-        self.software = SoftwareVersion.objects.create(
-            platform=self.device_platform, version="15.2(5)e", status=active_status
+        cls.software = SoftwareVersion.objects.create(
+            platform=cls.device_platform, version="15.2(5)e", status=active_status
         )
-        self.cve_ct = ContentType.objects.get_for_model(CVELCM)
-        self.status, _ = Status.objects.get_or_create(name="Fixed", color="4caf50", description="Unit has been fixed")
-        self.status.content_types.set([self.cve_ct])
+        cls.cve_ct = ContentType.objects.get_for_model(CVELCM)
+        cls.status, _ = Status.objects.get_or_create(name="Fixed", color="4caf50", description="Unit has been fixed")
+        cls.status.content_types.set([cls.cve_ct])
 
     def test_create_cvelcm_required_only(self):
         """Successfully create CVELCM with required fields only."""
@@ -453,15 +467,16 @@ class CVELCMTestCase(TestCase):
 class VulnerabilityLCMTestCase(TestCase):
     """Tests for the VulnerabilityLCM model."""
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         """Set up the test objects."""
-        self.inv_items = create_inventory_items()
-        self.devices = [inv_item.device for inv_item in self.inv_items]
-        self.cves = create_cves()
-        self.softwares = create_softwares()
+        cls.inv_items = create_inventory_items()
+        cls.devices = [inv_item.device for inv_item in cls.inv_items]
+        cls.cves = create_cves()
+        cls.softwares = create_softwares()
         vuln_ct = ContentType.objects.get_for_model(VulnerabilityLCM)
-        self.status = Status.objects.create(name="Exempt", color="4caf50", description="This unit is exempt.")
-        self.status.content_types.set([vuln_ct])
+        cls.status = Status.objects.create(name="Exempt", color="4caf50", description="This unit is exempt.")
+        cls.status.content_types.set([vuln_ct])
 
     def test_create_vulnerabilitylcm_device_required_only(self):
         """Successfully create VulnerabilityLCM for device with required fields only."""

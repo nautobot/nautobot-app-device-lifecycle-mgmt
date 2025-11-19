@@ -1,13 +1,18 @@
 """Menu items for the Lifecycle Management app."""
 
-# pylint: disable=C0412
-from nautobot.core.apps import NavMenuButton, NavMenuGroup, NavMenuItem, NavMenuTab
-from nautobot.core.choices import ButtonColorChoices
+from nautobot.apps.ui import (
+    NavigationIconChoices,
+    NavigationWeightChoices,
+    NavMenuGroup,
+    NavMenuItem,
+    NavMenuTab,
+)
 
 menu_items = (
     NavMenuTab(
         name="Device Lifecycle",
-        weight=600,
+        icon=NavigationIconChoices.DEVICE_LIFECYCLE,
+        weight=NavigationWeightChoices.DEVICE_LIFECYCLE,
         groups=(
             NavMenuGroup(
                 name="Hardware Notices",
@@ -16,26 +21,7 @@ menu_items = (
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list",
                         name="Hardware Notices",
-                        buttons=(
-                            NavMenuButton(
-                                link="plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_add",
-                                title="Add",
-                                icon_class="mdi mdi-plus-thick",
-                                button_class=ButtonColorChoices.GREEN,
-                                permissions=[
-                                    "nautobot_device_lifecycle_mgmt.add_hardwarelcm",
-                                ],
-                            ),
-                            NavMenuButton(
-                                link="plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_import",
-                                title="Import",
-                                icon_class="mdi mdi-database-import-outline",
-                                button_class=ButtonColorChoices.BLUE,
-                                permissions=[
-                                    "nautobot_device_lifecycle_mgmt.add_hardwarelcm",
-                                ],
-                            ),
-                        ),
+                        weight=100,
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_hardwarelcm",
                         ],
@@ -44,29 +30,12 @@ menu_items = (
             ),
             NavMenuGroup(
                 name="Software Lifecycle",
-                weight=100,
+                weight=200,
                 items=(
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_list",
                         name="Validated Software",
-                        buttons=(
-                            NavMenuButton(
-                                link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_add",
-                                title="Add",
-                                icon_class="mdi mdi-plus-thick",
-                                button_class=ButtonColorChoices.GREEN,
-                                permissions=[
-                                    "nautobot_device_lifecycle_mgmt.add_validatedsoftwarelcm",
-                                ],
-                            ),
-                            NavMenuButton(
-                                link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_import",
-                                title="Import",
-                                icon_class="mdi mdi-database-import-outline",
-                                button_class=ButtonColorChoices.BLUE,
-                                permissions=["nautobot_device_lifecycle_mgmt.add_validatedsoftwarelcm"],
-                            ),
-                        ),
+                        weight=100,
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
                         ],
@@ -74,24 +43,7 @@ menu_items = (
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:cvelcm_list",
                         name="CVE",
-                        buttons=(
-                            NavMenuButton(
-                                link="plugins:nautobot_device_lifecycle_mgmt:cvelcm_add",
-                                title="Add",
-                                icon_class="mdi mdi-plus-thick",
-                                button_class=ButtonColorChoices.GREEN,
-                                permissions=[
-                                    "nautobot_device_lifecycle_mgmt.add_cvelcm",
-                                ],
-                            ),
-                            NavMenuButton(
-                                link="plugins:nautobot_device_lifecycle_mgmt:cvelcm_import",
-                                title="Import",
-                                icon_class="mdi mdi-database-import-outline",
-                                button_class=ButtonColorChoices.BLUE,
-                                permissions=["nautobot_device_lifecycle_mgmt.add_cvelcm"],
-                            ),
-                        ),
+                        weight=200,
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_cvelcm",
                         ],
@@ -99,6 +51,7 @@ menu_items = (
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm_list",
                         name="Vulnerability",
+                        weight=300,
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_vulnerabilitylcm",
                         ],
@@ -107,31 +60,12 @@ menu_items = (
             ),
             NavMenuGroup(
                 name="Contracts",
-                weight=100,
+                weight=300,
                 items=(
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_list",
                         name="Contracts",
-                        buttons=(
-                            NavMenuButton(
-                                link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_add",
-                                title="Add",
-                                icon_class="mdi mdi-plus-thick",
-                                button_class=ButtonColorChoices.GREEN,
-                                permissions=[
-                                    "nautobot_device_lifecycle_mgmt.add_contractlcm",
-                                ],
-                            ),
-                            NavMenuButton(
-                                link="plugins:nautobot_device_lifecycle_mgmt:contractlcm_import",
-                                title="Import",
-                                icon_class="mdi mdi-database-import-outline",
-                                button_class=ButtonColorChoices.BLUE,
-                                permissions=[
-                                    "nautobot_device_lifecycle_mgmt.add_contractlcm",
-                                ],
-                            ),
-                        ),
+                        weight=100,
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_contractlcm",
                         ],
@@ -139,26 +73,7 @@ menu_items = (
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_list",
                         name="Vendors",
-                        buttons=(
-                            NavMenuButton(
-                                link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_add",
-                                title="Add",
-                                icon_class="mdi mdi-plus-thick",
-                                button_class=ButtonColorChoices.GREEN,
-                                permissions=[
-                                    "nautobot_device_lifecycle_mgmt.add_providerlcm",
-                                ],
-                            ),
-                            NavMenuButton(
-                                link="plugins:nautobot_device_lifecycle_mgmt:providerlcm_import",
-                                title="Import",
-                                icon_class="mdi mdi-database-import-outline",
-                                button_class=ButtonColorChoices.BLUE,
-                                permissions=[
-                                    "nautobot_device_lifecycle_mgmt.add_providerlcm",
-                                ],
-                            ),
-                        ),
+                        weight=200,
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_providerlcm",
                         ],
@@ -167,11 +82,12 @@ menu_items = (
             ),
             NavMenuGroup(
                 name="Reports",
-                weight=100,
+                weight=400,
                 items=(
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report_list",
                         name="Device Hardware Notice - Report",
+                        weight=100,
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_devicehardwarenoticeresult",
                         ],
@@ -179,6 +95,7 @@ menu_items = (
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:devicehardwarenoticeresult_list",
                         name="Device Hardware Notice - List",
+                        weight=200,
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_devicehardwarenoticeresult",
                         ],
@@ -186,6 +103,7 @@ menu_items = (
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report_list",
                         name="Device Software Validation - Report",
+                        weight=300,
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
                         ],
@@ -193,6 +111,7 @@ menu_items = (
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list",
                         name="Device Software Validation - List",
+                        weight=400,
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_devicesoftwarevalidationresult",
                         ],
@@ -200,6 +119,7 @@ menu_items = (
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report_list",
                         name="Inventory Item Software Validation - Report",
+                        weight=500,
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_validatedsoftwarelcm",
                         ],
@@ -207,6 +127,7 @@ menu_items = (
                     NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list",
                         name="Inventory Item Software Validation - List",
+                        weight=600,
                         permissions=[
                             "nautobot_device_lifecycle_mgmt.view_inventoryitemsoftwarevalidationresult",
                         ],

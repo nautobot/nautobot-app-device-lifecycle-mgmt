@@ -2,7 +2,7 @@
 """Unit tests for nautobot_device_lifecycle_mgmt."""
 
 import datetime
-from unittest import skip
+from unittest import mock, skip
 
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -30,6 +30,22 @@ from nautobot_device_lifecycle_mgmt.models import (
 from nautobot_device_lifecycle_mgmt.tests.conftest import create_cves, create_devices, create_softwares
 
 User = get_user_model()
+
+
+class IncludeM2MAPITestCaseMixin:
+    """Mixin to enable m2m fields in the test_bulk_create_objects test.
+
+    The REST API no longer returns m2m fields by default in Nautobot v3.0.0+.
+    This mixin restores the m2m field so that the test_bulk_create_objects test
+    can find them.
+    """
+
+    def _patched_get_list_url(self):
+        return super()._get_list_url() + "?exclude_m2m=false"
+
+    def test_bulk_create_objects(self):
+        with mock.patch.object(self, "_get_list_url", self._patched_get_list_url):
+            return super().test_bulk_create_objects()
 
 
 class HardwareLCMAPITest(APIViewTestCases.APIViewTestCase):
@@ -87,7 +103,7 @@ class HardwareLCMAPITest(APIViewTestCases.APIViewTestCase):
         pass
 
 
-class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):
+class ContractLCMAPITest(IncludeM2MAPITestCaseMixin, APIViewTestCases.APIViewTestCase):
     """Test the ContractLCM API."""
 
     model = ContractLCM
@@ -178,7 +194,7 @@ class ContractLCMAPITest(APIViewTestCases.APIViewTestCase):
         pass
 
 
-class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
+class ValidatedSoftwareLCMAPITest(IncludeM2MAPITestCaseMixin, APIViewTestCases.APIViewTestCase):
     """Test the SoftwareLCM API."""
 
     model = ValidatedSoftwareLCM
@@ -346,7 +362,7 @@ class ValidatedSoftwareLCMAPITest(APIViewTestCases.APIViewTestCase):
         pass
 
 
-class CVELCMAPITest(APIViewTestCases.APIViewTestCase):
+class CVELCMAPITest(IncludeM2MAPITestCaseMixin, APIViewTestCases.APIViewTestCase):
     """Test the CVELCM API."""
 
     model = CVELCM
