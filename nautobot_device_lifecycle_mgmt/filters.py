@@ -161,8 +161,10 @@ class SoftwareLCMFilterSet(NautobotFilterSet):
     documentation_url = django_filters.CharFilter(
         lookup_expr="contains",
     )
-    release_date = django_filters.DateTimeFromToRangeFilter()
-    end_of_support = django_filters.DateTimeFromToRangeFilter()
+    release_date_before = django_filters.DateTimeFilter(field_name="release_date", lookup_expr="lte")
+    release_date_after = django_filters.DateTimeFilter(field_name="release_date", lookup_expr="gte")
+    end_of_support_before = django_filters.DateTimeFilter(field_name="end_of_support", lookup_expr="lte")
+    end_of_support_after = django_filters.DateTimeFilter(field_name="end_of_support", lookup_expr="gte")
 
     class Meta:
         """Meta attributes for filter."""
@@ -352,8 +354,10 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
     device_name = django_filters.CharFilter(method="device", label="Device Name")
     device_id = django_filters.CharFilter(method="device", label="Device ID")
     inventory_item_id = django_filters.CharFilter(method="inventory_item", label="InventoryItem ID")
-    start = django_filters.DateTimeFromToRangeFilter()
-    end = django_filters.DateTimeFromToRangeFilter()
+    start_before = django_filters.DateFilter(field_name="start", lookup_expr="lte")
+    start_after = django_filters.DateFilter(field_name="start", lookup_expr="gte")
+    end_before = django_filters.DateFilter(field_name="end", lookup_expr="lte")
+    end_after = django_filters.DateFilter(field_name="end", lookup_expr="gte")
     valid = django_filters.BooleanFilter(method="valid_search", label="Currently valid")
 
     class Meta:
@@ -476,7 +480,7 @@ class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):
     )
     manufacturer_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device__device_type__manufacturer",
-        queryset=Role.objects.all(),
+        queryset=Manufacturer.objects.all(),
         label="Manufacturer",
     )
     manufacturer = django_filters.ModelMultipleChoiceFilter(
@@ -919,11 +923,13 @@ class CVELCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  # , Custom
         }
     )
 
-    published_date = django_filters.DateTimeFromToRangeFilter()
+    published_date_before = django_filters.DateTimeFilter(field_name="published_date", lookup_expr="lte")
+    published_date_after = django_filters.DateTimeFilter(field_name="published_date", lookup_expr="gte")
     published_date__gte = django_filters.DateFilter(field_name="published_date", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
     published_date__lte = django_filters.DateFilter(field_name="published_date", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
 
-    last_modified_date = django_filters.DateTimeFromToRangeFilter()
+    last_modified_date_before = django_filters.DateTimeFilter(field_name="last_modified_date", lookup_expr="lte")
+    last_modified_date_after = django_filters.DateTimeFilter(field_name="last_modified_date", lookup_expr="gte")
     last_modified_date__gte = django_filters.DateFilter(field_name="last_modified_date", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
     last_modified_date__lte = django_filters.DateFilter(field_name="last_modified_date", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
 
@@ -974,7 +980,8 @@ class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  
         }
     )
 
-    cve__published_date = django_filters.DateTimeFromToRangeFilter()  # pylint: disable=nb-warn-dunder-filter-field
+    cve__published_date_before = django_filters.DateTimeFilter(field_name="cve__published_date", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field
+    cve__published_date_after = django_filters.DateTimeFilter(field_name="cve__published_date", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field
     cve__published_date__gte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
     cve__published_date__lte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
     cve__severity = django_filters.ChoiceFilter(field_name="cve__severity", choices=CVESeverityChoices)  # pylint: disable=nb-warn-dunder-filter-field
