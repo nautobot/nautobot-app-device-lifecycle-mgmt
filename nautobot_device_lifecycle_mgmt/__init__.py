@@ -27,7 +27,7 @@ class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
     }
     docs_view_name = "plugins:nautobot_device_lifecycle_mgmt:docs"
     banner_function = "banner.models_migrated_to_core_banner"
-    searchable_models = ["hardwarelcm"]
+    searchable_models = ["hardwarelcm", "providerlcm"]
 
     def ready(self):
         """Register custom signals."""
