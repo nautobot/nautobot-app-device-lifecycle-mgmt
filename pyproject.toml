@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-lifecycle-mgmt"
-version = "3.2.1a0"
+version = "3.2.1"
 description = "Manages device lifecycles for platforms and software."
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
@@ -169,7 +169,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.towncrier]
 package = "nautobot_device_lifecycle_mgmt"
 directory = "changes"
-filename = "docs/admin/release_notes/version_X.Y.md"
+filename = "docs/admin/release_notes/version_3.2.md"
 template = "development/towncrier_template.j2"
 start_string = "<!-- towncrier release notes start -->"
 issue_format = "[#{issue}](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/{issue})"
