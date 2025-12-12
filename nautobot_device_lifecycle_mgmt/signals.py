@@ -18,6 +18,16 @@ def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # py
 
     ContractLCM = sender.get_model("ContractLCM")
 
+    # Mark the 'device_soft' and 'inventory_item_soft' relationship as managed by the Device Lifecycle Management (DLM) app.
+    device_soft = Relationship.objects.filter(key="device_soft").first()
+    if device_soft and " (DLM)" not in device_soft.destination_label:
+        device_soft.destination_label += " (DLM)"
+        device_soft.save()
+    inventory_item_soft = Relationship.objects.filter(key="inventory_item_soft").first()
+    if inventory_item_soft and " (DLM)" not in inventory_item_soft.destination_label:
+        inventory_item_soft.destination_label += " (DLM)"
+        inventory_item_soft.save()
+
     # Hide obsolete device_soft and inventory_item_soft relationships
     Relationship.objects.filter(key__in=("device_soft", "inventory_item_soft")).update(
         destination_hidden=True, source_hidden=True
