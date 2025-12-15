@@ -1,4 +1,4 @@
-import nautobot.core.models.fields
+from nautobot.apps.models import TagsField
 from django.db import migrations, models
 
 
@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="contactlcm",
             name="tags",
-            field=nautobot.core.models.fields.TagsField(through="extras.TaggedItem", to="extras.Tag"),
+            field=TagsField(through="extras.TaggedItem", to="extras.Tag"),
         ),
         migrations.AlterField(
             model_name="contractlcm",
@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="contractlcm",
             name="tags",
-            field=nautobot.core.models.fields.TagsField(through="extras.TaggedItem", to="extras.Tag"),
+            field=TagsField(through="extras.TaggedItem", to="extras.Tag"),
         ),
         migrations.AlterField(
             model_name="cvelcm",
@@ -46,7 +46,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="cvelcm",
             name="tags",
-            field=nautobot.core.models.fields.TagsField(through="extras.TaggedItem", to="extras.Tag"),
+            field=TagsField(through="extras.TaggedItem", to="extras.Tag"),
         ),
         migrations.AlterField(
             model_name="devicesoftwarevalidationresult",
@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="devicesoftwarevalidationresult",
             name="tags",
-            field=nautobot.core.models.fields.TagsField(through="extras.TaggedItem", to="extras.Tag"),
+            field=TagsField(through="extras.TaggedItem", to="extras.Tag"),
         ),
         migrations.AlterField(
             model_name="hardwarelcm",
@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="hardwarelcm",
             name="tags",
-            field=nautobot.core.models.fields.TagsField(through="extras.TaggedItem", to="extras.Tag"),
+            field=TagsField(through="extras.TaggedItem", to="extras.Tag"),
         ),
         migrations.AlterField(
             model_name="inventoryitemsoftwarevalidationresult",
@@ -76,7 +76,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="inventoryitemsoftwarevalidationresult",
             name="tags",
-            field=nautobot.core.models.fields.TagsField(through="extras.TaggedItem", to="extras.Tag"),
+            field=TagsField(through="extras.TaggedItem", to="extras.Tag"),
         ),
         migrations.AlterField(
             model_name="providerlcm",
@@ -91,7 +91,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="softwareimagelcm",
             name="tags",
-            field=nautobot.core.models.fields.TagsField(through="extras.TaggedItem", to="extras.Tag"),
+            field=TagsField(through="extras.TaggedItem", to="extras.Tag"),
         ),
         migrations.AlterField(
             model_name="softwarelcm",
@@ -101,7 +101,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="softwarelcm",
             name="tags",
-            field=nautobot.core.models.fields.TagsField(through="extras.TaggedItem", to="extras.Tag"),
+            field=TagsField(through="extras.TaggedItem", to="extras.Tag"),
         ),
         migrations.AlterField(
             model_name="validatedsoftwarelcm",
@@ -111,7 +111,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="validatedsoftwarelcm",
             name="tags",
-            field=nautobot.core.models.fields.TagsField(through="extras.TaggedItem", to="extras.Tag"),
+            field=TagsField(through="extras.TaggedItem", to="extras.Tag"),
         ),
         migrations.AlterField(
             model_name="vulnerabilitylcm",
@@ -121,6 +121,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="vulnerabilitylcm",
             name="tags",
-            field=nautobot.core.models.fields.TagsField(through="extras.TaggedItem", to="extras.Tag"),
+            field=TagsField(through="extras.TaggedItem", to="extras.Tag"),
         ),
     ]

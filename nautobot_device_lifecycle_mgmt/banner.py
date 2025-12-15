@@ -3,7 +3,7 @@
 from django.urls import NoReverseMatch, Resolver404, resolve, reverse
 from django.utils.html import format_html
 from nautobot.apps.ui import Banner, BannerClassChoices
-from nautobot.extras.models import Job
+from nautobot.apps.jobs import Job
 
 from nautobot_device_lifecycle_mgmt import models
 
