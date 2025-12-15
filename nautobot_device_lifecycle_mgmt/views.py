@@ -18,28 +18,27 @@ from django.utils.html import format_html, format_html_join
 from django_tables2 import RequestConfig
 from matplotlib.ticker import MaxNLocator
 from nautobot.apps.choices import ColorChoices
-from nautobot.apps.ui import ( 
-    Breadcrumbs, 
-    ModelBreadcrumbItem, 
-    Titles, 
-    ViewNameBreadcrumbItem,
-    ObjectDetailContent, 
-    ObjectFieldsPanel, 
-    ObjectDetailContent, 
-    StatsPanel, 
+from nautobot.apps.models import count_related
+from nautobot.apps.ui import (
+    Breadcrumbs,
+    ModelBreadcrumbItem,
+    ObjectDetailContent,
+    ObjectFieldsPanel,
     ObjectsTablePanel,
     SectionChoices,
+    StatsPanel,
+    Titles,
+    ViewNameBreadcrumbItem,
 )
-from nautobot.apps.views import(
-    NautobotUIViewSet, 
-    get_obj_from_context, 
-    ObjectView, 
-    ContentTypePermissionRequiredMixin, 
-    EnhancedPaginator, 
-    get_paginate_count,
+from nautobot.apps.views import (
+    ContentTypePermissionRequiredMixin,
+    EnhancedPaginator,
+    NautobotUIViewSet,
     ObjectListViewMixin,
+    ObjectView,
+    get_obj_from_context,
+    get_paginate_count,
 )
-from nautobot.apps.models import count_related
 from nautobot.core.templatetags.helpers import (
     hyperlinked_email,
     hyperlinked_object,

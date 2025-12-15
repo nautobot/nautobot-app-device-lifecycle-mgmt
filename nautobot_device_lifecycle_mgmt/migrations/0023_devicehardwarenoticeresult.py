@@ -4,8 +4,8 @@ import uuid
 
 import django.core.serializers.json
 import django.db.models.deletion
-from nautobot.apps.models import TagsField, DynamicGroupMixin, NotesMixin
 from django.db import migrations, models
+from nautobot.apps.models import DynamicGroupMixin, NotesMixin, TagsField
 
 
 class Migration(migrations.Migration):

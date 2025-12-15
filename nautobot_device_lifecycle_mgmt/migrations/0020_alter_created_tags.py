@@ -1,5 +1,5 @@
-from nautobot.apps.models import TagsField
 from django.db import migrations, models
+from nautobot.apps.models import TagsField
 
 
 class Migration(migrations.Migration):

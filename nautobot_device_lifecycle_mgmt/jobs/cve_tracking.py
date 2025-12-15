@@ -8,11 +8,11 @@ from time import sleep
 
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
+from nautobot.apps.exceptions import SecretError
+from nautobot.apps.jobs import BooleanVar, Job, ObjectVar, StringVar
 from nautobot.dcim.models import Device, InventoryItem
 from nautobot.dcim.models.devices import SoftwareVersion
-from nautobot.apps.jobs import BooleanVar, Job, ObjectVar, StringVar
 from nautobot.extras.models import ExternalIntegration
-from nautobot.apps.exceptions import SecretError
 from netutils.nist import get_nist_urls
 from requests import Session
 from requests.adapters import HTTPAdapter
