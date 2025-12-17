@@ -4,9 +4,8 @@ import uuid
 
 import django.core.serializers.json
 import django.db.models.deletion
-import nautobot.core.models.fields
-import nautobot.extras.models.mixins
 from django.db import migrations, models
+from nautobot.apps.models import DynamicGroupMixin, NotesMixin, TagsField
 
 
 class Migration(migrations.Migration):
@@ -53,7 +52,7 @@ class Migration(migrations.Migration):
                         to="nautobot_device_lifecycle_mgmt.hardwarelcm",
                     ),
                 ),
-                ("tags", nautobot.core.models.fields.TagsField(through="extras.TaggedItem", to="extras.Tag")),
+                ("tags", TagsField(through="extras.TaggedItem", to="extras.Tag")),
             ],
             options={
                 "verbose_name": "Device Hardware Notice Report",
@@ -61,8 +60,8 @@ class Migration(migrations.Migration):
             },
             bases=(
                 models.Model,
-                nautobot.extras.models.mixins.DynamicGroupMixin,
-                nautobot.extras.models.mixins.NotesMixin,
+                DynamicGroupMixin,
+                NotesMixin,
             ),
         ),
     ]

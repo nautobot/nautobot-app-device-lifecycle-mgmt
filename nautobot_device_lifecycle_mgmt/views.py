@@ -7,7 +7,6 @@ import logging
 import urllib
 
 import matplotlib.pyplot as plt
-import nautobot.apps.views
 import numpy as np
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import intcomma
@@ -19,20 +18,34 @@ from django.utils.html import format_html, format_html_join
 from django_tables2 import RequestConfig
 from matplotlib.ticker import MaxNLocator
 from nautobot.apps.choices import ColorChoices
-from nautobot.apps.ui import Breadcrumbs, ModelBreadcrumbItem, Titles, ViewNameBreadcrumbItem
-from nautobot.apps.views import NautobotUIViewSet, get_obj_from_context
-from nautobot.core.models.querysets import count_related
+from nautobot.apps.models import count_related
+from nautobot.apps.ui import (
+    Breadcrumbs,
+    ModelBreadcrumbItem,
+    ObjectDetailContent,
+    ObjectFieldsPanel,
+    ObjectsTablePanel,
+    SectionChoices,
+    StatsPanel,
+    Titles,
+    ViewNameBreadcrumbItem,
+)
+from nautobot.apps.views import (
+    ContentTypePermissionRequiredMixin,
+    EnhancedPaginator,
+    NautobotUIViewSet,
+    ObjectListViewMixin,
+    ObjectView,
+    get_obj_from_context,
+    get_paginate_count,
+)
 from nautobot.core.templatetags.helpers import (
     hyperlinked_email,
     hyperlinked_object,
     hyperlinked_phone_number,
     render_address,
 )
-from nautobot.core.ui import object_detail
-from nautobot.core.ui.choices import SectionChoices
 from nautobot.core.views import generic
-from nautobot.core.views.mixins import ContentTypePermissionRequiredMixin
-from nautobot.core.views.paginator import EnhancedPaginator, get_paginate_count
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, SoftwareVersion
 from nautobot.extras.models import Role, Tag
 
@@ -49,7 +62,7 @@ GREEN, RED, GREY = (f"#{ColorChoices.COLOR_LIGHT_GREEN}", f"#{ColorChoices.COLOR
 #
 # HardwareLCM UIViewSet
 #
-class HardwareLCMObjectFieldsPanel(object_detail.ObjectFieldsPanel):
+class HardwareLCMObjectFieldsPanel(ObjectFieldsPanel):
     """Add queryset_list_url_filter to ObjectFieldsPanel."""
 
     def queryset_list_url_filter(self, key, value, context: Context):
@@ -71,7 +84,7 @@ class HardwareLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.HardwareLCMSerializer
     table_class = tables.HardwareLCMTable
 
-    object_detail_content = object_detail.ObjectDetailContent(
+    object_detail_content = ObjectDetailContent(
         panels=(
             HardwareLCMObjectFieldsPanel(
                 label="Hardware Notice",
@@ -136,14 +149,14 @@ class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
         }
     )
 
-    object_detail_content = object_detail.ObjectDetailContent(
+    object_detail_content = ObjectDetailContent(
         panels=(
-            object_detail.ObjectFieldsPanel(
+            ObjectFieldsPanel(
                 weight=100,
                 section=SectionChoices.LEFT_HALF,
                 fields=["software", "start", "end", "valid", "preferred"],
             ),
-            object_detail.StatsPanel(
+            StatsPanel(
                 weight=100,
                 label="Stats",
                 section=SectionChoices.RIGHT_HALF,
@@ -160,7 +173,7 @@ class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
     )
 
 
-class ContractLCMFieldsPanel(object_detail.ObjectFieldsPanel):
+class ContractLCMFieldsPanel(ObjectFieldsPanel):
     """Custom fields panel for ContractLCM."""
 
     def render_value(self, key, value, context):
@@ -195,7 +208,7 @@ class ContractLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.ContractLCMSerializer
     table_class = tables.ContractLCMTable
 
-    object_detail_content = object_detail.ObjectDetailContent(
+    object_detail_content = ObjectDetailContent(
         panels=(
             ContractLCMFieldsPanel(
                 label="Contract",
@@ -230,9 +243,9 @@ class ProviderLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.ProviderLCMSerializer
     table_class = tables.ProviderLCMTable
 
-    object_detail_content = object_detail.ObjectDetailContent(
+    object_detail_content = ObjectDetailContent(
         panels=(
-            object_detail.ObjectFieldsPanel(
+            ObjectFieldsPanel(
                 weight=100,
                 section=SectionChoices.LEFT_HALF,
                 fields=(
@@ -250,7 +263,7 @@ class ProviderLCMUIViewSet(NautobotUIViewSet):
                     "email": [hyperlinked_email],
                 },
             ),
-            object_detail.ObjectsTablePanel(
+            ObjectsTablePanel(
                 weight=200,
                 section=SectionChoices.RIGHT_HALF,
                 table_class=tables.ContractLCMTable,
@@ -265,7 +278,7 @@ class ProviderLCMUIViewSet(NautobotUIViewSet):
     )
 
 
-class CVEObjectFieldsPanel(object_detail.ObjectFieldsPanel):
+class CVEObjectFieldsPanel(ObjectFieldsPanel):
     """Custom fields panel for CVELCM."""
 
     def render_value(self, key, value, context):
@@ -296,7 +309,7 @@ class CVELCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.CVELCMSerializer
     table_class = tables.CVELCMTable
 
-    object_detail_content = object_detail.ObjectDetailContent(
+    object_detail_content = ObjectDetailContent(
         panels=(
             CVEObjectFieldsPanel(
                 weight=100,
@@ -331,9 +344,9 @@ class VulnerabilityLCMUIViewSet(NautobotUIViewSet):
     serializer_class = serializers.VulnerabilityLCMSerializer
     table_class = tables.VulnerabilityLCMTable
 
-    object_detail_content = object_detail.ObjectDetailContent(
+    object_detail_content = ObjectDetailContent(
         panels=(
-            object_detail.ObjectFieldsPanel(
+            ObjectFieldsPanel(
                 weight=100,
                 section=SectionChoices.LEFT_HALF,
                 fields="__all__",
@@ -534,7 +547,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
         return ReportOverviewHelper.url_encode_figure(fig)
 
 
-class HardwareNoticeDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
+class HardwareNoticeDeviceReportUIViewSet(ObjectListViewMixin):  # pylint: disable=abstract-method
     """View for executive report on device hardware notices."""
 
     filterset_class = filters.DeviceHardwareNoticeResultFilterSet
@@ -653,7 +666,7 @@ class HardwareNoticeDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewMixi
         return context
 
 
-class ValidatedSoftwareDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
+class ValidatedSoftwareDeviceReportUIViewSet(ObjectListViewMixin):  # pylint: disable=abstract-method
     """View for executive report on device software validation."""
 
     filterset_class = filters.DeviceSoftwareValidationResultFilterSet
@@ -799,7 +812,7 @@ class ValidatedSoftwareDeviceReportUIViewSet(nautobot.apps.views.ObjectListViewM
         return "\n".join(csv_data)
 
 
-class DeviceHardwareNoticeResultUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
+class DeviceHardwareNoticeResultUIViewSet(ObjectListViewMixin):  # pylint: disable=abstract-method
     """DeviceHardwareNoticeResult List view."""
 
     filterset_class = filters.DeviceHardwareNoticeResultFilterSet
@@ -821,7 +834,7 @@ class DeviceHardwareNoticeResultUIViewSet(nautobot.apps.views.ObjectListViewMixi
     view_titles = Titles(titles={"list": "Device Hardware Notice List"})
 
 
-class DeviceSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
+class DeviceSoftwareValidationResultUIViewSet(ObjectListViewMixin):  # pylint: disable=abstract-method
     """DeviceSoftawareValidationResult List view."""
 
     filterset_class = filters.DeviceSoftwareValidationResultFilterSet
@@ -843,7 +856,7 @@ class DeviceSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectListView
     view_titles = Titles(titles={"list": "Device Software Validation List"})
 
 
-class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
+class ValidatedSoftwareInventoryItemReportUIViewSet(ObjectListViewMixin):  # pylint: disable=abstract-method
     """View for executive report on inventory item software validation."""
 
     filterset_class = filters.InventoryItemSoftwareValidationResultFilterSet
@@ -995,7 +1008,7 @@ class ValidatedSoftwareInventoryItemReportUIViewSet(nautobot.apps.views.ObjectLi
         return "\n".join(csv_data)
 
 
-class InventoryItemSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectListViewMixin):  # pylint: disable=abstract-method
+class InventoryItemSoftwareValidationResultUIViewSet(ObjectListViewMixin):  # pylint: disable=abstract-method
     """InvenotryItemSoftawareValidationResult List view."""
 
     filterset_class = filters.InventoryItemSoftwareValidationResultFilterSet
@@ -1017,7 +1030,7 @@ class InventoryItemSoftwareValidationResultUIViewSet(nautobot.apps.views.ObjectL
     view_titles = Titles(titles={"list": "Inventory Software Validation List"})
 
 
-class SoftwareVersionRelatedCveView(generic.ObjectView):
+class SoftwareVersionRelatedCveView(ObjectView):
     """Related CVEs tab view for SoftwareVersion."""
 
     queryset = SoftwareVersion.objects.all()

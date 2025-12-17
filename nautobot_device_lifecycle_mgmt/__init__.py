@@ -3,8 +3,7 @@
 # Metadata is inherited from Nautobot. If not including Nautobot in the environment, this should be added
 from importlib import metadata
 
-from nautobot.apps import NautobotAppConfig
-from nautobot.core.signals import nautobot_database_ready
+from nautobot.apps import NautobotAppConfig, nautobot_database_ready
 
 __version__ = metadata.version(__name__)
 

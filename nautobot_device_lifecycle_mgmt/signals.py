@@ -3,7 +3,7 @@
 from django.apps import apps as global_apps
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
-from nautobot.extras.choices import RelationshipTypeChoices
+from nautobot.apps.choices import RelationshipTypeChoices
 from nautobot.extras.models import ExternalIntegration, Secret, SecretsGroup
 
 
