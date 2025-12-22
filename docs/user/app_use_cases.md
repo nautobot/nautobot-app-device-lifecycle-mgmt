@@ -41,56 +41,75 @@ Read more about [Software Lifecycle](software_lifecycle.md) use-cases.
 
 You can view the list of Hardware/Software notices as well as filter the table.
 
-![](../images/lcm_hardware_list_view.png)
+![](../images/ss_lcm_hardware_list_view_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_hardware_list_view_dark.png#only-dark){ .on-glb }
+[//]: # "`https://demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/hardware/`"
+
 
 ### Hardware: Device Lifecycle Management Detail View
 
 You can also click a Hardware/Software Notice and see the detail view. This view provides links to the devices that are part affected by this EoX notice due to their device type.
 
-![](../images/lcm_hardware_detail_view.png)
+![](../images/ss_lcm_hardware_detail_view_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_hardware_detail_view_dark.png#only-dark){ .on-glb }
+[//]: # "`https://demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/hardware/ed2aaf82-972d-57d0-9acc-c57bc30cc497/`"
 
 ### Device View
 
 You can also view the associated Hardware notice from the device. If the device is end of life or end of support the notice will be red.
 
-![](../images/lcm_hardware_device_view.png)
+![](../images/ss_lcm_hardware_device_view_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_hardware_device_view_dark.png#only-dark){ .on-glb }
+[//]: # "`https://demo.nautobot.com/dcim/devices/9a91f27d-ee91-52f5-9756-d662091b7261/`"
 
 ### Device Type View
 
 This provides the same UI element as the device view, but within the specific device type's view.
 
-![](../images/lcm_hardware_device_type_view.png)
+![](../images/ss_lcm_hardware_device_type_view_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_hardware_device_type_view_dark.png#only-dark){ .on-glb }
+[//]: # "`https://demo.nautobot.com/dcim/device-types/6b82c333-18b4-5f37-b58f-3705fb580c6d/`"
 
 ### Contracts: Device Lifecycle Management Contract Detail View
 
 You can view the details of a contract along with the primary and escalation contacts. This view will also give you an association to the devices under this contract.
 
-![](../images/lcm_contract_detail.png)
+![](../images/ss_lcm_contract_detail_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_contract_detail_dark.png#only-dark){ .on-glb }
+[//]: # "`https://demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/contract/bf7fc26a-2b49-5231-a622-a0de6c9e76e9/`"
 
 ### Contracts: Device Lifecycle Management Contract Provider View
 
 You can view the details of a provider, along with a listing of the service contracts associated to the provider. Contracts that are expired will display in red.
 
-![](../images/lcm_contract_provider_detail.png)
+![](../images/ss_lcm_contract_provider_detail_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_contract_provider_detail_dark.png#only-dark){ .on-glb }
+[//]: # "`https://demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/provider/18b96c29-59a1-5ffa-806b-87a4baae3d57/`"
 
 ### Contracts: Device View with Contracts
 
 Contracts associated with devices will appear on the device detail page. Five contracts at most will be displayed here, listed in order of end date (latest date first). The same information will also be displayed on inventory item detail pages for contracts associated with inventory items.
 
-![](../images/lcm_contract_device_view.png)
+![](../images/ss_lcm_contract_device_view_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_contract_device_view_dark.png#only-dark){ .on-glb }
+[//]: # "`https://demo.nautobot.com/dcim/devices/43e0c7a2-3939-5fcf-bc2f-c659f1c40d46/`"
 
 
 ### Software: Validated Software Lifecycle Management List View
 
 You can view the list of Validated Software versions as well as filter the table.
 
-![](../images/lcm_validated_software_list_view.png)
+![](../images/ss_lcm_validated_software_list_view_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_validated_software_list_view_dark.png#only-dark){ .on-glb }
+[//]: # "`https://demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/validated-software/`"
 
 ### Software: Validated Software Lifecycle Detail View
 
 You can also click a Validated Software version and see the detail view. This view provides view of the device and inventory item attributes this validated software applies to.
 
-![](../images/lcm_validated_software_detail_view.png)
+![](../images/ss_lcm_validated_software_detail_view_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_validated_software_detail_view_dark.png#only-dark){ .on-glb }
+[//]: # "`https://demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/validated-software/13fe164e-bf1f-4419-afe5-93d6a6dc0f48/`"
 
 ### Software: Device View
 
@@ -98,8 +117,12 @@ You can also view the associated Software and Validated Software versions from t
 
 **Valid software:**
 
-![](../images/lcm_software_device_view_valid.png)
+![](../images/ss_lcm_software_device_view_valid_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_software_device_view_valid_dark.png#only-dark){ .on-glb }
+[//]: # "`https://demo.nautobot.com/dcim/devices/dd76f581-51cc-43b6-876a-3f90ebf93108/`"
 
 **Invalid software:**
 
-![](../images/lcm_software_device_view_invalid.png)
+![](../images/ss_lcm_software_device_view_invalid_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_software_device_view_invalid_dark.png#only-dark){ .on-glb }
+[//]: # "`https://demo.nautobot.com/dcim/devices/43e0c7a2-3939-5fcf-bc2f-c659f1c40d46/`"
