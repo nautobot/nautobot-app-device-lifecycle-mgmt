@@ -10,11 +10,15 @@ You can run these reports two ways:
 
 - The "Device Lifecycle" dropdown menu and selecting either **Device Software Validation - Report**, **Inventory Item Software Validation - Report** or **Device Hardware Notice - Report** and then clicking on **Run Software Validation** execute button on right side of screen.
 
-![](../images/lcm_software_validation_report_run.png)
+![](../images/ss_lcm_software_validation_report_run_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_software_validation_report_run_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/hardware-notice-device-report/`"
 
 - The "Jobs" dropdown and navigating to **Device/Sofware Lifecycle Reporting** section. The jobs will appear here and all you will need to do is click the play button.
 
-![](../images/lcm_software_validation_report_run_jobs.png)
+![](../images/ss_lcm_software_validation_report_run_jobs_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_software_validation_report_run_jobs_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/extras/jobs/`"
 
 !!! warning "If play button is grayed out."
     You will need to enable the job by clicking on edit button in the row and navigate to "Job" portion and click on "Enable"
@@ -25,17 +29,23 @@ Once the jobs are ran you can nagivate to the Device Software Validation Reports
 
 - **Summary Graph** - This will have your validated job results per platform
 
-![](../images/lcm_software_validation_report_run_graph.png)
+![](../images/ss_lcm_software_validation_report_run_graph_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_software_validation_report_run_graph_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/validated-software-device-report/`"
 
 !!! warning "If graph has too many platforms it will not render very well. You can filter it down to only a few with the right side search form. This issue is currenlty being worked on."
 
 - **Executive Summary** - Quick summary of all objects found with the report run.
 
-![](../images/lcm_software_validation_report_run_executive_summary.png)
+![](../images/ss_lcm_software_validation_report_run_executive_summary_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_software_validation_report_run_executive_summary_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/validated-software-device-report/`"
 
 - **Device Type/Inventory Item Summary** - Summery of each Device Type or Inventory Item objects found with the report run.
 
-![](../images/lcm_software_validation_report_run_detailed_summary.png)
+![](../images/ss_lcm_software_validation_report_run_detailed_summary_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_software_validation_report_run_detailed_summary_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/validated-software-device-report/`"
 
 ---
 
@@ -45,7 +55,9 @@ From the Device Software Validation and Hardware Notice Reports you can export t
 
 Once the reporting jobs have been run, you can navigate to the results page by selecting **Device Software Validation - List**, **Inventory Item Software Validation - List**, or **Device Hardware Notice - List** from the "Device Lifecycle" dropdown menu.
 
-![](../images/lcm_software_validation_report_run_results_list.png)
+![](../images/ss_lcm_software_validation_report_run_results_list_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_software_validation_report_run_results_list_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-result/`"
 
 The software validation list page contains the software report results for each device. All columns are sortable and filters can be applied.
 
@@ -58,7 +70,9 @@ The software validation list page contains the software report results for each 
 | **Run Type** | Type of software validation job that was ran. |
 | **Approved Software** | This is Validated Software object that is associated. This can be a list of softwares. |
 
-![](../images/lcm_hardware_notice_report_run_results_list.png)
+![](../images/ss_lcm_hardware_notice_report_run_results_list_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_hardware_notice_report_run_results_list_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/device-hardware-notice-result/`"
 
 The device hardware notice list page contains the hardware notice results for each device. All columns are sortable and filters can be applied.
 
@@ -76,13 +90,17 @@ There are various ways that you can export the software validation result data t
 
 **Device/Inventory Item Software Validation - Report**
 
-You can export the software validation results using the export button ![](../images/lcm_software_validation_export_button.png) on the row, which will give you more details of the results.
+You can export the software validation results using the export button ![](../images/ss_lcm_software_validation_export_button_light.png#only-light)![](../images/ss_lcm_software_validation_export_button_dark.png#only-dark) on the row, which will give you more details of the results.
 
-![](../images/lcm_software_validation_report_csv_small.png)
+![](../images/ss_lcm_software_validation_report_csv_small_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_software_validation_report_csv_small_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/validated-software-device-report/`"
 
 If you hit the export button on the right side it will only give you the summary numbers that are displayed on the page.
 
-![](../images/lcm_software_validation_reports_export_button.png)
+![](../images/ss_lcm_software_validation_reports_export_button_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_software_validation_reports_export_button_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/validated-software-device-report/`"
 
 If you want all the results click on the export data button on the *Executive Summary* table.
 
@@ -90,7 +108,10 @@ If you are only looking for **individual results** per platform/inventory item y
 
 **"Device/Inventory Item Software Validation - List" page**
 
-The export button ![](../images/lcm_software_validation_export_button_green.png) on the right pane of the page.
+The export button is located in the right panel of the page under Actions.
+![](../images/ss_lcm_software_validation_export_button_green_light.png#only-light)
+![](../images/ss_lcm_software_validation_export_button_green_dark.png#only-dark)
+[//]: # "`https://next.demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/validated-software-device-report/`"
 
 !!! warning "This will export data that is populated on the screen so if there are any filters applied to the list it will only export those filtered items"
 
@@ -102,11 +123,15 @@ There are various ways that you can export the device hardware notice report res
 
 From the executive summary table on the device hardware notice report page, click on the export data button. This will export all results, regardless of the filtering applied.
 
-![](../images/lcm_hardware_notice_reports_export_button.png)
+![](../images/ss_lcm_hardware_notice_reports_export_button_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_hardware_notice_reports_export_button_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/hardware-notice-device-report/`"
 
 If the report contains a large amount of data, it is recommended to use the green export button at the top of the page instead. This will hand the export job off to a worker and the results will be filtered based on the filter form inputs on the report page.
 
-![](../images/lcm_hardware_notice_report_export_button_and_filter_form.png)
+![](../images/ss_lcm_hardware_notice_report_export_button_and_filter_form_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_hardware_notice_report_export_button_and_filter_form_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/hardware-notice-device-report/`"
 
 The same filtering options and export button are available at the top of the **Device Hardare Notice - List** page. Here is an example of the expected output from a CSV export:
 
