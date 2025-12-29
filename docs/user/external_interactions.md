@@ -48,4 +48,5 @@ curl "http://$NBHOST/api/plugins/device-lifecycle/hardware/?expired=true" \
 
 ### GraphQL Examples
 
-![](../images/lcm_hardware_graphql.png)
+![](../images/ss_lcm_hardware_graphql_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_hardware_graphql_dark.png#only-dark){ .on-glb }

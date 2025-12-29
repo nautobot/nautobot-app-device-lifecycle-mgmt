@@ -109,8 +109,8 @@ If you are only looking for **individual results** per platform/inventory item y
 **"Device/Inventory Item Software Validation - List" page**
 
 The export button is located in the right panel of the page under Actions.
-![](../images/ss_lcm_software_validation_export_button_green_light.png#only-light)
-![](../images/ss_lcm_software_validation_export_button_green_dark.png#only-dark)
+![](../images/ss_lcm_software_validation_export_button_green_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_software_validation_export_button_green_dark.png#only-dark){ .on-glb }
 [//]: # "`https://next.demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/validated-software-device-report/`"
 
 !!! warning "This will export data that is populated on the screen so if there are any filters applied to the list it will only export those filtered items"
