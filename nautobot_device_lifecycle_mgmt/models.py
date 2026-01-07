@@ -80,12 +80,17 @@ class HardwareLCM(PrimaryModel):
 
     def __str__(self):
         """String representation of HardwareLCMs."""
-        name = f"Device Type: {self.device_type}" if self.device_type else f"Inventory Part: {self.inventory_item}"
+        return f"{self.device_type} (Device Type)" if self.device_type else f"{self.inventory_item} (Inventory Item)"
+
+    @property
+    def display(self):
+        """Return a display name for the HardwareLCM."""
+        name = str(self)
         if self.end_of_support:
             msg = f"{name} - End of support: {self.end_of_support}"
         else:
             msg = f"{name} - End of sale: {self.end_of_sale}"
-        return msg
+        return f"Hardware Notice: {msg}"
 
     @property
     def expired(self):
@@ -291,11 +296,11 @@ class ValidatedSoftwareLCM(PrimaryModel):
     old_software = models.ForeignKey(
         to="SoftwareLCM", on_delete=models.SET_NULL, verbose_name="Software Version", blank=True, null=True
     )
-    devices = models.ManyToManyField(to="dcim.Device", related_name="+", blank=True)
-    device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="+", blank=True)
-    device_roles = models.ManyToManyField(to="extras.Role", related_name="+", blank=True)
-    inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="+", blank=True)
-    object_tags = models.ManyToManyField(to="extras.Tag", related_name="+", blank=True)
+    devices = models.ManyToManyField(to="dcim.Device", related_name="validated_software", blank=True)
+    device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="validated_software", blank=True)
+    device_roles = models.ManyToManyField(to="extras.Role", related_name="validated_software", blank=True)
+    inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="validated_software", blank=True)
+    object_tags = models.ManyToManyField(to="extras.Tag", related_name="validated_software", blank=True)
     start = models.DateField(verbose_name="Valid Since")
     end = models.DateField(verbose_name="Valid Until", blank=True, null=True)
     preferred = models.BooleanField(verbose_name="Preferred Version", default=False)
@@ -307,10 +312,26 @@ class ValidatedSoftwareLCM(PrimaryModel):
         ordering = ("software", "preferred", "start")
         unique_together = ("software", "start", "end")
 
+    clone_fields = (
+        "software",
+        "devices",
+        "device_types",
+        "device_roles",
+        "inventory_items",
+        "object_tags",
+        "start",
+        "end",
+        "preferred",
+    )
+
     def __str__(self):
         """String representation of ValidatedSoftwareLCM."""
-        msg = f"{self.software} - Valid since: {self.start}"
-        return msg
+        return f"{self.software.version} - Valid since: {self.start}"
+
+    @property
+    def display(self):
+        """Return a display name for the ValidatedSoftwareLCM."""
+        return f"Validated Software: {str(self)}"
 
     @property
     def valid(self):
@@ -468,12 +489,9 @@ class InventoryItemSoftwareValidationResult(PrimaryModel):
     def __str__(self):
         """String representation of InventoryItemSoftwareValidationResult."""
         if self.is_validated:
-            msg = f"Inventory Item: {self.inventory_item.name} - " f"Device: {self.inventory_item.device.name} - Valid"
+            msg = f"Inventory Item: {self.inventory_item.name} - Device: {self.inventory_item.device.name} - Valid"
         else:
-            msg = (
-                f"Inventory Item: {self.inventory_item.name} - "
-                f"Device: {self.inventory_item.device.name} - Not Valid"
-            )
+            msg = f"Inventory Item: {self.inventory_item.name} - Device: {self.inventory_item.device.name} - Not Valid"
         return msg
 
 
@@ -538,6 +556,11 @@ class ContractLCM(PrimaryModel):
     def __str__(self):
         """String representation of ContractLCM."""
         return f"{self.name}"
+
+    @property
+    def display(self):
+        """Return a display name for the ContractLCM."""
+        return f"Contract: {str(self)}"
 
     @property
     def expired(self):
@@ -616,6 +639,11 @@ class ProviderLCM(OrganizationalModel):
     def __str__(self):
         """String representation of ProviderLCM."""
         return f"{self.name}"
+
+    @property
+    def display(self):
+        """Return a display name for the ProviderLCM."""
+        return f"Provider: {str(self)}"
 
     def save(self, *args, **kwargs):
         """Override save to assert a full clean."""
@@ -726,6 +754,11 @@ class CVELCM(PrimaryModel):
         """String representation of the model."""
         return f"{self.name}"
 
+    @property
+    def display(self):
+        """Return a display name for the CVELCM."""
+        return f"CVE: {str(self)}"
+
 
 @extras_features(
     "custom_fields",
@@ -751,6 +784,8 @@ class VulnerabilityLCM(PrimaryModel):
         on_delete=models.PROTECT,
         to="extras.status",
     )
+
+    natural_key_field_lookups = ["pk"]
 
     class Meta:
         """Meta attributes for the class."""

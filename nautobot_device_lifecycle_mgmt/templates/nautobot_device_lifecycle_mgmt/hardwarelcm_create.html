@@ -1,0 +1,42 @@
+{% extends 'generic/object_create.html' %}
+{% load static %}
+{% load form_helpers %}
+{% load helpers %}
+
+{% block form %}
+{% block pre_form %}{% endblock pre_form %}
+<div class="card">
+    <div class="card-header"><strong>Assign To</strong>
+        <ul class="nav nav-tabs card-header-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" href="#device_type" role="tab" data-bs-toggle="tab">Device Type</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" href="#inventory_item" role="tab" data-bs-toggle="tab">Inventory Item</a>
+            </li>
+    </div>
+    <div class="card-body">
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="device_type">
+                {% render_field form.device_type %}
+            </div>
+            <div role="tabpanel" class="tab-pane" id="inventory_item">
+                {% render_field form.inventory_item %}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header"><strong>Attributes</strong></div>
+    <div class="card-body">
+        {% render_field form.release_date %}
+        {% render_field form.end_of_sale %}
+        {% render_field form.end_of_support %}
+        {% render_field form.end_of_sw_releases %}
+        {% render_field form.end_of_security_patches %}
+        {% render_field form.documentation_url %}
+        {% render_field form.comments %}
+    </div>
+</div>
+{% include "inc/extras_features_edit_form_fields.html" %}
+{% endblock form %}

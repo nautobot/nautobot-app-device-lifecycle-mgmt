@@ -1,34 +1,25 @@
-{% extends "base.html" %}
+{% extends "generic/object_list.html" %}
 {% load buttons %}
 {% load static %}
 {% load helpers %}
 
-
-{% block content %}
-<div class="pull-right noprint">
+{% block buttons %}
 <div class="btn-group">
-    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <span class="mdi mdi-plus-thick" aria-hidden="true"></span> Execute <span class="caret"></span>
+    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="mdi mdi-plus-thick" aria-hidden="true"></span> Execute <span class="mdi mdi-chevron-down"></span>
     </button>
     <ul class="dropdown-menu">
-        <li><a href="{% url 'extras:job_run_by_class_path' class_path='nautobot_device_lifecycle_mgmt.jobs.lifecycle_reporting.InventoryItemSoftwareValidationFullReport' %}">Run Software Validation</a></li>
+        <li><a class="dropdown-item" href="{% url 'extras:job_run_by_class_path' class_path='nautobot_device_lifecycle_mgmt.jobs.lifecycle_reporting.InventoryItemSoftwareValidationFullReport' %}">Run Software Validation</a></li>
     </ul>
 </div>
-{% if request.user.is_authenticated and table_config_form %}
-    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#ObjectTable_config" title="Configure table"><i class="mdi mdi-cog"></i>Configure</button>
-{% endif %}
-{% if request.user.is_authenticated and 'export' in action_buttons %}
-    {% export_button content_type %}
-{% endif %}
-</div>
-    <h1>{% block title %}Inventory Item Software Validation Reports{% endblock title %}</h1>
-    <div class="row">
-        <div class="col-md-9">
+{% endblock buttons %}
+{% block title %}Inventory Item Software Validation Reports{% endblock title %}
+{% block table %}
             <!-- VISUAL BLOCK -->
             {% if report_last_run is None %}
                 <h4 class="text-center alert-danger p-4 m-4">-- No validation results found, you need to run the report at least once before seeing the results! --</h4>
             {% else %}
-            <h4 class="text-left alert-info p-4 m-4">Last full run of the report: {{ report_last_run }} - {{ report_last_run|timesince }} ago </h4>
+                <h4 class="text-start alert-info p-4 m-4">Last full run of the report: {{ report_last_run }} - {{ report_last_run|timesince }} ago </h4>
             {% endif %}
             {% if bar_chart is not None %}
                 {% block graphic %}
@@ -41,7 +32,7 @@
             {% endif %}
             <!-- END VISUAL BLOCK -->
             <h3 class="text-center m-2 p-3">Executive Summary</h3>
-            <table class="table table-hover table-headings">
+            <table class="table table-hover nb-table-headings">
                 <thead>
                     <tr>
                         <th><a>Type</a></th>
@@ -51,7 +42,7 @@
                         <th><a>No Software</a></th>
                         <th><a>Validation (%)</a></th>
                         <th><a>Summary</a></th>
-                        <th><a>Export Data</a></th>
+                        <th class="nb-w-0"><a>Export Data</a></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -86,9 +77,9 @@
                             <img style="width:150px;" src="data:image/png;base64,{{ inventory_visual|safe }}" alt="Inventory Pie Chart">
                             </a>
                         </td>
-                        <td>
+                        <td class="d-print-none nb-actions nb-w-0 text-end text-nowrap">
                             <a href='{% url "plugins-api:nautobot_device_lifecycle_mgmt-api:inventoryitemsoftwarevalidationresult-list" %}?format=csv'
-                                class="btn btn-default btn-xs" title="Export data for all inventory items" aria-hidden="true"> 
+                                class="btn btn-secondary btn-sm" title="Export data for all inventory items" aria-hidden="true">
                                 <i class="mdi mdi-download"></i>
                             </a>
                         </td>
@@ -96,14 +87,9 @@
                 </tbody>
             </table>
             <h3 class="text-center m-2 p-3">Inventory Item Part ID Summary</h3>
-            {% include "utilities/obj_table.html" %}
+            <div class="col-md-12">
+                {% include table_template|default:'panel_table.html' %}
+                {% include 'inc/paginator.html' with paginator=table.paginator page=table.page %}
+                <div class="clearfix"></div>
             </div>
-        <div class="col-md-3 noprint">
-        {% include "inc/search_panel.html" %}
-    </div>
-</div>
-{% table_config_form table table_name="ObjectTable" %}
-{% endblock content %}
-{% block javascript %}
-<script src="{% static 'js/tableconfig.js' %}"></script>
-{% endblock javascript %}
+{% endblock table %}

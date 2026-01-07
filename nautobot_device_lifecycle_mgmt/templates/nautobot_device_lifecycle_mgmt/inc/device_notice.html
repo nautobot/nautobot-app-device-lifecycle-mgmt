@@ -8,50 +8,49 @@
             </style>
 
             <!-- Defines all hardware notice logic within this tab-panel. -->
-            <div class="panel panel-default">
-                <div class="panel-heading">
+            <div class="card">
+                <div class="card-header">
                     <strong>Hardware Lifecycle Notices {% badge hw_notices.count show_empty=True %}</strong>
                 </div>
-                <table id="accordion" class="table table-hover panel-body attr-table">
+                <table id="accordion" class="table table-hover card-body attr-table">
                     {% for notice in hw_notices|slice:":5" %}
                     <tbody>
                         <tr>
-                            <th colspan="2">
-                                <button type="button" class="btn-link accordion-toggle mdi mdi-chevron-right"
-                                        name="hardware-notices-accordion-{{ forloop.counter }}" data-toggle="collapse"
-                                        data-target=".collapseme-hardware-notices-accordion-{{ forloop.counter }}">
+                            <td class="position-relative" colspan="2">
+                                <button type="button" class="btn float-none fs-4 fw-medium stretched-link nb-collapse-toggle"
+                                        name="hardware-notices-accordion-{{ forloop.counter }}" data-bs-toggle="collapse"
+                                        data-bs-target=".collapseme-hardware-notices-accordion-{{ forloop.counter }}">
+                                    <span aria-hidden="true" class="mdi mdi-chevron-down me-4"></span>
                                     {{ notice }}
                                 </button>
                                 {% if notice.expired %}
-                                    <span class="label label-danger pull-right">Expired</span>
+                                    <span class="badge bg-danger float-end">Expired</span>
                                 {% endif %}
                             </th>
                         </tr>
-                    </tbody>
-                    <tbody class="collapse collapseme-hardware-notices-accordion-{{ forloop.counter }}">
-                        <tr>
+                        <tr class="collapse collapseme-hardware-notices-accordion-{{ forloop.counter }} nb-transition-none">
                             <td>End of Sale</td>
                             <td>{{ notice.end_of_sale|placeholder }}</td>
                         </tr>
-                        <tr>
+                        <tr class="collapse collapseme-hardware-notices-accordion-{{ forloop.counter }} nb-transition-none">
                             <td>End of Support</td>
                             <td>{{ notice.end_of_support|placeholder }}</td>
                         </tr>
-                        <tr>
+                        <tr class="collapse collapseme-hardware-notices-accordion-{{ forloop.counter }} nb-transition-none">
                             <td>End of Software Releases</td>
                             <td>{{ notice.end_of_sw_releases|placeholder }}</td>
                         </tr>
-                        <tr>
+                        <tr class="collapse collapseme-hardware-notices-accordion-{{ forloop.counter }} nb-transition-none">
                             <td>End of Security Patches</td>
                             <td>{{ notice.end_of_security_patches|placeholder }}</td>
                         </tr>
-                        <tr>
+                        <tr class="collapse collapseme-hardware-notices-accordion-{{ forloop.counter }} nb-transition-none">
                             <td>Documentation URL</td>
                             <td>
                                 {% if notice.documentation_url %}<a href="{{ notice.documentation_url }}">{{ notice.documentation_url }}</a>{% else %}{{ None|placeholder }}{% endif %}
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="collapse collapseme-hardware-notices-accordion-{{ forloop.counter }} nb-transition-none">
                             <td>Comments</td>
                             <td>
                                 {% if notice.comments %}<pre>{{ notice.comments }}</pre>{% else %}{{ None|placeholder }}{% endif %}
@@ -61,8 +60,8 @@
                     {% endfor %}
                 </table>
                 {% if hw_notices|length > 5 %}
-                <div class="panel-footer text-right noprint">
-                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list' %}?q={% for inv in object.inventory_items.all %}{% if inv.part_id %}&inventory_item={{ inv.part_id|urlencode }}{% endif %}{% endfor %}" target="_blank" class="btn btn-primary btn-xs">
+                <div class="card-footer text-end d-print-none">
+                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list' %}?q={% for inv in object.inventory_items.all %}{% if inv.part_id %}&inventory_item={{ inv.part_id|urlencode }}{% endif %}{% endfor %}" target="_blank" class="btn btn-primary btn-sm">
                         <span class="mdi mdi-open-in-new" aria-hidden="true"></span>
                         See More Notices
                     </a>

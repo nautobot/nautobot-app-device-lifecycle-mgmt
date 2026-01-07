@@ -69,7 +69,7 @@ class ValidatedSoftwareDeviceReportViewTest(ViewTestCases.ListObjectsViewTestCas
     model = DeviceSoftwareValidationResult
 
     def _get_base_url(self):
-        return "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report"
+        return "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report_list"
 
     @classmethod
     def setUpTestData(cls):  # pylint: disable=invalid-name
@@ -92,7 +92,7 @@ class ValidatedSoftwareDeviceReportViewTest(ViewTestCases.ListObjectsViewTestCas
         self.assertHttpStatus(
             self.client.get(
                 reverse(
-                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report_list",
                 )
             ),
             403,
@@ -108,7 +108,7 @@ class ValidatedSoftwareDeviceReportViewTest(ViewTestCases.ListObjectsViewTestCas
         self.assertHttpStatus(
             self.client.get(
                 reverse(
-                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report",
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report_list",
                 )
             ),
             200,
@@ -149,7 +149,7 @@ class ValidatedSoftwareInventoryItemReportViewTest(ViewTestCases.ListObjectsView
     model = InventoryItemSoftwareValidationResult
 
     def _get_base_url(self):
-        return "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report"
+        return "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report_list"
 
     @classmethod
     def setUpTestData(cls):  # pylint: disable=invalid-name
@@ -177,7 +177,7 @@ class ValidatedSoftwareInventoryItemReportViewTest(ViewTestCases.ListObjectsView
         self.assertHttpStatus(
             self.client.get(
                 reverse(
-                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report_list",
                 )
             ),
             403,
@@ -193,7 +193,7 @@ class ValidatedSoftwareInventoryItemReportViewTest(ViewTestCases.ListObjectsView
         self.assertHttpStatus(
             self.client.get(
                 reverse(
-                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report",
+                    "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report_list",
                 )
             ),
             200,
@@ -266,7 +266,6 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the VulnerabilityLCM views."""
 
     model = VulnerabilityLCM
-    allowed_number_of_tree_queries_per_view_type = {"retrieve": 1}
 
     @classmethod
     def setUpTestData(cls):  # pylint: disable=invalid-name
