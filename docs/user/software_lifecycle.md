@@ -26,7 +26,9 @@ When creating the validated software the following fields are available. Fields 
 
 Example of a Validated Software object with most fields filled in:
 
-![](../images/lcm_software_validated_software_add_example.png)
+![](../images/ss_lcm_software_validated_software_add_example_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_software_validated_software_add_example_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/validated-software/add/`"
 
 ## Validated Software assignment rules
 

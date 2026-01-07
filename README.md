@@ -32,31 +32,31 @@ More screenshots can be found in the [Using the App](https://docs.nautobot.com/p
 
 You can view the list of Hardware/Software notices as well as filter the table.
 
-![](https://raw.githubusercontent.com/nautobot/nautobot-app-device-lifecycle-mgmt/develop/docs/images/lcm_hardware_list_view.png)
+![](https://raw.githubusercontent.com/nautobot/nautobot-app-device-lifecycle-mgmt/develop/docs/images/ss_lcm_hardware_list_view_dark.png)
 
 **Device Lifecycle Management Detail View**
 
 You can also click a Hardware/Software Notice and see the detail view. This view provides links to the devices that are part affected by this EoX notice due to their device type.
 
-![](https://raw.githubusercontent.com/nautobot/nautobot-app-device-lifecycle-mgmt/develop/docs/images/lcm_hardware_detail_view.png)
+![](https://raw.githubusercontent.com/nautobot/nautobot-app-device-lifecycle-mgmt/develop/docs/images/ss_lcm_hardware_detail_view_dark.png)
 
 **Software Lifecycle Reporting**
 
 Reports can be created from the Nautobot's software validation jobs **Device Software Validation - Report** or **Inventory Item Software Validation - Report**.
 
-![](https://raw.githubusercontent.com/nautobot/nautobot-app-device-lifecycle-mgmt/develop/docs/images/lcm_software_validation_report_run_graph.png)
+![](https://raw.githubusercontent.com/nautobot/nautobot-app-device-lifecycle-mgmt/develop/docs/images/ss_lcm_software_validation_report_run_graph_dark.png)
 
 Individual CSV files can be exported per platform or inventory item.
 
-![](https://raw.githubusercontent.com/nautobot/nautobot-app-device-lifecycle-mgmt/develop/docs/images/lcm_software_validation_report_run_detailed_summary.png)
+![](https://raw.githubusercontent.com/nautobot/nautobot-app-device-lifecycle-mgmt/develop/docs/images/ss_lcm_software_validation_report_run_detailed_summary_dark.png)
 
 Sample CSV.
 
-![](https://raw.githubusercontent.com/nautobot/nautobot-app-device-lifecycle-mgmt/develop/docs/images/lcm_software_validation_report_csv_small.png)
+![](https://raw.githubusercontent.com/nautobot/nautobot-app-device-lifecycle-mgmt/develop/docs/images/ss_lcm_software_validation_report_csv_small_dark.png)
 
 You can also view validation results as a list from the Nautobot GUI.
 
-![](https://raw.githubusercontent.com/nautobot/nautobot-app-device-lifecycle-mgmt/develop/docs/images/lcm_software_validation_report_run_results_list.png)
+![](https://raw.githubusercontent.com/nautobot/nautobot-app-device-lifecycle-mgmt/develop/docs/images/ss_lcm_software_validation_report_run_results_list_dark.png)
 
 ## Try it out!
 

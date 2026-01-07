@@ -35,11 +35,15 @@ As stated previously, you can associate a CVE to one or many software versions. 
 
 Example of a breadcrumb link on a CVE item's view:
 
-![](../images/lcm_cve_breadcrumb.png)
+![](../images/ss_lcm_cve_breadcrumb_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_cve_breadcrumb_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/cve/0cc65c48-a17e-592b-8495-0f4681598eef/`"
 
 Example of the "Related CVEs" tab on a Software item's view:
 
-![](../images/lcm_software_breadcrumb.png)
+![](../images/ss_lcm_software_breadcrumb_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_software_breadcrumb_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/software-versions/6d4b73fb-38da-523c-84fd-5109163231c9/related-cves/?tab=nautobot_device_lifecycle_mgmt:1`"
 
 ## Vulnerability objects
 
@@ -95,13 +99,19 @@ Automated discovery is used by running the ``NIST - Software CVE Search`` Job.
 
 To run this job, use the "Jobs" menu dropdown and navigate to the **CVE Tracking** section. The jobs will appear here and all you will need to do is click the play button in order to use the default External Integration[^1].  If you have configured additional Integrations, you may select the External Integration that you want to use.  **As stated previously, the name of the External Integration does not matter, but the External Integration must contain a SecretsGroup and Secret named as above**.
 
-![](../images/lcm_cve_nist_job.png)
+![](../images/ss_lcm_cve_nist_job_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_cve_nist_job_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/extras/jobs/`"
 
-![](../images/lcm_cve_nist_job_run.png)
+![](../images/ss_lcm_cve_nist_job_run_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_cve_nist_job_run_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/extras/jobs/fae52b77-309e-48d7-97fb-33a85f3028e1/run/`"
 
 The job output should indicate the softwares checked and the amount of CVEs received for that software, as well as the amount of CVEs created.  These will not always be the same.  New CVE will be created for software with existing CVE, also software will share CVEs.
 
-![](../images/lcm_cve_nist_job_log.png)
+![](../images/ss_lcm_cve_nist_job_log_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_cve_nist_job_log_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/extras/job-results/6b261884-fb23-43cb-a958-b5a99aebc3b2/`"
 
 [^1] Warning: If play button is grayed out. You will need to enable the job by clicking on edit button in the row and navigate to "Job" portion and click on "Enable"
 
