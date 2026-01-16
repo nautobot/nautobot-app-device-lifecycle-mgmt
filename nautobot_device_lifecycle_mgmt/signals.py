@@ -1,10 +1,14 @@
 """Custom signals for the Lifecycle Management app."""
 
 from django.apps import apps as global_apps
+from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from nautobot.apps.choices import RelationshipTypeChoices
-from nautobot.extras.models import ExternalIntegration, Secret, SecretsGroup
+from nautobot.core.choices import ColorChoices
+from nautobot.extras.models import ExternalIntegration, Secret, SecretsGroup, Status
+
+from nautobot_device_lifecycle_mgmt import models
 
 
 def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # pylint: disable=unused-argument
@@ -107,3 +111,29 @@ def create_nist_objects(sender, apps=global_apps, **kwargs):  # pylint: disable=
             },
         },
     )
+
+
+def assign_contract_statuses(sender, apps=global_apps, **kwargs):  # pylint: disable=unused-argument
+    """Assign default statuses and roles for VendorContract and related models."""
+    contract_ct = ContentType.objects.get_for_model(models.ContractLCM)
+
+    status_configs = [
+        {"name": "Active", "color": ColorChoices.COLOR_GREEN},
+        {"name": "Pending Approval", "color": ColorChoices.COLOR_YELLOW},
+        {"name": "Renewal Due", "color": ColorChoices.COLOR_DARK_ORANGE},
+        {"name": "Terminated", "color": ColorChoices.COLOR_DARK_RED},
+        {"name": "Expired", "color": ColorChoices.COLOR_RED},
+        {"name": "Month-to-Month", "color": ColorChoices.COLOR_LIME},
+    ]
+
+    for config in status_configs:
+        status, _ = Status.objects.get_or_create(
+            name=config["name"],
+            defaults={
+                "name": config["name"],
+                "color": config["color"],
+            },
+        )
+        # Always ensure the content type is associated with the Contract Statuses
+        if contract_ct not in status.content_types.all():
+            status.content_types.add(contract_ct)

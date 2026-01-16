@@ -572,3 +572,47 @@ class ProviderLCMTestCase(TestCase):
         self.assertEqual(cisco_contract.currency, "USD")
         self.assertEqual(cisco_contract.contract_type, "Hardware")
         self.assertEqual(cisco_contract.comments, "Cisco gave us discount")
+
+
+class ContractLCMTest(TestCase):
+    """Tests for the ContractLCMTest models."""
+
+    def setUp(self):
+        # Use the create_contracts helper to create test contracts
+        from nautobot_device_lifecycle_mgmt.tests.conftest import create_contracts
+
+        (
+            self.contract1,
+            self.contract2,
+            self.contract3,
+            self.contract4,
+        ) = create_contracts()
+
+    def test_contract_creation(self):
+        """Test that contracts are created by the helper."""
+        # Assert that the contracts created by the helper exist
+        self.assertEqual(ContractLCM.objects.count(), 4)
+        self.assertTrue(self.contract1.pk)
+        self.assertTrue(self.contract2.pk)
+        self.assertTrue(self.contract3.pk)
+        self.assertTrue(self.contract4.pk)
+
+    def test_contract_fields(self):
+        """Test that all required fields are present in the helper contracts."""
+        for contract in (self.contract1, self.contract2, self.contract3, self.contract4):
+            self.assertTrue(contract.name)
+            self.assertTrue(contract.number)
+            self.assertTrue(contract.start)
+            self.assertTrue(contract.end)
+            self.assertTrue(contract.cost)
+            self.assertTrue(contract.support_level)
+            self.assertTrue(contract.currency)
+            self.assertTrue(contract.contract_type)
+
+    def test_contract_status(self):
+        """Test that the contract's status is properly set by the helper."""
+        # The first two contracts are 'Expired', the last two are 'Active'
+        self.assertEqual(self.contract1.status.name, "Expired")
+        self.assertEqual(self.contract2.status.name, "Expired")
+        self.assertEqual(self.contract3.status.name, "Active")
+        self.assertEqual(self.contract4.status.name, "Active")
