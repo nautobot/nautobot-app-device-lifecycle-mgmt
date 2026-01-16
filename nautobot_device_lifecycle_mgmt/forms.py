@@ -16,6 +16,8 @@ from nautobot.apps.forms import (
     NullableDateField,
     StaticSelect2,
     StaticSelect2Multiple,
+    StatusModelBulkEditFormMixin,
+    StatusModelFilterFormMixin,
     TagFilterField,
     add_blank_choice,
 )
@@ -644,7 +646,7 @@ class ContractLCMBulkEditForm(NautobotBulkEditForm, StatusModelBulkEditFormMixin
         ]
 
 
-class ContractLCMFilterForm(NautobotFilterForm):
+class ContractLCMFilterForm(NautobotFilterForm, StatusModelFilterFormMixin):
     """Filter form for filtering ContractLCM objects."""
 
     model = ContractLCM

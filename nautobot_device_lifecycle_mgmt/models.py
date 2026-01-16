@@ -519,6 +519,7 @@ class ContractLCMQuerySet(RestrictedQuerySet):
     "export_templates",
     "graphql",
     "relationships",
+    "statuses",
     "webhooks",
 )
 class ContractLCM(PrimaryModel):
@@ -533,6 +534,12 @@ class ContractLCM(PrimaryModel):
         null=True,
     )
     name = models.CharField(max_length=CHARFIELD_MAX_LENGTH, unique=True)
+    status = StatusField(
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        to="extras.status",
+    )
     number = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True, default="")
     start = models.DateField(null=True, blank=True, verbose_name="Contract Start Date")
     end = models.DateField(null=True, blank=True, verbose_name="Contract End Date")
