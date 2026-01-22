@@ -22,6 +22,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
+from nautobot_device_lifecycle_mgmt.tests.conftest import create_contracts
 
 from .conftest import (
     create_cves,
@@ -579,8 +580,6 @@ class ContractLCMTest(TestCase):
 
     def setUp(self):
         # Use the create_contracts helper to create test contracts
-        from nautobot_device_lifecycle_mgmt.tests.conftest import create_contracts
-
         (
             self.contract1,
             self.contract2,
