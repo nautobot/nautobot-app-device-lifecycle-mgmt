@@ -14,8 +14,14 @@ from nautobot.dcim.models import (
 )
 from nautobot.extras.models import Role, Status
 
-from nautobot_device_lifecycle_mgmt.forms import CVELCMForm, HardwareLCMForm, ValidatedSoftwareLCMForm
-from nautobot_device_lifecycle_mgmt.models import CVELCM
+from nautobot_device_lifecycle_mgmt.forms import (
+    ContractLCMForm,
+    CVELCMForm,
+    HardwareLCMForm,
+    ProviderLCM,
+    ValidatedSoftwareLCMForm,
+)
+from nautobot_device_lifecycle_mgmt.models import CVELCM, ContractLCM
 
 
 class HardwareLCMFormTest(TestCase):
@@ -321,6 +327,90 @@ class CVELCMFormTest(TestCase):
             {
                 "published_date": ["This field is required."],
                 "link": ["This field is required."],
+            },
+            form.errors,
+        )
+
+
+class ContractLCMFormTest(TestCase):
+    """Test class for ContractLCMFormTest forms."""
+
+    contract_form_class = ContractLCMForm
+
+    def setUp(self):
+        # Build Variables Needed for Forms
+        self.provider, _ = ProviderLCM.objects.get_or_create(name="Skyrim Merchant")
+        self.contract_status = Status.objects.get_for_model(ContractLCM).first()
+
+        # Build Test Location for Contract
+        location_status = Status.objects.get_for_model(Location).first()
+        location_type, _ = LocationType.objects.get_or_create(name="City")
+        location_type.content_types.add(
+            ContentType.objects.get_for_model(Device),
+        )
+        location1, _ = Location.objects.get_or_create(
+            name="Whiterun", location_type=location_type, status=location_status
+        )
+
+        # Build Test Device for Contract
+        device_status = Status.objects.get_for_model(Device).first()
+
+        manufacturer_cisco, _ = Manufacturer.objects.get_or_create(name="Septim Empire")
+        self.devicetype, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer_cisco, model="Sword")
+        devicerole, _ = Role.objects.get_or_create(name="Blade", defaults={"color": "ff0000"})
+        self.test_device, _ = Device.objects.get_or_create(
+            device_type=self.devicetype, role=devicerole, name="Dragonbane", location=location1, status=device_status
+        )
+
+    # Verify setUp is correct.
+    def test_provider_creation(self):
+        """Test that a provider is correctly created."""
+        self.assertEqual(ProviderLCM.objects.count(), 1)
+        self.assertEqual(ProviderLCM.objects.first().name, "Skyrim Merchant")
+
+    def test_device_creation(self):
+        """Test that a device is correctly created."""
+        self.assertEqual(Device.objects.count(), 1)
+        self.assertEqual(Device.objects.first().name, "Dragonbane")
+        self.assertEqual(Device.objects.first().device_type.manufacturer.name, "Septim Empire")
+        self.assertEqual(Device.objects.first().location.name, "Whiterun")
+
+    # Actual Tests Begin
+    def test_form_initiation(self):
+        form = self.contract_form_class(data={})
+        self.assertIsNotNone(form)
+        self.assertIsInstance(form, ContractLCMForm)
+
+    def test_form_all_fields(self):
+        form = self.contract_form_class(
+            data={
+                "provider": self.provider,
+                "name": "Hero Discount",
+                "number": "111-111-1111",
+                "start": "2018-03-05",
+                "end": "2019-03-04",
+                "cost": "1000.00",
+                "support_level": "high support",
+                "currency": "USD",
+                "contract_type": "Hardware",
+                "devices": [self.test_device],
+                "status": self.contract_status,
+                "comments": "Hero Discount for saving the city.",
+            }
+        )
+        if not form.is_valid():
+            print("form.errors:", form.errors)
+        self.assertTrue(form.is_valid())
+        self.assertTrue(form.save())
+
+    def test_required_fields_missing(self):
+        form = self.contract_form_class(data={"cost": "0"})
+        self.assertFalse(form.is_valid())
+        self.assertDictEqual(
+            {
+                "provider": ["This field is required."],
+                "name": ["This field is required."],
+                "contract_type": ["This field is required."],
             },
             form.errors,
         )
