@@ -13,6 +13,15 @@ Device Lifecycle Management App version 3.2.0 adds support for ArubaOS and PanOS
     This release drops support for Python 3.9. Python 3.10 is now the minimum required version.
 
 <!-- towncrier release notes start -->
+
+
+## [v3.2.2 (2026-01-23)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v3.2.2)
+
+### Housekeeping
+
+- [#544](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/544) - Updated pycountry to 24.6.1 to eliminate deprecated pkg_resources API usage.
+- [#547](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/547) - Updated django-debug-toolbar to 4.4.0 to fix import errors.
+
 ## [v3.2.1 (2025-12-08)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v3.2.1)
 
 ### Changed
