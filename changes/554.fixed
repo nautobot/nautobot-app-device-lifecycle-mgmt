@@ -1,0 +1,1 @@
+Prevented AttributeError calling __str__ of None
