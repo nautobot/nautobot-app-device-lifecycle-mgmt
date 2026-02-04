@@ -20,7 +20,7 @@ def create_contract_statuses(apps, schema_editor):
         {"name": "Renewal Due", "color": ColorChoices.COLOR_DARK_ORANGE},
         {"name": "Terminated", "color": ColorChoices.COLOR_DARK_RED},
         {"name": "Expired", "color": ColorChoices.COLOR_RED},
-        {"name": "Month-to-Month", "color": ColorChoices.COLOR_LIME},
+        {"name": "Draft", "color": ColorChoices.COLOR_GREY},
     ]
 
     for config in status_configs:
@@ -50,7 +50,7 @@ def remove_contract_statuses(apps, schema_editor):
         {"name": "Renewal Due", "color": ColorChoices.COLOR_DARK_ORANGE},
         {"name": "Terminated", "color": ColorChoices.COLOR_DARK_RED},
         {"name": "Expired", "color": ColorChoices.COLOR_RED},
-        {"name": "Month-to-Month", "color": ColorChoices.COLOR_LIME},
+        {"name": "Draft", "color": ColorChoices.COLOR_GREY},
     ]
 
     for config in status_configs:
