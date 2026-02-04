@@ -326,6 +326,9 @@ class ValidatedSoftwareLCM(PrimaryModel):
 
     def __str__(self):
         """String representation of ValidatedSoftwareLCM."""
+        if not hasattr(self, "software"):
+            return f"{self.old_software.version} - Valid since: {self.start}"
+
         return f"{self.software.version} - Valid since: {self.start}"
 
     @property
@@ -802,6 +805,10 @@ class VulnerabilityLCM(PrimaryModel):
         name = f"Device: {self.device}" if self.device else f"Inventory Part: {self.inventory_item}"
         if self.software:
             name += f" - Software: {self.software}"
+        elif self.old_software:
+            name += f" - Software: {self.old_software}"
+
         if self.cve:
             name += f" - CVE: {self.cve}"
+
         return name
