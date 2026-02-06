@@ -27,13 +27,11 @@ def create_contract_statuses(apps, schema_editor):
         status, _ = Status.objects.get_or_create(
             name=config["name"],
             defaults={
-                "name": config["name"],
                 "color": config["color"],
             },
         )
         # Always ensure the content type is associated with the Contract Statuses
-        if contract_ct not in status.content_types.all():
-            status.content_types.add(contract_ct)
+        status.content_types.add(contract_ct)
 
 
 def remove_contract_statuses(apps, schema_editor):
