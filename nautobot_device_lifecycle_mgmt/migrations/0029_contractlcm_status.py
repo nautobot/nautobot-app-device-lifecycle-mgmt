@@ -4,6 +4,7 @@ import django.db.models.deletion
 import nautobot.extras.models.statuses
 from django.db import migrations
 from nautobot.core.choices import ColorChoices
+from nautobot.extras.management import STATUS_COLOR_MAP
 
 
 def create_contract_statuses(apps, schema_editor):
@@ -15,7 +16,7 @@ def create_contract_statuses(apps, schema_editor):
     contract_ct = ContentType.objects.get_for_model(ContractLCM)
 
     status_configs = [
-        {"name": "Active", "color": ColorChoices.COLOR_GREEN},
+        {"name": "Active", "color": STATUS_COLOR_MAP["Active"]},
         {"name": "Pending Approval", "color": ColorChoices.COLOR_YELLOW},
         {"name": "Renewal Due", "color": ColorChoices.COLOR_DARK_ORANGE},
         {"name": "Terminated", "color": ColorChoices.COLOR_DARK_RED},
@@ -43,7 +44,7 @@ def remove_contract_statuses(apps, schema_editor):
     contract_ct = ContentType.objects.get_for_model(ContractLCM)
 
     status_configs = [
-        {"name": "Active", "color": ColorChoices.COLOR_GREEN},
+        {"name": "Active", "color": STATUS_COLOR_MAP["Active"]},
         {"name": "Pending Approval", "color": ColorChoices.COLOR_YELLOW},
         {"name": "Renewal Due", "color": ColorChoices.COLOR_DARK_ORANGE},
         {"name": "Terminated", "color": ColorChoices.COLOR_DARK_RED},
