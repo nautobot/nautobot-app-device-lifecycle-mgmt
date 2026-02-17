@@ -85,13 +85,17 @@ Deprecated DLM models will be hidden from the GUI, but will remain accessible vi
 
 To execute the Device Lifecycle Management to Nautobot Core Model Migration job, go to the Jobs page and locate it under "DLM Models \-\> Nautobot Core Models Migration" section. The job will need to be enabled before running it the first time.
 
-![](../images/lcm_v3_migration_job_location.png)
+![](../images/ss_lcm_v3_migration_job_location_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_v3_migration_job_location_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/extras/jobs/`"
 
 ### Migration Job options
 
 The screenshot shows several options that are available for the migration job. These options are explained below.  
 
-![](../images/lcm_v3_migration_job_options.png)
+![](../images/ss_lcm_v3_migration_job_options_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_v3_migration_job_options_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/extras/jobs/2f2d9066-256d-45d1-bf3a-fdc7b6750a52/run/`"
 
 **Dryrun** \- Activate reporting mode to receive informational messages on what the migration job identified for migration. No changes will be made in this mode.
 
