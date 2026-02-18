@@ -539,7 +539,7 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
         )  # dynamic y margin based on qs counts (more results = smaller margins)
         axis.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-        legend_colors = {"supported": GREEN, "unsuported": RED}
+        legend_colors = {"supported": GREEN, "unsupported": RED}
         legend_labels = list(legend_colors.keys())
         legend_handles = [plt.Rectangle((0, 0), 1, 1, color=legend_colors[label]) for label in legend_labels]
         plt.legend(legend_handles, legend_labels)
