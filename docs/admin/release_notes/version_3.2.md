@@ -15,6 +15,12 @@ Device Lifecycle Management App version 3.2.0 adds support for ArubaOS and PanOS
 <!-- towncrier release notes start -->
 
 
+## [v3.2.3 (2026-02-18)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v3.2.3)
+
+### Fixed
+
+- [#554](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/554) - Fixed an issue rendering Validated Software in the UI before running the job to migrate to the core models.
+
 ## [v3.2.2 (2026-01-23)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v3.2.2)
 
 ### Housekeeping
