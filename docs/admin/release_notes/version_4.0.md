@@ -12,6 +12,35 @@ This major release marks the compatibility of the Device Lifecycle Management Ap
 
 We will continue to support the previous major release for users of Nautobot LTM 2.4 only with critical bug and security fixes as per the [Software Lifecycle Policy](https://networktocode.com/company/legal/software-lifecycle-policy/).
 
+## [v4.0.1 (2026-02-18)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v4.0.1)
+
+### Changed
+
+- [#512](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/512) - Allowed cloning of validated software objects.
+
+### Fixed
+
+- [#529](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/529) - Fixed global search for Vendors.
+- [#533](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/533) - Fixed duplicate "Software Version" column labels on the Devices and Inventory Items list views.
+- [#554](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/554) - Fixed an issue rendering Validated Software in the UI before running the job to migrate to the core models.
+
+### Documentation
+
+- [#540](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/540) - Updated documentation to include 3.0 screenshots.
+
+### Housekeeping
+
+- [#490](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/490) - Refactored DeviceHardwareNoticeResult, DeviceSoftwareValidationResult, InventoryItemSoftwareValidationResult model related UI views to use `NautobotUIViewSet`.
+- [#494](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/494) - Refactored HardwareLCM,ValidatedSoftwareLCM,ContractLCM,ProviderLCM,CVELCM,VulnerabilityLCM model related UI views to use `UI component framework`.
+- [#498](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/498) - Updated generate_dlm_test_data management command for DLM v3.
+- [#498](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/498) - Added --flush argument to generate_dlm_test_data management command.
+- [#498](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/498) - Added change logging to generate_dlm_test_data management command.
+- [#506](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/506) - Update any call to `get_extra_context` to call super of the method first.
+- [#539](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/539) - Refactored imports to use `nautobot.apps` and simplified existing import statements.
+- Rebaked from the cookie `nautobot-app-v2.7.0`.
+- Rebaked from the cookie `nautobot-app-v2.7.1`.
+- Rebaked from the cookie `nautobot-app-v3.0.0`.
+
 ## [v4.0.0 (2025-11-17)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v4.0.0)
 
 ### Added

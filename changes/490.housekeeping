@@ -1,1 +1,0 @@
-Refactored DeviceHardwareNoticeResult, DeviceSoftwareValidationResult, InventoryItemSoftwareValidationResult model related UI views to use `NautobotUIViewSet`.
