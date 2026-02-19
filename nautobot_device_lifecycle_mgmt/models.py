@@ -326,6 +326,8 @@ class ValidatedSoftwareLCM(PrimaryModel):
 
     def __str__(self):
         """String representation of ValidatedSoftwareLCM."""
+        if not self.software:
+            return str(self.pk)
         return f"{self.software.version} - Valid since: {self.start}"
 
     @property

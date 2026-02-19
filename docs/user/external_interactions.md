@@ -17,7 +17,9 @@ There are various integrations that you may want to incorporate into the Device 
 
 ### Hardware Lifecycle Management API Examples
 
-![](../images/lcm_hardware_api_view.png)
+![](../images/ss_lcm_hardware_api_view_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_hardware_api_view_dark.png#only-dark){ .on-glb }
+[//]: # "`https://next.demo.nautobot.com/api/docs/`"
 
 #### REST API Example 1
 
@@ -46,4 +48,5 @@ curl "http://$NBHOST/api/plugins/device-lifecycle/hardware/?expired=true" \
 
 ### GraphQL Examples
 
-![](../images/lcm_hardware_graphql.png)
+![](../images/ss_lcm_hardware_graphql_light.png#only-light){ .on-glb }
+![](../images/ss_lcm_hardware_graphql_dark.png#only-dark){ .on-glb }

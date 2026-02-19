@@ -17,11 +17,11 @@ from nautobot.apps.choices import (
     ObjectChangeEventContextChoices,
     SoftwareImageFileHashingAlgorithmChoices,
 )
+from nautobot.apps.jobs import BooleanVar, DryRunVar, Job
 from nautobot.apps.models import serialize_object, serialize_object_v2
 from nautobot.apps.utils import get_route_for_model
 from nautobot.dcim.models import Device, InventoryItem, SoftwareImageFile, SoftwareVersion
 from nautobot.extras.constants import CHANGELOG_MAX_OBJECT_REPR
-from nautobot.extras.jobs import BooleanVar, DryRunVar, Job
 from nautobot.extras.models import (
     ComputedField,
     Contact,

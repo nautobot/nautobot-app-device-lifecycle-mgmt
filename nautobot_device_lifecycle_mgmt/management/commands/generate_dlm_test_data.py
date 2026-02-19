@@ -6,7 +6,7 @@ from datetime import date
 from django.core.management.base import BaseCommand
 from django.db import DEFAULT_DB_ALIAS
 from nautobot.apps.change_logging import web_request_context
-from nautobot.core.factory import get_random_instances
+from nautobot.apps.factory import get_random_instances
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, SoftwareVersion
 from nautobot.users.models import User
 
