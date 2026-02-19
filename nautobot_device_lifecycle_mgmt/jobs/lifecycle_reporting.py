@@ -3,8 +3,8 @@
 
 from datetime import datetime
 
+from nautobot.apps.jobs import Job
 from nautobot.dcim.models import Device, InventoryItem
-from nautobot.extras.jobs import Job
 
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.models import (

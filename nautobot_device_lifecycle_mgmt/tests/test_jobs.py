@@ -1,8 +1,7 @@
 """Test Jobs."""
 
-from nautobot.apps.testing import create_job_result_and_run_job
-from nautobot.core.testing import TransactionTestCase
-from nautobot.extras.choices import JobResultStatusChoices
+from nautobot.apps.choices import JobResultStatusChoices
+from nautobot.apps.testing import TransactionTestCase, create_job_result_and_run_job
 
 from nautobot_device_lifecycle_mgmt.models import DeviceHardwareNoticeResult
 from nautobot_device_lifecycle_mgmt.tests import conftest

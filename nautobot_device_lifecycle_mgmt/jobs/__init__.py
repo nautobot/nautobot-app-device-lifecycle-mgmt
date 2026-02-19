@@ -1,6 +1,6 @@
 """Nautobot Jobs for the Device Lifecycle app."""
 
-from nautobot.core.celery import register_jobs
+from nautobot.apps.jobs import register_jobs
 
 from .cve_tracking import GenerateVulnerabilities, NistCveSyncSoftware
 from .lifecycle_reporting import (

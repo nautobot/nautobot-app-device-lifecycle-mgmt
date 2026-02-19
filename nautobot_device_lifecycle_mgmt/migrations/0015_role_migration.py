@@ -1,5 +1,5 @@
 from django.db import migrations
-from nautobot.extras.utils import migrate_role_data
+from nautobot.apps.utils import migrate_role_data
 
 
 def migrate_data_from_legacy_role_to_new_role(apps, schema):
