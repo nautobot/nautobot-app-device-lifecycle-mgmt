@@ -6,7 +6,7 @@ from nautobot_device_lifecycle_mgmt import filters, models
 from nautobot_device_lifecycle_mgmt.tests import fixtures
 
 
-class HardwareLCMFilterTestCase(FilterTestCases.FilterTestCase):
+class HardwareLCMFilterTestCase(FilterTestCases.FilterTestCase):  # pylint: disable=too-many-ancestors
     """HardwareLCM Filter Test Case."""
 
     queryset = models.HardwareLCM.objects.all()

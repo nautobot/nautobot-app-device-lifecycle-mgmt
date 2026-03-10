@@ -31,7 +31,7 @@ class HardwareLCMBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm):  # p
         ]
 
 
-class HardwareLCMFilterForm(NautobotFilterForm):
+class HardwareLCMFilterForm(NautobotFilterForm):  # pylint: disable=too-many-ancestors
     """Filter form to filter searches."""
 
     model = models.HardwareLCM
