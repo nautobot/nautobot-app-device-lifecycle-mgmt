@@ -327,6 +327,7 @@ class ContractLCMTestCase(FilterTestCases.FilterTestCase):
             ContractLCM.objects.get_or_create(
                 provider=cls.providers[0],
                 name="Contract 123456789-A",
+                status=active_status,
                 number=123456789 - 111,
                 start="2020-01-01",
                 end="2020-12-31",
@@ -339,6 +340,7 @@ class ContractLCMTestCase(FilterTestCases.FilterTestCase):
             ContractLCM.objects.get_or_create(
                 provider=cls.providers[1],
                 name="Contract 987654321-Z",
+                status=active_status,
                 number=987654321 - 222,
                 start="2022-02-01",
                 end="2023-01-31",
@@ -351,6 +353,7 @@ class ContractLCMTestCase(FilterTestCases.FilterTestCase):
             ContractLCM.objects.get_or_create(
                 provider=cls.providers[2],
                 name="Test Contract 3",
+                status=active_status,
                 number=3,
                 start="2022-02-01",
                 end="2023-01-31",
@@ -363,6 +366,7 @@ class ContractLCMTestCase(FilterTestCases.FilterTestCase):
             ContractLCM.objects.get_or_create(
                 provider=cls.providers[3],
                 name="Test Contract 4",
+                status=active_status,
                 number=4,
                 start="2022-02-01",
                 end="2023-01-31",
@@ -464,6 +468,11 @@ class ContractLCMTestCase(FilterTestCases.FilterTestCase):
             self.filterset(params, self.queryset).qs,
             self.queryset.filter(end__lt=datetime.today().date()),
         )
+
+    def test_contrat_status(self):
+        """Test status filter."""
+        params = {"status": "Active"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 4)
 
 
 class ProviderLCMTestCase(FilterTestCases.FilterTestCase):

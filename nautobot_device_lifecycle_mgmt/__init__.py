@@ -30,7 +30,9 @@ class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
 
     def ready(self):
         """Register custom signals."""
-        from .signals import post_migrate_create_relationships  # pylint: disable=import-outside-toplevel
+        from .signals import (  # pylint: disable=import-outside-toplevel
+            post_migrate_create_relationships,
+        )
 
         nautobot_database_ready.connect(post_migrate_create_relationships, sender=self)
 
