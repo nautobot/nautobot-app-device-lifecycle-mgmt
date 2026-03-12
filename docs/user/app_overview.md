@@ -9,7 +9,6 @@ The Device Lifecycle Management app aims to help in managing the lifecycle of th
 
 ## Description
 
-<<<<<<< HEAD
 Devices and their components, both hardware, and software, have fixed-period vendor support related to updates and availability. These are also often associated with several maintenance contracts. Managing these relationships is often complex and engineering teams may lack visibility into the processes involved.
 
 With the Device Lifecycle Management app, you can capture the processes related to the device's lifecycle in Nautobot, alongside existing device data. Lifecycle information that you can record includes:
@@ -28,10 +27,6 @@ Additionally, you can run jobs allowing you to:
 - Generate a report showing whether inventory items are running approved software version
 - Map recorded CVEs to affected devices, which creates corresponding vulnerability objects
 - Generate a report showing which device types, and how many device instances are affected by hardware notices.
-=======
-![Main Page](../media/ss_main_page_light.png#only-light)
-![Main Page](../media/ss_main_page_dark.png#only-dark)
->>>>>>> 9dca502 (Cookie updated targeting develop by NetworkToCode Cookie Drift Manager Tool)
 
 ## Audience (User Personas) - Who should use this App?
 
@@ -40,7 +35,7 @@ Additionally, you can run jobs allowing you to:
 
 ## Authors and Maintainers
 
-Nautobot Device Lifecycle App is maintained by Network to Code and members of the Nautobot community.  Anyone is welcome to contribute code, issues, feature requests, etc...  
+Nautobot Device Lifecycle App is maintained by Network to Code and members of the Nautobot community.  Anyone is welcome to contribute code, issues, feature requests, etc...
 
 ## Extras
 

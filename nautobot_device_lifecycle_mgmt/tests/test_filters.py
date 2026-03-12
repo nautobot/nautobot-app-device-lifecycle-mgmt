@@ -37,13 +37,8 @@ from nautobot_device_lifecycle_mgmt.models import (
 from .conftest import create_cves, create_devices, create_inventory_items, create_softwares
 
 
-<<<<<<< HEAD
 class CommonTestDataMixin:
     """Mixin to add common test data to the TestCase classes."""
-=======
-class HardwareLCMFilterTestCase(FilterTestCases.FilterTestCase):  # pylint: disable=too-many-ancestors
-    """HardwareLCM Filter Test Case."""
->>>>>>> 9dca502 (Cookie updated targeting develop by NetworkToCode Cookie Drift Manager Tool)
 
     @classmethod
     def setUpTestData(cls):  # pylint: disable=invalid-name
