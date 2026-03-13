@@ -47,6 +47,7 @@ from nautobot.core.templatetags.helpers import (
 )
 from nautobot.core.views import generic
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, SoftwareVersion
+from nautobot.tenancy.models import Tenant
 from nautobot.extras.models import Role, Tag
 
 from nautobot_device_lifecycle_mgmt import choices, filters, forms, helpers, models, tables
@@ -163,6 +164,7 @@ class ValidatedSoftwareLCMUIViewSet(NautobotUIViewSet):
                 related_models=[
                     (Device, "validated_software__in"),
                     (DeviceType, "validated_software__in"),
+                    (Tenant, "validated_software_tenants__in"),
                     (Role, "validated_software__in"),
                     (InventoryItem, "validated_software__in"),
                     (Tag, "validated_software__in"),

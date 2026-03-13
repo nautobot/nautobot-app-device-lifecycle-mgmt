@@ -6,6 +6,7 @@ import django_filters
 from django.db.models import Q
 from nautobot.apps.filters import NautobotFilterSet, SearchFilter, StatusFilter, StatusModelFilterSetMixin
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform, SoftwareVersion
+from nautobot.tenancy.models import Tenant
 from nautobot.extras.models import Role, Status, Tag
 
 from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
@@ -284,6 +285,7 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
             "start": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "end": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "devices__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "devices__tenant__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "device_types__model": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "device_roles__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "inventory_items__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
@@ -316,6 +318,11 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         queryset=DeviceType.objects.all(),
         to_field_name="model",
         label="Device Types (model)",
+    )
+    device_tenant = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_tenant__name",
+        queryset=Tenant.objects.all(),
+        label="Tenant",
     )
     device_roles_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device_roles",
@@ -371,7 +378,7 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         """Perform the valid_search search."""
         today = datetime.date.today()
         if value is True:
-            qs_filter = Q(start__lte=today, end=None) | Q(start__lte=today, end__gte=today)
+            qs_filter = Q(start__lte=today, end__isnull=True) | Q(start__lte=today, end__gte=today)
         else:
             qs_filter = Q(start__gt=today) | Q(end__lt=today)
         return queryset.filter(qs_filter)
@@ -427,6 +434,11 @@ class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):
         field_name="device__platform",
         queryset=Platform.objects.all(),
         label="Platform",
+    )
+    tenant = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__tenant",
+        queryset=Tenant.objects.all(),
+        label="Tenant",
     )
     location_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device__location",
@@ -562,6 +574,11 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         field_name="device__platform",
         queryset=Platform.objects.all(),
         label="Platform",
+    )
+    tenant = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__tenant",
+        queryset=Tenant.objects.all(),
+        label="Tenant",
     )
     location_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device__location",

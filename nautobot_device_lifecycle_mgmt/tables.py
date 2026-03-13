@@ -99,6 +99,7 @@ class ValidatedSoftwareLCMTable(BaseTable):
     )
     valid = BooleanColumn(verbose_name="Valid Now", orderable=False)
     software = tables.LinkColumn(verbose_name="Software")
+    device_tenant = tables.ManyToManyColumn(verbose_name="Tenant")
     actions = ButtonsColumn(ValidatedSoftwareLCM, buttons=("edit", "delete"))
     preferred = BooleanColumn()
 
@@ -110,6 +111,7 @@ class ValidatedSoftwareLCMTable(BaseTable):
             "pk",
             "name",
             "software",
+            "device_tenant",
             "start",
             "end",
             "valid",
