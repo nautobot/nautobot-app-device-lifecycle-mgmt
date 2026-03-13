@@ -86,7 +86,7 @@ class DeviceValidatedSoftwareFilter:
             )
         
         # Platform-based filter for non-tenant records
-        if self.item_obj.platform and not self.item_obj.tenant:
+        if self.item_obj.platform and not self.item_obj.tenant and not self.item_obj.validated_software.exists():
             query |= Q(software__platform=self.item_obj.platform, device_tenant__isnull=True)
         
         self.validated_software_qs = self.validated_software_qs.filter(query)
