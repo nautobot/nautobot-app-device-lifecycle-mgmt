@@ -127,8 +127,8 @@ class HardwareLCMBulkEditForm(NautobotBulkEditForm):
         ]
 
 
-class HardwareLCMFilterForm(NautobotFilterForm):
-    """Filter form for filtering HardwareLCM objects."""
+class HardwareLCMFilterForm(NautobotFilterForm):  # pylint: disable=too-many-ancestors
+    """Filter form to filter searches."""
 
     model = HardwareLCM
     field_order = [

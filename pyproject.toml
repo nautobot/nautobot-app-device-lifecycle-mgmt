@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "nautobot-device-lifecycle-mgmt"
 version = "4.0.2a0"
-description = "Manages device lifecycles for platforms and software."
+description = "Device Lifecycle Management"
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
 readme = "README.md"
@@ -17,6 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 packages = [
     { include = "nautobot_device_lifecycle_mgmt" },
@@ -27,7 +28,7 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.14"
+python = ">=3.10,<3.15"
 pycountry = "^22.3.5"
 matplotlib = "^3.3.4"
 numpy = ">1.26,<3"
@@ -71,6 +72,8 @@ mkdocstrings = "0.25.2"
 mkdocstrings-python = "1.10.8"
 mkdocs-autorefs = "1.2.0"
 griffe = "1.1.1"
+# Image lightboxing in mkdocs
+mkdocs-glightbox = "~0.5.2"
 
 [tool.poetry.extras]
 all = [
