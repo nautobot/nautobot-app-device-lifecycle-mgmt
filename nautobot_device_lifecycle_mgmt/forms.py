@@ -23,8 +23,8 @@ from nautobot.apps.forms import (
 )
 from nautobot.core.forms.constants import BOOLEAN_WITH_BLANK_CHOICES
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform, SoftwareVersion
-from nautobot.tenancy.models import Tenant
 from nautobot.extras.models import Role, Status, Tag
+from nautobot.tenancy.models import Tenant
 
 from nautobot_device_lifecycle_mgmt.choices import (
     ContractTypeChoices,
@@ -220,7 +220,13 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
         inventory_items = self.cleaned_data.get("inventory_items")
         object_tags = self.cleaned_data.get("object_tags")
 
-        if sum(obj.count() for obj in (devices, device_tenants,device_types, device_roles, inventory_items, object_tags)) == 0:
+        if (
+            sum(
+                obj.count()
+                for obj in (devices, device_tenants, device_types, device_roles, inventory_items, object_tags)
+            )
+            == 0
+        ):
             msg = "You need to assign to at least one object."
             self.add_error(None, msg)
 
@@ -294,8 +300,7 @@ class ValidatedSoftwareLCMBulkEditForm(NautobotBulkEditForm):
 
         nullable_fields = [
             "devices",
-            "device_tenants"
-            "device_types",
+            "device_tenants" "device_types",
             "device_roles",
             "inventory_items",
             "object_tags",

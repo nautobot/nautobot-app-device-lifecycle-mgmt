@@ -47,8 +47,8 @@ from nautobot.core.templatetags.helpers import (
 )
 from nautobot.core.views import generic
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, SoftwareVersion
-from nautobot.tenancy.models import Tenant
 from nautobot.extras.models import Role, Tag
+from nautobot.tenancy.models import Tenant
 
 from nautobot_device_lifecycle_mgmt import choices, filters, forms, helpers, models, tables
 from nautobot_device_lifecycle_mgmt.api import serializers

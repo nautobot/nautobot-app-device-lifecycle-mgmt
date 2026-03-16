@@ -4,16 +4,15 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tenancy', '0009_update_all_charfields_max_length_to_255'),
-        ('nautobot_device_lifecycle_mgmt', '0029_contractlcm_status'),
+        ("tenancy", "0009_update_all_charfields_max_length_to_255"),
+        ("nautobot_device_lifecycle_mgmt", "0029_contractlcm_status"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='validatedsoftwarelcm',
-            name='device_tenants',
-            field=models.ManyToManyField(blank=True, related_name='validated_software_tenants', to='tenancy.tenant'),
+            model_name="validatedsoftwarelcm",
+            name="device_tenants",
+            field=models.ManyToManyField(blank=True, related_name="validated_software_tenants", to="tenancy.tenant"),
         ),
     ]

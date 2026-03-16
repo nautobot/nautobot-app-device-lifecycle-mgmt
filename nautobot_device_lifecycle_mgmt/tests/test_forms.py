@@ -257,10 +257,10 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
             "preferred": False,
         }
         form = self.form_class(data)
-        
+
         self.assertTrue(form.is_valid(), f"Form errors: {form.errors.as_json()}")
         saved_obj = form.save()
-        
+
         # Verify the M2M relationship was actually saved
         self.assertIn(self.tenant_1, saved_obj.device_tenants.all())
 
@@ -276,9 +276,10 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
         form = self.form_class(data)
         self.assertTrue(form.is_valid())
         saved_obj = form.save()
-        
+
         self.assertEqual(saved_obj.device_tenants.count(), 1)
         self.assertEqual(saved_obj.device_types.count(), 1)
+
     def test_software_missing(self):
         data = {
             "end": "2023-08-31",

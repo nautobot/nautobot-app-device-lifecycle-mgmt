@@ -293,14 +293,14 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
 
     def test_get_for_object_device_with_tenant(self):
         """
-        Verify software matching the device's tenant is retrieved, 
+        Verify software matching the device's tenant is retrieved,
         while software for other tenants is excluded.
         """
         self.device_1.tenant = self.tenant_1
         self.device_1.device_type = self.device_type_1
         self.device_1.platform = self.device_platform
         self.device_1.save()
-    
+
         # 3. Create Software for Tenant A (Match)
         lcm_tenant_a = ValidatedSoftwareLCM.objects.create(
             software=self.software,
@@ -308,7 +308,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         )
         lcm_tenant_a.device_tenants.set([self.tenant_1])
         lcm_tenant_a.device_types.set([self.device_type_1])
-    
+
         # 4. Create Software for Tenant B (Should be excluded)
         lcm_tenant_b = ValidatedSoftwareLCM.objects.create(
             software=self.software,
@@ -316,38 +316,38 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         )
         lcm_tenant_b.device_tenants.set([self.tenant_2])
         lcm_tenant_b.device_types.set([self.device_type_1])
-    
+
         # 5. Query for device_1 (Tenant A)
         qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
-    
+
         self.assertIn(lcm_tenant_a, qs)
         self.assertNotIn(lcm_tenant_b, qs)
-    
+
     def test_get_for_object_device_tenant_fallback_to_global(self):
         """
-        Verify that a device with a tenant can still see "Global" software 
+        Verify that a device with a tenant can still see "Global" software
         (where device_tenants is empty) if your logic allows it.
         """
         self.device_1.tenant = self.tenant_1
         self.device_1.device_type = self.device_type_1
         self.device_1.platform = self.device_platform
         self.device_1.save()
-    
+
         # Create "Global" software (No tenants assigned)
         lcm_global = ValidatedSoftwareLCM.objects.create(
             software=self.software,
             start=date(2013, 11, 2),
         )
         lcm_global.device_tenants.set([self.tenant_1])
-    
+
         qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
-    
+
         # If your filter_qs includes Q(device_tenants__isnull=True), this passes
         self.assertIn(lcm_global, qs)
 
     def test_tenant_filtering_logic_on_device(self):
         """
-        Verify that a device belonging to a tenant retrieves the correct 
+        Verify that a device belonging to a tenant retrieves the correct
         software based on the tenant-specific filtering logic.
         """
         self.device_1.tenant = self.tenant_1
@@ -372,6 +372,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
 
         self.assertIn(tenant_software, validated_qs)
         self.assertNotIn(other_tenant_software, validated_qs)
+
 
 class DeviceSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
     """Tests for the DeviceSoftwareValidationResult model."""

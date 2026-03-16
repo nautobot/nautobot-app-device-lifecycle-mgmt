@@ -6,8 +6,8 @@ import django_filters
 from django.db.models import Q
 from nautobot.apps.filters import NautobotFilterSet, SearchFilter, StatusFilter, StatusModelFilterSetMixin
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform, SoftwareVersion
-from nautobot.tenancy.models import Tenant
 from nautobot.extras.models import Role, Status, Tag
+from nautobot.tenancy.models import Tenant
 
 from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.models import (
