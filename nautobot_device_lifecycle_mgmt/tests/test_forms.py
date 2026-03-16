@@ -13,6 +13,7 @@ from nautobot.dcim.models import (
     SoftwareVersion,
 )
 from nautobot.extras.models import Role, Status
+from nautobot.tenancy.models import Tenant
 
 from nautobot_device_lifecycle_mgmt.forms import (
     ContractLCMForm,
@@ -208,6 +209,7 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
             device_type=self.devicetype_1, role=devicerole, name="Device 1", location=location1, status=active_status
         )
         self.inventoryitem_1 = InventoryItem.objects.create(device=self.device_1, name="SwitchModule1")
+        self.tenant_1, _ = Tenant.objects.get_or_create(name="Tenant A")
 
     def test_specifying_all_fields_w_devices(self):
         data = {
@@ -245,6 +247,38 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
         self.assertTrue(form.is_valid())
         self.assertTrue(form.save())
 
+    def test_specifying_all_fields_w_tenant(self):
+        """Test the form with the new device_tenants M2M field."""
+        data = {
+            "software": self.software,
+            "device_tenants": [self.tenant_1.pk],  # M2M fields expect a list of PKs
+            "start": "2021-06-06",
+            "end": "2023-08-31",
+            "preferred": False,
+        }
+        form = self.form_class(data)
+        
+        self.assertTrue(form.is_valid(), f"Form errors: {form.errors.as_json()}")
+        saved_obj = form.save()
+        
+        # Verify the M2M relationship was actually saved
+        self.assertIn(self.tenant_1, saved_obj.device_tenants.all())
+
+    def test_tenant_and_device_type_combination(self):
+        """Verify the form handles multiple assignment types simultaneously."""
+        data = {
+            "software": self.software,
+            "device_tenants": [self.tenant_1.pk],
+            "device_types": [self.devicetype_1.pk],
+            "start": "2021-06-06",
+            "preferred": True,
+        }
+        form = self.form_class(data)
+        self.assertTrue(form.is_valid())
+        saved_obj = form.save()
+        
+        self.assertEqual(saved_obj.device_tenants.count(), 1)
+        self.assertEqual(saved_obj.device_types.count(), 1)
     def test_software_missing(self):
         data = {
             "end": "2023-08-31",

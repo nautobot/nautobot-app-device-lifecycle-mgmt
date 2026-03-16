@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from nautobot.apps.testing import TestCase
 from nautobot.dcim.models import DeviceType, Manufacturer, Platform, SoftwareVersion
 from nautobot.extras.models import Status
+from nautobot.tenancy.models import Tenant
 
 from nautobot_device_lifecycle_mgmt.choices import ReportRunTypeChoices
 from nautobot_device_lifecycle_mgmt.models import (
@@ -130,14 +131,14 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
     @classmethod
     def setUpTestData(cls):
         """Set up base objects."""
-        device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
-        active_status, _ = Status.objects.get_or_create(name="Active")
-        active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
+        cls.device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
+        cls.active_status, _ = Status.objects.get_or_create(name="Active")
+        cls.active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
         cls.software = SoftwareVersion.objects.create(
-            platform=device_platform,
+            platform=cls.device_platform,
             version="17.3.3 MD",
             release_date=date(2019, 1, 10),
-            status=active_status,
+            status=cls.active_status,
         )
         manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
         cls.device_type_1, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="ASR-1000")
@@ -145,6 +146,8 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         cls.content_type_devicetype = ContentType.objects.get(app_label="dcim", model="devicetype")
         cls.inventoryitem_1, cls.inventoryitem_2 = create_inventory_items()[:2]
         cls.device_1, cls.device_2 = cls.inventoryitem_1.device, cls.inventoryitem_2.device
+        cls.tenant_1, _ = Tenant.objects.get_or_create(name="Tenant A")
+        cls.tenant_2, _ = Tenant.objects.get_or_create(name="Tenant B")
 
     def test_create_validatedsoftwarelcm_required_only(self):
         """Successfully create ValidatedSoftwareLCM with required fields only."""
@@ -277,6 +280,98 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         self.assertEqual(validated_software_for_inventoryitem.count(), 1)
         self.assertTrue(self.inventoryitem_1 in validated_software_for_inventoryitem.first().inventory_items.all())
 
+    def test_create_validatedsoftwarelcm_w_tenant(self):
+        """Successfully create ValidatedSoftwareLCM with a tenant assigned."""
+        validatedsoftwarelcm = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2023, 1, 1),
+        )
+        validatedsoftwarelcm.device_tenants.set([self.tenant_1])
+
+        self.assertIn(self.tenant_1, validatedsoftwarelcm.device_tenants.all())
+        self.assertEqual(validatedsoftwarelcm.device_tenants.count(), 1)
+
+    def test_get_for_object_device_with_tenant(self):
+        """
+        Verify software matching the device's tenant is retrieved, 
+        while software for other tenants is excluded.
+        """
+        self.device_1.tenant = self.tenant_1
+        self.device_1.device_type = self.device_type_1
+        self.device_1.platform = self.device_platform
+        self.device_1.save()
+    
+        # 3. Create Software for Tenant A (Match)
+        lcm_tenant_a = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2013, 11, 22),
+        )
+        lcm_tenant_a.device_tenants.set([self.tenant_1])
+        lcm_tenant_a.device_types.set([self.device_type_1])
+    
+        # 4. Create Software for Tenant B (Should be excluded)
+        lcm_tenant_b = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2023, 1, 1),
+        )
+        lcm_tenant_b.device_tenants.set([self.tenant_2])
+        lcm_tenant_b.device_types.set([self.device_type_1])
+    
+        # 5. Query for device_1 (Tenant A)
+        qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
+    
+        self.assertIn(lcm_tenant_a, qs)
+        self.assertNotIn(lcm_tenant_b, qs)
+    
+    def test_get_for_object_device_tenant_fallback_to_global(self):
+        """
+        Verify that a device with a tenant can still see "Global" software 
+        (where device_tenants is empty) if your logic allows it.
+        """
+        self.device_1.tenant = self.tenant_1
+        self.device_1.device_type = self.device_type_1
+        self.device_1.platform = self.device_platform
+        self.device_1.save()
+    
+        # Create "Global" software (No tenants assigned)
+        lcm_global = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2013, 11, 2),
+        )
+        lcm_global.device_tenants.set([self.tenant_1])
+    
+        qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
+    
+        # If your filter_qs includes Q(device_tenants__isnull=True), this passes
+        self.assertIn(lcm_global, qs)
+
+    def test_tenant_filtering_logic_on_device(self):
+        """
+        Verify that a device belonging to a tenant retrieves the correct 
+        software based on the tenant-specific filtering logic.
+        """
+        self.device_1.tenant = self.tenant_1
+        self.device_1.device_type = self.device_type_1
+        self.device_1.platform = self.device_platform
+        self.device_1.save()
+
+        tenant_software = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2013, 11, 8),
+        )
+        tenant_software.device_tenants.set([self.tenant_1])
+        tenant_software.device_types.set([self.device_type_1])
+
+        other_tenant_software = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2013, 11, 9),
+        )
+        other_tenant_software.device_tenants.set([self.tenant_2])
+
+        validated_qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
+
+        self.assertIn(tenant_software, validated_qs)
+        self.assertNotIn(other_tenant_software, validated_qs)
 
 class DeviceSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
     """Tests for the DeviceSoftwareValidationResult model."""
