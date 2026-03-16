@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='validatedsoftwarelcm',
-            name='device_tenant',
+            name='device_tenants',
             field=models.ManyToManyField(blank=True, related_name='validated_software_tenants', to='tenancy.tenant'),
         ),
     ]

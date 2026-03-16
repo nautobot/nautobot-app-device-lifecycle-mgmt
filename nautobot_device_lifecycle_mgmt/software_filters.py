@@ -53,43 +53,19 @@ class DeviceValidatedSoftwareFilter:
 
     def filter_qs(self):
         """Returns filtered ValidatedSoftwareLCM query set."""
-        # Direct device match
-        query = Q(devices=self.item_obj.pk)
-        
-        # Device type and role combinations (for records without tenant)
-        if not self.item_obj.tenant:
-            query |= Q(
-                device_types=self.item_obj.device_type.pk, 
-                device_roles=self.item_obj.role.pk,
-                device_tenant__isnull=True
-            )
-            query |= Q(
-                device_types=self.item_obj.device_type.pk, 
-                device_roles=None,
-                device_tenant__isnull=True
-            )
-            query |= Q(
-                device_types=None,
-                device_roles=self.item_obj.role.pk,
-                device_tenant__isnull=True
-            )
-        
-        # Tag-based match
-        query |= Q(object_tags__in=self.item_obj.tags.all())
-        
-        # Tenant-specific filters
-        if self.item_obj.tenant:
-            query |= (
-                Q(device_tenant=self.item_obj.tenant, device_types=self.item_obj.device_type.pk)
-                | Q(device_tenant=self.item_obj.tenant, device_roles=self.item_obj.role.pk)
-                | Q(device_tenant=self.item_obj.tenant, software__platform=self.item_obj.platform)
-            )
-        
-        # Platform-based filter for non-tenant records
-        if self.item_obj.platform and not self.item_obj.tenant and not self.item_obj.validated_software.exists():
-            query |= Q(software__platform=self.item_obj.platform, device_tenant__isnull=True)
-        
-        self.validated_software_qs = self.validated_software_qs.filter(query)
+        self.validated_software_qs = self.validated_software_qs.filter(
+            Q(devices=self.item_obj.pk)
+            | Q(device_types=self.item_obj.device_type.pk, device_roles=self.item_obj.role.pk)
+            | Q(device_types=self.item_obj.device_type.pk, device_roles=None)
+            | Q(device_types=None, device_roles=self.item_obj.role.pk)
+            | Q(device_tenants=self.item_obj.tenant, device_types=self.item_obj.device_type.pk)
+            | Q(device_tenants=self.item_obj.tenant, device_roles=self.item_obj.role.pk)
+            | Q(device_tenants=self.item_obj.tenant, device_types=None, software__platform=self.item_obj.platform)    
+            | Q(object_tags__in=self.item_obj.tags.all())
+        )
+        # Override qs when direct device assignments exist so no duplicates are returned.
+        if self.item_obj.validated_software.exists():
+            self.validated_software_qs = self.validated_software_qs.filter(devices__in=[self.item_obj.pk])
         self.validated_software_qs = self._add_weights().order_by("weight", "start")
         self.validated_software_qs = (
             self.validated_software_qs.order_by("id", "weight", "start").distinct("id")
@@ -120,25 +96,25 @@ class DeviceValidatedSoftwareFilter:
                 When(device_roles=self.item_obj.role.pk, preferred=True, then=Value(40)),
                 When(device_roles=self.item_obj.role.pk, preferred=False, then=Value(1040)),
                 When(
-                    device_tenant=self.item_obj.tenant,
+                    device_tenants=self.item_obj.tenant,
                     device_types=self.item_obj.device_type.pk,
                     preferred=True,
                     then=Value(50),
                 ),
                 When(
-                    device_tenant=self.item_obj.tenant,
+                    device_tenants=self.item_obj.tenant,
                     device_types=self.item_obj.device_type.pk,
                     preferred=False,
                     then=Value(1050),
                 ),
                 When(
-                    device_tenant=self.item_obj.tenant,
+                    device_tenants=self.item_obj.tenant,
                     device_roles=self.item_obj.role.pk,
                     preferred=True,
                     then=Value(60),
                 ),
                 When(
-                    device_tenant=self.item_obj.tenant,
+                    device_tenants=self.item_obj.tenant,
                     device_roles=self.item_obj.role.pk,
                     preferred=False,
                     then=Value(1060),

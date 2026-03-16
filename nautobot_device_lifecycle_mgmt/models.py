@@ -298,7 +298,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
     )
     devices = models.ManyToManyField(to="dcim.Device", related_name="validated_software", blank=True)
     device_types = models.ManyToManyField(to="dcim.DeviceType", related_name="validated_software", blank=True)
-    device_tenant = models.ManyToManyField(to="tenancy.Tenant", related_name="validated_software_tenants", blank=True)
+    device_tenants = models.ManyToManyField(to="tenancy.Tenant", related_name="validated_software_tenants", blank=True)
     device_roles = models.ManyToManyField(to="extras.Role", related_name="validated_software", blank=True)
     inventory_items = models.ManyToManyField(to="dcim.InventoryItem", related_name="validated_software", blank=True)
     object_tags = models.ManyToManyField(to="extras.Tag", related_name="validated_software", blank=True)
@@ -316,7 +316,7 @@ class ValidatedSoftwareLCM(PrimaryModel):
     clone_fields = (
         "software",
         "devices",
-        "device_tenant",
+        "device_tenants",
         "device_types",
         "device_roles",
         "inventory_items",

@@ -319,8 +319,8 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         to_field_name="model",
         label="Device Types (model)",
     )
-    device_tenant = django_filters.ModelMultipleChoiceFilter(
-        field_name="device_tenant__name",
+    device_tenants = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_tenants__name",
         queryset=Tenant.objects.all(),
         label="Tenant",
     )

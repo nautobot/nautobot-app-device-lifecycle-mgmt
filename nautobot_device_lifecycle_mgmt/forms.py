@@ -174,7 +174,7 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
 
     software = DynamicModelChoiceField(queryset=SoftwareVersion.objects.all(), required=True)
     devices = DynamicModelMultipleChoiceField(queryset=Device.objects.all(), required=False)
-    device_tenant = DynamicModelMultipleChoiceField(queryset=Tenant.objects.all(), required=False)
+    device_tenants = DynamicModelMultipleChoiceField(queryset=Tenant.objects.all(), required=False)
     device_types = DynamicModelMultipleChoiceField(queryset=DeviceType.objects.all(), required=False)
     device_roles = DynamicModelMultipleChoiceField(
         queryset=Role.objects.all(), query_params={"content_types": "dcim.device"}, required=False
@@ -194,7 +194,7 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
         fields = [  # pylint: disable=E4271
             "software",
             "devices",
-            "device_tenant",
+            "device_tenants",
             "device_types",
             "device_roles",
             "inventory_items",
@@ -214,13 +214,13 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
         super().clean()
 
         devices = self.cleaned_data.get("devices")
-        device_tenant = self.cleaned_data.get("device_tenant")
+        device_tenants = self.cleaned_data.get("device_tenants")
         device_types = self.cleaned_data.get("device_types")
         device_roles = self.cleaned_data.get("device_roles")
         inventory_items = self.cleaned_data.get("inventory_items")
         object_tags = self.cleaned_data.get("object_tags")
 
-        if sum(obj.count() for obj in (devices, device_tenant,device_types, device_roles, inventory_items, object_tags)) == 0:
+        if sum(obj.count() for obj in (devices, device_tenants,device_types, device_roles, inventory_items, object_tags)) == 0:
             msg = "You need to assign to at least one object."
             self.add_error(None, msg)
 
@@ -246,7 +246,7 @@ class ValidatedSoftwareLCMBulkEditForm(NautobotBulkEditForm):
         required=False,
         label="Devices",
     )
-    device_tenant = DynamicModelMultipleChoiceField(
+    device_tenants = DynamicModelMultipleChoiceField(
         queryset=Tenant.objects.all(),
         required=False,
         label="Tenant",
@@ -294,7 +294,7 @@ class ValidatedSoftwareLCMBulkEditForm(NautobotBulkEditForm):
 
         nullable_fields = [
             "devices",
-            "device_tenant"
+            "device_tenants"
             "device_types",
             "device_roles",
             "inventory_items",
@@ -318,7 +318,7 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
         queryset=Device.objects.all(),
         required=False,
     )
-    device_tenant = DynamicModelMultipleChoiceField(
+    device_tenants = DynamicModelMultipleChoiceField(
         queryset=Tenant.objects.all(),
         to_field_name="name",
         required=False,
@@ -353,7 +353,7 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
             "q",
             "software",
             "devices",
-            "device_tenant",
+            "device_tenants",
             "device_types",
             "device_roles",
             "inventory_items",
