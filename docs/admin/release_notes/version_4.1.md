@@ -4,16 +4,16 @@ This document describes all new features and changes in the release. The format 
 
 ## Release Overview
 
-- Major features or milestones
-- Changes to compatibility with Nautobot and/or other apps, libraries etc.
+- Added a Status field to the  ContractLCM model.
+- Added Python 3.14 support.
 
 <!-- towncrier release notes start -->
-
 ## [v4.1.0 (2026-03-17)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v4.1.0)
 
 ### Added
 
-- [#337](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/337) - Added a Status Field to ContractLCM for lifecycle purposes.
+- Added Python 3.14 support.
+- [#337](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/337) - Added a Status field to ContractLCM for lifecycle purposes.
 
 ### Fixed
 
