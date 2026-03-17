@@ -300,7 +300,8 @@ class ValidatedSoftwareLCMBulkEditForm(NautobotBulkEditForm):
 
         nullable_fields = [
             "devices",
-            "device_tenants" "device_types",
+            "device_tenants",
+            "device_types",
             "device_roles",
             "inventory_items",
             "object_tags",

@@ -1,4 +1,5 @@
 """Filtering implementation for the Lifecycle Management app."""
+# pylint: disable=too-many-lines
 
 import datetime
 
