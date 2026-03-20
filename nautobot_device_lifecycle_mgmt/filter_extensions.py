@@ -201,7 +201,7 @@ class SoftwareVersionFilterExtension(FilterExtension):  # pylint: disable=too-fe
     model = "dcim.softwareversion"
 
     filterset_fields = {
-        "nautobot_device_lifecycle_mgmt_has_corresponding_cves": RelatedMembershipBooleanFilter(
+        "nautobot_device_lifecycle_mgmt_has_cves": RelatedMembershipBooleanFilter(
             field_name="corresponding_cves",
             label="Has CVEs",
         ),
