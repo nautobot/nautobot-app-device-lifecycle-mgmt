@@ -48,27 +48,27 @@
                 <tbody>
                     <tr class="even">
                         <td>
-                            <a href='{% url "plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list" %}'>
+                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list' %}">
                                 Inventory Items
                             </a>
                         </td>
                         <td>
-                            <a href='{% url "plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list" %}'>
+                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list' %}">
                                 {% if inventory_aggr.total is not None %} {{ inventory_aggr.total }} {% else %} -- {% endif %}
                             </a>
                         </td>
                         <td>
-                            <a href='{% url "plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list" %}?valid=True'>
+                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list' %}?valid=True">
                                 {% if inventory_aggr.valid is not None %} {{ inventory_aggr.valid }} {% else %} -- {% endif %}
                             </a>
                         </td>
                         <td>
-                            <a href='{% url "plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list" %}?valid=False'>
+                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list' %}?valid=False">
                                 {% if inventory_aggr.invalid is not None %} {{ inventory_aggr.invalid }} {% else %} -- {% endif %}
                             </a>
                         </td>
                         <td>
-                            <a href='{% url "plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list" %}?sw_missing_only=True'>
+                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list' %}?sw_missing_only=True">
                                 {% if inventory_aggr.no_software is not None %} {{ inventory_aggr.no_software }} {% else %} -- {% endif %}
                             </a>
                         </td>
@@ -78,7 +78,7 @@
                             </a>
                         </td>
                         <td class="d-print-none nb-actions nb-w-0 text-end text-nowrap">
-                            <a href='{% url "plugins-api:nautobot_device_lifecycle_mgmt-api:inventoryitemsoftwarevalidationresult-list" %}?format=csv'
+                            <a href="{% url 'plugins-api:nautobot_device_lifecycle_mgmt-api:inventoryitemsoftwarevalidationresult-list' %}?format=csv"
                                 class="btn btn-secondary btn-sm" title="Export data for all inventory items" aria-hidden="true">
                                 <i class="mdi mdi-download"></i>
                             </a>
@@ -88,8 +88,8 @@
             </table>
             <h3 class="text-center m-2 p-3">Inventory Item Part ID Summary</h3>
             <div class="col-md-12">
-                {% include table_template|default:'panel_table.html' %}
-                {% include 'inc/paginator.html' with paginator=table.paginator page=table.page %}
+                {% include table_template|default:"panel_table.html" %}
+                {% include "inc/paginator.html" with paginator=table.paginator page=table.page %}
                 <div class="clearfix"></div>
             </div>
 {% endblock table %}

@@ -48,27 +48,27 @@
                 <tbody>
                     <tr class="even">
                         <td>
-                            <a href='{% url "plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list" %}'>
+                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list' %}">
                                 Devices
                             </a>
                         </td>
                         <td>
-                            <a href='{% url "plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list" %}'>
+                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list' %}">
                                 {% if device_aggr.total is not None %} {{ device_aggr.total }} {% else %} -- {% endif %}
                             </a>
                         </td>
                         <td>
-                            <a href='{% url "plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list" %}?valid=True'>
+                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list' %}?valid=True">
                                 {% if device_aggr.valid is not None %} {{ device_aggr.valid }} {% else %} -- {% endif %}
                             </a>
                         </td>
                         <td>
-                            <a href='{% url "plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list" %}?valid=False'>
+                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list' %}?valid=False">
                                 {% if device_aggr.invalid is not None %} {{ device_aggr.invalid }} {% else %} -- {% endif %}
                             </a>
                         </td>
                         <td>
-                            <a href='{% url "plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list" %}?sw_missing_only=True'>
+                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list' %}?sw_missing_only=True">
                                 {% if device_aggr.no_software is not None %} {{ device_aggr.no_software }} {% else %} -- {% endif %}
                             </a>
                         </td>
@@ -79,7 +79,7 @@
                             </a>
                         </td>
                         <td class="d-print-none nb-actions nb-w-0 text-end text-nowrap">
-                            <a href='{% url "plugins-api:nautobot_device_lifecycle_mgmt-api:devicesoftwarevalidationresult-list" %}?format=csv'
+                            <a href="{% url 'plugins-api:nautobot_device_lifecycle_mgmt-api:devicesoftwarevalidationresult-list' %}?format=csv"
                                 class="btn btn-secondary btn-sm" title="Export data for all device types" aria-hidden="true">
                                 <i class="mdi mdi-download"></i>
                             </a>
@@ -89,8 +89,8 @@
             </table>
             <h3 class="text-center m-2 p-3">Device Type Summary</h3>
             <div class="col-md-12">
-                {% include table_template|default:'panel_table.html' %}
-                {% include 'inc/paginator.html' with paginator=table.paginator page=table.page %}
+                {% include table_template|default:"panel_table.html" %}
+                {% include "inc/paginator.html" with paginator=table.paginator page=table.page %}
                 <div class="clearfix"></div>
             </div>
 {% endblock table %}
