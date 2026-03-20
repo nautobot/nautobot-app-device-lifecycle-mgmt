@@ -1,7 +1,12 @@
 """Extensions to core filters."""
 
 from django_filters import BooleanFilter, ModelMultipleChoiceFilter
-from nautobot.apps.filters import FilterExtension, NaturalKeyOrPKMultipleChoiceFilter
+from nautobot.apps.filters import (
+    FilterExtension,
+    MultiValueDateFilter,
+    NaturalKeyOrPKMultipleChoiceFilter,
+    RelatedMembershipBooleanFilter,
+)
 from nautobot.apps.forms import DynamicModelMultipleChoiceField
 
 from nautobot_device_lifecycle_mgmt.models import ContractLCM, HardwareLCM, ValidatedSoftwareLCM
@@ -67,6 +72,26 @@ class DeviceFilterExtension(FilterExtension):
             field_name="device_type__hardwarelcm",
             queryset=HardwareLCM.objects.all(),
             label="Hardware Reports",
+        ),
+        "nautobot_device_lifecycle_mgmt_hardware_end_of_sale": MultiValueDateFilter(
+            field_name="device_type__hardwarelcm__end_of_sale",
+            label="Hardware End of Sale Date",
+        ),
+        "nautobot_device_lifecycle_mgmt_hardware_end_of_software_releases": MultiValueDateFilter(
+            field_name="device_type__hardwarelcm__end_of_sw_releases",
+            label="Hardware End of Software Releases Date",
+        ),
+        "nautobot_device_lifecycle_mgmt_hardware_end_of_security_patches": MultiValueDateFilter(
+            field_name="device_type__hardwarelcm__end_of_security_patches",
+            label="Hardware End of Security Patches Date",
+        ),
+        "nautobot_device_lifecycle_mgmt_hardware_end_of_support": MultiValueDateFilter(
+            field_name="device_type__hardwarelcm__end_of_support",
+            label="Hardware End of Support Date",
+        ),
+        "nautobot_device_lifecycle_mgmt_software_version_end_of_support_date": MultiValueDateFilter(
+            field_name="software_version__end_of_support_date",
+            label="Software End of Support Date",
         ),
     }
 
@@ -168,6 +193,22 @@ class TagFilterExtension(FilterExtension):
 
 
 #
+# SOFTWAREVERSION FILTER EXTENSION
+#
+class SoftwareVersionFilterExtension(FilterExtension):  # pylint: disable=too-few-public-methods
+    """Extends SoftwareVersion Filters."""
+
+    model = "dcim.softwareversion"
+
+    filterset_fields = {
+        "nautobot_device_lifecycle_mgmt_has_cves": RelatedMembershipBooleanFilter(
+            field_name="corresponding_cves",
+            label="Has CVEs",
+        ),
+    }
+
+
+#
 # REGISTER ALL EXTENSIONS
 #
 filter_extensions = [
@@ -176,4 +217,5 @@ filter_extensions = [
     RoleFilterExtension,
     DeviceTypeFilterExtension,
     TagFilterExtension,
+    SoftwareVersionFilterExtension,
 ]
