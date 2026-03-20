@@ -8,7 +8,7 @@ This document describes all new features and changes in the release. The format 
 - Added Python 3.14 support.
 
 <!-- towncrier release notes start -->
-## [v4.1.0 (2026-03-17)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v4.1.0)
+## [v4.1.0 (2026-03-20)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v4.1.0)
 
 ### Added
 
