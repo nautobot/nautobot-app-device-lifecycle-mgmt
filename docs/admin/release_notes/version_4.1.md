@@ -4,7 +4,7 @@ This document describes all new features and changes in the release. The format 
 
 ## Release Overview
 
-- Added a Status field to the  ContractLCM model.
+- Added a Status field to the ContractLCM model.
 - Added Python 3.14 support.
 
 <!-- towncrier release notes start -->
