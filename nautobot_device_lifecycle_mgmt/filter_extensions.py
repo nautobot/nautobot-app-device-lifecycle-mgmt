@@ -1,5 +1,7 @@
 """Extensions to core filters."""
 
+from django.db.models import Q
+from django.utils import timezone
 from django_filters import BooleanFilter, ModelMultipleChoiceFilter
 from nautobot.apps.filters import (
     FilterExtension,
@@ -8,6 +10,7 @@ from nautobot.apps.filters import (
     RelatedMembershipBooleanFilter,
 )
 from nautobot.apps.forms import DynamicModelMultipleChoiceField
+from nautobot.dcim.models import Platform
 
 from nautobot_device_lifecycle_mgmt.models import ContractLCM, HardwareLCM, ValidatedSoftwareLCM
 
@@ -17,6 +20,34 @@ def distinct_filter(queryset, _, value):
     if value:
         return queryset.without_tree_fields().order_by().distinct("part_id")
     return queryset
+
+
+def _filter_by_lcm_validity(queryset, value, lookup_prefix):
+    """Base filter that returns records based on whether their associated software is currently valid."""
+    if value is None:
+        return queryset
+
+    today = timezone.now().date()
+    if value:
+        qs_filter = Q(**{f"{lookup_prefix}start__lte": today}) & (
+            Q(**{f"{lookup_prefix}end__gte": today}) | Q(**{f"{lookup_prefix}end__isnull": True})
+        )
+    else:
+        qs_filter = Q(**{f"{lookup_prefix}start__gt": today}) | (Q(**{f"{lookup_prefix}end__lt": today}))
+
+    return queryset.filter(qs_filter).distinct()
+
+
+def filter_software_image_files_by_validity(queryset, name, value):  # pylint: disable=unused-argument
+    """Filter SoftwareImageFile records based on whether their associated software is currently valid."""
+    return _filter_by_lcm_validity(
+        queryset=queryset, value=value, lookup_prefix="software_version__validatedsoftwarelcm__"
+    )
+
+
+def filter_software_versions_by_validity(queryset, name, value):  # pylint: disable=unused-argument
+    """Filter SoftwareVersion records based on whether their associated software is currently valid."""
+    return _filter_by_lcm_validity(queryset=queryset, value=value, lookup_prefix="validatedsoftwarelcm__")
 
 
 #
@@ -193,6 +224,28 @@ class TagFilterExtension(FilterExtension):
 
 
 #
+# SOFTWARE IMGAE EXTENSION
+#
+class SoftwareImageFileFilterExtension(FilterExtension):
+    """SoftwareImageFile Filter Extension."""
+
+    model = "dcim.softwareimagefile"
+
+    filterset_fields = {
+        "nautobot_os_upgrades_valid": BooleanFilter(
+            method=filter_software_image_files_by_validity,
+            label="Software Version is currently valid",
+        ),
+        "nautobot_os_upgrades_platform": NaturalKeyOrPKMultipleChoiceFilter(
+            field_name="software_version__platform",
+            queryset=Platform.objects.all(),
+            to_field_name="name",
+            label="Software version platform (name or ID)",
+        ),
+    }
+
+
+#
 # SOFTWAREVERSION FILTER EXTENSION
 #
 class SoftwareVersionFilterExtension(FilterExtension):  # pylint: disable=too-few-public-methods
@@ -204,6 +257,13 @@ class SoftwareVersionFilterExtension(FilterExtension):  # pylint: disable=too-fe
         "nautobot_device_lifecycle_mgmt_has_cves": RelatedMembershipBooleanFilter(
             field_name="corresponding_cves",
             label="Has CVEs",
+        ),
+    }
+
+    filterset_fields = {
+        "nautobot_device_lifecycle_mgmt_software_is_valid": BooleanFilter(
+            method=filter_software_versions_by_validity,
+            label="Software Version is valid",
         ),
     }
 
