@@ -232,11 +232,11 @@ class SoftwareImageFileFilterExtension(FilterExtension):
     model = "dcim.softwareimagefile"
 
     filterset_fields = {
-        "nautobot_os_upgrades_valid": BooleanFilter(
+        "nautobot_device_lifecycle_mgmt_valid": BooleanFilter(
             method=filter_software_image_files_by_validity,
             label="Software Version is currently valid",
         ),
-        "nautobot_os_upgrades_platform": NaturalKeyOrPKMultipleChoiceFilter(
+        "nautobot_device_lifecycle_mgmt_platform": NaturalKeyOrPKMultipleChoiceFilter(
             field_name="software_version__platform",
             queryset=Platform.objects.all(),
             to_field_name="name",
@@ -277,5 +277,6 @@ filter_extensions = [
     RoleFilterExtension,
     DeviceTypeFilterExtension,
     TagFilterExtension,
+    SoftwareImageFileFilterExtension,
     SoftwareVersionFilterExtension,
 ]
