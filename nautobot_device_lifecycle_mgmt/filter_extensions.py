@@ -232,9 +232,9 @@ class SoftwareImageFileFilterExtension(FilterExtension):
     model = "dcim.softwareimagefile"
 
     filterset_fields = {
-        "nautobot_device_lifecycle_mgmt_valid": BooleanFilter(
+        "nautobot_device_lifecycle_mgmt_software_version_is_valid": BooleanFilter(
             method=filter_software_image_files_by_validity,
-            label="Software Version is currently valid",
+            label="Software Version is valid",
         ),
         "nautobot_device_lifecycle_mgmt_platform": NaturalKeyOrPKMultipleChoiceFilter(
             field_name="software_version__platform",
@@ -261,7 +261,7 @@ class SoftwareVersionFilterExtension(FilterExtension):  # pylint: disable=too-fe
     }
 
     filterset_fields = {
-        "nautobot_device_lifecycle_mgmt_software_is_valid": BooleanFilter(
+        "nautobot_device_lifecycle_mgmt_software_version_is_valid": BooleanFilter(
             method=filter_software_versions_by_validity,
             label="Software Version is valid",
         ),
