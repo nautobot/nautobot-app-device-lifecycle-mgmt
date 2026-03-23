@@ -59,7 +59,6 @@ class DeviceValidatedSoftwareFilter:
                 Q(devices__in=[self.item_obj.pk])
                 | Q(device_tenants=self.item_obj.tenant, device_types=self.item_obj.device_type.pk)
                 | Q(device_tenants=self.item_obj.tenant, device_roles=self.item_obj.role.pk)
-                #| Q(device_tenants=self.item_obj.tenant, device_types=None, software__platform=self.item_obj.platform)
                 | Q(device_tenants=self.item_obj.tenant, device_types=None)
                 | Q(object_tags__in=self.item_obj.tags.all())
             ).distinct()
@@ -67,9 +66,9 @@ class DeviceValidatedSoftwareFilter:
         else:
             self.validated_software_qs = self.validated_software_qs.filter(
                 Q(devices__in=[self.item_obj.pk])
-                | Q(device_types=self.item_obj.device_type.pk, device_roles=self.item_obj.role.pk)
-                | Q(device_types=self.item_obj.device_type.pk, device_roles=None)
-                | Q(device_types=None, device_roles=self.item_obj.role.pk)
+                | Q(device_types=self.item_obj.device_type.pk, device_roles=self.item_obj.role.pk, device_tenants__isnull=True)
+                | Q(device_types=self.item_obj.device_type.pk, device_roles=None, device_tenants__isnull=True)
+                | Q(device_types=None, device_roles=self.item_obj.role.pk, device_tenants__isnull=True)
                 | Q(object_tags__in=self.item_obj.tags.all())
             ).distinct()
         # 3. Override qs when direct device assignments exist so no duplicates are returned.
