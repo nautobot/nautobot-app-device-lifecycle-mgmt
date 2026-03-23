@@ -812,7 +812,7 @@ class DeviceSoftwareValidationResultFilterSetTestCase(FilterTestCases.FilterTest
         device_role = Role.objects.get(name="core-switch")
         params = {"device_role_id": [device_role.id]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-    
+
     def test_device_id_all(self):
         """Test device_id filter."""
         params = {"device_id": [self.device_1.id, self.device_2.id, self.device_3.id]}
@@ -971,7 +971,7 @@ class DeviceHardwareNoticeResultFilterSetTestCase(CommonTestDataMixin, FilterTes
         ("device_type_id", "device__device_type__id"),
         ("device_role", "device__role__name"),
         ("device_role_id", "device__role__id"),
-        ("tenant", "device__tenant__name"),  
+        ("tenant", "device__tenant__name"),
         ("tenant_id", "device__tenant__id"),
     ]
 

@@ -66,7 +66,11 @@ class DeviceValidatedSoftwareFilter:
         else:
             self.validated_software_qs = self.validated_software_qs.filter(
                 Q(devices__in=[self.item_obj.pk])
-                | Q(device_types=self.item_obj.device_type.pk, device_roles=self.item_obj.role.pk, device_tenants__isnull=True)
+                | Q(
+                    device_types=self.item_obj.device_type.pk,
+                    device_roles=self.item_obj.role.pk,
+                    device_tenants__isnull=True,
+                )
                 | Q(device_types=self.item_obj.device_type.pk, device_roles=None, device_tenants__isnull=True)
                 | Q(device_types=None, device_roles=self.item_obj.role.pk, device_tenants__isnull=True)
                 | Q(object_tags__in=self.item_obj.tags.all())
