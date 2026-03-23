@@ -56,17 +56,17 @@ class DeviceValidatedSoftwareFilter:
         # 1. tenant relationship exists.
         if self.item_obj.tenant:
             self.validated_software_qs = self.validated_software_qs.filter(
-                Q(devices=self.item_obj.pk)
+                Q(devices__in=[self.item_obj.pk])
                 | Q(device_tenants=self.item_obj.tenant, device_types=self.item_obj.device_type.pk)
                 | Q(device_tenants=self.item_obj.tenant, device_roles=self.item_obj.role.pk)
-                | Q(device_tenants=self.item_obj.tenant, device_types=None, software__platform=self.item_obj.platform)
+                #| Q(device_tenants=self.item_obj.tenant, device_types=None, software__platform=self.item_obj.platform)
                 | Q(device_tenants=self.item_obj.tenant, device_types=None)
                 | Q(object_tags__in=self.item_obj.tags.all())
             ).distinct()
         # 2. No tenant relationship exists, filter based on device type, role, and tags.
         else:
             self.validated_software_qs = self.validated_software_qs.filter(
-                Q(devices=self.item_obj.pk)
+                Q(devices__in=[self.item_obj.pk])
                 | Q(device_types=self.item_obj.device_type.pk, device_roles=self.item_obj.role.pk)
                 | Q(device_types=self.item_obj.device_type.pk, device_roles=None)
                 | Q(device_types=None, device_roles=self.item_obj.role.pk)
@@ -76,7 +76,6 @@ class DeviceValidatedSoftwareFilter:
         if self.item_obj.validated_software.exists():
             self.validated_software_qs = self.validated_software_qs.filter(devices__in=[self.item_obj.pk]).distinct()
         self.validated_software_qs = self._add_weights().order_by("weight", "start")
-        self.validated_software_qs = self.validated_software_qs.order_by("weight", "start")
 
         return self.validated_software_qs
 

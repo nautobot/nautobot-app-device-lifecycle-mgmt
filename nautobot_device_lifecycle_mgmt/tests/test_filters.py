@@ -9,6 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from nautobot.apps.testing import FilterTestCases
 from nautobot.dcim.models import Device, DeviceType, Location, LocationType, Manufacturer, Platform, SoftwareVersion
 from nautobot.extras.models import Role, Status
+from nautobot.tenancy.models import Tenant
 
 from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, CurrencyChoices, CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.filters import (
@@ -78,6 +79,8 @@ class CommonTestDataMixin:
         cls.location4, _ = Location.objects.get_or_create(
             name="Location4", location_type=location_type_location_a, status=active_status
         )
+        cls.tenant1, _ = Tenant.objects.get_or_create(name="Tenant A")
+        cls.tenant2, _ = Tenant.objects.get_or_create(name="Tenant B")
         cls.device_1, _ = Device.objects.get_or_create(
             name="r1",
             device_type=cls.device_type_1,
@@ -94,6 +97,7 @@ class CommonTestDataMixin:
         )
         cls.device_3, _ = Device.objects.get_or_create(
             name="r3",
+            tenant=cls.tenant1,
             device_type=cls.device_type_3,
             role=cls.devicerole_3,
             location=cls.location3,
@@ -101,6 +105,7 @@ class CommonTestDataMixin:
         )
         cls.device_4, _ = Device.objects.get_or_create(
             name="r4",
+            tenant=cls.tenant2,
             device_type=cls.device_type_4,
             role=cls.devicerole_4,
             location=cls.location4,
@@ -638,6 +643,8 @@ class ValidatedSoftwareLCMFilterSetTestCase(FilterTestCases.FilterTestCase):
         )
         validated_software.save()
         validated_software.device_roles.set([device_role_router.pk])
+        tenant_1, _ = Tenant.objects.get_or_create(name="Tenant A")
+        validated_software.device_tenants.set([tenant_1.pk])
 
     def test_q_one_start(self):
         """Test q filter to find single record based on start date."""
@@ -652,6 +659,11 @@ class ValidatedSoftwareLCMFilterSetTestCase(FilterTestCases.FilterTestCase):
     def test_device_roles_name(self):
         """Test device_roles filter."""
         params = {"device_roles": ["router"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_device_tenants(self):
+        """Test device_tenants filter."""
+        params = {"device_tenants": ["Tenant A"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_software(self):
@@ -749,6 +761,9 @@ class DeviceSoftwareValidationResultFilterSetTestCase(FilterTestCases.FilterTest
             release_date="2019-01-10",
             status=active_status,
         )
+        cls.tenant, _ = Tenant.objects.get_or_create(name="Tenant A")
+        cls.device_1.tenant = cls.tenant
+        cls.device_1.save()
 
         DeviceSoftwareValidationResult.objects.create(
             device=cls.device_1,
@@ -797,7 +812,7 @@ class DeviceSoftwareValidationResultFilterSetTestCase(FilterTestCases.FilterTest
         device_role = Role.objects.get(name="core-switch")
         params = {"device_role_id": [device_role.id]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
-
+    
     def test_device_id_all(self):
         """Test device_id filter."""
         params = {"device_id": [self.device_1.id, self.device_2.id, self.device_3.id]}
@@ -827,6 +842,16 @@ class DeviceSoftwareValidationResultFilterSetTestCase(FilterTestCases.FilterTest
         """Test location filter."""
         params = {"location": [self.location.name]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_tenant(self):
+        """Test tenant filter."""
+        params = {"tenant": [self.tenant.name]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_tenant_id(self):
+        """Test tenant_id filter."""
+        params = {"tenant_id": [self.tenant.id]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
 
 class InventoryItemSoftwareValidationResultFilterSetTestCase(FilterTestCases.FilterTestCase):
@@ -946,6 +971,8 @@ class DeviceHardwareNoticeResultFilterSetTestCase(CommonTestDataMixin, FilterTes
         ("device_type_id", "device__device_type__id"),
         ("device_role", "device__role__name"),
         ("device_role_id", "device__role__id"),
+        ("tenant", "device__tenant__name"),  
+        ("tenant_id", "device__tenant__id"),
     ]
 
     @skip("DeviceHardwareNoticeResultFilterSet q filter not implemented")
