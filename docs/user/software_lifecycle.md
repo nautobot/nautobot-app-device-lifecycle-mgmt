@@ -19,6 +19,7 @@ When creating the validated software the following fields are available. Fields 
 | Valid Until | End date when the rules defined by this object stop applying |
 | Preferred Version | Whether the Software specified by this Validated Software should be considered a preferred version |
 | Devices -> Devices | Devices whose software will be validated by this Validated Software |
+| Devices -> Device tenants | Devices assigned to these tenants will have software validated by this Validated Software |
 | Devices -> Device types | Devices having these device types will have software validated by this Validated Software |
 | Devices -> Device roles | Devices having these device roles will have software validated by this Validated Software |
 | Inventory Items -> Inventory items | Inventory items whose software will be validated by this Validated Software |
@@ -35,6 +36,7 @@ Example of a Validated Software object with most fields filled in:
 Validated Software object can be assigned to:
 
 - devices
+- device tenants
 - device types
 - device roles
 - inventory items
@@ -54,7 +56,9 @@ For device, Validated Software will be used if one, or more, of the following, a
 
 - Device is explicitly listed in the Validated Software `devices` attribute.
 - Device's device type AND device role match `device_types` AND `device_roles` in Validated Software. This applies only if BOTH are set. See the **Special cases** subsection that follows.
+- Device's tenant AND device type match `device_tenants` AND `device_types` in Validated Software. This applies only if BOTH are set. See the **Special cases** subsection that follows.
 - Device's device type is listed in the Validated Software `device_types` attribute.
+- Device's tenant is listed in the Validated Software `device_tenants` attribute.
 - Device's role is listed in the Validated Software `device_roles` attribute.
 - Device's tags are listed in the Validated Software `object_tags` attribute.
 
@@ -84,6 +88,27 @@ For example, in the below case **Validated Software 4.21M** will apply to **Devi
 - Validated Software - 4.21M:
     - device types: 7150-S64
     - device roles: leaf
+    - software: 4.21M
+
+When a Validated Software object is assigned to both device tenants and device type then these are used in conjunction (logical AND). That is, such an object will apply to devices that are assigned both, specified device tenant AND device type.
+
+This logic is used to allow to specify a subset of the devices of a given type by adding additional constraint in the form of tenant.
+
+For example, in the below case **Validated Software 4.21M** will apply to **Device 1** only since **Device 2** has a match for device type only.
+
+- Device 1
+    - device type: 7150-S64
+    - device tenants: tenant_A
+    - software: 4.21M
+
+- Device 2
+    - device type: 7150-S64
+    - device tenants: tenant_B
+    - software: 4.21M
+
+- Validated Software - 4.21M:
+    - device types: 7150-S64
+    - device tenants: tenant_A
     - software: 4.21M
 
 ### Behavior when using API to retrieve Validated Software list for devices and inventory items
