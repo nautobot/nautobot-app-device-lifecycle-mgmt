@@ -320,11 +320,16 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         to_field_name="model",
         label="Device Types (model)",
     )
+    device_tenants_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_tenants",
+        queryset=Tenant.objects.all(),
+        label="Tenant",
+    )
     device_tenants = django_filters.ModelMultipleChoiceFilter(
         field_name="device_tenants__name",
         queryset=Tenant.objects.all(),
         to_field_name="name",
-        label="Tenant",
+        label="Tenant (name)",
     )
     device_roles_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device_roles",
