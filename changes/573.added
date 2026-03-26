@@ -1,3 +1,2 @@
-feature:
-  - "Added multi-tenancy support to ValidatedSoftwareLCM, allowing software validations to be scoped to specific Tenants."
-  - "Added Tenant filtering to Hardware Notice and Validated Software reports."
+Added multi-tenancy support to ValidatedSoftwareLCM, allowing software validations to be scoped to specific Tenants.
+Added Tenant filtering to Hardware Notice and Validated Software reports.
