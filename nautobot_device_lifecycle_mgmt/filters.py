@@ -442,16 +442,16 @@ class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):
         queryset=Platform.objects.all(),
         label="Platform",
     )
-    tenant_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="device__tenant",
-        queryset=Tenant.objects.all(),
-        label="Tenant",
-    )
     tenant = django_filters.ModelMultipleChoiceFilter(
         field_name="device__tenant__name",
         queryset=Tenant.objects.all(),
         to_field_name="name",
         label="Tenant (name)",
+    )
+    tenant_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__tenant",
+        queryset=Tenant.objects.all(),
+        label="Tenant",
     )
     location_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device__location",
@@ -567,6 +567,7 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
             "device__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "software__version": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "device__platform__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "device__tenant__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "device__location__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "device__device_type__model": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "device__role__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
@@ -588,16 +589,16 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         queryset=Platform.objects.all(),
         label="Platform",
     )
-    tenant_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="device__tenant",
-        queryset=Tenant.objects.all(),
-        label="Tenant",
-    )
     tenant = django_filters.ModelMultipleChoiceFilter(
         field_name="device__tenant__name",
         queryset=Tenant.objects.all(),
         to_field_name="name",
         label="Tenant (name)",
+    )
+    tenant_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__tenant",
+        queryset=Tenant.objects.all(),
+        label="Tenant",
     )
     location_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device__location",

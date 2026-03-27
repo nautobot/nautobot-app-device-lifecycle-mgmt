@@ -1,4 +1,5 @@
 """Forms implementation for the Lifecycle Management app."""
+# pylint: disable=too-many-lines
 
 import logging
 
@@ -393,6 +394,7 @@ class DeviceHardwareNoticeResultFilterForm(NautobotFilterForm):
     tenant = DynamicModelMultipleChoiceField(
         queryset=Tenant.objects.all(),
         label="Tenant",
+        to_field_name="name",
         required=False,
     )
     location = DynamicModelMultipleChoiceField(
@@ -449,6 +451,7 @@ class DeviceHardwareNoticeResultFilterForm(NautobotFilterForm):
             "supported",
             "platform",
             "location",
+            "tenant",
             "device",
             "device_status",
             "device_type",
@@ -482,6 +485,7 @@ class DeviceSoftwareValidationResultFilterForm(NautobotFilterForm):
     tenant = DynamicModelMultipleChoiceField(
         queryset=Tenant.objects.all(),
         label="Tenant",
+        to_field_name="name",
         required=False,
     )
     valid = forms.BooleanField(
@@ -530,6 +534,7 @@ class DeviceSoftwareValidationResultFilterForm(NautobotFilterForm):
             "software",
             "valid",
             "platform",
+            "tenant",
             "location",
             "device",
             "device_type",
