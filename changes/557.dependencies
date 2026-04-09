@@ -1,1 +1,0 @@
-Widened range of permitted versions of `numpy` dependency to permit 2.x versions as well.
