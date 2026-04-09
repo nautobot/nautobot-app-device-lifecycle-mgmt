@@ -1,2 +1,2 @@
-Added multi-tenancy support to ValidatedSoftwareLCM, allowing software validations to be scoped to specific Tenants.
+Added multi-tenancy support to ValidatedSoftwareLCM, allowing software validations to be scoped to specific Tenants. Records without tenant assignments are treated as global and match all devices. Devices with a tenant see both tenant-specific and global software, with tenant-specific matches receiving higher priority.
 Added Tenant filtering to Hardware Notice and Validated Software reports.
