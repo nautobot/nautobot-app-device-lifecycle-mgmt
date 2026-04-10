@@ -8,6 +8,22 @@ This document describes all new features and changes in the release. The format 
 - Added Python 3.14 support.
 
 <!-- towncrier release notes start -->
+
+## [v4.1.1 (2026-04-10)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v4.1.1)
+
+### Added
+
+- [#576](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/576) - Added `nautobot_device_lifecycle_mgmt_hardware_end_of_sale` Device filter extension.
+- [#576](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/576) - Added `nautobot_device_lifecycle_mgmt_hardware_end_of_software_releases` Device filter extension.
+- [#576](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/576) - Added `nautobot_device_lifecycle_mgmt_hardware_end_of_security_patches` Device filter extension.
+- [#576](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/576) - Added `nautobot_device_lifecycle_mgmt_hardware_end_of_support` Device filter extension.
+- [#576](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/576) - Added `nautobot_device_lifecycle_mgmt_software_version_end_of_support_date` Device filter extension.
+- [#576](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/576) - Added `nautobot_device_lifecycle_mgmt_has_cves` Software Version filter extension.
+
+### Housekeeping
+
+- Rebaked from the cookie `nautobot-app-v3.1.3`.
+
 ## [v4.1.0 (2026-03-20)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v4.1.0)
 
 ### Added
