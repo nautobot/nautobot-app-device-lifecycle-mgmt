@@ -1,0 +1,1 @@
+Documented the `multi_tenant_mode` setting and added a matching-workflow diagram to the Software Lifecycle user guide covering legacy and multi-tenant modes for tenanted and non-tenanted devices.

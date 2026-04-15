@@ -67,6 +67,43 @@ If at least one Validated Software object, which is currently valid, matching So
 
 When resolving whether Validated Software is taken into account when validating software on a given device, the following logic applies.
 
+### Matching workflow for devices
+
+The following diagram summarizes how a candidate Validated Software record is accepted or rejected for a given device under each mode. The bullet-list subsections below expand on the individual match criteria referenced in the diagram.
+
+```mermaid
+flowchart TD
+    Start([Device + Validated Software candidate]) --> Flag{multi_tenant_mode?}
+
+    Flag -- False / legacy --> LegacyMatch{Match on devices,<br/>device_types,<br/>device_roles,<br/>or object_tags?}
+    LegacyMatch -- Yes --> Include([Include in queryset])
+    LegacyMatch -- No --> Exclude([Exclude])
+
+    Flag -- True / multi-tenant --> DeviceTenant{Device has<br/>a tenant?}
+
+    DeviceTenant -- No --> UntenantedVS{VS has<br/>device_tenants set?}
+    UntenantedVS -- Yes --> Exclude
+    UntenantedVS -- No --> LegacyMatch
+
+    DeviceTenant -- Yes --> TenantedVS{VS has<br/>device_tenants set?}
+    TenantedVS -- No --> TagOrDirect{Match via<br/>devices or<br/>object_tags?}
+    TagOrDirect -- Yes --> Include
+    TagOrDirect -- No --> Exclude
+
+    TenantedVS -- Yes --> TenantMatches{Device's tenant<br/>in VS.device_tenants?}
+    TenantMatches -- No --> TagOrDirect
+    TenantMatches -- Yes --> TenantScopedMatch{Match on device_types,<br/>device_roles,<br/>or tenant-only VS?}
+    TenantScopedMatch -- Yes --> Include
+    TenantScopedMatch -- No --> TagOrDirect
+```
+
+Key points illustrated by the diagram:
+
+- Legacy mode is a pure passthrough to the pre-tenancy criteria; `device_tenants` never influences the decision.
+- In multi-tenant mode, a tenanted device never falls back to untenanted Validated Software via type/role/tenant paths — only direct `devices` and `object_tags` matches are tenant-agnostic.
+- A non-tenanted device in multi-tenant mode only sees untenanted Validated Software; any record with `device_tenants` set is filtered out.
+- Direct device assignment and tag assignment are evaluated in both modes and both tenancy states.
+
 ### For devices — legacy mode (`multi_tenant_mode=False`)
 
 Validated Software will be used if one, or more, of the following applies:
