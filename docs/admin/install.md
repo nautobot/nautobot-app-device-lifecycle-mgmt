@@ -112,18 +112,18 @@ Enables **tenant-aware software filtering**:
 - Can only see ValidatedSoftware configured for their **specific tenant**
 - Cannot see global/untenanted software
 - Filtering is based on:
-  - Direct device assignments
-  - Tenant-specific device type matches
-  - Tenant-specific device role matches
-  - Tenant-specific software with no device type specified
-  - Device tags
+    - Direct device assignments
+    - Tenant-specific device type matches
+    - Tenant-specific device role matches
+    - Tenant-specific software with no device type specified
+    - Device tags
 
 **For devices WITHOUT a tenant assigned:**
 - Can only see **global/untenanted software** (where `device_tenants` is empty)
 - Filtering is based on:
-  - Direct device assignments
-  - Device type and role matches (if software has no tenant)
-  - Device tags
+    - Direct device assignments
+    - Device type and role matches (if software has no tenant)
+    - Device tags
 
 **Use case:** Multi-tenant environments where each tenant has different software requirements and needs isolated software catalogs.
 
