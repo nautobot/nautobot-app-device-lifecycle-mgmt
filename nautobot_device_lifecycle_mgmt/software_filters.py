@@ -53,22 +53,13 @@ class DeviceValidatedSoftwareFilter:
 
     def filter_qs(self):
         """Returns filtered ValidatedSoftwareLCM query set."""
-        # 1. Tenant relationship exists: return tenant-specific AND global matches.
+        # 1. tenant relationship exists.
         if self.item_obj.tenant:
             self.validated_software_qs = self.validated_software_qs.filter(
                 Q(devices__in=[self.item_obj.pk])
-                # Tenant-specific matches
                 | Q(device_tenants=self.item_obj.tenant, device_types=self.item_obj.device_type.pk)
                 | Q(device_tenants=self.item_obj.tenant, device_roles=self.item_obj.role.pk)
                 | Q(device_tenants=self.item_obj.tenant, device_types=None)
-                # Global fallback (records with no tenant assigned)
-                | Q(
-                    device_types=self.item_obj.device_type.pk,
-                    device_roles=self.item_obj.role.pk,
-                    device_tenants__isnull=True,
-                )
-                | Q(device_types=self.item_obj.device_type.pk, device_roles=None, device_tenants__isnull=True)
-                | Q(device_types=None, device_roles=self.item_obj.role.pk, device_tenants__isnull=True)
                 | Q(object_tags__in=self.item_obj.tags.all())
             ).distinct()
         # 2. No tenant relationship exists, filter based on device type, role, and tags.
@@ -92,32 +83,11 @@ class DeviceValidatedSoftwareFilter:
         return self.validated_software_qs
 
     def _add_weights(self):
-        """Adds weights to allow ordering of the ValidatedSoftwareLCM assignments.
-
-        Tenant-specific matches are ordered before their global equivalents.
-        Django Case evaluates When clauses in order and uses the first match.
-        """
+        """Adds weights to allow ordering of the ValidatedSoftwareLCM assignments."""
         return self.validated_software_qs.annotate(
             weight=Case(
-                # Direct device assignment (highest priority)
                 When(devices=self.item_obj.pk, preferred=True, then=Value(10)),
                 When(devices=self.item_obj.pk, preferred=False, then=Value(1000)),
-                # Tenant + type + role
-                When(
-                    device_tenants=self.item_obj.tenant,
-                    device_types=self.item_obj.device_type.pk,
-                    device_roles=self.item_obj.role.pk,
-                    preferred=True,
-                    then=Value(15),
-                ),
-                When(
-                    device_tenants=self.item_obj.tenant,
-                    device_types=self.item_obj.device_type.pk,
-                    device_roles=self.item_obj.role.pk,
-                    preferred=False,
-                    then=Value(1005),
-                ),
-                # Global type + role
                 When(
                     device_types=self.item_obj.device_type.pk,
                     device_roles=self.item_obj.role.pk,
@@ -130,48 +100,33 @@ class DeviceValidatedSoftwareFilter:
                     preferred=False,
                     then=Value(1010),
                 ),
-                # Tenant + type
-                When(
-                    device_tenants=self.item_obj.tenant,
-                    device_types=self.item_obj.device_type.pk,
-                    preferred=True,
-                    then=Value(25),
-                ),
-                When(
-                    device_tenants=self.item_obj.tenant,
-                    device_types=self.item_obj.device_type.pk,
-                    preferred=False,
-                    then=Value(1025),
-                ),
-                # Global type only
                 When(device_types=self.item_obj.device_type.pk, device_roles=None, preferred=True, then=Value(30)),
                 When(device_types=self.item_obj.device_type.pk, device_roles=None, preferred=False, then=Value(1030)),
-                # Tenant + role
-                When(
-                    device_tenants=self.item_obj.tenant,
-                    device_roles=self.item_obj.role.pk,
-                    preferred=True,
-                    then=Value(35),
-                ),
-                When(
-                    device_tenants=self.item_obj.tenant,
-                    device_roles=self.item_obj.role.pk,
-                    preferred=False,
-                    then=Value(1035),
-                ),
-                # Global role only
                 When(device_roles=self.item_obj.role.pk, preferred=True, then=Value(40)),
                 When(device_roles=self.item_obj.role.pk, preferred=False, then=Value(1040)),
-                # Tenant only (no type, no role)
                 When(
                     device_tenants=self.item_obj.tenant,
+                    device_types=self.item_obj.device_type.pk,
                     preferred=True,
-                    then=Value(45),
+                    then=Value(50),
                 ),
                 When(
                     device_tenants=self.item_obj.tenant,
+                    device_types=self.item_obj.device_type.pk,
                     preferred=False,
-                    then=Value(1045),
+                    then=Value(1050),
+                ),
+                When(
+                    device_tenants=self.item_obj.tenant,
+                    device_roles=self.item_obj.role.pk,
+                    preferred=True,
+                    then=Value(60),
+                ),
+                When(
+                    device_tenants=self.item_obj.tenant,
+                    device_roles=self.item_obj.role.pk,
+                    preferred=False,
+                    then=Value(1060),
                 ),
                 When(preferred=True, then=Value(990)),
                 default=Value(1990),

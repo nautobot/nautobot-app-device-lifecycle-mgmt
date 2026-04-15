@@ -319,24 +319,23 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         self.assertIn(lcm_tenant_a, qs)
         self.assertNotIn(lcm_tenant_b, qs)
 
-    def test_no_match_when_record_has_no_assignments(self):
+    def test_get_for_object_device_tenant_no_fallback_to_global(self):
         """
-        Verify that a ValidatedSoftwareLCM with no assignment criteria
-        (no device_types, device_roles, device_tenants, or tags)
-        does not match any device.
+        Verify that a device with a tenant cannot see "Global" software
+        (where device_tenants is empty).
         """
         self.device_1.tenant = self.tenant_1
         self.device_1.device_type = self.device_type_1
         self.device_1.save()
 
-        lcm_no_assignments = ValidatedSoftwareLCM.objects.create(
+        lcm_global = ValidatedSoftwareLCM.objects.create(
             software=self.software,
             start=date(2013, 11, 2),
         )
 
         qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
 
-        self.assertNotIn(lcm_no_assignments, qs)
+        self.assertNotIn(lcm_global, qs)
 
     def test_tenant_filtering_logic_on_device(self):
         """
@@ -364,145 +363,6 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
 
         self.assertIn(tenant_software, validated_qs)
         self.assertNotIn(other_tenant_software, validated_qs)
-
-    def test_device_with_tenant_sees_global_by_device_type(self):
-        """
-        Regression: a device with a tenant must still see global
-        ValidatedSoftwareLCM records (no device_tenants set) that
-        match by device_type. This is the upgrade scenario where
-        all existing records are global.
-        """
-        self.device_1.tenant = self.tenant_1
-        self.device_1.device_type = self.device_type_1
-        self.device_1.save()
-
-        lcm_global = ValidatedSoftwareLCM.objects.create(
-            software=self.software,
-            start=date(2013, 11, 2),
-        )
-        lcm_global.device_types.set([self.device_type_1])
-
-        qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
-
-        self.assertIn(lcm_global, qs)
-
-    def test_device_with_tenant_sees_both_tenant_specific_and_global(self):
-        """
-        A device with a tenant should see both tenant-specific and global
-        records. Tenant-specific should have higher priority (appear first).
-        """
-        self.device_1.tenant = self.tenant_1
-        self.device_1.device_type = self.device_type_1
-        self.device_1.save()
-
-        lcm_global = ValidatedSoftwareLCM.objects.create(
-            software=self.software,
-            start=date(2013, 11, 2),
-        )
-        lcm_global.device_types.set([self.device_type_1])
-
-        lcm_tenant = ValidatedSoftwareLCM.objects.create(
-            software=self.software,
-            start=date(2013, 11, 3),
-        )
-        lcm_tenant.device_tenants.set([self.tenant_1])
-        lcm_tenant.device_types.set([self.device_type_1])
-
-        qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
-
-        self.assertIn(lcm_global, qs)
-        self.assertIn(lcm_tenant, qs)
-        # Tenant-specific should come first (lower weight = higher priority)
-        qs_list = list(qs)
-        self.assertLess(qs_list.index(lcm_tenant), qs_list.index(lcm_global))
-
-    def test_device_with_tenant_a_does_not_see_tenant_b_records(self):
-        """
-        A device with Tenant A should see global records but NOT
-        records scoped to Tenant B.
-        """
-        self.device_1.tenant = self.tenant_1
-        self.device_1.device_type = self.device_type_1
-        self.device_1.save()
-
-        lcm_global = ValidatedSoftwareLCM.objects.create(
-            software=self.software,
-            start=date(2013, 11, 2),
-        )
-        lcm_global.device_types.set([self.device_type_1])
-
-        lcm_tenant_b = ValidatedSoftwareLCM.objects.create(
-            software=self.software,
-            start=date(2013, 11, 3),
-        )
-        lcm_tenant_b.device_tenants.set([self.tenant_2])
-        lcm_tenant_b.device_types.set([self.device_type_1])
-
-        qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
-
-        self.assertIn(lcm_global, qs)
-        self.assertNotIn(lcm_tenant_b, qs)
-
-    def test_device_without_tenant_does_not_see_tenant_specific(self):
-        """
-        A device with no tenant should only see global records,
-        not records scoped to any specific tenant.
-        """
-        self.device_1.tenant = None
-        self.device_1.device_type = self.device_type_1
-        self.device_1.save()
-
-        lcm_global = ValidatedSoftwareLCM.objects.create(
-            software=self.software,
-            start=date(2013, 11, 2),
-        )
-        lcm_global.device_types.set([self.device_type_1])
-
-        lcm_tenant = ValidatedSoftwareLCM.objects.create(
-            software=self.software,
-            start=date(2013, 11, 3),
-        )
-        lcm_tenant.device_tenants.set([self.tenant_1])
-        lcm_tenant.device_types.set([self.device_type_1])
-
-        qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
-
-        self.assertIn(lcm_global, qs)
-        self.assertNotIn(lcm_tenant, qs)
-
-    def test_direct_device_assignment_overrides_tenant_and_global(self):
-        """
-        When a device has direct ValidatedSoftwareLCM assignments,
-        only those direct assignments should be returned.
-        """
-        self.device_1.tenant = self.tenant_1
-        self.device_1.device_type = self.device_type_1
-        self.device_1.save()
-
-        lcm_direct = ValidatedSoftwareLCM.objects.create(
-            software=self.software,
-            start=date(2013, 11, 2),
-        )
-        lcm_direct.devices.set([self.device_1])
-
-        lcm_global = ValidatedSoftwareLCM.objects.create(
-            software=self.software,
-            start=date(2013, 11, 3),
-        )
-        lcm_global.device_types.set([self.device_type_1])
-
-        lcm_tenant = ValidatedSoftwareLCM.objects.create(
-            software=self.software,
-            start=date(2013, 11, 4),
-        )
-        lcm_tenant.device_tenants.set([self.tenant_1])
-        lcm_tenant.device_types.set([self.device_type_1])
-
-        qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
-
-        self.assertIn(lcm_direct, qs)
-        self.assertNotIn(lcm_global, qs)
-        self.assertNotIn(lcm_tenant, qs)
 
 
 class DeviceSoftwareValidationResultTestCase(TestCase):  # pylint: disable=too-many-instance-attributes

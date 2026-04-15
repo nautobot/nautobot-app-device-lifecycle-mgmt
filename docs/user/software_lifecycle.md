@@ -62,9 +62,6 @@ For device, Validated Software will be used if one, or more, of the following, a
 - Device's role is listed in the Validated Software `device_roles` attribute.
 - Device's tags are listed in the Validated Software `object_tags` attribute.
 
-!!! note "Global vs. Tenant-Scoped Validated Software"
-    A Validated Software record with no `device_tenants` set is considered **global** and will match devices regardless of their tenant assignment. A record with `device_tenants` set is **tenant-scoped** and will only match devices assigned to one of those tenants. Devices with a tenant will see both tenant-specific and global matches, with tenant-specific matches receiving higher priority in the ordering.
-
 For inventory items, Validated Software will be used if one, or more, of the following, applies:
 
 - Inventory item is explicitly listed in the Validated Software `devices` attribute.
@@ -316,23 +313,15 @@ If there is more than one Validated Software object matching software assigned t
 #### Ordering for devices
 
 1. Device is listed in the `devices` attribute, `preferred` flag set to `True`
-2. Device's tenant AND device type AND device role match, `preferred` flag set to `True`
-3. Device's device type AND device role are listed in the `device_types` and `device_roles` attributes, `preferred` flag set to `True`
-4. Device's tenant AND device type match, `preferred` flag set to `True`
-5. Device's device type is listed in the `device_types` attribute, `preferred` flag set to `True`
-6. Device's tenant AND device role match, `preferred` flag set to `True`
-7. Device's device role is listed in the `device_roles` attribute, `preferred` flag set to `True`
-8. Device's tenant matches (no type/role constraint), `preferred` flag set to `True`
-9. Device's tag is listed in the `object_tags` attribute, `preferred` flag set to `True`
-10. Device is listed in the `devices` attribute, `preferred` flag set to `False`
-11. Device's tenant AND device type AND device role match, `preferred` flag set to `False`
-12. Device's device type AND device role are listed in the `device_types` and `device_roles` attributes, `preferred` flag set to `False`
-13. Device's tenant AND device type match, `preferred` flag set to `False`
-14. Device's device type is listed in the `device_types` attribute, `preferred` flag set to `False`
-15. Device's tenant AND device role match, `preferred` flag set to `False`
-16. Device's device role is listed in the `device_roles` attribute, `preferred` flag set to `False`
-17. Device's tenant matches (no type/role constraint), `preferred` flag set to `False`
-18. Device's tag is listed in the `object_tags` attribute, `preferred` flag set to `False`
+2. Device's device type AND device role are listed in the `device_types` and `device_roles` attributes,  `preferred` flag set to `True`
+3. Device's device type is listed in the `device_types` attribute, `preferred` flag set to `True`
+4. Device's device role is listed in the `device_roles` attribute, `preferred` flag set to `True`
+5. Device's tag is listed in the `object_tags` attribute, `preferred` flag set to `True`
+6. Device is listed in the `devices` attribute, `preferred` flag set to `False`
+7. Device's device type AND device role are listed in the `device_types` and `device_roles` attributes,  `preferred` flag set to `False`
+8. Device's device type is listed in the `device_types` attribute, `preferred` flag set to `False`
+9. Device's device role is listed in the `device_roles` attribute, `preferred` flag set to `False`
+10. Device's tag is listed in the `object_tags` attribute, `preferred` flag set to `False`
 
 #### Ordering for inventory items
 
