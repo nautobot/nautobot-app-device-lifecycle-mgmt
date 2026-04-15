@@ -19,7 +19,7 @@ When creating the validated software the following fields are available. Fields 
 | Valid Until | End date when the rules defined by this object stop applying |
 | Preferred Version | Whether the Software specified by this Validated Software should be considered a preferred version |
 | Devices -> Devices | Devices whose software will be validated by this Validated Software |
-| Devices -> Device tenants | Devices assigned to these tenants will have software validated by this Validated Software |
+| Devices -> Device tenants | Devices assigned to these tenants will have software validated by this Validated Software. *Only honored when `multi_tenant_mode=True`; ignored by matching in the default legacy mode (see [Multi-tenant mode](#multi-tenant-mode-opt-in)).* |
 | Devices -> Device types | Devices having these device types will have software validated by this Validated Software |
 | Devices -> Device roles | Devices having these device roles will have software validated by this Validated Software |
 | Inventory Items -> Inventory items | Inventory items whose software will be validated by this Validated Software |
@@ -36,13 +36,28 @@ Example of a Validated Software object with most fields filled in:
 Validated Software object can be assigned to:
 
 - devices
-- device tenants
+- device tenants *(honored only when `multi_tenant_mode=True` — see [Multi-tenant mode](#multi-tenant-mode-opt-in))*
 - device types
 - device roles
 - inventory items
 - object tags applied to devices and inventory items
 
 One Validated Software object can be assigned to multiple other objects.
+
+## Multi-tenant mode (opt-in)
+
+The app supports two matching modes for `ValidatedSoftwareLCM` records, controlled by the `multi_tenant_mode` app setting (see the [admin install guide](../admin/install.md#app-configuration)):
+
+| `multi_tenant_mode` | Behavior |
+| -- | -- |
+| `False` (default) | **Legacy mode** — the `device_tenants` assignment on a Validated Software record is **ignored** by the matching logic. Matching uses `devices`, `device_types`, `device_roles`, and `object_tags` only. This preserves the pre-tenancy behavior of the app. |
+| `True` | **Multi-tenant mode** — the device's tenant must match one of the `device_tenants` on any tenant-scoped Validated Software record for it to apply. Device type, device role, direct device, and tag assignments continue to work, and can be combined with tenant scoping. **No global (untenanted) fallback** is provided for devices that belong to a tenant. |
+
+!!! note
+    The `device_tenants` field remains editable in the UI and exposed in the API regardless of the setting. In legacy mode it is simply ignored by matching; existing tenant assignments remain in place and become effective if the setting is later switched to `True`.
+
+!!! warning
+    Changing `multi_tenant_mode` requires a Nautobot service restart for the new value to take effect.
 
 ## Validated Software matching logic
 
@@ -52,17 +67,33 @@ If at least one Validated Software object, which is currently valid, matching So
 
 When resolving whether Validated Software is taken into account when validating software on a given device, the following logic applies.
 
-For device, Validated Software will be used if one, or more, of the following, applies:
+### For devices — legacy mode (`multi_tenant_mode=False`)
+
+Validated Software will be used if one, or more, of the following applies:
 
 - Device is explicitly listed in the Validated Software `devices` attribute.
 - Device's device type AND device role match `device_types` AND `device_roles` in Validated Software. This applies only if BOTH are set. See the **Special cases** subsection that follows.
-- Device's tenant AND device type match `device_tenants` AND `device_types` in Validated Software. This applies only if BOTH are set. See the **Special cases** subsection that follows.
 - Device's device type is listed in the Validated Software `device_types` attribute.
-- Device's tenant is listed in the Validated Software `device_tenants` attribute.
 - Device's role is listed in the Validated Software `device_roles` attribute.
 - Device's tags are listed in the Validated Software `object_tags` attribute.
 
-For inventory items, Validated Software will be used if one, or more, of the following, applies:
+The `device_tenants` assignment, if any, is ignored.
+
+### For devices — multi-tenant mode (`multi_tenant_mode=True`)
+
+If the device has a tenant assigned, Validated Software will be used if one, or more, of the following applies:
+
+- Device is explicitly listed in the Validated Software `devices` attribute.
+- Device's tenant AND device type match `device_tenants` AND `device_types` in Validated Software. This applies only if BOTH are set. See the **Special cases** subsection that follows.
+- Device's tenant AND device role match `device_tenants` AND `device_roles` in Validated Software.
+- Device's tenant is listed in the Validated Software `device_tenants` attribute (with no device type set).
+- Device's tags are listed in the Validated Software `object_tags` attribute.
+
+If the device has no tenant assigned, only Validated Software records that have **no** `device_tenants` set are considered, and the legacy-mode rules above apply.
+
+### For inventory items
+
+Inventory item matching does not take tenancy into account in either mode. Validated Software will be used if one, or more, of the following applies:
 
 - Inventory item is explicitly listed in the Validated Software `devices` attribute.
 - Inventory item's tags are listed in the Validated Software `object_tags` attribute.
@@ -89,6 +120,10 @@ For example, in the below case **Validated Software 4.21M** will apply to **Devi
     - device types: 7150-S64
     - device roles: leaf
     - software: 4.21M
+
+### Special cases - device tenant and device type defined together
+
+*Only applies when `multi_tenant_mode=True`.*
 
 When a Validated Software object is assigned to both device tenants and device type then these are used in conjunction (logical AND). That is, such an object will apply to devices that are assigned both, specified device tenant AND device type.
 
@@ -316,12 +351,16 @@ If there is more than one Validated Software object matching software assigned t
 2. Device's device type AND device role are listed in the `device_types` and `device_roles` attributes,  `preferred` flag set to `True`
 3. Device's device type is listed in the `device_types` attribute, `preferred` flag set to `True`
 4. Device's device role is listed in the `device_roles` attribute, `preferred` flag set to `True`
-5. Device's tag is listed in the `object_tags` attribute, `preferred` flag set to `True`
-6. Device is listed in the `devices` attribute, `preferred` flag set to `False`
-7. Device's device type AND device role are listed in the `device_types` and `device_roles` attributes,  `preferred` flag set to `False`
-8. Device's device type is listed in the `device_types` attribute, `preferred` flag set to `False`
-9. Device's device role is listed in the `device_roles` attribute, `preferred` flag set to `False`
-10. Device's tag is listed in the `object_tags` attribute, `preferred` flag set to `False`
+5. *(multi-tenant mode only)* Device's tenant AND device type are listed in the `device_tenants` and `device_types` attributes, `preferred` flag set to `True`
+6. *(multi-tenant mode only)* Device's tenant AND device role are listed in the `device_tenants` and `device_roles` attributes, `preferred` flag set to `True`
+7. Device's tag is listed in the `object_tags` attribute, `preferred` flag set to `True`
+8. Device is listed in the `devices` attribute, `preferred` flag set to `False`
+9. Device's device type AND device role are listed in the `device_types` and `device_roles` attributes,  `preferred` flag set to `False`
+10. Device's device type is listed in the `device_types` attribute, `preferred` flag set to `False`
+11. Device's device role is listed in the `device_roles` attribute, `preferred` flag set to `False`
+12. *(multi-tenant mode only)* Device's tenant AND device type, `preferred` flag set to `False`
+13. *(multi-tenant mode only)* Device's tenant AND device role, `preferred` flag set to `False`
+14. Device's tag is listed in the `object_tags` attribute, `preferred` flag set to `False`
 
 #### Ordering for inventory items
 

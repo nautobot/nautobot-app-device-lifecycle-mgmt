@@ -2,13 +2,14 @@
 """nautobot_device_lifecycle_mgmt test class for models."""
 
 from datetime import date
+from unittest import mock
 
 import time_machine
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from nautobot.apps.testing import TestCase
 from nautobot.dcim.models import DeviceType, Manufacturer, Platform, SoftwareVersion
-from nautobot.extras.models import Status
+from nautobot.extras.models import Status, Tag
 from nautobot.tenancy.models import Tenant
 
 from nautobot_device_lifecycle_mgmt.choices import ReportRunTypeChoices
@@ -291,11 +292,109 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         self.assertIn(self.tenant_1, validatedsoftwarelcm.device_tenants.all())
         self.assertEqual(validatedsoftwarelcm.device_tenants.count(), 1)
 
-    def test_get_for_object_device_with_tenant(self):
-        """
-        Verify software matching the device's tenant is retrieved,
-        while software for other tenants is excluded.
-        """
+    # ------------------------------------------------------------------
+    # Legacy mode tests (multi_tenant_mode=False — default).
+    # In legacy mode the `device_tenants` M2M is ignored by matching logic:
+    # a ValidatedSoftwareLCM with device_tenants set is matched purely on
+    # its other assignment fields (devices / device_types / device_roles /
+    # object_tags).
+    # ------------------------------------------------------------------
+
+    def test_legacy_mode_tenanted_vs_matches_non_tenant_device_by_type(self):
+        """Tenanted VS still matches a non-tenant device via device_type in legacy mode."""
+        self.device_1.device_type = self.device_type_1
+        self.device_1.save()
+
+        lcm_with_tenant = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2013, 11, 22),
+        )
+        lcm_with_tenant.device_tenants.set([self.tenant_1])
+        lcm_with_tenant.device_types.set([self.device_type_1])
+
+        with mock.patch(
+            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            return_value=False,
+        ):
+            qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
+
+        self.assertIn(lcm_with_tenant, qs)
+
+    def test_legacy_mode_tenanted_vs_matches_tenanted_device_by_type(self):
+        """Tenanted VS matches a tenanted device via device_type regardless of tenant match."""
+        self.device_1.tenant = self.tenant_1
+        self.device_1.device_type = self.device_type_1
+        self.device_1.save()
+
+        # VS scoped to a *different* tenant but matching device_type — should still match
+        # in legacy mode because device_tenants is ignored.
+        lcm_other_tenant = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2013, 11, 22),
+        )
+        lcm_other_tenant.device_tenants.set([self.tenant_2])
+        lcm_other_tenant.device_types.set([self.device_type_1])
+
+        with mock.patch(
+            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            return_value=False,
+        ):
+            qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
+
+        self.assertIn(lcm_other_tenant, qs)
+
+    def test_legacy_mode_non_tenanted_vs_matches_by_type(self):
+        """A non-tenanted VS matches via device_type in legacy mode (pre-tenancy behavior)."""
+        self.device_1.device_type = self.device_type_1
+        self.device_1.save()
+
+        lcm_global = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2013, 11, 22),
+        )
+        lcm_global.device_types.set([self.device_type_1])
+
+        with mock.patch(
+            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            return_value=False,
+        ):
+            qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
+
+        self.assertIn(lcm_global, qs)
+
+    def test_legacy_mode_direct_device_assignment_ordered_first(self):
+        """Direct `devices` match is ordered before type-only match, but both appear."""
+        self.device_1.device_type = self.device_type_1
+        self.device_1.save()
+
+        lcm_direct = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2013, 11, 22),
+        )
+        lcm_direct.devices.set([self.device_1])
+
+        lcm_type_only = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2013, 11, 23),
+        )
+        lcm_type_only.device_types.set([self.device_type_1])
+
+        with mock.patch(
+            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            return_value=False,
+        ):
+            qs = list(ValidatedSoftwareLCM.objects.get_for_object(self.device_1))
+
+        self.assertIn(lcm_direct, qs)
+        self.assertIn(lcm_type_only, qs)
+        self.assertLess(qs.index(lcm_direct), qs.index(lcm_type_only))
+
+    # ------------------------------------------------------------------
+    # Multi-tenant mode tests (multi_tenant_mode=True — opt-in).
+    # ------------------------------------------------------------------
+
+    def test_multi_tenant_mode_tenanted_vs_matches_by_tenant_and_type(self):
+        """Tenanted VS matches a device sharing both tenant and device_type."""
         self.device_1.tenant = self.tenant_1
         self.device_1.device_type = self.device_type_1
         self.device_1.save()
@@ -314,16 +413,17 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         lcm_tenant_b.device_tenants.set([self.tenant_2])
         lcm_tenant_b.device_types.set([self.device_type_1])
 
-        qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
+        with mock.patch(
+            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            return_value=True,
+        ):
+            qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
 
         self.assertIn(lcm_tenant_a, qs)
         self.assertNotIn(lcm_tenant_b, qs)
 
-    def test_get_for_object_device_tenant_no_fallback_to_global(self):
-        """
-        Verify that a device with a tenant cannot see "Global" software
-        (where device_tenants is empty).
-        """
+    def test_multi_tenant_mode_no_global_fallback_for_tenanted_device(self):
+        """A tenanted device does not see untenanted/global VS records."""
         self.device_1.tenant = self.tenant_1
         self.device_1.device_type = self.device_type_1
         self.device_1.save()
@@ -332,16 +432,110 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
             software=self.software,
             start=date(2013, 11, 2),
         )
+        lcm_global.device_types.set([self.device_type_1])
 
-        qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
+        with mock.patch(
+            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            return_value=True,
+        ):
+            qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
 
         self.assertNotIn(lcm_global, qs)
 
-    def test_tenant_filtering_logic_on_device(self):
-        """
-        Verify that a device belonging to a tenant retrieves the correct
-        software based on the tenant-specific filtering logic.
-        """
+    def test_multi_tenant_mode_non_tenanted_device_sees_untenanted_only(self):
+        """A device with no tenant matches only untenanted VS records."""
+        self.device_1.tenant = None
+        self.device_1.device_type = self.device_type_1
+        self.device_1.save()
+
+        lcm_global = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2013, 11, 22),
+        )
+        lcm_global.device_types.set([self.device_type_1])
+
+        lcm_tenanted = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2013, 11, 23),
+        )
+        lcm_tenanted.device_tenants.set([self.tenant_1])
+        lcm_tenanted.device_types.set([self.device_type_1])
+
+        with mock.patch(
+            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            return_value=True,
+        ):
+            qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
+
+        self.assertIn(lcm_global, qs)
+        self.assertNotIn(lcm_tenanted, qs)
+
+    def test_multi_tenant_mode_direct_device_assignment_works_with_tenanted_vs(self):
+        """Direct `devices` assignment applies even when the VS has tenants set."""
+        self.device_1.tenant = self.tenant_1
+        self.device_1.save()
+
+        lcm_direct_tenanted = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2013, 11, 22),
+        )
+        lcm_direct_tenanted.device_tenants.set([self.tenant_2])  # different tenant
+        lcm_direct_tenanted.devices.set([self.device_1])
+
+        with mock.patch(
+            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            return_value=True,
+        ):
+            qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
+
+        self.assertIn(lcm_direct_tenanted, qs)
+
+    def test_multi_tenant_mode_object_tag_match_works_with_tenanted_vs(self):
+        """`object_tags` assignment applies regardless of the VS tenant."""
+        self.device_1.tenant = self.tenant_1
+        self.device_1.save()
+
+        tag = Tag.objects.create(name="approved")
+        tag.content_types.add(ContentType.objects.get_for_model(self.device_1))
+        self.device_1.tags.add(tag)
+
+        lcm_tag_other_tenant = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2013, 11, 22),
+        )
+        lcm_tag_other_tenant.device_tenants.set([self.tenant_2])
+        lcm_tag_other_tenant.object_tags.set([tag])
+
+        with mock.patch(
+            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            return_value=True,
+        ):
+            qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
+
+        self.assertIn(lcm_tag_other_tenant, qs)
+
+    def test_multi_tenant_mode_device_role_match_works_with_tenanted_vs(self):
+        """Tenant + device_role match applies in multi-tenant mode."""
+        self.device_1.tenant = self.tenant_1
+        self.device_1.save()
+
+        lcm_tenant_and_role = ValidatedSoftwareLCM.objects.create(
+            software=self.software,
+            start=date(2013, 11, 22),
+        )
+        lcm_tenant_and_role.device_tenants.set([self.tenant_1])
+        lcm_tenant_and_role.device_roles.set([self.device_1.role])
+
+        with mock.patch(
+            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            return_value=True,
+        ):
+            qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
+
+        self.assertIn(lcm_tenant_and_role, qs)
+
+    def test_multi_tenant_mode_tenant_isolation(self):
+        """A VS scoped only to another tenant is excluded."""
         self.device_1.tenant = self.tenant_1
         self.device_1.device_type = self.device_type_1
         self.device_1.save()
@@ -359,7 +553,11 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         )
         other_tenant_software.device_tenants.set([self.tenant_2])
 
-        validated_qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
+        with mock.patch(
+            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            return_value=True,
+        ):
+            validated_qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
 
         self.assertIn(tenant_software, validated_qs)
         self.assertNotIn(other_tenant_software, validated_qs)

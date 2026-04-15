@@ -77,6 +77,29 @@ The app behavior can be controlled with the following list of settings:
 | `barchart_width`     | `12`                                                                | `12`               | The width of the barchart within the overview report.                |
 | `barchart_height`    | `5`                                                                 | `5`                | The height of the barchart within the overview report.               |
 | `enabled_metrics`    | `["metrics_lcm_hw_end_of_support_location"]`                        | `[]`               | Enables metrics corresponding to the provided entries.               |
+| `multi_tenant_mode`  | `True`                                                              | `False`            | Opt-in flag that enables tenant-scoped Validated Software matching. When `False` (default) the `device_tenants` M2M on `ValidatedSoftwareLCM` is ignored by matching logic, preserving pre-tenancy behavior. See the [user guide](../user/software_lifecycle.md#multi-tenant-mode-opt-in) for details. |
+
+### Enabling Multi-Tenant Validated Software Matching
+
+By default the app ignores `device_tenants` assignments on `ValidatedSoftwareLCM` records when determining whether a Validated Software applies to a given device. This preserves the matching behavior from releases prior to the introduction of the `device_tenants` field.
+
+To enable tenant-aware matching, set `multi_tenant_mode` to `True` in `PLUGINS_CONFIG` and restart Nautobot services:
+
+```python
+PLUGINS_CONFIG = {
+    "nautobot_device_lifecycle_mgmt": {
+        "multi_tenant_mode": True,
+    },
+}
+```
+
+!!! note
+    Changing this setting requires a Nautobot service restart (`nautobot-server`, workers, and scheduler).
+
+!!! note
+    When the flag is off, the `device_tenants` field remains visible and editable in the UI and API. Any assignments stored there are preserved and become effective as soon as the flag is set to `True`.
+
+See the [Software Lifecycle user guide](../user/software_lifecycle.md#multi-tenant-mode-opt-in) for the full matching logic differences between the two modes.
 
 ### Available Metric Names
 

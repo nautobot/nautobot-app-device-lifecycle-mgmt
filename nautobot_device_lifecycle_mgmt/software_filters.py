@@ -1,9 +1,15 @@
 """Filters for Software Lifecycle QuerySets."""
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Case, IntegerField, Q, Subquery, Value, When
 from nautobot.dcim.models import Device, InventoryItem
 from nautobot.extras.models import RelationshipAssociation
+
+
+def _multi_tenant_mode_enabled():
+    """Return True when the `multi_tenant_mode` app setting is enabled."""
+    return settings.PLUGINS_CONFIG.get("nautobot_device_lifecycle_mgmt", {}).get("multi_tenant_mode", False)
 
 
 class BaseSoftwareFilter:
@@ -52,38 +58,98 @@ class DeviceValidatedSoftwareFilter:
         self.item_obj = item_obj
 
     def filter_qs(self):
-        """Returns filtered ValidatedSoftwareLCM query set."""
-        # 1. tenant relationship exists.
-        if self.item_obj.tenant:
-            self.validated_software_qs = self.validated_software_qs.filter(
-                Q(devices__in=[self.item_obj.pk])
-                | Q(device_tenants=self.item_obj.tenant, device_types=self.item_obj.device_type.pk)
-                | Q(device_tenants=self.item_obj.tenant, device_roles=self.item_obj.role.pk)
-                | Q(device_tenants=self.item_obj.tenant, device_types=None)
-                | Q(object_tags__in=self.item_obj.tags.all())
-            ).distinct()
-        # 2. No tenant relationship exists, filter based on device type, role, and tags.
+        """Return the filtered, weight-ordered ValidatedSoftwareLCM queryset."""
+        if _multi_tenant_mode_enabled():
+            self.validated_software_qs = self._filter_multi_tenant_mode()
         else:
-            self.validated_software_qs = self.validated_software_qs.filter(
-                Q(devices__in=[self.item_obj.pk])
-                | Q(
-                    device_types=self.item_obj.device_type.pk,
-                    device_roles=self.item_obj.role.pk,
-                    device_tenants__isnull=True,
-                )
-                | Q(device_types=self.item_obj.device_type.pk, device_roles=None, device_tenants__isnull=True)
-                | Q(device_types=None, device_roles=self.item_obj.role.pk, device_tenants__isnull=True)
-                | Q(object_tags__in=self.item_obj.tags.all())
-            ).distinct()
-        # 3. Override qs when direct device assignments exist so no duplicates are returned.
-        if self.item_obj.validated_software.exists():
-            self.validated_software_qs = self.validated_software_qs.filter(devices__in=[self.item_obj.pk]).distinct()
+            self.validated_software_qs = self._filter_legacy_mode()
+
         self.validated_software_qs = self._add_weights().order_by("weight", "start")
 
         return self.validated_software_qs
 
+    def _filter_legacy_mode(self):
+        """Return the queryset filtered without tenant-awareness."""
+        return self.validated_software_qs.filter(
+            Q(devices__in=[self.item_obj.pk])
+            | Q(device_types=self.item_obj.device_type.pk, device_roles=self.item_obj.role.pk)
+            | Q(device_types=self.item_obj.device_type.pk, device_roles=None)
+            | Q(device_types=None, device_roles=self.item_obj.role.pk)
+            | Q(object_tags__in=self.item_obj.tags.all())
+        ).distinct()
+
+    def _filter_multi_tenant_mode(self):
+        """Return the queryset filtered with tenant-aware matching."""
+        if self.item_obj.tenant:
+            return self.validated_software_qs.filter(
+                Q(devices__in=[self.item_obj.pk])
+                | Q(
+                    device_tenants=self.item_obj.tenant,
+                    device_types=self.item_obj.device_type.pk,
+                    device_roles=self.item_obj.role.pk,
+                )
+                | Q(
+                    device_tenants=self.item_obj.tenant,
+                    device_types=self.item_obj.device_type.pk,
+                    device_roles=None,
+                )
+                | Q(
+                    device_tenants=self.item_obj.tenant,
+                    device_types=None,
+                    device_roles=self.item_obj.role.pk,
+                )
+                | Q(device_tenants=self.item_obj.tenant, device_types=None, device_roles=None)
+                | Q(object_tags__in=self.item_obj.tags.all())
+            ).distinct()
+        # Device has no tenant: match only untenanted records via the legacy criteria.
+        return self.validated_software_qs.filter(
+            Q(devices__in=[self.item_obj.pk])
+            | Q(
+                device_types=self.item_obj.device_type.pk,
+                device_roles=self.item_obj.role.pk,
+                device_tenants__isnull=True,
+            )
+            | Q(device_types=self.item_obj.device_type.pk, device_roles=None, device_tenants__isnull=True)
+            | Q(device_types=None, device_roles=self.item_obj.role.pk, device_tenants__isnull=True)
+            | Q(object_tags__in=self.item_obj.tags.all())
+        ).distinct()
+
     def _add_weights(self):
         """Adds weights to allow ordering of the ValidatedSoftwareLCM assignments."""
+        if _multi_tenant_mode_enabled():
+            return self._add_weights_multi_tenant_mode()
+        return self._add_weights_legacy_mode()
+
+    def _add_weights_legacy_mode(self):
+        """Return the queryset annotated with legacy-mode ordering weights."""
+        return self.validated_software_qs.annotate(
+            weight=Case(
+                When(devices=self.item_obj.pk, preferred=True, then=Value(10)),
+                When(devices=self.item_obj.pk, preferred=False, then=Value(1000)),
+                When(
+                    device_types=self.item_obj.device_type.pk,
+                    device_roles=self.item_obj.role.pk,
+                    preferred=True,
+                    then=Value(20),
+                ),
+                When(
+                    device_types=self.item_obj.device_type.pk,
+                    device_roles=self.item_obj.role.pk,
+                    preferred=False,
+                    then=Value(1010),
+                ),
+                When(device_types=self.item_obj.device_type.pk, device_roles=None, preferred=True, then=Value(30)),
+                When(device_types=self.item_obj.device_type.pk, device_roles=None, preferred=False, then=Value(1030)),
+                When(device_roles=self.item_obj.role.pk, preferred=True, then=Value(40)),
+                When(device_roles=self.item_obj.role.pk, preferred=False, then=Value(1040)),
+                When(preferred=True, then=Value(990)),
+                default=Value(1990),
+                output_field=IntegerField(),
+            )
+        )
+
+    def _add_weights_multi_tenant_mode(self):
+        """Return the queryset annotated with multi-tenant-mode ordering weights."""
         return self.validated_software_qs.annotate(
             weight=Case(
                 When(devices=self.item_obj.pk, preferred=True, then=Value(10)),
