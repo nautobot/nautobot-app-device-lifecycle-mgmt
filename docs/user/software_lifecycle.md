@@ -59,6 +59,12 @@ The app supports two matching modes for `ValidatedSoftwareLCM` records, controll
 !!! warning
     Changing `multi_tenant_mode` requires a Nautobot service restart for the new value to take effect.
 
+!!! warning
+    Enabling `multi_tenant_mode` without first creating tenant-scoped Validated Software records will cause all tenanted devices to show zero matching validations. Before switching modes, ensure tenant-scoped Validated Software records exist for every tenant whose devices need coverage.
+
+!!! note
+    Tag-based (`object_tags`) and direct device (`devices`) assignments are tenant-agnostic in both modes. A Validated Software record matches a device via these fields regardless of the tenant configuration on the record.
+
 ## Validated Software matching logic
 
 When a device or inventory item has Software assigned app will attempt to find a Validated Software object that is linked to the Software and matches the device/inventory item through assignment resolution.

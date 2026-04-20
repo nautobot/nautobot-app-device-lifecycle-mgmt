@@ -115,13 +115,7 @@ class DeviceValidatedSoftwareFilter:
         ).distinct()
 
     def _add_weights(self):
-        """Adds weights to allow ordering of the ValidatedSoftwareLCM assignments."""
-        if _multi_tenant_mode_enabled():
-            return self._add_weights_multi_tenant_mode()
-        return self._add_weights_legacy_mode()
-
-    def _add_weights_legacy_mode(self):
-        """Return the queryset annotated with legacy-mode ordering weights."""
+        """Return the queryset annotated with an integer `weight` field for ordering."""
         return self.validated_software_qs.annotate(
             weight=Case(
                 When(devices=self.item_obj.pk, preferred=True, then=Value(10)),
@@ -142,58 +136,6 @@ class DeviceValidatedSoftwareFilter:
                 When(device_types=self.item_obj.device_type.pk, device_roles=None, preferred=False, then=Value(1030)),
                 When(device_roles=self.item_obj.role.pk, preferred=True, then=Value(40)),
                 When(device_roles=self.item_obj.role.pk, preferred=False, then=Value(1040)),
-                When(preferred=True, then=Value(990)),
-                default=Value(1990),
-                output_field=IntegerField(),
-            )
-        )
-
-    def _add_weights_multi_tenant_mode(self):
-        """Return the queryset annotated with multi-tenant-mode ordering weights."""
-        return self.validated_software_qs.annotate(
-            weight=Case(
-                When(devices=self.item_obj.pk, preferred=True, then=Value(10)),
-                When(devices=self.item_obj.pk, preferred=False, then=Value(1000)),
-                When(
-                    device_types=self.item_obj.device_type.pk,
-                    device_roles=self.item_obj.role.pk,
-                    preferred=True,
-                    then=Value(20),
-                ),
-                When(
-                    device_types=self.item_obj.device_type.pk,
-                    device_roles=self.item_obj.role.pk,
-                    preferred=False,
-                    then=Value(1010),
-                ),
-                When(device_types=self.item_obj.device_type.pk, device_roles=None, preferred=True, then=Value(30)),
-                When(device_types=self.item_obj.device_type.pk, device_roles=None, preferred=False, then=Value(1030)),
-                When(device_roles=self.item_obj.role.pk, preferred=True, then=Value(40)),
-                When(device_roles=self.item_obj.role.pk, preferred=False, then=Value(1040)),
-                When(
-                    device_tenants=self.item_obj.tenant,
-                    device_types=self.item_obj.device_type.pk,
-                    preferred=True,
-                    then=Value(50),
-                ),
-                When(
-                    device_tenants=self.item_obj.tenant,
-                    device_types=self.item_obj.device_type.pk,
-                    preferred=False,
-                    then=Value(1050),
-                ),
-                When(
-                    device_tenants=self.item_obj.tenant,
-                    device_roles=self.item_obj.role.pk,
-                    preferred=True,
-                    then=Value(60),
-                ),
-                When(
-                    device_tenants=self.item_obj.tenant,
-                    device_roles=self.item_obj.role.pk,
-                    preferred=False,
-                    then=Value(1060),
-                ),
                 When(preferred=True, then=Value(990)),
                 default=Value(1990),
                 output_field=IntegerField(),
