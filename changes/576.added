@@ -1,6 +1,0 @@
-Added `nautobot_device_lifecycle_mgmt_hardware_end_of_sale` Device filter extension.
-Added `nautobot_device_lifecycle_mgmt_hardware_end_of_software_releases` Device filter extension.
-Added `nautobot_device_lifecycle_mgmt_hardware_end_of_security_patches` Device filter extension.
-Added `nautobot_device_lifecycle_mgmt_hardware_end_of_support` Device filter extension.
-Added `nautobot_device_lifecycle_mgmt_software_version_end_of_support_date` Device filter extension.
-Added `nautobot_device_lifecycle_mgmt_has_cves` Software Version filter extension.
