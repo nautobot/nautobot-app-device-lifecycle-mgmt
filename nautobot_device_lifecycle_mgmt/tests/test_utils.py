@@ -8,6 +8,8 @@ from nautobot_device_lifecycle_mgmt.utils import standardize_cvss_severity
 
 
 class StandardizeCvssSeverityTest(TestCase):
+    """Test the standardize_cvss_severity function."""
+
     def test_nist_uppercase_values_map_to_choices(self):
         cases = {
             "CRITICAL": CVESeverityChoices.CRITICAL,
@@ -47,6 +49,8 @@ class StandardizeCvssSeverityTest(TestCase):
 
 
 class ConvertV2BaseScoreToSeverityTest(TestCase):
+    """Test the convert_v2_base_score_to_severity function."""
+
     def test_low_band(self):
         for score in (0.0, 1.5, 3.9):
             with self.subTest(score=score):
