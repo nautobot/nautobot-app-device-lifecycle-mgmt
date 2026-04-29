@@ -1,13 +1,20 @@
 from django.db import migrations
 
-from nautobot_device_lifecycle_mgmt.utils import standardize_cvss_severity
+_VALID_SEVERITIES = {"Critical", "High", "Medium", "Low", "None"}
+
+
+def _standardize(raw):
+    if not raw:
+        return "None"
+    candidate = raw.strip().title()
+    return candidate if candidate in _VALID_SEVERITIES else "None"
 
 
 def standardize_cve_severity(apps, schema_editor):
     """Coerce CVELCM.severity values to CVESeverityChoices via standardize_cvss_severity."""
     CVELCM = apps.get_model("nautobot_device_lifecycle_mgmt", "CVELCM")
     for raw in CVELCM.objects.values_list("severity", flat=True).distinct():
-        standardized = standardize_cvss_severity(raw)
+        standardized = _standardize(raw)
         if standardized != raw:
             CVELCM.objects.filter(severity=raw).update(severity=standardized)
 
