@@ -11,7 +11,7 @@ def _standardize(raw):
 
 
 def standardize_cve_severity(apps, schema_editor):
-    """Coerce CVELCM.severity values to CVESeverityChoices via standardize_cvss_severity."""
+    """Coerce CVELCM.severity values to CVESeverityChoices via _standardize."""
     CVELCM = apps.get_model("nautobot_device_lifecycle_mgmt", "CVELCM")
     for raw in CVELCM.objects.values_list("severity", flat=True).distinct():
         standardized = _standardize(raw)
