@@ -84,7 +84,7 @@ An External Integration must be created and configured in order to use the NIST 
         - ``backoff``: The backoff factor for the retry attempts (default: 2).  This is the multiplier for the delay between retries.
 - A new Secrets Group object named ``NAUTOBOT DLM NIST SECRETS GROUP`` used for access to the NIST API Key from the External Integration.
 - A new Secret object named ``NAUTOBOT DLM NIST API KEY``.  This object is created for you during setup with minimum defaults.  The Secret name must be exactly as above, but you will need to configure the Secret to properly access the NIST API Key.
-    - To obtain your NIST API Key go [here]('https://nvd.nist.gov/developers/request-an-api-key').
+    - To obtain your NIST API Key go [here](https://nvd.nist.gov/developers/request-an-api-key).
     - This key will be made invalid if not used for a seven day period and a request for a new key will be necessary to use this function.
 
 NOTE: You may change the name of the External Integration or create your own using other configuration settings, but the SecretsGroup and Secret objects must be named as above.  The External Integration is selected when starting the Job run.
