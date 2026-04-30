@@ -19,7 +19,9 @@ from requests.adapters import HTTPAdapter
 from requests.exceptions import HTTPError
 from urllib3.util import Retry
 
+from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.models import CVELCM, VulnerabilityLCM
+from nautobot_device_lifecycle_mgmt.utils import standardize_cvss_severity
 
 name = "CVE Tracking"  # pylint: disable=invalid-name
 
@@ -259,7 +261,7 @@ class NistCveSyncSoftware(Job):
                 last_modified_date=date.fromisoformat(info.get("modified_date", "1900-01-01")[0:10]),
                 link=info["url"],
                 cvss=info["cvss_base_score"],
-                severity=info["cvss_severity"],
+                severity=standardize_cvss_severity(info["cvss_severity"]),
                 cvss_v2=info["cvssv2_score"],
                 cvss_v3=info["cvssv3_score"],
                 comments="ENTRY CREATED BY NAUTOBOT NIST JOB",
@@ -349,21 +351,22 @@ class NistCveSyncSoftware(Job):
 
     @staticmethod
     def convert_v2_base_score_to_severity(score: float) -> str:
-        """Uses V2 Base Score to convert to Severity Value.
+        """Use V2 Base Score to convert to a ``CVESeverityChoices`` value.
 
         Args:
-            score (float): CVSS V2 Base Score
+            score (float): CVSS V2 Base Score.
 
         Returns:
-            str: Severity Value ["HIGH", "MEDIUM", "LOW", "UNDEFINED"]
+            str: A ``CVESeverityChoices`` value. Out-of-band scores return
+            ``CVESeverityChoices.NONE``.
         """
-        if 0.0 >= score <= 3.9:
-            return "LOW"
-        if 4.0 >= score <= 6.9:
-            return "MEDIUM"
-        if 7.0 >= score <= 10:
-            return "HIGH"
-        return "UNDEFINED"
+        if 0.0 <= score <= 3.9:
+            return CVESeverityChoices.LOW
+        if 4.0 <= score <= 6.9:
+            return CVESeverityChoices.MEDIUM
+        if 7.0 <= score <= 10.0:
+            return CVESeverityChoices.HIGH
+        return CVESeverityChoices.NONE
 
     def prep_cve_for_dlc(self, cve_json: dict) -> dict:  # pylint: disable=too-many-locals
         """Convert CVE info into a format compatible with the DLC model.
@@ -453,7 +456,7 @@ class NistCveSyncSoftware(Job):
         current_dlc_cve.last_modified_date = f"{updated_cve['modified_date'][0:10]}"
         current_dlc_cve.link = updated_cve["url"]
         current_dlc_cve.cvss = updated_cve["cvss_base_score"]
-        current_dlc_cve.severity = updated_cve["cvss_severity"].title()
+        current_dlc_cve.severity = standardize_cvss_severity(updated_cve["cvss_severity"])
         current_dlc_cve.cvss_v2 = updated_cve["cvssv2_score"]
         current_dlc_cve.cvss_v3 = updated_cve["cvssv3_score"]
 
