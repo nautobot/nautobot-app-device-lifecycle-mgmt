@@ -1,1 +1,0 @@
-Added a "fix_cve_severities" management command to standardize existing CVE severity values.
