@@ -1,2 +1,1 @@
-Updated pycountry to 24.6.1 to eliminate deprecated pkg_resources API usage.
-Formatted release notes MD files to prevent markdown linter errors
+Formatted release notes MD files to prevent markdown linter errors.
