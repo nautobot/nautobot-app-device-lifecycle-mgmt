@@ -98,7 +98,7 @@ The `multi_tenant_mode` setting controls how the app filters ValidatedSoftware f
 ### Default Behavior (Legacy Mode - `multi_tenant_mode = False`)
 
 **All devices** (whether assigned to a tenant or not) use legacy filtering logic:
-- Filter software by **device type**, **device role**, and **tags only**
+- Filter software by **direct device assignment**, **device type**, **device role**, and **tags**
 - **Tenant assignments are completely ignored**
 - Devices in different tenants will see the same software
 
@@ -109,21 +109,23 @@ The `multi_tenant_mode` setting controls how the app filters ValidatedSoftware f
 Enables **tenant-aware software filtering**:
 
 **For devices WITH a tenant assigned:**
-- Can only see ValidatedSoftware configured for their **specific tenant**
-- Cannot see global/untenanted software
+- See ValidatedSoftware configured for their **specific tenant** (matched by device type, device role, or either being unset)
+- Also see ValidatedSoftware matched via **direct device assignment** or **device tags**, regardless of the tenant configured on the record
 - Filtering is based on:
-    - Direct device assignments
-    - Tenant-specific device type matches
-    - Tenant-specific device role matches
-    - Tenant-specific software with no device type specified
-    - Device tags
+    - Direct device assignments (tenant-agnostic)
+    - Tenant-specific device type + role matches
+    - Tenant-specific device type matches (any role)
+    - Tenant-specific device role matches (any type)
+    - Tenant-scoped records with no device type or role specified
+    - Device tags (tenant-agnostic)
 
 **For devices WITHOUT a tenant assigned:**
-- Can only see **global/untenanted software** (where `device_tenants` is empty)
+- See **global/untenanted software** (where `device_tenants` is empty) matched by device type, device role, or either being unset
+- Also see ValidatedSoftware matched via **direct device assignment** or **device tags**, regardless of the tenant configured on the record
 - Filtering is based on:
-    - Direct device assignments
-    - Device type and role matches (if software has no tenant)
-    - Device tags
+    - Direct device assignments (tenant-agnostic)
+    - Device type and role matches (software must have no tenant)
+    - Device tags (tenant-agnostic, may match tenant-scoped records)
 
 **Use case:** Multi-tenant environments where each tenant has different software requirements and needs isolated software catalogs.
 
