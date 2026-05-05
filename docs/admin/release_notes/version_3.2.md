@@ -15,6 +15,20 @@ Device Lifecycle Management App version 3.2.0 adds support for ArubaOS and PanOS
 <!-- towncrier release notes start -->
 
 
+## [v3.2.4 (2026-05-01)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v3.2.4)
+
+### Added
+
+- [#566](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/566) - Added a "fix_cve_severities" management command to standardize existing CVE severity values.
+
+### Fixed
+
+- [#566](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/566) - Fixed the NIST CVE Job to use standardized values for severity.
+
+### Documentation
+
+- Fixed a link to the NIST CVE API website in the documentation.
+
 ## [v3.2.3 (2026-02-18)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v3.2.3)
 
 ### Fixed
