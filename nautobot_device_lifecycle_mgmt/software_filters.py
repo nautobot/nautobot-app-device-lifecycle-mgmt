@@ -70,7 +70,7 @@ class DeviceValidatedSoftwareFilter:
 
     def _filter_legacy_mode(self):
         """Return the queryset filtered without tenant-awareness."""
-        return self.validated_software_qs.filter(
+        return self.validated_software_qs.filter(device_tenants__isnull=True).filter(
             Q(devices=self.item_obj.pk)
             | Q(device_types=self.item_obj.device_type.pk, device_roles=self.item_obj.role.pk)
             | Q(device_types=self.item_obj.device_type.pk, device_roles=None)
@@ -103,7 +103,7 @@ class DeviceValidatedSoftwareFilter:
             ).distinct()
         # Device has no tenant: match only untenanted records via the legacy criteria.
         return self.validated_software_qs.filter(
-            Q(devices=self.item_obj.pk)
+            Q(devices=self.item_obj.pk, device_tenants__isnull=True)
             | Q(
                 device_types=self.item_obj.device_type.pk,
                 device_roles=self.item_obj.role.pk,
@@ -111,7 +111,7 @@ class DeviceValidatedSoftwareFilter:
             )
             | Q(device_types=self.item_obj.device_type.pk, device_roles=None, device_tenants__isnull=True)
             | Q(device_types=None, device_roles=self.item_obj.role.pk, device_tenants__isnull=True)
-            | Q(object_tags__in=self.item_obj.tags.all())
+            | Q(object_tags__in=self.item_obj.tags.all(), device_tenants__isnull=True)
         ).distinct()
 
     def _add_weights(self):

@@ -100,8 +100,8 @@ The `multi_tenant_mode` setting controls how the app filters ValidatedSoftware f
 **All devices** (whether assigned to a tenant or not) use legacy filtering logic:
 
 - Filter software by **direct device assignment**, **device type**, **device role**, and **tags**
-- **Tenant assignments are completely ignored**
-- Devices in different tenants will see the same software
+- ValidatedSoftware records with a `device_tenants` assignment are excluded; only untenanted records are considered
+- The device's own tenant is ignored — all devices see the same pool of untenanted records
 
 **Use case:** Existing deployments with tenant-assigned devices that don't need per-tenant software isolation.
 
@@ -123,12 +123,11 @@ Enables **tenant-aware software filtering**:
 
 **For devices WITHOUT a tenant assigned:**
 
-- See **global/untenanted software** (where `device_tenants` is empty) matched by device type, device role, or either being unset
-- Also see ValidatedSoftware matched via **direct device assignment** or **device tags**, regardless of the tenant configured on the record
+- See only ValidatedSoftware records with **no tenant** assigned, matched by direct device assignment, device type, device role, or tags
 - Filtering is based on:
-    - Direct device assignments (tenant-agnostic)
+    - Direct device assignments (software must have no tenant)
     - Device type and role matches (software must have no tenant)
-    - Device tags (tenant-agnostic, may match tenant-scoped records)
+    - Device tags (software must have no tenant)
 
 **Use case:** Multi-tenant environments where each tenant has different software requirements and needs isolated software catalogs.
 
@@ -170,3 +169,9 @@ sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
 !!! note
     No database migrations are required when changing this setting - it is purely logical and doesn't affect how software is stored.
 
+!!! warning
+    Switching modes in either direction affects compliance results immediately after restart.
+    Enabling `multi_tenant_mode` without tenant-scoped Validated Software records will cause
+    tenanted devices to show zero matching validations. Disabling it will revert tenanted
+    devices to global-only matching; if those devices have no global Validated Software records,
+    compliance will also drop to zero until the setting is re-enabled.
