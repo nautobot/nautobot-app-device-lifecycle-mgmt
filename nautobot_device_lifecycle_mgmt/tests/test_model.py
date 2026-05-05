@@ -294,14 +294,13 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
 
     # ------------------------------------------------------------------
     # Legacy mode tests (multi_tenant_mode=False — default).
-    # In legacy mode the `device_tenants` M2M is ignored by matching logic:
-    # a ValidatedSoftwareLCM with device_tenants set is matched purely on
-    # its other assignment fields (devices / device_types / device_roles /
-    # object_tags).
+    # In legacy mode only ValidatedSoftwareLCM records with no device_tenants
+    # set are considered; tenant-scoped VS records are excluded before any
+    # matching criteria are applied.
     # ------------------------------------------------------------------
 
-    def test_legacy_mode_tenanted_vs_matches_non_tenant_device_by_type(self):
-        """Tenanted VS still matches a non-tenant device via device_type in legacy mode."""
+    def test_legacy_mode_tenanted_vs_excluded_for_non_tenant_device(self):
+        """Tenanted VS is excluded for a non-tenant device in legacy mode."""
         self.device_1.device_type = self.device_type_1
         self.device_1.save()
 
@@ -318,16 +317,14 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         ):
             qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
 
-        self.assertIn(lcm_with_tenant, qs)
+        self.assertNotIn(lcm_with_tenant, qs)
 
-    def test_legacy_mode_tenanted_vs_matches_tenanted_device_by_type(self):
-        """Tenanted VS matches a tenanted device via device_type regardless of tenant match."""
+    def test_legacy_mode_tenanted_vs_excluded_for_tenanted_device(self):
+        """Tenanted VS is excluded even for a tenanted device in legacy mode."""
         self.device_1.tenant = self.tenant_1
         self.device_1.device_type = self.device_type_1
         self.device_1.save()
 
-        # VS scoped to a *different* tenant but matching device_type — should still match
-        # in legacy mode because device_tenants is ignored.
         lcm_other_tenant = ValidatedSoftwareLCM.objects.create(
             software=self.software,
             start=date(2013, 11, 22),
@@ -341,7 +338,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         ):
             qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
 
-        self.assertIn(lcm_other_tenant, qs)
+        self.assertNotIn(lcm_other_tenant, qs)
 
     def test_legacy_mode_non_tenanted_vs_matches_by_type(self):
         """A non-tenanted VS matches via device_type in legacy mode (pre-tenancy behavior)."""

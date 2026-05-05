@@ -70,13 +70,17 @@ class DeviceValidatedSoftwareFilter:
 
     def _filter_legacy_mode(self):
         """Return the queryset filtered without tenant-awareness."""
-        return self.validated_software_qs.filter(device_tenants__isnull=True).filter(
-            Q(devices=self.item_obj.pk)
-            | Q(device_types=self.item_obj.device_type.pk, device_roles=self.item_obj.role.pk)
-            | Q(device_types=self.item_obj.device_type.pk, device_roles=None)
-            | Q(device_types=None, device_roles=self.item_obj.role.pk)
-            | Q(object_tags__in=self.item_obj.tags.all())
-        ).distinct()
+        return (
+            self.validated_software_qs.filter(device_tenants__isnull=True)
+            .filter(
+                Q(devices=self.item_obj.pk)
+                | Q(device_types=self.item_obj.device_type.pk, device_roles=self.item_obj.role.pk)
+                | Q(device_types=self.item_obj.device_type.pk, device_roles=None)
+                | Q(device_types=None, device_roles=self.item_obj.role.pk)
+                | Q(object_tags__in=self.item_obj.tags.all())
+            )
+            .distinct()
+        )
 
     def _filter_multi_tenant_mode(self):
         """Return the queryset filtered with tenant-aware matching."""
