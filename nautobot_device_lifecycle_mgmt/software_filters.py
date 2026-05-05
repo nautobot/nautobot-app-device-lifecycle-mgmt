@@ -71,7 +71,7 @@ class DeviceValidatedSoftwareFilter:
     def _filter_legacy_mode(self):
         """Return the queryset filtered without tenant-awareness."""
         return self.validated_software_qs.filter(
-            Q(devices__in=[self.item_obj.pk])
+            Q(devices=self.item_obj.pk)
             | Q(device_types=self.item_obj.device_type.pk, device_roles=self.item_obj.role.pk)
             | Q(device_types=self.item_obj.device_type.pk, device_roles=None)
             | Q(device_types=None, device_roles=self.item_obj.role.pk)
@@ -82,7 +82,7 @@ class DeviceValidatedSoftwareFilter:
         """Return the queryset filtered with tenant-aware matching."""
         if self.item_obj.tenant:
             return self.validated_software_qs.filter(
-                Q(devices__in=[self.item_obj.pk])
+                Q(devices=self.item_obj.pk)
                 | Q(
                     device_tenants=self.item_obj.tenant,
                     device_types=self.item_obj.device_type.pk,
@@ -103,7 +103,7 @@ class DeviceValidatedSoftwareFilter:
             ).distinct()
         # Device has no tenant: match only untenanted records via the legacy criteria.
         return self.validated_software_qs.filter(
-            Q(devices__in=[self.item_obj.pk])
+            Q(devices=self.item_obj.pk)
             | Q(
                 device_types=self.item_obj.device_type.pk,
                 device_roles=self.item_obj.role.pk,
