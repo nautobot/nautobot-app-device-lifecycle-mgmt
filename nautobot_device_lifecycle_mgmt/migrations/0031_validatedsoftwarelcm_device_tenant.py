@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("tenancy", "0009_update_all_charfields_max_length_to_255"),
-        ("nautobot_device_lifecycle_mgmt", "0029_contractlcm_status"),
+        ("nautobot_device_lifecycle_mgmt", "0030_standardize_cve_severity"),
     ]
 
     operations = [
