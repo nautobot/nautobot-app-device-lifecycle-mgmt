@@ -30,3 +30,4 @@ This release includes some of the following highlights:
 - [#160](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/160): Define default columns for the Software list view.
 
 ### Fixed
+

@@ -46,3 +46,4 @@ This release includes some of the following highlights:
 - [#55](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/55) Removed image related fields from Software model.
 
 ### Fixed
+
