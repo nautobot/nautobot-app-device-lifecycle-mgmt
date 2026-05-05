@@ -98,6 +98,7 @@ The `multi_tenant_mode` setting controls how the app filters ValidatedSoftware f
 ### Default Behavior (Legacy Mode - `multi_tenant_mode = False`)
 
 **All devices** (whether assigned to a tenant or not) use legacy filtering logic:
+
 - Filter software by **direct device assignment**, **device type**, **device role**, and **tags**
 - **Tenant assignments are completely ignored**
 - Devices in different tenants will see the same software
@@ -109,6 +110,7 @@ The `multi_tenant_mode` setting controls how the app filters ValidatedSoftware f
 Enables **tenant-aware software filtering**:
 
 **For devices WITH a tenant assigned:**
+
 - See ValidatedSoftware configured for their **specific tenant** (matched by device type, device role, or either being unset)
 - Also see ValidatedSoftware matched via **direct device assignment** or **device tags**, regardless of the tenant configured on the record
 - Filtering is based on:
@@ -120,6 +122,7 @@ Enables **tenant-aware software filtering**:
     - Device tags (tenant-agnostic)
 
 **For devices WITHOUT a tenant assigned:**
+
 - See **global/untenanted software** (where `device_tenants` is empty) matched by device type, device role, or either being unset
 - Also see ValidatedSoftware matched via **direct device assignment** or **device tags**, regardless of the tenant configured on the record
 - Filtering is based on:
@@ -144,11 +147,13 @@ PLUGINS_CONFIG = {
 ### Examples
 
 #### Example 1: Legacy Mode (Default)
+
 - Device "rtr1" assigned to **Tenant A**
 - Global software "IOS 17.3.3" configured for device type "ASR-1000"
 - **Result:** Device "rtr1" **CAN** see the global software (legacy behavior)
 
 #### Example 2: Multi-Tenant Mode
+
 - Device "rtr1" assigned to **Tenant A**
 - Global software "IOS 17.3.3" configured for device type "ASR-1000" (no tenant)
 - ValidatedSoftware for same version configured for **Tenant A**

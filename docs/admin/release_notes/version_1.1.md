@@ -31,6 +31,7 @@ This release includes some of the following highlights:
 ### Added
 
 ### Changed
+
 - [#119](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/119) remove requirement for `["barchart_bar_width", "barchart_width", "barchart_height"]` settings to be in `nautobot_config.py` (honoring sane defaults from [#83](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/83))
 
 ### Fixed
@@ -40,12 +41,14 @@ This release includes some of the following highlights:
 !!! warning "Note: - This release increases minimum supported Nautobot version to 1.2.0."
     - Support for Python 3.6 has been removed. Minimum supported Python version is 3.7.
 ### Added
+
 - [#84](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/84) Add to defaults, and document, settings needed for report generation.
 - [#100](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/100) Adds compatibility for Nautobot 1.4. Fixes to pipeline, API serializers, filters and unit tests.
 
 ### Changed
 
 ### Fixed
+
 - [#111](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/111) Fixes project reference URLs displayed on PyPi package page.
 - [#109](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/109) Fixes Hardware Notices Table sorting bug.
 - [#108](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/108) Fixes missing view GUI errors for some of the list views.

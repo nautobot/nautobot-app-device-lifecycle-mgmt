@@ -18,6 +18,7 @@ This release includes some of the following highlights:
 !!! warning "Note: - This release increases minimum supported Nautobot version to 1.4.0."
 
 ### Added
+
 - [#137](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/137) Add testing against the upstream version of Nautobot.
 - [#140](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/140) Add progress info log messages to the Generate Vulnerabilities job.
 

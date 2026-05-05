@@ -14,22 +14,27 @@ This release includes some of the following highlights:
 - Removes compatibility code for Nautobot versions <1.4
 
 ## [v1.3.2] - 2023-08-02
+
 ### Changed
+
 - [#200](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/200) Provides more clarity by adding in device and inventory item name to help identify. Fix API name and making columns sortable.
 
 
 ## [v1.3.1] - 2023-07-29
 
 ### Added
+
 - [#196](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/196) Adds reverse relationship from device type to software image.
 - [#194](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/194) Adds table with matching ValidatedSoftware objects to the DeviceType detailed view in GUI.
 
 ### Removed
+
 - [#197](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/197) Removes compatibility code for Nautobot versions < 1.4
 
 ## [v1.3.0] - 2023-06-17
 
 ### Added
+
 - [#165](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/165) Add Portal URL to API and Template.
 - [#170](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/170) Add download url column to SoftwareImage table.
 - [#166](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/166) Add Hashing Algorithm to Image Model.
@@ -40,11 +45,14 @@ This release includes some of the following highlights:
 - [#156](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/156) Add functionality summary page.
 
 ### Removed
+
 - [#168](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/168) Delete unused admin interface.
 
 ### Changed
+
 - [#161](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/161) Update the debug env variable name to NAUTOBOT_DEBUG.
 - [#178](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/178) Make HW End Of Support metric names consistent.
 
 ### Fixed
+
 - [#184](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/184) address docker compose development environment.

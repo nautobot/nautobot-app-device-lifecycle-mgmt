@@ -38,9 +38,11 @@ This release includes some of the following highlights:
     - Software model fields `image_file_name`, `download_url` and `image_file_checksum` have been removed.
 
 ### Added
+
 - [#55](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/55) Added Software Image model.
 
 ### Changed
+
 - [#55](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/55) Removed image related fields from Software model.
 
 ### Fixed

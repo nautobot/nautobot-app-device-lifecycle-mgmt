@@ -15,6 +15,7 @@ This release adds support for [Nautobot v2.0.0](https://github.com/nautobot/naut
 ## [v2.0.3] - 2023-11-08
 
 ### Fixed
+
 - [#253](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/253) - Fixes issue with incorrect logging in the Device Software Validation Report job.
 
 ## [v2.0.2] - 2023-11-06
