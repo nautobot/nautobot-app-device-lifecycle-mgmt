@@ -123,11 +123,15 @@ A `ValidatedSoftware` record matches if **any one** of the following applies:
 
 **For devices WITHOUT a tenant assigned:**
 
-- See only ValidatedSoftware records with **no tenant** assigned, matched by direct device assignment, device type, device role, or tags
-- Filtering is based on:
-    - Direct device assignments (software must have no tenant)
-    - Device type and role matches (software must have no tenant)
-    - Device tags (software must have no tenant)
+Only `ValidatedSoftware` records with **no `device_tenants` set** are considered.
+
+A record matches if **any one** of the following applies:
+
+- The device is directly listed in the record's `devices` field
+- The record has both `device_types` and `device_roles` set, and both match the device
+- The record has only `device_types` set, and it matches the device's type
+- The record has only `device_roles` set, and it matches the device's role
+- The record's `object_tags` intersects the device's tags
 
 **Use case:** Multi-tenant environments where each tenant has different software requirements and needs isolated software catalogs.
 
