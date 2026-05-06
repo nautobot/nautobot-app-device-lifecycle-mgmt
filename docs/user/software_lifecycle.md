@@ -129,9 +129,10 @@ Only ValidatedSoftware records with no `device_tenants` set are considered. The 
 If the device has a tenant assigned, Validated Software will be used if one, or more, of the following applies:
 
 - Device is explicitly listed in the Validated Software `devices` attribute.
-- Device's tenant AND device type match `device_tenants` AND `device_types` in Validated Software. This applies only if BOTH are set. See the **Special cases** subsection that follows.
-- Device's tenant AND device role match `device_tenants` AND `device_roles` in Validated Software.
-- Device's tenant is listed in the Validated Software `device_tenants` attribute (with no device type set).
+- The record's `device_tenants` includes the device's tenant, AND both `device_types` and `device_roles` are set and match the device. See the **Special cases** subsection that follows.
+- Device's tenant matches a `device_tenants` entry AND `device_types` matches the device's type (when `device_types` is set but `device_roles` is not set on the record).
+- Device's tenant matches a `device_tenants` entry AND `device_roles` matches the device's role (when `device_roles` is set but `device_types` is not set on the record).
+- Device's tenant matches a `device_tenants` entry and neither `device_types` nor `device_roles` is set on the record (tenant-only record).
 - Device's tags are listed in the Validated Software `object_tags` attribute.
 
 If the device has no tenant assigned, only Validated Software records that have **no** `device_tenants` set are considered, and the legacy-mode rules above apply.
