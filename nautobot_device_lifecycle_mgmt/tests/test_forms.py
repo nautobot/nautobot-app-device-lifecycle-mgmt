@@ -1,5 +1,7 @@
 """Test forms."""
 
+from unittest import mock
+
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from nautobot.dcim.models import (
@@ -247,22 +249,34 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
         self.assertTrue(form.is_valid())
         self.assertTrue(form.save())
 
-    def test_specifying_all_fields_w_tenant(self):
-        """Test the form with the new device_tenants M2M field."""
+    def test_specifying_only_tenant_legacy_mode_is_invalid(self):
+        """In legacy mode, device_tenants alone does not satisfy the at-least-one-object requirement."""
         data = {
             "software": self.software,
-            "device_tenants": [self.tenant_1.pk],  # M2M fields expect a list of PKs
+            "device_tenants": [self.tenant_1.pk],
             "start": "2021-06-06",
             "end": "2023-08-31",
             "preferred": False,
         }
-        form = self.form_class(data)
+        with mock.patch("nautobot_device_lifecycle_mgmt.forms.multi_tenant_mode_enabled", return_value=False):
+            form = self.form_class(data)
+            self.assertFalse(form.is_valid())
+            self.assertIn("You need to assign to at least one object.", form.errors.get("__all__", []))
 
-        self.assertTrue(form.is_valid(), f"Form errors: {form.errors.as_json()}")
-        saved_obj = form.save()
-
-        # Verify the M2M relationship was actually saved
-        self.assertIn(self.tenant_1, saved_obj.device_tenants.all())
+    def test_specifying_only_tenant_multi_tenant_mode_is_valid(self):
+        """In multi-tenant mode, device_tenants alone satisfies the at-least-one-object requirement."""
+        data = {
+            "software": self.software,
+            "device_tenants": [self.tenant_1.pk],
+            "start": "2021-06-06",
+            "end": "2023-08-31",
+            "preferred": False,
+        }
+        with mock.patch("nautobot_device_lifecycle_mgmt.forms.multi_tenant_mode_enabled", return_value=True):
+            form = self.form_class(data)
+            self.assertTrue(form.is_valid(), f"Form errors: {form.errors.as_json()}")
+            saved_obj = form.save()
+            self.assertIn(self.tenant_1, saved_obj.device_tenants.all())
 
     def test_tenant_and_device_type_combination(self):
         """Verify the form handles multiple assignment types simultaneously."""
