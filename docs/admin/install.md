@@ -111,15 +111,15 @@ Enables **tenant-aware software filtering**:
 
 **For devices WITH a tenant assigned:**
 
-- See ValidatedSoftware configured for their **specific tenant** (matched by device type, device role, or either being unset)
-- Also see ValidatedSoftware matched via **direct device assignment** or **device tags**, regardless of the tenant configured on the record
-- Filtering is based on:
-    - Direct device assignments (tenant-agnostic)
-    - Tenant-specific device type + role matches
-    - Tenant-specific device type matches (any role)
-    - Tenant-specific device role matches (any type)
-    - Tenant-scoped records with no device type or role specified
-    - Device tags (tenant-agnostic)
+A `ValidatedSoftware` record matches if **any one** of the following applies:
+
+- The device is directly listed in the record's `devices` field (evaluated regardless of whether the record has `device_tenants` set)
+- The record's `device_tenants` includes the device's tenant, AND:
+    - Both `device_types` and `device_roles` are set and match the device
+    - Only `device_types` is set and matches the device's type
+    - Only `device_roles` is set and matches the device's role
+    - Neither `device_types` nor `device_roles` is set (tenant-only record)
+- The record's `object_tags` intersects the device's tags (evaluated regardless of whether the record has `device_tenants` set)
 
 **For devices WITHOUT a tenant assigned:**
 
