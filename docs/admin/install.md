@@ -99,7 +99,7 @@ The `multi_tenant_mode` setting controls which ValidatedSoftware records are con
 
 **All devices** (whether assigned to a tenant or not) use legacy filtering logic:
 
-- Filter software by **direct device assignment**, **device type**, **device role**, and **tags**
+- Filter software by **direct device assignment**, **device type**, **device role**, or the device's **tags** (`object_tags`)
 - ValidatedSoftware records with a `device_tenants` assignment are excluded; only untenanted records are considered
 - The device's own tenant is ignored — all devices see the same pool of untenanted records
 
