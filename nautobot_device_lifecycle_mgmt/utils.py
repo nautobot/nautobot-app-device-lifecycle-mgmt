@@ -2,11 +2,18 @@
 
 import logging
 
+from django.conf import settings
+
 from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 
 _VALID_SEVERITIES = {choice[0] for choice in CVESeverityChoices.CHOICES}
+
+
+def multi_tenant_mode_enabled():
+    """Return True when the `multi_tenant_mode` app setting is enabled."""
+    return settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"].get("multi_tenant_mode", False)
 
 
 def standardize_cvss_severity(raw: str | None) -> str:

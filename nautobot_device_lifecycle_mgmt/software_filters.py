@@ -1,15 +1,11 @@
 """Filters for Software Lifecycle QuerySets."""
 
-from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Case, IntegerField, Q, Subquery, Value, When
 from nautobot.dcim.models import Device, InventoryItem
 from nautobot.extras.models import RelationshipAssociation
 
-
-def _multi_tenant_mode_enabled():
-    """Return True when the `multi_tenant_mode` app setting is enabled."""
-    return settings.PLUGINS_CONFIG.get("nautobot_device_lifecycle_mgmt", {}).get("multi_tenant_mode", False)
+from nautobot_device_lifecycle_mgmt.utils import multi_tenant_mode_enabled
 
 
 class BaseSoftwareFilter:
@@ -59,7 +55,7 @@ class DeviceValidatedSoftwareFilter:
 
     def filter_qs(self):
         """Return the filtered, weight-ordered ValidatedSoftwareLCM queryset."""
-        if _multi_tenant_mode_enabled():
+        if multi_tenant_mode_enabled():
             self.validated_software_qs = self._filter_multi_tenant_mode()
         else:
             self.validated_software_qs = self._filter_legacy_mode()

@@ -44,6 +44,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
+from nautobot_device_lifecycle_mgmt.utils import multi_tenant_mode_enabled
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 
@@ -221,15 +222,12 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
         inventory_items = self.cleaned_data.get("inventory_items")
         object_tags = self.cleaned_data.get("object_tags")
 
-        if (
-            sum(
-                obj.count()
-                for obj in (devices, device_tenants, device_types, device_roles, inventory_items, object_tags)
-            )
-            == 0
-        ):
-            msg = "You need to assign to at least one object."
-            self.add_error(None, msg)
+        counted = [devices, device_types, device_roles, inventory_items, object_tags]
+        if multi_tenant_mode_enabled():
+            counted.append(device_tenants)
+
+        if sum(obj.count() for obj in counted) == 0:
+            self.add_error(None, "You need to assign to at least one object.")
 
 
 class ValidatedSoftwareLCMBulkEditForm(NautobotBulkEditForm):

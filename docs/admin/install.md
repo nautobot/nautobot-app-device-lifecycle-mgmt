@@ -175,3 +175,13 @@ sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
     tenanted devices to show zero matching validations. Disabling it will revert tenanted
     devices to global-only matching; if those devices have no global Validated Software records,
     compliance will also drop to zero until the setting is re-enabled.
+
+!!! warning
+    `ValidatedSoftwareLCM` records that have **only** `device_tenants` set, with no
+    `device_types`, `device_roles`, `devices`, `inventory_items`, or `object_tags`
+    assigned, will fail form validation after disabling `multi_tenant_mode`. In legacy
+    mode, `device_tenants` does not count toward the required "at least one object"
+    assignment, so these records cannot be saved in their current state. Before
+    disabling the flag, either add a second assignment criterion to any tenant-only
+    records, or accept that they will need to be updated before they can be edited.
+    These records will also have no compliance effect while the flag is off.

@@ -312,7 +312,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         lcm_with_tenant.device_types.set([self.device_type_1])
 
         with mock.patch(
-            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            "nautobot_device_lifecycle_mgmt.software_filters.multi_tenant_mode_enabled",
             return_value=False,
         ):
             qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
@@ -333,7 +333,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         lcm_other_tenant.device_types.set([self.device_type_1])
 
         with mock.patch(
-            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            "nautobot_device_lifecycle_mgmt.software_filters.multi_tenant_mode_enabled",
             return_value=False,
         ):
             qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
@@ -352,7 +352,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         lcm_global.device_types.set([self.device_type_1])
 
         with mock.patch(
-            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            "nautobot_device_lifecycle_mgmt.software_filters.multi_tenant_mode_enabled",
             return_value=False,
         ):
             qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
@@ -377,7 +377,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         lcm_type_only.device_types.set([self.device_type_1])
 
         with mock.patch(
-            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            "nautobot_device_lifecycle_mgmt.software_filters.multi_tenant_mode_enabled",
             return_value=False,
         ):
             qs = list(ValidatedSoftwareLCM.objects.get_for_object(self.device_1))
@@ -411,7 +411,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         lcm_tenant_b.device_types.set([self.device_type_1])
 
         with mock.patch(
-            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            "nautobot_device_lifecycle_mgmt.software_filters.multi_tenant_mode_enabled",
             return_value=True,
         ):
             qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
@@ -432,7 +432,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         lcm_global.device_types.set([self.device_type_1])
 
         with mock.patch(
-            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            "nautobot_device_lifecycle_mgmt.software_filters.multi_tenant_mode_enabled",
             return_value=True,
         ):
             qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
@@ -459,7 +459,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         lcm_tenanted.device_types.set([self.device_type_1])
 
         with mock.patch(
-            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            "nautobot_device_lifecycle_mgmt.software_filters.multi_tenant_mode_enabled",
             return_value=True,
         ):
             qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
@@ -480,7 +480,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         lcm_direct_tenanted.devices.set([self.device_1])
 
         with mock.patch(
-            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            "nautobot_device_lifecycle_mgmt.software_filters.multi_tenant_mode_enabled",
             return_value=True,
         ):
             qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
@@ -504,7 +504,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         lcm_tag_other_tenant.object_tags.set([tag])
 
         with mock.patch(
-            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            "nautobot_device_lifecycle_mgmt.software_filters.multi_tenant_mode_enabled",
             return_value=True,
         ):
             qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
@@ -524,7 +524,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         lcm_tenant_and_role.device_roles.set([self.device_1.role])
 
         with mock.patch(
-            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            "nautobot_device_lifecycle_mgmt.software_filters.multi_tenant_mode_enabled",
             return_value=True,
         ):
             qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
@@ -551,7 +551,7 @@ class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instan
         other_tenant_software.device_tenants.set([self.tenant_2])
 
         with mock.patch(
-            "nautobot_device_lifecycle_mgmt.software_filters._multi_tenant_mode_enabled",
+            "nautobot_device_lifecycle_mgmt.software_filters.multi_tenant_mode_enabled",
             return_value=True,
         ):
             validated_qs = ValidatedSoftwareLCM.objects.get_for_object(self.device_1)
