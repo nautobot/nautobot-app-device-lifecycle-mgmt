@@ -93,7 +93,7 @@ Following are the metric names that can be defined in `enabled_metrics`:
 
 ## Multi-Tenant Mode
 
-The `multi_tenant_mode` setting controls how the app filters ValidatedSoftware for devices based on tenant assignments.
+The `multi_tenant_mode` setting controls which ValidatedSoftware records are considered when evaluating software compliance for a given device.
 
 ### Default Behavior (Legacy Mode - `multi_tenant_mode = False`)
 
