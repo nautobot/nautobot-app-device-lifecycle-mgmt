@@ -3,6 +3,7 @@
 This document describes all new features and changes in the release `1.3.X`. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Release Overview
+
 This release includes some of the following highlights:
 
 - improved software reporting with new functional summary page and links
@@ -18,7 +19,6 @@ This release includes some of the following highlights:
 ### Changed
 
 - [#200](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/200) Provides more clarity by adding in device and inventory item name to help identify. Fix API name and making columns sortable.
-
 
 ## [v1.3.1] - 2023-07-29
 

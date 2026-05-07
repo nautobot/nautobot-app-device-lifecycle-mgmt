@@ -27,6 +27,3 @@ This release includes some of the following highlights:
 ### Fixed
 
 - [#37](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/37) Fixes GraphQL incompatibility with Nautobot >= 1.2.0.
-- 
-
-

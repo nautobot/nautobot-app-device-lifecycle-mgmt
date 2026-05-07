@@ -3,13 +3,13 @@
 This document describes all new features and changes in the release `1.1.X`. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Release Overview
+
 This release includes some of the following highlights:
 
 - New mixin name from Nautobot version 1.5.2 that can cause issues with post_upgrade tasks (related to CustomFieldModelFilterSet).  Additionally, the testing of permissions on the app were modified slightly for features not in use.
 - Modifies the barchart dimension default behavior and removes the requirement for barchart details to be included in the `nautobot_config.py` file.
 - Addresses some CI issues with the latest version of Nautobot Core around tests for bulk CSV.
 - Addresses a new mixin name from Nautobot version 1.5.2 that can cause issues with post_upgrade tasks (related to CustomFieldModelFilterSet).  Additionally, the testing of permissions on the app were modified slightly for features not in use.
-
 
 ## [v1.1.2] - 2022-12-07
 
@@ -22,8 +22,8 @@ This release includes some of the following highlights:
 - [#123](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/123) Fixed CustomFieldModelFilterSet import source
 - [#123](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/124) Remove testing of permissions on app
 
-
 ## [v1.1.1] - 2022-11-04
+
 !!! warning "Note - change in app default config!"
     v1.1.1 Modifies the barchart dimension default behavior and **removes** the requirement for barchart details to be included in the `nautobot_config.py` file.
     - details can be found in PR [#119](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/119)
@@ -36,8 +36,8 @@ This release includes some of the following highlights:
 
 ### Fixed
 
-
 ## [v1.1.0] - 2022-12-07
+
 !!! warning "Note: - This release increases minimum supported Nautobot version to 1.2.0."
     - Support for Python 3.6 has been removed. Minimum supported Python version is 3.7.
 ### Added

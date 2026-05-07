@@ -26,7 +26,6 @@ Note: This release fixes an issue with upgrading this app from 1.x version to 2.
 
 - [#250](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/pull/250) - Fix issue with migrations in 2.0.1 causing issues with upgrading app from 1.x versions.
 
-
 ## [v2.0.1] - 2023-10-31
 
 Note: This release fixes an issue with clean installations of this app on Nautobot 2.0.X environments.
