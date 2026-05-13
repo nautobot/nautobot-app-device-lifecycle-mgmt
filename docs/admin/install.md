@@ -114,7 +114,7 @@ Enables **tenant-aware software filtering**:
 A `ValidatedSoftware` record matches if **any one** of the following applies:
 
 - The device is directly listed in the record's `devices` field (evaluated regardless of whether the record has `device_tenants` set)
-- The record's `device_tenants` includes the device's tenant, AND:
+- The record's `device_tenants` includes the device's tenant, AND one of:
     - Both `device_types` and `device_roles` are set and match the device
     - Only `device_types` is set and matches the device's type
     - Only `device_roles` is set and matches the device's role
