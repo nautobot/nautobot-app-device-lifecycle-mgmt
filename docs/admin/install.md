@@ -152,15 +152,15 @@ PLUGINS_CONFIG = {
 #### Example 1: Legacy Mode (Default)
 
 - Device "rtr1" assigned to **Tenant A**
-- Global validated software "IOS 17.3.3" configured for device type "ASR-1000"
-- **Result:** Device "rtr1" **CAN** see the global validated software (legacy behavior)
+- Validated software "IOS 17.3.3" configured for device type "ASR-1000"
+- **Result:** Device "rtr1" **CAN** see the validated software (legacy behavior)
 
 #### Example 2: Multi-Tenant Mode
 
 - Device "rtr1" assigned to **Tenant A**
-- Global validated software "IOS 17.3.3" configured for device type "ASR-1000" (no tenant)
+- Validated software "IOS 17.3.3" configured for device type "ASR-1000" (no tenant)
 - ValidatedSoftware for same version configured for **Tenant A**
-- **Result:** Device "rtr1" **CANNOT** see the global validated software, only the Tenant A version
+- **Result:** Device "rtr1" **CANNOT** see the first validated software (no tenant), only the Tenant A version.
 
 ### Switching Modes
 
@@ -177,7 +177,7 @@ sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
     Switching modes in either direction affects compliance results immediately after restart.
     Enabling `multi_tenant_mode` without tenant-scoped Validated Software records will cause
     tenanted devices to show zero matching validations. Disabling it will revert tenanted
-    devices to global-only matching; if those devices have no global Validated Software records,
+    devices to legacy matching; if those devices have no untenanted Validated Software records,
     compliance will also drop to zero until the setting is re-enabled.
 
 !!! warning
