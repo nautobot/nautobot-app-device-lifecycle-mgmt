@@ -51,7 +51,7 @@ The app supports two matching modes for `ValidatedSoftwareLCM` records, controll
 | `multi_tenant_mode` | Behavior |
 | -- | -- |
 | `False` (default) | **Legacy mode** — ValidatedSoftware records with a `device_tenants` assignment are excluded; only untenanted records are considered. The device's own tenant is never checked. Matching within those records uses `devices`, `device_types`, `device_roles`, and `object_tags`. This preserves the pre-tenancy behavior of the app. |
-| `True` | **Multi-tenant mode** — the device's tenant must match one of the `device_tenants` on any tenant-scoped Validated Software record for it to apply. Device type, device role, direct device, and tag assignments continue to work, and can be combined with tenant scoping. **No global (untenanted) fallback** is provided for devices that belong to a tenant. |
+| `True` | **Multi-tenant mode** — the device's tenant must match one of the `device_tenants` on any tenant-scoped Validated Software record for it to apply. Device type, device role, direct device, and tag assignments continue to work, and can be combined with tenant scoping. **No untenanted fallback** is provided for devices that belong to a tenant. |
 
 !!! note
     The `device_tenants` field remains editable in the UI and exposed in the API regardless of the setting. In legacy mode it is simply ignored by matching; existing tenant assignments remain in place and become effective if the setting is later switched to `True`.
