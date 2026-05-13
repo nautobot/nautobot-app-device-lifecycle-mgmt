@@ -152,15 +152,15 @@ PLUGINS_CONFIG = {
 #### Example 1: Legacy Mode (Default)
 
 - Device "rtr1" assigned to **Tenant A**
-- Global software "IOS 17.3.3" configured for device type "ASR-1000"
-- **Result:** Device "rtr1" **CAN** see the global software (legacy behavior)
+- Global validated software "IOS 17.3.3" configured for device type "ASR-1000"
+- **Result:** Device "rtr1" **CAN** see the global validated software (legacy behavior)
 
 #### Example 2: Multi-Tenant Mode
 
 - Device "rtr1" assigned to **Tenant A**
-- Global software "IOS 17.3.3" configured for device type "ASR-1000" (no tenant)
+- Global validated software "IOS 17.3.3" configured for device type "ASR-1000" (no tenant)
 - ValidatedSoftware for same version configured for **Tenant A**
-- **Result:** Device "rtr1" **CANNOT** see the global software, only the Tenant A version
+- **Result:** Device "rtr1" **CANNOT** see the global validated software, only the Tenant A version
 
 ### Switching Modes
 
