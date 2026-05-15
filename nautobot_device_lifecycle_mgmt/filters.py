@@ -1,4 +1,5 @@
 """Filtering implementation for the Lifecycle Management app."""
+# pylint: disable=too-many-lines
 
 import datetime
 
@@ -7,6 +8,7 @@ from django.db.models import Q
 from nautobot.apps.filters import NautobotFilterSet, SearchFilter, StatusFilter, StatusModelFilterSetMixin
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform, SoftwareVersion
 from nautobot.extras.models import Role, Status, Tag
+from nautobot.tenancy.models import Tenant
 
 from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.models import (
@@ -284,6 +286,7 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
             "start": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "end": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "devices__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "device_tenants__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "device_types__model": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "device_roles__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "inventory_items__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
@@ -316,6 +319,17 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         queryset=DeviceType.objects.all(),
         to_field_name="model",
         label="Device Types (model)",
+    )
+    device_tenants_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_tenants",
+        queryset=Tenant.objects.all(),
+        label="Tenant",
+    )
+    device_tenants = django_filters.ModelMultipleChoiceFilter(
+        field_name="device_tenants__name",
+        queryset=Tenant.objects.all(),
+        to_field_name="name",
+        label="Tenant (name)",
     )
     device_roles_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device_roles",
@@ -371,7 +385,7 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         """Perform the valid_search search."""
         today = datetime.date.today()
         if value is True:
-            qs_filter = Q(start__lte=today, end=None) | Q(start__lte=today, end__gte=today)
+            qs_filter = Q(start__lte=today, end__isnull=True) | Q(start__lte=today, end__gte=today)
         else:
             qs_filter = Q(start__gt=today) | Q(end__lt=today)
         return queryset.filter(qs_filter)
@@ -427,6 +441,17 @@ class DeviceHardwareNoticeResultFilterSet(NautobotFilterSet):
         field_name="device__platform",
         queryset=Platform.objects.all(),
         label="Platform",
+    )
+    tenant = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__tenant__name",
+        queryset=Tenant.objects.all(),
+        to_field_name="name",
+        label="Tenant (name)",
+    )
+    tenant_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__tenant",
+        queryset=Tenant.objects.all(),
+        label="Tenant",
     )
     location_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device__location",
@@ -542,6 +567,7 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
             "device__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "software__version": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "device__platform__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
+            "device__tenant__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "device__location__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "device__device_type__model": {"lookup_expr": "icontains", "preprocessor": str.strip},
             "device__role__name": {"lookup_expr": "icontains", "preprocessor": str.strip},
@@ -562,6 +588,17 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
         field_name="device__platform",
         queryset=Platform.objects.all(),
         label="Platform",
+    )
+    tenant = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__tenant__name",
+        queryset=Tenant.objects.all(),
+        to_field_name="name",
+        label="Tenant (name)",
+    )
+    tenant_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="device__tenant",
+        queryset=Tenant.objects.all(),
+        label="Tenant",
     )
     location_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device__location",
