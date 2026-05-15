@@ -1,2 +1,0 @@
-Added opt-in `multi_tenant_mode` app setting (default `False`) that enables tenant-scoped Validated Software matching via the `device_tenants` M2M on `ValidatedSoftwareLCM`. When disabled, matching behavior is identical to pre-tenancy releases.
-Added Tenant filtering to Hardware Notice and Validated Software reports.
