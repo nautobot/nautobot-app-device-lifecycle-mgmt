@@ -1,13 +1,17 @@
 """Test Jobs."""
 
+import unittest
 from datetime import date
+from unittest import mock
 
 from django.contrib.contenttypes.models import ContentType
 from nautobot.apps.choices import JobResultStatusChoices
 from nautobot.apps.testing import TransactionTestCase, create_job_result_and_run_job
 from nautobot.dcim.models import Platform, SoftwareVersion
 from nautobot.extras.models import Status
+from requests.exceptions import ChunkedEncodingError, Timeout
 
+from nautobot_device_lifecycle_mgmt.jobs.cve_tracking import NistCveSyncSoftware
 from nautobot_device_lifecycle_mgmt.models import (
     DeviceHardwareNoticeResult,
     DeviceSoftwareValidationResult,
@@ -103,3 +107,80 @@ class DeviceSoftwareValidationFullReportTestCase(TransactionTestCase):
         result_no_sw = DeviceSoftwareValidationResult.objects.get(device=self.devices[2])
         self.assertFalse(result_no_sw.is_validated)
         self.assertIsNone(result_no_sw.software)
+
+
+class NistCveSyncSoftwareQueryApiTestCase(unittest.TestCase):
+    """Test NistCveSyncSoftware.query_api retry/session-rebuild behavior."""
+
+    def _build_job(self, max_attempts=3):
+        """Construct a NistCveSyncSoftware instance with stubbed integration/logger.
+
+        Bypasses Job.__init__ since we only exercise query_api in isolation.
+        """
+        job = NistCveSyncSoftware.__new__(NistCveSyncSoftware)
+        job.logger = mock.MagicMock()
+        job.integration = mock.MagicMock()
+        job.integration.extra_config = {"retries": {"max_attempts": max_attempts, "backoff": 0}}
+        return job
+
+    def test_query_api_rebuilds_session_on_chunked_encoding_error(self):
+        """A ChunkedEncodingError mid-stream rebuilds the session and returns the next response."""
+        failing_session = mock.MagicMock()
+        failing_session.get.side_effect = ChunkedEncodingError("Stream 35 was reset by remote peer. Reason: 0x2.")
+
+        success_response = mock.MagicMock()
+        success_response.json.return_value = {"vulnerabilities": [], "totalResults": 0}
+        rebuilt_session = mock.MagicMock()
+        rebuilt_session.get.return_value = success_response
+
+        job = self._build_job()
+        job.nist_session = failing_session
+        job.nist_session_init = mock.MagicMock(return_value=rebuilt_session)
+
+        with mock.patch("nautobot_device_lifecycle_mgmt.jobs.cve_tracking.sleep"):
+            result = job.query_api("https://example.com/")
+
+        self.assertEqual(result, {"vulnerabilities": [], "totalResults": 0})
+        failing_session.close.assert_called_once()
+        job.nist_session_init.assert_called_once()
+        rebuilt_session.get.assert_called_once_with("https://example.com/")
+
+    def test_query_api_raises_after_exhausting_attempts(self):
+        """When every attempt resets, the original error propagates after max_attempts."""
+        err = ChunkedEncodingError("Stream 35 was reset by remote peer. Reason: 0x2.")
+        failing_session = mock.MagicMock()
+        failing_session.get.side_effect = err
+        rebuilt_session = mock.MagicMock()
+        rebuilt_session.get.side_effect = err
+
+        job = self._build_job(max_attempts=2)
+        job.nist_session = failing_session
+        job.nist_session_init = mock.MagicMock(return_value=rebuilt_session)
+
+        with mock.patch("nautobot_device_lifecycle_mgmt.jobs.cve_tracking.sleep"):
+            with self.assertRaises(ChunkedEncodingError):
+                job.query_api("https://example.com/")
+
+        # session rebuilt once between the two attempts; not rebuilt after the final failure
+        self.assertEqual(job.nist_session_init.call_count, 1)
+
+    def test_query_api_rebuilds_session_on_timeout(self):
+        """A Timeout also triggers session rebuild and retry."""
+        failing_session = mock.MagicMock()
+        failing_session.get.side_effect = Timeout("Read timed out.")
+
+        success_response = mock.MagicMock()
+        success_response.json.return_value = {"vulnerabilities": [], "totalResults": 0}
+        rebuilt_session = mock.MagicMock()
+        rebuilt_session.get.return_value = success_response
+
+        job = self._build_job()
+        job.nist_session = failing_session
+        job.nist_session_init = mock.MagicMock(return_value=rebuilt_session)
+
+        with mock.patch("nautobot_device_lifecycle_mgmt.jobs.cve_tracking.sleep"):
+            result = job.query_api("https://example.com/")
+
+        self.assertEqual(result, {"vulnerabilities": [], "totalResults": 0})
+        failing_session.close.assert_called_once()
+        job.nist_session_init.assert_called_once()

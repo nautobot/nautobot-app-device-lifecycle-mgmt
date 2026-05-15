@@ -1,0 +1,1 @@
+Made the NIST CVE Sync job resilient to transient transport failures (HTTP/2 stream resets surfaced as `ChunkedEncodingError`, `ConnectionError`, and `Timeout`) by closing and re-initializing the NIST session before retrying, up to `retries.max_attempts` with `retries.backoff * attempt` seconds between attempts.
