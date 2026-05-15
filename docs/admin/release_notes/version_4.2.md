@@ -4,8 +4,8 @@ This document describes all new features and changes in the release. The format 
 
 ## Release Overview
 
-- Major features or milestones
-- Changes to compatibility with Nautobot and/or other apps, libraries etc.
+- Added opt-in multi_tenant_mode app setting (default False). When enabled, Validated Software matching becomes tenant-scoped via the device_tenants M2M on ValidatedSoftwareLCM, so a device only matches Validated Software records associated with its tenant. When left disabled, matching behavior is unchanged from prior releases — no migration or configuration changes are required for existing deployments.
+- Added Tenant filtering to the Hardware Notice and Validated Software reports. Administrators managing multi-tenant environments can now scope report output to a specific tenant (or set of tenants) when auditing hardware end-of-life exposure and software compliance.
 
 <!-- towncrier release notes start -->
 
