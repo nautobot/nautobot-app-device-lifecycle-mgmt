@@ -1,1 +1,0 @@
-Raised pycountry upper bound to 25.0.0 to resolve deprecated pkg_resources API usage.
