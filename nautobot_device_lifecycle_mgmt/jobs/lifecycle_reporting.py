@@ -94,7 +94,11 @@ class DeviceSoftwareValidationFullReport(Job):
         job_run_time = datetime.now()
         validation_count = 0
 
-        for device in Device.objects.filter(software_version__isnull=True):
+        for device in (
+            Device.objects.select_related("device_type", "role", "tenant")
+            .prefetch_related("tags")
+            .filter(software_version__isnull=True)
+        ):
             validate_obj, _ = DeviceSoftwareValidationResult.objects.get_or_create(device=device)
             validate_obj.is_validated = False
             validate_obj.valid_software.set(ValidatedSoftwareLCM.objects.get_for_object(device))
@@ -104,7 +108,11 @@ class DeviceSoftwareValidationFullReport(Job):
             validate_obj.validated_save()
             validation_count += 1
 
-        for device in Device.objects.filter(software_version__isnull=False):
+        for device in (
+            Device.objects.select_related("device_type", "role", "tenant", "software_version")
+            .prefetch_related("tags")
+            .filter(software_version__isnull=False)
+        ):
             device_software = DeviceSoftware(device)
             validate_obj, _ = DeviceSoftwareValidationResult.objects.get_or_create(device=device)
             validate_obj.is_validated = device_software.validate_software()
