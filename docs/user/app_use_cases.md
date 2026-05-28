@@ -6,7 +6,7 @@ This document describes common use-cases and scenarios for this App.
 
 ### Adding Information into the App
 
-To add data into the Device Life Cycle App, you need to either add it manually throughout the UI, or through the REST API endpoint. In this current version there is no synchronization of data from a vendor API endpoint, but this may be a feature request in the future.
+To add data into the Device Life Cycle App, you need to either add it manually through the UI, or through the REST API endpoint. In this current version there is no synchronization of data from a vendor API endpoint, but this may be a feature request in the future.
 
 #### App API Definition
 
@@ -105,7 +105,7 @@ You can view the list of Validated Software versions as well as filter the table
 
 ### Software: Validated Software Lifecycle Detail View
 
-You can also click a Validated Software version and see the detail view. This view provides view of the device and inventory item attributes this validated software applies to.
+You can also click a Validated Software version and see the detail view. This provides a view of the device and inventory item attributes this validated software applies to.
 
 ![](../images/ss_lcm_validated_software_detail_view_light.png#only-light){ .on-glb }
 ![](../images/ss_lcm_validated_software_detail_view_dark.png#only-dark){ .on-glb }
@@ -113,7 +113,7 @@ You can also click a Validated Software version and see the detail view. This vi
 
 ### Software: Device View
 
-You can also view the associated Software and Validated Software versions from the device. If the Software assigned to the device matches Validated Software for this device, the Software will be displayed in green. If it's invalid it will be displayed in red.
+You can also view the associated Software and Validated Software versions from the device. If the Software assigned to the device matches the Validated Software for this device, the Software will be displayed in green. If it's invalid it will be displayed in red.
 
 **Valid software:**
 

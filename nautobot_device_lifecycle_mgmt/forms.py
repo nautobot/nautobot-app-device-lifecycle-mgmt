@@ -1,4 +1,5 @@
 """Forms implementation for the Lifecycle Management app."""
+# pylint: disable=too-many-lines
 
 import logging
 
@@ -24,6 +25,7 @@ from nautobot.apps.forms import (
 from nautobot.core.forms.constants import BOOLEAN_WITH_BLANK_CHOICES
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform, SoftwareVersion
 from nautobot.extras.models import Role, Status, Tag
+from nautobot.tenancy.models import Tenant
 
 from nautobot_device_lifecycle_mgmt.choices import (
     ContractTypeChoices,
@@ -42,6 +44,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
+from nautobot_device_lifecycle_mgmt.utils import multi_tenant_mode_enabled
 
 logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 
@@ -173,6 +176,7 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
 
     software = DynamicModelChoiceField(queryset=SoftwareVersion.objects.all(), required=True)
     devices = DynamicModelMultipleChoiceField(queryset=Device.objects.all(), required=False)
+    device_tenants = DynamicModelMultipleChoiceField(queryset=Tenant.objects.all(), required=False)
     device_types = DynamicModelMultipleChoiceField(queryset=DeviceType.objects.all(), required=False)
     device_roles = DynamicModelMultipleChoiceField(
         queryset=Role.objects.all(), query_params={"content_types": "dcim.device"}, required=False
@@ -192,6 +196,7 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
         fields = [  # pylint: disable=E4271
             "software",
             "devices",
+            "device_tenants",
             "device_types",
             "device_roles",
             "inventory_items",
@@ -211,14 +216,18 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
         super().clean()
 
         devices = self.cleaned_data.get("devices")
+        device_tenants = self.cleaned_data.get("device_tenants")
         device_types = self.cleaned_data.get("device_types")
         device_roles = self.cleaned_data.get("device_roles")
         inventory_items = self.cleaned_data.get("inventory_items")
         object_tags = self.cleaned_data.get("object_tags")
 
-        if sum(obj.count() for obj in (devices, device_types, device_roles, inventory_items, object_tags)) == 0:
-            msg = "You need to assign to at least one object."
-            self.add_error(None, msg)
+        counted = [devices, device_types, device_roles, inventory_items, object_tags]
+        if multi_tenant_mode_enabled():
+            counted.append(device_tenants)
+
+        if sum(obj.count() for obj in counted) == 0:
+            self.add_error(None, "You need to assign to at least one object.")
 
 
 class ValidatedSoftwareLCMBulkEditForm(NautobotBulkEditForm):
@@ -241,6 +250,11 @@ class ValidatedSoftwareLCMBulkEditForm(NautobotBulkEditForm):
         queryset=Device.objects.all(),
         required=False,
         label="Devices",
+    )
+    device_tenants = DynamicModelMultipleChoiceField(
+        queryset=Tenant.objects.all(),
+        required=False,
+        label="Tenant",
     )
     device_types = DynamicModelMultipleChoiceField(
         queryset=DeviceType.objects.all(),
@@ -285,6 +299,7 @@ class ValidatedSoftwareLCMBulkEditForm(NautobotBulkEditForm):
 
         nullable_fields = [
             "devices",
+            "device_tenants",
             "device_types",
             "device_roles",
             "inventory_items",
@@ -306,6 +321,11 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
     software = DynamicModelChoiceField(required=False, queryset=SoftwareVersion.objects.all())
     devices = DynamicModelMultipleChoiceField(
         queryset=Device.objects.all(),
+        required=False,
+    )
+    device_tenants = DynamicModelMultipleChoiceField(
+        queryset=Tenant.objects.all(),
+        to_field_name="name",
         required=False,
     )
     device_types = DynamicModelMultipleChoiceField(
@@ -338,6 +358,7 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
             "q",
             "software",
             "devices",
+            "device_tenants",
             "device_types",
             "device_roles",
             "inventory_items",
@@ -366,6 +387,12 @@ class DeviceHardwareNoticeResultFilterForm(NautobotFilterForm):
     platform = DynamicModelMultipleChoiceField(
         queryset=Platform.objects.all(),
         label="Platform",
+        required=False,
+    )
+    tenant = DynamicModelMultipleChoiceField(
+        queryset=Tenant.objects.all(),
+        label="Tenant",
+        to_field_name="name",
         required=False,
     )
     location = DynamicModelMultipleChoiceField(
@@ -422,6 +449,7 @@ class DeviceHardwareNoticeResultFilterForm(NautobotFilterForm):
             "supported",
             "platform",
             "location",
+            "tenant",
             "device",
             "device_status",
             "device_type",
@@ -450,6 +478,12 @@ class DeviceSoftwareValidationResultFilterForm(NautobotFilterForm):
     platform = DynamicModelMultipleChoiceField(
         queryset=Platform.objects.all(),
         label="Platform",
+        required=False,
+    )
+    tenant = DynamicModelMultipleChoiceField(
+        queryset=Tenant.objects.all(),
+        label="Tenant",
+        to_field_name="name",
         required=False,
     )
     valid = forms.BooleanField(
@@ -498,6 +532,7 @@ class DeviceSoftwareValidationResultFilterForm(NautobotFilterForm):
             "software",
             "valid",
             "platform",
+            "tenant",
             "location",
             "device",
             "device_type",

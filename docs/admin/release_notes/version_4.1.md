@@ -9,6 +9,20 @@ This document describes all new features and changes in the release. The format 
 
 <!-- towncrier release notes start -->
 
+## [v4.1.2 (2026-05-01)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v4.1.2)
+
+### Added
+
+- [#566](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/566) - Added a migration to standardize all existing CVE severities.
+
+### Fixed
+
+- [#566](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/566) - Fixed the NIST CVE Job to use standardized values for severity.
+
+### Documentation
+
+- Fixed a link to the NIST CVE API website in the documentation.
+
 ## [v4.1.1 (2026-04-10)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v4.1.1)
 
 ### Added

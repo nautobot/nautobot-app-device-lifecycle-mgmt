@@ -77,6 +77,7 @@ The app behavior can be controlled with the following list of settings:
 | `barchart_width`     | `12`                                                                | `12`               | The width of the barchart within the overview report.                |
 | `barchart_height`    | `5`                                                                 | `5`                | The height of the barchart within the overview report.               |
 | `enabled_metrics`    | `["metrics_lcm_hw_end_of_support_location"]`                        | `[]`               | Enables metrics corresponding to the provided entries.               |
+| `multi_tenant_mode`  | `True` or `False`                                                   | `False`            | Enable tenant-aware software filtering. See [Multi-Tenant Mode](#multi-tenant-mode) below. |
 
 ### Available Metric Names
 
@@ -89,3 +90,102 @@ Following are the metric names that can be defined in `enabled_metrics`:
 - `nautobot_lcm_hw_end_of_support_per_part_number`: Number of End of Support devices and inventory items per Part Number.
 
 - `nautobot_lcm_hw_end_of_support_per_location`: Number of End of Support devices and inventory items per Location.
+
+## Multi-Tenant Mode
+
+The `multi_tenant_mode` setting controls which ValidatedSoftware records are considered when evaluating software compliance for a given device.
+
+### Default Behavior (Legacy Mode - `multi_tenant_mode = False`)
+
+**All devices** (whether assigned to a tenant or not) use legacy filtering logic:
+
+- Filter software by **direct device assignment**, **device type**, **device role**, or the device's **tags** (`object_tags`)
+- ValidatedSoftware records with a `device_tenants` assignment are excluded; only untenanted records are considered
+- The device's own tenant is ignored — all devices see the same pool of untenanted records
+
+**Use case:** Existing deployments with tenant-assigned devices that don't need per-tenant software isolation.
+
+### Multi-Tenant Mode (`multi_tenant_mode = True`)
+
+Enables **tenant-aware software filtering**:
+
+**For devices WITH a tenant assigned:**
+
+A `ValidatedSoftware` record matches if **any one** of the following applies:
+
+- The device is directly listed in the record's `devices` field (evaluated regardless of whether the record has `device_tenants` set)
+- The record's `device_tenants` includes the device's tenant, AND one of:
+    - Both `device_types` and `device_roles` are set and match the device
+    - Only `device_types` is set and matches the device's type
+    - Only `device_roles` is set and matches the device's role
+    - Neither `device_types` nor `device_roles` is set (tenant-only record)
+- The record's `object_tags` intersects the device's tags (evaluated regardless of whether the record has `device_tenants` set)
+
+**For devices WITHOUT a tenant assigned:**
+
+Only `ValidatedSoftware` records with **no `device_tenants` set** are considered.
+
+A record matches if **any one** of the following applies:
+
+- The device is directly listed in the record's `devices` field
+- The record has both `device_types` and `device_roles` set, and both match the device
+- The record has only `device_types` set, and it matches the device's type
+- The record has only `device_roles` set, and it matches the device's role
+- The record's `object_tags` intersects the device's tags
+
+**Use case:** Multi-tenant environments where each tenant has different software requirements and needs isolated software catalogs.
+
+### Configuration
+
+To enable multi-tenant mode, add the following to your `nautobot_config.py`:
+
+```python
+PLUGINS_CONFIG = {
+    "nautobot_device_lifecycle_mgmt": {
+        "multi_tenant_mode": True,  # Enable tenant-aware filtering
+    },
+}
+```
+
+### Examples
+
+#### Example 1: Legacy Mode (Default)
+
+- Device "rtr1" assigned to **Tenant A**
+- Validated software "IOS 17.3.3" configured for device type "ASR-1000"
+- **Result:** Device "rtr1" **CAN** see the validated software (legacy behavior)
+
+#### Example 2: Multi-Tenant Mode
+
+- Device "rtr1" assigned to **Tenant A**
+- Validated software "IOS 17.3.3" configured for device type "ASR-1000" (no tenant)
+- ValidatedSoftware for same version configured for **Tenant A**
+- **Result:** Device "rtr1" **CANNOT** see the first validated software (no tenant), only the Tenant A version.
+
+### Switching Modes
+
+To switch between modes, simply update the `multi_tenant_mode` setting in your `nautobot_config.py` and restart Nautobot services:
+
+```shell
+sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
+```
+
+!!! note
+    No database migrations are required when changing this setting - it is purely logical and doesn't affect how software is stored.
+
+!!! warning
+    Switching modes in either direction affects compliance results immediately after restart.
+    Enabling `multi_tenant_mode` without tenant-scoped Validated Software records will cause
+    tenanted devices to show zero matching validations. Disabling it will revert tenanted
+    devices to legacy matching; if those devices have no untenanted Validated Software records,
+    compliance will also drop to zero until the setting is re-enabled.
+
+!!! warning
+    `ValidatedSoftwareLCM` records that have **only** `device_tenants` set, with no
+    `device_types`, `device_roles`, `devices`, `inventory_items`, or `object_tags`
+    assigned, will fail form validation after disabling `multi_tenant_mode`. In legacy
+    mode, `device_tenants` does not count toward the required "at least one object"
+    assignment, so these records cannot be saved in their current state. Before
+    disabling the flag, either add a second assignment criterion to any tenant-only
+    records, or accept that they will need to be updated before they can be edited.
+    These records will also have no compliance effect while the flag is off.

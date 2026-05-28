@@ -130,5 +130,6 @@ PLUGINS_CONFIG = {
         "barchart_width": int(os.environ.get("BARCHART_WIDTH", 12)),
         "barchart_height": int(os.environ.get("BARCHART_HEIGHT", 5)),
         "enabled_metrics": [x for x in os.environ.get("NAUTOBOT_DLM_ENABLED_METRICS", "").split(",") if x],
+        "multi_tenant_mode": is_truthy(os.getenv("NAUTOBOT_DLM_MULTI_TENANT_MODE", "false")),
     },
 }

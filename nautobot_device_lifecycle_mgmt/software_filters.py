@@ -5,6 +5,8 @@ from django.db.models import Case, IntegerField, Q, Subquery, Value, When
 from nautobot.dcim.models import Device, InventoryItem
 from nautobot.extras.models import RelationshipAssociation
 
+from nautobot_device_lifecycle_mgmt.utils import multi_tenant_mode_enabled
+
 
 class BaseSoftwareFilter:
     """Base class for SoftwareFilter classes."""
@@ -52,21 +54,68 @@ class DeviceValidatedSoftwareFilter:
         self.item_obj = item_obj
 
     def filter_qs(self):
-        """Returns filtered ValidatedSoftwareLCM query set."""
-        self.validated_software_qs = self.validated_software_qs.filter(
-            Q(devices=self.item_obj.pk)
-            | Q(device_types=self.item_obj.device_type.pk, device_roles=self.item_obj.role.pk)
-            | Q(device_types=self.item_obj.device_type.pk, device_roles=None)
-            | Q(device_types=None, device_roles=self.item_obj.role.pk)
-            | Q(object_tags__in=self.item_obj.tags.all())
-        ).distinct()
+        """Return the filtered, weight-ordered ValidatedSoftwareLCM queryset."""
+        if multi_tenant_mode_enabled():
+            self.validated_software_qs = self._filter_multi_tenant_mode()
+        else:
+            self.validated_software_qs = self._filter_legacy_mode()
 
         self.validated_software_qs = self._add_weights().order_by("weight", "start")
 
         return self.validated_software_qs
 
+    def _filter_legacy_mode(self):
+        """Return the queryset filtered without tenant-awareness."""
+        return (
+            self.validated_software_qs.filter(device_tenants__isnull=True)
+            .filter(
+                Q(devices=self.item_obj.pk)
+                | Q(device_types=self.item_obj.device_type.pk, device_roles=self.item_obj.role.pk)
+                | Q(device_types=self.item_obj.device_type.pk, device_roles=None)
+                | Q(device_types=None, device_roles=self.item_obj.role.pk)
+                | Q(object_tags__in=self.item_obj.tags.all())
+            )
+            .distinct()
+        )
+
+    def _filter_multi_tenant_mode(self):
+        """Return the queryset filtered with tenant-aware matching."""
+        if self.item_obj.tenant:
+            return self.validated_software_qs.filter(
+                Q(devices=self.item_obj.pk)
+                | Q(
+                    device_tenants=self.item_obj.tenant,
+                    device_types=self.item_obj.device_type.pk,
+                    device_roles=self.item_obj.role.pk,
+                )
+                | Q(
+                    device_tenants=self.item_obj.tenant,
+                    device_types=self.item_obj.device_type.pk,
+                    device_roles=None,
+                )
+                | Q(
+                    device_tenants=self.item_obj.tenant,
+                    device_types=None,
+                    device_roles=self.item_obj.role.pk,
+                )
+                | Q(device_tenants=self.item_obj.tenant, device_types=None, device_roles=None)
+                | Q(object_tags__in=self.item_obj.tags.all())
+            ).distinct()
+        # Device has no tenant: match only untenanted records via the legacy criteria.
+        return self.validated_software_qs.filter(
+            Q(devices=self.item_obj.pk, device_tenants__isnull=True)
+            | Q(
+                device_types=self.item_obj.device_type.pk,
+                device_roles=self.item_obj.role.pk,
+                device_tenants__isnull=True,
+            )
+            | Q(device_types=self.item_obj.device_type.pk, device_roles=None, device_tenants__isnull=True)
+            | Q(device_types=None, device_roles=self.item_obj.role.pk, device_tenants__isnull=True)
+            | Q(object_tags__in=self.item_obj.tags.all(), device_tenants__isnull=True)
+        ).distinct()
+
     def _add_weights(self):
-        """Adds weights to allow ordering of the ValidatedSoftwareLCM assignments."""
+        """Return the queryset annotated with an integer `weight` field for ordering."""
         return self.validated_software_qs.annotate(
             weight=Case(
                 When(devices=self.item_obj.pk, preferred=True, then=Value(10)),

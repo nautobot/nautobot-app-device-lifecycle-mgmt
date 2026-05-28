@@ -193,6 +193,32 @@ class TagFilterExtension(FilterExtension):
 
 
 #
+# TENANT FILTER EXTENSION
+#
+class TenantFilterExtension(FilterExtension):
+    """Extends Tenant Filters."""
+
+    model = "tenancy.tenant"
+
+    filterset_fields = {
+        "nautobot_device_lifecycle_mgmt_validated_software": NaturalKeyOrPKMultipleChoiceFilter(
+            field_name="validated_software_tenants",
+            queryset=ValidatedSoftwareLCM.objects.all(),
+            to_field_name="pk",
+            label="Validated Software",
+        ),
+    }
+
+    filterform_fields = {
+        "nautobot_device_lifecycle_mgmt_validated_software": DynamicModelMultipleChoiceField(
+            queryset=ValidatedSoftwareLCM.objects.all(),
+            label="Validated Software",
+            required=False,
+        ),
+    }
+
+
+#
 # SOFTWAREVERSION FILTER EXTENSION
 #
 class SoftwareVersionFilterExtension(FilterExtension):  # pylint: disable=too-few-public-methods
@@ -217,5 +243,6 @@ filter_extensions = [
     RoleFilterExtension,
     DeviceTypeFilterExtension,
     TagFilterExtension,
+    TenantFilterExtension,
     SoftwareVersionFilterExtension,
 ]
