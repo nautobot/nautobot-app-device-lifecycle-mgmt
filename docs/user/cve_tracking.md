@@ -83,9 +83,11 @@ An External Integration must be created and configured in order to use the NIST 
 
 - A new External Integration object named ``NAUTOBOT DLM NIST EXTERNAL INTEGRATION`` that allows you to control the following behaviors of the integration:
     - ``api_call_delay``: A delay between API calls in seconds (default: 6).  NIST Recommends a minimum value of 6 to prevent overloading resources.
-    - ``retries``: Even with using a delay, the NIST API may return a 500 error.  The settings in this dictionary allows you to control the number of retries and backoff.
-        - ``max_attempts``: The maximum number of retry attempts (default: 3).
-        - ``backoff``: The backoff factor for the retry attempts (default: 2).  This is the multiplier for the delay between retries.
+    - ``retries``: Controls how the job handles transient failures from the NIST API. There are two retry layers:
+        - HTTP status retries at the session layer (502/503/504).
+        - Transport-level failures at the job layer — `requests.exceptions.ConnectionError`, `ChunkedEncodingError` (e.g., HTTP/2 stream resets such as `Stream X was reset by remote peer`), and `Timeout`. On a transport-level failure the job closes the existing NIST session, re-initializes a fresh one via `nist_session_init`, sleeps `backoff * attempt` seconds, and retries the same URL up to `max_attempts` times before re-raising. HTTP errors and JSON decode errors are not retried at the job layer and propagate immediately.
+        - ``max_attempts``: The maximum number of attempts (default: 3). Used by both layers above.
+        - ``backoff``: The backoff factor for the retry attempts (default: 2). At the session layer this is the urllib3 `backoff_factor`; at the job layer this is the multiplier applied as `backoff * attempt` before each rebuild-and-retry.
 - A new Secrets Group object named ``NAUTOBOT DLM NIST SECRETS GROUP`` used for access to the NIST API Key from the External Integration.
 - A new Secret object named ``NAUTOBOT DLM NIST API KEY``.  This object is created for you during setup with minimum defaults.  The Secret name must be exactly as above, but you will need to configure the Secret to properly access the NIST API Key.
     - To obtain your NIST API Key go [here](https://nvd.nist.gov/developers/request-an-api-key).
