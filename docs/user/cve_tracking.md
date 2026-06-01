@@ -94,6 +94,64 @@ An External Integration must be created and configured in order to use the NIST 
 NOTE: You may change the name of the External Integration or create your own using other configuration settings, but the SecretsGroup and Secret objects must be named as above.  The External Integration is selected when starting the Job run.
 
 
+### Version formats for NIST CVE search
+
+The ``NIST - Software CVE Search`` Job uses `netutils.nist` and `netutils.os_version` to build NIST NVD query URLs from each Software Version's platform (network driver) and version string. Each NIST-mapped platform uses either the **default** parser or a **vendor-specific** parser. The **version** value on your Software Version objects should match the format expected by that parser so that CVE discovery works correctly.
+
+#### Platforms using the default parser
+
+These platforms use the default parser from `netutils.os_version` (Generic - Loosely based on, and compatible with SymVer formatting.):
+
+| Network driver   | NIST vendor:platform                              |
+|------------------|---------------------------------------------------|
+| `arista_eos`     | arista:eos                                        |
+| `aruba_os`       | arubanetworks:arubaos                             |
+| `cisco_asa`      | cisco:adaptive_security_appliance_software        |
+| `cisco_ios`      | cisco:ios                                         |
+| `cisco_nxos`     | cisco:nx-os                                       |
+| `cisco_xe`       | cisco:ios_xe                                      |
+| `cisco_xr`       | cisco:ios_xr                                      |
+| `paloalto_panos` | paloaltonetworks:pan-os                           |
+
+**Default parser version format:**
+
+- **Full (preferred):** `major.minor.patch` with optional `-prerelease` and `+buildmetadata`.
+    - `major`, `minor`, `patch`: numeric, no leading zeros (e.g. `0`, `1`, `10`).
+    - `prerelease`: alphanumeric, hyphens, dots (e.g. `alpha`, `alpha.beta.1`).
+    - `buildmetadata`: alphanumeric, hyphens, dots (e.g. `build.1`).
+- **Fallback:** `major.minor` followed by any suffix (e.g. `15.5(2)S1c`, `10.20`, `1.0.0-alpha`).
+
+Examples: `15.5`, `10.20.30`, `1.0.0-alpha.beta.1`, `15.5(2)S1c`, `9.1.6`, `9.1.15-h1`.
+
+#### Platforms using a custom parser
+
+| Network driver   | NIST vendor:platform |
+|------------------|----------------------|
+| `juniper_junos`  | juniper:junos        |
+
+**Juniper JunOS version format:**
+
+- **Core:** `main.minor` (digits), then optionally a **type** (`x`, `X`, `r`, `R`, `s`, `S`) and **build** (digits).
+- **Optional suffix** after `-` or `:`: service letter (`s`/`S` or `d`/`D`) + optional `service_build` (digits) + optional `.` + `service_respin` (digits).
+
+Pattern: 
+<pre>
+12.1R3-S4.1
+│   ││ ││ │
+│   ││ ││ └─── service_respin
+│   ││ |└───── service_build (4)
+│   ││ └────── service_letter (S)
+│   │└──────── build (3)
+│   └───────── build_type (R)
+└───────────── main.minor (12.1)
+</pre>
+
+Examples: `12.3R4`, `12.1R3-S4.1`, `12.1x47`, `12.2x50:d41.1`, `10.2R2.11`, `10.4s`.
+
+If the version does not match this pattern, the JunOS parser will not populate the fields needed for the custom NIST URL builder and CVE discovery may fail or be incorrect for that software.
+
+If your platform is not in the above listings the entry will be skipped leaving a log message.  You may submit an issue request to have a mapping added to the netutils library to support your platform. Issue requests for netutils can be submitted here: https://github.com/networktocode/netutils/issues
+
 ### Run Job
 Automated discovery is used by running the ``NIST - Software CVE Search`` Job.
 
@@ -120,3 +178,12 @@ The job output should indicate the softwares checked and the amount of CVEs rece
 Due to the way vendor platform entries vary in NIST, some platforms may work without issue, others may not work so well (false positives/negatives).  Juniper JunOS is a great example and has a custom parser in netutils to handle this.
 
 If the platform you are attempting to gather information from does not work, a custom parser will likely be needed to build a proper NIST search URL.
+
+### External Documentation References
+
+#### Relevent Netutils Module Documentation
+*OS Version Module* - Responsible for parsing version strings into version parameters:
+    https://netutils.readthedocs.io/en/latest/user/lib_use_cases_os_version/
+
+*NIST Module* - Responsible for all NIST related functions:
+    https://netutils.readthedocs.io/en/latest/user/lib_use_cases_nist/
