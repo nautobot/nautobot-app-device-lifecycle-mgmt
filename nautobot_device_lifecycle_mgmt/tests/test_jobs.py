@@ -1,5 +1,6 @@
 """Test Jobs."""
 
+import json
 import unittest
 from datetime import date
 from unittest import mock
@@ -9,7 +10,7 @@ from nautobot.apps.choices import JobResultStatusChoices
 from nautobot.apps.testing import TransactionTestCase, create_job_result_and_run_job
 from nautobot.dcim.models import Platform, SoftwareVersion
 from nautobot.extras.models import Status
-from requests.exceptions import ChunkedEncodingError, Timeout
+from requests.exceptions import ChunkedEncodingError, HTTPError, MissingSchema, RequestException, Timeout
 
 from nautobot_device_lifecycle_mgmt.jobs.cve_tracking import NistCveSyncSoftware
 from nautobot_device_lifecycle_mgmt.models import (
@@ -109,6 +110,87 @@ class DeviceSoftwareValidationFullReportTestCase(TransactionTestCase):
         self.assertIsNone(result_no_sw.software)
 
 
+class NistCveSyncSoftwareGetSoftwareVersionsTestCase(TransactionTestCase):
+    """Test NistCveSyncSoftware.get_software_versions filtering behavior."""
+
+    databases = ("default", "job_logs")
+
+    def setUp(self):
+        """Create a set of Software Versions to filter against."""
+        active_status, _ = Status.objects.get_or_create(name="Active")
+        active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
+        device_platform, _ = Platform.objects.get_or_create(name="cisco_ios")
+
+        self.software_a = SoftwareVersion.objects.create(
+            platform=device_platform, version="15.2(1)T", status=active_status
+        )
+        self.software_b = SoftwareVersion.objects.create(
+            platform=device_platform, version="12.0(1)T", status=active_status
+        )
+        self.software_c = SoftwareVersion.objects.create(
+            platform=device_platform, version="17.3(1)", status=active_status
+        )
+
+    def test_none_returns_all_software_versions(self):
+        """When no Software Versions are selected, all are returned."""
+        result = NistCveSyncSoftware.get_software_versions(None)
+        self.assertIn(self.software_a, result)
+        self.assertIn(self.software_b, result)
+        self.assertIn(self.software_c, result)
+        self.assertEqual(result.count(), SoftwareVersion.objects.count())
+
+    def test_empty_returns_all_software_versions(self):
+        """An empty selection falls back to all Software Versions."""
+        result = NistCveSyncSoftware.get_software_versions([])
+        self.assertIn(self.software_a, result)
+        self.assertIn(self.software_b, result)
+        self.assertIn(self.software_c, result)
+        self.assertEqual(result.count(), SoftwareVersion.objects.count())
+
+    def test_subset_returns_only_selected_software_versions(self):
+        """A selection restricts the queryset to just those Software Versions."""
+        result = NistCveSyncSoftware.get_software_versions([self.software_a, self.software_c])
+        self.assertEqual(set(result), {self.software_a, self.software_c})
+
+
+class NistCveSyncSoftwareRunTestCase(unittest.TestCase):
+    """Test NistCveSyncSoftware.run software-version selection wiring."""
+
+    def _build_job(self):
+        """Construct a NistCveSyncSoftware instance with a stubbed logger.
+
+        Bypasses Job.__init__ since we only exercise run() in isolation.
+        """
+        job = NistCveSyncSoftware.__new__(NistCveSyncSoftware)
+        job.logger = mock.MagicMock()
+        job.nist_api_key = None
+        job.nist_session = None
+        return job
+
+    def test_run_passes_selected_software_versions_to_get_software_versions(self):
+        """run() forwards the selected software_versions to get_software_versions and iterates the result."""
+        integration = mock.MagicMock()
+        selected = [mock.MagicMock(), mock.MagicMock()]
+
+        # get_software_versions has its own dedicated tests; stub it here to isolate the
+        # run() wiring that builds software_qs and loops over it (an empty queryset exercises
+        # the "no software" path without needing to mock the NIST HTTP calls in the loop body).
+        software_qs = mock.MagicMock()
+        software_qs.__len__.return_value = 0
+        software_qs.__iter__.return_value = iter([])
+
+        job = self._build_job()
+        job.nist_session_init = mock.MagicMock(return_value=mock.MagicMock())
+        job.get_software_versions = mock.MagicMock(return_value=software_qs)
+
+        with mock.patch("nautobot_device_lifecycle_mgmt.jobs.cve_tracking.sleep"):
+            job.run(nist_integration=integration, software_versions=selected)
+
+        job.get_software_versions.assert_called_once_with(selected)
+        software_qs.__len__.assert_called_once()
+        job.nist_session.close.assert_called_once()
+
+
 class NistCveSyncSoftwareQueryApiTestCase(unittest.TestCase):
     """Test NistCveSyncSoftware.query_api retry/session-rebuild behavior."""
 
@@ -184,3 +266,84 @@ class NistCveSyncSoftwareQueryApiTestCase(unittest.TestCase):
         self.assertEqual(result, {"vulnerabilities": [], "totalResults": 0})
         failing_session.close.assert_called_once()
         job.nist_session_init.assert_called_once()
+
+    def test_query_api_does_not_retry_on_http_error(self):
+        """An HTTPError (4xx/5xx) is logged and raised immediately without retrying or rebuilding the session."""
+        response = mock.MagicMock()
+        http_err = HTTPError("404 Client Error")
+        http_err.response = mock.MagicMock(status_code=404)
+        response.raise_for_status.side_effect = http_err
+        session = mock.MagicMock()
+        session.get.return_value = response
+
+        job = self._build_job()
+        job.nist_session = session
+        job.nist_session_init = mock.MagicMock()
+
+        with mock.patch("nautobot_device_lifecycle_mgmt.jobs.cve_tracking.sleep"):
+            with self.assertRaises(HTTPError):
+                job.query_api("https://example.com/")
+
+        # No retry: the request is made exactly once and the session is neither closed nor rebuilt.
+        session.get.assert_called_once()
+        session.close.assert_not_called()
+        job.nist_session_init.assert_not_called()
+
+    def test_query_api_does_not_retry_on_non_transient_request_error(self):
+        """A malformed-request error (e.g. MissingSchema) fails fast without retrying or rebuilding the session."""
+        failing_session = mock.MagicMock()
+        failing_session.get.side_effect = MissingSchema("Invalid URL 'example.com': No scheme supplied.")
+
+        job = self._build_job()
+        job.nist_session = failing_session
+        job.nist_session_init = mock.MagicMock()
+
+        with mock.patch("nautobot_device_lifecycle_mgmt.jobs.cve_tracking.sleep"):
+            with self.assertRaises(MissingSchema):
+                job.query_api("example.com/")
+
+        # No retry: request made exactly once, session neither closed nor rebuilt.
+        failing_session.get.assert_called_once()
+        failing_session.close.assert_not_called()
+        job.nist_session_init.assert_not_called()
+
+    def test_query_api_rebuilds_session_on_generic_request_exception(self):
+        """Any RequestException (not just the enumerated transport errors) triggers the retry path."""
+        failing_session = mock.MagicMock()
+        failing_session.get.side_effect = RequestException("Some other requests failure.")
+
+        success_response = mock.MagicMock()
+        success_response.json.return_value = {"vulnerabilities": [], "totalResults": 0}
+        rebuilt_session = mock.MagicMock()
+        rebuilt_session.get.return_value = success_response
+
+        job = self._build_job()
+        job.nist_session = failing_session
+        job.nist_session_init = mock.MagicMock(return_value=rebuilt_session)
+
+        with mock.patch("nautobot_device_lifecycle_mgmt.jobs.cve_tracking.sleep"):
+            result = job.query_api("https://example.com/")
+
+        self.assertEqual(result, {"vulnerabilities": [], "totalResults": 0})
+        failing_session.close.assert_called_once()
+        job.nist_session_init.assert_called_once()
+
+    def test_query_api_does_not_retry_on_json_decode_error(self):
+        """A malformed JSON body is logged and raised immediately without retrying or rebuilding the session."""
+        response = mock.MagicMock()
+        response.json.side_effect = json.JSONDecodeError("Expecting value", "not json", 0)
+        session = mock.MagicMock()
+        session.get.return_value = response
+
+        job = self._build_job()
+        job.nist_session = session
+        job.nist_session_init = mock.MagicMock()
+
+        with mock.patch("nautobot_device_lifecycle_mgmt.jobs.cve_tracking.sleep"):
+            with self.assertRaises(json.JSONDecodeError):
+                job.query_api("https://example.com/")
+
+        # No retry: the request is made exactly once and the session is neither closed nor rebuilt.
+        session.get.assert_called_once()
+        session.close.assert_not_called()
+        job.nist_session_init.assert_not_called()
