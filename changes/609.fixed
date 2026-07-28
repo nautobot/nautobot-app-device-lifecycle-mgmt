@@ -1,0 +1,3 @@
+Fixed tags being silently discarded when creating or editing Validated Software, CVE, and Vulnerability objects in the UI. Their forms declared a `tags` field but omitted `"tags"` from an explicit `Meta.fields`, so Django's `_save_m2m()` never persisted the selection.
+
+Fixed the Contract list view showing the tags column by default. Tags are now available but hidden, matching the other Lifecycle Management list views.
