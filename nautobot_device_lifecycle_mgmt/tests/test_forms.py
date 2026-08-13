@@ -233,7 +233,11 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
         self.assertTrue(form.save())
 
     def test_tags_are_saved(self):
-        """Tags selected on the form must be persisted, not silently dropped."""
+        """Tags selected on the form must be persisted, not silently dropped.
+
+        ValidatedSoftwareLCM has no PrimaryObjectViewTestCase, so the generic create/edit tests that
+        assert tag persistence via `form_data` do not cover it.
+        """
         tag = Tag.objects.create(name="Validated Software Tag")
         tag.content_types.add(ContentType.objects.get_for_model(ValidatedSoftwareLCM))
         data = {
@@ -347,23 +351,6 @@ class CVELCMFormTest(TestCase):
         )
         self.assertTrue(form.is_valid())
         self.assertTrue(form.save())
-
-    def test_tags_are_saved(self):
-        """Tags selected on the form must be persisted, not silently dropped."""
-        tag = Tag.objects.create(name="CVE Tag")
-        tag.content_types.add(self.cve_ct)
-        form = CVELCMForm(
-            data={
-                "name": "CVE-2021-34700",
-                "published_date": "2021-09-23",
-                "link": "https://www.cvedetails.com/cve/CVE-2021-34700/",
-                "status": self.status,
-                "tags": [tag.pk],
-            }
-        )
-        self.assertTrue(form.is_valid(), form.errors)
-        cve = form.save()
-        self.assertEqual(list(cve.tags.values_list("name", flat=True)), ["CVE Tag"])
 
     def test_required_fields_missing(self):
         form = CVELCMForm(data={"name": "CVE-2022-0002"})
