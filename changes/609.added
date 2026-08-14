@@ -1,0 +1,1 @@
+Added tag support to the bulk edit forms for Hardware Notice, Validated Software, Contract, CVE, and Vulnerability objects. Tags are now applied through the `Add tags` and `Remove tags` fields honored by Nautobot's bulk edit view; the previous `Tags` field on the CVE and Vulnerability bulk edit forms had no effect.

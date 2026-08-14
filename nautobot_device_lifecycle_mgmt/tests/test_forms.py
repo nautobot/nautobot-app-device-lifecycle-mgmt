@@ -14,17 +14,29 @@ from nautobot.dcim.models import (
     Platform,
     SoftwareVersion,
 )
-from nautobot.extras.models import Role, Status
+from nautobot.extras.models import Role, Status, Tag
 from nautobot.tenancy.models import Tenant
 
 from nautobot_device_lifecycle_mgmt.forms import (
+    ContractLCMBulkEditForm,
     ContractLCMForm,
+    CVELCMBulkEditForm,
     CVELCMForm,
+    HardwareLCMBulkEditForm,
     HardwareLCMForm,
     ProviderLCM,
+    ValidatedSoftwareLCMBulkEditForm,
     ValidatedSoftwareLCMForm,
+    VulnerabilityLCMBulkEditForm,
+    VulnerabilityLCMForm,
 )
-from nautobot_device_lifecycle_mgmt.models import CVELCM, ContractLCM
+from nautobot_device_lifecycle_mgmt.models import (
+    CVELCM,
+    ContractLCM,
+    HardwareLCM,
+    ValidatedSoftwareLCM,
+    VulnerabilityLCM,
+)
 
 
 class HardwareLCMFormTest(TestCase):
@@ -224,6 +236,27 @@ class ValidatedSoftwareLCMFormTest(TestCase):  # pylint: disable=no-member
         form = self.form_class(data)
         self.assertTrue(form.is_valid())
         self.assertTrue(form.save())
+
+    def test_tags_are_saved(self):
+        """Tags selected on the form must be persisted, not silently dropped.
+
+        ValidatedSoftwareLCM has no PrimaryObjectViewTestCase, so the generic create/edit tests that
+        assert tag persistence via `form_data` do not cover it.
+        """
+        tag = Tag.objects.create(name="Validated Software Tag")
+        tag.content_types.add(ContentType.objects.get_for_model(ValidatedSoftwareLCM))
+        data = {
+            "software": self.software,
+            "devices": [self.device_1],
+            "start": "2021-06-06",
+            "end": "2023-08-31",
+            "preferred": False,
+            "tags": [tag.pk],
+        }
+        form = self.form_class(data)
+        self.assertTrue(form.is_valid(), form.errors)
+        validated_software = form.save()
+        self.assertEqual(list(validated_software.tags.values_list("name", flat=True)), ["Validated Software Tag"])
 
     def test_specifying_all_fields_w_device_type(self):
         data = {
@@ -463,3 +496,58 @@ class ContractLCMFormTest(TestCase):
             },
             form.errors,
         )
+
+
+class TaggableModelFormTest(TestCase):
+    """Test tag support on the create/edit forms of taggable Lifecycle Management models."""
+
+    form_classes = (
+        HardwareLCMForm,
+        ValidatedSoftwareLCMForm,
+        ContractLCMForm,
+        CVELCMForm,
+        VulnerabilityLCMForm,
+    )
+
+    def test_tags_field_present(self):
+        """The tags widget must be offered by the form."""
+        for form_class in self.form_classes:
+            with self.subTest(form=form_class.__name__):
+                self.assertIn("tags", form_class().fields)
+
+    def test_tags_included_in_meta_fields(self):
+        """Django's _save_m2m() drops tags unless "tags" is listed in an explicit Meta.fields."""
+        for form_class in self.form_classes:
+            with self.subTest(form=form_class.__name__):
+                meta_fields = form_class._meta.fields  # pylint: disable=protected-access, no-member
+                # ModelFormMetaclass normalizes `fields = "__all__"` to None, which saves every model field.
+                if meta_fields is not None:
+                    self.assertIn("tags", meta_fields)
+
+
+class TaggableModelBulkEditFormTest(TestCase):
+    """Test tag support on the bulk edit forms of taggable Lifecycle Management models."""
+
+    forms_and_models = (
+        (HardwareLCMBulkEditForm, HardwareLCM),
+        (ValidatedSoftwareLCMBulkEditForm, ValidatedSoftwareLCM),
+        (ContractLCMBulkEditForm, ContractLCM),
+        (CVELCMBulkEditForm, CVELCM),
+        (VulnerabilityLCMBulkEditForm, VulnerabilityLCM),
+    )
+
+    def test_add_and_remove_tags_fields_present(self):
+        """The bulk edit view only applies tags through the `add_tags` and `remove_tags` fields."""
+        for form_class, model in self.forms_and_models:
+            with self.subTest(form=form_class.__name__):
+                form = form_class(model)
+                self.assertIn("add_tags", form.fields)
+                self.assertIn("remove_tags", form.fields)
+
+    def test_tags_is_not_a_bulk_edit_field(self):
+        """A plain `tags` field is silently ignored by the bulk edit view, so it must not be offered."""
+        for form_class, model in self.forms_and_models:
+            with self.subTest(form=form_class.__name__):
+                form = form_class(model)
+                self.assertNotIn("tags", form.fields)
+                self.assertNotIn("tags", form.nullable_fields)

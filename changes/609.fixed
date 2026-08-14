@@ -1,0 +1,3 @@
+Fixed tags being silently discarded when creating or editing Validated Software, CVE, and Vulnerability objects in the UI. Their forms declared a `tags` field but omitted `"tags"` from an explicit `Meta.fields`, so Django's `_save_m2m()` never persisted the selection.
+
+Fixed `AttributeError` when bulk editing Contract objects. `StatusModelBulkEditFormMixin` was listed after `NautobotBulkEditForm` on `ContractLCMBulkEditForm`, which placed it after `BulkEditForm` in the MRO and ran its `__init__()` before `self.model` was assigned.

@@ -20,6 +20,7 @@ from nautobot.apps.forms import (
     StatusModelBulkEditFormMixin,
     StatusModelFilterFormMixin,
     TagFilterField,
+    TagsBulkEditFormMixin,
     add_blank_choice,
 )
 from nautobot.core.forms.constants import BOOLEAN_WITH_BLANK_CHOICES
@@ -104,7 +105,7 @@ class HardwareLCMForm(NautobotModelForm):
         }
 
 
-class HardwareLCMBulkEditForm(NautobotBulkEditForm):
+class HardwareLCMBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm):
     """Hardware Device Lifecycle bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=HardwareLCM.objects.all(), widget=forms.MultipleHiddenInput)
@@ -185,8 +186,6 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
     inventory_items = DynamicModelMultipleChoiceField(queryset=InventoryItem.objects.all(), required=False)
     object_tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
-    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
-
     class Meta:
         """Meta attributes."""
 
@@ -204,6 +203,7 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
             "start",
             "end",
             "preferred",
+            "tags",
         ]
 
         widgets = {
@@ -230,7 +230,7 @@ class ValidatedSoftwareLCMForm(NautobotModelForm):
             self.add_error(None, "You need to assign to at least one object.")
 
 
-class ValidatedSoftwareLCMBulkEditForm(NautobotBulkEditForm):
+class ValidatedSoftwareLCMBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm):
     """Validated Software Lifecycle bulk edit form."""
 
     model = ValidatedSoftwareLCM
@@ -637,7 +637,6 @@ class ContractLCMForm(NautobotModelForm):
     )
     contract_type = forms.ChoiceField(choices=add_blank_choice(ContractTypeChoices.CHOICES), label="Contract Type")
     currency = forms.ChoiceField(required=False, choices=add_blank_choice(CurrencyChoices.CHOICES))
-    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     devices = DynamicModelMultipleChoiceField(queryset=Device.objects.all(), required=False)
 
     class Meta:
@@ -656,7 +655,7 @@ class ContractLCMForm(NautobotModelForm):
         return {"provider": self.request.GET.get("provider")}  # pylint: disable=E1101
 
 
-class ContractLCMBulkEditForm(NautobotBulkEditForm, StatusModelBulkEditFormMixin):
+class ContractLCMBulkEditForm(TagsBulkEditFormMixin, StatusModelBulkEditFormMixin, NautobotBulkEditForm):
     """Device Lifecycle Contrcts bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=ContractLCM.objects.all(), widget=forms.MultipleHiddenInput)
@@ -800,7 +799,6 @@ class CVELCMForm(NautobotModelForm):
     published_date = forms.DateField(widget=DatePicker())
     last_modified_date = forms.DateField(widget=DatePicker(), required=False)
     severity = forms.ChoiceField(choices=CVESeverityChoices.CHOICES, label="Severity", required=False)
-    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     affected_softwares = DynamicModelMultipleChoiceField(queryset=SoftwareVersion.objects.all(), required=False)
     comments = CommentField(label="Comments", required=False)
 
@@ -825,6 +823,7 @@ class CVELCMForm(NautobotModelForm):
             "fix",
             "comments",
             "affected_softwares",
+            "tags",
         ]
 
         widgets = {
@@ -833,14 +832,13 @@ class CVELCMForm(NautobotModelForm):
         }
 
 
-class CVELCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):
+class CVELCMBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):
     """CVE Lifecycle Management bulk edit form."""
 
     model = CVELCM
     pk = forms.ModelMultipleChoiceField(queryset=CVELCM.objects.all(), widget=forms.MultipleHiddenInput)
     description = forms.CharField(required=False, widget=forms.Textarea)
     comments = CommentField(required=False)
-    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     status = DynamicModelChoiceField(
         queryset=Status.objects.all(),
         required=False,
@@ -854,7 +852,6 @@ class CVELCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin
             "description",
             "comments",
             "status",
-            "tags",
         ]
 
 
@@ -922,8 +919,6 @@ class CVELCMFilterForm(NautobotFilterForm):
 class VulnerabilityLCMForm(NautobotModelForm):
     """Vulnerability Lifecycle Management creation/edit form."""
 
-    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
-
     class Meta:
         """Meta attributes for the VulnerabilityLCMForm class."""
 
@@ -937,14 +932,14 @@ class VulnerabilityLCMForm(NautobotModelForm):
             "device",
             "inventory_item",
             "status",
+            "tags",
         ]
 
 
-class VulnerabilityLCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):
+class VulnerabilityLCMBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):
     """Vulnerability Lifecycle Management bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=VulnerabilityLCM.objects.all(), widget=forms.MultipleHiddenInput)
-    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
 
     class Meta:
         """Meta attributes for the VulnerabilityLCMBulkEditForm class."""
@@ -952,7 +947,6 @@ class VulnerabilityLCMBulkEditForm(NautobotBulkEditForm, CustomFieldModelBulkEdi
         model = VulnerabilityLCM
         nullable_fields = [
             "status",
-            "tags",
         ]
 
 

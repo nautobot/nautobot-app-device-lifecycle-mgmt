@@ -9,7 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from nautobot.apps.testing import ViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer
-from nautobot.extras.models import Status
+from nautobot.extras.models import Status, Tag
 from nautobot.users.models import ObjectPermission
 
 from nautobot_device_lifecycle_mgmt.models import (
@@ -50,10 +50,15 @@ class HardwareLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
         HardwareLCM.objects.create(device_type=device_types[1], end_of_sale=datetime.date(2021, 4, 1))
         HardwareLCM.objects.create(device_type=device_types[2], end_of_sale=datetime.date(2021, 4, 1))
 
+        # Including tags in form_data makes the generic create/edit tests assert that they are persisted.
+        tag = Tag.objects.create(name="Hardware Notice Tag")
+        tag.content_types.add(ContentType.objects.get_for_model(HardwareLCM))
+
         cls.form_data = {
             "device_type": device_types[3].id,
             "end_of_sale": datetime.date(2021, 4, 1),
             "end_of_support": datetime.date(2024, 4, 1),
+            "tags": [tag.pk],
         }
         cls.csv_data = (
             "device_type,end_of_sale,end_of_support,end_of_sw_releases,end_of_security_patches,documentation_url",
@@ -239,10 +244,15 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
             "status": Status.objects.get_for_model(CVELCM).first().pk,
         }
 
+        # Including tags in form_data makes the generic create/edit tests assert that they are persisted.
+        tag = Tag.objects.create(name="CVE Tag")
+        tag.content_types.add(ContentType.objects.get_for_model(CVELCM))
+
         cls.form_data = {
             "name": "Test 1",
             "published_date": datetime.date(2022, 1, 1),
             "link": "https://www.cvedetails.com/cve/CVE-2022-0001/",
+            "tags": [tag.pk],
         }
 
     @skip("Not implemented")
