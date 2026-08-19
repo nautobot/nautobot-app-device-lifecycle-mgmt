@@ -7,17 +7,27 @@ from datetime import date, datetime
 from time import sleep
 
 from django.core.exceptions import ValidationError
+from django.db.models import QuerySet
 from django.db.utils import IntegrityError
 from nautobot.apps.exceptions import SecretError
-from nautobot.apps.jobs import BooleanVar, Job, ObjectVar, StringVar
+from nautobot.apps.jobs import BooleanVar, Job, MultiObjectVar, ObjectVar, StringVar
 from nautobot.dcim.models import Device, InventoryItem
 from nautobot.dcim.models.devices import SoftwareVersion
 from nautobot.extras.models import ExternalIntegration
 from netutils.nist import get_nist_urls
 from requests import Session
 from requests.adapters import HTTPAdapter
-from requests.exceptions import ChunkedEncodingError, HTTPError, Timeout
-from requests.exceptions import ConnectionError as RequestsConnectionError
+from requests.exceptions import (
+    HTTPError,
+    InvalidHeader,
+    InvalidProxyURL,
+    InvalidSchema,
+    InvalidURL,
+    MissingSchema,
+    RequestException,
+    TooManyRedirects,
+    URLRequired,
+)
 from urllib3.util import Retry
 
 from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
@@ -25,6 +35,19 @@ from nautobot_device_lifecycle_mgmt.models import CVELCM, VulnerabilityLCM
 from nautobot_device_lifecycle_mgmt.utils import standardize_cvss_severity
 
 name = "CVE Tracking"  # pylint: disable=invalid-name
+
+# RequestException subclasses that signal a malformed request or config error rather than a
+# transient transport failure. Retrying these only burns backoff delays before failing the same way,
+# so query_api fails fast on them instead of rebuilding the session.
+NON_TRANSIENT_REQUEST_ERRORS = (
+    MissingSchema,
+    InvalidSchema,
+    InvalidURL,
+    InvalidHeader,
+    InvalidProxyURL,
+    URLRequired,
+    TooManyRedirects,
+)
 
 
 class GenerateVulnerabilities(Job):
@@ -92,6 +115,11 @@ class NistCveSyncSoftware(Job):
         required=True,
         default=lambda: ExternalIntegration.objects.get(name="NAUTOBOT DLM NIST EXTERNAL INTEGRATION"),
     )
+    software_versions = MultiObjectVar(
+        model=SoftwareVersion,
+        description="Select the Software Versions to search. Leave empty to search all Software Versions.",
+        required=False,
+    )
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta class for the job."""
@@ -118,7 +146,7 @@ class NistCveSyncSoftware(Job):
         session.headers.update({"apiKey": self.nist_api_key})
         return session
 
-    def run(self, *args, **kwargs: dict):  # pylint: disable=too-many-locals
+    def run(self, *args, **kwargs: dict):  # pylint: disable=too-many-locals,too-many-statements
         """Check all software in DLC against NIST database and associate registered CVEs.
 
         Args:
@@ -146,7 +174,12 @@ class NistCveSyncSoftware(Job):
 
         self.nist_session = self.nist_session_init()
 
-        for software in SoftwareVersion.objects.all():
+        software_qs = self.get_software_versions(kwargs.get("software_versions"))
+        # len() evaluates and caches the queryset so the loop below reuses those rows;
+        # .count() would issue a separate COUNT(*) and leave the loop to re-query.
+        software_count = len(software_qs)
+
+        for software in software_qs:
             platform = software.platform.network_driver.lower()
             version = software.version.replace(" ", "")
 
@@ -237,8 +270,26 @@ class NistCveSyncSoftware(Job):
         self.nist_session.close()
 
         self.logger.info(
-            "Performed discovery on all software. Created %s CVE.", cve_counter, extra={"grouping": "CVE Creation"}
+            "Performed discovery on %s software version(s). Created %s CVE.",
+            software_count,
+            cve_counter,
+            extra={"grouping": "CVE Creation"},
         )
+
+    @staticmethod
+    def get_software_versions(software_versions=None) -> QuerySet:
+        """Return the SoftwareVersion queryset to search.
+
+        Args:
+            software_versions: Optional iterable of ``SoftwareVersion`` objects selected in the job form.
+                When empty or ``None``, all Software Versions are returned.
+
+        Returns:
+            QuerySet: The ``SoftwareVersion`` objects to search for CVEs.
+        """
+        if software_versions:
+            return SoftwareVersion.objects.filter(pk__in=[software.pk for software in software_versions])
+        return SoftwareVersion.objects.all()
 
     def create_dlc_cves(self, cpe_cves: dict, software: SoftwareVersion) -> None:
         """Create CVE entries in the DLC database.
@@ -359,7 +410,14 @@ class NistCveSyncSoftware(Job):
             except json.JSONDecodeError as err:
                 self.logger.error("Invalid JSON response from NIST Service: %s", err)
                 raise
-            except (RequestsConnectionError, ChunkedEncodingError, Timeout) as err:
+            except NON_TRANSIENT_REQUEST_ERRORS as err:
+                self.logger.error(
+                    "Malformed NIST request (%s); this is a configuration error and will not be retried. ERROR: %s",
+                    type(err).__name__,
+                    err,
+                )
+                raise
+            except RequestException as err:
                 last_err = err
                 if attempt < max_attempts:
                     self.logger.warning(
