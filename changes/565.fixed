@@ -1,0 +1,5 @@
+Fixed the `tag` filter form field on the CVE and Vulnerability list views. It was named `tag` while the corresponding filterset filter is `tags`, so the field could never bind and filtering by tag was rejected with "Invalid filters were specified".
+
+Fixed the missing `exclude_status` filter on `VulnerabilityLCMFilterSet`. The filter form offered the field but the filterset had no matching filter.
+
+Fixed a server error when sorting the Vulnerability list view by the Name column. `VulnerabilityLCM` has no `name` field - the label comes from `__str__` - so the column is no longer orderable.

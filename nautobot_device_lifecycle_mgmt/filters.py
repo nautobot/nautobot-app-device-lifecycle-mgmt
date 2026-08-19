@@ -1021,6 +1021,7 @@ class VulnerabilityLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):  
     cve__published_date__gte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="gte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
     cve__published_date__lte = django_filters.DateFilter(field_name="cve__published_date", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field # TODO 3.0: Remove this filter when Nautobot adds it automatically
     cve__severity = django_filters.ChoiceFilter(field_name="cve__severity", choices=CVESeverityChoices)  # pylint: disable=nb-warn-dunder-filter-field
+    exclude_status = StatusFilter(field_name="status", exclude=True)
 
     class Meta:
         """Meta attributes for filter."""

@@ -898,7 +898,7 @@ class CVELCMFilterForm(NautobotFilterForm):
         query_params={"content_types": model._meta.label_lower},  # pylint: disable=protected-access, no-member
         to_field_name="name",
     )
-    tag = TagFilterField(model)
+    tags = TagFilterField(model)
 
     class Meta:
         """Meta attributes."""
@@ -978,7 +978,7 @@ class VulnerabilityLCMFilterForm(NautobotFilterForm):
         query_params={"content_types": model._meta.label_lower},  # pylint: disable=protected-access, no-member
         to_field_name="name",
     )
-    tag = TagFilterField(model)
+    tags = TagFilterField(model)
 
     class Meta:
         """Meta attributes."""

@@ -563,8 +563,13 @@ class VulnerabilityLCMTable(StatusTableMixin, BaseTable):
 
     model = VulnerabilityLCM
     pk = ToggleColumn()
+    # VulnerabilityLCM has no `name` field; the label comes from __str__, so this column
+    # cannot be ordered by the database.
     name = tables.LinkColumn(
-        "plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm", text=lambda record: record, args=[A("pk")]
+        "plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm",
+        text=lambda record: record,
+        args=[A("pk")],
+        orderable=False,
     )
     cve = tables.LinkColumn(verbose_name="CVE")
     software = tables.LinkColumn()
