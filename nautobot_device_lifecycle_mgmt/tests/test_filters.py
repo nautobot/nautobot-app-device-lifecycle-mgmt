@@ -7,8 +7,17 @@ from unittest import skip
 import time_machine
 from django.contrib.contenttypes.models import ContentType
 from nautobot.apps.testing import FilterTestCases
-from nautobot.dcim.models import Device, DeviceType, Location, LocationType, Manufacturer, Platform, SoftwareVersion
-from nautobot.extras.models import Role, Status
+from nautobot.dcim.models import (
+    Device,
+    DeviceType,
+    InventoryItem,
+    Location,
+    LocationType,
+    Manufacturer,
+    Platform,
+    SoftwareVersion,
+)
+from nautobot.extras.models import Role, Status, Tag
 from nautobot.tenancy.models import Tenant
 
 from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, CurrencyChoices, CVESeverityChoices
@@ -616,6 +625,28 @@ class ValidatedSoftwareLCMFilterSetTestCase(FilterTestCases.FilterTestCase):
 
         manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
         device_type, _ = DeviceType.objects.get_or_create(manufacturer=manufacturer, model="ASR-1000")
+        cls.device_type = device_type
+        cls.device_role_router = device_role_router
+
+        # Objects for the devices / inventory_items / object_tags filters. Names deliberately avoid
+        # digits, so they cannot match the date values used by the `q` filter tests.
+        active_status.content_types.add(ContentType.objects.get_for_model(Device))
+        active_status.content_types.add(ContentType.objects.get_for_model(Location))
+        location_type, _ = LocationType.objects.get_or_create(name="Site")
+        location_type.content_types.add(ContentType.objects.get_for_model(Device))
+        location, _ = Location.objects.get_or_create(
+            name="Filter Test Site", location_type=location_type, defaults={"status": active_status}
+        )
+        cls.device = Device.objects.create(
+            name="filter-test-device",
+            device_type=device_type,
+            role=device_role_router,
+            location=location,
+            status=active_status,
+        )
+        cls.inventory_item = InventoryItem.objects.create(device=cls.device, name="filter-test-item")
+        cls.object_tag = Tag.objects.create(name="filter-test-tag")
+        cls.object_tag.content_types.add(ContentType.objects.get_for_model(ValidatedSoftwareLCM))
 
         validated_software = ValidatedSoftwareLCM(
             software=cls.softwares[0],
@@ -625,6 +656,9 @@ class ValidatedSoftwareLCMFilterSetTestCase(FilterTestCases.FilterTestCase):
         )
         validated_software.save()
         validated_software.device_types.set([device_type.pk])
+        validated_software.devices.set([cls.device])
+        validated_software.inventory_items.set([cls.inventory_item])
+        validated_software.object_tags.set([cls.object_tag])
 
         validated_software = ValidatedSoftwareLCM(
             software=cls.softwares[1],
@@ -664,6 +698,46 @@ class ValidatedSoftwareLCMFilterSetTestCase(FilterTestCases.FilterTestCase):
     def test_device_tenants(self):
         """Test device_tenants filter."""
         params = {"device_tenants": ["Tenant A"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    # The filters below are NaturalKeyOrPKMultipleChoiceFilter, so each must accept both a primary
+    # key and a natural key. The PK path is what the filter form submits from the UI.
+    def test_devices(self):
+        """Test devices filter by PK and by name."""
+        for value in (self.device.pk, self.device.name):
+            with self.subTest(value=value):
+                params = {"devices": [value]}
+                self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_inventory_items(self):
+        """Test inventory_items filter by PK and by name."""
+        for value in (self.inventory_item.pk, self.inventory_item.name):
+            with self.subTest(value=value):
+                params = {"inventory_items": [value]}
+                self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_object_tags(self):
+        """Test object_tags filter by PK and by name."""
+        for value in (self.object_tag.pk, self.object_tag.name):
+            with self.subTest(value=value):
+                params = {"object_tags": [value]}
+                self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_device_types(self):
+        """Test device_types filter by PK and by model."""
+        for value in (self.device_type.pk, self.device_type.model):
+            with self.subTest(value=value):
+                params = {"device_types": [value]}
+                self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_device_roles_pk(self):
+        """Test device_roles filter by PK."""
+        params = {"device_roles": [self.device_role_router.pk]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_device_tenants_pk(self):
+        """Test device_tenants filter by PK."""
+        params = {"device_tenants": [Tenant.objects.get(name="Tenant A").pk]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_software(self):
