@@ -319,6 +319,9 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
         help_text="Search for start or end date of validity.",
     )
     software = DynamicModelChoiceField(required=False, queryset=SoftwareVersion.objects.all())
+    # Device, InventoryItem and DeviceType have non-unique natural keys, so their filters set
+    # `prefers_id=True` and these fields submit PKs. The remaining fields target models with a
+    # unique `name` and submit that instead.
     devices = DynamicModelMultipleChoiceField(
         queryset=Device.objects.all(),
         required=False,
@@ -330,7 +333,6 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
     )
     device_types = DynamicModelMultipleChoiceField(
         queryset=DeviceType.objects.all(),
-        to_field_name="model",
         required=False,
     )
     device_roles = DynamicModelMultipleChoiceField(
@@ -345,6 +347,7 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
     )
     object_tags = DynamicModelMultipleChoiceField(
         queryset=Tag.objects.all(),
+        to_field_name="name",
         required=False,
     )
     start_before = forms.DateField(label="Valid Since Date Before", required=False, widget=DatePicker())

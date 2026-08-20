@@ -5,7 +5,13 @@ import datetime
 
 import django_filters
 from django.db.models import Q
-from nautobot.apps.filters import NautobotFilterSet, SearchFilter, StatusFilter, StatusModelFilterSetMixin
+from nautobot.apps.filters import (
+    NaturalKeyOrPKMultipleChoiceFilter,
+    NautobotFilterSet,
+    SearchFilter,
+    StatusFilter,
+    StatusModelFilterSetMixin,
+)
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, Location, Manufacturer, Platform, SoftwareVersion
 from nautobot.extras.models import Role, Status, Tag
 from nautobot.tenancy.models import Tenant
@@ -303,66 +309,71 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         queryset=Device.objects.all(),
         label="Devices",
     )
-    devices = django_filters.ModelMultipleChoiceFilter(
-        field_name="devices__name",
+    # `prefers_id=True` where the target's natural key is not globally unique: the filter form
+    # submits PKs, while the natural key still works as a query parameter.
+    devices = NaturalKeyOrPKMultipleChoiceFilter(
+        field_name="devices",
         queryset=Device.objects.all(),
         to_field_name="name",
-        label="Devices (name)",
+        prefers_id=True,
+        label="Devices (name or ID)",
     )
     device_types_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device_types",
         queryset=DeviceType.objects.all(),
         label="Device Types",
     )
-    device_types = django_filters.ModelMultipleChoiceFilter(
-        field_name="device_types__model",
+    device_types = NaturalKeyOrPKMultipleChoiceFilter(
+        field_name="device_types",
         queryset=DeviceType.objects.all(),
         to_field_name="model",
-        label="Device Types (model)",
+        prefers_id=True,
+        label="Device Types (model or ID)",
     )
     device_tenants_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device_tenants",
         queryset=Tenant.objects.all(),
         label="Tenant",
     )
-    device_tenants = django_filters.ModelMultipleChoiceFilter(
-        field_name="device_tenants__name",
+    device_tenants = NaturalKeyOrPKMultipleChoiceFilter(
+        field_name="device_tenants",
         queryset=Tenant.objects.all(),
         to_field_name="name",
-        label="Tenant (name)",
+        label="Tenant (name or ID)",
     )
     device_roles_id = django_filters.ModelMultipleChoiceFilter(
         field_name="device_roles",
         queryset=Role.objects.all(),
         label="Device Roles",
     )
-    device_roles = django_filters.ModelMultipleChoiceFilter(
-        field_name="device_roles__name",
+    device_roles = NaturalKeyOrPKMultipleChoiceFilter(
+        field_name="device_roles",
         queryset=Role.objects.all(),
         to_field_name="name",
-        label="Device Roles (name)",
+        label="Device Roles (name or ID)",
     )
     inventory_items_id = django_filters.ModelMultipleChoiceFilter(
         field_name="inventory_items",
         queryset=InventoryItem.objects.all(),
         label="Inventory Items",
     )
-    inventory_items = django_filters.ModelMultipleChoiceFilter(
-        field_name="inventory_items__name",
+    inventory_items = NaturalKeyOrPKMultipleChoiceFilter(
+        field_name="inventory_items",
         queryset=InventoryItem.objects.all(),
         to_field_name="name",
-        label="Inventory Items (name)",
+        prefers_id=True,
+        label="Inventory Items (name or ID)",
     )
     object_tags_id = django_filters.ModelMultipleChoiceFilter(
         field_name="object_tags",
         queryset=Tag.objects.all(),
         label="Object Tags",
     )
-    object_tags = django_filters.ModelMultipleChoiceFilter(
-        field_name="object_tags__name",
+    object_tags = NaturalKeyOrPKMultipleChoiceFilter(
+        field_name="object_tags",
         queryset=Tag.objects.all(),
         to_field_name="name",
-        label="Object Tags (name)",
+        label="Object Tags (name or ID)",
     )
     device_name = django_filters.CharFilter(method="device", label="Device Name")
     device_id = django_filters.CharFilter(method="device", label="Device ID")
@@ -798,7 +809,7 @@ class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):
         return queryset
 
 
-class ContractLCMFilterSet(NautobotFilterSet):
+class ContractLCMFilterSet(NautobotFilterSet, StatusModelFilterSetMixin):
     """Filter for ContractLCM."""
 
     q = SearchFilter(
