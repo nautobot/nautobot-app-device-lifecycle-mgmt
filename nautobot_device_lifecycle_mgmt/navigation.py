@@ -10,7 +10,7 @@ from nautobot.apps.ui import (
 
 menu_items = (
     NavMenuTab(
-        name="Device Lifecycle",
+        name="Lifecycle",
         icon=NavigationIconChoices.DEVICE_LIFECYCLE,
         weight=NavigationWeightChoices.DEVICE_LIFECYCLE,
         groups=(
