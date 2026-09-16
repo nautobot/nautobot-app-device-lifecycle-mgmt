@@ -278,7 +278,7 @@ class NistCveSyncSoftware(Job):
 
     @staticmethod
     def get_software_versions(software_versions=None) -> QuerySet:
-        """Return the SoftwareVersion queryset to search.
+        """Return the SoftwareVersion queryset or list to search.
 
         Args:
             software_versions: Optional iterable of ``SoftwareVersion`` objects selected in the job form.
@@ -288,7 +288,7 @@ class NistCveSyncSoftware(Job):
             QuerySet: The ``SoftwareVersion`` objects to search for CVEs.
         """
         if software_versions:
-            return SoftwareVersion.objects.filter(pk__in=[software.pk for software in software_versions])
+            return software_versions
         return SoftwareVersion.objects.all()
 
     def create_dlc_cves(self, cpe_cves: dict, software: SoftwareVersion) -> None:
