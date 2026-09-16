@@ -11,8 +11,10 @@ from nautobot.dcim.models import Platform, SoftwareVersion
 from nautobot.extras.models import Status
 from requests.exceptions import ChunkedEncodingError, Timeout
 
+from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.jobs.cve_tracking import NistCveSyncSoftware
 from nautobot_device_lifecycle_mgmt.models import (
+    CVELCM,
     DeviceHardwareNoticeResult,
     DeviceSoftwareValidationResult,
     ValidatedSoftwareLCM,
@@ -184,3 +186,119 @@ class NistCveSyncSoftwareQueryApiTestCase(unittest.TestCase):
         self.assertEqual(result, {"vulnerabilities": [], "totalResults": 0})
         failing_session.close.assert_called_once()
         job.nist_session_init.assert_called_once()
+
+
+class NistCveSyncSoftwarePrepCveForDlcTestCase(unittest.TestCase):
+    """Test NistCveSyncSoftware.prep_cve_for_dlc CVSS version handling."""
+
+    def _build_job(self):
+        """Construct a NistCveSyncSoftware instance with a stubbed logger.
+
+        Bypasses Job.__init__ since we only exercise prep_cve_for_dlc in isolation.
+        """
+        job = NistCveSyncSoftware.__new__(NistCveSyncSoftware)
+        job.logger = mock.MagicMock()
+        return job
+
+    @staticmethod
+    def _build_cve_json(metrics=None):
+        return {
+            "id": "CVE-2024-12345",
+            "descriptions": [{"lang": "en", "value": "A test CVE description."}],
+            "published": "2024-01-01T00:00:00.000",
+            "lastModified": "2024-01-02T00:00:00.000",
+            "references": [{"url": "https://example.com/cve/CVE-2024-12345"}],
+            "metrics": metrics or {},
+        }
+
+    def test_skips_cvss_when_only_cvss_v4_metrics_present(self):
+        """A CVE scored only with CVSS v4 has no CVSS data extracted, but is still returned."""
+        cve_json = self._build_cve_json(
+            metrics={
+                "cvssMetricV40": [{"cvssData": {"baseScore": 9.8, "baseSeverity": "CRITICAL"}}],
+            }
+        )
+        job = self._build_job()
+
+        result = job.prep_cve_for_dlc(cve_json)
+
+        self.assertIsNone(result["cvss_base_score"])
+        self.assertEqual(result["cvss_severity"], CVESeverityChoices.NONE)
+        self.assertIsNone(result["cvssv2_score"])
+        self.assertIsNone(result["cvssv3_score"])
+        self.assertEqual(result["url"], "https://example.com/cve/CVE-2024-12345")
+        self.assertEqual(result["description"], "A test CVE description.")
+        job.logger.warning.assert_called_once()
+
+    def test_skips_cvss_when_metrics_absent(self):
+        """A CVE with no metrics at all also skips CVSS data without raising."""
+        cve_json = self._build_cve_json(metrics={})
+        job = self._build_job()
+
+        result = job.prep_cve_for_dlc(cve_json)
+
+        self.assertIsNone(result["cvss_base_score"])
+        self.assertEqual(result["cvss_severity"], CVESeverityChoices.NONE)
+        job.logger.warning.assert_not_called()
+
+    def test_populates_cvss_from_v2_when_no_v3_present(self):
+        """CVSS v2-only CVEs still populate CVSS fields (regression check for the v2 branch)."""
+        cve_json = self._build_cve_json(
+            metrics={
+                "cvssMetricV2": [
+                    {
+                        "cvssData": {"baseScore": 5.0},
+                        "baseSeverity": CVESeverityChoices.MEDIUM,
+                        "exploitabilityScore": 8.6,
+                    },
+                ],
+            }
+        )
+        job = self._build_job()
+
+        result = job.prep_cve_for_dlc(cve_json)
+
+        self.assertEqual(result["cvss_base_score"], 5.0)
+        self.assertEqual(result["cvss_severity"], CVESeverityChoices.MEDIUM)
+        self.assertEqual(result["cvssv2_score"], 8.6)
+        self.assertEqual(result["cvssv3_score"], 0)
+        job.logger.warning.assert_not_called()
+
+
+class NistCveSyncSoftwareCreateDlcCvesTestCase(TransactionTestCase):
+    """Test NistCveSyncSoftware.create_dlc_cves creates CVEs even when CVSS data is unavailable."""
+
+    databases = ("default", "job_logs")
+
+    def _build_job(self):
+        """Construct a NistCveSyncSoftware instance with a stubbed logger.
+
+        Bypasses Job.__init__ since we only exercise create_dlc_cves in isolation.
+        """
+        job = NistCveSyncSoftware.__new__(NistCveSyncSoftware)
+        job.logger = mock.MagicMock()
+        return job
+
+    def test_creates_cve_with_null_cvss_fields(self):
+        """A CVE prepped without CVSS data (e.g. CVSS v4 only) is still created."""
+        job = self._build_job()
+        cpe_cves = {
+            "CVE-2024-99999": {
+                "url": "https://example.com/cve/CVE-2024-99999",
+                "description": "A CVE scored with CVSS v4 only.",
+                "published_date": "2024-01-01T00:00:00.000",
+                "modified_date": "2024-01-02T00:00:00.000",
+                "cvss_base_score": None,
+                "cvss_severity": CVESeverityChoices.NONE,
+                "cvssv2_score": None,
+                "cvssv3_score": None,
+            }
+        }
+
+        job.create_dlc_cves(cpe_cves, software=None)
+
+        cve = CVELCM.objects.get(name="CVE-2024-99999")
+        self.assertIsNone(cve.cvss)
+        self.assertIsNone(cve.cvss_v2)
+        self.assertIsNone(cve.cvss_v3)
+        self.assertEqual(cve.severity, CVESeverityChoices.NONE)

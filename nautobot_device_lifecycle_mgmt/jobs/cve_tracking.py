@@ -419,6 +419,11 @@ class NistCveSyncSoftware(Job):
         else:
             cve_url = f"https://www.cvedetails.com/cve/{cve_name}/"
 
+        cvss_base_score = None
+        cvss_severity = CVESeverityChoices.NONE
+        cvssv2_score = None
+        cvssv3_score = None
+
         # Determine if V3 exists and set all params based on found version info
         if cve_impact:
             if cve_impact.get("cvssMetricV31"):
@@ -439,7 +444,7 @@ class NistCveSyncSoftware(Job):
                     cvssv2_score = 10
                 cvssv3_score = cve_impact["cvssMetricV30"][0].get("exploitabilityScore", 10)
 
-            else:
+            elif cve_impact.get("cvssMetricV2"):
                 cvss_base_score = cve_impact["cvssMetricV2"][0]["cvssData"]["baseScore"]
                 cvss_severity = cve_impact["cvssMetricV2"][0]["baseSeverity"] or self.convert_v2_base_score_to_severity(
                     cvss_base_score
@@ -447,25 +452,24 @@ class NistCveSyncSoftware(Job):
                 cvssv2_score = cve_impact["cvssMetricV2"][0].get("exploitabilityScore", 10)
                 cvssv3_score = 0
 
-            all_cve_info = {
-                "url": cve_url,
-                "description": cve_description,
-                "published_date": cve_published_date,
-                "modified_date": cve_modified_date,
-                "cvss_base_score": cvss_base_score,
-                "cvss_severity": cvss_severity,
-                "cvssv2_score": cvssv2_score,
-                "cvssv3_score": cvssv3_score,
-            }
+            else:
+                error_msg = (
+                    f"Skipping {cve_name}: NIST has not published a CVSS v3.1, v3.0, or v2 base score yet."
+                    "This is normal for recently disclosed CVEs awaiting NVD analysis."
+                    "It will be picked up automatically on a future run once a supported score is published."
+                )
+                self.logger.warning(error_msg)
 
-        else:
-            all_cve_info = {
-                "url": cve_url,
-                "description": cve_description,
-                "published_date": cve_published_date,
-                "modified_date": cve_modified_date,
-            }
-        return all_cve_info
+        return {
+            "url": cve_url,
+            "description": cve_description,
+            "published_date": cve_published_date,
+            "modified_date": cve_modified_date,
+            "cvss_base_score": cvss_base_score,
+            "cvss_severity": cvss_severity,
+            "cvssv2_score": cvssv2_score,
+            "cvssv3_score": cvssv3_score,
+        }
 
     def update_cve(self, current_dlc_cve: CVELCM, updated_cve: dict) -> None:
         """Update CVE information if the latest info is newer than existing info.

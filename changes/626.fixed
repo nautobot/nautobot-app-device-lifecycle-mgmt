@@ -1,0 +1,1 @@
+Fixed `NistCveSyncSoftware` raising an error for CVEs scored with an unsupported CVSS version (e.g. CVSS 4.0 without a CVSS v3.1, v3.0, or v2 score); the CVE is now still created, with CVSS data left blank until NIST publishes a supported score.
