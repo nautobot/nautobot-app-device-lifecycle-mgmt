@@ -392,7 +392,7 @@ class NistCveSyncSoftware(Job):
             dict: Dictionary of returned results if successful.
         """
         retries_cfg = self.integration.extra_config.get("retries", {})
-        max_attempts = retries_cfg.get("max_attempts", 3)
+        max_attempts = max(1, retries_cfg.get("max_attempts", 3))
         backoff = retries_cfg.get("backoff", 1)
 
         last_err = None
