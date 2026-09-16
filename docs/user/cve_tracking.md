@@ -98,7 +98,7 @@ NOTE: You may change the name of the External Integration or create your own usi
 
 ### Version formats for NIST CVE search
 
-The ``NIST - Software CVE Search`` Job uses `netutils.nist` and `netutils.os_version` to build NIST NVD query URLs from each Software Version's platform (network driver) and version string. Each NIST-mapped platform uses either the **default** parser or a **vendor-specific** parser. The **version** value on your Software Version objects should match the format expected by that parser so that CVE discovery works correctly.
+The ``NIST - Software CVE Search`` Job uses `netutils.nist` and `netutils.os_version` to build NIST NVD query URLs from each Software Version's platform (network driver) and version string. Each NIST-mapped platform uses either the **default** parser or a **vendor-specific** parser. The **version** value on your Software Version objects should match the format expected by that parser so that CVE discovery works correctly. If the CVSS version is not currently supported, a safe null default for CVSS values are set, and the CVE is still created.
 
 #### Platforms using the default parser
 
@@ -136,7 +136,7 @@ Examples: `15.5`, `10.20.30`, `1.0.0-alpha.beta.1`, `15.5(2)S1c`, `9.1.6`, `9.1.
 - **Core:** `main.minor` (digits), then optionally a **type** (`x`, `X`, `r`, `R`, `s`, `S`) and **build** (digits).
 - **Optional suffix** after `-` or `:`: service letter (`s`/`S` or `d`/`D`) + optional `service_build` (digits) + optional `.` + `service_respin` (digits).
 
-Pattern: 
+Pattern:
 <pre>
 12.1R3-S4.1
 │   ││ ││ │
