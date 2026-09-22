@@ -1,0 +1,1 @@
+Fixed the CSV export links on the Hardware Notice and Validated Software report views being hidden from assistive technology. The links carried `aria-hidden="true"` themselves; the attribute now sits on the decorative download icon and the links expose an `aria-label`.
