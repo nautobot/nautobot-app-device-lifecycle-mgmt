@@ -1,0 +1,5 @@
+Added a `cvss_vector` field to the CVE model that records the CVSS vector string of the score used for the CVSS base score, which also indicates its CVSS version. The NIST CVE Search Job populates it automatically.
+Added the CVSS Vector column to the default CVE list view columns.
+Added a pop-up to the CVE detail page that explains each metric in the CVSS vector string and links to the official CVSS calculator.
+Added screenshots for the updated views.
+Added a Force CVE Updates option to the NIST CVE Search Job that updates every CVE from its NIST record, regardless of the CVE's Last Modified Date. After upgrading, run the Job once with Force CVE Updates checked so that existing CVEs get the new CVSS Base Score, Severity and CVSS Vector.
