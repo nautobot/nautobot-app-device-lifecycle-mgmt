@@ -393,6 +393,7 @@ class CVELCMFormTest(TestCase):
                 "description": "Thanos",
                 "severity": "High",
                 "cvss": 6.8,
+                "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
                 "cvss_v2": 6.9,
                 "cvss_v3": 6.7,
                 "fix": "Avengers",

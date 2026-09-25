@@ -1,0 +1,2 @@
+Deprecated the `cvss_v2` and `cvss_v3` fields on the CVE model. They will be removed in an upcoming major version; migrate any data you rely on in these fields to a custom field before upgrading.
+Removed the deprecated CVSSv2 Score and CVSSv3 Score columns from the default CVE list view columns. They can still be enabled with the table's Configure option.

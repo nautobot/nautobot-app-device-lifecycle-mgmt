@@ -821,6 +821,7 @@ class CVELCMForm(NautobotModelForm):
             "description",
             "severity",
             "cvss",
+            "cvss_vector",
             "cvss_v2",
             "cvss_v3",
             "fix",
