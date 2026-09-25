@@ -1,0 +1,52 @@
+<a href="#cvss_vector_modal"
+   data-bs-toggle="modal"
+   data-bs-target="#cvss_vector_modal"
+   title="Explain this CVSS vector"><code>{{ cvss.vector }}</code></a>
+<div class="modal fade"
+     id="cvss_vector_modal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="cvss_vector_modal_title">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="cvss_vector_modal_title">CVSS v{{ cvss.version }} Vector</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    <code>{{ cvss.vector }}</code>
+                </p>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for metric in cvss.metrics %}
+                            <tr>
+                                <td>
+                                    {{ metric.name }} <span class="text-secondary">({{ metric.key }})</span>
+                                </td>
+                                <td>
+                                    {{ metric.value_name }} <span class="text-secondary">({{ metric.value }})</span>
+                                </td>
+                                <td>{{ metric.description }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <a href="{{ cvss.calculator_url }}"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="btn btn-secondary">Open in CVSS v{{ cvss.version }} calculator <span class="mdi mdi-open-in-new"></span></a>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

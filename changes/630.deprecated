@@ -1,0 +1,1 @@
+Deprecated the `cvss_v2` and `cvss_v3` fields on the CVE model. They will be removed in an upcoming major version; migrate any data you rely on in these fields to a custom field before upgrading.

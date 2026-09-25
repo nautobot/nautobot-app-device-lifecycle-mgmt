@@ -16,14 +16,18 @@ When creating a CVE object, the following fields are available. Fields in **bold
 | Status | The current status of the CVE (requires a [Status object](https://docs.nautobot.com/projects/core/en/stable/models/extras/status/) to be created and associated to the CVE model) |
 | Description | The description of the CVE |
 | Severity | The severity (Low, Medium, High, Critical) of the CVE |
-| CVSS Base Score | The Base (v1) Common Vulnerability Scoring System of the CVE |
-| CVSSv2 Score | The CVSSv2 Score |
-| CVSSv3 Score | The CVSSv3 Score |
+| CVSS Base Score | The Common Vulnerability Scoring System base score of the CVE. The NIST CVE Search Job populates this from the highest CVSS version available (v4.0, then v3.1, v3.0, v2) |
+| CVSS Vector | The CVSS vector string for the CVSS version used for the CVSS Base Score and Severity. The version is shown by the vector's prefix (for example `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`); CVSS v2 vectors have no prefix (for example `AV:N/AC:L/Au:N/C:P/I:P/A:P`). On the CVE detail page, click the vector to open a pop-up that explains each metric and links to the official CVSS calculator. The NIST CVE Search Job populates this automatically |
+| CVSSv2 Score | **Deprecated.** Legacy field retained for backward compatibility; no longer populated by the NIST CVE Search Job |
+| CVSSv3 Score | **Deprecated.** Legacy field retained for backward compatibility; no longer populated by the NIST CVE Search Job |
 | Affected Softwares | Software versions affected by this CVE |
 | Fix | The software fix (if available) for the CVE |
 | Comments | Any additional comments or details about the CVE |
 | Tags | Arbitrary [tag objects](https://docs.nautobot.com/projects/core/en/stable/models/extras/tag/) that can be applied to this CVE |
 | Last Modified Date | The date that the CVE record was last modified |
+
+!!! warning "Deprecated fields"
+    The CVSSv2 Score (`cvss_v2`) and CVSSv3 Score (`cvss_v3`) fields are deprecated and will be removed in an upcoming major version of this app. If you rely on these fields (for example in the REST API, GraphQL, filters, or export templates), plan to migrate to a custom field before upgrading to the next major version.
 
 !!! note
     In addition to these standard fields, you can also add one or more [Custom Fields](https://docs.nautobot.com/projects/core/en/stable/models/extras/customfield/) to the model.
@@ -77,6 +81,9 @@ The NTC Nautobot Device Lifecycle Management app now supports automated CVE disc
 
 !!! note
     If a record is updated due to a mismatched Modified Date against NIST, a comment will be added to the TOP of the comments section notifying of an update and the timestamp that the record was locally modified.  The record's Last Modifed Date will be updated to show when the record itself was modifed in NIST.
+
+!!! note
+    The Job sets the CVE's CVSS Base Score and Severity from the highest CVSS version NIST provides (v4.0, then v3.1, v3.0, v2), and records that version's vector string in the CVSS Vector field. For v3.0 and later, the Severity is NIST's `baseSeverity`. For v2, the Severity is always derived from the base score (Low: 0.0-3.9, Medium: 4.0-6.9, High: 7.0-10.0). The legacy CVSSv2 Score and CVSSv3 Score fields are no longer modified by the Job.
 
 ### External Integration
 An External Integration must be created and configured in order to use the NIST NVD API for automatic software CVE discovery. On this note, the following is installed for you:

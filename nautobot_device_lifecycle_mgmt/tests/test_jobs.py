@@ -11,6 +11,7 @@ from nautobot.dcim.models import Platform, SoftwareVersion
 from nautobot.extras.models import Status
 from requests.exceptions import ChunkedEncodingError, Timeout
 
+from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.jobs.cve_tracking import NistCveSyncSoftware
 from nautobot_device_lifecycle_mgmt.models import (
     DeviceHardwareNoticeResult,
@@ -184,3 +185,141 @@ class NistCveSyncSoftwareQueryApiTestCase(unittest.TestCase):
         self.assertEqual(result, {"vulnerabilities": [], "totalResults": 0})
         failing_session.close.assert_called_once()
         job.nist_session_init.assert_called_once()
+
+
+def _cvss_metric(score, severity=None, severity_in_cvss_data=True, vector=None):
+    """Build a NIST CVSS metric entry list."""
+    metric = {"cvssData": {"baseScore": score}}
+    if vector is not None:
+        metric["cvssData"]["vectorString"] = vector
+    if severity is not None:
+        if severity_in_cvss_data:
+            metric["cvssData"]["baseSeverity"] = severity
+        else:
+            metric["baseSeverity"] = severity
+    return [metric]
+
+
+class NistCveSyncSoftwarePrepCveTestCase(unittest.TestCase):
+    """Test NistCveSyncSoftware CVSS score/severity selection."""
+
+    def setUp(self):
+        """Construct a NistCveSyncSoftware instance, bypassing Job.__init__."""
+        self.job = NistCveSyncSoftware.__new__(NistCveSyncSoftware)
+        self.job.logger = mock.MagicMock()
+
+    @staticmethod
+    def _cve_json(metrics=None):
+        """Build a minimal NIST CVE record."""
+        cve = {
+            "id": "CVE-2024-0001",
+            "descriptions": [{"lang": "en", "value": "Test CVE"}],
+            "published": "2024-01-01T00:00:00.000",
+            "lastModified": "2024-02-01T00:00:00.000",
+            "references": [{"url": "https://example.com/CVE-2024-0001"}],
+        }
+        if metrics is not None:
+            cve["metrics"] = metrics
+        return cve
+
+    def test_prefers_v40_over_lower_versions(self):
+        """CVSS v4.0 is used when present alongside v3.1 and v2."""
+        result = self.job.prep_cve_for_dlc(
+            self._cve_json(
+                {
+                    "cvssMetricV40": _cvss_metric(
+                        9.3, "CRITICAL", vector="CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N"
+                    ),
+                    "cvssMetricV31": _cvss_metric(7.5, "HIGH", vector="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"),
+                    "cvssMetricV2": _cvss_metric(
+                        5.0, "MEDIUM", severity_in_cvss_data=False, vector="AV:N/AC:L/Au:N/C:P/I:P/A:P"
+                    ),
+                }
+            )
+        )
+        self.assertEqual(result["cvss_base_score"], 9.3)
+        self.assertEqual(result["cvss_severity"], CVESeverityChoices.CRITICAL)
+        self.assertEqual(result["cvss_vector"], "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N")
+        self.assertNotIn("cvssv2_score", result)
+        self.assertNotIn("cvssv3_score", result)
+
+    def test_prefers_v31_over_v2(self):
+        """CVSS v3.1 is used when v4.0 is absent."""
+        result = self.job.prep_cve_for_dlc(
+            self._cve_json(
+                {
+                    "cvssMetricV31": _cvss_metric(7.5, "HIGH"),
+                    "cvssMetricV2": _cvss_metric(5.0, "MEDIUM", severity_in_cvss_data=False),
+                }
+            )
+        )
+        self.assertEqual(result["cvss_base_score"], 7.5)
+        self.assertEqual(result["cvss_severity"], CVESeverityChoices.HIGH)
+
+    def test_uses_v30_when_only_version(self):
+        """CVSS v3.0 is used when it is the only version available."""
+        result = self.job.prep_cve_for_dlc(self._cve_json({"cvssMetricV30": _cvss_metric(4.3, "MEDIUM")}))
+        self.assertEqual(result["cvss_base_score"], 4.3)
+        self.assertEqual(result["cvss_severity"], CVESeverityChoices.MEDIUM)
+
+    def test_non_v2_severity_uses_standardize(self):
+        """Severity for v3+ comes from standardize_cvss_severity, not the v2 score conversion."""
+        with mock.patch.object(NistCveSyncSoftware, "convert_v2_base_score_to_severity") as mock_convert:
+            result = self.job.prep_cve_for_dlc(self._cve_json({"cvssMetricV31": _cvss_metric(9.8, "CRITICAL")}))
+        mock_convert.assert_not_called()
+        self.assertEqual(result["cvss_severity"], CVESeverityChoices.CRITICAL)
+
+    def test_v2_severity_derived_from_score(self):
+        """Severity for v2 always comes from the base score, ignoring NIST's baseSeverity."""
+        with mock.patch("nautobot_device_lifecycle_mgmt.jobs.cve_tracking.standardize_cvss_severity") as mock_std:
+            result = self.job.prep_cve_for_dlc(
+                self._cve_json(
+                    {
+                        "cvssMetricV2": _cvss_metric(
+                            9.8, "CRITICAL", severity_in_cvss_data=False, vector="AV:N/AC:L/Au:N/C:P/I:P/A:P"
+                        )
+                    }
+                )
+            )
+        mock_std.assert_not_called()
+        self.assertEqual(result["cvss_base_score"], 9.8)
+        self.assertEqual(result["cvss_severity"], CVESeverityChoices.HIGH)
+        self.assertEqual(result["cvss_vector"], "AV:N/AC:L/Au:N/C:P/I:P/A:P")
+
+    def test_v2_without_severity(self):
+        """A v2 metric with no baseSeverity still gets a severity from its score."""
+        result = self.job.prep_cve_for_dlc(self._cve_json({"cvssMetricV2": _cvss_metric(2.1)}))
+        self.assertEqual(result["cvss_base_score"], 2.1)
+        self.assertEqual(result["cvss_severity"], CVESeverityChoices.LOW)
+
+    def test_no_metrics(self):
+        """A CVE without CVSS metrics has no score and a severity of None."""
+        for metrics in (None, {}):
+            with self.subTest(metrics=metrics):
+                result = self.job.prep_cve_for_dlc(self._cve_json(metrics))
+                self.assertIsNone(result["cvss_base_score"])
+                self.assertEqual(result["cvss_severity"], CVESeverityChoices.NONE)
+                self.assertEqual(result["cvss_vector"], "")
+
+    def test_missing_vector_string(self):
+        """A metric without a vectorString results in an empty vector."""
+        result = self.job.prep_cve_for_dlc(self._cve_json({"cvssMetricV31": _cvss_metric(7.5, "HIGH")}))
+        self.assertEqual(result["cvss_vector"], "")
+
+    def test_update_cve_leaves_legacy_scores_untouched(self):
+        """update_cve sets cvss/severity and does not modify cvss_v2/cvss_v3."""
+        current_cve = mock.MagicMock(cvss=1.0, cvss_v2=3.3, cvss_v3=4.4, comments="")
+        updated_cve = self.job.prep_cve_for_dlc(
+            self._cve_json(
+                {"cvssMetricV31": _cvss_metric(9.8, "CRITICAL", vector="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H")}
+            )
+        )
+
+        self.job.update_cve(current_cve, updated_cve)
+
+        self.assertEqual(current_cve.cvss, 9.8)
+        self.assertEqual(current_cve.severity, CVESeverityChoices.CRITICAL)
+        self.assertEqual(current_cve.cvss_vector, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H")
+        self.assertEqual(current_cve.cvss_v2, 3.3)
+        self.assertEqual(current_cve.cvss_v3, 4.4)
+        current_cve.validated_save.assert_called_once()

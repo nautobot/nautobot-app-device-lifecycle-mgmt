@@ -26,6 +26,9 @@ from nautobot_device_lifecycle_mgmt.utils import standardize_cvss_severity
 
 name = "CVE Tracking"  # pylint: disable=invalid-name
 
+# NIST CVSS metric keys, ordered from highest to lowest CVSS version.
+CVSS_METRIC_PRIORITY = ("cvssMetricV40", "cvssMetricV31", "cvssMetricV30", "cvssMetricV2")
+
 
 class GenerateVulnerabilities(Job):
     """Generates VulnerabilityLCM objects based on CVEs that are related to Devices."""
@@ -262,9 +265,8 @@ class NistCveSyncSoftware(Job):
                 last_modified_date=date.fromisoformat(info.get("modified_date", "1900-01-01")[0:10]),
                 link=info["url"],
                 cvss=info["cvss_base_score"],
-                severity=standardize_cvss_severity(info["cvss_severity"]),
-                cvss_v2=info["cvssv2_score"],
-                cvss_v3=info["cvssv3_score"],
+                cvss_vector=info["cvss_vector"],
+                severity=info["cvss_severity"],
                 comments="ENTRY CREATED BY NAUTOBOT NIST JOB",
             )
 
@@ -394,7 +396,43 @@ class NistCveSyncSoftware(Job):
             return CVESeverityChoices.HIGH
         return CVESeverityChoices.NONE
 
-    def prep_cve_for_dlc(self, cve_json: dict) -> dict:  # pylint: disable=too-many-locals
+    def get_highest_cvss_score(self, cve_metrics: dict | None) -> dict:
+        """Return the CVSS details from the highest available CVSS version.
+
+        CVSS v2 severity is always derived from the base score. All other versions
+        use the ``baseSeverity`` provided by NIST.
+
+        Args:
+            cve_metrics (dict | None): The ``metrics`` object from a NIST CVE record.
+
+        Returns:
+            dict: The ``cvss_base_score``, ``cvss_severity`` and ``cvss_vector``. If no
+            CVSS metrics are available, the score is ``None``, the severity is
+            ``CVESeverityChoices.NONE`` and the vector is empty.
+        """
+        cve_metrics = cve_metrics or {}
+        for metric_key in CVSS_METRIC_PRIORITY:
+            if not cve_metrics.get(metric_key):
+                continue
+            cvss_data = cve_metrics[metric_key][0]["cvssData"]
+            base_score = cvss_data["baseScore"]
+            if metric_key == "cvssMetricV2":
+                severity = self.convert_v2_base_score_to_severity(base_score)
+            else:
+                severity = standardize_cvss_severity(cvss_data.get("baseSeverity"))
+            return {
+                "cvss_base_score": base_score,
+                "cvss_severity": severity,
+                "cvss_vector": cvss_data.get("vectorString", ""),
+            }
+
+        return {
+            "cvss_base_score": None,
+            "cvss_severity": CVESeverityChoices.NONE,
+            "cvss_vector": "",
+        }
+
+    def prep_cve_for_dlc(self, cve_json: dict) -> dict:
         """Convert CVE info into a format compatible with the DLC model.
 
         Args:
@@ -411,7 +449,6 @@ class NistCveSyncSoftware(Job):
 
         cve_published_date = cve_json["published"]
         cve_modified_date = cve_json["lastModified"]
-        cve_impact = cve_json.get("metrics")
 
         # Determine URL
         if len(cve_json["references"]) > 0:
@@ -419,53 +456,13 @@ class NistCveSyncSoftware(Job):
         else:
             cve_url = f"https://www.cvedetails.com/cve/{cve_name}/"
 
-        # Determine if V3 exists and set all params based on found version info
-        if cve_impact:
-            if cve_impact.get("cvssMetricV31"):
-                cvss_base_score = cve_impact["cvssMetricV31"][0]["cvssData"]["baseScore"]
-                cvss_severity = cve_impact["cvssMetricV31"][0]["cvssData"]["baseSeverity"]
-                if cve_impact.get("cvssMetricV2"):
-                    cvssv2_score = cve_impact["cvssMetricV2"][0].get("exploitabilityScore", 10)
-                else:
-                    cvssv2_score = 10
-                cvssv3_score = cve_impact["cvssMetricV31"][0].get("exploitabilityScore", 10)
-
-            elif cve_impact.get("cvssMetricV30"):
-                cvss_base_score = cve_impact["cvssMetricV30"][0]["cvssData"]["baseScore"]
-                cvss_severity = cve_impact["cvssMetricV30"][0]["cvssData"]["baseSeverity"]
-                if cve_impact.get("cvssMetricV2"):
-                    cvssv2_score = cve_impact["cvssMetricV2"][0].get("exploitabilityScore", 10)
-                else:
-                    cvssv2_score = 10
-                cvssv3_score = cve_impact["cvssMetricV30"][0].get("exploitabilityScore", 10)
-
-            else:
-                cvss_base_score = cve_impact["cvssMetricV2"][0]["cvssData"]["baseScore"]
-                cvss_severity = cve_impact["cvssMetricV2"][0]["baseSeverity"] or self.convert_v2_base_score_to_severity(
-                    cvss_base_score
-                )
-                cvssv2_score = cve_impact["cvssMetricV2"][0].get("exploitabilityScore", 10)
-                cvssv3_score = 0
-
-            all_cve_info = {
-                "url": cve_url,
-                "description": cve_description,
-                "published_date": cve_published_date,
-                "modified_date": cve_modified_date,
-                "cvss_base_score": cvss_base_score,
-                "cvss_severity": cvss_severity,
-                "cvssv2_score": cvssv2_score,
-                "cvssv3_score": cvssv3_score,
-            }
-
-        else:
-            all_cve_info = {
-                "url": cve_url,
-                "description": cve_description,
-                "published_date": cve_published_date,
-                "modified_date": cve_modified_date,
-            }
-        return all_cve_info
+        return {
+            "url": cve_url,
+            "description": cve_description,
+            "published_date": cve_published_date,
+            "modified_date": cve_modified_date,
+            **self.get_highest_cvss_score(cve_json.get("metrics")),
+        }
 
     def update_cve(self, current_dlc_cve: CVELCM, updated_cve: dict) -> None:
         """Update CVE information if the latest info is newer than existing info.
@@ -482,9 +479,8 @@ class NistCveSyncSoftware(Job):
         current_dlc_cve.last_modified_date = f"{updated_cve['modified_date'][0:10]}"
         current_dlc_cve.link = updated_cve["url"]
         current_dlc_cve.cvss = updated_cve["cvss_base_score"]
-        current_dlc_cve.severity = standardize_cvss_severity(updated_cve["cvss_severity"])
-        current_dlc_cve.cvss_v2 = updated_cve["cvssv2_score"]
-        current_dlc_cve.cvss_v3 = updated_cve["cvssv3_score"]
+        current_dlc_cve.cvss_vector = updated_cve["cvss_vector"]
+        current_dlc_cve.severity = updated_cve["cvss_severity"]
 
         if update_message not in current_dlc_cve.comments:
             current_dlc_cve.comments = f"{update_message} - {timestamp}\nPlace any other comments below this line.\n\n{current_dlc_cve.comments}"
