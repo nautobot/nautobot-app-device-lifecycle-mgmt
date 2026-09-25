@@ -1,0 +1,2 @@
+Changed the NIST CVE Search Job to set a CVE's CVSS base score and severity from the highest CVSS version available (v4.0, v3.1, v3.0, then v2). CVSS v2 severity is always derived from the base score.
+Changed the NIST CVE Search Job to no longer populate the legacy `cvss_v2` and `cvss_v3` fields. Existing values are left unchanged.

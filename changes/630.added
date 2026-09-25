@@ -1,0 +1,2 @@
+Added a `cvss_vector` field to the CVE model that records the CVSS vector string for the highest available CVSS version, which also indicates that version. The NIST CVE Search Job populates it automatically.
+Added a pop-up to the CVE detail page that explains each metric in the CVSS vector string and links to the official CVSS calculator.

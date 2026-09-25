@@ -13,6 +13,7 @@ from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, ExpressionWrapper, F, FloatField, Q
 from django.template import Context
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.html import format_html, format_html_join
 from django_tables2 import RequestConfig
@@ -52,6 +53,7 @@ from nautobot.tenancy.models import Tenant
 
 from nautobot_device_lifecycle_mgmt import choices, filters, forms, helpers, models, tables
 from nautobot_device_lifecycle_mgmt.api import serializers
+from nautobot_device_lifecycle_mgmt.cvss import parse_cvss_vector
 
 PLUGIN_CFG = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]
 
@@ -284,7 +286,12 @@ class CVEObjectFieldsPanel(ObjectFieldsPanel):
     """Custom fields panel for CVELCM."""
 
     def render_value(self, key, value, context):
-        """Render affected software as clickable links."""
+        """Render affected software as clickable links and the CVSS vector as an explanatory pop-up."""
+        if key == "cvss_vector":
+            cvss = parse_cvss_vector(value)
+            if cvss:
+                return render_to_string("nautobot_device_lifecycle_mgmt/inc/cvss_vector_modal.html", {"cvss": cvss})
+
         if key == "affected_softwares":
             queryset = value.all() if hasattr(value, "all") else value
 
@@ -324,6 +331,7 @@ class CVELCMUIViewSet(NautobotUIViewSet):
                     "description",
                     "severity",
                     "cvss",
+                    "cvss_vector",
                     "cvss_v2",
                     "cvss_v3",
                     "affected_softwares",
