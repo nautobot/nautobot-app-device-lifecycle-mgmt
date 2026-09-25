@@ -271,6 +271,55 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     def test_bulk_import_objects_with_constrained_permission(self):
         pass
 
+    def test_detail_view_renders_cvss_vector_modal(self):
+        """The CVSS vector renders as a link that opens a pop-up describing each metric."""
+        cve = CVELCM.objects.first()
+        cve.cvss_vector = "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H"
+        cve.validated_save()
+        self.add_permissions("nautobot_device_lifecycle_mgmt.view_cvelcm")
+
+        response = self.client.get(cve.get_absolute_url())
+
+        self.assertHttpStatus(response, 200)
+        content = response.content.decode(response.charset)
+        self.assertIn('data-bs-target="#cvss_vector_modal"', content)
+        self.assertIn('id="cvss_vector_modal"', content)
+        self.assertIn("CVSS v3.1 Vector", content)
+        self.assertIn("User Interaction", content)
+        self.assertIn("Required", content)
+        self.assertIn(f"https://www.first.org/cvss/calculator/3.1#{cve.cvss_vector}", content)
+
+    def test_detail_view_escapes_html_in_cvss_vector(self):
+        """HTML entered in the CVSS vector is never rendered as markup, with or without the pop-up."""
+        payload = "<img src=x onerror=alert(1)>"
+        cases = (
+            (f"CVSS:3.1/AV:N/{payload}", True),
+            (payload, False),
+        )
+        self.add_permissions("nautobot_device_lifecycle_mgmt.view_cvelcm")
+        cve = CVELCM.objects.first()
+        for vector, has_modal in cases:
+            with self.subTest(vector=vector):
+                cve.cvss_vector = vector
+                cve.validated_save()
+
+                response = self.client.get(cve.get_absolute_url())
+
+                self.assertHttpStatus(response, 200)
+                content = response.content.decode(response.charset)
+                self.assertNotIn(payload, content)
+                self.assertEqual('id="cvss_vector_modal"' in content, has_modal)
+
+    def test_detail_view_without_cvss_vector_has_no_modal(self):
+        """A CVE without a CVSS vector does not render the pop-up."""
+        cve = CVELCM.objects.filter(cvss_vector="").first()
+        self.add_permissions("nautobot_device_lifecycle_mgmt.view_cvelcm")
+
+        response = self.client.get(cve.get_absolute_url())
+
+        self.assertHttpStatus(response, 200)
+        self.assertNotIn('id="cvss_vector_modal"', response.content.decode(response.charset))
+
 
 class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the VulnerabilityLCM views."""
