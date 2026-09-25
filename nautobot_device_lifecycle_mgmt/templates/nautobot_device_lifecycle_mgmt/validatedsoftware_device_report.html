@@ -4,93 +4,93 @@
 {% load helpers %}
 
 {% block buttons %}
-<div class="btn-group">
-    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <span class="mdi mdi-plus-thick" aria-hidden="true"></span>Execute<span class="mdi mdi-chevron-down"></span>
-    </button>
-    <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="{% url 'extras:job_run_by_class_path' class_path='nautobot_device_lifecycle_mgmt.jobs.lifecycle_reporting.DeviceSoftwareValidationFullReport' %}">Run Software Validation</a></li>
-    </ul>
-</div>
+    <div class="btn-group">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="mdi mdi-plus-thick" aria-hidden="true"></span>Execute<span class="mdi mdi-chevron-down"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'extras:job_run_by_class_path' class_path='nautobot_device_lifecycle_mgmt.jobs.lifecycle_reporting.DeviceSoftwareValidationFullReport' %}">Run Software Validation</a></li>
+        </ul>
+    </div>
 {% endblock buttons %}
 {% block title %}Device Software Validation Reports{% endblock title %}
 {% block table %}
             <!-- VISUAL BLOCK -->
-            {% if report_last_run is None %}
-                <h4 class="text-center alert-danger p-4 m-4">-- No validation results found, you need to run the report at least once before seeing the results! --</h4>
-            {% else %}
-                <h4 class="text-start alert-info p-4 m-4">Last full run of the report: {{ report_last_run }} - {{ report_last_run|timesince }} ago </h4>
-            {% endif %}
-            {% if bar_chart is not None %}
-                {% block graphic %}
-                    <div id="content">
-                        <img src="data:image/png;base64,{{ bar_chart|safe }}" style="width:100%" alt="Platform Bar Chart">
-                    </div>
-                {% endblock graphic %}
-            {% else %}
-                    <span class="text-center alert-danger p-4 m-4">-- Can't generate visualization, no config validation found. --</span>
-            {% endif %}
-            <!-- END VISUAL BLOCK -->
-            <h3 class="text-center m-2 p-3">Executive Summary</h3>
-            <table class="table table-hover nb-table-headings">
-                <thead>
-                    <tr>
-                        <th><a>Type</a></th>
-                        <th><a>Total</a></th>
-                        <th><a>Valid</a></th>
-                        <th><a>Invalid</a></th>
-                        <th><a>No Software</a></th>
-                        <th><a>Compliance (%)</a></th>
-                        <th><a>Summary</a></th>
-                        <th class="nb-w-0"><a>Export Data</a></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="even">
-                        <td>
-                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list' %}">
-                                Devices
-                            </a>
-                        </td>
-                        <td>
-                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list' %}">
-                                {% if device_aggr.total is not None %} {{ device_aggr.total }} {% else %} -- {% endif %}
-                            </a>
-                        </td>
-                        <td>
-                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list' %}?valid=True">
-                                {% if device_aggr.valid is not None %} {{ device_aggr.valid }} {% else %} -- {% endif %}
-                            </a>
-                        </td>
-                        <td>
-                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list' %}?valid=False">
-                                {% if device_aggr.invalid is not None %} {{ device_aggr.invalid }} {% else %} -- {% endif %}
-                            </a>
-                        </td>
-                        <td>
-                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list' %}?sw_missing_only=True">
-                                {% if device_aggr.no_software is not None %} {{ device_aggr.no_software }} {% else %} -- {% endif %}
-                            </a>
-                        </td>
-                        <td>{% if device_aggr.valid_percent is not None %} {{ device_aggr.valid_percent }} % {% else %} -- {% endif %}</td>
-                        <td>
-                            <a target="_blank" href="data:image/png;base64,{{ device_visual|safe }}" title="Devices Pie Chart">
-                            <img style="width:150px;" src="data:image/png;base64,{{ device_visual|safe }}" alt="Devices Pie Chart">
-                            </a>
-                        </td>
-                        <td class="d-print-none nb-actions nb-w-0 text-end text-nowrap">
-                            <a href="{% url 'plugins-api:nautobot_device_lifecycle_mgmt-api:devicesoftwarevalidationresult-list' %}?format=csv"
-                                class="btn btn-secondary btn-sm" title="Export data for all device types" aria-hidden="true">
-                                <i class="mdi mdi-download"></i>
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <h3 class="text-center m-2 p-3">Device Type Summary</h3>
-            <div class="col-md-12">
-                {% include table_template|default:"panel_table.html" %}
-                {% include "inc/paginator.html" with paginator=table.paginator page=table.page %}
-                <div class="clearfix"></div>
+    {% if report_last_run is None %}
+        <h4 class="text-center alert-danger p-4 m-4">-- No validation results found, you need to run the report at least once before seeing the results! --</h4>
+    {% else %}
+        <h4 class="text-start alert-info p-4 m-4">Last full run of the report: {{ report_last_run }} - {{ report_last_run|timesince }} ago </h4>
+    {% endif %}
+    {% if bar_chart is not None %}
+        {% block graphic %}
+            <div id="content">
+                <img src="data:image/png;base64,{{ bar_chart|safe }}" style="width:100%" alt="Platform Bar Chart">
             </div>
+        {% endblock graphic %}
+    {% else %}
+        <span class="text-center alert-danger p-4 m-4">-- Can't generate visualization, no config validation found. --</span>
+    {% endif %}
+            <!-- END VISUAL BLOCK -->
+    <h3 class="text-center m-2 p-3">Executive Summary</h3>
+    <table class="table table-hover nb-table-headings">
+        <thead>
+            <tr>
+                <th><a>Type</a></th>
+                <th><a>Total</a></th>
+                <th><a>Valid</a></th>
+                <th><a>Invalid</a></th>
+                <th><a>No Software</a></th>
+                <th><a>Compliance (%)</a></th>
+                <th><a>Summary</a></th>
+                <th class="nb-w-0"><a>Export Data</a></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="even">
+                <td>
+                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list' %}">
+                        Devices
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list' %}">
+                        {% if device_aggr.total is not None %} {{ device_aggr.total }} {% else %} -- {% endif %}
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list' %}?valid=True">
+                        {% if device_aggr.valid is not None %} {{ device_aggr.valid }} {% else %} -- {% endif %}
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list' %}?valid=False">
+                        {% if device_aggr.invalid is not None %} {{ device_aggr.invalid }} {% else %} -- {% endif %}
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list' %}?sw_missing_only=True">
+                        {% if device_aggr.no_software is not None %} {{ device_aggr.no_software }} {% else %} -- {% endif %}
+                    </a>
+                </td>
+                <td>{% if device_aggr.valid_percent is not None %} {{ device_aggr.valid_percent }} % {% else %} -- {% endif %}</td>
+                <td>
+                    <a target="_blank" href="data:image/png;base64,{{ device_visual|safe }}" title="Devices Pie Chart">
+                        <img style="width:150px;" src="data:image/png;base64,{{ device_visual|safe }}" alt="Devices Pie Chart">
+                    </a>
+                </td>
+                <td class="d-print-none nb-actions nb-w-0 text-end text-nowrap">
+                    <a href="{% url 'plugins-api:nautobot_device_lifecycle_mgmt-api:devicesoftwarevalidationresult-list' %}?format=csv"
+                       class="btn btn-secondary btn-sm" title="Export data for all device types" aria-label="Export data for all device types">
+                        <i class="mdi mdi-download" aria-hidden="true"></i>
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <h3 class="text-center m-2 p-3">Device Type Summary</h3>
+    <div class="col-md-12">
+        {% include table_template|default:"panel_table.html" %}
+        {% include "inc/paginator.html" with paginator=table.paginator page=table.page %}
+        <div class="clearfix"></div>
+    </div>
 {% endblock table %}
