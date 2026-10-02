@@ -745,8 +745,25 @@ class CVELCM(PrimaryModel):
         max_length=CHARFIELD_MAX_LENGTH, choices=choices.CVESeverityChoices, default=choices.CVESeverityChoices.NONE
     )
     cvss = models.FloatField(blank=True, null=True, verbose_name="CVSS Base Score")
-    cvss_v2 = models.FloatField(blank=True, null=True, verbose_name="CVSSv2 Score")
-    cvss_v3 = models.FloatField(blank=True, null=True, verbose_name="CVSSv3 Score")
+    cvss_vector = models.CharField(
+        max_length=CHARFIELD_MAX_LENGTH,
+        blank=True,
+        default="",
+        verbose_name="CVSS Vector",
+        help_text="CVSS vector string for the highest available CVSS version.",
+    )
+    cvss_v2 = models.FloatField(
+        blank=True,
+        null=True,
+        verbose_name="CVSSv2 Score",
+        help_text="Deprecated: will be removed in an upcoming major version. Migrate this data to a custom field.",
+    )
+    cvss_v3 = models.FloatField(
+        blank=True,
+        null=True,
+        verbose_name="CVSSv3 Score",
+        help_text="Deprecated: will be removed in an upcoming major version. Migrate this data to a custom field.",
+    )
     fix = models.CharField(max_length=255, blank=True, default="")
     comments = models.TextField(blank=True, default="")
     affected_softwares = models.ManyToManyField(

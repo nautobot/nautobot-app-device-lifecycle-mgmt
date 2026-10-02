@@ -1020,6 +1020,7 @@ class CVELCMTestCase(FilterTestCases.FilterTestCase):
             last_modified_date="2021-03-24",
             link="https://www.cvedetails.com/cve/CVE-2021-1391/",
             cvss=3.0,
+            cvss_vector="AV:N/AC:L/Au:N/C:P/I:P/A:P",
             cvss_v2=3.0,
             cvss_v3=3.0,
         )
@@ -1030,6 +1031,7 @@ class CVELCMTestCase(FilterTestCases.FilterTestCase):
             link="https://www.cvedetails.com/cve/CVE-2021-44228/",
             status=not_fixed,
             cvss=5.0,
+            cvss_vector="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
             cvss_v2=5.0,
             cvss_v3=5.0,
         )
@@ -1041,6 +1043,7 @@ class CVELCMTestCase(FilterTestCases.FilterTestCase):
             severity=CVESeverityChoices.CRITICAL,
             status=fixed,
             cvss=7,
+            cvss_vector="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
             cvss_v2=7,
             cvss_v3=7,
         )
@@ -1073,6 +1076,13 @@ class CVELCMTestCase(FilterTestCases.FilterTestCase):
     def test_severity(self):
         """Test severity filter."""
         params = {"severity": [CVESeverityChoices.CRITICAL]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_cvss_vector(self):
+        """Test cvss_vector filter."""
+        params = {"cvss_vector": ["CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+        params = {"cvss_vector__ic": ["au:n"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_published_date_before(self):

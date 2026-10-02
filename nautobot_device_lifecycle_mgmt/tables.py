@@ -536,6 +536,7 @@ class CVELCMTable(StatusTableMixin, BaseTable):
             "link",
             "severity",
             "cvss",
+            "cvss_vector",
             "cvss_v2",
             "cvss_v3",
             "affected_softwares",

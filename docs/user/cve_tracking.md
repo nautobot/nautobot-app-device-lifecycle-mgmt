@@ -16,18 +16,46 @@ When creating a CVE object, the following fields are available. Fields in **bold
 | Status | The current status of the CVE (requires a [Status object](https://docs.nautobot.com/projects/core/en/stable/models/extras/status/) to be created and associated to the CVE model) |
 | Description | The description of the CVE |
 | Severity | The severity (Low, Medium, High, Critical) of the CVE |
-| CVSS Base Score | The Base (v1) Common Vulnerability Scoring System of the CVE |
-| CVSSv2 Score | The CVSSv2 Score |
-| CVSSv3 Score | The CVSSv3 Score |
+| CVSS Base Score | The Common Vulnerability Scoring System base score of the CVE. The NIST CVE Search Job populates this from the highest CVSS version in the CVE's NIST data |
+| CVSS Vector | The CVSS vector string for the CVSS version used for the CVSS Base Score and Severity. The version is shown by the vector's prefix (for example `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`); CVSS v2 vectors have no prefix (for example `AV:N/AC:L/Au:N/C:P/I:P/A:P`). On the CVE detail page, click the vector to open a pop-up that explains each metric and links to the official CVSS calculator. The NIST CVE Search Job populates this automatically |
+| CVSSv2 Score | **Deprecated.** Legacy field retained for backward compatibility; no longer populated by the NIST CVE Search Job |
+| CVSSv3 Score | **Deprecated.** Legacy field retained for backward compatibility; no longer populated by the NIST CVE Search Job |
 | Affected Softwares | Software versions affected by this CVE |
 | Fix | The software fix (if available) for the CVE |
 | Comments | Any additional comments or details about the CVE |
 | Tags | Arbitrary [tag objects](https://docs.nautobot.com/projects/core/en/stable/models/extras/tag/) that can be applied to this CVE |
 | Last Modified Date | The date that the CVE record was last modified |
 
+!!! warning "Deprecated fields"
+    The CVSSv2 Score (`cvss_v2`) and CVSSv3 Score (`cvss_v3`) fields are deprecated and will be removed in an upcoming major version of this app. If you rely on these fields (for example in the REST API, GraphQL, filters, or export templates), plan to migrate to a custom field before upgrading to the next major version.
+
 !!! note
     In addition to these standard fields, you can also add one or more [Custom Fields](https://docs.nautobot.com/projects/core/en/stable/models/extras/customfield/) to the model.
 
+### CVE Detail View
+
+The CVE detail view shows the CVE's Severity and CVSS Base Score alongside the CVSS Vector they were taken from. The deprecated CVSSv2 Score and CVSSv3 Score fields are still shown for backward compatibility.
+
+![CVE detail view showing the Severity, CVSS Base Score, and CVSS Vector fields](../images/ss_lcm_cve_view_light.png#only-light){ .on-glb }
+![CVE detail view showing the Severity, CVSS Base Score, and CVSS Vector fields](../images/ss_lcm_cve_view_dark.png#only-dark){ .on-glb }
+
+### Editing a CVE
+
+When editing a CVE, the CVSS Vector can be entered or updated alongside the CVSS Base Score. The deprecated CVSSv2 Score and CVSSv3 Score fields show a deprecation notice below each field.
+
+![CVE edit form showing the CVSS Vector field and the deprecation notices on the CVSSv2 Score and CVSSv3 Score fields](../images/ss_lcm_cve_edit_light.png#only-light){ .on-glb }
+![CVE edit form showing the CVSS Vector field and the deprecation notices on the CVSSv2 Score and CVSSv3 Score fields](../images/ss_lcm_cve_edit_dark.png#only-dark){ .on-glb }
+
+### CVSS Vector Details
+
+On the CVE detail view, click the CVSS Vector to open a pop-up that explains the vector. Each metric in the vector is listed with its full name, its value, and a description of what the metric measures. CVSS v2.0, v3.0, v3.1, and v4.0 vectors are supported, including the optional CVSS v3.x temporal and environmental metrics and the CVSS v4.0 threat, environmental, and supplemental metrics. Blank or malformed segments in a vector are ignored.
+
+![CVSS vector pop-up listing each metric of a CVSS v4.0 vector with its value and description](../images/ss_lcm_cve_cvss_details_light.png#only-light){ .on-glb }
+![CVSS vector pop-up listing each metric of a CVSS v4.0 vector with its value and description](../images/ss_lcm_cve_cvss_details_dark.png#only-dark){ .on-glb }
+
+The **Open in CVSS calculator** button opens the vector in the official calculator for its CVSS version in a new tab: the [FIRST CVSS calculator](https://www.first.org/cvss/) for CVSS v3.0, v3.1, and v4.0, or the [NVD CVSS v2 calculator](https://nvd.nist.gov/vuln-metrics/cvss/v2-calculator) for CVSS v2.0. The calculator shows how the vector's metrics produce the CVSS Base Score.
+
+![FIRST CVSS v4.0 calculator with the metrics from the CVE's vector selected, showing a score of 9.3 (Critical)](../images/ss_lcm_cvss_calculator.png){ .on-glb }
 
 ### Software Association
 
@@ -77,6 +105,9 @@ The NTC Nautobot Device Lifecycle Management app now supports automated CVE disc
 
 !!! note
     If a record is updated due to a mismatched Modified Date against NIST, a comment will be added to the TOP of the comments section notifying of an update and the timestamp that the record was locally modified.  The record's Last Modifed Date will be updated to show when the record itself was modifed in NIST.
+
+!!! note
+    The Job sets the CVE's CVSS Base Score and Severity from the highest CVSS version in the CVE's NIST data, and records that version's vector string in the CVSS Vector field. The Job compares the CVSS metric entries NIST returns for the CVE (`cvssMetricV2`, `cvssMetricV30`, `cvssMetricV31`, `cvssMetricV40`) and uses the highest version that has data, so a newer CVSS version that NIST adds with the same naming is picked up automatically. For v3.0 and later, the Severity is NIST's `baseSeverity`. For v2, the Severity is always derived from the base score (Low: 0.0-3.9, Medium: 4.0-6.9, High: 7.0-10.0). The legacy CVSSv2 Score and CVSSv3 Score fields are no longer modified by the Job.
 
 ### External Integration
 An External Integration must be created and configured in order to use the NIST NVD API for automatic software CVE discovery. On this note, the following is installed for you:
