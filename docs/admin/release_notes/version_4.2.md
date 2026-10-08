@@ -19,7 +19,6 @@ This document describes all new features and changes in the release. The format 
 
 - [#582](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/582) - Made the NIST CVE Sync job resilient to transient transport failures (HTTP/2 stream resets surfaced as `ChunkedEncodingError`, `ConnectionError`, and `Timeout`) by closing and re-initializing the NIST session before retrying, up to `retries.max_attempts` with `retries.backoff * attempt` seconds between attempts.
 - [#609](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/609) - Fixed tags being silently discarded when creating or editing Validated Software, CVE, and Vulnerability objects in the UI. Their forms declared a `tags` field but omitted `"tags"` from an explicit `Meta.fields`, so Django's `_save_m2m()` never persisted the selection.
-- [#609](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/609) - 
 - [#609](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/609) - Fixed `AttributeError` when bulk editing Contract objects. `StatusModelBulkEditFormMixin` was listed after `NautobotBulkEditForm` on `ContractLCMBulkEditForm`, which placed it after `BulkEditForm` in the MRO and ran its `__init__()` before `self.model` was assigned.
 
 ### Housekeeping
