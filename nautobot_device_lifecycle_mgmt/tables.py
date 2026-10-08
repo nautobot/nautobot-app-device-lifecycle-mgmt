@@ -66,12 +66,26 @@ class HardwareLCMTable(BaseTable):
         verbose_name="Documentation",
     )
     actions = ButtonsColumn(HardwareLCM, buttons=("changelog", "edit", "delete"))
+    tags = TagColumn(url_name="plugins:nautobot_device_lifecycle_mgmt:hardwarelcm_list")
 
     class Meta(BaseTable.Meta):
         """Meta attributes."""
 
         model = HardwareLCM
         fields = (
+            "pk",
+            "name",
+            "reference_item",
+            "release_date",
+            "end_of_sale",
+            "end_of_support",
+            "end_of_sw_releases",
+            "end_of_security_patches",
+            "documentation_url",
+            "tags",
+            "actions",
+        )
+        default_columns = (
             "pk",
             "name",
             "reference_item",
@@ -102,12 +116,25 @@ class ValidatedSoftwareLCMTable(BaseTable):
     device_tenants = tables.ManyToManyColumn(verbose_name="Tenant")
     actions = ButtonsColumn(ValidatedSoftwareLCM, buttons=("edit", "delete"))
     preferred = BooleanColumn()
+    tags = TagColumn(url_name="plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_list")
 
     class Meta(BaseTable.Meta):
         """Meta attributes."""
 
         model = ValidatedSoftwareLCM
         fields = (
+            "pk",
+            "name",
+            "software",
+            "device_tenants",
+            "start",
+            "end",
+            "valid",
+            "preferred",
+            "tags",
+            "actions",
+        )
+        default_columns = (
             "pk",
             "name",
             "software",
@@ -441,7 +468,6 @@ class ContractLCMTable(StatusTableMixin, BaseTable):
             "contract_type",
             "provider",
             "active",
-            "tags",
             "actions",
         )
 
@@ -495,7 +521,7 @@ class CVELCMTable(StatusTableMixin, BaseTable):
                     {% endif %}""",
         verbose_name="Link",
     )
-    tags = TagColumn()
+    tags = TagColumn(url_name="plugins:nautobot_device_lifecycle_mgmt:cvelcm_list")
     actions = ButtonsColumn(CVELCM, buttons=("changelog", "edit", "delete"))
 
     class Meta(BaseTable.Meta):
@@ -544,7 +570,7 @@ class VulnerabilityLCMTable(StatusTableMixin, BaseTable):
     software = tables.LinkColumn()
     device = tables.LinkColumn()
     inventory_item = tables.LinkColumn(verbose_name="Inventory Item")
-    tags = TagColumn()
+    tags = TagColumn(url_name="plugins:nautobot_device_lifecycle_mgmt:vulnerabilitylcm_list")
     actions = ButtonsColumn(VulnerabilityLCM, buttons=("changelog", "edit", "delete"))
 
     class Meta(BaseTable.Meta):

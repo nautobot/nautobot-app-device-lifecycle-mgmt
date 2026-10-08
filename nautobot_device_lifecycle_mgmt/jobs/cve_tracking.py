@@ -16,7 +16,8 @@ from nautobot.extras.models import ExternalIntegration
 from netutils.nist import get_nist_urls
 from requests import Session
 from requests.adapters import HTTPAdapter
-from requests.exceptions import HTTPError
+from requests.exceptions import ChunkedEncodingError, HTTPError, Timeout
+from requests.exceptions import ConnectionError as RequestsConnectionError
 from urllib3.util import Retry
 
 from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
@@ -329,25 +330,50 @@ class NistCveSyncSoftware(Job):
     def query_api(self, url: str) -> dict:
         """Query the NIST API for the requested CVE.
 
+        Retries on transient transport failures (remote stream/connection resets) by
+        rebuilding the session, since urllib3 does not auto-retry once a response body
+        has started streaming.
+
         Args:
             url (str): The API endpoint being queried.
 
         Returns:
             dict: Dictionary of returned results if successful.
         """
-        try:
-            result = self.nist_session.get(url)
-            result.raise_for_status()
-            return result.json()
-        except HTTPError as err:
-            code = err.response.status_code
-            self.logger.error(
-                "The NIST Service is currently unavailable. Status Code: %s. Try running the job again later.", code
-            )
-            raise
-        except json.JSONDecodeError as err:
-            self.logger.error("Invalid JSON response from NIST Service: %s", err)
-            raise
+        retries_cfg = self.integration.extra_config.get("retries", {})
+        max_attempts = retries_cfg.get("max_attempts", 3)
+        backoff = retries_cfg.get("backoff", 1)
+
+        last_err = None
+        for attempt in range(1, max_attempts + 1):
+            try:
+                result = self.nist_session.get(url)
+                result.raise_for_status()
+                return result.json()
+            except HTTPError as err:
+                code = err.response.status_code
+                self.logger.error(
+                    "The NIST Service is currently unavailable. Status Code: %s. Try running the job again later.", code
+                )
+                raise
+            except json.JSONDecodeError as err:
+                self.logger.error("Invalid JSON response from NIST Service: %s", err)
+                raise
+            except (RequestsConnectionError, ChunkedEncodingError, Timeout) as err:
+                last_err = err
+                if attempt < max_attempts:
+                    self.logger.warning(
+                        "NIST request failure on attempt %s/%s; rebuilding session and retrying. ERROR: %s",
+                        attempt,
+                        max_attempts,
+                        err,
+                    )
+                    self.nist_session.close()
+                    self.nist_session = self.nist_session_init()
+                    sleep(backoff * attempt)
+
+        self.logger.error("NIST request failed after %s attempts. ERROR: %s", max_attempts, last_err)
+        raise last_err
 
     @staticmethod
     def convert_v2_base_score_to_severity(score: float) -> str:
