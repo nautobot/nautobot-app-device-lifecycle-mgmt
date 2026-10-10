@@ -1,0 +1,1 @@
+Added an optional `Software Versions` filter to the `NIST - Software CVE Search` job so the search can be scoped to selected Software Versions instead of always searching all of them.
