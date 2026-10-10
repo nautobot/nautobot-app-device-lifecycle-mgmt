@@ -1,0 +1,9 @@
+Fixed the `tag` filter form field on the CVE and Vulnerability list views. It was named `tag` while the corresponding filterset filter is `tags`, so the field could never bind and filtering by tag was rejected with "Invalid filters were specified".
+
+Fixed the missing `exclude_status` filter on `VulnerabilityLCMFilterSet`. The filter form offered the field but the filterset had no matching filter.
+
+Fixed a server error when sorting the Vulnerability list view by the Name column. `VulnerabilityLCM` has no `name` field - the label comes from `__str__` - so the column is no longer orderable.
+
+Fixed the Devices, Inventory Items and Object Tags filters on the Validated Software list view, which rejected the value selected in the UI with "Select a valid choice. <uuid> is not one of the available choices". The filters on `ValidatedSoftwareLCMFilterSet` matched on the natural key only, while the filter form submitted a primary key. All six related-object filters there are now `NaturalKeyOrPKMultipleChoiceFilter` and accept either a primary key or a natural key. Filters whose target has a non-unique natural key (`devices`, `inventory_items`, `device_types`) use `prefers_id=True`, so the UI submits primary keys while the natural key still works as a query parameter.
+
+Fixed the Status filter on the Contract list view. `ContractLCMFilterSet` was missing `StatusModelFilterSetMixin`, so the auto-generated filter matched on primary key while the filter form submitted the status name.
