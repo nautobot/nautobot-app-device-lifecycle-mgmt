@@ -9,6 +9,23 @@ This document describes all new features and changes in the release. The format 
 
 <!-- towncrier release notes start -->
 
+## [v4.2.1 (2026-10-08)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v4.2.1)
+
+### Added
+
+- [#609](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/609) - Added tag support to the bulk edit forms for Hardware Notice, Validated Software, Contract, CVE, and Vulnerability objects. Tags are now applied through the `Add tags` and `Remove tags` fields honored by Nautobot's bulk edit view; the previous `Tags` field on the CVE and Vulnerability bulk edit forms had no effect.
+
+### Fixed
+
+- [#582](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/582) - Made the NIST CVE Sync job resilient to transient transport failures (HTTP/2 stream resets surfaced as `ChunkedEncodingError`, `ConnectionError`, and `Timeout`) by closing and re-initializing the NIST session before retrying, up to `retries.max_attempts` with `retries.backoff * attempt` seconds between attempts.
+- [#609](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/609) - Fixed tags being silently discarded when creating or editing Validated Software, CVE, and Vulnerability objects in the UI. Their forms declared a `tags` field but omitted `"tags"` from an explicit `Meta.fields`, so Django's `_save_m2m()` never persisted the selection.
+- [#609](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/609) - Fixed `AttributeError` when bulk editing Contract objects. `StatusModelBulkEditFormMixin` was listed after `NautobotBulkEditForm` on `ContractLCMBulkEditForm`, which placed it after `BulkEditForm` in the MRO and ran its `__init__()` before `self.model` was assigned.
+
+### Housekeeping
+
+- [#476](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/476) - Adding documentation that informs the user of supported platform values and possible version requirements.
+- Rebaked from the cookie `nautobot-app-v3.1.4`.
+
 ## [v4.2.0 (2026-05-15)](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/releases/tag/v4.2.0)
 
 ### Added
