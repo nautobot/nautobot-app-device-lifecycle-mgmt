@@ -6,7 +6,10 @@ from django.urls import reverse
 from nautobot_device_lifecycle_mgmt.tables import (
     ContractLCMTable,
     CVELCMTable,
+    DeviceHardwareNoticeResultTable,
+    DeviceSoftwareValidationResultTable,
     HardwareLCMTable,
+    InventoryItemSoftwareValidationResultTable,
     ValidatedSoftwareLCMTable,
     VulnerabilityLCMTable,
 )
@@ -47,3 +50,37 @@ class TaggableModelTableTest(TestCase):
                 url_name = tags_column.extra_context.get("url_name")
                 self.assertIsNotNone(url_name)
                 self.assertTrue(reverse(url_name))
+
+
+class ReportTableLinkTest(TestCase):
+    """Test the filtered links on the report tables grouped by device type or part ID."""
+
+    def test_links_url_encode_the_filter_value(self):
+        """A `+` in a model or part ID must reach the linked view as `%2B`, not be decoded as a space."""
+        device_type_row = {"device__device_type__model": "C9300-24P+", "total": 2, "valid": 1, "invalid": 1}
+        part_id_row = {"inventory_item__part_id": "C9300-NM-8X+", "total": 2, "valid": 1, "invalid": 1}
+        cases = (
+            (
+                DeviceHardwareNoticeResultTable,
+                device_type_row,
+                "device_type=C9300-24P%2B",
+                ("name", "total", "valid", "invalid", "actions"),
+            ),
+            (
+                DeviceSoftwareValidationResultTable,
+                device_type_row,
+                "device_type=C9300-24P%2B",
+                ("name", "total", "valid", "invalid", "no_software", "actions"),
+            ),
+            (
+                InventoryItemSoftwareValidationResultTable,
+                part_id_row,
+                "part_id=C9300-NM-8X%2B",
+                ("part_id", "total", "valid", "invalid", "no_software", "actions"),
+            ),
+        )
+        for table_class, row, expected_filter, column_names in cases:
+            table_row = table_class([row]).rows[0]
+            for column_name in column_names:
+                with self.subTest(table=table_class.__name__, column=column_name):
+                    self.assertIn(expected_filter, str(table_row.get_cell(column_name)))  # pylint: disable=no-member

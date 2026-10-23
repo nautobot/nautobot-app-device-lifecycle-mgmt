@@ -1,0 +1,3 @@
+Fixed report links and CSV exports returning no results for device type models or part IDs containing characters such as `+`.
+
+Fixed the valid count link on the Inventory Item Software Validation report returning no results.
