@@ -138,6 +138,7 @@ class HardwareLCMFilterForm(NautobotFilterForm):  # pylint: disable=too-many-anc
     field_order = [
         "q",
         "expired",
+        "device",
         "device_type",
         "inventory_item",
         "release_date",
@@ -152,6 +153,12 @@ class HardwareLCMFilterForm(NautobotFilterForm):  # pylint: disable=too-many-anc
         required=False,
         label="Support Expired",
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+    )
+
+    device = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        required=False,
     )
 
     device_type = DynamicModelMultipleChoiceField(required=False, queryset=DeviceType.objects.all())
