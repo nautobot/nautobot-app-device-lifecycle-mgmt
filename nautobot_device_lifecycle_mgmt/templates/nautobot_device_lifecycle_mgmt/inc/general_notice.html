@@ -4,7 +4,7 @@
         <div class="card">
             <div class="card-header">
                 <strong>Hardware {% if notice.inventory_item %}Inventory Part {% endif %}Notice</strong>
-                {% if notice.expired %}<span class="badge bg-danger">Expired</span>{% endif %}
+                {% if notice.expired %}<span class="badge bg-danger">Expired</span>{% elif notice.expiring_soon %}<span class="badge bg-warning">Expiring Soon</span>{% endif %}
             </div>
             <table class="table table-hover card-body attr-table">
                 <tr>

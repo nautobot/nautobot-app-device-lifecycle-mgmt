@@ -24,6 +24,7 @@ class NautobotDeviceLifecycleManagementConfig(NautobotAppConfig):
         "barchart_height": 5,
         "enabled_metrics": [],
         "multi_tenant_mode": False,
+        "expiring_soon_days": 180,
     }
     docs_view_name = "plugins:nautobot_device_lifecycle_mgmt:docs"
     banner_function = "banner.models_migrated_to_core_banner"
