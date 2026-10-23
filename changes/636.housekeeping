@@ -1,0 +1,1 @@
+Added tests that catch regressions in the Contract `status` and Vulnerability `exclude_status` filters.
