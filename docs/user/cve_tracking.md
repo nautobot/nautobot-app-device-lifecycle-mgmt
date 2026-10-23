@@ -85,7 +85,7 @@ An External Integration must be created and configured in order to use the NIST 
     - ``api_call_delay``: A delay between API calls in seconds (default: 6).  NIST Recommends a minimum value of 6 to prevent overloading resources.
     - ``retries``: Controls how the job handles transient failures from the NIST API. There are two retry layers:
         - HTTP status retries at the session layer (502/503/504).
-        - Transport-level failures at the job layer — `requests.exceptions.ConnectionError`, `ChunkedEncodingError` (e.g., HTTP/2 stream resets such as `Stream X was reset by remote peer`), and `Timeout`. On a transport-level failure the job closes the existing NIST session, re-initializes a fresh one via `nist_session_init`, sleeps `backoff * attempt` seconds, and retries the same URL up to `max_attempts` times before re-raising. HTTP errors and JSON decode errors are not retried at the job layer and propagate immediately.
+        - Transport-level failures at the job layer — any `requests.exceptions.RequestException` (e.g., `ConnectionError`, `ChunkedEncodingError` from HTTP/2 stream resets such as `Stream X was reset by remote peer`, and `Timeout`). On such a failure the job closes the existing NIST session, re-initializes a fresh one via `nist_session_init`, sleeps `backoff * attempt` seconds, and retries the same URL up to `max_attempts` times before re-raising. `HTTPError` responses (4xx/5xx) and JSON decode errors are handled separately and are **not** retried at the job layer — they propagate immediately, since those indicate data/input errors rather than transient transport failures.
         - ``max_attempts``: The maximum number of attempts (default: 3). Used by both layers above.
         - ``backoff``: The backoff factor for the retry attempts (default: 2). At the session layer this is the urllib3 `backoff_factor`; at the job layer this is the multiplier applied as `backoff * attempt` before each rebuild-and-retry.
 - A new Secrets Group object named ``NAUTOBOT DLM NIST SECRETS GROUP`` used for access to the NIST API Key from the External Integration.
@@ -158,6 +158,8 @@ If your platform is not in the above listings the entry will be skipped leaving 
 Automated discovery is used by running the ``NIST - Software CVE Search`` Job.
 
 To run this job, use the "Jobs" menu dropdown and navigate to the **CVE Tracking** section. The jobs will appear here and all you will need to do is click the play button in order to use the default External Integration[^1].  If you have configured additional Integrations, you may select the External Integration that you want to use.  **As stated previously, the name of the External Integration does not matter, but the External Integration must contain a SecretsGroup and Secret named as above**.
+
+You may also optionally select one or more **Software Versions** to limit the search to just those versions. Leaving this field empty searches all Software Versions (the previous default behavior).
 
 ![](../images/ss_lcm_cve_nist_job_light.png#only-light){ .on-glb }
 ![](../images/ss_lcm_cve_nist_job_dark.png#only-dark){ .on-glb }
