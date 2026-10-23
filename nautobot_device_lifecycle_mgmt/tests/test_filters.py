@@ -745,6 +745,16 @@ class ValidatedSoftwareLCMFilterSetTestCase(FilterTestCases.FilterTestCase):
         params = {"software": [self.softwares[0].pk]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
+    def test_platform(self):
+        """Test platform filter."""
+        params = {"platform": [self.softwares[1].platform.name]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_platform_pk(self):
+        """Test platform filter by PK."""
+        params = {"platform": [self.softwares[0].platform.pk]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
     def test_preferred(self):
         """Test preferred filter."""
         params = {"preferred": True}
