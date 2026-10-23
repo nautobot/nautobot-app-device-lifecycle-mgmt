@@ -1,6 +1,6 @@
 {% if record %}
     {% if record.device__device_type__model %}
-        <a href='{% url "plugins-api:nautobot_device_lifecycle_mgmt-api:devicehardwarenoticeresult-list" %}?device_type={{ record.device__device_type__model }}&format=csv'
+        <a href='{% url "plugins-api:nautobot_device_lifecycle_mgmt-api:devicehardwarenoticeresult-list" %}?device_type={{ record.device__device_type__model|urlencode }}&format=csv'
         class="btn btn-secondary btn-sm" title="Export data for device type" aria-label="Export data for device type">
         <i class="mdi mdi-download" aria-hidden="true"></i>
         </a>

@@ -1,0 +1,3 @@
+Fixed the device type and part ID links and the CSV export buttons on the Device Hardware Notice, Device Software Validation and Inventory Item Software Validation reports returning no results when the model or part ID contained characters such as `+`.
+
+Fixed the valid count link on the Inventory Item Software Validation report never returning results due to a malformed `part_id` query parameter.
