@@ -13,6 +13,7 @@ from nautobot.apps.jobs import BooleanVar, Job, ObjectVar, StringVar
 from nautobot.dcim.models import Device, InventoryItem
 from nautobot.dcim.models.devices import SoftwareVersion
 from nautobot.extras.models import ExternalIntegration
+from netutils.lib_mapper import NIST_LIB_MAPPER_REVERSE
 from netutils.nist import get_nist_urls
 from requests import Session
 from requests.adapters import HTTPAdapter
@@ -150,34 +151,21 @@ class NistCveSyncSoftware(Job):
             platform = software.platform.network_driver.lower()
             version = software.version.replace(" ", "")
 
-            try:
-                cpe_software_search_urls = get_nist_urls(platform, version)
-                if not cpe_software_search_urls:
-                    self.logger.error(
-                        "The URL generator was not able to create URLs for this Software Version. Please check the version value for %s %s %s.",
-                        software.platform.manufacturer.name,
-                        software.platform.network_driver,
-                        software.version,
-                        extra={"grouping": "URL Creation"},
-                    )
-                    continue
-                # URLS are obtaind from netutils.nist method that includes the NIST URL.
-                # We need to remove the NIST URL and replace it with the one from the integration in order to allow customization if needed.
-                cpe_software_search_urls = [
-                    re.sub(r"^.*(?=\?)", self.integration.remote_url, cpe_url) for cpe_url in cpe_software_search_urls
-                ]
-            except KeyError:
+            if platform not in NIST_LIB_MAPPER_REVERSE:
                 self.logger.warning(
                     "OS Platform %s is not yet supported; Skipping.",
                     platform,
                     extra={"object": software.platform, "grouping": "CVE Information"},
                 )
                 continue
-            # Known possible error from netutils.nist method
-            except ValueError as err:
+
+            try:
+                cpe_software_search_urls = get_nist_urls(platform, version)
+            # Known possible errors from netutils.nist method when it cannot parse the version
+            except (AttributeError, TypeError, ValueError) as err:
                 self.logger.error(
                     "There was an error in creating URLs for this Software Version. Please check the version value for %s %s %s. ERROR: %s",
-                    software.platform.manufacturer.name,
+                    software.platform.name,
                     software.platform.network_driver,
                     software.version,
                     err,
@@ -185,16 +173,20 @@ class NistCveSyncSoftware(Job):
                 )
                 continue
 
-            except TypeError as err:
+            if not cpe_software_search_urls:
                 self.logger.error(
-                    "There was an error in creating URLs for this Software Version. Please check the version value for %s %s %s. ERROR: %s",
-                    software.platform.manufacturer.name,
+                    "The URL generator was not able to create URLs for this Software Version. Please check the version value for %s %s %s.",
+                    software.platform.name,
                     software.platform.network_driver,
                     software.version,
-                    err,
                     extra={"grouping": "URL Creation"},
                 )
                 continue
+            # URLS are obtaind from netutils.nist method that includes the NIST URL.
+            # We need to remove the NIST URL and replace it with the one from the integration in order to allow customization if needed.
+            cpe_software_search_urls = [
+                re.sub(r"^.*(?=\?)", self.integration.remote_url, cpe_url) for cpe_url in cpe_software_search_urls
+            ]
 
             self.logger.info(
                 "Gathering CVE Information for Software Version: %s",
