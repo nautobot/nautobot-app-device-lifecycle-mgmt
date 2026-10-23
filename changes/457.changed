@@ -1,0 +1,1 @@
+Changed `save()` on Hardware Notice, Validated Software, Contract and Vendor objects to no longer run model validation, which `validated_save()` already does. Use `validated_save()` to save with validation.

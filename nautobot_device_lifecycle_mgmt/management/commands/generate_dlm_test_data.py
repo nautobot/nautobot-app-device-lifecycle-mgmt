@@ -49,17 +49,17 @@ class Command(BaseCommand):
 
         # create HardwareLCM
         for device_type in device_types:
-            HardwareLCM.objects.using(db).create(device_type=device_type, end_of_sale=date(2022, 3, 14))
+            HardwareLCM(device_type=device_type, end_of_sale=date(2022, 3, 14)).validated_save(using=db)
         for inventory_item in inventory_items:
-            HardwareLCM.objects.using(db).create(inventory_item=inventory_item, end_of_support=date(2020, 5, 4))
+            HardwareLCM(inventory_item=inventory_item, end_of_support=date(2020, 5, 4)).validated_save(using=db)
 
         # create ValidatedSoftwareLCM
         for software in software_versions:
-            ValidatedSoftwareLCM.objects.using(db).create(
+            ValidatedSoftwareLCM(
                 software=software,
                 start=date(2020, 1, 1),
                 end=date(2020, 12, 31),
-            )
+            ).validated_save(using=db)
 
         # create DeviceSoftwareValidationResult
         for device in devices:
@@ -77,17 +77,17 @@ class Command(BaseCommand):
 
         # create ProviderLCM
         for i in range(1, 9):
-            ProviderLCM.objects.using(db).create(
+            ProviderLCM(
                 name=f"Test Provider {i}",
                 description=f"Description for Provider {i}",
-            )
+            ).validated_save(using=db)
 
         # create ContractLCM
         for provider in ProviderLCM.objects.using(db).all():
-            ContractLCM.objects.using(db).create(
+            ContractLCM(
                 provider=provider,
                 name=f"Test Contract for {provider.name}",
-            )
+            ).validated_save(using=db)
 
         # create ContactLCM
         for contract in ContractLCM.objects.using(db).all():
