@@ -25,6 +25,7 @@ from nautobot_device_lifecycle_mgmt.forms import (
     HardwareLCMBulkEditForm,
     HardwareLCMForm,
     ProviderLCM,
+    ProviderLCMForm,
     ValidatedSoftwareLCMBulkEditForm,
     ValidatedSoftwareLCMForm,
     VulnerabilityLCMBulkEditForm,
@@ -523,6 +524,14 @@ class TaggableModelFormTest(TestCase):
                 # ModelFormMetaclass normalizes `fields = "__all__"` to None, which saves every model field.
                 if meta_fields is not None:
                     self.assertIn("tags", meta_fields)
+
+
+class ProviderLCMFormTest(TestCase):
+    """Test the Vendor create/edit form."""
+
+    def test_tags_field_not_offered(self):
+        """Vendors have no tags, so a tags widget would silently discard the selection on save."""
+        self.assertNotIn("tags", ProviderLCMForm().fields)
 
 
 class TaggableModelBulkEditFormTest(TestCase):
