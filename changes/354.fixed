@@ -1,0 +1,1 @@
+Removed the Tags field from the Vendor form, as Vendors do not support tags and the selection was discarded on save.
