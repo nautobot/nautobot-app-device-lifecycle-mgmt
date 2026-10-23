@@ -3,13 +3,16 @@
 from django.test import TestCase
 from django.urls import reverse
 
+from nautobot_device_lifecycle_mgmt.models import DeviceSoftwareValidationResult
 from nautobot_device_lifecycle_mgmt.tables import (
     ContractLCMTable,
     CVELCMTable,
+    DeviceSoftwareValidationResultListTable,
     HardwareLCMTable,
     ValidatedSoftwareLCMTable,
     VulnerabilityLCMTable,
 )
+from nautobot_device_lifecycle_mgmt.tests.conftest import create_devices
 
 
 # `base_columns` is added to each table by the django-tables2 metaclass, so pylint cannot see it.
@@ -47,3 +50,21 @@ class TaggableModelTableTest(TestCase):
                 url_name = tags_column.extra_context.get("url_name")
                 self.assertIsNotNone(url_name)
                 self.assertTrue(reverse(url_name))
+
+
+class DeviceSoftwareValidationResultListTableTest(TestCase):
+    """Test the Location column on the device software validation result list table."""
+
+    def test_location_column_is_not_a_default_column(self):
+        """The Location column is selectable but hidden until a user opts into it."""
+        self.assertIn("location", DeviceSoftwareValidationResultListTable.base_columns)  # pylint: disable=no-member
+        self.assertNotIn("location", DeviceSoftwareValidationResultListTable.Meta.default_columns)
+
+    def test_location_column_links_to_device_location(self):
+        """The Location column shows the device's location as a link."""
+        device = create_devices()[0]
+        DeviceSoftwareValidationResult.objects.create(device=device)
+        table = DeviceSoftwareValidationResultListTable(DeviceSoftwareValidationResult.objects.all())
+        cell = str(table.rows[0].get_cell("location"))  # pylint: disable=no-member
+        self.assertIn(device.location.get_absolute_url(), cell)
+        self.assertIn(device.location.name, cell)
