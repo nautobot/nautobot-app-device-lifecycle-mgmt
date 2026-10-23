@@ -225,6 +225,17 @@ class HardwareLCMTestCase(CommonTestDataMixin, FilterTestCases.FilterTestCase):
         params = {"documentation_url": "https://cisco.com/c9300-48"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
+    def test_expiring_soon_search(self):
+        """Test expiring_soon filter splits notices on end_of_support within the next expiring_soon_days days."""
+        today = datetime.today().date()
+        soon = HardwareLCM.objects.create(inventory_item="SOON-PART", end_of_support=today + timedelta(days=30))
+        HardwareLCM.objects.create(inventory_item="LATER-PART", end_of_support=today + timedelta(days=365))
+        HardwareLCM.objects.create(inventory_item="NO-EOS-PART", end_of_sale=today)
+        self.assertQuerysetEqualAndNotEmpty(self.filterset({"expiring_soon": True}, self.queryset).qs, [soon])
+        self.assertQuerysetEqualAndNotEmpty(
+            self.filterset({"expiring_soon": False}, self.queryset).qs, self.queryset.exclude(pk=soon.pk), ordered=False
+        )
+
     def test_expired_search(self):
         """Test returned devices are either end of sale or end of support."""
         test_year = (datetime.today() + timedelta(days=365)).year

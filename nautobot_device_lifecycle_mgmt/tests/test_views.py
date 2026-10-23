@@ -7,7 +7,7 @@ from unittest import skip
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
-from nautobot.apps.testing import ViewTestCases
+from nautobot.apps.testing import TestCase, ViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer
 from nautobot.extras.models import Status, Tag
 from nautobot.users.models import ObjectPermission
@@ -470,3 +470,19 @@ class InventoryItemSoftwareValidationResultListViewTest(ViewTestCases.ListObject
     @skip("Not implemented")
     def test_list_objects_filtered(self):
         pass
+
+
+class HardwareNoticeBadgeTest(TestCase):
+    """Test the hardware notice badges on core object pages."""
+
+    def test_expiring_soon_badge(self):
+        device = create_devices()[0]
+        HardwareLCM.objects.create(
+            device_type=device.device_type, end_of_support=datetime.date.today() + datetime.timedelta(days=30)
+        )
+        self.add_permissions(
+            "dcim.view_device", "dcim.view_devicetype", "nautobot_device_lifecycle_mgmt.view_hardwarelcm"
+        )
+        for url in (device.get_absolute_url(), device.device_type.get_absolute_url()):
+            with self.subTest(url=url):
+                self.assertContains(self.client.get(url), "Expiring Soon")

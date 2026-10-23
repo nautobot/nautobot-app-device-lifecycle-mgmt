@@ -1,0 +1,1 @@
+Added an Expiring Soon badge and filter for Hardware Notices whose End of Support falls within the new `expiring_soon_days` setting (180 days by default).
