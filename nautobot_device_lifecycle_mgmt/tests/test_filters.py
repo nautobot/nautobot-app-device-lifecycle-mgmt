@@ -276,6 +276,7 @@ class ContractLCMTestCase(FilterTestCases.FilterTestCase):
         active_status, _ = Status.objects.get_or_create(name="Active")
         active_status.content_types.add(ContentType.objects.get_for_model(Location))
         active_status.content_types.add(ContentType.objects.get_for_model(Device))
+        expired_status = Status.objects.get(name="Expired")
         cls.location1, _ = Location.objects.get_or_create(
             name="Location1", location_type=location_type_location_a, status=active_status
         )
@@ -380,7 +381,7 @@ class ContractLCMTestCase(FilterTestCases.FilterTestCase):
             ContractLCM.objects.get_or_create(
                 provider=cls.providers[3],
                 name="Test Contract 4",
-                status=active_status,
+                status=expired_status,
                 number=4,
                 start="2022-02-01",
                 end="2023-01-31",
@@ -483,10 +484,10 @@ class ContractLCMTestCase(FilterTestCases.FilterTestCase):
             self.queryset.filter(end__lt=datetime.today().date()),
         )
 
-    def test_contrat_status(self):
+    def test_status(self):
         """Test status filter."""
-        params = {"status": "Active"}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 4)
+        params = {"status": ["Active"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
 
 class ProviderLCMTestCase(FilterTestCases.FilterTestCase):
@@ -1352,6 +1353,11 @@ class VulnerabilityLCMTestCase(FilterTestCases.FilterTestCase):
     def test_q_software_version(self):
         """Test q filter to find single record based on Software version."""
         params = {"q": "4.22.9M"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_exclude_status(self):
+        """Test exclude_status filter."""
+        params = {"exclude_status": ["Fix Me"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_cve__published_date_before(self):
