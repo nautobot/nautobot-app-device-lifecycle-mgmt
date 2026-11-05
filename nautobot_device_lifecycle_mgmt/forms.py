@@ -738,7 +738,6 @@ class ContractLCMFilterForm(NautobotFilterForm, StatusModelFilterFormMixin):
 class ProviderLCMForm(NautobotModelForm):
     """Device Lifecycle Contract Providers creation/edit form."""
 
-    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     country = forms.ChoiceField(
         required=False,
         choices=add_blank_choice(CountryCodes.CHOICES),
