@@ -322,6 +322,11 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
     # Device, InventoryItem and DeviceType have non-unique natural keys, so their filters set
     # `prefers_id=True` and these fields submit PKs. The remaining fields target models with a
     # unique `name` and submit that instead.
+    platform = DynamicModelMultipleChoiceField(
+        queryset=Platform.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
     devices = DynamicModelMultipleChoiceField(
         queryset=Device.objects.all(),
         required=False,
@@ -360,6 +365,7 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
         fields = [
             "q",
             "software",
+            "platform",
             "devices",
             "device_tenants",
             "device_types",
