@@ -304,6 +304,12 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
         queryset=SoftwareVersion.objects.all(),
         label="Software",
     )
+    platform = NaturalKeyOrPKMultipleChoiceFilter(
+        field_name="software__platform",
+        queryset=Platform.objects.all(),
+        to_field_name="name",
+        label="Platform (name or ID)",
+    )
     devices_id = django_filters.ModelMultipleChoiceFilter(
         field_name="devices",
         queryset=Device.objects.all(),
