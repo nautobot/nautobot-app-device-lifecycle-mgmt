@@ -945,7 +945,9 @@ class VulnerabilityLCMForm(NautobotModelForm):
         ]
 
 
-class VulnerabilityLCMBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):
+class VulnerabilityLCMBulkEditForm(
+    TagsBulkEditFormMixin, StatusModelBulkEditFormMixin, NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin
+):
     """Vulnerability Lifecycle Management bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=VulnerabilityLCM.objects.all(), widget=forms.MultipleHiddenInput)
