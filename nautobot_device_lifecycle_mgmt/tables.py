@@ -267,6 +267,7 @@ class DeviceSoftwareValidationResultListTable(BaseTable):  # pylint: disable='nb
     """Table for a list of device to software validation report."""
 
     device = tables.Column(accessor="device", verbose_name="Device", linkify=True)
+    location = tables.Column(accessor="device__location", verbose_name="Location", linkify=True)
     software = tables.Column(accessor="software", verbose_name="Current Software", linkify=True)
     valid = tables.Column(accessor="is_validated", verbose_name="Valid")
     last_run = tables.Column(accessor="last_run", verbose_name="Last Run")
@@ -286,7 +287,7 @@ class DeviceSoftwareValidationResultListTable(BaseTable):  # pylint: disable='nb
         """Metaclass attributes of DeviceSoftwareValidationResultTable."""
 
         model = DeviceSoftwareValidationResult
-        fields = ["device", "software", "valid", "last_run", "run_type", "valid_software"]
+        fields = ["device", "location", "software", "valid", "last_run", "run_type", "valid_software"]
         default_columns = [
             "device",
             "software",
