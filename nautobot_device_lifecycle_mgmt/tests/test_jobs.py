@@ -6,7 +6,7 @@ from unittest import mock
 
 from django.contrib.contenttypes.models import ContentType
 from nautobot.apps.choices import JobResultStatusChoices
-from nautobot.apps.testing import TransactionTestCase, create_job_result_and_run_job
+from nautobot.apps.testing import TestCase, TransactionTestCase, create_job_result_and_run_job
 from nautobot.dcim.models import Platform, SoftwareVersion
 from nautobot.extras.models import Status
 from requests.exceptions import ChunkedEncodingError, Timeout
@@ -184,3 +184,37 @@ class NistCveSyncSoftwareQueryApiTestCase(unittest.TestCase):
         self.assertEqual(result, {"vulnerabilities": [], "totalResults": 0})
         failing_session.close.assert_called_once()
         job.nist_session_init.assert_called_once()
+
+
+class NistCveSyncSoftwareRunTestCase(TestCase):
+    """Test NistCveSyncSoftware.run for Software Versions that netutils cannot build NIST URLs for."""
+
+    def setUp(self):
+        """Create a job with a stubbed logger and NIST session."""
+        self.active_status, _ = Status.objects.get_or_create(name="Active")
+        self.active_status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
+        self.job = NistCveSyncSoftware.__new__(NistCveSyncSoftware)
+        self.job.logger = mock.MagicMock()
+        self.job.nist_session_init = mock.MagicMock()
+
+    def test_unsupported_platform_is_skipped(self):
+        """A platform without a NIST mapping is skipped with a warning, also when it has no manufacturer."""
+        platform = Platform.objects.create(name="FortiOS", network_driver="fortinet")
+        SoftwareVersion.objects.create(platform=platform, version="7.0.1", status=self.active_status)
+
+        self.job.run(nist_integration=mock.MagicMock())
+
+        self.job.logger.warning.assert_called_once()
+        self.assertIn("fortinet", self.job.logger.warning.call_args.args)
+        self.job.logger.error.assert_not_called()
+
+    def test_url_errors_are_logged_with_platform_name(self):
+        """Versions netutils cannot parse are logged as errors, also when the platform has no manufacturer."""
+        for name, network_driver, version in (("Cisco IOS", "cisco_ios", ""), ("Junos", "juniper_junos", "garbage")):
+            platform = Platform.objects.create(name=name, network_driver=network_driver)
+            SoftwareVersion.objects.create(platform=platform, version=version, status=self.active_status)
+
+        self.job.run(nist_integration=mock.MagicMock())
+
+        logged_platforms = {logged_call.args[1] for logged_call in self.job.logger.error.call_args_list}
+        self.assertEqual(logged_platforms, {"Cisco IOS", "Junos"})
