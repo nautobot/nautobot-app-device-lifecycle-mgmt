@@ -322,6 +322,11 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
     # Device, InventoryItem and DeviceType have non-unique natural keys, so their filters set
     # `prefers_id=True` and these fields submit PKs. The remaining fields target models with a
     # unique `name` and submit that instead.
+    platform = DynamicModelMultipleChoiceField(
+        queryset=Platform.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
     devices = DynamicModelMultipleChoiceField(
         queryset=Device.objects.all(),
         required=False,
@@ -360,6 +365,7 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
         fields = [
             "q",
             "software",
+            "platform",
             "devices",
             "device_tenants",
             "device_types",
@@ -732,7 +738,6 @@ class ContractLCMFilterForm(NautobotFilterForm, StatusModelFilterFormMixin):
 class ProviderLCMForm(NautobotModelForm):
     """Device Lifecycle Contract Providers creation/edit form."""
 
-    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     country = forms.ChoiceField(
         required=False,
         choices=add_blank_choice(CountryCodes.CHOICES),
@@ -939,7 +944,9 @@ class VulnerabilityLCMForm(NautobotModelForm):
         ]
 
 
-class VulnerabilityLCMBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):
+class VulnerabilityLCMBulkEditForm(
+    TagsBulkEditFormMixin, StatusModelBulkEditFormMixin, NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin
+):
     """Vulnerability Lifecycle Management bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=VulnerabilityLCM.objects.all(), widget=forms.MultipleHiddenInput)
