@@ -252,6 +252,22 @@ class HardwareLCMTestCase(CommonTestDataMixin, FilterTestCases.FilterTestCase):
             self.queryset.filter(end_of_support__lt=datetime.today().date()),
         )
 
+    def test_device(self):
+        """Test device filter returns notices for the device type and the device's inventory item part IDs."""
+        InventoryItem.objects.create(device=self.device_1, name="Uplink Module", part_id="C9300-NM-8X")
+        part_notice = HardwareLCM.objects.create(inventory_item="C9300-NM-8X", end_of_sale="2025-01-01")
+        HardwareLCM.objects.create(inventory_item="C9300-NM-2Q", end_of_sale="2025-01-01")
+        device_1_notices = [self.notice_1.pk, part_notice.pk]
+        for params, expected in (
+            ({"device": [self.device_1.name]}, device_1_notices),
+            ({"device": [self.device_1.pk]}, device_1_notices),
+            ({"device": [self.device_1.name, self.device_2.pk]}, [*device_1_notices, self.notice_2.pk]),
+        ):
+            with self.subTest(params=params):
+                self.assertQuerysetEqualAndNotEmpty(
+                    self.filterset(params, self.queryset).qs, self.queryset.filter(pk__in=expected), ordered=False
+                )
+
 
 class ContractLCMTestCase(FilterTestCases.FilterTestCase):
     """Tests for ContractLCMFilter."""
