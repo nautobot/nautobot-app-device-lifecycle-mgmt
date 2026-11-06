@@ -137,6 +137,7 @@ class HardwareLCMFilterForm(NautobotFilterForm):  # pylint: disable=too-many-anc
     model = HardwareLCM
     field_order = [
         "q",
+        "expiring_soon",
         "expired",
         "device_type",
         "inventory_item",
@@ -148,6 +149,11 @@ class HardwareLCMFilterForm(NautobotFilterForm):  # pylint: disable=too-many-anc
         "documentation_url",
     ]
     q = forms.CharField(required=False, label="Search")
+    expiring_soon = forms.BooleanField(
+        required=False,
+        label="Support Expiring Soon",
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+    )
     expired = forms.BooleanField(
         required=False,
         label="Support Expired",

@@ -1,12 +1,15 @@
 # pylint: disable=no-member
 """nautobot_device_lifecycle_mgmt test class for models."""
 
-from datetime import date
+from copy import deepcopy
+from datetime import date, timedelta
 from unittest import mock
 
 import time_machine
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.test import override_settings
 from nautobot.apps.testing import TestCase
 from nautobot.dcim.models import DeviceType, Manufacturer, Platform, SoftwareVersion
 from nautobot.extras.models import Status, Tag
@@ -124,6 +127,22 @@ class HardwareLCMTestCase(TestCase):
         """Test expired property is NOT expired with end_of_support."""
         hwlcm_obj = HardwareLCM.objects.create(device_type=self.device_type, end_of_support=date(2099, 4, 1))
         self.assertFalse(hwlcm_obj.expired)
+
+    def test_expiring_soon_property(self):
+        """Test expiring_soon is True only when end_of_support is within the next expiring_soon_days days."""
+        plugins_config = deepcopy(settings.PLUGINS_CONFIG)
+        plugins_config["nautobot_device_lifecycle_mgmt"]["expiring_soon_days"] = 30
+        today = date.today()
+        for end_of_support, expected in (
+            (today, True),
+            (today + timedelta(days=30), True),
+            (today + timedelta(days=31), False),
+            (today - timedelta(days=1), False),
+            (None, False),
+        ):
+            with self.subTest(end_of_support=end_of_support), override_settings(PLUGINS_CONFIG=plugins_config):
+                hwlcm_obj = HardwareLCM(device_type=self.device_type, end_of_sale=today, end_of_support=end_of_support)
+                self.assertEqual(hwlcm_obj.expiring_soon, expected)
 
 
 class ValidatedSoftwareLCMTestCase(TestCase):  # pylint: disable=too-many-instance-attributes
