@@ -104,6 +104,13 @@ class HardwareLCMFilterSet(NautobotFilterSet):
         label="Inventory Part ID",
     )
 
+    device = NaturalKeyOrPKMultipleChoiceFilter(
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        method="_device_search",
+        label="Device (name or ID)",
+    )
+
     documentation_url = django_filters.CharFilter(
         lookup_expr="contains",
     )
@@ -155,6 +162,15 @@ class HardwareLCMFilterSet(NautobotFilterSet):
         if not value:
             qs_filter = Q(**{"end_of_support__gte": today}) | Q(**{"end_of_support__isnull": True})
         return queryset.filter(qs_filter)
+
+    def _device_search(self, queryset, name, value):  # pylint: disable=unused-argument
+        """Return notices for the devices' types and for the part IDs of their inventory items."""
+        if not value:
+            return queryset
+        part_ids = InventoryItem.objects.filter(device__in=value).exclude(part_id="").values_list("part_id", flat=True)
+        return queryset.filter(
+            Q(device_type__in=[device.device_type_id for device in value]) | Q(inventory_item__in=part_ids)
+        )
 
 
 class SoftwareLCMFilterSet(NautobotFilterSet):
@@ -314,6 +330,12 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
     software = django_filters.ModelMultipleChoiceFilter(
         queryset=SoftwareVersion.objects.all(),
         label="Software",
+    )
+    platform = NaturalKeyOrPKMultipleChoiceFilter(
+        field_name="software__platform",
+        queryset=Platform.objects.all(),
+        to_field_name="name",
+        label="Platform (name or ID)",
     )
     devices_id = django_filters.ModelMultipleChoiceFilter(
         field_name="devices",

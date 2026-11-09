@@ -263,6 +263,22 @@ class HardwareLCMTestCase(CommonTestDataMixin, FilterTestCases.FilterTestCase):
             self.queryset.filter(end_of_support__lt=datetime.today().date()),
         )
 
+    def test_device(self):
+        """Test device filter returns notices for the device type and the device's inventory item part IDs."""
+        InventoryItem.objects.create(device=self.device_1, name="Uplink Module", part_id="C9300-NM-8X")
+        part_notice = HardwareLCM.objects.create(inventory_item="C9300-NM-8X", end_of_sale="2025-01-01")
+        HardwareLCM.objects.create(inventory_item="C9300-NM-2Q", end_of_sale="2025-01-01")
+        device_1_notices = [self.notice_1.pk, part_notice.pk]
+        for params, expected in (
+            ({"device": [self.device_1.name]}, device_1_notices),
+            ({"device": [self.device_1.pk]}, device_1_notices),
+            ({"device": [self.device_1.name, self.device_2.pk]}, [*device_1_notices, self.notice_2.pk]),
+        ):
+            with self.subTest(params=params):
+                self.assertQuerysetEqualAndNotEmpty(
+                    self.filterset(params, self.queryset).qs, self.queryset.filter(pk__in=expected), ordered=False
+                )
+
 
 class ContractLCMTestCase(FilterTestCases.FilterTestCase):
     """Tests for ContractLCMFilter."""
@@ -287,6 +303,7 @@ class ContractLCMTestCase(FilterTestCases.FilterTestCase):
         active_status, _ = Status.objects.get_or_create(name="Active")
         active_status.content_types.add(ContentType.objects.get_for_model(Location))
         active_status.content_types.add(ContentType.objects.get_for_model(Device))
+        expired_status = Status.objects.get(name="Expired")
         cls.location1, _ = Location.objects.get_or_create(
             name="Location1", location_type=location_type_location_a, status=active_status
         )
@@ -391,7 +408,7 @@ class ContractLCMTestCase(FilterTestCases.FilterTestCase):
             ContractLCM.objects.get_or_create(
                 provider=cls.providers[3],
                 name="Test Contract 4",
-                status=active_status,
+                status=expired_status,
                 number=4,
                 start="2022-02-01",
                 end="2023-01-31",
@@ -494,10 +511,10 @@ class ContractLCMTestCase(FilterTestCases.FilterTestCase):
             self.queryset.filter(end__lt=datetime.today().date()),
         )
 
-    def test_contrat_status(self):
+    def test_status(self):
         """Test status filter."""
-        params = {"status": "Active"}
-        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 4)
+        params = {"status": ["Active"]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
 
 
 class ProviderLCMTestCase(FilterTestCases.FilterTestCase):
@@ -754,6 +771,16 @@ class ValidatedSoftwareLCMFilterSetTestCase(FilterTestCases.FilterTestCase):
     def test_software(self):
         """Test software filter."""
         params = {"software": [self.softwares[0].pk]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_platform(self):
+        """Test platform filter."""
+        params = {"platform": [self.softwares[1].platform.name]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_platform_pk(self):
+        """Test platform filter by PK."""
+        params = {"platform": [self.softwares[0].platform.pk]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_preferred(self):
@@ -1363,6 +1390,11 @@ class VulnerabilityLCMTestCase(FilterTestCases.FilterTestCase):
     def test_q_software_version(self):
         """Test q filter to find single record based on Software version."""
         params = {"q": "4.22.9M"}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_exclude_status(self):
+        """Test exclude_status filter."""
+        params = {"exclude_status": ["Fix Me"]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_cve__published_date_before(self):

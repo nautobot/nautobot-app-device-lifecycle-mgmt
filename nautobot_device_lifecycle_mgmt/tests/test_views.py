@@ -324,14 +324,6 @@ class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     def test_bulk_import_objects_with_permission_csv_file(self):
         pass
 
-    @skip("Not implemented")
-    def test_bulk_edit_objects_with_permission(self):
-        pass
-
-    @skip("Not implemented")
-    def test_bulk_edit_objects_with_constrained_permission(self):
-        pass
-
 
 class DeviceSoftwareValidationResultListViewTest(ViewTestCases.ListObjectsViewTestCase):
     """Test DeviceSoftwareValidationResultListView"""
