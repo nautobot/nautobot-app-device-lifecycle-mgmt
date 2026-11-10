@@ -3,7 +3,6 @@
 from datetime import date, datetime, timedelta
 
 # from django.urls import reverse
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -25,6 +24,7 @@ from nautobot_device_lifecycle_mgmt.software_filters import (
     InventoryItemSoftwareImageFilter,
     InventoryItemValidatedSoftwareFilter,
 )
+from nautobot_device_lifecycle_mgmt.utils import expiring_soon_days
 
 
 @extras_features(
@@ -116,8 +116,7 @@ class HardwareLCM(PrimaryModel):
         if not self.end_of_support:
             return False
         today = datetime.today().date()
-        days = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]["expiring_soon_days"]
-        return today <= self.end_of_support <= today + timedelta(days=days)
+        return today <= self.end_of_support <= today + timedelta(days=expiring_soon_days())
 
     def save(self, *args, **kwargs):
         """Override save to assert a full clean."""

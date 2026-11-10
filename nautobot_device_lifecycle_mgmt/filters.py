@@ -4,7 +4,6 @@
 import datetime
 
 import django_filters
-from django.conf import settings
 from django.db.models import Q
 from nautobot.apps.filters import (
     NaturalKeyOrPKMultipleChoiceFilter,
@@ -32,6 +31,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
+from nautobot_device_lifecycle_mgmt.utils import expiring_soon_days
 
 
 class HardwareLCMFilterSet(NautobotFilterSet):
@@ -144,11 +144,10 @@ class HardwareLCMFilterSet(NautobotFilterSet):
     def _expiring_soon_search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
         today = datetime.datetime.today().date()
-        days = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]["expiring_soon_days"]
-        qs_filter = Q(end_of_support__range=(today, today + datetime.timedelta(days=days)))
+        end_of_support_range = (today, today + datetime.timedelta(days=expiring_soon_days()))
         if value:
-            return queryset.filter(qs_filter)
-        return queryset.exclude(qs_filter)
+            return queryset.filter(end_of_support__range=end_of_support_range)
+        return queryset.exclude(end_of_support__range=end_of_support_range)
 
     def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
