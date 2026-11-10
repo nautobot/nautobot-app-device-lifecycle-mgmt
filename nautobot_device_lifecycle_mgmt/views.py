@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import intcomma
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import Count, ExpressionWrapper, F, FloatField, Q
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.template import Context
 from django.urls import reverse
@@ -53,12 +53,12 @@ from nautobot.core.templatetags.helpers import (
 from nautobot.core.views import generic
 from nautobot.dcim.filters import DeviceFilterSet
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, SoftwareVersion
-from nautobot.extras.models import Role, Tag
-from nautobot.extras.utils import get_saved_view_filter_params
+from nautobot.extras.models import Role, SavedView, Tag
 from nautobot.tenancy.models import Tenant
 
 from nautobot_device_lifecycle_mgmt import choices, filters, forms, helpers, models, qr_codes, tables
 from nautobot_device_lifecycle_mgmt.api import serializers
+from nautobot_device_lifecycle_mgmt.utils import qr_codes_enabled
 
 PLUGIN_CFG = settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"]
 
@@ -1076,6 +1076,8 @@ class DeviceQRCodeView(ObjectPermissionRequiredMixin, View):
 
     def get(self, request, pk):
         """Return the QR code image as a file download."""
+        if not qr_codes_enabled():
+            raise Http404("QR codes are disabled in the app settings.")
         device = get_object_or_404(self.queryset, pk=pk)
         image_format = "png" if request.GET.get("format") == "png" else "svg"
         content, content_type, file_name = qr_codes.get_device_qr_code_file(request, device, image_format)
@@ -1095,14 +1097,25 @@ class DeviceLabelsView(ObjectPermissionRequiredMixin, View):
         """Require permission to view devices."""
         return "dcim.view_device"
 
+    @staticmethod
+    def get_saved_view_filter_params(pk):
+        """Return the filters of the given Device list saved view, or no filters if there is no such saved view."""
+        try:
+            saved_view = SavedView.objects.get(pk=pk, view="dcim:device_list")
+        except (SavedView.DoesNotExist, ValidationError):
+            return {}
+        return saved_view.config.get("filter_params", {})
+
     def get(self, request):
         """Render one label per matching device, up to `max_labels`."""
+        if not qr_codes_enabled():
+            raise Http404("QR codes are disabled in the app settings.")
         params = request.GET.copy()
         filter_params = get_filterable_params_from_filter_params(
             params, ObjectListViewMixin.non_filter_params, DeviceFilterSet()
         )
         if params.get("saved_view") and not filter_params and not params.get("all_filters_removed"):
-            filter_params = get_saved_view_filter_params(params.get("saved_view"))
+            filter_params = self.get_saved_view_filter_params(params.get("saved_view"))
 
         filterset = DeviceFilterSet(filter_params, queryset=self.queryset)
         if not filterset.is_valid():

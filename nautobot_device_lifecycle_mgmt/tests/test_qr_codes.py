@@ -1,9 +1,11 @@
 """Tests for the device QR codes and printable labels."""
 
 from unittest import mock
+from urllib.parse import unquote
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.test import RequestFactory
+from django.test import RequestFactory, override_settings
 from django.urls import reverse
 from nautobot.apps.testing import TestCase
 from nautobot.dcim.models import Device
@@ -16,8 +18,15 @@ from nautobot_device_lifecycle_mgmt.views import DeviceLabelsView
 from .conftest import create_devices
 
 
+def app_settings(**overrides):
+    """Return `PLUGINS_CONFIG` with the given app settings overridden."""
+    app_config = {**settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"], **overrides}
+    return {**settings.PLUGINS_CONFIG, "nautobot_device_lifecycle_mgmt": app_config}
+
+
+@override_settings(PLUGINS_CONFIG=app_settings(enable_qr_codes=True))
 class DeviceQRCodeTest(TestCase):
-    """Test the QR code panel, the QR code download and the label sheet."""
+    """Test the QR code button, the QR code download and the label sheet."""
 
     @classmethod
     def setUpTestData(cls):
@@ -36,6 +45,12 @@ class DeviceQRCodeTest(TestCase):
     def test_qr_code_encodes_absolute_device_url(self):
         request = RequestFactory().get("/")
         self.assertEqual(qr_codes.get_device_url(request, self.sw1), f"http://testserver/dcim/devices/{self.sw1.pk}/")
+
+    def test_qr_code_has_white_background(self):
+        request = RequestFactory().get("/")
+        self.assertIn("fill='#fff'", unquote(qr_codes.get_device_qr_code_data_uri(request, self.sw1)))
+        svg_file = qr_codes.get_device_qr_code_file(request, self.sw1, "svg")[0]
+        self.assertIn(b'fill="#fff"', svg_file)
 
     def test_device_detail_page_shows_qr_code_button(self):
         self.add_permissions("dcim.view_device")
@@ -97,6 +112,7 @@ class DeviceQRCodeTest(TestCase):
             config={"filter_params": {"location": ["Location2"]}},
         )
         self.assertEqual(self.get_label_names(f"saved_view={saved_view.pk}"), ["sw3"])
+        self.assertEqual(self.get_label_names("saved_view=not-a-saved-view"), ["sw1", "sw2", "sw3"])
 
     def test_labels_only_include_permitted_devices(self):
         obj_perm = ObjectPermission.objects.create(name="View sw2 only", actions=["view"], constraints={"name": "sw2"})
@@ -116,3 +132,31 @@ class DeviceQRCodeTest(TestCase):
             response = self.client.get(self.labels_url)
         self.assertEqual(len(response.context["labels"]), 2)
         self.assertContains(response, "Showing the first 2 of 3 devices")
+
+
+@override_settings(PLUGINS_CONFIG=app_settings(enable_qr_codes=False))
+class DeviceQRCodeDisabledTest(TestCase):
+    """Test that the QR code features disappear when the `enable_qr_codes` app setting is off."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.sw1 = create_devices()[0]
+        cls.labels_url = reverse("plugins:nautobot_device_lifecycle_mgmt:device_labels")
+
+    def setUp(self):
+        super().setUp()
+        self.add_permissions("dcim.view_device")
+
+    def test_qr_code_buttons_are_hidden(self):
+        for url in (self.sw1.get_absolute_url(), reverse("dcim:device_list")):
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertHttpStatus(response, 200)
+                self.assertNotContains(response, "mdi-qrcode")
+                self.assertNotContains(response, self.labels_url)
+
+    def test_qr_code_views_return_not_found(self):
+        qr_code_url = reverse("plugins:nautobot_device_lifecycle_mgmt:device_qr_code", kwargs={"pk": self.sw1.pk})
+        for url in (qr_code_url, self.labels_url):
+            with self.subTest(url=url):
+                self.assertHttpStatus(self.client.get(url), 404)

@@ -6,6 +6,8 @@ import segno
 from django.utils.text import slugify
 
 QR_ERROR_CORRECTION = "m"
+# segno leaves the light modules transparent in SVG output, which makes the code unreadable on dark backgrounds.
+QR_LIGHT_COLOR = "#fff"
 QR_CONTENT_TYPES = {"png": "image/png", "svg": "image/svg+xml"}
 
 
@@ -21,12 +23,12 @@ def make_device_qr_code(request, device):
 
 def get_device_qr_code_data_uri(request, device):
     """Return the device QR code as an SVG data URI, sized by the img tag that displays it."""
-    return make_device_qr_code(request, device).svg_data_uri(border=2, omitsize=True)
+    return make_device_qr_code(request, device).svg_data_uri(border=2, omitsize=True, light=QR_LIGHT_COLOR)
 
 
 def get_device_qr_code_file(request, device, image_format="svg"):
     """Return the device QR code as (content, content type, file name) for downloading."""
     buffer = io.BytesIO()
-    make_device_qr_code(request, device).save(buffer, kind=image_format, scale=10, border=4)
+    make_device_qr_code(request, device).save(buffer, kind=image_format, scale=10, border=4, light=QR_LIGHT_COLOR)
     file_name = f"{slugify(device.name) or device.pk}-qr.{image_format}"
     return buffer.getvalue(), QR_CONTENT_TYPES[image_format], file_name

@@ -77,6 +77,7 @@ The app behavior can be controlled with the following list of settings:
 | `barchart_width`     | `12`                                                                | `12`               | The width of the barchart within the overview report.                |
 | `barchart_height`    | `5`                                                                 | `5`                | The height of the barchart within the overview report.               |
 | `enabled_metrics`    | `["metrics_lcm_hw_end_of_support_location"]`                        | `[]`               | Enables metrics corresponding to the provided entries.               |
+| `enable_qr_codes`    | `True` or `False`                                                   | `False`            | Show the QR Code button on Device pages and the Print Labels button on the Device list. |
 | `multi_tenant_mode`  | `True` or `False`                                                   | `False`            | Enable tenant-aware software filtering. See [Multi-Tenant Mode](#multi-tenant-mode) below. |
 
 ### Available Metric Names

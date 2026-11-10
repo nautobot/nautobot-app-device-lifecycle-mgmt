@@ -14,6 +14,7 @@ from nautobot_device_lifecycle_mgmt import qr_codes
 from nautobot_device_lifecycle_mgmt.models import ContractLCM, HardwareLCM, ValidatedSoftwareLCM
 from nautobot_device_lifecycle_mgmt.software import DeviceSoftware, InventoryItemSoftware
 from nautobot_device_lifecycle_mgmt.tables import ContractLCMTable, ValidatedSoftwareLCMTable
+from nautobot_device_lifecycle_mgmt.utils import qr_codes_enabled
 
 
 class DeviceTypeHWLCM(TemplateExtension, metaclass=ABCMeta):
@@ -223,6 +224,10 @@ class SoftwareVersionRelatedCVELCMTab(TemplateExtension):  # pylint: disable=abs
 class DeviceQRCodeButton(Button):
     """Device page button that opens a dropdown with the QR code for the device detail page."""
 
+    def should_render(self, context):
+        """Render only when the `enable_qr_codes` app setting is enabled."""
+        return qr_codes_enabled() and super().should_render(context)
+
     def get_extra_context(self, context):
         """Add the QR code image and the URL it encodes."""
         device = get_obj_from_context(context)
@@ -249,6 +254,8 @@ class DeviceQRCode(TemplateExtension):  # pylint: disable=abstract-method
 
     def list_buttons(self):
         """Add a button that opens a printable label sheet for the devices matching the current filters."""
+        if not qr_codes_enabled():
+            return ""
         url = reverse("plugins:nautobot_device_lifecycle_mgmt:device_labels")
         query_string = self.context["request"].GET.urlencode()
         if query_string:
