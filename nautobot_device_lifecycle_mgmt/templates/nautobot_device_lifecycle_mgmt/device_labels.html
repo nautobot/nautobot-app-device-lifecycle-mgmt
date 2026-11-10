@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Device Labels</title>
+        <link rel="stylesheet" href="{% static 'nautobot_device_lifecycle_mgmt/css/device_labels.css' %}">
+    </head>
+    <body>
+        <div class="toolbar">
+            {% if filter_errors %}
+                <p class="error">The Device list filters are not valid:</p>
+                <ul class="error">
+                    {% for field, errors in filter_errors.items %}
+                        <li>{{ field }}: {{ errors|join:", " }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <span>{{ labels|length }} label{{ labels|length|pluralize }}</span>
+                {% if total_count > max_labels %}
+                    <span class="warning">Showing the first {{ max_labels }} of {{ total_count }} devices. Narrow the Device list filters to print the rest.</span>
+                {% endif %}
+                <button type="button" id="print-labels">Print</button>
+            {% endif %}
+        </div>
+        <div class="sheet">
+            {% for label in labels %}
+                <div class="label">
+                    <img src="{{ label.qr_code }}" alt="QR code for {{ label.device }}">
+                    <div class="details">
+                        <div class="name">{{ label.device }}</div>
+                        {% if label.device.serial %}<div>S/N: {{ label.device.serial }}</div>{% endif %}
+                        {% if label.device.asset_tag %}<div>Asset: {{ label.device.asset_tag }}</div>{% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                {% if not filter_errors %}<p>No devices match these filters.</p>{% endif %}
+            {% endfor %}
+        </div>
+        <script src="{% static 'nautobot_device_lifecycle_mgmt/js/device_labels.js' %}"></script>
+    </body>
+</html>

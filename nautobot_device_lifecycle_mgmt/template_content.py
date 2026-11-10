@@ -6,8 +6,11 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.urls import reverse
-from nautobot.apps.ui import TemplateExtension
+from django.utils.html import format_html
+from nautobot.apps.ui import Button, TemplateExtension
+from nautobot.apps.views import get_obj_from_context
 
+from nautobot_device_lifecycle_mgmt import qr_codes
 from nautobot_device_lifecycle_mgmt.models import ContractLCM, HardwareLCM, ValidatedSoftwareLCM
 from nautobot_device_lifecycle_mgmt.software import DeviceSoftware, InventoryItemSoftware
 from nautobot_device_lifecycle_mgmt.tables import ContractLCMTable, ValidatedSoftwareLCMTable
@@ -217,8 +220,49 @@ class SoftwareVersionRelatedCVELCMTab(TemplateExtension):  # pylint: disable=abs
             return []
 
 
+class DeviceQRCodeButton(Button):
+    """Device page button that opens a dropdown with the QR code for the device detail page."""
+
+    def get_extra_context(self, context):
+        """Add the QR code image and the URL it encodes."""
+        device = get_obj_from_context(context)
+        request = context["request"]
+        return {
+            **super().get_extra_context(context),
+            "qr_code": qr_codes.get_device_qr_code_data_uri(request, device),
+            "device_url": qr_codes.get_device_url(request, device),
+        }
+
+
+class DeviceQRCode(TemplateExtension):  # pylint: disable=abstract-method
+    """Add a QR code button to the Device detail page and a label printing button to the Device list."""
+
+    model = "dcim.device"
+    object_detail_buttons = [
+        DeviceQRCodeButton(
+            weight=100,
+            label="QR Code",
+            icon="mdi-qrcode",
+            template_path="nautobot_device_lifecycle_mgmt/inc/device_qr_code_button.html",
+        ),
+    ]
+
+    def list_buttons(self):
+        """Add a button that opens a printable label sheet for the devices matching the current filters."""
+        url = reverse("plugins:nautobot_device_lifecycle_mgmt:device_labels")
+        query_string = self.context["request"].GET.urlencode()
+        if query_string:
+            url = f"{url}?{query_string}"
+        return format_html(
+            '<a href="{}" class="btn btn-secondary" target="_blank" rel="noopener">'
+            '<span class="mdi mdi-qrcode" aria-hidden="true"></span> Print Labels</a>',
+            url,
+        )
+
+
 template_extensions = [
     DeviceContractLCM,
+    DeviceQRCode,
     DeviceTypeHWLCM,
     DeviceTypeValidatedSoftwareLCM,
     DeviceHWLCM,

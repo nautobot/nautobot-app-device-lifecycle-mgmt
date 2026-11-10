@@ -1,0 +1,21 @@
+<div id="component-{{ component.component_id }}" class="dropdown d-inline-flex">
+    <button type="button" class="btn btn-{{ color }} dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+        <span class="mdi {{ icon }}" aria-hidden="true"></span>
+        {{ label }}
+        <span class="mdi mdi-chevron-down" aria-hidden="true"></span>
+    </button>
+    <div class="dropdown-menu dropdown-menu-end p-16 text-center">
+        <img src="{{ qr_code }}" alt="QR code for {{ object }}" title="{{ device_url }}" width="200" height="200">
+        <div class="d-flex gap-8 justify-content-center mt-8">
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:device_labels' %}?id={{ object.pk }}" class="btn btn-sm btn-primary d-flex flex-column align-items-center" target="_blank" rel="noopener">
+                <span class="mdi mdi-printer" aria-hidden="true"></span> Print
+            </a>
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:device_qr_code' pk=object.pk %}" class="btn btn-sm btn-secondary d-flex flex-column align-items-center">
+                <span class="mdi mdi-download" aria-hidden="true"></span> SVG
+            </a>
+            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:device_qr_code' pk=object.pk %}?format=png" class="btn btn-sm btn-secondary d-flex flex-column align-items-center">
+                <span class="mdi mdi-download" aria-hidden="true"></span> PNG
+            </a>
+        </div>
+    </div>
+</div>
