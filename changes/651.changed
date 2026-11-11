@@ -1,0 +1,1 @@
+Changed the CVE, Software, Device and Inventory Item fields on the Vulnerability form to search as you type instead of loading every object.
