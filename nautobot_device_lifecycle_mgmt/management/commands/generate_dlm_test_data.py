@@ -10,7 +10,7 @@ from nautobot.apps.factory import get_random_instances
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, SoftwareVersion
 from nautobot.users.models import User
 
-from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
+from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices, ReportRunTypeChoices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContactLCM,
@@ -41,7 +41,7 @@ class Command(BaseCommand):
             help="Flush any existing device lifecycle management models data from the database before generating new data.",
         )
 
-    def _generate_static_data(self, db):
+    def _generate_static_data(self, db):  # pylint: disable=too-many-locals
         devices = get_random_instances(Device.objects.using(db), minimum=2, maximum=4)
         device_types = get_random_instances(DeviceType.objects.using(db), minimum=2, maximum=4)
         inventory_items = get_random_instances(InventoryItem.objects.using(db), minimum=2, maximum=4)
@@ -63,17 +63,21 @@ class Command(BaseCommand):
 
         # create DeviceSoftwareValidationResult
         for device in devices:
-            DeviceSoftwareValidationResult.objects.using(db).create(
+            device_result = DeviceSoftwareValidationResult(
                 device=device,
                 software=random.choice(software_versions),  # noqa: S311
+                run_type=ReportRunTypeChoices.REPORT_FULL_RUN,
             )
+            device_result.validated_save(using=db)
 
         # create InventoryItemSoftwareValidationResult
         for inventory_item in inventory_items:
-            InventoryItemSoftwareValidationResult.objects.using(db).create(
+            inventory_item_result = InventoryItemSoftwareValidationResult(
                 inventory_item=inventory_item,
                 software=random.choice(software_versions),  # noqa: S311
+                run_type=ReportRunTypeChoices.REPORT_FULL_RUN,
             )
+            inventory_item_result.validated_save(using=db)
 
         # create ProviderLCM
         for i in range(1, 9):
@@ -91,26 +95,33 @@ class Command(BaseCommand):
 
         # create ContactLCM
         for contract in ContractLCM.objects.using(db).all():
-            ContactLCM.objects.using(db).create(
+            contact = ContactLCM(
                 contract=contract,
                 name=f"Test Contact for {contract.name}",
+                email="support@example.com",
             )
+            contact.validated_save(using=db)
 
         # create CVELCM
         for i in range(1, 5):
-            cve = CVELCM.objects.using(db).create(
+            cve = CVELCM(
                 name=f"Test CVELCM {i}",
                 published_date=date(2020, 1, 1),
-                link="http://cve.example.org/{i}/details/",
+                link=f"http://cve.example.org/{i}/details/",
                 severity=random.choice(CVESeverityChoices.values()),  # noqa: S311
             )
+            cve.validated_save(using=db)
             cve.affected_softwares.set(get_random_instances(SoftwareVersion.objects.using(db), minimum=1))
 
         # create VulnerabilityLCM
-        VulnerabilityLCM.objects.using(db).create(cve=CVELCM.objects.using(db).get(name="Test CVELCM 1"))
-        VulnerabilityLCM.objects.using(db).create(software=SoftwareVersion.objects.using(db).first())
-        VulnerabilityLCM.objects.using(db).create(device=Device.objects.using(db).first())
-        VulnerabilityLCM.objects.using(db).create(inventory_item=InventoryItem.objects.using(db).first())
+        vulnerability = VulnerabilityLCM(cve=CVELCM.objects.using(db).get(name="Test CVELCM 1"))
+        vulnerability.validated_save(using=db)
+        vulnerability = VulnerabilityLCM(software=SoftwareVersion.objects.using(db).first())
+        vulnerability.validated_save(using=db)
+        vulnerability = VulnerabilityLCM(device=Device.objects.using(db).first())
+        vulnerability.validated_save(using=db)
+        vulnerability = VulnerabilityLCM(inventory_item=InventoryItem.objects.using(db).first())
+        vulnerability.validated_save(using=db)
 
     def handle(self, *args, **options):
         """Entry point to the management command."""

@@ -1,0 +1,1 @@
+Fixed the `generate_dlm_test_data` command creating objects that fail model validation.
