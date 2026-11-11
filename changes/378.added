@@ -1,0 +1,1 @@
+Added a Device filter to Hardware Notices that returns the notices for a device's type and its inventory items.
