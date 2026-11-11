@@ -490,20 +490,16 @@ This command can only guess the schema, so it's up to the developer to manually 
 
 ### Test Data Generation
 
-To quickly generate test data for developing against this app, first run the following command from a shell inside the container (`invoke cli`):
+To quickly generate test data for developing against this app, run the following command from your host:
 
 ```bash
-nautobot-server generate_test_data --flush
+invoke generate-test-data --flush
 ```
 
-Then run the following commands from your host:
+The command builds on data that already exists in Nautobot. It picks devices, device types, inventory items and software versions at random and creates Hardware Notices, Validated Software and validation results for them. Populate Nautobot with those first, for example with the [`generate_test_data`](https://docs.nautobot.com/projects/core/en/stable/user-guide/administration/tools/nautobot-server/#generate_test_data) command from Nautobot core, which creates devices, device types and software versions but no inventory items.
 
-```bash
-invoke generate-test-data
-invoke createsuperuser
-```
+!!! note
+    The `--flush` flag deletes all existing Device Lifecycle Management objects before generating new data, so the command can be run as many times as needed. Without it, a second run fails as soon as it creates an object that clashes with one from the first run, such as a second Hardware Notice for the same device type or a Vendor with the same name. Each run picks devices and software at random, so the Hardware Notices, Validated Software and validation results change between runs, while the numbers of Vendors, Contracts, Contract POCs, CVEs and Vulnerabilities stay the same.
 
 !!! danger
-    The `--flush` flag will completely empty your database and replace it with test data. This command should never be run in a production environment.
-
-This uses the [`generate_test_data`](https://docs.nautobot.com/projects/core/en/stable/user-guide/administration/tools/nautobot-server/#generate_test_data) management command from Nautobot core to generate the Statuses, Platforms, Device Types, Devices, etc. Nautobot version 2.2.0 is the minimum version required for devices to be generated. If using an older version of Nautobot, you'll need to create devices manually after running `nautobot-server generate_test_data`.
+    The `--flush` flag also deletes the Device Lifecycle Management objects you created yourself, such as Hardware Notices and Contracts. Never run this command in a production environment.
