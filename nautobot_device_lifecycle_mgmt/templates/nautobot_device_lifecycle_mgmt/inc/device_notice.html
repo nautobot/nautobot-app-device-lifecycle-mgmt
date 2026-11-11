@@ -25,6 +25,8 @@
                                 </button>
                                 {% if notice.expired %}
                                     <span class="badge bg-danger float-end">Expired</span>
+                                {% elif notice.expiring_soon %}
+                                    <span class="badge bg-warning float-end">Expiring Soon</span>
                                 {% endif %}
                             </th>
                         </tr>

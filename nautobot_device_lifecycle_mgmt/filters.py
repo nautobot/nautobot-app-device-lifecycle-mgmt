@@ -31,6 +31,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
+from nautobot_device_lifecycle_mgmt.utils import expiring_soon_days
 
 
 class HardwareLCMFilterSet(NautobotFilterSet):
@@ -131,6 +132,7 @@ class HardwareLCMFilterSet(NautobotFilterSet):
     end_of_sw_releases__lte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field  # TODO 3.0: Remove this filter when Nautobot adds it automatically
 
     expired = django_filters.BooleanFilter(method="_expired_search", label="Support Expired")
+    expiring_soon = django_filters.BooleanFilter(method="_expiring_soon_search", label="Support Expiring Soon")
 
     class Meta:
         """Meta attributes for filter."""
@@ -138,6 +140,14 @@ class HardwareLCMFilterSet(NautobotFilterSet):
         model = HardwareLCM
 
         fields = "__all__"
+
+    def _expiring_soon_search(self, queryset, name, value):  # pylint: disable=unused-argument
+        """Perform the filtered search."""
+        today = datetime.datetime.today().date()
+        end_of_support_range = (today, today + datetime.timedelta(days=expiring_soon_days()))
+        if value:
+            return queryset.filter(end_of_support__range=end_of_support_range)
+        return queryset.exclude(end_of_support__range=end_of_support_range)
 
     def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
