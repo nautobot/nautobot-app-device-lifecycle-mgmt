@@ -16,6 +16,11 @@ def multi_tenant_mode_enabled():
     return settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"].get("multi_tenant_mode", False)
 
 
+def expiring_soon_days():
+    """Return how many days before End of Support a hardware notice counts as expiring soon."""
+    return settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"].get("expiring_soon_days", 180)
+
+
 def standardize_cvss_severity(raw: str | None) -> str:
     """Standardize a raw CVSS severity string to a ``CVESeverityChoices`` value.
 

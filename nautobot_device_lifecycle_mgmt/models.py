@@ -1,6 +1,6 @@
 """Django models for the Lifecycle Management app."""
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 # from django.urls import reverse
 from django.core.exceptions import ValidationError
@@ -24,6 +24,7 @@ from nautobot_device_lifecycle_mgmt.software_filters import (
     InventoryItemSoftwareImageFilter,
     InventoryItemValidatedSoftwareFilter,
 )
+from nautobot_device_lifecycle_mgmt.utils import expiring_soon_days
 
 
 @extras_features(
@@ -104,6 +105,18 @@ class HardwareLCM(PrimaryModel):
         if not getattr(self, "end_of_support"):
             return False
         return today > getattr(self, "end_of_support")
+
+    @property
+    def expiring_soon(self):
+        """
+        Return True if the end of support date is within the next `expiring_soon_days` days.
+
+        If the end of support date has not been provided or has already passed, return False.
+        """
+        if not self.end_of_support:
+            return False
+        today = datetime.today().date()
+        return today <= self.end_of_support <= today + timedelta(days=expiring_soon_days())
 
     def clean(self):
         """Override clean to do custom validation."""
