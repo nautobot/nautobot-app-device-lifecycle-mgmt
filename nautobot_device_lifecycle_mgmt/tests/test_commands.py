@@ -20,14 +20,14 @@ from nautobot_device_lifecycle_mgmt.tests.conftest import create_inventory_items
 
 
 class GenerateDLMTestDataTest(TestCase):
-    """Test the `generate_dlm_test_data` management command."""
+    """Test the `generate_nautobot_device_lifecycle_mgmt_test_data` management command."""
 
     def test_generated_objects_pass_validation(self):
         """Every model gets test data, and every generated object passes model validation."""
         create_inventory_items()
         create_softwares()
 
-        call_command("generate_dlm_test_data", stdout=StringIO())
+        call_command("generate_nautobot_device_lifecycle_mgmt_test_data", stdout=StringIO())
 
         for model in (
             HardwareLCM,

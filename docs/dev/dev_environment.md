@@ -490,12 +490,17 @@ This command can only guess the schema, so it's up to the developer to manually 
 
 ### Test Data Generation
 
-To quickly generate test data for developing against this app, you can use the following commands:
+To quickly generate test data for developing against this app, first run the following command from a shell inside the container (`invoke cli`):
 
 ```bash
 nautobot-server generate_test_data --flush
-nautobot-server generate_dlm_test_data
-nautobot-server createsuperuser
+```
+
+Then run the following commands from your host:
+
+```bash
+invoke generate-test-data
+invoke createsuperuser
 ```
 
 !!! danger

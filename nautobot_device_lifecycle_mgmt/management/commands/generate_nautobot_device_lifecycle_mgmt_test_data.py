@@ -1,7 +1,27 @@
 """Generate test data for the Device Lifecycle Management app."""
 
+import random
+from datetime import date
+
 from django.core.management.base import BaseCommand
 from django.db import DEFAULT_DB_ALIAS
+from nautobot.apps.change_logging import web_request_context
+from nautobot.apps.factory import get_random_instances
+from nautobot.dcim.models import Device, DeviceType, InventoryItem, SoftwareVersion
+from nautobot.users.models import User
+
+from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices, ReportRunTypeChoices
+from nautobot_device_lifecycle_mgmt.models import (
+    CVELCM,
+    ContactLCM,
+    ContractLCM,
+    DeviceSoftwareValidationResult,
+    HardwareLCM,
+    InventoryItemSoftwareValidationResult,
+    ProviderLCM,
+    ValidatedSoftwareLCM,
+    VulnerabilityLCM,
+)
 
 
 class Command(BaseCommand):
@@ -22,16 +42,113 @@ class Command(BaseCommand):
             help="Flush any existing Device Lifecycle Management test data from the database before generating new data.",
         )
 
-    def _generate_static_data(self, db):
+    def _generate_static_data(self, db):  # pylint: disable=too-many-locals
         """Generate static data required for test cases."""
-        # TODO: populate the database with Device Lifecycle Management test data.
+        devices = get_random_instances(Device.objects.using(db), minimum=2, maximum=4)
+        device_types = get_random_instances(DeviceType.objects.using(db), minimum=2, maximum=4)
+        inventory_items = get_random_instances(InventoryItem.objects.using(db), minimum=2, maximum=4)
+        software_versions = get_random_instances(SoftwareVersion.objects.using(db), minimum=2, maximum=4)
+
+        # create HardwareLCM
+        for device_type in device_types:
+            hardware_notice = HardwareLCM(device_type=device_type, end_of_sale=date(2022, 3, 14))
+            hardware_notice.validated_save(using=db)
+        for inventory_item in inventory_items:
+            hardware_notice = HardwareLCM(inventory_item=inventory_item, end_of_support=date(2020, 5, 4))
+            hardware_notice.validated_save(using=db)
+
+        # create ValidatedSoftwareLCM
+        for software in software_versions:
+            validated_software = ValidatedSoftwareLCM(
+                software=software,
+                start=date(2020, 1, 1),
+                end=date(2020, 12, 31),
+            )
+            validated_software.validated_save(using=db)
+
+        # create DeviceSoftwareValidationResult
+        for device in devices:
+            device_result = DeviceSoftwareValidationResult(
+                device=device,
+                software=random.choice(software_versions),  # noqa: S311
+                run_type=ReportRunTypeChoices.REPORT_FULL_RUN,
+            )
+            device_result.validated_save(using=db)
+
+        # create InventoryItemSoftwareValidationResult
+        for inventory_item in inventory_items:
+            inventory_item_result = InventoryItemSoftwareValidationResult(
+                inventory_item=inventory_item,
+                software=random.choice(software_versions),  # noqa: S311
+                run_type=ReportRunTypeChoices.REPORT_FULL_RUN,
+            )
+            inventory_item_result.validated_save(using=db)
+
+        # create ProviderLCM
+        for i in range(1, 9):
+            provider = ProviderLCM(
+                name=f"Test Provider {i}",
+                description=f"Description for Provider {i}",
+            )
+            provider.validated_save(using=db)
+
+        # create ContractLCM
+        for provider in ProviderLCM.objects.using(db).all():
+            contract = ContractLCM(
+                provider=provider,
+                name=f"Test Contract for {provider.name}",
+            )
+            contract.validated_save(using=db)
+
+        # create ContactLCM
+        for contract in ContractLCM.objects.using(db).all():
+            contact = ContactLCM(
+                contract=contract,
+                name=f"Test Contact for {contract.name}",
+                email="support@example.com",
+            )
+            contact.validated_save(using=db)
+
+        # create CVELCM
+        for i in range(1, 5):
+            cve = CVELCM(
+                name=f"Test CVELCM {i}",
+                published_date=date(2020, 1, 1),
+                link=f"http://cve.example.org/{i}/details/",
+                severity=random.choice(CVESeverityChoices.values()),  # noqa: S311
+            )
+            cve.validated_save(using=db)
+            cve.affected_softwares.set(get_random_instances(SoftwareVersion.objects.using(db), minimum=1))
+
+        # create VulnerabilityLCM
+        vulnerability = VulnerabilityLCM(cve=CVELCM.objects.using(db).get(name="Test CVELCM 1"))
+        vulnerability.validated_save(using=db)
+        vulnerability = VulnerabilityLCM(software=SoftwareVersion.objects.using(db).first())
+        vulnerability.validated_save(using=db)
+        vulnerability = VulnerabilityLCM(device=Device.objects.using(db).first())
+        vulnerability.validated_save(using=db)
+        vulnerability = VulnerabilityLCM(inventory_item=InventoryItem.objects.using(db).first())
+        vulnerability.validated_save(using=db)
 
     def handle(self, *args, **options):
         """Entry point to the management command."""
         if options["flush"]:
-            self.stdout.write("Flushing existing Device Lifecycle Management test data...")
-            # TODO: delete any objects created by `_generate_static_data` here.
+            self.stdout.write(
+                self.style.WARNING("Flushing device lifecycle management models objects from the database...")
+            )
+            VulnerabilityLCM.objects.using(options["database"]).all().delete()
+            CVELCM.objects.using(options["database"]).all().delete()
+            ContactLCM.objects.using(options["database"]).all().delete()
+            ContractLCM.objects.using(options["database"]).all().delete()
+            ProviderLCM.objects.using(options["database"]).all().delete()
+            InventoryItemSoftwareValidationResult.objects.using(options["database"]).all().delete()
+            DeviceSoftwareValidationResult.objects.using(options["database"]).all().delete()
+            ValidatedSoftwareLCM.objects.using(options["database"]).all().delete()
+            HardwareLCM.objects.using(options["database"]).all().delete()
 
-        self._generate_static_data(db=options["database"])
+        with web_request_context(
+            user=User.objects.first(), context_detail="generate_nautobot_device_lifecycle_mgmt_test_data"
+        ):
+            self._generate_static_data(db=options["database"])
 
         self.stdout.write(self.style.SUCCESS(f"Database {options['database']} populated with app data successfully!"))
