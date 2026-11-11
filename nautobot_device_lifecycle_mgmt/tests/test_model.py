@@ -101,21 +101,24 @@ class HardwareLCMTestCase(TestCase):
     def test_create_hwlcm_notice_failed_missing_one_of(self):
         """Successfully create basic notice."""
         with self.assertRaises(ValidationError) as failure_exception:
-            HardwareLCM.objects.create(device_type=self.device_type)
+            hwlcm_obj = HardwareLCM(device_type=self.device_type)
+            hwlcm_obj.validated_save()
         self.assertEqual(failure_exception.exception.messages[0], "End of Sale or End of Support must be specified.")
 
     def test_create_hwlcm_notice_failed_validation_documentation_url(self):
         """Successfully create basic notice."""
         with self.assertRaises(ValidationError) as failure_exception:
-            HardwareLCM.objects.create(
+            hwlcm_obj = HardwareLCM(
                 device_type=self.device_type, end_of_support=date(2023, 4, 1), documentation_url="test.com"
             )
+            hwlcm_obj.validated_save()
         self.assertEqual(failure_exception.exception.messages[0], "Enter a valid URL.")
 
     def test_create_hwlcm_notice_failed_validation_date(self):
         """Successfully create basic notice."""
         with self.assertRaises(ValidationError) as failure_exception:
-            HardwareLCM.objects.create(device_type=self.device_type, end_of_support="April 1st 2022")
+            hwlcm_obj = HardwareLCM(device_type=self.device_type, end_of_support="April 1st 2022")
+            hwlcm_obj.validated_save()
         self.assertIn("invalid date format. It must be in YYYY-MM-DD format.", failure_exception.exception.messages[0])
 
     def test_expired_property_end_of_support_expired(self):
