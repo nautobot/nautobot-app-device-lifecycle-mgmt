@@ -41,7 +41,7 @@ class Command(BaseCommand):
             help="Flush any existing device lifecycle management models data from the database before generating new data.",
         )
 
-    def _generate_static_data(self, db):  # pylint: disable=too-many-locals
+    def _generate_static_data(self, db):
         devices = get_random_instances(Device.objects.using(db), minimum=2, maximum=4)
         device_types = get_random_instances(DeviceType.objects.using(db), minimum=2, maximum=4)
         inventory_items = get_random_instances(InventoryItem.objects.using(db), minimum=2, maximum=4)
@@ -49,20 +49,17 @@ class Command(BaseCommand):
 
         # create HardwareLCM
         for device_type in device_types:
-            hardware_notice = HardwareLCM(device_type=device_type, end_of_sale=date(2022, 3, 14))
-            hardware_notice.validated_save(using=db)
+            HardwareLCM.objects.using(db).create(device_type=device_type, end_of_sale=date(2022, 3, 14))
         for inventory_item in inventory_items:
-            hardware_notice = HardwareLCM(inventory_item=inventory_item, end_of_support=date(2020, 5, 4))
-            hardware_notice.validated_save(using=db)
+            HardwareLCM.objects.using(db).create(inventory_item=inventory_item, end_of_support=date(2020, 5, 4))
 
         # create ValidatedSoftwareLCM
         for software in software_versions:
-            validated_software = ValidatedSoftwareLCM(
+            ValidatedSoftwareLCM.objects.using(db).create(
                 software=software,
                 start=date(2020, 1, 1),
                 end=date(2020, 12, 31),
             )
-            validated_software.validated_save(using=db)
 
         # create DeviceSoftwareValidationResult
         for device in devices:
@@ -80,19 +77,17 @@ class Command(BaseCommand):
 
         # create ProviderLCM
         for i in range(1, 9):
-            provider = ProviderLCM(
+            ProviderLCM.objects.using(db).create(
                 name=f"Test Provider {i}",
                 description=f"Description for Provider {i}",
             )
-            provider.validated_save(using=db)
 
         # create ContractLCM
         for provider in ProviderLCM.objects.using(db).all():
-            contract = ContractLCM(
+            ContractLCM.objects.using(db).create(
                 provider=provider,
                 name=f"Test Contract for {provider.name}",
             )
-            contract.validated_save(using=db)
 
         # create ContactLCM
         for contract in ContractLCM.objects.using(db).all():
