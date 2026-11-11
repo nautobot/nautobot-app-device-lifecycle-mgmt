@@ -3,7 +3,15 @@
 
 import django_tables2 as tables
 from django_tables2.utils import A
-from nautobot.apps.tables import BaseTable, BooleanColumn, ButtonsColumn, StatusTableMixin, TagColumn, ToggleColumn
+from nautobot.apps.tables import (
+    BaseTable,
+    BooleanColumn,
+    ButtonsColumn,
+    LinkedCountColumn,
+    StatusTableMixin,
+    TagColumn,
+    ToggleColumn,
+)
 
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -113,7 +121,24 @@ class ValidatedSoftwareLCMTable(BaseTable):
     )
     valid = BooleanColumn(verbose_name="Valid Now", orderable=False)
     software = tables.LinkColumn(verbose_name="Software")
-    device_tenants = tables.ManyToManyColumn(verbose_name="Tenant")
+    device_tenants = tables.ManyToManyColumn(verbose_name="Tenant", linkify_item=True)
+    device_count = LinkedCountColumn(
+        viewname="dcim:device_list",
+        url_params={"nautobot_device_lifecycle_mgmt_validated_software": "pk"},
+        lookup="devices",
+        reverse_lookup="validated_software",
+        verbose_name="Devices",
+    )
+    device_types = tables.ManyToManyColumn(verbose_name="Device Types", linkify_item=True, orderable=False)
+    device_roles = tables.ManyToManyColumn(verbose_name="Device Roles", linkify_item=True, orderable=False)
+    inventory_item_count = LinkedCountColumn(
+        viewname="dcim:inventoryitem_list",
+        url_params={"nautobot_device_lifecycle_mgmt_validated_software": "pk"},
+        lookup="inventory_items",
+        reverse_lookup="validated_software",
+        verbose_name="Inventory Items",
+    )
+    object_tags = tables.ManyToManyColumn(verbose_name="Object Tags", linkify_item=True, orderable=False)
     actions = ButtonsColumn(ValidatedSoftwareLCM, buttons=("edit", "delete"))
     preferred = BooleanColumn()
     tags = TagColumn(url_name="plugins:nautobot_device_lifecycle_mgmt:validatedsoftwarelcm_list")
@@ -127,6 +152,11 @@ class ValidatedSoftwareLCMTable(BaseTable):
             "name",
             "software",
             "device_tenants",
+            "device_count",
+            "device_types",
+            "device_roles",
+            "inventory_item_count",
+            "object_tags",
             "start",
             "end",
             "valid",
