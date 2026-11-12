@@ -150,7 +150,10 @@ class NistCveSyncSoftwareForceUpdateTestCase(unittest.TestCase):
             mock.patch(f"{module}.get_nist_urls", return_value=["https://nvd.example.com/?cpeName=test"]),
             mock.patch(f"{module}.sleep"),
         ):
-            mock_software.objects.all.return_value = [mock.MagicMock() for _ in range(software_count)]
+            mock_software.objects.all.return_value = [
+                mock.MagicMock(**{"platform.network_driver": "cisco_ios", "version": "15.2(1)T"})
+                for _ in range(software_count)
+            ]
             job.run(nist_integration=integration, force_cve_updates=force_cve_updates)
 
         return job.update_cve
