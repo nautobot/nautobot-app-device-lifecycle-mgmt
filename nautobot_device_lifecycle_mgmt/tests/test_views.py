@@ -12,11 +12,14 @@ from nautobot.dcim.models import DeviceType, Manufacturer
 from nautobot.extras.models import Status, Tag
 from nautobot.users.models import ObjectPermission
 
+from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
+    ContractLCM,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
+    ProviderLCM,
     VulnerabilityLCM,
 )
 
@@ -478,3 +481,60 @@ class HardwareNoticeBadgeTest(TestCase):
         for url in (device.get_absolute_url(), device.device_type.get_absolute_url()):
             with self.subTest(url=url):
                 self.assertContains(self.client.get(url), "Expiring Soon")
+
+
+class DeviceContractPanelTest(TestCase):
+    """Test the Contracts panel on the device page."""
+
+    user_permissions = ("dcim.view_device", "nautobot_device_lifecycle_mgmt.view_contractlcm")
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.device = create_devices()[0]
+        cls.provider = ProviderLCM(name="Panel Test Vendor")
+        cls.provider.validated_save()
+        contract = ContractLCM(
+            provider=cls.provider,
+            name="Panel Test Contract",
+            number="PANEL-0001",
+            support_level="Panel Test 24x7",
+            contract_type=ContractTypeChoices.HARDWARE,
+        )
+        contract.validated_save()
+        contract.devices.add(cls.device)
+        cls.add_contract_url = (
+            f"{reverse('plugins:nautobot_device_lifecycle_mgmt:contractlcm_add')}"
+            f"?devices={cls.device.pk}&return_url={cls.device.get_absolute_url()}"
+        )
+
+    def test_panel_shows_contract_support_details(self):
+        response = self.client.get(self.device.get_absolute_url())
+        provider_url = reverse("plugins:nautobot_device_lifecycle_mgmt:providerlcm", args=[self.provider.pk])
+        for text in (provider_url, "Panel Test Vendor", "Contract Type", "Hardware", "Panel Test 24x7", "PANEL-0001"):
+            with self.subTest(text=text):
+                self.assertContains(response, text)
+
+    def test_panel_lists_latest_end_date_first_then_name(self):
+        for name, end in (
+            ("Panel Zulu", datetime.date(2030, 12, 31)),
+            ("Panel Alpha", datetime.date(2030, 12, 31)),
+            ("Panel Later", datetime.date(2031, 12, 31)),
+        ):
+            contract = ContractLCM(
+                provider=self.provider, name=name, contract_type=ContractTypeChoices.HARDWARE, end=end
+            )
+            contract.validated_save()
+            contract.devices.add(self.device)
+        content = self.client.get(self.device.get_absolute_url()).content.decode()
+        positions = [content.index(name) for name in ("Panel Later", "Panel Alpha", "Panel Zulu")]
+        self.assertEqual(positions, sorted(positions))
+
+    def test_add_contract_button_requires_add_permission(self):
+        self.assertNotContains(self.client.get(self.device.get_absolute_url()), self.add_contract_url)
+        self.add_permissions("nautobot_device_lifecycle_mgmt.add_contractlcm")
+        self.assertContains(self.client.get(self.device.get_absolute_url()), self.add_contract_url)
+
+    def test_add_contract_button_preselects_device(self):
+        self.add_permissions("nautobot_device_lifecycle_mgmt.add_contractlcm")
+        response = self.client.get(self.add_contract_url)
+        self.assertEqual(response.context["form"]["devices"].value(), [str(self.device.pk)])

@@ -163,22 +163,18 @@ class DeviceContractLCM(
     def __init__(self, context):
         """Init setting up the ContractLCM object."""
         super().__init__(context)
-        self.device_contracts = (
-            ContractLCM.objects.get_for_object(self.context["object"]).order_by("name").order_by("-end")[:5]
-        )
+        self.device_contracts = ContractLCM.objects.get_for_object(self.context["object"]).order_by("-end", "name")[:5]
         self.device_contracts_table = ContractLCMTable(
             list(self.device_contracts),
             orderable=False,
             exclude=(
                 "actions",
                 "cost",
-                "contract_type",
                 "devices",
-                "provider",
-                "support_level",
                 "cr_contractlcm_to_inventoryitem_src",
             ),
         )
+        self.device_contracts_table.columns.show("number")
 
     def right_page(self):
         """Display table on right side of page."""
