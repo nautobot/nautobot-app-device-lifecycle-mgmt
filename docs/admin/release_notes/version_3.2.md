@@ -19,14 +19,12 @@ Device Lifecycle Management App version 3.2.0 adds support for ArubaOS and PanOS
 
 ### Added
 
-- [#609](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/609) - Added tag support to the bulk edit forms for Hardware Notice, Validated Software, Contract, CVE, and Vulnerability objects. Tags are now applied through the `Add tags` and `Remove tags` fields honored by Nautobot's bulk edit view; the previous `Tags` field on the CVE and Vulnerability bulk edit forms had no effect.
-- [#609](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/609) - 
+- [#609](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/609) - Added tag support to the bulk edit forms for Hardware Notice, Validated Software, Contract, CVE, and Vulnerability objects.
 - [#609](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/609) - Added a selectable (non-default) tags column to the Hardware Notice and Validated Software list views.
 
 ### Fixed
 
 - [#609](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/609) - Fixed tags being silently discarded when creating or editing Validated Software, CVE, and Vulnerability objects in the UI. Their forms declared a `tags` field but omitted `"tags"` from an explicit `Meta.fields`, so Django's `_save_m2m()` never persisted the selection.
-- [#609](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/609) - 
 - [#609](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/609) - Fixed the Contract list view showing the tags column by default. Tags are now available but hidden, matching the other Lifecycle Management list views.
 - [#657](https://github.com/nautobot/nautobot-app-device-lifecycle-mgmt/issues/657) - Corrected typo `unsuported` in "Device Hardware Notice Report" graph.
 
