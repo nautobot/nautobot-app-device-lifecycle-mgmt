@@ -46,6 +46,8 @@ urlpatterns += [
         RedirectView.as_view(url=static("nautobot_device_lifecycle_mgmt/docs/index.html")),
         name="docs",
     ),
+    path("devices/<uuid:pk>/qr-code/", views.DeviceQRCodeView.as_view(), name="device_qr_code"),
+    path("device-labels/", views.DeviceLabelsView.as_view(), name="device_labels"),
     # SoftwareVersionRelatedCVEResult
     path(
         "software-versions/<uuid:pk>/related-cves/",
