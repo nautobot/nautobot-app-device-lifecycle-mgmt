@@ -1,0 +1,1 @@
+Fixed the NIST - Software CVE Search job crashing on Software Versions with an unparsable version or a platform that has no manufacturer or no NIST mapping.

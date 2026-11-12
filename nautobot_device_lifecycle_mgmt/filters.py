@@ -31,6 +31,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
+from nautobot_device_lifecycle_mgmt.utils import expiring_soon_days
 
 
 class HardwareLCMFilterSet(NautobotFilterSet):
@@ -103,6 +104,13 @@ class HardwareLCMFilterSet(NautobotFilterSet):
         label="Inventory Part ID",
     )
 
+    device = NaturalKeyOrPKMultipleChoiceFilter(
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        method="_device_search",
+        label="Device (name or ID)",
+    )
+
     documentation_url = django_filters.CharFilter(
         lookup_expr="contains",
     )
@@ -124,6 +132,7 @@ class HardwareLCMFilterSet(NautobotFilterSet):
     end_of_sw_releases__lte = django_filters.DateFilter(field_name="end_of_sw_releases", lookup_expr="lte")  # pylint: disable=nb-warn-dunder-filter-field  # TODO 3.0: Remove this filter when Nautobot adds it automatically
 
     expired = django_filters.BooleanFilter(method="_expired_search", label="Support Expired")
+    expiring_soon = django_filters.BooleanFilter(method="_expiring_soon_search", label="Support Expiring Soon")
 
     class Meta:
         """Meta attributes for filter."""
@@ -131,6 +140,14 @@ class HardwareLCMFilterSet(NautobotFilterSet):
         model = HardwareLCM
 
         fields = "__all__"
+
+    def _expiring_soon_search(self, queryset, name, value):  # pylint: disable=unused-argument
+        """Perform the filtered search."""
+        today = datetime.datetime.today().date()
+        end_of_support_range = (today, today + datetime.timedelta(days=expiring_soon_days()))
+        if value:
+            return queryset.filter(end_of_support__range=end_of_support_range)
+        return queryset.exclude(end_of_support__range=end_of_support_range)
 
     def _expired_search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
@@ -144,6 +161,15 @@ class HardwareLCMFilterSet(NautobotFilterSet):
         if not value:
             qs_filter = Q(**{"end_of_support__gte": today}) | Q(**{"end_of_support__isnull": True})
         return queryset.filter(qs_filter)
+
+    def _device_search(self, queryset, name, value):  # pylint: disable=unused-argument
+        """Return notices for the devices' types and for the part IDs of their inventory items."""
+        if not value:
+            return queryset
+        part_ids = InventoryItem.objects.filter(device__in=value).exclude(part_id="").values_list("part_id", flat=True)
+        return queryset.filter(
+            Q(device_type__in=[device.device_type_id for device in value]) | Q(inventory_item__in=part_ids)
+        )
 
 
 class SoftwareLCMFilterSet(NautobotFilterSet):
@@ -303,6 +329,12 @@ class ValidatedSoftwareLCMFilterSet(NautobotFilterSet):
     software = django_filters.ModelMultipleChoiceFilter(
         queryset=SoftwareVersion.objects.all(),
         label="Software",
+    )
+    platform = NaturalKeyOrPKMultipleChoiceFilter(
+        field_name="software__platform",
+        queryset=Platform.objects.all(),
+        to_field_name="name",
+        label="Platform (name or ID)",
     )
     devices_id = django_filters.ModelMultipleChoiceFilter(
         field_name="devices",

@@ -137,7 +137,9 @@ class HardwareLCMFilterForm(NautobotFilterForm):  # pylint: disable=too-many-anc
     model = HardwareLCM
     field_order = [
         "q",
+        "expiring_soon",
         "expired",
+        "device",
         "device_type",
         "inventory_item",
         "release_date",
@@ -148,10 +150,21 @@ class HardwareLCMFilterForm(NautobotFilterForm):  # pylint: disable=too-many-anc
         "documentation_url",
     ]
     q = forms.CharField(required=False, label="Search")
+    expiring_soon = forms.BooleanField(
+        required=False,
+        label="Support Expiring Soon",
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+    )
     expired = forms.BooleanField(
         required=False,
         label="Support Expired",
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+    )
+
+    device = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        to_field_name="name",
+        required=False,
     )
 
     device_type = DynamicModelMultipleChoiceField(required=False, queryset=DeviceType.objects.all())
@@ -322,6 +335,11 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
     # Device, InventoryItem and DeviceType have non-unique natural keys, so their filters set
     # `prefers_id=True` and these fields submit PKs. The remaining fields target models with a
     # unique `name` and submit that instead.
+    platform = DynamicModelMultipleChoiceField(
+        queryset=Platform.objects.all(),
+        to_field_name="name",
+        required=False,
+    )
     devices = DynamicModelMultipleChoiceField(
         queryset=Device.objects.all(),
         required=False,
@@ -360,6 +378,7 @@ class ValidatedSoftwareLCMFilterForm(NautobotFilterForm):
         fields = [
             "q",
             "software",
+            "platform",
             "devices",
             "device_tenants",
             "device_types",
@@ -732,7 +751,6 @@ class ContractLCMFilterForm(NautobotFilterForm, StatusModelFilterFormMixin):
 class ProviderLCMForm(NautobotModelForm):
     """Device Lifecycle Contract Providers creation/edit form."""
 
-    tags = DynamicModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
     country = forms.ChoiceField(
         required=False,
         choices=add_blank_choice(CountryCodes.CHOICES),
@@ -940,7 +958,9 @@ class VulnerabilityLCMForm(NautobotModelForm):
         ]
 
 
-class VulnerabilityLCMBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):
+class VulnerabilityLCMBulkEditForm(
+    TagsBulkEditFormMixin, StatusModelBulkEditFormMixin, NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin
+):
     """Vulnerability Lifecycle Management bulk edit form."""
 
     pk = forms.ModelMultipleChoiceField(queryset=VulnerabilityLCM.objects.all(), widget=forms.MultipleHiddenInput)

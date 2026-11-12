@@ -46,6 +46,17 @@ curl "http://$NBHOST/api/plugins/device-lifecycle/hardware/?expired=true" \
 -H  "Authorization: Token $TOKEN" | json_pp
 ```
 
+#### REST API Example 3
+
+Gather hardware notices that reach end of support within the next `expiring_soon_days` days (180 by default, see [App Configuration](../admin/install.md#app-configuration)).
+
+```shell
+curl "http://$NBHOST/api/plugins/device-lifecycle/hardware/?expiring_soon=true" \
+-X GET \
+-H  "accept: application/json" \
+-H  "Authorization: Token $TOKEN" | json_pp
+```
+
 ### GraphQL Examples
 
 ![](../images/ss_lcm_hardware_graphql_light.png#only-light){ .on-glb }

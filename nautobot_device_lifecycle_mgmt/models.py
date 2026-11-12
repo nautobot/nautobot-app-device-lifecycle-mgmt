@@ -1,6 +1,6 @@
 """Django models for the Lifecycle Management app."""
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 # from django.urls import reverse
 from django.core.exceptions import ValidationError
@@ -24,6 +24,7 @@ from nautobot_device_lifecycle_mgmt.software_filters import (
     InventoryItemSoftwareImageFilter,
     InventoryItemValidatedSoftwareFilter,
 )
+from nautobot_device_lifecycle_mgmt.utils import expiring_soon_days
 
 
 @extras_features(
@@ -105,11 +106,17 @@ class HardwareLCM(PrimaryModel):
             return False
         return today > getattr(self, "end_of_support")
 
-    def save(self, *args, **kwargs):
-        """Override save to assert a full clean."""
-        # Full clean to assert custom validation in clean() for ORM, etc.
-        super().full_clean()
-        super().save(*args, **kwargs)
+    @property
+    def expiring_soon(self):
+        """
+        Return True if the end of support date is within the next `expiring_soon_days` days.
+
+        If the end of support date has not been provided or has already passed, return False.
+        """
+        if not self.end_of_support:
+            return False
+        today = datetime.today().date()
+        return today <= self.end_of_support <= today + timedelta(days=expiring_soon_days())
 
     def clean(self):
         """Override clean to do custom validation."""
@@ -345,12 +352,6 @@ class ValidatedSoftwareLCM(PrimaryModel):
             return self.end >= today >= self.start
 
         return today >= self.start
-
-    def save(self, *args, **kwargs):
-        """Override save to assert a full clean."""
-        # Full clean to assert custom validation in clean() for ORM, etc.
-        super().full_clean()
-        super().save(*args, **kwargs)
 
     def clean(self):
         """Override clean to do custom validation."""
@@ -602,12 +603,6 @@ class ContractLCM(PrimaryModel):
             return True
         return datetime.today().date() <= self.end
 
-    def save(self, *args, **kwargs):
-        """Override save to assert a full clean."""
-        # Full clean to assert custom validation in clean() for ORM, etc.
-        super().full_clean()
-        super().save(*args, **kwargs)
-
     def clean(self):
         """Override clean to do custom validation."""
         super().clean()
@@ -655,12 +650,6 @@ class ProviderLCM(OrganizationalModel):
     def display(self):
         """Return a display name for the ProviderLCM."""
         return f"Provider: {str(self)}"
-
-    def save(self, *args, **kwargs):
-        """Override save to assert a full clean."""
-        # Full clean to assert custom validation in clean() for ORM, etc.
-        super().full_clean()
-        super().save(*args, **kwargs)
 
 
 @extras_features(

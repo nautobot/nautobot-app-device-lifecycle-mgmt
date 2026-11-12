@@ -225,6 +225,17 @@ class HardwareLCMTestCase(CommonTestDataMixin, FilterTestCases.FilterTestCase):
         params = {"documentation_url": "https://cisco.com/c9300-48"}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
+    def test_expiring_soon_search(self):
+        """Test expiring_soon filter splits notices on end_of_support within the next expiring_soon_days days."""
+        today = datetime.today().date()
+        soon = HardwareLCM.objects.create(inventory_item="SOON-PART", end_of_support=today + timedelta(days=30))
+        HardwareLCM.objects.create(inventory_item="LATER-PART", end_of_support=today + timedelta(days=365))
+        HardwareLCM.objects.create(inventory_item="NO-EOS-PART", end_of_sale=today)
+        self.assertQuerysetEqualAndNotEmpty(self.filterset({"expiring_soon": True}, self.queryset).qs, [soon])
+        self.assertQuerysetEqualAndNotEmpty(
+            self.filterset({"expiring_soon": False}, self.queryset).qs, self.queryset.exclude(pk=soon.pk), ordered=False
+        )
+
     def test_expired_search(self):
         """Test returned devices are either end of sale or end of support."""
         test_year = (datetime.today() + timedelta(days=365)).year
@@ -251,6 +262,22 @@ class HardwareLCMTestCase(CommonTestDataMixin, FilterTestCases.FilterTestCase):
             self.filterset(params, self.queryset).qs,
             self.queryset.filter(end_of_support__lt=datetime.today().date()),
         )
+
+    def test_device(self):
+        """Test device filter returns notices for the device type and the device's inventory item part IDs."""
+        InventoryItem.objects.create(device=self.device_1, name="Uplink Module", part_id="C9300-NM-8X")
+        part_notice = HardwareLCM.objects.create(inventory_item="C9300-NM-8X", end_of_sale="2025-01-01")
+        HardwareLCM.objects.create(inventory_item="C9300-NM-2Q", end_of_sale="2025-01-01")
+        device_1_notices = [self.notice_1.pk, part_notice.pk]
+        for params, expected in (
+            ({"device": [self.device_1.name]}, device_1_notices),
+            ({"device": [self.device_1.pk]}, device_1_notices),
+            ({"device": [self.device_1.name, self.device_2.pk]}, [*device_1_notices, self.notice_2.pk]),
+        ):
+            with self.subTest(params=params):
+                self.assertQuerysetEqualAndNotEmpty(
+                    self.filterset(params, self.queryset).qs, self.queryset.filter(pk__in=expected), ordered=False
+                )
 
 
 class ContractLCMTestCase(FilterTestCases.FilterTestCase):
@@ -744,6 +771,16 @@ class ValidatedSoftwareLCMFilterSetTestCase(FilterTestCases.FilterTestCase):
     def test_software(self):
         """Test software filter."""
         params = {"software": [self.softwares[0].pk]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
+
+    def test_platform(self):
+        """Test platform filter."""
+        params = {"platform": [self.softwares[1].platform.name]}
+        self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
+
+    def test_platform_pk(self):
+        """Test platform filter by PK."""
+        params = {"platform": [self.softwares[0].platform.pk]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 1)
 
     def test_preferred(self):
