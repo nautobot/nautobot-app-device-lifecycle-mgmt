@@ -940,6 +940,11 @@ class CVELCMFilterForm(NautobotFilterForm):
 class VulnerabilityLCMForm(NautobotModelForm):
     """Vulnerability Lifecycle Management creation/edit form."""
 
+    cve = DynamicModelChoiceField(queryset=CVELCM.objects.all(), required=False, label="CVE")
+    software = DynamicModelChoiceField(queryset=SoftwareVersion.objects.all(), required=False)
+    device = DynamicModelChoiceField(queryset=Device.objects.all(), required=False)
+    inventory_item = DynamicModelChoiceField(queryset=InventoryItem.objects.all(), required=False)
+
     class Meta:
         """Meta attributes for the VulnerabilityLCMForm class."""
 

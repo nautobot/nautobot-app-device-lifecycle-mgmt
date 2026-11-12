@@ -4,6 +4,7 @@ from unittest import mock
 
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
+from nautobot.apps.forms import DynamicModelChoiceField
 from nautobot.dcim.models import (
     Device,
     DeviceType,
@@ -38,6 +39,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ValidatedSoftwareLCM,
     VulnerabilityLCM,
 )
+from nautobot_device_lifecycle_mgmt.tests.conftest import create_cves, create_inventory_items, create_softwares
 
 
 class HardwareLCMFormTest(TestCase):
@@ -413,6 +415,39 @@ class CVELCMFormTest(TestCase):
             },
             form.errors,
         )
+
+
+class VulnerabilityLCMFormTest(TestCase):
+    """Test the Vulnerability create/edit form."""
+
+    def test_related_object_fields_search_through_the_api(self):
+        """The related object fields search through the API instead of listing every object."""
+        form = VulnerabilityLCMForm()
+        for field_name in ("cve", "software", "device", "inventory_item"):
+            with self.subTest(field=field_name):
+                self.assertIsInstance(form.fields[field_name], DynamicModelChoiceField)
+
+    def test_cve_field_label(self):
+        self.assertEqual(VulnerabilityLCMForm().fields["cve"].label, "CVE")
+
+    def test_selected_objects_are_saved(self):
+        cve = create_cves()[0]
+        software = create_softwares()[0]
+        inventory_item = create_inventory_items()[0]
+        form = VulnerabilityLCMForm(
+            data={
+                "cve": cve.pk,
+                "software": software.pk,
+                "device": inventory_item.device.pk,
+                "inventory_item": inventory_item.pk,
+            }
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        vulnerability = form.save()
+        self.assertEqual(vulnerability.cve, cve)
+        self.assertEqual(vulnerability.software, software)
+        self.assertEqual(vulnerability.device, inventory_item.device)
+        self.assertEqual(vulnerability.inventory_item, inventory_item)
 
 
 class ContractLCMFormTest(TestCase):
