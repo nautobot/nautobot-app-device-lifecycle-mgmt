@@ -9,7 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from nautobot.apps.testing import TestCase, ViewTestCases
 from nautobot.dcim.models import DeviceType, Manufacturer
-from nautobot.extras.models import Status, Tag
+from nautobot.extras.models import Relationship, RelationshipAssociation, Status, Tag
 from nautobot.users.models import ObjectPermission
 
 from nautobot_device_lifecycle_mgmt.models import (
@@ -20,7 +20,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     VulnerabilityLCM,
 )
 
-from .conftest import create_cves, create_devices, create_inventory_items, create_softwares
+from .conftest import create_contracts, create_cves, create_devices, create_inventory_items, create_softwares
 
 User = get_user_model()
 
@@ -478,3 +478,47 @@ class HardwareNoticeBadgeTest(TestCase):
         for url in (device.get_absolute_url(), device.device_type.get_absolute_url()):
             with self.subTest(url=url):
                 self.assertContains(self.client.get(url), "Expiring Soon")
+
+
+class ContractLCMDevicesTabTest(TestCase):
+    """Test the Devices tab on the contract detail page."""
+
+    @classmethod
+    def setUpTestData(cls):  # pylint: disable=invalid-name
+        cls.contract = create_contracts()[0]
+        inventory_items = create_inventory_items()
+        for index, inventory_item in enumerate(inventory_items):
+            inventory_item.device.serial = f"DEVICE-SERIAL-{index}"
+            inventory_item.device.validated_save()
+            inventory_item.serial = f"ITEM-SERIAL-{index}"
+            inventory_item.validated_save()
+
+        cls.contract.devices.add(inventory_items[0].device)
+        RelationshipAssociation(
+            relationship=Relationship.objects.get(key="contractlcm_to_inventoryitem"),
+            source=cls.contract,
+            destination=inventory_items[0],
+        ).validated_save()
+
+    def test_devices_tab_lists_contract_devices_and_inventory_items(self):
+        self.add_permissions(
+            "nautobot_device_lifecycle_mgmt.view_contractlcm", "dcim.view_device", "dcim.view_inventoryitem"
+        )
+        response = self.client.get(self.contract.get_absolute_url())
+
+        self.assertContains(response, 'aria-controls="devices"')
+        self.assertContains(response, "DEVICE-SERIAL-0")
+        self.assertContains(response, "ITEM-SERIAL-0")
+        for serial in ("DEVICE-SERIAL-1", "DEVICE-SERIAL-2", "ITEM-SERIAL-1", "ITEM-SERIAL-2"):
+            self.assertNotContains(response, serial)
+
+    def test_inventory_items_link_lists_contract_inventory_items(self):
+        self.add_permissions("nautobot_device_lifecycle_mgmt.view_contractlcm", "dcim.view_inventoryitem")
+        list_url = f"{reverse('dcim:inventoryitem_list')}?nautobot_device_lifecycle_mgmt_contracts={self.contract.pk}"
+        self.assertContains(self.client.get(self.contract.get_absolute_url()), f'href="{list_url}"')
+
+        response = self.client.get(list_url)
+
+        self.assertContains(response, "ITEM-SERIAL-0")
+        for serial in ("ITEM-SERIAL-1", "ITEM-SERIAL-2"):
+            self.assertNotContains(response, serial)

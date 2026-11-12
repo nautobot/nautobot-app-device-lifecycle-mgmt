@@ -27,6 +27,7 @@ from nautobot.apps.ui import (
     ObjectsTablePanel,
     SectionChoices,
     StatsPanel,
+    Tab,
     Titles,
     ViewNameBreadcrumbItem,
 )
@@ -47,6 +48,7 @@ from nautobot.core.templatetags.helpers import (
 )
 from nautobot.core.views import generic
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, SoftwareVersion
+from nautobot.dcim.tables import DeviceTable, InventoryItemTable
 from nautobot.extras.models import Role, Tag
 from nautobot.tenancy.models import Tenant
 
@@ -231,7 +233,48 @@ class ContractLCMUIViewSet(NautobotUIViewSet):
                 value_transforms={"cost": [intcomma]},
             ),
         ),
+        extra_tabs=(
+            Tab(
+                weight=Tab.WEIGHT_MAIN_TAB + 50,
+                tab_id="devices",
+                label="Devices",
+                panels=(
+                    ObjectsTablePanel(
+                        weight=100,
+                        section=SectionChoices.FULL_WIDTH,
+                        table_class=DeviceTable,
+                        table_filter="device_contracts",
+                        related_field_name="nautobot_device_lifecycle_mgmt_device_contracts",
+                        include_columns=["serial"],
+                        exclude_columns=["pk", "tenant", "rack", "role", "primary_ip", "actions"],
+                        add_button_route=None,
+                        show_table_config_button=False,
+                    ),
+                    ObjectsTablePanel(
+                        weight=200,
+                        section=SectionChoices.FULL_WIDTH,
+                        table_class=InventoryItemTable,
+                        table_attribute="inventory_items",
+                        related_field_name="nautobot_device_lifecycle_mgmt_contracts",
+                        exclude_columns=["pk", "label", "manufacturer", "asset_tag", "actions"],
+                        hide_hierarchy_ui=True,
+                        add_button_route=None,
+                        show_table_config_button=False,
+                    ),
+                ),
+            ),
+        ),
     )
+
+    def get_extra_context(self, request, instance=None):
+        """Attach the inventory items linked to the contract for the Devices tab."""
+        context = super().get_extra_context(request, instance)
+        if self.action == "retrieve":
+            instance.inventory_items = InventoryItem.objects.filter(
+                destination_for_associations__relationship__key="contractlcm_to_inventoryitem",
+                destination_for_associations__source_id=instance.pk,
+            )
+        return context
 
 
 class ProviderLCMUIViewSet(NautobotUIViewSet):

@@ -72,7 +72,7 @@ This provides the same UI element as the device view, but within the specific de
 
 ### Contracts: Device Lifecycle Management Contract Detail View
 
-You can view the details of a contract along with the primary and escalation contacts. This view will also give you an association to the devices under this contract.
+You can view the details of a contract along with the primary and escalation contacts. This view will also give you an association to the devices under this contract. The Devices tab lists the devices and inventory items under the contract, and links to the Device and Inventory Item lists filtered to the contract, where they can be exported to CSV.
 
 ![](../images/ss_lcm_contract_detail_light.png#only-light){ .on-glb }
 ![](../images/ss_lcm_contract_detail_dark.png#only-dark){ .on-glb }
