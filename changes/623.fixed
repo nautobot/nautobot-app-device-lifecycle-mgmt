@@ -1,0 +1,1 @@
+Fixed the NIST API key being linked to its secrets group with invalid access type and secret type values, including on existing installations.
