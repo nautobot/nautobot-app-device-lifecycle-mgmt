@@ -517,7 +517,7 @@ class ContractLCMDevicesTabTest(TestCase):
         list_url = f"{reverse('dcim:inventoryitem_list')}?nautobot_device_lifecycle_mgmt_contracts={self.contract.pk}"
         self.assertContains(self.client.get(self.contract.get_absolute_url()), f'href="{list_url}"')
 
-        response = self.client.get(list_url)
+        response = self.client.get(list_url, headers={"HX-Request": "true"})
 
         self.assertContains(response, "ITEM-SERIAL-0")
         for serial in ("ITEM-SERIAL-1", "ITEM-SERIAL-2"):
