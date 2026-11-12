@@ -1,0 +1,2 @@
+Moved the test data generator to the `generate_nautobot_device_lifecycle_mgmt_test_data` command, so that `invoke generate-test-data` runs it.
+Fixed the test data generator creating objects that fail model validation.
