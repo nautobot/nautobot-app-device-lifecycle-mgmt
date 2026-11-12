@@ -520,6 +520,8 @@ class NistCveSyncSoftwareLegacyScoresTestCase(NistCveSyncSoftwarePrepCveBase):
         self.assertIsNone(current_cve.cvss_v2)
         self.assertEqual(current_cve.cvss_v3, 3.9)
         current_cve.validated_save.assert_called_once()
+
+
 class NistCveSyncSoftwareRunTestCase(TestCase):
     """Test NistCveSyncSoftware.run for Software Versions that netutils cannot build NIST URLs for."""
 
