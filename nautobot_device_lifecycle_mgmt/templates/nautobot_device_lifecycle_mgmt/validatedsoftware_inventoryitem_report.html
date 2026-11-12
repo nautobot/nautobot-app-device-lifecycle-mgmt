@@ -2,6 +2,7 @@
 {% load buttons %}
 {% load static %}
 {% load helpers %}
+{% load lifecycle_report_links %}
 
 {% block buttons %}
 <div class="btn-group">
@@ -48,27 +49,27 @@
                 <tbody>
                     <tr class="even">
                         <td>
-                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list' %}">
+                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list' %}{% report_link_querystring %}">
                                 Inventory Items
                             </a>
                         </td>
                         <td>
-                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list' %}">
+                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list' %}{% report_link_querystring %}">
                                 {% if inventory_aggr.total is not None %} {{ inventory_aggr.total }} {% else %} -- {% endif %}
                             </a>
                         </td>
                         <td>
-                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list' %}?valid=True">
+                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list' %}{% report_link_querystring valid=True %}">
                                 {% if inventory_aggr.valid is not None %} {{ inventory_aggr.valid }} {% else %} -- {% endif %}
                             </a>
                         </td>
                         <td>
-                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list' %}?valid=False">
+                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list' %}{% report_link_querystring valid=False exclude_sw_missing=True %}">
                                 {% if inventory_aggr.invalid is not None %} {{ inventory_aggr.invalid }} {% else %} -- {% endif %}
                             </a>
                         </td>
                         <td>
-                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list' %}?sw_missing_only=True">
+                            <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list' %}{% report_link_querystring sw_missing_only=True %}">
                                 {% if inventory_aggr.no_software is not None %} {{ inventory_aggr.no_software }} {% else %} -- {% endif %}
                             </a>
                         </td>
