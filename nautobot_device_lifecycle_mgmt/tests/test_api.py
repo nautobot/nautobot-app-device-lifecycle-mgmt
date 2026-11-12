@@ -371,6 +371,7 @@ class CVELCMAPITest(IncludeM2MAPITestCaseMixin, APIViewTestCases.APIViewTestCase
         "cvss",
         "cvss_v2",
         "cvss_v3",
+        "cvss_vector",
         "description",
         "display",
         "fix",
