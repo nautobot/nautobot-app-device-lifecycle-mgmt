@@ -11,6 +11,11 @@ logger = logging.getLogger("nautobot_device_lifecycle_mgmt")
 _VALID_SEVERITIES = {choice[0] for choice in CVESeverityChoices.CHOICES}
 
 
+def qr_codes_enabled():
+    """Return True when the `enable_qr_codes` app setting is enabled."""
+    return settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"].get("enable_qr_codes", False)
+
+
 def multi_tenant_mode_enabled():
     """Return True when the `multi_tenant_mode` app setting is enabled."""
     return settings.PLUGINS_CONFIG["nautobot_device_lifecycle_mgmt"].get("multi_tenant_mode", False)
