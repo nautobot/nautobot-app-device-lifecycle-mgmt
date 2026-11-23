@@ -582,7 +582,6 @@ class CVELCMTable(StatusTableMixin, BaseTable):
             "last_modified_date",
             "link",
             "severity",
-            "cvss_vector",
             "cvss",
             "status",
             "actions",

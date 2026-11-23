@@ -406,6 +406,63 @@ class CVELCMFormTest(TestCase):
         self.assertTrue(form.is_valid())
         self.assertTrue(form.save())
 
+    def _form_with_vector(self, cvss_vector):
+        return CVELCMForm(
+            data={
+                "name": "CVE-2021-34699",
+                "published_date": "2021-09-23",
+                "link": "https://www.cvedetails.com/cve/CVE-2021-34699/",
+                "cvss_vector": cvss_vector,
+            }
+        )
+
+    def test_cvss_vector_valid_versions(self):
+        for vector in (
+            "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+            "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/E:P/RL:O/RC:C",
+            "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+        ):
+            with self.subTest(vector=vector):
+                form = self._form_with_vector(vector)
+                self.assertTrue(form.is_valid(), form.errors)
+                self.assertEqual(form.cleaned_data["cvss_vector"], vector)
+
+    def test_cvss_vector_blank_is_allowed(self):
+        form = self._form_with_vector("   ")
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["cvss_vector"], "")
+
+    def test_cvss_vector_is_normalized(self):
+        form = self._form_with_vector(" (AV:N / AC:L/Au:N//C:P/I:P/A:P) ")
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["cvss_vector"], "AV:N/AC:L/Au:N/C:P/I:P/A:P")
+
+    def test_cvss_vector_v2_prefix_is_removed(self):
+        form = self._form_with_vector("CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P")
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["cvss_vector"], "AV:N/AC:L/Au:N/C:P/I:P/A:P")
+
+    def test_cvss_vector_unsupported_version(self):
+        form = self._form_with_vector("CVSS:9.9/AV:N/AC:L")
+        self.assertFalse(form.is_valid())
+        self.assertIn("Enter a CVSS vector string", form.errors["cvss_vector"][0])
+
+    def test_cvss_vector_not_a_vector(self):
+        form = self._form_with_vector("not a vector")
+        self.assertFalse(form.is_valid())
+        self.assertIn("Enter a CVSS vector string", form.errors["cvss_vector"][0])
+
+    def test_cvss_vector_malformed_segment(self):
+        form = self._form_with_vector("CVSS:3.1/AV:N/AC=L/PR:N")
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors["cvss_vector"], ["These segments are not valid CVSS 3.1 metrics: AC=L."])
+
+    def test_cvss_vector_unknown_metric(self):
+        form = self._form_with_vector("CVSS:3.1/AV:N/AT:N")
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors["cvss_vector"], ["These segments are not valid CVSS 3.1 metrics: AT:N."])
+
     def test_required_fields_missing(self):
         form = CVELCMForm(data={"name": "CVE-2022-0002"})
         self.assertFalse(form.is_valid())

@@ -124,6 +124,17 @@ class ParseCvssVectorTestCase(SimpleTestCase):
             ],
         )
 
+    def test_v2_vector_prefix_is_removed(self):
+        result = parse_cvss_vector("CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P")
+
+        self.assertEqual(result["version"], "2.0")
+        self.assertEqual(result["vector"], "AV:N/AC:L/Au:N/C:P/I:P/A:P")
+        self.assertEqual(result["invalid_segments"], [])
+        self.assertEqual(
+            result["calculator_url"],
+            "https://nvd.nist.gov/vuln-metrics/cvss/v2-calculator?vector=%28AV%3AN%2FAC%3AL%2FAu%3AN%2FC%3AP%2FI%3AP%2FA%3AP%29",
+        )
+
     def test_v2_vector_with_parentheses(self):
         result = parse_cvss_vector("(AV:N/AC:L/Au:N/C:P/I:P/A:P)")
 
@@ -178,6 +189,22 @@ class ParseCvssVectorTestCase(SimpleTestCase):
 
         self.assertEqual(result["vector"], "CVSS:3.1/AV:N/AC:L")
         self.assertEqual([(m["key"], m["value_name"]) for m in result["metrics"]], [("AV", "Network"), ("AC", "Low")])
+        self.assertEqual(result["invalid_segments"], ["garbage", "AC:", ":L", "PR:N:X"])
+
+    def test_unknown_metric_is_an_invalid_segment(self):
+        result = parse_cvss_vector("CVSS:3.1/AV:N/AT:N/AC:L")
+
+        self.assertEqual(result["invalid_segments"], ["AT:N"])
+        self.assertEqual(result["vector"], "CVSS:3.1/AV:N/AT:N/AC:L")
+
+    def test_valid_vector_has_no_invalid_segments(self):
+        for vector in (
+            "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+            "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:W/RC:R",
+            "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+        ):
+            with self.subTest(vector=vector):
+                self.assertEqual(parse_cvss_vector(vector)["invalid_segments"], [])
 
     def test_empty_or_unsupported_vector(self):
         for vector in (None, "", "   ", "()", "/", "CVSS:3.1/", "CVSS:3.1//", "garbage", "CVSS:9.9/AV:N"):

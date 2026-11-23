@@ -25,6 +25,9 @@ from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
 from nautobot_device_lifecycle_mgmt.models import CVELCM, VulnerabilityLCM
 from nautobot_device_lifecycle_mgmt.utils import standardize_cvss_severity
 
+# Logged as the source of a CVSS score whose NIST entry does not name one.
+UNNAMED_CVSS_SOURCE = "an unnamed source"
+
 name = "CVE Tracking"  # pylint: disable=invalid-name
 
 
@@ -275,7 +278,7 @@ class NistCveSyncSoftware(Job):
             except TypeError:
                 description = "No Description Provided from NIST DB."
 
-            _, created = CVELCM.objects.get_or_create(
+            dlc_cve, created = CVELCM.objects.get_or_create(
                 name=cve,
                 description=description,
                 published_date=date.fromisoformat(info.get("published_date", "1900-01-01")[0:10]),
@@ -291,6 +294,7 @@ class NistCveSyncSoftware(Job):
 
             if created:
                 created_count += 1
+                self.log_cvss_score_details(dlc_cve, info, "CVE Creation")
 
         self.logger.info("Created %s new CVEs.", created_count, extra={"object": software, "grouping": "CVE Creation"})
 
@@ -432,11 +436,12 @@ class NistCveSyncSoftware(Job):
 
     @staticmethod
     def get_highest_cvss_score(cve_metrics: dict | None) -> dict:
-        """Return the CVSS details from the highest CVSS version scored by NIST.
+        """Return the CVSS Base Score, Severity, Vector and source of the score to use for a CVE.
 
         NIST's own scores (``Primary`` entries) are preferred over scores from other sources
         such as the vendor. The highest CVSS version with a NIST score is used. If NIST has not
-        scored any version, the highest available version is used with its first entry.
+        scored any version, the highest available version is used with its first entry, and
+        ``cvss_source`` names the source of that entry.
 
         CVSS v2 severity is always derived from the base score. All other versions
         use the ``baseSeverity`` of the chosen entry. If the entry has no ``baseScore``,
@@ -446,9 +451,11 @@ class NistCveSyncSoftware(Job):
             cve_metrics (dict | None): The ``metrics`` object from a NIST CVE record.
 
         Returns:
-            dict: The ``cvss_base_score``, ``cvss_severity`` and ``cvss_vector``. If no
-            CVSS metrics are available, the score is ``None``, the severity is
-            ``CVESeverityChoices.NONE`` and the vector is empty.
+            dict: The ``cvss_base_score``, ``cvss_severity``, ``cvss_vector`` and ``cvss_source``.
+            ``cvss_source`` is ``None`` when the score is NIST's own, and ``UNNAMED_CVSS_SOURCE``
+            when the entry used has no ``source``. If no CVSS metrics are available, the score is
+            ``None``, the severity is ``CVESeverityChoices.NONE``, the vector is empty and the
+            source is ``None``.
         """
         # NIST metric keys (cvssMetricV2, cvssMetricV30, cvssMetricV31, cvssMetricV40) sort by CVSS version as strings.
         metric_keys = [key for key, value in (cve_metrics or {}).items() if key.startswith("cvssMetricV") and value]
@@ -457,7 +464,8 @@ class NistCveSyncSoftware(Job):
                 key for key in metric_keys if any(entry.get("type") == "Primary" for entry in cve_metrics[key])
             ]
             metric_key = max(nist_keys or metric_keys)
-            cvss_data = NistCveSyncSoftware.get_preferred_cvss_metric(cve_metrics[metric_key])["cvssData"]
+            metric_entry = NistCveSyncSoftware.get_preferred_cvss_metric(cve_metrics[metric_key])
+            cvss_data = metric_entry["cvssData"]
             base_score = cvss_data.get("baseScore")
             if metric_key == "cvssMetricV2":
                 severity = (
@@ -471,12 +479,14 @@ class NistCveSyncSoftware(Job):
                 "cvss_base_score": base_score,
                 "cvss_severity": severity,
                 "cvss_vector": cvss_data.get("vectorString", ""),
+                "cvss_source": None if nist_keys else metric_entry.get("source") or UNNAMED_CVSS_SOURCE,
             }
 
         return {
             "cvss_base_score": None,
             "cvss_severity": CVESeverityChoices.NONE,
             "cvss_vector": "",
+            "cvss_source": None,
         }
 
     @staticmethod
@@ -537,12 +547,6 @@ class NistCveSyncSoftware(Job):
         cve_metrics = cve_json.get("metrics") or {}
         cvss_details = self.get_highest_cvss_score(cve_metrics)
         has_cvss_metric = any(key.startswith("cvssMetricV") and value for key, value in cve_metrics.items())
-        if has_cvss_metric and cvss_details["cvss_base_score"] is None:
-            self.logger.warning(
-                "NIST did not provide a CVSS base score for %s; the CVSS Base Score will be empty.",
-                cve_name,
-                extra={"grouping": "CVE Processing"},
-            )
 
         return {
             "url": cve_url,
@@ -550,11 +554,38 @@ class NistCveSyncSoftware(Job):
             "published_date": cve_published_date,
             "modified_date": cve_modified_date,
             **cvss_details,
+            "cvss_base_score_missing": has_cvss_metric and cvss_details["cvss_base_score"] is None,
             **self.get_legacy_cvss_scores(cve_metrics),
         }
 
+    def log_cvss_score_details(self, dlc_cve: CVELCM, cve_info: dict, grouping: str) -> None:
+        """Log where a created or updated CVE's CVSS score came from, and warn if it has no base score.
+
+        An info message names the source of the score when the score is not NIST's own. A warning
+        is logged when NIST provided a CVSS metric without a base score.
+
+        Args:
+            dlc_cve (CVELCM): The CVE that was created or updated.
+            cve_info (dict): The CVE information from ``prep_cve_for_dlc`` used to create or update the CVE.
+            grouping (str): The job log grouping to log under.
+        """
+        cvss_source = cve_info.get("cvss_source")
+        if cvss_source is not None:
+            self.logger.info(
+                "CVSS score provided by %s for %s",
+                cvss_source,
+                dlc_cve.name,
+                extra={"object": dlc_cve, "grouping": grouping},
+            )
+        if cve_info.get("cvss_base_score_missing"):
+            self.logger.warning(
+                "NIST did not provide a CVSS base score for %s; the CVSS Base Score is empty.",
+                dlc_cve.name,
+                extra={"object": dlc_cve, "grouping": grouping},
+            )
+
     def update_cve(self, current_dlc_cve: CVELCM, updated_cve: dict) -> None:
-        """Update CVE information if the latest info is newer than existing info.
+        """Overwrite a CVE with the latest NIST information.
 
         Args:
             current_dlc_cve (CVELCM): Current CVE object from the DLM database.
@@ -583,6 +614,7 @@ class NistCveSyncSoftware(Job):
         try:
             current_dlc_cve.validated_save()
             self.logger.info("Modified CVE.", extra={"object": current_dlc_cve, "grouping": "CVE Updates"})
+            self.log_cvss_score_details(current_dlc_cve, updated_cve, "CVE Updates")
         except ValidationError as err:
             self.logger.error(
                 "Unable to update CVE. ERROR: %s", err, extra={"object": current_dlc_cve, "grouping": "CVE Updates"}

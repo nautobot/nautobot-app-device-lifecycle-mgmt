@@ -235,19 +235,23 @@ def parse_cvss_vector(vector: str | None) -> dict | None:
     """Decode a CVSS vector string into its version and human-readable metrics.
 
     CVSS v3.0, v3.1 and v4.0 vectors start with a ``CVSS:<version>/`` prefix. Vectors
-    without a prefix are treated as CVSS v2.0. Each ``/``-separated segment must match the
-    CVSS calculator's ``METRIC:VALUE`` form (for example ``AV:N``); blank or malformed
-    segments are skipped, and the returned ``vector`` is rebuilt from the valid segments.
+    without a prefix are treated as CVSS v2.0. CVSS v2 vectors have no prefix, so a ``CVSS:2.0/``
+    prefix is left out of the returned ``vector``. Each ``/``-separated segment must match the
+    CVSS calculator's ``METRIC:VALUE`` form (for example ``AV:N``); blank segments are skipped,
+    malformed segments are left out of the metrics, and the returned ``vector`` is rebuilt from
+    the well-formed segments.
 
     Args:
         vector: A CVSS vector string, for example ``CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H``.
 
     Returns:
-        A dictionary with the ``version``, the ``vector``, the ``calculator_url`` and a list
-        of ``metrics``, each with its ``key``, ``name``, ``description``, ``value`` and
-        ``value_name``. Metrics or values that are not recognized keep their raw text and
-        have an empty description. Returns ``None`` if the vector is empty, uses an
-        unsupported CVSS version, or has no valid metrics.
+        A dictionary with the ``version``, the ``vector``, the ``calculator_url``, a list
+        of ``metrics`` and a list of ``invalid_segments``. Each metric has its ``key``, ``name``,
+        ``description``, ``value`` and ``value_name``. Metrics or values that are not recognized
+        keep their raw text and have an empty description. ``invalid_segments`` lists, in order,
+        the segments that are malformed or name a metric that the CVSS version does not define.
+        Returns ``None`` if the vector is empty, uses an unsupported CVSS version, or has no
+        well-formed metrics.
     """
     vector = (vector or "").strip().strip("()")
     if not vector:
@@ -257,6 +261,8 @@ def parse_cvss_vector(vector: str | None) -> dict | None:
     if parts and parts[0].startswith("CVSS:"):
         prefix = parts.pop(0)
         version = prefix.removeprefix("CVSS:")
+        if version == "2.0":
+            prefix = ""
     else:
         prefix = ""
         version = "2.0"
@@ -266,11 +272,15 @@ def parse_cvss_vector(vector: str | None) -> dict | None:
         return None
 
     metrics = []
+    invalid_segments = []
     for part in parts:
         match = _METRIC_PATTERN.match(part)
         if not match:
+            invalid_segments.append(part)
             continue
         key, value = match.group("key"), match.group("value")
+        if key not in definitions:
+            invalid_segments.append(part)
         name, description, values = definitions.get(key, (key, "", {}))
         metrics.append(
             {
@@ -294,4 +304,5 @@ def parse_cvss_vector(vector: str | None) -> dict | None:
         "vector": vector,
         "calculator_url": _calculator_url(version, vector),
         "metrics": metrics,
+        "invalid_segments": invalid_segments,
     }
