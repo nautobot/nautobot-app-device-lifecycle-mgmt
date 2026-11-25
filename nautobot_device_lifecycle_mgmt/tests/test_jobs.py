@@ -9,11 +9,14 @@ from nautobot.apps.choices import JobResultStatusChoices
 from nautobot.apps.testing import TestCase, TransactionTestCase, create_job_result_and_run_job
 from nautobot.dcim.models import Platform, SoftwareVersion
 from nautobot.extras.models import Status
+from nautobot.tenancy.models import Tenant
 from requests.exceptions import ChunkedEncodingError, Timeout
 
+from nautobot_device_lifecycle_mgmt.choices import ReportRunTypeChoices
 from nautobot_device_lifecycle_mgmt.jobs.cve_tracking import NistCveSyncSoftware
 from nautobot_device_lifecycle_mgmt.models import (
     DeviceHardwareNoticeResult,
+    DeviceSoftwareValidationHistoricResult,
     DeviceSoftwareValidationResult,
     ValidatedSoftwareLCM,
 )
@@ -107,6 +110,61 @@ class DeviceSoftwareValidationFullReportTestCase(TransactionTestCase):
         result_no_sw = DeviceSoftwareValidationResult.objects.get(device=self.devices[2])
         self.assertFalse(result_no_sw.is_validated)
         self.assertIsNone(result_no_sw.software)
+
+    def test_unfiltered_run_records_full_run_history(self):
+        """A run without platform or tenant filters validates every device and records a full-run history entry."""
+        create_job_result_and_run_job(
+            module="nautobot_device_lifecycle_mgmt.jobs.lifecycle_reporting",
+            name="DeviceSoftwareValidationFullReport",
+        )
+
+        history = DeviceSoftwareValidationHistoricResult.objects.get()
+        self.assertEqual(history.run_type, ReportRunTypeChoices.REPORT_FULL_RUN)
+        self.assertTrue(history.all_platforms)
+        self.assertTrue(history.all_tenants)
+        self.assertEqual(history.filters, {"platforms": [], "tenants": []})
+        self.assertEqual(
+            {row["device"]["id"] for row in history.device_validation_results},
+            {str(device.pk) for device in self.devices},
+        )
+        valid_row = next(
+            row for row in history.device_validation_results if row["device"]["id"] == str(self.devices[0].pk)
+        )
+        self.assertTrue(valid_row["is_validated"])
+        self.assertEqual(valid_row["software"]["id"], str(self.software_valid.pk))
+        self.assertEqual(len(valid_row["valid_software"]), 1)
+
+    def test_filtered_run_validates_only_matching_devices(self):
+        """Platform and tenant filters limit which devices are validated and are recorded on the history entry."""
+        tenant = Tenant.objects.create(name="Tenant A")
+        self.devices[0].tenant = tenant
+        self.devices[0].save()
+        platform = self.devices[0].platform
+
+        job_result = create_job_result_and_run_job(
+            "nautobot_device_lifecycle_mgmt.jobs.lifecycle_reporting",
+            "DeviceSoftwareValidationFullReport",
+            platforms=[str(platform.pk)],
+            tenants=[str(tenant.pk)],
+        )
+
+        self.assertEqual(job_result.status, JobResultStatusChoices.STATUS_SUCCESS)
+        result = DeviceSoftwareValidationResult.objects.get()
+        self.assertEqual(result.device, self.devices[0])
+        self.assertEqual(result.run_type, ReportRunTypeChoices.REPORT_FILTERED_RUN)
+
+        history = DeviceSoftwareValidationHistoricResult.objects.get()
+        self.assertEqual(history.run_type, ReportRunTypeChoices.REPORT_FILTERED_RUN)
+        self.assertFalse(history.all_platforms)
+        self.assertFalse(history.all_tenants)
+        self.assertEqual(
+            history.filters,
+            {
+                "platforms": [{"id": str(platform.pk), "name": platform.name}],
+                "tenants": [{"id": str(tenant.pk), "name": tenant.name}],
+            },
+        )
+        self.assertEqual([row["device"]["id"] for row in history.device_validation_results], [str(self.devices[0].pk)])
 
 
 class NistCveSyncSoftwareQueryApiTestCase(unittest.TestCase):

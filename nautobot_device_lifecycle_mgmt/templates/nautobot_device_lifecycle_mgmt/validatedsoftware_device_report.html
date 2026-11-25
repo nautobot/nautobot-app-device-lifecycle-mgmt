@@ -16,10 +16,13 @@
 {% block title %}Device Software Validation Reports{% endblock title %}
 {% block table %}
             <!-- VISUAL BLOCK -->
-            {% if report_last_run is None %}
+            {% if not report_has_results %}
                 <h4 class="text-center alert-danger p-4 m-4">-- No validation results found, you need to run the report at least once before seeing the results! --</h4>
-            {% else %}
+            {% elif report_last_run %}
                 <h4 class="text-start alert-info p-4 m-4">Last full run of the report: {{ report_last_run }} - {{ report_last_run|timesince }} ago </h4>
+            {% endif %}
+            {% if report_last_run_filtered %}
+                <h4 class="text-start alert-warning p-4 m-4">The most recent validation run was limited to selected platforms and/or tenants. Devices outside that selection show results from their last validation run. See the <a href="{% url 'plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationhistoricresult_list' %}">validation history</a> for details.</h4>
             {% endif %}
             {% if bar_chart is not None %}
                 {% block graphic %}
@@ -74,9 +77,9 @@
                         </td>
                         <td>{% if device_aggr.valid_percent is not None %} {{ device_aggr.valid_percent }} % {% else %} -- {% endif %}</td>
                         <td>
-                            <a target="_blank" href="data:image/png;base64,{{ device_visual|safe }}" title="Devices Pie Chart">
+                            {% if device_visual %}<a target="_blank" href="data:image/png;base64,{{ device_visual|safe }}" title="Devices Pie Chart">
                             <img style="width:150px;" src="data:image/png;base64,{{ device_visual|safe }}" alt="Devices Pie Chart">
-                            </a>
+                            </a>{% else %}--{% endif %}
                         </td>
                         <td class="d-print-none nb-actions nb-w-0 text-end text-nowrap">
                             <a href="{% url 'plugins-api:nautobot_device_lifecycle_mgmt-api:devicesoftwarevalidationresult-list' %}?format=csv"

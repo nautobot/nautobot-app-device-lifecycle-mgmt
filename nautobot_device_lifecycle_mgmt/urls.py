@@ -34,6 +34,9 @@ router.register(
 router.register("device-hardware-notice-result", viewset=views.DeviceHardwareNoticeResultUIViewSet)
 router.register("device-validated-software-result", viewset=views.DeviceSoftwareValidationResultUIViewSet)
 router.register(
+    "device-validated-software-historic-result", viewset=views.DeviceSoftwareValidationHistoricResultUIViewSet
+)
+router.register(
     "inventory-item-validated-software-result", viewset=views.InventoryItemSoftwareValidationResultUIViewSet
 )
 

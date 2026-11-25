@@ -75,10 +75,12 @@ class ReportRunTypeChoices(ChoiceSet):
 
     REPORT_SINGLE_OBJECT_RUN = "single-object-run"
     REPORT_FULL_RUN = "full-report-run"
+    REPORT_FILTERED_RUN = "filtered-report-run"
 
     CHOICES = (
         (REPORT_SINGLE_OBJECT_RUN, "Single Object Run"),
         (REPORT_FULL_RUN, "Full Report Run"),
+        (REPORT_FILTERED_RUN, "Filtered Report Run"),
     )
 
 

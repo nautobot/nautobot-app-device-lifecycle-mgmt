@@ -23,6 +23,22 @@ You can run these reports two ways:
 !!! warning "If play button is grayed out."
     You will need to enable the job by clicking on edit button in the row and navigate to "Job" portion and click on "Enable"
 
+### Limiting Device Software Validation to Platforms and Tenants
+
+When running the **Device Software Validation Report** job you can optionally select one or more **Platforms** and/or **Tenants**. Only devices that match the selected platforms and tenants are validated. Leaving a field empty includes all devices regardless of that attribute, so leaving both empty validates every device.
+
+A run with any selection is recorded with the **Filtered Report Run** run type; a run with no selection is a **Full Report Run**. Devices outside the selection keep the result from their previous validation run, so when the most recent run was filtered the **Device Software Validation - Report** page shows a notice that some results may be older than the last run.
+
+### Device Software Validation History
+
+Every run of the **Device Software Validation Report** job stores a snapshot of its results. Open **Device Software Validation - History** from the "Device Lifecycle" dropdown menu to see past runs, with their date, run type, the platforms and tenants they were limited to, and how many devices were validated.
+
+Select a run's date to see the result recorded for each device during that run: its software, whether it was valid, and the approved software that applied. Devices, software, and validated software that have since been deleted are shown by the name they had at the time of the run.
+
+The history is also available through the REST API:
+
+> GET /api/plugins/nautobot-device-lifecycle-mgmt/device-validated-software-historic-result/
+
 ## Device Software Validation Reports
 
 Once the jobs are ran you can nagivate to the Device Software Validation Reports by selecting **Device Software Validation - Report** or **Inventory Item Software Validation - Report** from the "Device Lifecycle" dropdown menu.

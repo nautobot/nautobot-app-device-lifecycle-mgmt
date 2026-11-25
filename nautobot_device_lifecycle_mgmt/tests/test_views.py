@@ -12,8 +12,10 @@ from nautobot.dcim.models import DeviceType, Manufacturer
 from nautobot.extras.models import Status, Tag
 from nautobot.users.models import ObjectPermission
 
+from nautobot_device_lifecycle_mgmt.choices import ReportRunTypeChoices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
+    DeviceSoftwareValidationHistoricResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -392,6 +394,70 @@ class DeviceSoftwareValidationResultListViewTest(ViewTestCases.ListObjectsViewTe
         pass
 
 
+class DeviceSoftwareValidationHistoricResultViewTest(
+    ViewTestCases.ListObjectsViewTestCase,
+    ViewTestCases.GetObjectViewTestCase,
+):
+    """Test DeviceSoftwareValidationHistoricResultUIViewSet."""
+
+    model = DeviceSoftwareValidationHistoricResult
+
+    @classmethod
+    def setUpTestData(cls):  # pylint: disable=invalid-name
+        """Set up test objects."""
+        device_1, device_2, _ = create_devices()
+        cls.device_1 = device_1
+        device_results = [
+            {
+                "device": {"id": str(device_1.pk), "name": device_1.name},
+                "software": None,
+                "is_validated": False,
+                "valid_software": [],
+            },
+            {
+                "device": {"id": str(device_2.pk), "name": device_2.name},
+                "software": None,
+                "is_validated": False,
+                "valid_software": [],
+            },
+            {
+                "device": {"id": "00000000-0000-0000-0000-000000000000", "name": "deleted-device"},
+                "software": {"id": "00000000-0000-0000-0000-000000000001", "name": "deleted-software"},
+                "is_validated": True,
+                "valid_software": [{"id": "00000000-0000-0000-0000-000000000002", "name": "deleted-valid-sw"}],
+            },
+        ]
+        for day in (1, 2, 3):
+            DeviceSoftwareValidationHistoricResult.objects.create(
+                date=datetime.datetime(2026, 1, day, tzinfo=datetime.timezone.utc),
+                run_type=ReportRunTypeChoices.REPORT_FILTERED_RUN,
+                all_platforms=False,
+                all_tenants=True,
+                filters={
+                    "platforms": [{"id": str(device_1.platform.pk), "name": device_1.platform.name}],
+                    "tenants": [],
+                },
+                device_validation_results=device_results,
+            )
+
+    def test_detail_view_renders_stored_device_results(self):
+        """Existing devices are linked and deleted ones fall back to their recorded names."""
+        self.add_permissions(
+            "nautobot_device_lifecycle_mgmt.view_devicesoftwarevalidationhistoricresult", "dcim.view_device"
+        )
+        instance = DeviceSoftwareValidationHistoricResult.objects.first()
+
+        response = self.client.get(instance.get_absolute_url())
+
+        self.assertHttpStatus(response, 200)
+        content = response.content.decode(response.charset)
+        self.assertIn(self.device_1.get_absolute_url(), content)
+        self.assertIn("deleted-device", content)
+        self.assertIn("deleted-software", content)
+        self.assertIn("deleted-valid-sw", content)
+        self.assertIn(self.device_1.platform.name, content)
+
+
 class InventoryItemSoftwareValidationResultListViewTest(ViewTestCases.ListObjectsViewTestCase):
     """Test InventoryItemSoftwareValidationResultListView"""
 
@@ -478,3 +544,18 @@ class HardwareNoticeBadgeTest(TestCase):
         for url in (device.get_absolute_url(), device.device_type.get_absolute_url()):
             with self.subTest(url=url):
                 self.assertContains(self.client.get(url), "Expiring Soon")
+
+
+class EmptySoftwareValidationReportTest(TestCase):
+    """Report pages render when there are no validation results to chart."""
+
+    def test_reports_render_without_results(self):
+        self.user.is_superuser = True
+        self.user.save()
+        for view_name in (
+            "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report_list",
+            "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report_list",
+            "plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report_list",
+        ):
+            with self.subTest(view_name=view_name):
+                self.assertHttpStatus(self.client.get(reverse(view_name)), 200)

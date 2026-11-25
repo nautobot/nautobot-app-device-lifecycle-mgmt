@@ -17,6 +17,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
     DeviceHardwareNoticeResult,
+    DeviceSoftwareValidationHistoricResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -326,6 +327,39 @@ class DeviceSoftwareValidationResultListTable(BaseTable):  # pylint: disable='nb
             "run_type",
             "valid_software",
         ]
+
+
+class DeviceSoftwareValidationHistoricResultTable(BaseTable):
+    """Table for a list of device software validation historic results."""
+
+    pk = ToggleColumn()
+    date = tables.DateTimeColumn(linkify=True, verbose_name="Date")
+    run_type = tables.Column(verbose_name="Run Type")
+    platforms = tables.TemplateColumn(
+        template_code=(
+            "{% if record.all_platforms %}All{% else %}{% for platform in record.filters.platforms %}"
+            "{{ platform.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}"
+        ),
+        verbose_name="Platforms",
+        orderable=False,
+    )
+    tenants = tables.TemplateColumn(
+        template_code=(
+            "{% if record.all_tenants %}All{% else %}{% for tenant in record.filters.tenants %}"
+            "{{ tenant.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}"
+        ),
+        verbose_name="Tenants",
+        orderable=False,
+    )
+    device_count = tables.Column(verbose_name="Devices", orderable=False)
+    tags = TagColumn(url_name="plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationhistoricresult_list")
+
+    class Meta(BaseTable.Meta):
+        """Metaclass attributes of DeviceSoftwareValidationHistoricResultTable."""
+
+        model = DeviceSoftwareValidationHistoricResult
+        fields = ["pk", "date", "run_type", "platforms", "tenants", "device_count", "tags"]
+        default_columns = ["pk", "date", "run_type", "platforms", "tenants", "device_count"]
 
 
 class InventoryItemSoftwareValidationResultTable(BaseTable):

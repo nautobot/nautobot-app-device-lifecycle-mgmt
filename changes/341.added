@@ -1,0 +1,2 @@
+Added the option to limit the Device Software Validation Report job to selected tenants.
+Added a history of Device Software Validation Report job runs, viewable in the UI and REST API.

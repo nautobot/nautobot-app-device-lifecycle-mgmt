@@ -22,6 +22,7 @@ from nautobot_device_lifecycle_mgmt.models import (
     ContactLCM,
     ContractLCM,
     DeviceHardwareNoticeResult,
+    DeviceSoftwareValidationHistoricResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -717,6 +718,24 @@ class DeviceSoftwareValidationResultFilterSet(NautobotFilterSet):
             return queryset.filter(Q(software=None))
 
         return queryset
+
+
+class DeviceSoftwareValidationHistoricResultFilterSet(NautobotFilterSet):
+    """Filter for DeviceSoftwareValidationHistoricResult."""
+
+    q = SearchFilter(
+        filter_predicates={
+            "run_type": {"lookup_expr": "icontains", "preprocessor": str.strip},
+        }
+    )
+
+    class Meta:
+        """Meta attributes for filter."""
+
+        model = DeviceSoftwareValidationHistoricResult
+
+        fields = "__all__"
+        exclude = ("filters", "device_validation_results")
 
 
 class InventoryItemSoftwareValidationResultFilterSet(NautobotFilterSet):

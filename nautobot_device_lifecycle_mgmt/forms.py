@@ -33,11 +33,13 @@ from nautobot_device_lifecycle_mgmt.choices import (
     CountryCodes,
     CurrencyChoices,
     CVESeverityChoices,
+    ReportRunTypeChoices,
 )
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
     DeviceHardwareNoticeResult,
+    DeviceSoftwareValidationHistoricResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -562,6 +564,32 @@ class DeviceSoftwareValidationResultFilterForm(NautobotFilterForm):
             "exclude_sw_missing",
             "sw_missing_only",
         ]
+
+
+class DeviceSoftwareValidationHistoricResultFilterForm(NautobotFilterForm):
+    """Filter form to filter searches for DeviceSoftwareValidationHistoricResult."""
+
+    model = DeviceSoftwareValidationHistoricResult
+    q = forms.CharField(
+        required=False,
+        label="Search",
+    )
+    run_type = forms.MultipleChoiceField(
+        choices=ReportRunTypeChoices,
+        required=False,
+        widget=StaticSelect2Multiple(),
+    )
+    all_platforms = forms.NullBooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="All platforms",
+    )
+    all_tenants = forms.NullBooleanField(
+        required=False,
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+        label="All tenants",
+    )
+    tags = TagFilterField(model)
 
 
 class InventoryItemSoftwareValidationResultFilterForm(NautobotFilterForm):

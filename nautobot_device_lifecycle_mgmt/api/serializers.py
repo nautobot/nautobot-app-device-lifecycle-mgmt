@@ -117,6 +117,16 @@ class DeviceSoftwareValidationResultSerializer(NautobotModelSerializer, TaggedMo
         fields = "__all__"
 
 
+class DeviceSoftwareValidationHistoricResultSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):  # pylint: disable=too-many-ancestors
+    """DeviceSoftwareValidationHistoricResult Serializer."""
+
+    class Meta:
+        """Meta attributes."""
+
+        model = models.DeviceSoftwareValidationHistoricResult
+        fields = "__all__"
+
+
 class DeviceHardwareNoticeResultSerializer(NautobotModelSerializer):
     """REST API serializer for DeviceHardwareNoticeResult records."""
 

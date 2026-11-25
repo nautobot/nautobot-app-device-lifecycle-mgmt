@@ -21,6 +21,8 @@ from nautobot.apps.choices import ColorChoices
 from nautobot.apps.models import count_related
 from nautobot.apps.ui import (
     Breadcrumbs,
+    DataTablePanel,
+    KeyValueTablePanel,
     ModelBreadcrumbItem,
     ObjectDetailContent,
     ObjectFieldsPanel,
@@ -34,7 +36,10 @@ from nautobot.apps.views import (
     ContentTypePermissionRequiredMixin,
     EnhancedPaginator,
     NautobotUIViewSet,
+    ObjectChangeLogViewMixin,
+    ObjectDetailViewMixin,
     ObjectListViewMixin,
+    ObjectNotesViewMixin,
     ObjectView,
     get_obj_from_context,
     get_paginate_count,
@@ -44,6 +49,7 @@ from nautobot.core.templatetags.helpers import (
     hyperlinked_object,
     hyperlinked_phone_number,
     render_address,
+    render_boolean,
 )
 from nautobot.core.views import generic
 from nautobot.dcim.models import Device, DeviceType, InventoryItem, SoftwareVersion
@@ -396,6 +402,9 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
             pie_chart_labels.append(chart_label)
             pie_chart_colors.append(color)
 
+        if not sizes:
+            return None
+
         explode = len(sizes) * (0.1,)
         fig1, ax1 = plt.subplots()
         logging.debug(fig1)
@@ -730,6 +739,12 @@ class ValidatedSoftwareDeviceReportUIViewSet(ObjectListViewMixin):  # pylint: di
         except models.DeviceSoftwareValidationResult.DoesNotExist:  # pylint: disable=no-member
             report_last_run = None
 
+        context["report_has_results"] = models.DeviceSoftwareValidationResult.objects.exists()
+        last_historic_result = models.DeviceSoftwareValidationHistoricResult.objects.only("run_type").first()
+        context["report_last_run_filtered"] = bool(
+            last_historic_result and last_historic_result.run_type == choices.ReportRunTypeChoices.REPORT_FILTERED_RUN
+        )
+
         device_aggr = self.get_global_aggr(request)
 
         # Platform-level aggregation for bar chart
@@ -856,6 +871,94 @@ class DeviceSoftwareValidationResultUIViewSet(ObjectListViewMixin):  # pylint: d
         }
     )
     view_titles = Titles(titles={"list": "Device Software Validation List"})
+
+
+class DeviceSoftwareValidationHistoricResultUIViewSet(  # pylint: disable=abstract-method
+    ObjectListViewMixin,
+    ObjectDetailViewMixin,
+    ObjectChangeLogViewMixin,
+    ObjectNotesViewMixin,
+):
+    """DeviceSoftwareValidationHistoricResult list and detail views."""
+
+    filterset_class = filters.DeviceSoftwareValidationHistoricResultFilterSet
+    filterset_form_class = forms.DeviceSoftwareValidationHistoricResultFilterForm
+    queryset = models.DeviceSoftwareValidationHistoricResult.objects.all()
+    serializer_class = serializers.DeviceSoftwareValidationHistoricResultSerializer
+    table_class = tables.DeviceSoftwareValidationHistoricResultTable
+    action_buttons = ("export",)
+
+    object_detail_content = ObjectDetailContent(
+        panels=(
+            ObjectFieldsPanel(
+                weight=100,
+                section=SectionChoices.LEFT_HALF,
+                fields=["date", "run_type", "all_platforms", "all_tenants"],
+            ),
+            KeyValueTablePanel(
+                weight=200,
+                label="Filters",
+                section=SectionChoices.RIGHT_HALF,
+                context_data_key="historic_run_summary",
+            ),
+            DataTablePanel(
+                weight=300,
+                label="Device Validation Results",
+                section=SectionChoices.FULL_WIDTH,
+                context_data_key="historic_device_results",
+                columns=["device", "software", "is_validated", "valid_software"],
+                column_headers=["Device", "Software", "Valid", "Approved Software"],
+            ),
+        ),
+    )
+
+    @staticmethod
+    def _render_reference(entry, objects_by_pk):
+        """Link to the referenced object if it still exists and is viewable, otherwise show its recorded name."""
+        if not entry:
+            return None
+        obj = objects_by_pk.get(entry["id"])
+        return hyperlinked_object(obj) if obj else entry["name"]
+
+    def get_extra_context(self, request, instance=None):
+        """Resolve the stored per-device results into rows for the detail page."""
+        context = super().get_extra_context(request, instance)
+        if self.action != "retrieve":
+            return context
+
+        results = instance.device_validation_results
+        device_ids = {row["device"]["id"] for row in results}
+        software_ids = {row["software"]["id"] for row in results if row["software"]}
+        valid_software_ids = {valid_sw["id"] for row in results for valid_sw in row["valid_software"]}
+
+        devices = Device.objects.restrict(request.user, "view").in_bulk(device_ids)
+        software_versions = SoftwareVersion.objects.restrict(request.user, "view").in_bulk(software_ids)
+        validated_software = models.ValidatedSoftwareLCM.objects.restrict(request.user, "view").in_bulk(
+            valid_software_ids
+        )
+        devices = {str(pk): obj for pk, obj in devices.items()}
+        software_versions = {str(pk): obj for pk, obj in software_versions.items()}
+        validated_software = {str(pk): obj for pk, obj in validated_software.items()}
+
+        context["historic_device_results"] = [
+            {
+                "device": self._render_reference(row["device"], devices),
+                "software": self._render_reference(row["software"], software_versions),
+                "is_validated": render_boolean(row["is_validated"]),
+                "valid_software": format_html_join(
+                    format_html("<br>"),
+                    "{}",
+                    ((self._render_reference(valid_sw, validated_software),) for valid_sw in row["valid_software"]),
+                ),
+            }
+            for row in sorted(results, key=lambda row: row["device"]["name"])
+        ]
+        context["historic_run_summary"] = {
+            "Platforms": ", ".join(platform["name"] for platform in instance.filters.get("platforms", [])) or "All",
+            "Tenants": ", ".join(tenant["name"] for tenant in instance.filters.get("tenants", [])) or "All",
+            "Devices": instance.device_count,
+        }
+        return context
 
 
 class ValidatedSoftwareInventoryItemReportUIViewSet(ObjectListViewMixin):  # pylint: disable=abstract-method

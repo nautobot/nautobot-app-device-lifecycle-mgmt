@@ -3,12 +3,14 @@
 
 from datetime import datetime
 
-from nautobot.apps.jobs import Job
-from nautobot.dcim.models import Device, InventoryItem
+from nautobot.apps.jobs import Job, MultiObjectVar
+from nautobot.dcim.models import Device, InventoryItem, Platform
+from nautobot.tenancy.models import Tenant
 
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.models import (
     DeviceHardwareNoticeResult,
+    DeviceSoftwareValidationHistoricResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -84,44 +86,85 @@ class DeviceSoftwareValidationFullReport(Job):
     description = "Validates software version on devices."
     read_only = False
 
+    platforms = MultiObjectVar(
+        model=Platform,
+        label="Platforms",
+        description="Limit validation to devices with these platforms. Leave empty to include all platforms.",
+        required=False,
+    )
+    tenants = MultiObjectVar(
+        model=Tenant,
+        label="Tenants",
+        description="Limit validation to devices with these tenants. Leave empty to include all tenants.",
+        required=False,
+    )
+
     class Meta:
         """Meta class for the job."""
 
         has_sensitive_variables = False
 
-    def run(self) -> None:  # pylint: disable=arguments-differ
+    def run(self, *, platforms=None, tenants=None) -> None:  # pylint: disable=arguments-differ
         """Check if software assigned to each device is valid. If no software is assigned return warning message."""
         job_run_time = datetime.now()
         validation_count = 0
+        historic_results = []
 
-        for device in (
-            Device.objects.select_related("device_type", "role", "tenant")
-            .prefetch_related("tags")
-            .filter(software_version__isnull=True)
-        ):
-            validate_obj, _ = DeviceSoftwareValidationResult.objects.get_or_create(device=device)
-            validate_obj.is_validated = False
-            validate_obj.valid_software.set(ValidatedSoftwareLCM.objects.get_for_object(device))
-            validate_obj.software = None
-            validate_obj.last_run = job_run_time
-            validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
-            validate_obj.validated_save()
-            validation_count += 1
+        devices = Device.objects.select_related("device_type", "role", "tenant", "software_version").prefetch_related(
+            "tags"
+        )
+        if platforms:
+            devices = devices.filter(platform__in=platforms)
+        if tenants:
+            devices = devices.filter(tenant__in=tenants)
 
-        for device in (
-            Device.objects.select_related("device_type", "role", "tenant", "software_version")
-            .prefetch_related("tags")
-            .filter(software_version__isnull=False)
-        ):
-            device_software = DeviceSoftware(device)
+        if platforms or tenants:
+            run_type = choices.ReportRunTypeChoices.REPORT_FILTERED_RUN
+        else:
+            run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
+
+        for device in devices:
+            if device.software_version is None:
+                is_validated = False
+            else:
+                is_validated = DeviceSoftware(device).validate_software()
+
             validate_obj, _ = DeviceSoftwareValidationResult.objects.get_or_create(device=device)
-            validate_obj.is_validated = device_software.validate_software()
+            validate_obj.is_validated = is_validated
             validate_obj.valid_software.set(ValidatedSoftwareLCM.objects.get_for_object(device))
             validate_obj.software = device.software_version
             validate_obj.last_run = job_run_time
-            validate_obj.run_type = choices.ReportRunTypeChoices.REPORT_FULL_RUN
+            validate_obj.run_type = run_type
             validate_obj.validated_save()
             validation_count += 1
+
+            historic_results.append(
+                {
+                    "device": {"id": str(device.pk), "name": str(device)},
+                    "software": (
+                        {"id": str(device.software_version.pk), "name": str(device.software_version)}
+                        if device.software_version
+                        else None
+                    ),
+                    "is_validated": is_validated,
+                    "valid_software": [
+                        {"id": str(valid_sw.pk), "name": str(valid_sw)}
+                        for valid_sw in validate_obj.valid_software.all()
+                    ],
+                }
+            )
+
+        DeviceSoftwareValidationHistoricResult(
+            date=job_run_time,
+            run_type=run_type,
+            all_platforms=not platforms,
+            all_tenants=not tenants,
+            filters={
+                "platforms": [{"id": str(platform.pk), "name": platform.name} for platform in platforms or []],
+                "tenants": [{"id": str(tenant.pk), "name": tenant.name} for tenant in tenants or []],
+            },
+            device_validation_results=historic_results,
+        ).validated_save()
 
         self.logger.info("Performed validation on: %d devices.", validation_count)
 
