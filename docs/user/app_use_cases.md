@@ -88,7 +88,7 @@ You can view the details of a provider, along with a listing of the service cont
 
 ### Contracts: Device View with Contracts
 
-Contracts associated with devices will appear on the device detail page. Five contracts at most will be displayed here, listed in order of end date (latest date first). The same information will also be displayed on inventory item detail pages for contracts associated with inventory items.
+Contracts associated with devices will appear on the device detail page, along with the vendor, contract number, contract type and support level needed to open a support case. Five contracts at most will be displayed here, listed in order of end date (latest date first) and then by name. Users who can add contracts will also see an Add Contract button, which opens the contract form with the device already selected. The same information will also be displayed on inventory item detail pages for contracts associated with inventory items.
 
 ![](../images/ss_lcm_contract_device_view_light.png#only-light){ .on-glb }
 ![](../images/ss_lcm_contract_device_view_dark.png#only-dark){ .on-glb }

@@ -475,6 +475,7 @@ class ContractLCMTable(StatusTableMixin, BaseTable):
         fields = (
             "pk",
             "name",
+            "number",
             "status",
             "start",
             "end",
