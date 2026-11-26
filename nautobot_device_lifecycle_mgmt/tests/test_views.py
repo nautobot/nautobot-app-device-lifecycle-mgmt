@@ -12,11 +12,14 @@ from nautobot.dcim.models import DeviceType, Manufacturer
 from nautobot.extras.models import Relationship, RelationshipAssociation, Status, Tag
 from nautobot.users.models import ObjectPermission
 
+from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
+    ContractLCM,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
+    ProviderLCM,
     VulnerabilityLCM,
 )
 
@@ -271,6 +274,55 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     def test_bulk_import_objects_with_constrained_permission(self):
         pass
 
+    def test_detail_view_renders_cvss_vector_modal(self):
+        """The CVSS vector renders as a link that opens a pop-up describing each metric."""
+        cve = CVELCM.objects.first()
+        cve.cvss_vector = "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H"
+        cve.validated_save()
+        self.add_permissions("nautobot_device_lifecycle_mgmt.view_cvelcm")
+
+        response = self.client.get(cve.get_absolute_url())
+
+        self.assertHttpStatus(response, 200)
+        content = response.content.decode(response.charset)
+        self.assertIn('data-bs-target="#cvss_vector_modal"', content)
+        self.assertIn('id="cvss_vector_modal"', content)
+        self.assertIn("CVSS v3.1 Vector", content)
+        self.assertIn("User Interaction", content)
+        self.assertIn("Required", content)
+        self.assertIn(f"https://www.first.org/cvss/calculator/3.1#{cve.cvss_vector}", content)
+
+    def test_detail_view_escapes_html_in_cvss_vector(self):
+        """HTML entered in the CVSS vector is never rendered as markup, with or without the pop-up."""
+        payload = "<img src=x onerror=alert(1)>"
+        cases = (
+            (f"CVSS:3.1/AV:N/{payload}", True),
+            (payload, False),
+        )
+        self.add_permissions("nautobot_device_lifecycle_mgmt.view_cvelcm")
+        cve = CVELCM.objects.first()
+        for vector, has_modal in cases:
+            with self.subTest(vector=vector):
+                cve.cvss_vector = vector
+                cve.validated_save()
+
+                response = self.client.get(cve.get_absolute_url())
+
+                self.assertHttpStatus(response, 200)
+                content = response.content.decode(response.charset)
+                self.assertNotIn(payload, content)
+                self.assertEqual('id="cvss_vector_modal"' in content, has_modal)
+
+    def test_detail_view_without_cvss_vector_has_no_modal(self):
+        """A CVE without a CVSS vector does not render the pop-up."""
+        cve = CVELCM.objects.filter(cvss_vector="").first()
+        self.add_permissions("nautobot_device_lifecycle_mgmt.view_cvelcm")
+
+        response = self.client.get(cve.get_absolute_url())
+
+        self.assertHttpStatus(response, 200)
+        self.assertNotIn('id="cvss_vector_modal"', response.content.decode(response.charset))
+
 
 class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the VulnerabilityLCM views."""
@@ -478,6 +530,63 @@ class HardwareNoticeBadgeTest(TestCase):
         for url in (device.get_absolute_url(), device.device_type.get_absolute_url()):
             with self.subTest(url=url):
                 self.assertContains(self.client.get(url), "Expiring Soon")
+
+
+class DeviceContractPanelTest(TestCase):
+    """Test the Contracts panel on the device page."""
+
+    user_permissions = ("dcim.view_device", "nautobot_device_lifecycle_mgmt.view_contractlcm")
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.device = create_devices()[0]
+        cls.provider = ProviderLCM(name="Panel Test Vendor")
+        cls.provider.validated_save()
+        contract = ContractLCM(
+            provider=cls.provider,
+            name="Panel Test Contract",
+            number="PANEL-0001",
+            support_level="Panel Test 24x7",
+            contract_type=ContractTypeChoices.HARDWARE,
+        )
+        contract.validated_save()
+        contract.devices.add(cls.device)
+        cls.add_contract_url = (
+            f"{reverse('plugins:nautobot_device_lifecycle_mgmt:contractlcm_add')}"
+            f"?devices={cls.device.pk}&return_url={cls.device.get_absolute_url()}"
+        )
+
+    def test_panel_shows_contract_support_details(self):
+        response = self.client.get(self.device.get_absolute_url())
+        provider_url = reverse("plugins:nautobot_device_lifecycle_mgmt:providerlcm", args=[self.provider.pk])
+        for text in (provider_url, "Panel Test Vendor", "Contract Type", "Hardware", "Panel Test 24x7", "PANEL-0001"):
+            with self.subTest(text=text):
+                self.assertContains(response, text)
+
+    def test_panel_lists_latest_end_date_first_then_name(self):
+        for name, end in (
+            ("Panel Zulu", datetime.date(2030, 12, 31)),
+            ("Panel Alpha", datetime.date(2030, 12, 31)),
+            ("Panel Later", datetime.date(2031, 12, 31)),
+        ):
+            contract = ContractLCM(
+                provider=self.provider, name=name, contract_type=ContractTypeChoices.HARDWARE, end=end
+            )
+            contract.validated_save()
+            contract.devices.add(self.device)
+        content = self.client.get(self.device.get_absolute_url()).content.decode()
+        positions = [content.index(name) for name in ("Panel Later", "Panel Alpha", "Panel Zulu")]
+        self.assertEqual(positions, sorted(positions))
+
+    def test_add_contract_button_requires_add_permission(self):
+        self.assertNotContains(self.client.get(self.device.get_absolute_url()), self.add_contract_url)
+        self.add_permissions("nautobot_device_lifecycle_mgmt.add_contractlcm")
+        self.assertContains(self.client.get(self.device.get_absolute_url()), self.add_contract_url)
+
+    def test_add_contract_button_preselects_device(self):
+        self.add_permissions("nautobot_device_lifecycle_mgmt.add_contractlcm")
+        response = self.client.get(self.add_contract_url)
+        self.assertEqual(response.context["form"]["devices"].value(), [str(self.device.pk)])
 
 
 class ContractLCMDevicesTabTest(TestCase):

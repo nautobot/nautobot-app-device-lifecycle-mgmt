@@ -16,18 +16,46 @@ When creating a CVE object, the following fields are available. Fields in **bold
 | Status | The current status of the CVE (requires a [Status object](https://docs.nautobot.com/projects/core/en/stable/models/extras/status/) to be created and associated to the CVE model) |
 | Description | The description of the CVE |
 | Severity | The severity (Low, Medium, High, Critical) of the CVE |
-| CVSS Base Score | The Base (v1) Common Vulnerability Scoring System of the CVE |
-| CVSSv2 Score | The CVSSv2 Score |
-| CVSSv3 Score | The CVSSv3 Score |
+| CVSS Base Score | The Common Vulnerability Scoring System base score of the CVE. The NIST CVE Search Job populates this from NIST's own score for the highest CVSS version that NIST has scored, or, if NIST has not scored the CVE, from the first score listed for the highest CVSS version, whatever its source |
+| CVSS Vector | The CVSS vector string for the CVSS version used for the CVSS Base Score and Severity. The version is shown by the vector's prefix (for example `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`); CVSS v2 vectors have no prefix (for example `AV:N/AC:L/Au:N/C:P/I:P/A:P`), and the CVE form removes a `CVSS:2.0/` prefix. On the CVE detail page, click the vector to open a pop-up that explains each metric and links to the official CVSS calculator. The NIST CVE Search Job populates this automatically |
+| CVSSv2 Score | **Deprecated.** Legacy field retained for backward compatibility. The NIST CVE Search Job populates this with the CVSS v2 exploitability score, or leaves it empty if NIST does not provide one |
+| CVSSv3 Score | **Deprecated.** Legacy field retained for backward compatibility. The NIST CVE Search Job populates this with the CVSS v3.1 (or v3.0) exploitability score, or leaves it empty if NIST does not provide one |
 | Affected Softwares | Software versions affected by this CVE |
 | Fix | The software fix (if available) for the CVE |
 | Comments | Any additional comments or details about the CVE |
 | Tags | Arbitrary [tag objects](https://docs.nautobot.com/projects/core/en/stable/models/extras/tag/) that can be applied to this CVE |
 | Last Modified Date | The date that the CVE record was last modified |
 
+!!! warning "Deprecated fields"
+    The CVSSv2 Score (`cvss_v2`) and CVSSv3 Score (`cvss_v3`) fields are deprecated and will be removed in an upcoming major version of this app. If you rely on these fields (for example in the REST API, GraphQL, filters, or export templates), plan to migrate to a custom field before upgrading to the next major version.
+
 !!! note
     In addition to these standard fields, you can also add one or more [Custom Fields](https://docs.nautobot.com/projects/core/en/stable/models/extras/customfield/) to the model.
 
+### CVE Detail View
+
+The CVE detail view shows the CVE's Severity and CVSS Base Score alongside the CVSS Vector they were taken from. The deprecated CVSSv2 Score and CVSSv3 Score fields are still shown for backward compatibility.
+
+![CVE detail view showing the Severity, CVSS Base Score, and CVSS Vector fields](../images/ss_lcm_cve_view_light.png#only-light){ .on-glb }
+![CVE detail view showing the Severity, CVSS Base Score, and CVSS Vector fields](../images/ss_lcm_cve_view_dark.png#only-dark){ .on-glb }
+
+### Editing a CVE
+
+When editing a CVE, the CVSS Vector can be entered or updated alongside the CVSS Base Score. The form rejects a CVSS Vector that uses an unsupported CVSS version, or that has a malformed segment or a metric the CVSS version does not define. The deprecated CVSSv2 Score and CVSSv3 Score fields show a deprecation notice below each field.
+
+![CVE edit form showing the CVSS Vector field and the deprecation notices on the CVSSv2 Score and CVSSv3 Score fields](../images/ss_lcm_cve_edit_light.png#only-light){ .on-glb }
+![CVE edit form showing the CVSS Vector field and the deprecation notices on the CVSSv2 Score and CVSSv3 Score fields](../images/ss_lcm_cve_edit_dark.png#only-dark){ .on-glb }
+
+### CVSS Vector Details
+
+On the CVE detail view, click the CVSS Vector to open a pop-up that explains the vector. Each metric in the vector is listed with its full name, its value, and a description of what the metric measures. CVSS v2.0, v3.0, v3.1, and v4.0 vectors are supported, including the optional CVSS v3.x temporal and environmental metrics and the CVSS v4.0 threat, environmental, and supplemental metrics. The pop-up leaves out blank and malformed segments. A segment that names a metric the CVSS version does not define is listed with its raw text and no description.
+
+![CVSS vector pop-up listing each metric of a CVSS v4.0 vector with its value and description](../images/ss_lcm_cve_cvss_details_light.png#only-light){ .on-glb }
+![CVSS vector pop-up listing each metric of a CVSS v4.0 vector with its value and description](../images/ss_lcm_cve_cvss_details_dark.png#only-dark){ .on-glb }
+
+The **Open in CVSS vX.Y calculator** button, for example **Open in CVSS v3.1 calculator**, opens the vector in the official calculator for its CVSS version in a new tab: the [FIRST CVSS calculator](https://www.first.org/cvss/) for CVSS v3.0, v3.1, and v4.0, or the [NVD CVSS v2 calculator](https://nvd.nist.gov/vuln-metrics/cvss/v2-calculator) for CVSS v2.0. The calculator shows how the vector's metrics produce the CVSS Base Score.
+
+![FIRST CVSS v4.0 calculator with the metrics from the CVE's vector selected, showing a score of 9.3 (Critical)](../images/ss_lcm_cvss_calculator.png){ .on-glb }
 
 ### Software Association
 
@@ -77,6 +105,24 @@ The NTC Nautobot Device Lifecycle Management app now supports automated CVE disc
 
 !!! note
     If a record is updated due to a mismatched Modified Date against NIST, a comment will be added to the TOP of the comments section notifying of an update and the timestamp that the record was locally modified.  The record's Last Modifed Date will be updated to show when the record itself was modifed in NIST.
+
+!!! note
+    The Job sets the CVE's CVSS Base Score and Severity from one score in the CVE's NIST record, and stores that score's vector string in the CVSS Vector field. A NIST record can hold several scores for each CVSS version: NIST's own score (`Primary`) and scores from other sources such as the vendor (`Secondary`).
+
+!!! warning "Run the Job with Force CVE Updates after upgrading"
+    After upgrading to v4.3.0, run the Job once with **Force CVE Updates** checked. The Job only updates an existing CVE when its Modified Date in NIST differs from the CVE's Last Modified Date, so without a forced run existing CVEs keep their previous CVSS Base Score, Severity, CVSSv2 Score and CVSSv3 Score, and their CVSS Vector stays empty, until NIST modifies the CVE record. A forced run updates every CVE that NIST returns for your Software Versions, regardless of its Last Modified Date. See the [upgrade guide](../admin/upgrade_to_v4.3.0.md#migrating-to-dlm-app-version-430).
+
+### CVSS Score Priorities and Logic
+
+- **Which score is used**: NIST's own score for the highest CVSS version that NIST has scored. The Job reads every CVSS metric entry in the record (`cvssMetricV2`, `cvssMetricV30`, `cvssMetricV31`, `cvssMetricV40`) to find that version.
+
+- **When NIST has not scored the CVE** (for example, while the CVE is awaiting NIST analysis): the Job uses the first score listed for the highest CVSS version, which is usually the vendor's. When the Job creates or updates the CVE, it logs `CVSS score provided by <source> for <CVE>` as an info message under CVE Creation or CVE Updates.
+
+- **When NIST provides a CVSS metric without a base score**: the CVSS Base Score is left empty, and the Job logs the warning `NIST did not provide a CVSS base score for <CVE>; the CVSS Base Score is empty.` when it creates or updates the CVE.
+
+- **Severity**: For v3.0 and later, the chosen score's `baseSeverity`. For v2, it is always derived from the base score (Low: 0.0-3.9, Medium: 4.0-6.9, High: 7.0-10.0).
+
+- **Deprecated CVSSv2 Score and CVSSv3 Score fields**: Set to the CVSS v2 and v3.x exploitability scores, preferring NIST's own score for each version. They do not depend on which version the CVSS Base Score came from.
 
 ### External Integration
 An External Integration must be created and configured in order to use the NIST NVD API for automatic software CVE discovery. On this note, the following is installed for you:

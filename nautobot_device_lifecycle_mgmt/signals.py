@@ -3,8 +3,18 @@
 from django.apps import apps as global_apps
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
-from nautobot.apps.choices import RelationshipTypeChoices
-from nautobot.extras.models import ExternalIntegration, Secret, SecretsGroup
+from nautobot.apps.choices import (
+    RelationshipTypeChoices,
+    SecretsGroupAccessTypeChoices,
+    SecretsGroupSecretTypeChoices,
+)
+from nautobot.extras.models import ExternalIntegration, Secret, SecretsGroup, SecretsGroupAssociation
+
+NIST_API_KEY_ASSOCIATION = {
+    "access_type": SecretsGroupAccessTypeChoices.TYPE_HTTP,
+    "secret_type": SecretsGroupSecretTypeChoices.TYPE_TOKEN,
+}
+INVALID_NIST_API_KEY_ASSOCIATION = {"access_type": "HTTP_HEADER", "secret_type": "apiKey"}
 
 
 def post_migrate_create_relationships(sender, apps=global_apps, **kwargs):  # pylint: disable=unused-argument
@@ -79,14 +89,15 @@ def create_nist_objects(sender, apps=global_apps, **kwargs):  # pylint: disable=
         },
     )
 
-    # Add secret with specific access type and secret type
-    nist_secrets_group.secrets.add(
-        nist_api_key,
-        through_defaults={
-            "access_type": "HTTP_HEADER",
-            "secret_type": "apiKey",  # Match the NIST expected header key
-        },
-    )
+    nist_secrets_group.secrets.add(nist_api_key, through_defaults=NIST_API_KEY_ASSOCIATION)
+
+    # Existing installs can hold invalid choice values, which `.add()` leaves in place
+    if not SecretsGroupAssociation.objects.filter(
+        secrets_group=nist_secrets_group, **NIST_API_KEY_ASSOCIATION
+    ).exists():
+        SecretsGroupAssociation.objects.filter(
+            secrets_group=nist_secrets_group, secret=nist_api_key, **INVALID_NIST_API_KEY_ASSOCIATION
+        ).update(**NIST_API_KEY_ASSOCIATION)
 
     # Ensure an ExternalIntegration exists for NIST API Integration
     ExternalIntegration.objects.get_or_create(
