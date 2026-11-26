@@ -103,8 +103,6 @@ class NistCveSyncSoftware(Job):
         description="Forces update of all CVE objects from NIST records.",
     )
 
-    cvss_score_source = CVSSScoreSourceChoices.NVD
-
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta class for the job."""
 
@@ -116,6 +114,7 @@ class NistCveSyncSoftware(Job):
         super().__init__(*args, **kwargs)
         self.nist_api_key = None
         self.nist_session = None
+        self.cvss_score_source = CVSSScoreSourceChoices.NVD
 
     def nist_session_init(self):
         """Initialize the NIST session."""

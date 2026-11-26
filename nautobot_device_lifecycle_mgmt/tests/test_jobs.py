@@ -315,6 +315,7 @@ class NistCveSyncSoftwarePrepCveBase(unittest.TestCase):
         """Construct a NistCveSyncSoftware instance, bypassing Job.__init__."""
         self.job = NistCveSyncSoftware.__new__(NistCveSyncSoftware)
         self.job.logger = mock.MagicMock()
+        self.job.cvss_score_source = CVSSScoreSourceChoices.NVD
 
     @staticmethod
     def _cve_json(metrics=None):
@@ -738,6 +739,7 @@ class NistCveSyncSoftwareCreateCveTestCase(TestCase):
         """Construct a NistCveSyncSoftware instance, bypassing Job.__init__."""
         self.job = NistCveSyncSoftware.__new__(NistCveSyncSoftware)
         self.job.logger = mock.MagicMock()
+        self.job.cvss_score_source = CVSSScoreSourceChoices.NVD
 
     def _create_cve(self, metrics):
         """Run a NIST CVE record through prep_cve_for_dlc and create_dlc_cves, and return the saved CVE."""
