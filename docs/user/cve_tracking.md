@@ -110,7 +110,7 @@ The NTC Nautobot Device Lifecycle Management app now supports automated CVE disc
     The Job sets the CVE's CVSS Base Score and Severity from one score in the CVE's NIST record, and stores that score's vector string in the CVSS Vector field. A NIST record can hold several scores for each CVSS version: NIST's own score (`Primary`) and scores from other sources such as the vendor (`Secondary`).
 
 !!! warning "Run the Job with Force CVE Updates after upgrading"
-    After upgrading to v4.3.0, run the Job once with **Force CVE Updates** checked. The Job only updates an existing CVE when its Modified Date in NIST differs from the CVE's Last Modified Date, so without a forced run existing CVEs keep their previous CVSS Base Score, Severity, CVSSv2 Score and CVSSv3 Score, and their CVSS Vector stays empty, until NIST modifies the CVE record. A forced run updates every CVE that NIST returns for your Software Versions, regardless of its Last Modified Date. See the [upgrade guide](../admin/upgrade_to_v4.3.0.md#migrating-to-dlm-app-version-430).
+    After upgrading to v4.3.0, run the Job once with **Force CVE Updates** checked. The Job only updates an existing CVE when its Modified Date in NIST differs from the CVE's Last Modified Date, so without a forced run existing CVEs keep their previous CVSS Base Score, Severity, CVSSv2 Score and CVSSv3 Score, and their CVSS Vector stays empty, until NIST modifies the CVE record. A forced run updates every CVE that NIST returns for your Software Versions, regardless of its Last Modified Date. See the [upgrade guide](../admin/upgrade.md#migrating-to-dlm-app-version-430).
 
 ### CVSS Score Priorities and Logic
 
