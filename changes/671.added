@@ -1,1 +1,1 @@
-Added a `CVSS_SCORE_SOURCE` setting that selects whose CVSS score the NIST CVE Search Job uses: NIST's (default), the vendor's, or the highest score of the highest CVSS version.
+Added a `CVSS_SCORE_SOURCE` setting that selects whose CVSS score the NIST CVE Search Job uses.
