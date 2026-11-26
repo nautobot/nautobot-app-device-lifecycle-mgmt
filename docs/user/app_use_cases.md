@@ -78,6 +78,9 @@ You can view the details of a contract along with the primary and escalation con
 ![](../images/ss_lcm_contract_detail_dark.png#only-dark){ .on-glb }
 [//]: # "`https://next.demo.nautobot.com/plugins/nautobot-device-lifecycle-mgmt/contract/bf7fc26a-2b49-5231-a622-a0de6c9e76e9/`"
 
+![Devices tab of a contract listing the contract's devices and inventory items](../images/ss_lcm_contract_devices_tab_light.png#only-light){ .on-glb }
+![Devices tab of a contract listing the contract's devices and inventory items](../images/ss_lcm_contract_devices_tab_dark.png#only-dark){ .on-glb }
+
 ### Contracts: Device Lifecycle Management Contract Provider View
 
 You can view the details of a provider, along with a listing of the service contracts associated to the provider. Contracts that are expired will display in red.
