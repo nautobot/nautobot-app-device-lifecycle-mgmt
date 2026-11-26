@@ -15,13 +15,15 @@ from nautobot.dcim.models import DeviceType, Manufacturer
 from nautobot.extras.models import Status, Tag
 from nautobot.users.models import ObjectPermission
 
-from nautobot_device_lifecycle_mgmt.choices import ReportRunTypeChoices
+from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, ReportRunTypeChoices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
+    ContractLCM,
     DeviceHardwareNoticeResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
+    ProviderLCM,
     VulnerabilityLCM,
 )
 
@@ -234,6 +236,128 @@ class ValidatedSoftwareInventoryItemReportViewTest(ViewTestCases.ListObjectsView
         pass
 
 
+class ReportCountLinkTest(TestCase):
+    """Test that the count links on the report pages keep the report filters."""
+
+    def get_report(self, view_name, status_filter):
+        """Get the report filtered by location and `status_filter`, with the device type table rendered.
+
+        The `HX-Request` header renders the table rows, as the HTMX request of a list view does.
+        """
+        return self.client.get(
+            reverse(view_name),
+            {"location": "Location1", **status_filter, "per_page": "10"},
+            headers={"HX-Request": "true"},
+        )
+
+    def get_link_queries(self, response, view_name):
+        """Return the query parameters of each link on the page to the given view."""
+        url = reverse(view_name)
+        hrefs = re.findall(f'href="{re.escape(url)}([^"]*)"', response.content.decode())
+        return [parse_qs(urlsplit(html.unescape(href)).query) for href in hrefs]
+
+    def assert_links_keep_location(self, links, expected_links):
+        """Assert that each expected link exists with the location filter and without `per_page`."""
+        for expected_link in expected_links:
+            with self.subTest(link=expected_link):
+                self.assertIn({"location": ["Location1"], **expected_link}, links)
+
+    def test_device_software_report_links_keep_the_report_filters(self):
+        devices = create_devices()
+        software = create_softwares()[0]
+        for device, device_software, is_validated in (
+            (devices[0], software, True),
+            (devices[1], software, False),
+            (devices[2], None, False),
+        ):
+            DeviceSoftwareValidationResult(
+                device=device,
+                software=device_software,
+                is_validated=is_validated,
+                run_type=ReportRunTypeChoices.REPORT_FULL_RUN,
+            ).validated_save()
+        self.add_permissions("nautobot_device_lifecycle_mgmt.view_devicesoftwarevalidationresult")
+
+        response = self.get_report(
+            "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report_list", {"valid": "True"}
+        )
+
+        self.assertHttpStatus(response, 200)
+        links = self.get_link_queries(
+            response, "plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list"
+        )
+        self.assert_links_keep_location(
+            links,
+            (
+                {"valid": ["True"]},
+                {"valid": ["False"], "exclude_sw_missing": ["True"]},
+                {"valid": ["True"], "sw_missing_only": ["True"]},
+                {"device_type": ["6509-E"], "valid": ["False"], "exclude_sw_missing": ["True"]},
+            ),
+        )
+
+    def test_inventory_item_software_report_links_keep_the_report_filters(self):
+        inventory_items = create_inventory_items()
+        software = create_softwares()[0]
+        for inventory_item, item_software, is_validated in (
+            (inventory_items[0], software, True),
+            (inventory_items[1], software, False),
+            (inventory_items[2], None, False),
+        ):
+            InventoryItemSoftwareValidationResult(
+                inventory_item=inventory_item,
+                software=item_software,
+                is_validated=is_validated,
+                run_type=ReportRunTypeChoices.REPORT_FULL_RUN,
+            ).validated_save()
+        self.add_permissions("nautobot_device_lifecycle_mgmt.view_inventoryitemsoftwarevalidationresult")
+
+        response = self.get_report(
+            "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report_list", {"valid": "True"}
+        )
+
+        self.assertHttpStatus(response, 200)
+        links = self.get_link_queries(
+            response, "plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list"
+        )
+        self.assert_links_keep_location(
+            links,
+            (
+                {"valid": ["True"]},
+                {"valid": ["False"], "exclude_sw_missing": ["True"]},
+                {"valid": ["True"], "sw_missing_only": ["True"]},
+                {"part_id": ["VS-S2T-10G"], "valid": ["False"], "exclude_sw_missing": ["True"]},
+            ),
+        )
+
+    def test_hardware_notice_report_links_keep_the_report_filters(self):
+        devices = create_devices()
+        hardware_notice = HardwareLCM(device_type=devices[0].device_type, end_of_support=datetime.date(2030, 1, 1))
+        hardware_notice.validated_save()
+        for device, is_supported in ((devices[0], True), (devices[1], False), (devices[2], False)):
+            DeviceHardwareNoticeResult(
+                device=device,
+                hardware_notice=hardware_notice,
+                is_supported=is_supported,
+                run_type=ReportRunTypeChoices.REPORT_FULL_RUN,
+            ).validated_save()
+        self.add_permissions("nautobot_device_lifecycle_mgmt.view_devicehardwarenoticeresult")
+
+        response = self.get_report(
+            "plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report_list", {"supported": "True"}
+        )
+
+        self.assertHttpStatus(response, 200)
+        summary_links = self.get_link_queries(
+            response, "plugins:nautobot_device_lifecycle_mgmt:devicehardwarenoticeresult_list"
+        )
+        self.assert_links_keep_location(summary_links, ({"supported": ["True"]}, {"supported": ["False"]}))
+        device_type_links = self.get_link_queries(
+            response, "plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report_list"
+        )
+        self.assert_links_keep_location(device_type_links, ({"device_type": ["6509-E"], "supported": ["False"]},))
+
+
 class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     """Test the CVELCM views."""
 
@@ -275,6 +399,55 @@ class CVELCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
     @skip("Not implemented")
     def test_bulk_import_objects_with_constrained_permission(self):
         pass
+
+    def test_detail_view_renders_cvss_vector_modal(self):
+        """The CVSS vector renders as a link that opens a pop-up describing each metric."""
+        cve = CVELCM.objects.first()
+        cve.cvss_vector = "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H"
+        cve.validated_save()
+        self.add_permissions("nautobot_device_lifecycle_mgmt.view_cvelcm")
+
+        response = self.client.get(cve.get_absolute_url())
+
+        self.assertHttpStatus(response, 200)
+        content = response.content.decode(response.charset)
+        self.assertIn('data-bs-target="#cvss_vector_modal"', content)
+        self.assertIn('id="cvss_vector_modal"', content)
+        self.assertIn("CVSS v3.1 Vector", content)
+        self.assertIn("User Interaction", content)
+        self.assertIn("Required", content)
+        self.assertIn(f"https://www.first.org/cvss/calculator/3.1#{cve.cvss_vector}", content)
+
+    def test_detail_view_escapes_html_in_cvss_vector(self):
+        """HTML entered in the CVSS vector is never rendered as markup, with or without the pop-up."""
+        payload = "<img src=x onerror=alert(1)>"
+        cases = (
+            (f"CVSS:3.1/AV:N/{payload}", True),
+            (payload, False),
+        )
+        self.add_permissions("nautobot_device_lifecycle_mgmt.view_cvelcm")
+        cve = CVELCM.objects.first()
+        for vector, has_modal in cases:
+            with self.subTest(vector=vector):
+                cve.cvss_vector = vector
+                cve.validated_save()
+
+                response = self.client.get(cve.get_absolute_url())
+
+                self.assertHttpStatus(response, 200)
+                content = response.content.decode(response.charset)
+                self.assertNotIn(payload, content)
+                self.assertEqual('id="cvss_vector_modal"' in content, has_modal)
+
+    def test_detail_view_without_cvss_vector_has_no_modal(self):
+        """A CVE without a CVSS vector does not render the pop-up."""
+        cve = CVELCM.objects.filter(cvss_vector="").first()
+        self.add_permissions("nautobot_device_lifecycle_mgmt.view_cvelcm")
+
+        response = self.client.get(cve.get_absolute_url())
+
+        self.assertHttpStatus(response, 200)
+        self.assertNotIn('id="cvss_vector_modal"', response.content.decode(response.charset))
 
 
 class VulnerabilityLCMViewTest(ViewTestCases.PrimaryObjectViewTestCase):
@@ -485,123 +658,58 @@ class HardwareNoticeBadgeTest(TestCase):
                 self.assertContains(self.client.get(url), "Expiring Soon")
 
 
-class ReportCountLinkTest(TestCase):
-    """Test that the count links on the report pages keep the report filters."""
+class DeviceContractPanelTest(TestCase):
+    """Test the Contracts panel on the device page."""
 
-    def get_report(self, view_name, status_filter):
-        """Get the report filtered by location and `status_filter`, with the device type table rendered.
+    user_permissions = ("dcim.view_device", "nautobot_device_lifecycle_mgmt.view_contractlcm")
 
-        The `HX-Request` header renders the table rows, as the HTMX request of a list view does.
-        """
-        return self.client.get(
-            reverse(view_name),
-            {"location": "Location1", **status_filter, "per_page": "10"},
-            headers={"HX-Request": "true"},
+    @classmethod
+    def setUpTestData(cls):
+        cls.device = create_devices()[0]
+        cls.provider = ProviderLCM(name="Panel Test Vendor")
+        cls.provider.validated_save()
+        contract = ContractLCM(
+            provider=cls.provider,
+            name="Panel Test Contract",
+            number="PANEL-0001",
+            support_level="Panel Test 24x7",
+            contract_type=ContractTypeChoices.HARDWARE,
+        )
+        contract.validated_save()
+        contract.devices.add(cls.device)
+        cls.add_contract_url = (
+            f"{reverse('plugins:nautobot_device_lifecycle_mgmt:contractlcm_add')}"
+            f"?devices={cls.device.pk}&return_url={cls.device.get_absolute_url()}"
         )
 
-    def get_link_queries(self, response, view_name):
-        """Return the query parameters of each link on the page to the given view."""
-        url = reverse(view_name)
-        hrefs = re.findall(f'href="{re.escape(url)}([^"]*)"', response.content.decode())
-        return [parse_qs(urlsplit(html.unescape(href)).query) for href in hrefs]
+    def test_panel_shows_contract_support_details(self):
+        response = self.client.get(self.device.get_absolute_url())
+        provider_url = reverse("plugins:nautobot_device_lifecycle_mgmt:providerlcm", args=[self.provider.pk])
+        for text in (provider_url, "Panel Test Vendor", "Contract Type", "Hardware", "Panel Test 24x7", "PANEL-0001"):
+            with self.subTest(text=text):
+                self.assertContains(response, text)
 
-    def assert_links_keep_location(self, links, expected_links):
-        """Assert that each expected link exists with the location filter and without `per_page`."""
-        for expected_link in expected_links:
-            with self.subTest(link=expected_link):
-                self.assertIn({"location": ["Location1"], **expected_link}, links)
-
-    def test_device_software_report_links_keep_the_report_filters(self):
-        devices = create_devices()
-        software = create_softwares()[0]
-        for device, device_software, is_validated in (
-            (devices[0], software, True),
-            (devices[1], software, False),
-            (devices[2], None, False),
+    def test_panel_lists_latest_end_date_first_then_name(self):
+        for name, end in (
+            ("Panel Zulu", datetime.date(2030, 12, 31)),
+            ("Panel Alpha", datetime.date(2030, 12, 31)),
+            ("Panel Later", datetime.date(2031, 12, 31)),
         ):
-            DeviceSoftwareValidationResult(
-                device=device,
-                software=device_software,
-                is_validated=is_validated,
-                run_type=ReportRunTypeChoices.REPORT_FULL_RUN,
-            ).validated_save()
-        self.add_permissions("nautobot_device_lifecycle_mgmt.view_devicesoftwarevalidationresult")
+            contract = ContractLCM(
+                provider=self.provider, name=name, contract_type=ContractTypeChoices.HARDWARE, end=end
+            )
+            contract.validated_save()
+            contract.devices.add(self.device)
+        content = self.client.get(self.device.get_absolute_url()).content.decode()
+        positions = [content.index(name) for name in ("Panel Later", "Panel Alpha", "Panel Zulu")]
+        self.assertEqual(positions, sorted(positions))
 
-        response = self.get_report(
-            "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report_list", {"valid": "True"}
-        )
+    def test_add_contract_button_requires_add_permission(self):
+        self.assertNotContains(self.client.get(self.device.get_absolute_url()), self.add_contract_url)
+        self.add_permissions("nautobot_device_lifecycle_mgmt.add_contractlcm")
+        self.assertContains(self.client.get(self.device.get_absolute_url()), self.add_contract_url)
 
-        self.assertHttpStatus(response, 200)
-        links = self.get_link_queries(
-            response, "plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationresult_list"
-        )
-        self.assert_links_keep_location(
-            links,
-            (
-                {"valid": ["True"]},
-                {"valid": ["False"], "exclude_sw_missing": ["True"]},
-                {"valid": ["True"], "sw_missing_only": ["True"]},
-                {"device_type": ["6509-E"], "valid": ["False"], "exclude_sw_missing": ["True"]},
-            ),
-        )
-
-    def test_inventory_item_software_report_links_keep_the_report_filters(self):
-        inventory_items = create_inventory_items()
-        software = create_softwares()[0]
-        for inventory_item, item_software, is_validated in (
-            (inventory_items[0], software, True),
-            (inventory_items[1], software, False),
-            (inventory_items[2], None, False),
-        ):
-            InventoryItemSoftwareValidationResult(
-                inventory_item=inventory_item,
-                software=item_software,
-                is_validated=is_validated,
-                run_type=ReportRunTypeChoices.REPORT_FULL_RUN,
-            ).validated_save()
-        self.add_permissions("nautobot_device_lifecycle_mgmt.view_inventoryitemsoftwarevalidationresult")
-
-        response = self.get_report(
-            "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report_list", {"valid": "True"}
-        )
-
-        self.assertHttpStatus(response, 200)
-        links = self.get_link_queries(
-            response, "plugins:nautobot_device_lifecycle_mgmt:inventoryitemsoftwarevalidationresult_list"
-        )
-        self.assert_links_keep_location(
-            links,
-            (
-                {"valid": ["True"]},
-                {"valid": ["False"], "exclude_sw_missing": ["True"]},
-                {"valid": ["True"], "sw_missing_only": ["True"]},
-                {"part_id": ["VS-S2T-10G"], "valid": ["False"], "exclude_sw_missing": ["True"]},
-            ),
-        )
-
-    def test_hardware_notice_report_links_keep_the_report_filters(self):
-        devices = create_devices()
-        hardware_notice = HardwareLCM(device_type=devices[0].device_type, end_of_support=datetime.date(2030, 1, 1))
-        hardware_notice.validated_save()
-        for device, is_supported in ((devices[0], True), (devices[1], False), (devices[2], False)):
-            DeviceHardwareNoticeResult(
-                device=device,
-                hardware_notice=hardware_notice,
-                is_supported=is_supported,
-                run_type=ReportRunTypeChoices.REPORT_FULL_RUN,
-            ).validated_save()
-        self.add_permissions("nautobot_device_lifecycle_mgmt.view_devicehardwarenoticeresult")
-
-        response = self.get_report(
-            "plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report_list", {"supported": "True"}
-        )
-
-        self.assertHttpStatus(response, 200)
-        summary_links = self.get_link_queries(
-            response, "plugins:nautobot_device_lifecycle_mgmt:devicehardwarenoticeresult_list"
-        )
-        self.assert_links_keep_location(summary_links, ({"supported": ["True"]}, {"supported": ["False"]}))
-        device_type_links = self.get_link_queries(
-            response, "plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report_list"
-        )
-        self.assert_links_keep_location(device_type_links, ({"device_type": ["6509-E"], "supported": ["False"]},))
+    def test_add_contract_button_preselects_device(self):
+        self.add_permissions("nautobot_device_lifecycle_mgmt.add_contractlcm")
+        response = self.client.get(self.add_contract_url)
+        self.assertEqual(response.context["form"]["devices"].value(), [str(self.device.pk)])

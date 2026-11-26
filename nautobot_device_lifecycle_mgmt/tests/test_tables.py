@@ -159,3 +159,12 @@ class ValidatedSoftwareLCMTableTest(TestCase):
         for column_name, url in expected_links.items():
             with self.subTest(column=column_name):
                 self.assertIn(url, str(table_row.get_cell(column_name)))  # pylint: disable=no-member
+
+
+class ContractLCMTableTest(TestCase):
+    """Test the Number column on the Contract list table."""
+
+    def test_number_column_is_not_a_default_column(self):
+        """The Number column is selectable but hidden until a user opts into it."""
+        self.assertIn("number", ContractLCMTable.base_columns)  # pylint: disable=no-member
+        self.assertNotIn("number", ContractLCMTable.Meta.default_columns)

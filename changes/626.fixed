@@ -1,0 +1,1 @@
+Fixed the NIST CVE Search Job failing on CVEs that have no CVSS v3.x or v2 score.
