@@ -4,6 +4,9 @@ import unittest
 from datetime import date
 from unittest import mock
 
+from constance.admin import get_values
+from constance.forms import ConstanceForm
+from constance.test import override_config
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from nautobot.apps.choices import JobResultStatusChoices
@@ -12,7 +15,7 @@ from nautobot.dcim.models import Platform, SoftwareVersion
 from nautobot.extras.models import Status
 from requests.exceptions import ChunkedEncodingError, Timeout
 
-from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
+from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices, CVSSScoreSourceChoices
 from nautobot_device_lifecycle_mgmt.jobs.cve_tracking import UNNAMED_CVSS_SOURCE, NistCveSyncSoftware
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -443,6 +446,69 @@ class NistCveSyncSoftwarePrepCveTestCase(NistCveSyncSoftwarePrepCveBase):
                 result = self.job.prep_cve_for_dlc(self._cve_json(metrics))
                 self.assertIsNone(result["cvss_source"])
 
+    def test_cvss_score_selection_by_source(self):
+        """The vendor and highest_version sources pick their score, and name the source used on a fallback."""
+        vendor, highest_version = CVSSScoreSourceChoices.VENDOR, CVSSScoreSourceChoices.HIGHEST_VERSION
+        # Each case is (score source, NIST metrics, expected base score, expected cvss_source).
+        cases = {
+            "vendor's v3.1 over NIST's v4.0": (
+                vendor,
+                {
+                    "cvssMetricV40": _metric_entry(9.3, "Primary"),
+                    "cvssMetricV31": _metric_entry(9.8, "Primary") + _metric_entry(7.5, "Secondary"),
+                },
+                7.5,
+                None,
+            ),
+            "vendor's first non-NIST score": (
+                vendor,
+                {"cvssMetricV31": _metric_entry(6.0, "Secondary") + _metric_entry(5.5, "Secondary")},
+                6.0,
+                None,
+            ),
+            "vendor falls back to NIST's highest version": (
+                vendor,
+                {
+                    "cvssMetricV31": _metric_entry(7.5, "Primary", source="nvd@nist.gov"),
+                    "cvssMetricV2": _metric_entry(5.0, "Primary"),
+                },
+                7.5,
+                "nvd@nist.gov",
+            ),
+            "highest version from any source": (
+                highest_version,
+                {"cvssMetricV40": _metric_entry(9.3, "Secondary"), "cvssMetricV31": _metric_entry(7.5, "Primary")},
+                9.3,
+                None,
+            ),
+            "highest score within the highest version": (
+                highest_version,
+                {"cvssMetricV31": _metric_entry(6.7, "Primary") + _metric_entry(8.1, "Secondary")},
+                8.1,
+                None,
+            ),
+            "an entry without a score loses": (
+                highest_version,
+                {"cvssMetricV31": [{"type": "Secondary", "cvssData": {}}] + _metric_entry(5.0, "Primary")},
+                5.0,
+                None,
+            ),
+        }
+        for name, (score_source, metrics, score, source) in cases.items():
+            with self.subTest(name):
+                self.job.cvss_score_source = score_source
+                result = self.job.prep_cve_for_dlc(self._cve_json(metrics))
+                self.assertEqual(result["cvss_base_score"], score)
+                self.assertEqual(result["cvss_vector"], _metric_vector(score))
+                self.assertEqual(result["cvss_source"], source)
+
+    def test_highest_version_prefers_nist_on_a_tie(self):
+        self.job.cvss_score_source = CVSSScoreSourceChoices.HIGHEST_VERSION
+        metrics = _cvss_metric(7.5, vector="vendor", entry_type="Secondary")
+        metrics += _cvss_metric(7.5, vector="nist", entry_type="Primary")
+        result = self.job.prep_cve_for_dlc(self._cve_json({"cvssMetricV31": metrics}))
+        self.assertEqual(result["cvss_vector"], "nist")
+
     def test_secondary_score_without_base_score_keeps_source(self):
         """A non-NIST entry without a baseScore keeps its source and is flagged as missing a base score."""
         metric = [{"type": "Secondary", "source": "psirt@cisco.com", "cvssData": {"baseSeverity": "HIGH"}}]
@@ -724,7 +790,7 @@ class NistCveSyncSoftwareCreateCveTestCase(TestCase):
 
 
 class NistCveSyncSoftwareRunTestCase(TestCase):
-    """Test NistCveSyncSoftware.run for Software Versions that netutils cannot build NIST URLs for."""
+    """Test NistCveSyncSoftware.run and its CVSS_SCORE_SOURCE setting."""
 
     def setUp(self):
         """Create a job with a stubbed logger and NIST session."""
@@ -755,3 +821,12 @@ class NistCveSyncSoftwareRunTestCase(TestCase):
 
         logged_platforms = {logged_call.args[1] for logged_call in self.job.logger.error.call_args_list}
         self.assertEqual(logged_platforms, {"Cisco IOS", "Junos"})
+
+    def test_run_reads_cvss_score_source(self):
+        with override_config(nautobot_device_lifecycle_mgmt__CVSS_SCORE_SOURCE=CVSSScoreSourceChoices.VENDOR):
+            self.job.run(nist_integration=mock.MagicMock())
+        self.assertEqual(self.job.cvss_score_source, CVSSScoreSourceChoices.VENDOR)
+
+    def test_cvss_score_source_is_a_drop_down(self):
+        field = ConstanceForm(initial=get_values()).fields["nautobot_device_lifecycle_mgmt__CVSS_SCORE_SOURCE"]
+        self.assertEqual(list(field.choices), list(CVSSScoreSourceChoices.CHOICES))
