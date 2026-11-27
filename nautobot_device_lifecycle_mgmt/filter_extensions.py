@@ -19,6 +19,16 @@ def distinct_filter(queryset, _, value):
     return queryset
 
 
+def contract_filter(queryset, _, value):
+    """Returns Inventory Items linked to the given contracts."""
+    if not value:
+        return queryset
+    return queryset.filter(
+        destination_for_associations__relationship__key="contractlcm_to_inventoryitem",
+        destination_for_associations__source_id__in=[contract.pk for contract in value],
+    )
+
+
 #
 # INVENTORY ITEM FILTER EXTENSION
 #
@@ -37,12 +47,22 @@ class InventoryItemFilterExtension(FilterExtension):
             to_field_name="pk",
             label="Validated Software",
         ),
+        "nautobot_device_lifecycle_mgmt_contracts": NaturalKeyOrPKMultipleChoiceFilter(
+            queryset=ContractLCM.objects.all(),
+            method=contract_filter,
+            label="Contracts",
+        ),
     }
 
     filterform_fields = {
         "nautobot_device_lifecycle_mgmt_validated_software": DynamicModelMultipleChoiceField(
             queryset=ValidatedSoftwareLCM.objects.all(),
             label="Validated Software",
+            required=False,
+        ),
+        "nautobot_device_lifecycle_mgmt_contracts": DynamicModelMultipleChoiceField(
+            queryset=ContractLCM.objects.all(),
+            label="Contracts",
             required=False,
         ),
     }
