@@ -1,0 +1,1 @@
+Fixed the count links on the software validation and hardware notice reports ignoring the report filters, and the Invalid summary link also listing items without software.
