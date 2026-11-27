@@ -34,6 +34,7 @@ from nautobot_device_lifecycle_mgmt.choices import (
     CurrencyChoices,
     CVESeverityChoices,
 )
+from nautobot_device_lifecycle_mgmt.cvss import parse_cvss_vector
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
@@ -839,6 +840,7 @@ class CVELCMForm(NautobotModelForm):
             "description",
             "severity",
             "cvss",
+            "cvss_vector",
             "cvss_v2",
             "cvss_v3",
             "fix",
@@ -851,6 +853,34 @@ class CVELCMForm(NautobotModelForm):
             "published_date": DatePicker(),
             "last_modified_date": DatePicker(),
         }
+
+    def clean_cvss_vector(self):
+        """Validate the CVSS vector and return it in standard form.
+
+        Returns:
+            str: The vector rebuilt by `parse_cvss_vector`, or an empty string if no vector was entered.
+
+        Raises:
+            ValidationError: If the vector uses an unsupported CVSS version, or has a segment that is malformed
+                or names a metric the CVSS version does not define.
+        """
+        vector = (self.cleaned_data.get("cvss_vector") or "").strip()
+        if not vector:
+            return ""
+
+        parsed = parse_cvss_vector(vector)
+        if parsed is None:
+            raise forms.ValidationError(
+                "Enter a CVSS vector string, for example CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H. "
+                "CVSS v3.0, v3.1 and v4.0 vectors start with CVSS:<version>/; CVSS v2 vectors have no prefix."
+            )
+
+        if parsed["invalid_segments"]:
+            raise forms.ValidationError(
+                f"These segments are not valid CVSS {parsed['version']} metrics: "
+                f"{', '.join(parsed['invalid_segments'])}."
+            )
+        return parsed["vector"]
 
 
 class CVELCMBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm, CustomFieldModelBulkEditFormMixin):
