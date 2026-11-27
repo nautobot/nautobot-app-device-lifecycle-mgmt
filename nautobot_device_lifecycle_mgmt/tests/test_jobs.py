@@ -13,7 +13,7 @@ from nautobot.extras.models import Status
 from nautobot.tenancy.models import Tenant
 from requests.exceptions import ChunkedEncodingError, Timeout
 
-from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
+from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices, ReportRunTypeChoices
 from nautobot_device_lifecycle_mgmt.jobs.cve_tracking import UNNAMED_CVSS_SOURCE, NistCveSyncSoftware
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,

@@ -12,7 +12,7 @@ from nautobot.dcim.models import DeviceType, Manufacturer
 from nautobot.extras.models import Status, Tag
 from nautobot.users.models import ObjectPermission
 
-from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices
+from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, ReportRunTypeChoices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
