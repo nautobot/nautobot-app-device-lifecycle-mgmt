@@ -79,6 +79,7 @@ The app behavior can be controlled with the following list of settings:
 | `enabled_metrics`    | `["metrics_lcm_hw_end_of_support_location"]`                        | `[]`               | Enables metrics corresponding to the provided entries.               |
 | `multi_tenant_mode`  | `True` or `False`                                                   | `False`            | Enable tenant-aware software filtering. See [Multi-Tenant Mode](#multi-tenant-mode) below. |
 | `expiring_soon_days` | `90`                                                                | `180`              | Number of days before End of Support at which a Hardware Notice is marked as expiring soon. |
+| `CVSS_SCORE_SOURCE`  | `"vendor"`                                                          | `"nvd"`            | Whose CVSS score the NIST CVE Search Job uses. Can also be set in the Admin UI under Configuration > Config. See [CVSS Score Priorities and Logic](../user/cve_tracking.md#cvss-score-priorities-and-logic). |
 
 ### Available Metric Names
 

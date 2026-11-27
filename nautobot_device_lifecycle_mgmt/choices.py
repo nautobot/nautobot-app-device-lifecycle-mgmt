@@ -98,3 +98,17 @@ class CVESeverityChoices(ChoiceSet):
         (LOW, LOW),
         (NONE, NONE),
     )
+
+
+class CVSSScoreSourceChoices(ChoiceSet):
+    """Choices for the source of the CVSS Base Score that the NIST CVE Search Job sets on a CVE."""
+
+    NVD = "nvd"
+    VENDOR = "vendor"
+    HIGHEST_VERSION = "highest_version"
+
+    CHOICES = (
+        (NVD, "NVD"),
+        (VENDOR, "Vendor"),
+        (HIGHEST_VERSION, "Highest CVSS version"),
+    )

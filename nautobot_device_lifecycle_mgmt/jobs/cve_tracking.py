@@ -8,6 +8,7 @@ from time import sleep
 
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
+from nautobot.apps.config import get_app_settings_or_config
 from nautobot.apps.exceptions import SecretError
 from nautobot.apps.jobs import BooleanVar, Job, ObjectVar, StringVar
 from nautobot.dcim.models import Device, InventoryItem
@@ -21,7 +22,7 @@ from requests.exceptions import ChunkedEncodingError, HTTPError, Timeout
 from requests.exceptions import ConnectionError as RequestsConnectionError
 from urllib3.util import Retry
 
-from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
+from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices, CVSSScoreSourceChoices
 from nautobot_device_lifecycle_mgmt.models import CVELCM, VulnerabilityLCM
 from nautobot_device_lifecycle_mgmt.utils import standardize_cvss_severity
 
@@ -29,6 +30,11 @@ from nautobot_device_lifecycle_mgmt.utils import standardize_cvss_severity
 UNNAMED_CVSS_SOURCE = "an unnamed source"
 
 name = "CVE Tracking"  # pylint: disable=invalid-name
+
+
+def _is_nist_score(entry: dict) -> bool:
+    """Return True if a CVSS metric entry of a NIST record is NIST's own score rather than another source's."""
+    return entry.get("type") == "Primary"
 
 
 class GenerateVulnerabilities(Job):
@@ -113,6 +119,7 @@ class NistCveSyncSoftware(Job):
         super().__init__(*args, **kwargs)
         self.nist_api_key = None
         self.nist_session = None
+        self.cvss_score_source = CVSSScoreSourceChoices.NVD
 
     def nist_session_init(self):
         """Initialize the NIST session."""
@@ -151,6 +158,7 @@ class NistCveSyncSoftware(Job):
             )
             return
 
+        self.cvss_score_source = get_app_settings_or_config("nautobot_device_lifecycle_mgmt", "CVSS_SCORE_SOURCE")
         force_cve_updates = kwargs.get("force_cve_updates", False)
         cve_counter = 0
         # CVEs created or updated during this run, so a forced update runs once per CVE.
@@ -435,13 +443,14 @@ class NistCveSyncSoftware(Job):
         return next((entry for entry in metric_entries if entry.get("type") == "Primary"), metric_entries[0])
 
     @staticmethod
-    def get_highest_cvss_score(cve_metrics: dict | None) -> dict:
+    def get_highest_cvss_score(cve_metrics: dict | None, score_source: str) -> dict:
         """Return the CVSS Base Score, Severity, Vector and source of the score to use for a CVE.
 
-        NIST's own scores (``Primary`` entries) are preferred over scores from other sources
-        such as the vendor. The highest CVSS version with a NIST score is used. If NIST has not
-        scored any version, the highest available version is used with its first entry, and
-        ``cvss_source`` names the source of that entry.
+        NIST's own scores are ``Primary`` entries. ``score_source`` picks the score:
+
+        - ``nvd``: NIST's score for the highest version NIST scored, else the highest version's first score.
+        - ``vendor``: the first non-NIST score for the highest version another source scored, else as ``nvd``.
+        - ``highest_version``: the highest score of the highest version, NIST's on a tie.
 
         CVSS v2 severity is always derived from the base score. All other versions
         use the ``baseSeverity`` of the chosen entry. If the entry has no ``baseScore``,
@@ -449,25 +458,52 @@ class NistCveSyncSoftware(Job):
 
         Args:
             cve_metrics (dict | None): The ``metrics`` object from a NIST CVE record.
+            score_source (str): A ``CVSSScoreSourceChoices`` value.
 
         Returns:
             dict: The ``cvss_base_score``, ``cvss_severity``, ``cvss_vector`` and ``cvss_source``.
-            ``cvss_source`` is ``None`` when the score is NIST's own, and ``UNNAMED_CVSS_SOURCE``
-            when the entry used has no ``source``. If no CVSS metrics are available, the score is
-            ``None``, the severity is ``CVESeverityChoices.NONE``, the vector is empty and the
-            source is ``None``.
+            ``cvss_source`` names the score's source when the configured source had no score
+            (``UNNAMED_CVSS_SOURCE`` if the entry names none), otherwise ``None``. If no CVSS metrics are
+            available, the score is ``None``, the severity is ``CVESeverityChoices.NONE`` and the vector is empty.
         """
-        # NIST metric keys (cvssMetricV2, cvssMetricV30, cvssMetricV31, cvssMetricV40) sort by CVSS version as strings.
-        metric_keys = [key for key, value in (cve_metrics or {}).items() if key.startswith("cvssMetricV") and value]
-        if metric_keys:
-            nist_keys = [
-                key for key in metric_keys if any(entry.get("type") == "Primary" for entry in cve_metrics[key])
+        # The record's CVSS version keys (cvssMetricV2, cvssMetricV30, cvssMetricV31, cvssMetricV40) sort by version
+        # as strings, so max() returns the highest version.
+        versions = [key for key, entries in (cve_metrics or {}).items() if key.startswith("cvssMetricV") and entries]
+        if versions:
+            versions_scored_by_nist = [
+                version for version in versions if any(_is_nist_score(entry) for entry in cve_metrics[version])
             ]
-            metric_key = max(nist_keys or metric_keys)
-            metric_entry = NistCveSyncSoftware.get_preferred_cvss_metric(cve_metrics[metric_key])
-            cvss_data = metric_entry["cvssData"]
+            versions_scored_by_others = [
+                version for version in versions if any(not _is_nist_score(entry) for entry in cve_metrics[version])
+            ]
+            # True when the configured source has no score and another source's score is used instead.
+            used_fallback = False
+
+            # The highest score of the highest version. NIST's score wins a tie, and an entry without a score loses.
+            if score_source == CVSSScoreSourceChoices.HIGHEST_VERSION:
+                chosen_version = max(versions)
+                chosen_entry = max(
+                    cve_metrics[chosen_version],
+                    key=lambda entry: (entry["cvssData"].get("baseScore", -1), _is_nist_score(entry)),
+                )
+            # The first non-NIST score of the highest version that another source scored.
+            elif score_source == CVSSScoreSourceChoices.VENDOR and versions_scored_by_others:
+                chosen_version = max(versions_scored_by_others)
+                chosen_entry = next(entry for entry in cve_metrics[chosen_version] if not _is_nist_score(entry))
+            # NIST's score for the highest version NIST scored. Also `vendor`'s fallback when only NIST scored.
+            elif versions_scored_by_nist:
+                chosen_version = max(versions_scored_by_nist)
+                chosen_entry = next(entry for entry in cve_metrics[chosen_version] if _is_nist_score(entry))
+                used_fallback = score_source == CVSSScoreSourceChoices.VENDOR
+            # NIST has not scored the CVE: the first score of the highest version.
+            else:
+                chosen_version = max(versions)
+                chosen_entry = cve_metrics[chosen_version][0]
+                used_fallback = True
+
+            cvss_data = chosen_entry["cvssData"]
             base_score = cvss_data.get("baseScore")
-            if metric_key == "cvssMetricV2":
+            if chosen_version == "cvssMetricV2":
                 severity = (
                     NistCveSyncSoftware.convert_v2_base_score_to_severity(base_score)
                     if base_score is not None
@@ -479,7 +515,7 @@ class NistCveSyncSoftware(Job):
                 "cvss_base_score": base_score,
                 "cvss_severity": severity,
                 "cvss_vector": cvss_data.get("vectorString", ""),
-                "cvss_source": None if nist_keys else metric_entry.get("source") or UNNAMED_CVSS_SOURCE,
+                "cvss_source": (chosen_entry.get("source") or UNNAMED_CVSS_SOURCE) if used_fallback else None,
             }
 
         return {
@@ -545,7 +581,7 @@ class NistCveSyncSoftware(Job):
             cve_url = f"https://www.cvedetails.com/cve/{cve_name}/"
 
         cve_metrics = cve_json.get("metrics") or {}
-        cvss_details = self.get_highest_cvss_score(cve_metrics)
+        cvss_details = self.get_highest_cvss_score(cve_metrics, self.cvss_score_source)
         has_cvss_metric = any(key.startswith("cvssMetricV") and value for key, value in cve_metrics.items())
 
         return {
@@ -561,8 +597,8 @@ class NistCveSyncSoftware(Job):
     def log_cvss_score_details(self, dlc_cve: CVELCM, cve_info: dict, grouping: str) -> None:
         """Log where a created or updated CVE's CVSS score came from, and warn if it has no base score.
 
-        An info message names the source of the score when the score is not NIST's own. A warning
-        is logged when NIST provided a CVSS metric without a base score.
+        An info message names the score's source when the configured ``CVSS_SCORE_SOURCE`` had no score
+        for the CVE. A warning is logged when NIST provided a CVSS metric without a base score.
 
         Args:
             dlc_cve (CVELCM): The CVE that was created or updated.

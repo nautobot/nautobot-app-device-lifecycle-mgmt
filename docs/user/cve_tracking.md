@@ -114,9 +114,15 @@ The NTC Nautobot Device Lifecycle Management app now supports automated CVE disc
 
 ### CVSS Score Priorities and Logic
 
-- **Which score is used**: NIST's own score for the highest CVSS version that NIST has scored. The Job reads every CVSS metric entry in the record (`cvssMetricV2`, `cvssMetricV30`, `cvssMetricV31`, `cvssMetricV40`) to find that version.
+The `CVSS_SCORE_SOURCE` setting selects the score. Set it in the Admin UI under **Configuration > Config**, in the Nautobot Device Lifecycle Management section, or in `PLUGINS_CONFIG`, which takes precedence. After changing it, run the Job with **Force CVE Updates** to update existing CVEs.
 
-- **When NIST has not scored the CVE** (for example, while the CVE is awaiting NIST analysis): the Job uses the first score listed for the highest CVSS version, which is usually the vendor's. When the Job creates or updates the CVE, it logs `CVSS score provided by <source> for <CVE>` as an info message under CVE Creation or CVE Updates.
+| Value | Score used | If that source has no score |
+|---|---|---|
+| `nvd` (default) | NIST's own score for the highest CVSS version NIST has scored | The first score of the highest CVSS version, usually the vendor's |
+| `vendor` | The first non-NIST score for the highest CVSS version that another source has scored, usually the vendor's | NIST's own score for the highest CVSS version |
+| `highest_version` | The highest score for the highest CVSS version, NIST's own on a tie | Not applicable |
+
+- **When the configured source has no score**: the Job logs `CVSS score provided by <source> for <CVE>` as an info message under CVE Creation or CVE Updates when it creates or updates the CVE.
 
 - **When NIST provides a CVSS metric without a base score**: the CVSS Base Score is left empty, and the Job logs the warning `NIST did not provide a CVSS base score for <CVE>; the CVSS Base Score is empty.` when it creates or updates the CVE.
 
