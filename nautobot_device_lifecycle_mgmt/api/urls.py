@@ -17,7 +17,6 @@ router.register("cve", views.CVELCMViewSet)
 router.register("vulnerability", views.VulnerabilityLCMViewSet)
 router.register("device-hardware-notice-result", views.DeviceHardwareNoticeResultListViewSet)
 router.register("device-validated-software-result", views.DeviceSoftwareValidationResultListViewSet)
-router.register("device-validated-software-historic-result", views.DeviceSoftwareValidationHistoricResultListViewSet)
 router.register("inventory-item-validated-software-result", views.InventoryItemSoftwareValidationResultListViewSet)
 
 app_name = "nautobot_device_lifecycle_mgmt-api"

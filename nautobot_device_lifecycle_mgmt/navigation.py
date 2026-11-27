@@ -117,14 +117,6 @@ menu_items = (
                         ],
                     ),
                     NavMenuItem(
-                        link="plugins:nautobot_device_lifecycle_mgmt:devicesoftwarevalidationhistoricresult_list",
-                        name="Device Software Validation - History",
-                        weight=450,
-                        permissions=[
-                            "nautobot_device_lifecycle_mgmt.view_devicesoftwarevalidationhistoricresult",
-                        ],
-                    ),
-                    NavMenuItem(
                         link="plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report_list",
                         name="Inventory Item Software Validation - Report",
                         weight=500,

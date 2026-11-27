@@ -5,7 +5,6 @@ from datetime import date, datetime, timedelta
 # from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.formats import date_format
 
 try:
     from nautobot.apps.constants import CHARFIELD_MAX_LENGTH
@@ -459,46 +458,6 @@ class DeviceSoftwareValidationResult(PrimaryModel):
         else:
             msg = f"Device: {self.device} - Not Valid"
         return msg
-
-
-@extras_features(
-    "custom_fields",
-    "custom_links",
-    "export_templates",
-    "graphql",
-    "relationships",
-    "webhooks",
-)
-class DeviceSoftwareValidationHistoricResult(PrimaryModel):
-    """Snapshot of a single Device Software Validation job run.
-
-    `filters` holds the platforms and tenants the run was limited to, as `{"platforms": [...], "tenants": [...]}`,
-    each entry being `{"id": ..., "name": ...}`. An empty list means the run was not limited by that attribute.
-    `device_validation_results` holds one entry per validated device, recorded at the time of the run.
-    """
-
-    date = models.DateTimeField()
-    run_type = models.CharField(max_length=CHARFIELD_MAX_LENGTH, choices=choices.ReportRunTypeChoices)
-    all_platforms = models.BooleanField(default=True)
-    all_tenants = models.BooleanField(default=True)
-    filters = models.JSONField(default=dict, blank=True)
-    device_validation_results = models.JSONField(default=list, blank=True)
-
-    class Meta:
-        """Meta attributes for DeviceSoftwareValidationHistoricResult."""
-
-        verbose_name = "Device Software Validation Historic Result"
-        ordering = ("-date",)
-        unique_together = ("date", "run_type")
-
-    def __str__(self):
-        """String representation of DeviceSoftwareValidationHistoricResult."""
-        return f"{date_format(self.date, 'DATETIME_FORMAT')} - {self.get_run_type_display()}"
-
-    @property
-    def device_count(self):
-        """Number of devices validated in this run."""
-        return len(self.device_validation_results)
 
 
 @extras_features(

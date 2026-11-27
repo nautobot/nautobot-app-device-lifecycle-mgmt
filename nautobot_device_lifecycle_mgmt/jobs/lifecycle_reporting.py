@@ -10,7 +10,6 @@ from nautobot.tenancy.models import Tenant
 from nautobot_device_lifecycle_mgmt import choices
 from nautobot_device_lifecycle_mgmt.models import (
     DeviceHardwareNoticeResult,
-    DeviceSoftwareValidationHistoricResult,
     DeviceSoftwareValidationResult,
     HardwareLCM,
     InventoryItemSoftwareValidationResult,
@@ -108,7 +107,6 @@ class DeviceSoftwareValidationFullReport(Job):
         """Check if software assigned to each device is valid. If no software is assigned return warning message."""
         job_run_time = datetime.now()
         validation_count = 0
-        historic_results = []
 
         devices = Device.objects.select_related("device_type", "role", "tenant", "software_version").prefetch_related(
             "tags"
@@ -137,34 +135,6 @@ class DeviceSoftwareValidationFullReport(Job):
             validate_obj.run_type = run_type
             validate_obj.validated_save()
             validation_count += 1
-
-            historic_results.append(
-                {
-                    "device": {"id": str(device.pk), "name": str(device)},
-                    "software": (
-                        {"id": str(device.software_version.pk), "name": str(device.software_version)}
-                        if device.software_version
-                        else None
-                    ),
-                    "is_validated": is_validated,
-                    "valid_software": [
-                        {"id": str(valid_sw.pk), "name": str(valid_sw)}
-                        for valid_sw in validate_obj.valid_software.all()
-                    ],
-                }
-            )
-
-        DeviceSoftwareValidationHistoricResult(
-            date=job_run_time,
-            run_type=run_type,
-            all_platforms=not platforms,
-            all_tenants=not tenants,
-            filters={
-                "platforms": [{"id": str(platform.pk), "name": platform.name} for platform in platforms or []],
-                "tenants": [{"id": str(tenant.pk), "name": tenant.name} for tenant in tenants or []],
-            },
-            device_validation_results=historic_results,
-        ).validated_save()
 
         self.logger.info("Performed validation on: %d devices.", validation_count)
 
