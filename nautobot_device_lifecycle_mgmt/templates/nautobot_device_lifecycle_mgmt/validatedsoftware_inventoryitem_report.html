@@ -73,9 +73,9 @@
                             </a>
                         </td>
                         <td>{% if inventory_aggr.valid_percent is not None %} {{ inventory_aggr.valid_percent }} % {% else %} -- {% endif %}</td>
-                        <td><a target="_blank" href="data:image/png;base64,{{ inventory_visual|safe }}" title="Inventory Pie Chart">
+                        <td>{% if inventory_visual %}<a target="_blank" href="data:image/png;base64,{{ inventory_visual|safe }}" title="Inventory Pie Chart">
                             <img style="width:150px;" src="data:image/png;base64,{{ inventory_visual|safe }}" alt="Inventory Pie Chart">
-                            </a>
+                            </a>{% else %}--{% endif %}
                         </td>
                         <td class="d-print-none nb-actions nb-w-0 text-end text-nowrap">
                             <a href="{% url 'plugins-api:nautobot_device_lifecycle_mgmt-api:inventoryitemsoftwarevalidationresult-list' %}?format=csv"
