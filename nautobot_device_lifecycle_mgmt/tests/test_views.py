@@ -587,3 +587,18 @@ class DeviceContractPanelTest(TestCase):
         self.add_permissions("nautobot_device_lifecycle_mgmt.add_contractlcm")
         response = self.client.get(self.add_contract_url)
         self.assertEqual(response.context["form"]["devices"].value(), [str(self.device.pk)])
+
+
+class EmptySoftwareValidationReportTest(TestCase):
+    """Report pages render when there are no validation results to chart."""
+
+    def test_reports_render_without_results(self):
+        self.user.is_superuser = True
+        self.user.save()
+        for view_name in (
+            "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_device_report_list",
+            "plugins:nautobot_device_lifecycle_mgmt:validatedsoftware_inventoryitem_report_list",
+            "plugins:nautobot_device_lifecycle_mgmt:hardwarenotice_device_report_list",
+        ):
+            with self.subTest(view_name=view_name):
+                self.assertHttpStatus(self.client.get(reverse(view_name)), 200)
