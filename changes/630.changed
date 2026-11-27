@@ -1,4 +1,4 @@
-Changed the NIST CVE Search Job to set a CVE's CVSS Base Score and Severity from the highest CVSS version in its NIST record, including CVSS v4.0, and to prefer NIST's own score over the vendor's.
+Changed the NIST CVE Search Job to set a CVE's CVSS Base Score and Severity from NIST's own score for the highest CVSS version that NIST has scored, including CVSS v4.0. If NIST has not scored the CVE, the first score of the highest available version is used, which is usually the vendor's.
 Changed the NIST CVE Search Job to leave the `cvss_v2` and `cvss_v3` fields empty when NIST does not provide an exploitability score, instead of setting them to 10 or 0.
 Changed the NIST CVE Search Job to leave the CVSS Base Score empty when NIST provides a CVSS metric without a base score, and to log a warning when it creates or updates such a CVE.
 Changed the default CVE list view columns to leave out the deprecated CVSSv2 Score and CVSSv3 Score columns, which can still be enabled with the table's Configure option.
