@@ -12,7 +12,7 @@ from nautobot.dcim.models import DeviceType, Manufacturer
 from nautobot.extras.models import Status, Tag
 from nautobot.users.models import ObjectPermission
 
-from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices
+from nautobot_device_lifecycle_mgmt.choices import ContractTypeChoices, ReportRunTypeChoices
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
     ContractLCM,
@@ -121,6 +121,21 @@ class ValidatedSoftwareDeviceReportViewTest(ViewTestCases.ListObjectsViewTestCas
             ),
             200,
         )
+
+    def test_filtered_last_run_shows_notice(self):
+        """When the latest validation run was filtered, the report says so instead of reporting no results."""
+        DeviceSoftwareValidationResult.objects.update(
+            run_type=ReportRunTypeChoices.REPORT_FILTERED_RUN,
+            last_run=datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc),
+        )
+        self.user.is_superuser = True
+        self.user.save()
+
+        response = self.client.get(reverse(self._get_base_url()))
+
+        self.assertContains(response, "The most recent validation run was limited to selected platforms")
+        self.assertNotContains(response, "No validation results found")
+        self.assertNotContains(response, "Last full run of the report")
 
     @skip("not implemented")
     def test_list_objects_unknown_filter_no_strict_filtering(self):

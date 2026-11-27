@@ -10,9 +10,10 @@ from nautobot.apps.choices import JobResultStatusChoices
 from nautobot.apps.testing import TestCase, TransactionTestCase, create_job_result_and_run_job
 from nautobot.dcim.models import Platform, SoftwareVersion
 from nautobot.extras.models import Status
+from nautobot.tenancy.models import Tenant
 from requests.exceptions import ChunkedEncodingError, Timeout
 
-from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices
+from nautobot_device_lifecycle_mgmt.choices import CVESeverityChoices, ReportRunTypeChoices
 from nautobot_device_lifecycle_mgmt.jobs.cve_tracking import UNNAMED_CVSS_SOURCE, NistCveSyncSoftware
 from nautobot_device_lifecycle_mgmt.models import (
     CVELCM,
@@ -110,6 +111,37 @@ class DeviceSoftwareValidationFullReportTestCase(TransactionTestCase):
         result_no_sw = DeviceSoftwareValidationResult.objects.get(device=self.devices[2])
         self.assertFalse(result_no_sw.is_validated)
         self.assertIsNone(result_no_sw.software)
+
+    def test_unfiltered_run_is_recorded_as_full_run(self):
+        """A run without platform or tenant filters records every result as a full report run."""
+        create_job_result_and_run_job(
+            module="nautobot_device_lifecycle_mgmt.jobs.lifecycle_reporting",
+            name="DeviceSoftwareValidationFullReport",
+        )
+
+        self.assertEqual(
+            set(DeviceSoftwareValidationResult.objects.values_list("run_type", flat=True)),
+            {ReportRunTypeChoices.REPORT_FULL_RUN},
+        )
+
+    def test_filtered_run_validates_only_matching_devices(self):
+        """Platform and tenant filters limit which devices are validated and mark the run as filtered."""
+        tenant = Tenant.objects.create(name="Tenant A")
+        self.devices[0].tenant = tenant
+        self.devices[0].save()
+        platform = self.devices[0].platform
+
+        job_result = create_job_result_and_run_job(
+            "nautobot_device_lifecycle_mgmt.jobs.lifecycle_reporting",
+            "DeviceSoftwareValidationFullReport",
+            platforms=[str(platform.pk)],
+            tenants=[str(tenant.pk)],
+        )
+
+        self.assertEqual(job_result.status, JobResultStatusChoices.STATUS_SUCCESS)
+        result = DeviceSoftwareValidationResult.objects.get()
+        self.assertEqual(result.device, self.devices[0])
+        self.assertEqual(result.run_type, ReportRunTypeChoices.REPORT_FILTERED_RUN)
 
 
 class NistCveSyncSoftwareForceUpdateTestCase(unittest.TestCase):

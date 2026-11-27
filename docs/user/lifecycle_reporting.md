@@ -23,6 +23,12 @@ You can run these reports two ways:
 !!! warning "If play button is grayed out."
     You will need to enable the job by clicking on edit button in the row and navigate to "Job" portion and click on "Enable"
 
+### Limiting Device Software Validation to Platforms and Tenants
+
+When running the **Device Software Validation Report** job you can optionally select one or more **Platforms** and/or **Tenants**. Only devices that match the selected platforms and tenants are validated. Leaving a field empty includes all devices regardless of that attribute, so leaving both empty validates every device.
+
+A run with any selection is recorded with the **Filtered Report Run** run type; a run with no selection is a **Full Report Run**. Devices outside the selection keep the result from their previous validation run, so when the most recent run was filtered the **Device Software Validation - Report** page shows a notice that some results may be older than the last run.
+
 ## Device Software Validation Reports
 
 Once the jobs are ran you can nagivate to the Device Software Validation Reports by selecting **Device Software Validation - Report** or **Inventory Item Software Validation - Report** from the "Device Lifecycle" dropdown menu.

@@ -738,6 +738,12 @@ class ValidatedSoftwareDeviceReportUIViewSet(ObjectListViewMixin):  # pylint: di
         except models.DeviceSoftwareValidationResult.DoesNotExist:  # pylint: disable=no-member
             report_last_run = None
 
+        latest_result = models.DeviceSoftwareValidationResult.objects.only("run_type").order_by("-last_run").first()
+        context["report_has_results"] = latest_result is not None
+        context["report_last_run_filtered"] = bool(
+            latest_result and latest_result.run_type == choices.ReportRunTypeChoices.REPORT_FILTERED_RUN
+        )
+
         device_aggr = self.get_global_aggr(request)
 
         # Platform-level aggregation for bar chart
