@@ -74,9 +74,9 @@
                         </td>
                         <td>{% if device_aggr.valid_percent is not None %} {{ device_aggr.valid_percent }} % {% else %} -- {% endif %}</td>
                         <td>
-                            <a target="_blank" href="data:image/png;base64,{{ device_visual|safe }}" title="Devices Pie Chart">
+                            {% if device_visual %}<a target="_blank" href="data:image/png;base64,{{ device_visual|safe }}" title="Devices Pie Chart">
                             <img style="width:150px;" src="data:image/png;base64,{{ device_visual|safe }}" alt="Devices Pie Chart">
-                            </a>
+                            </a>{% else %}--{% endif %}
                         </td>
                         <td class="d-print-none nb-actions nb-w-0 text-end text-nowrap">
                             <a href="{% url 'plugins-api:nautobot_device_lifecycle_mgmt-api:devicesoftwarevalidationresult-list' %}?format=csv"

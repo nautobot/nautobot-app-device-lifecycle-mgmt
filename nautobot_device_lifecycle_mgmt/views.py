@@ -404,6 +404,9 @@ class ReportOverviewHelper(ContentTypePermissionRequiredMixin, generic.View):
             pie_chart_labels.append(chart_label)
             pie_chart_colors.append(color)
 
+        if not sizes:
+            return None
+
         explode = len(sizes) * (0.1,)
         fig1, ax1 = plt.subplots()
         logging.debug(fig1)
